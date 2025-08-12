@@ -47,7 +47,7 @@ class AniEnvironment implements IAniEnvironment {
 
 interface EnvPropsOptions {
     key: string;
-    defaultValue: NullishType;
+    defaultValue: Any;
 }
 
 /**
@@ -58,10 +58,10 @@ interface EnvPropsOptions {
  */
 class Environment {
     private static instance_: Environment | undefined = undefined;
-    private props_: Map<string, NullishType> = new Map<string, NullishType>();
+    private props_: Map<string, Any> = new Map<string, Any>();
     private readonly aniEnvironment: AniEnvironment = new AniEnvironment();
     private ttypeMap_: Map<string, Type> = new Map<string, Type>([
-        ['accessibilityEnabled', Type.from<string>()],
+        ['accessibilityEnabled', Type.from<boolean>()],
         ['layoutDirection', Type.from<string>()],
         ['languageCode', Type.from<string>()],
         ['colorMode', Type.from<number>()],
@@ -99,7 +99,7 @@ class Environment {
             return false;
         }
 
-        let tmp: NullishType = undefined;
+        let tmp: Any = undefined;
         switch (key) {
             case 'accessibilityEnabled':
                 tmp = Environment.getOrCreate().aniEnvironment.getAccessibilityEnabled();
@@ -120,11 +120,11 @@ class Environment {
                 tmp = Environment.getOrCreate().aniEnvironment.getLanguageCode();
                 break;
             default:
-                tmp = value as NullishType;
+                tmp = value as Any;
         }
 
         if (tmp === undefined || tmp === -1 || tmp === '') {
-            tmp = value as NullishType;
+            tmp = value as Any;
         }
 
         const prop = AppStorage.setAndRef(key, tmp as T, ttype);
@@ -139,7 +139,7 @@ class Environment {
     public static envProps(properties: EnvPropsOptions[]): void {
         properties.forEach((prop) => {
             const key: string = prop.key;
-            const defaultValue: NullishType = prop.defaultValue;
+            const defaultValue: Any = prop.defaultValue;
             const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
             Environment.envProp(key, defaultValue);
         });

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export { observableProxy, ObservableClass, TrackableProps } from "@koalaui/compat"
+export { observableProxy, ObservableClass, ObservableClassV2, TrackableProps } from "@koalaui/compat"
 
 export {
     AnimatedState,

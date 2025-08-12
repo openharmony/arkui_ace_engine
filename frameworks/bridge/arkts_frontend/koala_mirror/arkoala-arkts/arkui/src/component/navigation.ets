@@ -16,28 +16,29 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { VoidCallback, Length, Dimension, ResourceStr, ResourceColor } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
+import { Bindable_Arkui_Component_Units_Length_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia.image"
 import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./../generated/arkui.SymbolGlyphModifier"
 import { window_SystemBarStyle_serializer, window } from "./../generated/ohos.window"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { CustomBuilder, PageMapBuilder } from "./builder"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { TitleHeight, Color } from "./enums"
 import { LengthMetrics, LengthMetrics_serializer } from "./../generated/arkui.Graphics"
 import { TextModifier, TextModifier_serializer } from "./../generated/arkui.TextModifier"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NavDestinationContext, NavDestinationMode, NavDestinationContext_serializer } from "./navDestination"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export interface NavigationTransitionProxy {
     from: NavContentInfo
     to: NavContentInfo
@@ -176,8 +177,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : boolean | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult : boolean | undefined = buffer
@@ -185,12 +185,12 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     }
     private setIsInteractive_serialize(isInteractive: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let isInteractive_type : int32 = RuntimeType.UNDEFINED
-        isInteractive_type = runtimeType(isInteractive)
-        thisSerializer.writeInt8((isInteractive_type).toChar())
-        if ((isInteractive_type) != (RuntimeType.UNDEFINED)) {
-            const isInteractive_value  = isInteractive!
-            thisSerializer.writeBoolean(isInteractive_value)
+        if (isInteractive !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isInteractiveTmpValue  = isInteractive!
+            thisSerializer.writeBoolean(isInteractiveTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_setIsInteractive(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -200,31 +200,31 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : VoidCallback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = ():void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    InteropNativeModule._CallCallback(-2038961969, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = ():void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                InteropNativeModule._CallCallback(-2038961969, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : VoidCallback | undefined = buffer
         return returnResult
     }
     private setCancelTransition_serialize(cancelTransition: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let cancelTransition_type : int32 = RuntimeType.UNDEFINED
-        cancelTransition_type = runtimeType(cancelTransition)
-        thisSerializer.writeInt8((cancelTransition_type).toChar())
-        if ((cancelTransition_type) != (RuntimeType.UNDEFINED)) {
-            const cancelTransition_value  = cancelTransition!
-            thisSerializer.holdAndWriteCallback(cancelTransition_value)
+        if (cancelTransition !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const cancelTransitionTmpValue  = cancelTransition!
+            thisSerializer.holdAndWriteCallback(cancelTransitionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_setCancelTransition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -234,32 +234,32 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : UpdateTransitionCallback | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (progress: number):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    buffer__argsSerializer.writeNumber(progress);
-    InteropNativeModule._CallCallback(-448105339, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (progress: number):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                buffer_BufArgsSerializer.writeNumber(progress);
+                InteropNativeModule._CallCallback(-448105339, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : UpdateTransitionCallback | undefined = buffer
         return returnResult
     }
     private setUpdateTransition_serialize(updateTransition: UpdateTransitionCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let updateTransition_type : int32 = RuntimeType.UNDEFINED
-        updateTransition_type = runtimeType(updateTransition)
-        thisSerializer.writeInt8((updateTransition_type).toChar())
-        if ((updateTransition_type) != (RuntimeType.UNDEFINED)) {
-            const updateTransition_value  = updateTransition!
-            thisSerializer.holdAndWriteCallback(updateTransition_value)
+        if (updateTransition !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const updateTransitionTmpValue  = updateTransition!
+            thisSerializer.holdAndWriteCallback(updateTransitionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_setUpdateTransition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -317,26 +317,26 @@ export class NavPathInfo implements MaterializedBase {
     }
     static construct(name: string, param: Object | undefined, onPop?: ((value0: PopInfo) => void), isEntry?: boolean): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            thisSerializer.holdAndWriteObject(paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let onPop_type : int32 = RuntimeType.UNDEFINED
-        onPop_type = runtimeType(onPop)
-        thisSerializer.writeInt8((onPop_type).toChar())
-        if ((onPop_type) != (RuntimeType.UNDEFINED)) {
-            const onPop_value  = onPop!
-            thisSerializer.holdAndWriteCallback(onPop_value)
+        if (onPop !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onPopTmpValue  = onPop!
+            thisSerializer.holdAndWriteCallback(onPopTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let isEntry_type : int32 = RuntimeType.UNDEFINED
-        isEntry_type = runtimeType(isEntry)
-        thisSerializer.writeInt8((isEntry_type).toChar())
-        if ((isEntry_type) != (RuntimeType.UNDEFINED)) {
-            const isEntry_value  = isEntry!
-            thisSerializer.writeBoolean(isEntry_value)
+        if (isEntry !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isEntryTmpValue  = isEntry!
+            thisSerializer.writeBoolean(isEntryTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathInfo_construct(name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -397,8 +397,7 @@ export class NavPathInfo implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : Object | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readObject() as object)
         }
         const returnResult : Object | undefined = buffer
@@ -406,12 +405,12 @@ export class NavPathInfo implements MaterializedBase {
     }
     private setParam_serialize(param: Object | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            thisSerializer.holdAndWriteObject(paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathInfo_setParam(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -421,32 +420,32 @@ export class NavPathInfo implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : ((value0: PopInfo) => void) | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const buffer__resource : CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer__call : KPointer = retvalDeserializer.readPointer()
-            const buffer__callSync : KPointer = retvalDeserializer.readPointer()
-            buffer = (value0: PopInfo):void => { 
-    const buffer__argsSerializer : SerializerBase = SerializerBase.hold();
-    buffer__argsSerializer.writeInt32(buffer__resource.resourceId);
-    buffer__argsSerializer.writePointer(buffer__call);
-    buffer__argsSerializer.writePointer(buffer__callSync);
-    PopInfo_serializer.write(buffer__argsSerializer, value0);
-    InteropNativeModule._CallCallback(624053870, buffer__argsSerializer.asBuffer(), buffer__argsSerializer.length());
-    buffer__argsSerializer.release();
-    return; }
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const buffer_BufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+            const buffer_BufCall : KPointer = retvalDeserializer.readPointer()
+            const buffer_BufCallSync : KPointer = retvalDeserializer.readPointer()
+            buffer = (value0: PopInfo):void => {
+                const buffer_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
+                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
+                PopInfo_serializer.write(buffer_BufArgsSerializer, value0);
+                InteropNativeModule._CallCallback(624053870, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                buffer_BufArgsSerializer.release();
+                return;
+            }
         }
         const returnResult : ((value0: PopInfo) => void) | undefined = buffer
         return returnResult
     }
     private setOnPop_serialize(onPop: ((value0: PopInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let onPop_type : int32 = RuntimeType.UNDEFINED
-        onPop_type = runtimeType(onPop)
-        thisSerializer.writeInt8((onPop_type).toChar())
-        if ((onPop_type) != (RuntimeType.UNDEFINED)) {
-            const onPop_value  = onPop!
-            thisSerializer.holdAndWriteCallback(onPop_value)
+        if (onPop !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const onPopTmpValue  = onPop!
+            thisSerializer.holdAndWriteCallback(onPopTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathInfo_setOnPop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -456,8 +455,7 @@ export class NavPathInfo implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : boolean | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
         const returnResult : boolean | undefined = buffer
@@ -465,12 +463,12 @@ export class NavPathInfo implements MaterializedBase {
     }
     private setIsEntry_serialize(isEntry: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let isEntry_type : int32 = RuntimeType.UNDEFINED
-        isEntry_type = runtimeType(isEntry)
-        thisSerializer.writeInt8((isEntry_type).toChar())
-        if ((isEntry_type) != (RuntimeType.UNDEFINED)) {
-            const isEntry_value  = isEntry!
-            thisSerializer.writeBoolean(isEntry_value)
+        if (isEntry !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isEntryTmpValue  = isEntry!
+            thisSerializer.writeBoolean(isEntryTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathInfo_setIsEntry(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -480,8 +478,7 @@ export class NavPathInfo implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : string | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readString() as string)
         }
         const returnResult : string | undefined = buffer
@@ -489,12 +486,12 @@ export class NavPathInfo implements MaterializedBase {
     }
     private setNavDestinationId_serialize(navDestinationId: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let navDestinationId_type : int32 = RuntimeType.UNDEFINED
-        navDestinationId_type = runtimeType(navDestinationId)
-        thisSerializer.writeInt8((navDestinationId_type).toChar())
-        if ((navDestinationId_type) != (RuntimeType.UNDEFINED)) {
-            const navDestinationId_value  = navDestinationId!
-            thisSerializer.writeString(navDestinationId_value)
+        if (navDestinationId !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const navDestinationIdTmpValue  = navDestinationId!
+            thisSerializer.writeString(navDestinationIdTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathInfo_setNavDestinationId(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -700,36 +697,36 @@ export class NavPathStack implements MaterializedBase {
     }
     private pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_pushPath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private pushPath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_pushPath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private pushDestination0_serialize(info: NavPathInfo, animated?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._NavPathStack_pushDestination0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
@@ -738,12 +735,12 @@ export class NavPathStack implements MaterializedBase {
     }
     private pushDestination1_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._NavPathStack_pushDestination1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
@@ -752,19 +749,19 @@ export class NavPathStack implements MaterializedBase {
     }
     private pushPathByName0_serialize(name: string, param: Object | undefined, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
+        if (param !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const paramTmpValue  = param!
+            thisSerializer.holdAndWriteObject(paramTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_pushPathByName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -773,12 +770,12 @@ export class NavPathStack implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(param)
         thisSerializer.holdAndWriteCallback(onPop)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_pushPathByName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -786,12 +783,12 @@ export class NavPathStack implements MaterializedBase {
     private pushDestinationByName0_serialize(name: string, param: Object, animated?: boolean): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(param)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._NavPathStack_pushDestinationByName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
@@ -802,12 +799,12 @@ export class NavPathStack implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(param)
         thisSerializer.holdAndWriteCallback(onPop)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._NavPathStack_pushDestinationByName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
@@ -816,36 +813,36 @@ export class NavPathStack implements MaterializedBase {
     }
     private replacePath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_replacePath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private replacePath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_replacePath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private replaceDestination_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._NavPathStack_replaceDestination(this.peer!.ptr, toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
@@ -855,12 +852,12 @@ export class NavPathStack implements MaterializedBase {
     private replacePathByName_serialize(name: string, param: Object, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(param)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_replacePathByName(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -868,9 +865,9 @@ export class NavPathStack implements MaterializedBase {
     private removeByIndexes_serialize(indexes: Array<number>): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((indexes.length).toInt())
-        for (let indexes_counter_i = 0; indexes_counter_i < indexes.length; indexes_counter_i++) {
-            const indexes_element : number = indexes[indexes_counter_i]
-            thisSerializer.writeNumber(indexes_element)
+        for (let indexesCounterI = 0; indexesCounterI < indexes.length; indexesCounterI++) {
+            const indexesTmpElement : number = indexes[indexesCounterI]
+            thisSerializer.writeNumber(indexesTmpElement)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_removeByIndexes(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -886,20 +883,19 @@ export class NavPathStack implements MaterializedBase {
     }
     private pop0_serialize(animated?: boolean): NavPathInfo | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : NavPathInfo | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
         }
         const returnResult : NavPathInfo | undefined = buffer
@@ -908,20 +904,19 @@ export class NavPathStack implements MaterializedBase {
     private pop1_serialize(result: Object, animated?: boolean): NavPathInfo | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(result)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_pop1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : NavPathInfo | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
         }
         const returnResult : NavPathInfo | undefined = buffer
@@ -929,12 +924,12 @@ export class NavPathStack implements MaterializedBase {
     }
     private popToName0_serialize(name: string, animated?: boolean): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_popToName0(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -943,12 +938,12 @@ export class NavPathStack implements MaterializedBase {
     private popToName1_serialize(name: string, result: Object, animated?: boolean): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(result)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_popToName1(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -956,12 +951,12 @@ export class NavPathStack implements MaterializedBase {
     }
     private popToIndex0_serialize(index: number, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_popToIndex0(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -969,24 +964,24 @@ export class NavPathStack implements MaterializedBase {
     private popToIndex1_serialize(index: number, result: Object, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(result)
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_popToIndex1(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private moveToTop_serialize(name: string, animated?: boolean): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_moveToTop(this.peer!.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -994,24 +989,24 @@ export class NavPathStack implements MaterializedBase {
     }
     private moveIndexToTop_serialize(index: number, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_moveIndexToTop(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private clear_serialize(animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_clear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1019,10 +1014,10 @@ export class NavPathStack implements MaterializedBase {
     private getAllPathName_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<string> = new Array<string>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
         return returnResult
@@ -1032,8 +1027,7 @@ export class NavPathStack implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : Object | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (retvalDeserializer.readObject() as object)
         }
         const returnResult : Object | undefined = buffer
@@ -1042,16 +1036,15 @@ export class NavPathStack implements MaterializedBase {
     private getParamByName_serialize(name: string): Array<Object | undefined> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<Object | undefined> = new Array<Object | undefined>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            const buffer_buf_runtimeType  = retvalDeserializer.readInt8().toInt()
-            let buffer_buf : Object | undefined
-            if ((buffer_buf_runtimeType) != (RuntimeType.UNDEFINED))
-            {
-                buffer_buf = (retvalDeserializer.readObject() as object)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<Object | undefined> = new Array<Object | undefined>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            const bufferTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
+            let bufferTempBuf : Object | undefined
+            if ((bufferTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                bufferTempBuf = (retvalDeserializer.readObject() as object)
             }
-            buffer[buffer_i] = buffer_buf
+            buffer[bufferBufCounterI] = bufferTempBuf
         }
         const returnResult : Array<Object | undefined> = buffer
         return returnResult
@@ -1059,10 +1052,10 @@ export class NavPathStack implements MaterializedBase {
     private getIndexByName_serialize(name: string): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<number> = new Array<number>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
         }
         const returnResult : Array<number> = buffer
         return returnResult
@@ -1072,8 +1065,7 @@ export class NavPathStack implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : NavPathStack | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (NavPathStack_serializer.read(retvalDeserializer) as NavPathStack)
         }
         const returnResult : NavPathStack | undefined = buffer
@@ -1095,10 +1087,10 @@ export class NavPathStack implements MaterializedBase {
     private getPathStack_serialize(): Array<NavPathInfo> {
         const retval  = ArkUIGeneratedNativeModule._NavPathStack_getPathStack(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<NavPathInfo> = new Array<NavPathInfo>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<NavPathInfo> = new Array<NavPathInfo>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
         }
         const returnResult : Array<NavPathInfo> = buffer
         return returnResult
@@ -1106,16 +1098,16 @@ export class NavPathStack implements MaterializedBase {
     private setPathStack_serialize(pathStack: Array<NavPathInfo>, animated?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((pathStack.length).toInt())
-        for (let pathStack_counter_i = 0; pathStack_counter_i < pathStack.length; pathStack_counter_i++) {
-            const pathStack_element : NavPathInfo = pathStack[pathStack_counter_i]
-            NavPathInfo_serializer.write(thisSerializer, pathStack_element)
+        for (let pathStackCounterI = 0; pathStackCounterI < pathStack.length; pathStackCounterI++) {
+            const pathStackTmpElement : NavPathInfo = pathStack[pathStackCounterI]
+            NavPathInfo_serializer.write(thisSerializer, pathStackTmpElement)
         }
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavPathStack_setPathStack(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1128,7 +1120,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkNavigationPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Navigation_construct(peerId, flags)
-        const _peer  = new ArkNavigationPeer(_peerPtr, peerId, "Navigation", flags)
+        const _peer  = new ArkNavigationPeer(_peerPtr, peerId, 'Navigation', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -1138,604 +1130,566 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
     setNavigationOptions1Attribute(pathInfos: NavPathStack): void {
         ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions1(this.peer.ptr, toPeerPtr(pathInfos))
     }
-    setNavBarWidthAttribute(value: Length | undefined): void {
+    setNavBarWidthAttribute(value: Length | Bindable<Length> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((2).toChar())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueTmpValue instanceof Bindable<Length>) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
+                Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
-            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setNavBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNavBarPositionAttribute(value: NavBarPosition | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as NavBarPosition)
-            thisSerializer.writeInt32(TypeChecker.NavBarPosition_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as NavBarPosition)
+            thisSerializer.writeInt32(TypeChecker.NavBarPosition_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setNavBarPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNavBarWidthRangeAttribute(value: [ Dimension, Dimension ] | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            const value_value_0  = value_value[0]
-            let value_value_0_type : int32 = RuntimeType.UNDEFINED
-            value_value_0_type = runtimeType(value_value_0)
-            if (RuntimeType.STRING == value_value_0_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            const valueTmpValue_0  = valueTmpValue[0]
+            if (valueTmpValue_0 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0_0  = value_value_0 as string
-                thisSerializer.writeString(value_value_0_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_0_type) {
+                const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
+                thisSerializer.writeString(valueTmpValue_0ForIdx0)
+            } else if (valueTmpValue_0 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_0_1  = value_value_0 as number
-                thisSerializer.writeNumber(value_value_0_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_0_type) {
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
+                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+            } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_0_2  = value_value_0 as Resource
-                Resource_serializer.write(thisSerializer, value_value_0_2)
+                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
-            const value_value_1  = value_value[1]
-            let value_value_1_type : int32 = RuntimeType.UNDEFINED
-            value_value_1_type = runtimeType(value_value_1)
-            if (RuntimeType.STRING == value_value_1_type) {
+            const valueTmpValue_1  = valueTmpValue[1]
+            if (valueTmpValue_1 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_1_0  = value_value_1 as string
-                thisSerializer.writeString(value_value_1_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_1_type) {
+                const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
+                thisSerializer.writeString(valueTmpValue_1ForIdx0)
+            } else if (valueTmpValue_1 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1_1  = value_value_1 as number
-                thisSerializer.writeNumber(value_value_1_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_1_type) {
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
+                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+            } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_1_2  = value_value_1 as Resource
-                Resource_serializer.write(thisSerializer, value_value_1_2)
+                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setNavBarWidthRange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinContentWidthAttribute(value: Dimension | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setModeAttribute(value: NavigationMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as NavigationMode)
-            thisSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as NavigationMode)
+            thisSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackButtonIcon0Attribute(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (TypeChecker.isimage_PixelMap(value_value, false, false)) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof image.PixelMap) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as image.PixelMap
-                image_PixelMap_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
-            }
-            else if (TypeChecker.isSymbolGlyphModifier(value_value)) {
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof SymbolGlyphModifier) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as SymbolGlyphModifier
-                SymbolGlyphModifier_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as SymbolGlyphModifier
+                SymbolGlyphModifier_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setBackButtonIcon0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideNavBarAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideNavBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideTitleBar0Attribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideTitleBar0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideBackButtonAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideBackButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTitleModeAttribute(value: NavigationTitleMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as NavigationTitleMode)
-            thisSerializer.writeInt32(TypeChecker.NavigationTitleMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as NavigationTitleMode)
+            thisSerializer.writeInt32(TypeChecker.NavigationTitleMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setTitleMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenus0Attribute(value: Array<NavigationMenuItem> | CustomBuilder | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (TypeChecker.isArray_NavigationMenuItem(valueTmpValue)) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Array<NavigationMenuItem>
-                thisSerializer.writeInt32((value_value_0.length).toInt())
-                for (let value_value_0_counter_i = 0; value_value_0_counter_i < value_value_0.length; value_value_0_counter_i++) {
-                    const value_value_0_element : NavigationMenuItem = value_value_0[value_value_0_counter_i]
-                    NavigationMenuItem_serializer.write(thisSerializer, value_value_0_element)
+                const valueTmpValueForIdx0  = valueTmpValue as Array<NavigationMenuItem>
+                thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
+                for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
+                    const valueTmpValueForIdx0TmpElement : NavigationMenuItem = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
+                    NavigationMenuItem_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
+            } else if (valueTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+                const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setMenus0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideToolBar0Attribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideToolBar0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableToolBarAdaptationAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableToolBarAdaptation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnTitleModeChangeAttribute(value: ((titleMode: NavigationTitleMode) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setOnTitleModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnNavBarStateChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setOnNavBarStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnNavigationModeChangeAttribute(value: ((mode: NavigationMode) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setOnNavigationModeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNavDestinationAttribute(value: PageMapBuilder | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setNavDestination(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCustomNavContentTransitionAttribute(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setCustomNavContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSystemBarStyleAttribute(value: window.SystemBarStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            window_SystemBarStyle_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            window_SystemBarStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setSystemBarStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRecoverableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setRecoverable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableDragBarAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableDragBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableModeChangeAnimationAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableModeChangeAnimation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackButtonIcon1Attribute(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let icon_type : int32 = RuntimeType.UNDEFINED
-        icon_type = runtimeType(icon)
-        thisSerializer.writeInt8((icon_type).toChar())
-        if ((icon_type) != (RuntimeType.UNDEFINED)) {
-            const icon_value  = icon!
-            let icon_value_type : int32 = RuntimeType.UNDEFINED
-            icon_value_type = runtimeType(icon_value)
-            if (RuntimeType.STRING == icon_value_type) {
+        if (icon !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const iconTmpValue  = icon!
+            if (iconTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const icon_value_0  = icon_value as string
-                thisSerializer.writeString(icon_value_0)
-            }
-            else if (TypeChecker.isimage_PixelMap(icon_value, false, false)) {
+                const iconTmpValueForIdx0  = iconTmpValue as string
+                thisSerializer.writeString(iconTmpValueForIdx0)
+            } else if (iconTmpValue instanceof image.PixelMap) {
                 thisSerializer.writeInt8((1).toChar())
-                const icon_value_1  = icon_value as image.PixelMap
-                image_PixelMap_serializer.write(thisSerializer, icon_value_1)
-            }
-            else if (TypeChecker.isResource(icon_value, false, false, false, false, false)) {
+                const iconTmpValueForIdx1  = iconTmpValue as image.PixelMap
+                image_PixelMap_serializer.write(thisSerializer, iconTmpValueForIdx1)
+            } else if (iconTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const icon_value_2  = icon_value as Resource
-                Resource_serializer.write(thisSerializer, icon_value_2)
-            }
-            else if (TypeChecker.isSymbolGlyphModifier(icon_value)) {
+                const iconTmpValueForIdx2  = iconTmpValue as Resource
+                Resource_serializer.write(thisSerializer, iconTmpValueForIdx2)
+            } else if (iconTmpValue instanceof SymbolGlyphModifier) {
                 thisSerializer.writeInt8((3).toChar())
-                const icon_value_3  = icon_value as SymbolGlyphModifier
-                SymbolGlyphModifier_serializer.write(thisSerializer, icon_value_3)
+                const iconTmpValueForIdx3  = iconTmpValue as SymbolGlyphModifier
+                SymbolGlyphModifier_serializer.write(thisSerializer, iconTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let accessibilityText_type : int32 = RuntimeType.UNDEFINED
-        accessibilityText_type = runtimeType(accessibilityText)
-        thisSerializer.writeInt8((accessibilityText_type).toChar())
-        if ((accessibilityText_type) != (RuntimeType.UNDEFINED)) {
-            const accessibilityText_value  = accessibilityText!
-            let accessibilityText_value_type : int32 = RuntimeType.UNDEFINED
-            accessibilityText_value_type = runtimeType(accessibilityText_value)
-            if (RuntimeType.STRING == accessibilityText_value_type) {
+        if (accessibilityText !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const accessibilityTextTmpValue  = accessibilityText!
+            if (accessibilityTextTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const accessibilityText_value_0  = accessibilityText_value as string
-                thisSerializer.writeString(accessibilityText_value_0)
-            }
-            else if (RuntimeType.OBJECT == accessibilityText_value_type) {
+                const accessibilityTextTmpValueForIdx0  = accessibilityTextTmpValue as string
+                thisSerializer.writeString(accessibilityTextTmpValueForIdx0)
+            } else if (accessibilityTextTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const accessibilityText_value_1  = accessibilityText_value as Resource
-                Resource_serializer.write(thisSerializer, accessibilityText_value_1)
+                const accessibilityTextTmpValueForIdx1  = accessibilityTextTmpValue as Resource
+                Resource_serializer.write(thisSerializer, accessibilityTextTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setBackButtonIcon1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTitleAttribute(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ResourceStr
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
+            } else if (valueTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
-            }
-            else if (TypeChecker.isNavigationCommonTitle(value_value, false, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
+            } else if (valueTmpValue instanceof NavigationCommonTitle) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as NavigationCommonTitle
-                NavigationCommonTitle_serializer.write(thisSerializer, value_value_2)
-            }
-            else if (TypeChecker.isNavigationCustomTitle(value_value, false, false)) {
+                const valueTmpValueForIdx2  = valueTmpValue as NavigationCommonTitle
+                NavigationCommonTitle_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof NavigationCustomTitle) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as NavigationCustomTitle
-                NavigationCustomTitle_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as NavigationCustomTitle
+                NavigationCustomTitle_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationTitleOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationTitleOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setTitle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideTitleBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let hide_type : int32 = RuntimeType.UNDEFINED
-        hide_type = runtimeType(hide)
-        thisSerializer.writeInt8((hide_type).toChar())
-        if ((hide_type) != (RuntimeType.UNDEFINED)) {
-            const hide_value  = hide!
-            thisSerializer.writeBoolean(hide_value)
+        if (hide !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const hideTmpValue  = hide!
+            thisSerializer.writeBoolean(hideTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideTitleBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMenus1Attribute(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let items_type : int32 = RuntimeType.UNDEFINED
-        items_type = runtimeType(items)
-        thisSerializer.writeInt8((items_type).toChar())
-        if ((items_type) != (RuntimeType.UNDEFINED)) {
-            const items_value  = items!
-            let items_value_type : int32 = RuntimeType.UNDEFINED
-            items_value_type = runtimeType(items_value)
-            if (RuntimeType.OBJECT == items_value_type) {
+        if (items !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const itemsTmpValue  = items!
+            if (TypeChecker.isArray_NavigationMenuItem(itemsTmpValue)) {
                 thisSerializer.writeInt8((0).toChar())
-                const items_value_0  = items_value as Array<NavigationMenuItem>
-                thisSerializer.writeInt32((items_value_0.length).toInt())
-                for (let items_value_0_counter_i = 0; items_value_0_counter_i < items_value_0.length; items_value_0_counter_i++) {
-                    const items_value_0_element : NavigationMenuItem = items_value_0[items_value_0_counter_i]
-                    NavigationMenuItem_serializer.write(thisSerializer, items_value_0_element)
+                const itemsTmpValueForIdx0  = itemsTmpValue as Array<NavigationMenuItem>
+                thisSerializer.writeInt32((itemsTmpValueForIdx0.length).toInt())
+                for (let itemsTmpValueForIdx0CounterI = 0; itemsTmpValueForIdx0CounterI < itemsTmpValueForIdx0.length; itemsTmpValueForIdx0CounterI++) {
+                    const itemsTmpValueForIdx0TmpElement : NavigationMenuItem = itemsTmpValueForIdx0[itemsTmpValueForIdx0CounterI]
+                    NavigationMenuItem_serializer.write(thisSerializer, itemsTmpValueForIdx0TmpElement)
                 }
-            }
-            else if (RuntimeType.FUNCTION == items_value_type) {
+            } else if (itemsTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((1).toChar())
-                const items_value_1  = items_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(items_value_1))
+                const itemsTmpValueForIdx1  = itemsTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(itemsTmpValueForIdx1))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationMenuOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setMenus1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setToolbarConfigurationAttribute(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (TypeChecker.isArray_ToolbarItem(valueTmpValue)) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Array<ToolbarItem>
-                thisSerializer.writeInt32((value_value_0.length).toInt())
-                for (let value_value_0_counter_i = 0; value_value_0_counter_i < value_value_0.length; value_value_0_counter_i++) {
-                    const value_value_0_element : ToolbarItem = value_value_0[value_value_0_counter_i]
-                    ToolbarItem_serializer.write(thisSerializer, value_value_0_element)
+                const valueTmpValueForIdx0  = valueTmpValue as Array<ToolbarItem>
+                thisSerializer.writeInt32((valueTmpValueForIdx0.length).toInt())
+                for (let valueTmpValueForIdx0CounterI = 0; valueTmpValueForIdx0CounterI < valueTmpValueForIdx0.length; valueTmpValueForIdx0CounterI++) {
+                    const valueTmpValueForIdx0TmpElement : ToolbarItem = valueTmpValueForIdx0[valueTmpValueForIdx0CounterI]
+                    ToolbarItem_serializer.write(thisSerializer, valueTmpValueForIdx0TmpElement)
                 }
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
+            } else if (valueTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
+                const valueTmpValueForIdx1  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            NavigationToolbarOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NavigationToolbarOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setToolbarConfiguration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHideToolBar1Attribute(hide: boolean | undefined, animated: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let hide_type : int32 = RuntimeType.UNDEFINED
-        hide_type = runtimeType(hide)
-        thisSerializer.writeInt8((hide_type).toChar())
-        if ((hide_type) != (RuntimeType.UNDEFINED)) {
-            const hide_value  = hide!
-            thisSerializer.writeBoolean(hide_value)
+        if (hide !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const hideTmpValue  = hide!
+            thisSerializer.writeBoolean(hideTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let animated_type : int32 = RuntimeType.UNDEFINED
-        animated_type = runtimeType(animated)
-        thisSerializer.writeInt8((animated_type).toChar())
-        if ((animated_type) != (RuntimeType.UNDEFINED)) {
-            const animated_value  = animated!
-            thisSerializer.writeBoolean(animated_value)
+        if (animated !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animatedTmpValue  = animated!
+            thisSerializer.writeBoolean(animatedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setHideToolBar1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIgnoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let types_type : int32 = RuntimeType.UNDEFINED
-        types_type = runtimeType(types)
-        thisSerializer.writeInt8((types_type).toChar())
-        if ((types_type) != (RuntimeType.UNDEFINED)) {
-            const types_value  = types!
-            thisSerializer.writeInt32((types_value.length).toInt())
-            for (let types_value_counter_i = 0; types_value_counter_i < types_value.length; types_value_counter_i++) {
-                const types_value_element : LayoutSafeAreaType = types_value[types_value_counter_i]
-                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaType_ToNumeric(types_value_element))
+        if (types !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typesTmpValue  = types!
+            thisSerializer.writeInt32((typesTmpValue.length).toInt())
+            for (let typesTmpValueCounterI = 0; typesTmpValueCounterI < typesTmpValue.length; typesTmpValueCounterI++) {
+                const typesTmpValueTmpElement : LayoutSafeAreaType = typesTmpValue[typesTmpValueCounterI]
+                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaType_ToNumeric(typesTmpValueTmpElement))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let edges_type : int32 = RuntimeType.UNDEFINED
-        edges_type = runtimeType(edges)
-        thisSerializer.writeInt8((edges_type).toChar())
-        if ((edges_type) != (RuntimeType.UNDEFINED)) {
-            const edges_value  = edges!
-            thisSerializer.writeInt32((edges_value.length).toInt())
-            for (let edges_value_counter_i = 0; edges_value_counter_i < edges_value.length; edges_value_counter_i++) {
-                const edges_value_element : LayoutSafeAreaEdge = edges_value[edges_value_counter_i]
-                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaEdge_ToNumeric(edges_value_element))
+        if (edges !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const edgesTmpValue  = edges!
+            thisSerializer.writeInt32((edgesTmpValue.length).toInt())
+            for (let edgesTmpValueCounterI = 0; edgesTmpValueCounterI < edgesTmpValue.length; edgesTmpValueCounterI++) {
+                const edgesTmpValueTmpElement : LayoutSafeAreaEdge = edgesTmpValue[edgesTmpValueCounterI]
+                thisSerializer.writeInt32(TypeChecker.LayoutSafeAreaEdge_ToNumeric(edgesTmpValueTmpElement))
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._NavigationAttribute_setIgnoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1855,7 +1809,7 @@ export interface MoreButtonOptions {
     backgroundEffect?: BackgroundEffectOptions;
 }
 export interface NavigationAttribute extends CommonMethod {
-    navBarWidth(value: Length | undefined): this {
+    navBarWidth(value: Length | Bindable<Length> | undefined): this {
         throw new Error("Unimplemented method navBarWidth")
     }
     navBarPosition(value: NavBarPosition | undefined): this {
@@ -1947,7 +1901,7 @@ export interface NavigationAttribute extends CommonMethod {
     }
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
-    navBarWidth_value?: Length | undefined
+    navBarWidth_value?: Length | Bindable<Length> | undefined
     navBarPosition_value?: NavBarPosition | undefined
     navBarWidthRange_value?: [ Dimension, Dimension ] | undefined
     minContentWidth_value?: Dimension | undefined
@@ -1970,7 +1924,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
     public navBarPosition(value: NavBarPosition | undefined): this {
@@ -2060,53 +2014,6 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: NavigationAttribute): void {
-        super.apply(target)
-        if (this.navBarWidth_value !== undefined)
-            target.navBarWidth(this.navBarWidth_value!)
-        if (this.navBarPosition_value !== undefined)
-            target.navBarPosition(this.navBarPosition_value!)
-        if (this.navBarWidthRange_value !== undefined)
-            target.navBarWidthRange(this.navBarWidthRange_value!)
-        if (this.minContentWidth_value !== undefined)
-            target.minContentWidth(this.minContentWidth_value!)
-        if (this.mode_value !== undefined)
-            target.mode(this.mode_value!)
-        if (this.backButtonIcon_value !== undefined)
-            target.backButtonIcon(this.backButtonIcon_value!)
-        if (this.hideNavBar_value !== undefined)
-            target.hideNavBar(this.hideNavBar_value!)
-        if (this.hideTitleBar_value !== undefined)
-            target.hideTitleBar(this.hideTitleBar_value!)
-        if (this.hideBackButton_value !== undefined)
-            target.hideBackButton(this.hideBackButton_value!)
-        if (this.titleMode_value !== undefined)
-            target.titleMode(this.titleMode_value!)
-        if (this.menus_value !== undefined)
-            target.menus(this.menus_value!)
-        if (this.hideToolBar_value !== undefined)
-            target.hideToolBar(this.hideToolBar_value!)
-        if (this.enableToolBarAdaptation_value !== undefined)
-            target.enableToolBarAdaptation(this.enableToolBarAdaptation_value!)
-        if (this.onTitleModeChange_value !== undefined)
-            target.onTitleModeChange(this.onTitleModeChange_value!)
-        if (this.onNavBarStateChange_value !== undefined)
-            target.onNavBarStateChange(this.onNavBarStateChange_value!)
-        if (this.onNavigationModeChange_value !== undefined)
-            target.onNavigationModeChange(this.onNavigationModeChange_value!)
-        if (this.navDestination_value !== undefined)
-            target.navDestination(this.navDestination_value!)
-        if (this.customNavContentTransition_value !== undefined)
-            target.customNavContentTransition(this.customNavContentTransition_value!)
-        if (this.systemBarStyle_value !== undefined)
-            target.systemBarStyle(this.systemBarStyle_value!)
-        if (this.recoverable_value !== undefined)
-            target.recoverable(this.recoverable_value!)
-        if (this.enableDragBar_value !== undefined)
-            target.enableDragBar(this.enableDragBar_value!)
-        if (this.enableModeChangeAnimation_value !== undefined)
-            target.enableModeChangeAnimation(this.enableModeChangeAnimation_value!)
-    }
 }
 export interface NavigationAnimatedTransition {
     onTransitionEnd?: ((isVisible: boolean) => void);
@@ -2142,9 +2049,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public navBarWidth(value: Length | undefined): this {
+    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
         if (this.checkPriority("navBarWidth")) {
-            const value_casted = value as (Length | undefined)
+            const value_casted = value as (Length | Bindable<Length> | undefined)
             this.getPeer()?.setNavBarWidthAttribute(value_casted)
             return this
         }
@@ -2382,7 +2289,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -2390,26 +2296,6 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 }
-export function withNavigationStyle(receiver: NavigationAttribute, modifier: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkNavigationStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Navigation")
-// export function Navigation(
-//     
-//     @memo
-//     content_?: () => void,
-// ): NavigationAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Navigation(
@@ -2425,21 +2311,11 @@ export function Navigation(
     NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer): void => {
         receiver.setNavigationOptions()
         style?.(receiver)
-        withNavigationStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-// @memo
-// @BuilderLambda("Navigation")
-// export function Navigation(
-//     pathInfos: NavPathStack,
-//     @memo
-//     content_?: () => void,
-// ): NavigationAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Navigation(
@@ -2455,256 +2331,1310 @@ export function Navigation(
     NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer): void => {
         receiver.setNavigationOptions(pathInfos)
         style?.(receiver)
-        withNavigationStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkNavigationSet extends ArkCommonMethodSet implements NavigationAttribute {
+export class NavigationModifier extends CommonMethodModifier implements NavigationAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _navBarWidth_flag?: boolean
-    _navBarWidth0_value?: Length | undefined
-    _navBarPosition_flag?: boolean
-    _navBarPosition0_value?: NavBarPosition | undefined
-    _navBarWidthRange_flag?: boolean
-    _navBarWidthRange0_value?: [ Dimension, Dimension ] | undefined
-    _minContentWidth_flag?: boolean
-    _minContentWidth0_value?: Dimension | undefined
-    _mode_flag?: boolean
-    _mode0_value?: NavigationMode | undefined
-    _backButtonIcon_flag?: boolean
-    _backButtonIcon0_value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
-    _backButtonIcon1_value?: ResourceStr | undefined
-    _hideNavBar_flag?: boolean
-    _hideNavBar0_value?: boolean | undefined
-    _hideTitleBar_flag?: boolean
-    _hideTitleBar0_value?: boolean | undefined
-    _hideTitleBar1_value?: boolean | undefined
-    _hideBackButton_flag?: boolean
-    _hideBackButton0_value?: boolean | undefined
-    _titleMode_flag?: boolean
-    _titleMode0_value?: NavigationTitleMode | undefined
-    _menus_flag?: boolean
-    _menus0_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
-    _menus1_value?: NavigationMenuOptions | undefined
-    _hideToolBar_flag?: boolean
-    _hideToolBar0_value?: boolean | undefined
-    _hideToolBar1_value?: boolean | undefined
-    _enableToolBarAdaptation_flag?: boolean
-    _enableToolBarAdaptation0_value?: boolean | undefined
-    _onTitleModeChange_flag?: boolean
-    _onTitleModeChange0_value?: ((titleMode: NavigationTitleMode) => void) | undefined
-    _onNavBarStateChange_flag?: boolean
-    _onNavBarStateChange0_value?: ((isVisible: boolean) => void) | undefined
-    _onNavigationModeChange_flag?: boolean
-    _onNavigationModeChange0_value?: ((mode: NavigationMode) => void) | undefined
-    _navDestination_flag?: boolean
-    _navDestination0_value?: PageMapBuilder | undefined
-    _customNavContentTransition_flag?: boolean
-    _customNavContentTransition0_value?: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined
-    _systemBarStyle_flag?: boolean
-    _systemBarStyle0_value?: window.SystemBarStyle | undefined
-    _recoverable_flag?: boolean
-    _recoverable0_value?: boolean | undefined
-    _enableDragBar_flag?: boolean
-    _enableDragBar0_value?: boolean | undefined
-    _enableModeChangeAnimation_flag?: boolean
-    _enableModeChangeAnimation0_value?: boolean | undefined
-    _title_flag?: boolean
-    _title0_value?: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined
-    _title1_value?: NavigationTitleOptions | undefined
-    _toolbarConfiguration_flag?: boolean
-    _toolbarConfiguration0_value?: Array<ToolbarItem> | CustomBuilder | undefined
-    _toolbarConfiguration1_value?: NavigationToolbarOptions | undefined
-    _ignoreLayoutSafeArea_flag?: boolean
-    _ignoreLayoutSafeArea0_value?: Array<LayoutSafeAreaType> | undefined
-    _ignoreLayoutSafeArea1_value?: Array<LayoutSafeAreaEdge> | undefined
-    applyModifierPatch(component: NavigationAttribute): void {
-        if (this._navBarWidth_flag)
-            component.navBarWidth((this._navBarWidth0_value as Length | undefined))
-        if (this._navBarPosition_flag)
-            component.navBarPosition((this._navBarPosition0_value as NavBarPosition | undefined))
-        if (this._navBarWidthRange_flag)
-            component.navBarWidthRange((this._navBarWidthRange0_value as [ Dimension, Dimension ] | undefined))
-        if (this._minContentWidth_flag)
-            component.minContentWidth((this._minContentWidth0_value as Dimension | undefined))
-        if (this._mode_flag)
-            component.mode((this._mode0_value as NavigationMode | undefined))
-        if (this._backButtonIcon_flag)
-            component.backButtonIcon((this._backButtonIcon0_value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon1_value as ResourceStr | undefined))
-        if (this._hideNavBar_flag)
-            component.hideNavBar((this._hideNavBar0_value as boolean | undefined))
-        if (this._hideTitleBar_flag)
-            component.hideTitleBar((this._hideTitleBar0_value as boolean | undefined), (this._hideTitleBar1_value as boolean | undefined))
-        if (this._hideBackButton_flag)
-            component.hideBackButton((this._hideBackButton0_value as boolean | undefined))
-        if (this._titleMode_flag)
-            component.titleMode((this._titleMode0_value as NavigationTitleMode | undefined))
-        if (this._menus_flag)
-            component.menus((this._menus0_value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus1_value as NavigationMenuOptions | undefined))
-        if (this._hideToolBar_flag)
-            component.hideToolBar((this._hideToolBar0_value as boolean | undefined), (this._hideToolBar1_value as boolean | undefined))
-        if (this._enableToolBarAdaptation_flag)
-            component.enableToolBarAdaptation((this._enableToolBarAdaptation0_value as boolean | undefined))
-        if (this._onTitleModeChange_flag)
-            component.onTitleModeChange((this._onTitleModeChange0_value as ((titleMode: NavigationTitleMode) => void) | undefined))
-        if (this._onNavBarStateChange_flag)
-            component.onNavBarStateChange((this._onNavBarStateChange0_value as ((isVisible: boolean) => void) | undefined))
-        if (this._onNavigationModeChange_flag)
-            component.onNavigationModeChange((this._onNavigationModeChange0_value as ((mode: NavigationMode) => void) | undefined))
-        if (this._navDestination_flag)
-            component.navDestination((this._navDestination0_value as PageMapBuilder | undefined))
-        if (this._customNavContentTransition_flag)
-            component.customNavContentTransition((this._customNavContentTransition0_value as ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined))
-        if (this._systemBarStyle_flag)
-            component.systemBarStyle((this._systemBarStyle0_value as window.SystemBarStyle | undefined))
-        if (this._recoverable_flag)
-            component.recoverable((this._recoverable0_value as boolean | undefined))
-        if (this._enableDragBar_flag)
-            component.enableDragBar((this._enableDragBar0_value as boolean | undefined))
-        if (this._enableModeChangeAnimation_flag)
-            component.enableModeChangeAnimation((this._enableModeChangeAnimation0_value as boolean | undefined))
-        if (this._title_flag)
-            component.title((this._title0_value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title1_value as NavigationTitleOptions | undefined))
-        if (this._toolbarConfiguration_flag)
-            component.toolbarConfiguration((this._toolbarConfiguration0_value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration1_value as NavigationToolbarOptions | undefined))
-        if (this._ignoreLayoutSafeArea_flag)
-            component.ignoreLayoutSafeArea((this._ignoreLayoutSafeArea0_value as Array<LayoutSafeAreaType> | undefined), (this._ignoreLayoutSafeArea1_value as Array<LayoutSafeAreaEdge> | undefined))
+    _navBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _navBarWidth_0_0value?: Length | Bindable<Length> | undefined
+    _navBarPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _navBarPosition_0_0value?: NavBarPosition | undefined
+    _navBarWidthRange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _navBarWidthRange_0_0value?: [ Dimension, Dimension ] | undefined
+    _minContentWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minContentWidth_0_0value?: Dimension | undefined
+    _mode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _mode_0_0value?: NavigationMode | undefined
+    _backButtonIcon_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backButtonIcon_0_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
+    _hideNavBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideNavBar_0_0value?: boolean | undefined
+    _hideTitleBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideTitleBar_0_0value?: boolean | undefined
+    _hideBackButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideBackButton_0_0value?: boolean | undefined
+    _titleMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _titleMode_0_0value?: NavigationTitleMode | undefined
+    _menus_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menus_0_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
+    _hideToolBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideToolBar_0_0value?: boolean | undefined
+    _enableToolBarAdaptation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableToolBarAdaptation_0_0value?: boolean | undefined
+    _onTitleModeChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onTitleModeChange_0_0value?: ((titleMode: NavigationTitleMode) => void) | undefined
+    _onNavBarStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onNavBarStateChange_0_0value?: ((isVisible: boolean) => void) | undefined
+    _onNavigationModeChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onNavigationModeChange_0_0value?: ((mode: NavigationMode) => void) | undefined
+    _navDestination_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _navDestination_0_0value?: PageMapBuilder | undefined
+    _customNavContentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _customNavContentTransition_0_0value?: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined
+    _systemBarStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _systemBarStyle_0_0value?: window.SystemBarStyle | undefined
+    _recoverable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _recoverable_0_0value?: boolean | undefined
+    _enableDragBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableDragBar_0_0value?: boolean | undefined
+    _enableModeChangeAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableModeChangeAnimation_0_0value?: boolean | undefined
+    _backButtonIcon_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backButtonIcon_1_0value?: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined
+    _backButtonIcon_1_1value?: ResourceStr | undefined
+    _title_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _title_0_0value?: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined
+    _title_0_1value?: NavigationTitleOptions | undefined
+    _hideTitleBar_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideTitleBar_1_0value?: boolean | undefined
+    _hideTitleBar_1_1value?: boolean | undefined
+    _menus_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menus_1_0value?: Array<NavigationMenuItem> | CustomBuilder | undefined
+    _menus_1_1value?: NavigationMenuOptions | undefined
+    _toolbarConfiguration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _toolbarConfiguration_0_0value?: Array<ToolbarItem> | CustomBuilder | undefined
+    _toolbarConfiguration_0_1value?: NavigationToolbarOptions | undefined
+    _hideToolBar_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _hideToolBar_1_0value?: boolean | undefined
+    _hideToolBar_1_1value?: boolean | undefined
+    _ignoreLayoutSafeArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
+    _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
+    applyModifierPatch(peer: ArkNavigationPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._navBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNavBarWidthAttribute((this._navBarWidth_0_0value as Length | Bindable<Length> | undefined));
+                    this._navBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._navBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._navBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNavBarWidthAttribute((undefined as Length | Bindable<Length> | undefined));
+                }
+            }
+        }
+        if (this._navBarPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._navBarPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNavBarPositionAttribute((this._navBarPosition_0_0value as NavBarPosition | undefined));
+                    this._navBarPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._navBarPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._navBarPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNavBarPositionAttribute((undefined as NavBarPosition | undefined));
+                }
+            }
+        }
+        if (this._navBarWidthRange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._navBarWidthRange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNavBarWidthRangeAttribute((this._navBarWidthRange_0_0value as [ Dimension, Dimension ] | undefined));
+                    this._navBarWidthRange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._navBarWidthRange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._navBarWidthRange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNavBarWidthRangeAttribute((undefined as [ Dimension, Dimension ] | undefined));
+                }
+            }
+        }
+        if (this._minContentWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minContentWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinContentWidthAttribute((this._minContentWidth_0_0value as Dimension | undefined));
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minContentWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinContentWidthAttribute((undefined as Dimension | undefined));
+                }
+            }
+        }
+        if (this._mode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._mode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setModeAttribute((this._mode_0_0value as NavigationMode | undefined));
+                    this._mode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._mode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._mode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setModeAttribute((undefined as NavigationMode | undefined));
+                }
+            }
+        }
+        if (this._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backButtonIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackButtonIcon0Attribute((this._backButtonIcon_0_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backButtonIcon_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackButtonIcon0Attribute((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
+                }
+            }
+        }
+        if (this._hideNavBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideNavBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideNavBarAttribute((this._hideNavBar_0_0value as boolean | undefined));
+                    this._hideNavBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideNavBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideNavBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideNavBarAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideTitleBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideTitleBar0Attribute((this._hideTitleBar_0_0value as boolean | undefined));
+                    this._hideTitleBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideTitleBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideTitleBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideTitleBar0Attribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._hideBackButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideBackButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideBackButtonAttribute((this._hideBackButton_0_0value as boolean | undefined));
+                    this._hideBackButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideBackButton_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideBackButton_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideBackButtonAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._titleMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._titleMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTitleModeAttribute((this._titleMode_0_0value as NavigationTitleMode | undefined));
+                    this._titleMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._titleMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._titleMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTitleModeAttribute((undefined as NavigationTitleMode | undefined));
+                }
+            }
+        }
+        if (this._menus_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menus_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenus0Attribute((this._menus_0_0value as Array<NavigationMenuItem> | CustomBuilder | undefined));
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menus_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menus_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenus0Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
+                }
+            }
+        }
+        if (this._hideToolBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideToolBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideToolBar0Attribute((this._hideToolBar_0_0value as boolean | undefined));
+                    this._hideToolBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideToolBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideToolBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideToolBar0Attribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableToolBarAdaptation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableToolBarAdaptation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableToolBarAdaptationAttribute((this._enableToolBarAdaptation_0_0value as boolean | undefined));
+                    this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableToolBarAdaptationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onTitleModeChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onTitleModeChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnTitleModeChangeAttribute((this._onTitleModeChange_0_0value as ((titleMode: NavigationTitleMode) => void) | undefined));
+                    this._onTitleModeChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onTitleModeChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onTitleModeChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnTitleModeChangeAttribute((undefined as ((titleMode: NavigationTitleMode) => void) | undefined));
+                }
+            }
+        }
+        if (this._onNavBarStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onNavBarStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnNavBarStateChangeAttribute((this._onNavBarStateChange_0_0value as ((isVisible: boolean) => void) | undefined));
+                    this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnNavBarStateChangeAttribute((undefined as ((isVisible: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (this._onNavigationModeChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onNavigationModeChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnNavigationModeChangeAttribute((this._onNavigationModeChange_0_0value as ((mode: NavigationMode) => void) | undefined));
+                    this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnNavigationModeChangeAttribute((undefined as ((mode: NavigationMode) => void) | undefined));
+                }
+            }
+        }
+        if (this._navDestination_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._navDestination_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNavDestinationAttribute((this._navDestination_0_0value as PageMapBuilder | undefined));
+                    this._navDestination_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._navDestination_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._navDestination_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNavDestinationAttribute((undefined as PageMapBuilder | undefined));
+                }
+            }
+        }
+        if (this._customNavContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._customNavContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCustomNavContentTransitionAttribute((this._customNavContentTransition_0_0value as ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined));
+                    this._customNavContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._customNavContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._customNavContentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCustomNavContentTransitionAttribute((undefined as ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined));
+                }
+            }
+        }
+        if (this._systemBarStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._systemBarStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSystemBarStyleAttribute((this._systemBarStyle_0_0value as window.SystemBarStyle | undefined));
+                    this._systemBarStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._systemBarStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._systemBarStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSystemBarStyleAttribute((undefined as window.SystemBarStyle | undefined));
+                }
+            }
+        }
+        if (this._recoverable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._recoverable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRecoverableAttribute((this._recoverable_0_0value as boolean | undefined));
+                    this._recoverable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._recoverable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._recoverable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRecoverableAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableDragBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableDragBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableDragBarAttribute((this._enableDragBar_0_0value as boolean | undefined));
+                    this._enableDragBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableDragBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableDragBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableDragBarAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableModeChangeAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableModeChangeAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableModeChangeAnimationAttribute((this._enableModeChangeAnimation_0_0value as boolean | undefined));
+                    this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableModeChangeAnimationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backButtonIcon_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackButtonIcon1Attribute((this._backButtonIcon_1_0value as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (this._backButtonIcon_1_1value as ResourceStr | undefined));
+                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backButtonIcon_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackButtonIcon1Attribute((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
+                }
+            }
+        }
+        if (this._title_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._title_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTitleAttribute((this._title_0_0value as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (this._title_0_1value as NavigationTitleOptions | undefined));
+                    this._title_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._title_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._title_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTitleAttribute((undefined as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (undefined as NavigationTitleOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._hideTitleBar_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideTitleBar_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideTitleBar1Attribute((this._hideTitleBar_1_0value as boolean | undefined), (this._hideTitleBar_1_1value as boolean | undefined));
+                    this._hideTitleBar_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideTitleBar_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideTitleBar_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideTitleBar1Attribute((undefined as boolean | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menus_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenus1Attribute((this._menus_1_0value as Array<NavigationMenuItem> | CustomBuilder | undefined), (this._menus_1_1value as NavigationMenuOptions | undefined));
+                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menus_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menus_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenus1Attribute((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._toolbarConfiguration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._toolbarConfiguration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setToolbarConfigurationAttribute((this._toolbarConfiguration_0_0value as Array<ToolbarItem> | CustomBuilder | undefined), (this._toolbarConfiguration_0_1value as NavigationToolbarOptions | undefined));
+                    this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setToolbarConfigurationAttribute((undefined as Array<ToolbarItem> | CustomBuilder | undefined), (undefined as NavigationToolbarOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._hideToolBar_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._hideToolBar_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHideToolBar1Attribute((this._hideToolBar_1_0value as boolean | undefined), (this._hideToolBar_1_1value as boolean | undefined));
+                    this._hideToolBar_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._hideToolBar_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._hideToolBar_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHideToolBar1Attribute((undefined as boolean | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined));
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
     }
-    public navBarWidth(value: Length | undefined): this {
-        this._navBarWidth_flag = true
-        this._navBarWidth0_value = value
+    mergeModifier(modifier: NavigationModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._navBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._navBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.navBarWidth(modifier._navBarWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.navBarWidth((undefined as Length | Bindable<Length> | undefined));
+                }
+            }
+        }
+        if (modifier._navBarPosition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._navBarPosition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.navBarPosition(modifier._navBarPosition_0_0value);
+                    break;
+                }
+                default: {
+                    this.navBarPosition((undefined as NavBarPosition | undefined));
+                }
+            }
+        }
+        if (modifier._navBarWidthRange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._navBarWidthRange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.navBarWidthRange(modifier._navBarWidthRange_0_0value);
+                    break;
+                }
+                default: {
+                    this.navBarWidthRange((undefined as [ Dimension, Dimension ] | undefined));
+                }
+            }
+        }
+        if (modifier._minContentWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minContentWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minContentWidth(modifier._minContentWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.minContentWidth((undefined as Dimension | undefined));
+                }
+            }
+        }
+        if (modifier._mode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._mode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.mode(modifier._mode_0_0value);
+                    break;
+                }
+                default: {
+                    this.mode((undefined as NavigationMode | undefined));
+                }
+            }
+        }
+        if (modifier._backButtonIcon_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backButtonIcon_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backButtonIcon(modifier._backButtonIcon_0_0value);
+                    break;
+                }
+                default: {
+                    this.backButtonIcon((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined));
+                }
+            }
+        }
+        if (modifier._hideNavBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideNavBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideNavBar(modifier._hideNavBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.hideNavBar((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._hideTitleBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideTitleBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideTitleBar(modifier._hideTitleBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.hideTitleBar((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._hideBackButton_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideBackButton_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideBackButton(modifier._hideBackButton_0_0value);
+                    break;
+                }
+                default: {
+                    this.hideBackButton((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._titleMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._titleMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.titleMode(modifier._titleMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.titleMode((undefined as NavigationTitleMode | undefined));
+                }
+            }
+        }
+        if (modifier._menus_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menus_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menus(modifier._menus_0_0value);
+                    break;
+                }
+                default: {
+                    this.menus((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined));
+                }
+            }
+        }
+        if (modifier._hideToolBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideToolBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideToolBar(modifier._hideToolBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.hideToolBar((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableToolBarAdaptation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableToolBarAdaptation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableToolBarAdaptation(modifier._enableToolBarAdaptation_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableToolBarAdaptation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onTitleModeChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onTitleModeChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onTitleModeChange(modifier._onTitleModeChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTitleModeChange((undefined as ((titleMode: NavigationTitleMode) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onNavBarStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onNavBarStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onNavBarStateChange(modifier._onNavBarStateChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onNavBarStateChange((undefined as ((isVisible: boolean) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onNavigationModeChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onNavigationModeChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onNavigationModeChange(modifier._onNavigationModeChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onNavigationModeChange((undefined as ((mode: NavigationMode) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._navDestination_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._navDestination_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.navDestination(modifier._navDestination_0_0value);
+                    break;
+                }
+                default: {
+                    this.navDestination((undefined as PageMapBuilder | undefined));
+                }
+            }
+        }
+        if (modifier._customNavContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._customNavContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.customNavContentTransition(modifier._customNavContentTransition_0_0value);
+                    break;
+                }
+                default: {
+                    this.customNavContentTransition((undefined as ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined));
+                }
+            }
+        }
+        if (modifier._systemBarStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._systemBarStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.systemBarStyle(modifier._systemBarStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.systemBarStyle((undefined as window.SystemBarStyle | undefined));
+                }
+            }
+        }
+        if (modifier._recoverable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._recoverable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.recoverable(modifier._recoverable_0_0value);
+                    break;
+                }
+                default: {
+                    this.recoverable((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableDragBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableDragBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableDragBar(modifier._enableDragBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableDragBar((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableModeChangeAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableModeChangeAnimation_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableModeChangeAnimation(modifier._enableModeChangeAnimation_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableModeChangeAnimation((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._backButtonIcon_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backButtonIcon_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backButtonIcon(modifier._backButtonIcon_1_0value, modifier._backButtonIcon_1_1value);
+                    break;
+                }
+                default: {
+                    this.backButtonIcon((undefined as string | image.PixelMap | Resource | SymbolGlyphModifier | undefined), (undefined as ResourceStr | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._title_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._title_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.title(modifier._title_0_0value, modifier._title_0_1value);
+                    break;
+                }
+                default: {
+                    this.title((undefined as ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined), (undefined as NavigationTitleOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._hideTitleBar_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideTitleBar_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideTitleBar(modifier._hideTitleBar_1_0value, modifier._hideTitleBar_1_1value);
+                    break;
+                }
+                default: {
+                    this.hideTitleBar((undefined as boolean | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._menus_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menus_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menus(modifier._menus_1_0value, modifier._menus_1_1value);
+                    break;
+                }
+                default: {
+                    this.menus((undefined as Array<NavigationMenuItem> | CustomBuilder | undefined), (undefined as NavigationMenuOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._toolbarConfiguration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._toolbarConfiguration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.toolbarConfiguration(modifier._toolbarConfiguration_0_0value, modifier._toolbarConfiguration_0_1value);
+                    break;
+                }
+                default: {
+                    this.toolbarConfiguration((undefined as Array<ToolbarItem> | CustomBuilder | undefined), (undefined as NavigationToolbarOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._hideToolBar_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._hideToolBar_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.hideToolBar(modifier._hideToolBar_1_0value, modifier._hideToolBar_1_1value);
+                    break;
+                }
+                default: {
+                    this.hideToolBar((undefined as boolean | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._ignoreLayoutSafeArea_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._ignoreLayoutSafeArea_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.ignoreLayoutSafeArea(modifier._ignoreLayoutSafeArea_0_0value, modifier._ignoreLayoutSafeArea_0_1value);
+                    break;
+                }
+                default: {
+                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
+    }
+    navBarWidth(value: Length | Bindable<Length> | undefined): this {
+        if (((this._navBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._navBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._navBarWidth_0_0value = value
+        } else
+        {
+            this._navBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public navBarPosition(value: NavBarPosition | undefined): this {
-        this._navBarPosition_flag = true
-        this._navBarPosition0_value = value
+    navBarPosition(value: NavBarPosition | undefined): this {
+        if (((this._navBarPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._navBarPosition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._navBarPosition_0_0value = value
+        } else
+        {
+            this._navBarPosition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
-        this._navBarWidthRange_flag = true
-        this._navBarWidthRange0_value = value
+    navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
+        if (((this._navBarWidthRange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._navBarWidthRange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._navBarWidthRange_0_0value = value
+        } else
+        {
+            this._navBarWidthRange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minContentWidth(value: Dimension | undefined): this {
-        this._minContentWidth_flag = true
-        this._minContentWidth0_value = value
+    minContentWidth(value: Dimension | undefined): this {
+        if (((this._minContentWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minContentWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minContentWidth_0_0value = value
+        } else
+        {
+            this._minContentWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public mode(value: NavigationMode | undefined): this {
-        this._mode_flag = true
-        this._mode0_value = value
+    mode(value: NavigationMode | undefined): this {
+        if (((this._mode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._mode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._mode_0_0value = value
+        } else
+        {
+            this._mode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
-        this._backButtonIcon_flag = true
-        this._backButtonIcon0_value = icon
-        this._backButtonIcon1_value = accessibilityText
+    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
+        if (((this._backButtonIcon_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backButtonIcon_0_0value = value
+        } else
+        {
+            this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public hideNavBar(value: boolean | undefined): this {
-        this._hideNavBar_flag = true
-        this._hideNavBar0_value = value
+    hideNavBar(value: boolean | undefined): this {
+        if (((this._hideNavBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideNavBar_0_0value) !== (value)))
+        {
+            this._hideNavBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hideNavBar_0_0value = value
+        } else
+        {
+            this._hideNavBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
-        this._hideTitleBar_flag = true
-        this._hideTitleBar0_value = hide
-        this._hideTitleBar1_value = animated
+    hideTitleBar(value: boolean | undefined): this {
+        if (((this._hideTitleBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideTitleBar_0_0value) !== (value)))
+        {
+            this._hideTitleBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hideTitleBar_0_0value = value
+        } else
+        {
+            this._hideTitleBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public hideBackButton(value: boolean | undefined): this {
-        this._hideBackButton_flag = true
-        this._hideBackButton0_value = value
+    hideBackButton(value: boolean | undefined): this {
+        if (((this._hideBackButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideBackButton_0_0value) !== (value)))
+        {
+            this._hideBackButton_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hideBackButton_0_0value = value
+        } else
+        {
+            this._hideBackButton_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public titleMode(value: NavigationTitleMode | undefined): this {
-        this._titleMode_flag = true
-        this._titleMode0_value = value
+    titleMode(value: NavigationTitleMode | undefined): this {
+        if (((this._titleMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._titleMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._titleMode_0_0value = value
+        } else
+        {
+            this._titleMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
-        this._menus_flag = true
-        this._menus0_value = items
-        this._menus1_value = options
+    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
+        if (((this._menus_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menus_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menus_0_0value = value
+        } else
+        {
+            this._menus_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this {
-        this._hideToolBar_flag = true
-        this._hideToolBar0_value = hide
-        this._hideToolBar1_value = animated
+    hideToolBar(value: boolean | undefined): this {
+        if (((this._hideToolBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideToolBar_0_0value) !== (value)))
+        {
+            this._hideToolBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._hideToolBar_0_0value = value
+        } else
+        {
+            this._hideToolBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableToolBarAdaptation(value: boolean | undefined): this {
-        this._enableToolBarAdaptation_flag = true
-        this._enableToolBarAdaptation0_value = value
+    enableToolBarAdaptation(value: boolean | undefined): this {
+        if (((this._enableToolBarAdaptation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableToolBarAdaptation_0_0value) !== (value)))
+        {
+            this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableToolBarAdaptation_0_0value = value
+        } else
+        {
+            this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
-        this._onTitleModeChange_flag = true
-        this._onTitleModeChange0_value = value
+    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
+        if (((this._onTitleModeChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onTitleModeChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onTitleModeChange_0_0value = value
+        } else
+        {
+            this._onTitleModeChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
-        this._onNavBarStateChange_flag = true
-        this._onNavBarStateChange0_value = value
+    onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (((this._onNavBarStateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onNavBarStateChange_0_0value = value
+        } else
+        {
+            this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
-        this._onNavigationModeChange_flag = true
-        this._onNavigationModeChange0_value = value
+    onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
+        if (((this._onNavigationModeChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onNavigationModeChange_0_0value = value
+        } else
+        {
+            this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public navDestination(value: PageMapBuilder | undefined): this {
-        this._navDestination_flag = true
-        this._navDestination0_value = value
+    navDestination(value: PageMapBuilder | undefined): this {
+        if (((this._navDestination_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._navDestination_0_flag = AttributeUpdaterFlag.UPDATE
+            this._navDestination_0_0value = value
+        } else
+        {
+            this._navDestination_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
-        this._customNavContentTransition_flag = true
-        this._customNavContentTransition0_value = value
+    customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
+        if (((this._customNavContentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._customNavContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._customNavContentTransition_0_0value = value
+        } else
+        {
+            this._customNavContentTransition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public systemBarStyle(value: window.SystemBarStyle | undefined): this {
-        this._systemBarStyle_flag = true
-        this._systemBarStyle0_value = value
+    systemBarStyle(value: window.SystemBarStyle | undefined): this {
+        if (((this._systemBarStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._systemBarStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._systemBarStyle_0_0value = value
+        } else
+        {
+            this._systemBarStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public recoverable(value: boolean | undefined): this {
-        this._recoverable_flag = true
-        this._recoverable0_value = value
+    recoverable(value: boolean | undefined): this {
+        if (((this._recoverable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._recoverable_0_0value) !== (value)))
+        {
+            this._recoverable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._recoverable_0_0value = value
+        } else
+        {
+            this._recoverable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableDragBar(value: boolean | undefined): this {
-        this._enableDragBar_flag = true
-        this._enableDragBar0_value = value
+    enableDragBar(value: boolean | undefined): this {
+        if (((this._enableDragBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDragBar_0_0value) !== (value)))
+        {
+            this._enableDragBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableDragBar_0_0value = value
+        } else
+        {
+            this._enableDragBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableModeChangeAnimation(value: boolean | undefined): this {
-        this._enableModeChangeAnimation_flag = true
-        this._enableModeChangeAnimation0_value = value
+    enableModeChangeAnimation(value: boolean | undefined): this {
+        if (((this._enableModeChangeAnimation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableModeChangeAnimation_0_0value) !== (value)))
+        {
+            this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableModeChangeAnimation_0_0value = value
+        } else
+        {
+            this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
-        this._title_flag = true
-        this._title0_value = value
-        this._title1_value = options
+    backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+        if (((this._backButtonIcon_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._backButtonIcon_1_flag = AttributeUpdaterFlag.UPDATE
+            this._backButtonIcon_1_0value = icon
+            this._backButtonIcon_1_1value = accessibilityText
+        } else
+        {
+            this._backButtonIcon_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
-        this._toolbarConfiguration_flag = true
-        this._toolbarConfiguration0_value = value
-        this._toolbarConfiguration1_value = options
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
+        if (((this._title_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._title_0_flag = AttributeUpdaterFlag.UPDATE
+            this._title_0_0value = value
+            this._title_0_1value = options
+        } else
+        {
+            this._title_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
-        this._ignoreLayoutSafeArea_flag = true
-        this._ignoreLayoutSafeArea0_value = types
-        this._ignoreLayoutSafeArea1_value = edges
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
+        if (((this._hideTitleBar_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideTitleBar_1_0value) !== (hide)) || ((this._hideTitleBar_1_1value) !== (animated)))
+        {
+            this._hideTitleBar_1_flag = AttributeUpdaterFlag.UPDATE
+            this._hideTitleBar_1_0value = hide
+            this._hideTitleBar_1_1value = animated
+        } else
+        {
+            this._hideTitleBar_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+        if (((this._menus_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._menus_1_flag = AttributeUpdaterFlag.UPDATE
+            this._menus_1_0value = items
+            this._menus_1_1value = options
+        } else
+        {
+            this._menus_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+        if (((this._toolbarConfiguration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.UPDATE
+            this._toolbarConfiguration_0_0value = value
+            this._toolbarConfiguration_0_1value = options
+        } else
+        {
+            this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this {
+        if (((this._hideToolBar_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._hideToolBar_1_0value) !== (hide)) || ((this._hideToolBar_1_1value) !== (animated)))
+        {
+            this._hideToolBar_1_flag = AttributeUpdaterFlag.UPDATE
+            this._hideToolBar_1_0value = hide
+            this._hideToolBar_1_1value = animated
+        } else
+        {
+            this._hideToolBar_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (((this._ignoreLayoutSafeArea_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
+            this._ignoreLayoutSafeArea_0_0value = types
+            this._ignoreLayoutSafeArea_0_1value = edges
+        } else
+        {
+            this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -2725,331 +3655,312 @@ export class NavPathStack_serializer {
 export class NavContentInfo_serializer {
     public static write(buffer: SerializerBase, value: NavContentInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_name  = value.name
-        let value_name_type : int32 = RuntimeType.UNDEFINED
-        value_name_type = runtimeType(value_name)
-        valueSerializer.writeInt8((value_name_type).toChar())
-        if ((value_name_type) != (RuntimeType.UNDEFINED)) {
-            const value_name_value  = value_name!
-            valueSerializer.writeString(value_name_value)
+        const valueHolderForName  = value.name
+        if (valueHolderForName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNameTmpValue  = valueHolderForName!
+            valueSerializer.writeString(valueHolderForNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_index  = value.index
-        valueSerializer.writeNumber(value_index)
-        const value_mode  = value.mode
-        let value_mode_type : int32 = RuntimeType.UNDEFINED
-        value_mode_type = runtimeType(value_mode)
-        valueSerializer.writeInt8((value_mode_type).toChar())
-        if ((value_mode_type) != (RuntimeType.UNDEFINED)) {
-            const value_mode_value  = (value_mode as NavDestinationMode)
-            valueSerializer.writeInt32(TypeChecker.NavDestinationMode_ToNumeric(value_mode_value))
+        const valueHolderForIndex  = value.index
+        valueSerializer.writeNumber(valueHolderForIndex)
+        const valueHolderForMode  = value.mode
+        if (valueHolderForMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModeTmpValue  = (valueHolderForMode as NavDestinationMode)
+            valueSerializer.writeInt32(TypeChecker.NavDestinationMode_ToNumeric(valueHolderForModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_param  = value.param
-        let value_param_type : int32 = RuntimeType.UNDEFINED
-        value_param_type = runtimeType(value_param)
-        valueSerializer.writeInt8((value_param_type).toChar())
-        if ((value_param_type) != (RuntimeType.UNDEFINED)) {
-            const value_param_value  = value_param!
-            valueSerializer.holdAndWriteObject(value_param_value)
+        const valueHolderForParam  = value.param
+        if (valueHolderForParam !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamTmpValue  = valueHolderForParam!
+            valueSerializer.holdAndWriteObject(valueHolderForParamTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_navDestinationId  = value.navDestinationId
-        let value_navDestinationId_type : int32 = RuntimeType.UNDEFINED
-        value_navDestinationId_type = runtimeType(value_navDestinationId)
-        valueSerializer.writeInt8((value_navDestinationId_type).toChar())
-        if ((value_navDestinationId_type) != (RuntimeType.UNDEFINED)) {
-            const value_navDestinationId_value  = value_navDestinationId!
-            valueSerializer.writeString(value_navDestinationId_value)
+        const valueHolderForNavDestinationId  = value.navDestinationId
+        if (valueHolderForNavDestinationId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForNavDestinationIdTmpValue  = valueHolderForNavDestinationId!
+            valueSerializer.writeString(valueHolderForNavDestinationIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavContentInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const name_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let name_buf : string | undefined
-        if ((name_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            name_buf = (valueDeserializer.readString() as string)
+        const nameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let nameTmpBuf : string | undefined
+        if ((nameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            nameTmpBuf = (valueDeserializer.readString() as string)
         }
-        const name_result : string | undefined = name_buf
-        const index_result : number = (valueDeserializer.readNumber() as number)
-        const mode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mode_buf : NavDestinationMode | undefined
-        if ((mode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            mode_buf = TypeChecker.NavDestinationMode_FromNumeric(valueDeserializer.readInt32())
+        const nameTmpResult : string | undefined = nameTmpBuf
+        const indexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modeTmpBuf : NavDestinationMode | undefined
+        if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            modeTmpBuf = TypeChecker.NavDestinationMode_FromNumeric(valueDeserializer.readInt32())
         }
-        const mode_result : NavDestinationMode | undefined = mode_buf
-        const param_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let param_buf : Object | undefined
-        if ((param_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            param_buf = (valueDeserializer.readObject() as object)
+        const modeTmpResult : NavDestinationMode | undefined = modeTmpBuf
+        const paramTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramTmpBuf : Object | undefined
+        if ((paramTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paramTmpBuf = (valueDeserializer.readObject() as object)
         }
-        const param_result : Object | undefined = param_buf
-        const navDestinationId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let navDestinationId_buf : string | undefined
-        if ((navDestinationId_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            navDestinationId_buf = (valueDeserializer.readString() as string)
+        const paramTmpResult : Object | undefined = paramTmpBuf
+        const navDestinationIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let navDestinationIdTmpBuf : string | undefined
+        if ((navDestinationIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            navDestinationIdTmpBuf = (valueDeserializer.readString() as string)
         }
-        const navDestinationId_result : string | undefined = navDestinationId_buf
-        let value : NavContentInfo = ({name: name_result, index: index_result, mode: mode_result, param: param_result, navDestinationId: navDestinationId_result} as NavContentInfo)
+        const navDestinationIdTmpResult : string | undefined = navDestinationIdTmpBuf
+        let value : NavContentInfo = ({name: nameTmpResult, index: indexTmpResult, mode: modeTmpResult, param: paramTmpResult, navDestinationId: navDestinationIdTmpResult} as NavContentInfo)
         return value
     }
 }
 export class NavigationAnimatedTransition_serializer {
     public static write(buffer: SerializerBase, value: NavigationAnimatedTransition): void {
         let valueSerializer : SerializerBase = buffer
-        const value_onTransitionEnd  = value.onTransitionEnd
-        let value_onTransitionEnd_type : int32 = RuntimeType.UNDEFINED
-        value_onTransitionEnd_type = runtimeType(value_onTransitionEnd)
-        valueSerializer.writeInt8((value_onTransitionEnd_type).toChar())
-        if ((value_onTransitionEnd_type) != (RuntimeType.UNDEFINED)) {
-            const value_onTransitionEnd_value  = value_onTransitionEnd!
-            valueSerializer.holdAndWriteCallback(value_onTransitionEnd_value)
+        const valueHolderForOnTransitionEnd  = value.onTransitionEnd
+        if (valueHolderForOnTransitionEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnTransitionEndTmpValue  = valueHolderForOnTransitionEnd!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnTransitionEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_timeout  = value.timeout
-        let value_timeout_type : int32 = RuntimeType.UNDEFINED
-        value_timeout_type = runtimeType(value_timeout)
-        valueSerializer.writeInt8((value_timeout_type).toChar())
-        if ((value_timeout_type) != (RuntimeType.UNDEFINED)) {
-            const value_timeout_value  = value_timeout!
-            valueSerializer.writeNumber(value_timeout_value)
+        const valueHolderForTimeout  = value.timeout
+        if (valueHolderForTimeout !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTimeoutTmpValue  = valueHolderForTimeout!
+            valueSerializer.writeNumber(valueHolderForTimeoutTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_isInteractive  = value.isInteractive
-        let value_isInteractive_type : int32 = RuntimeType.UNDEFINED
-        value_isInteractive_type = runtimeType(value_isInteractive)
-        valueSerializer.writeInt8((value_isInteractive_type).toChar())
-        if ((value_isInteractive_type) != (RuntimeType.UNDEFINED)) {
-            const value_isInteractive_value  = value_isInteractive!
-            valueSerializer.writeBoolean(value_isInteractive_value)
+        const valueHolderForIsInteractive  = value.isInteractive
+        if (valueHolderForIsInteractive !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsInteractiveTmpValue  = valueHolderForIsInteractive!
+            valueSerializer.writeBoolean(valueHolderForIsInteractiveTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_transition  = value.transition
-        valueSerializer.holdAndWriteCallback(value_transition)
+        const valueHolderForTransition  = value.transition
+        valueSerializer.holdAndWriteCallback(valueHolderForTransition)
     }
     public static read(buffer: DeserializerBase): NavigationAnimatedTransition {
         let valueDeserializer : DeserializerBase = buffer
-        const onTransitionEnd_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onTransitionEnd_buf : ((isVisible: boolean) => void) | undefined
-        if ((onTransitionEnd_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onTransitionEnd_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onTransitionEnd_buf__call : KPointer = valueDeserializer.readPointer()
-            const onTransitionEnd_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onTransitionEnd_buf = (isVisible: boolean):void => { 
-    const onTransitionEnd_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onTransitionEnd_buf__argsSerializer.writeInt32(onTransitionEnd_buf__resource.resourceId);
-    onTransitionEnd_buf__argsSerializer.writePointer(onTransitionEnd_buf__call);
-    onTransitionEnd_buf__argsSerializer.writePointer(onTransitionEnd_buf__callSync);
-    onTransitionEnd_buf__argsSerializer.writeBoolean(isVisible);
-    InteropNativeModule._CallCallback(313269291, onTransitionEnd_buf__argsSerializer.asBuffer(), onTransitionEnd_buf__argsSerializer.length());
-    onTransitionEnd_buf__argsSerializer.release();
-    return; }
+        const onTransitionEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onTransitionEndTmpBuf : ((isVisible: boolean) => void) | undefined
+        if ((onTransitionEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onTransitionEndTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onTransitionEndTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onTransitionEndTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onTransitionEndTmpBuf = (isVisible: boolean):void => {
+                const onTransitionEndTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onTransitionEndTmpBuf_BufArgsSerializer.writeInt32(onTransitionEndTmpBuf_BufResource.resourceId);
+                onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCall);
+                onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCallSync);
+                onTransitionEndTmpBuf_BufArgsSerializer.writeBoolean(isVisible);
+                InteropNativeModule._CallCallback(313269291, onTransitionEndTmpBuf_BufArgsSerializer.asBuffer(), onTransitionEndTmpBuf_BufArgsSerializer.length());
+                onTransitionEndTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const onTransitionEnd_result : ((isVisible: boolean) => void) | undefined = onTransitionEnd_buf
-        const timeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeout_buf : number | undefined
-        if ((timeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            timeout_buf = (valueDeserializer.readNumber() as number)
+        const onTransitionEndTmpResult : ((isVisible: boolean) => void) | undefined = onTransitionEndTmpBuf
+        const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let timeoutTmpBuf : number | undefined
+        if ((timeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            timeoutTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const timeout_result : number | undefined = timeout_buf
-        const isInteractive_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isInteractive_buf : boolean | undefined
-        if ((isInteractive_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isInteractive_buf = valueDeserializer.readBoolean()
+        const timeoutTmpResult : number | undefined = timeoutTmpBuf
+        const isInteractiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isInteractiveTmpBuf : boolean | undefined
+        if ((isInteractiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isInteractiveTmpBuf = valueDeserializer.readBoolean()
         }
-        const isInteractive_result : boolean | undefined = isInteractive_buf
-        const transition_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const transition_buf_call : KPointer = valueDeserializer.readPointer()
-        const transition_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const transition_result : ((transitionProxy: NavigationTransitionProxy) => void) = (transitionProxy: NavigationTransitionProxy):void => { 
-    const transition_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    transition_buf_argsSerializer.writeInt32(transition_buf_resource.resourceId);
-    transition_buf_argsSerializer.writePointer(transition_buf_call);
-    transition_buf_argsSerializer.writePointer(transition_buf_callSync);
-    NavigationTransitionProxy_serializer.write(transition_buf_argsSerializer, transitionProxy);
-    InteropNativeModule._CallCallback(-1375731066, transition_buf_argsSerializer.asBuffer(), transition_buf_argsSerializer.length());
-    transition_buf_argsSerializer.release();
-    return; }
-        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEnd_result, timeout: timeout_result, isInteractive: isInteractive_result, transition: transition_result} as NavigationAnimatedTransition)
+        const isInteractiveTmpResult : boolean | undefined = isInteractiveTmpBuf
+        const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const transitionTmpResult : ((transitionProxy: NavigationTransitionProxy) => void) = (transitionProxy: NavigationTransitionProxy):void => {
+            const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
+            NavigationTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, transitionProxy);
+            InteropNativeModule._CallCallback(-1375731066, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            transitionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEndTmpResult, timeout: timeoutTmpResult, isInteractive: isInteractiveTmpResult, transition: transitionTmpResult} as NavigationAnimatedTransition)
         return value
     }
 }
 export class NavigationInterception_serializer {
     public static write(buffer: SerializerBase, value: NavigationInterception): void {
         let valueSerializer : SerializerBase = buffer
-        const value_willShow  = value.willShow
-        let value_willShow_type : int32 = RuntimeType.UNDEFINED
-        value_willShow_type = runtimeType(value_willShow)
-        valueSerializer.writeInt8((value_willShow_type).toChar())
-        if ((value_willShow_type) != (RuntimeType.UNDEFINED)) {
-            const value_willShow_value  = value_willShow!
-            valueSerializer.holdAndWriteCallback(value_willShow_value)
+        const valueHolderForWillShow  = value.willShow
+        if (valueHolderForWillShow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWillShowTmpValue  = valueHolderForWillShow!
+            valueSerializer.holdAndWriteCallback(valueHolderForWillShowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_didShow  = value.didShow
-        let value_didShow_type : int32 = RuntimeType.UNDEFINED
-        value_didShow_type = runtimeType(value_didShow)
-        valueSerializer.writeInt8((value_didShow_type).toChar())
-        if ((value_didShow_type) != (RuntimeType.UNDEFINED)) {
-            const value_didShow_value  = value_didShow!
-            valueSerializer.holdAndWriteCallback(value_didShow_value)
+        const valueHolderForDidShow  = value.didShow
+        if (valueHolderForDidShow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDidShowTmpValue  = valueHolderForDidShow!
+            valueSerializer.holdAndWriteCallback(valueHolderForDidShowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_modeChange  = value.modeChange
-        let value_modeChange_type : int32 = RuntimeType.UNDEFINED
-        value_modeChange_type = runtimeType(value_modeChange)
-        valueSerializer.writeInt8((value_modeChange_type).toChar())
-        if ((value_modeChange_type) != (RuntimeType.UNDEFINED)) {
-            const value_modeChange_value  = value_modeChange!
-            valueSerializer.holdAndWriteCallback(value_modeChange_value)
+        const valueHolderForModeChange  = value.modeChange
+        if (valueHolderForModeChange !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForModeChangeTmpValue  = valueHolderForModeChange!
+            valueSerializer.holdAndWriteCallback(valueHolderForModeChangeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationInterception {
         let valueDeserializer : DeserializerBase = buffer
-        const willShow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let willShow_buf : InterceptionShowCallback | undefined
-        if ((willShow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const willShow_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const willShow_buf__call : KPointer = valueDeserializer.readPointer()
-            const willShow_buf__callSync : KPointer = valueDeserializer.readPointer()
-            willShow_buf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => { 
-    const willShow_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    willShow_buf__argsSerializer.writeInt32(willShow_buf__resource.resourceId);
-    willShow_buf__argsSerializer.writePointer(willShow_buf__call);
-    willShow_buf__argsSerializer.writePointer(willShow_buf__callSync);
-    let from_type : int32 = RuntimeType.UNDEFINED;
-    from_type = runtimeType(from);
-    if (RuntimeType.OBJECT == from_type) {
-        willShow_buf__argsSerializer.writeInt8((0).toChar());
-        const from_0  = from as NavDestinationContext;
-        NavDestinationContext_serializer.write(willShow_buf__argsSerializer, from_0);
-    }
-    else if (RuntimeType.STRING == from_type) {
-        willShow_buf__argsSerializer.writeInt8((1).toChar());
-        const from_1  = from as NavBar;
-        willShow_buf__argsSerializer.writeString(from_1);
-    }
-    let to_type : int32 = RuntimeType.UNDEFINED;
-    to_type = runtimeType(to);
-    if (RuntimeType.OBJECT == to_type) {
-        willShow_buf__argsSerializer.writeInt8((0).toChar());
-        const to_0  = to as NavDestinationContext;
-        NavDestinationContext_serializer.write(willShow_buf__argsSerializer, to_0);
-    }
-    else if (RuntimeType.STRING == to_type) {
-        willShow_buf__argsSerializer.writeInt8((1).toChar());
-        const to_1  = to as NavBar;
-        willShow_buf__argsSerializer.writeString(to_1);
-    }
-    willShow_buf__argsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
-    willShow_buf__argsSerializer.writeBoolean(isAnimated);
-    InteropNativeModule._CallCallback(1852781814, willShow_buf__argsSerializer.asBuffer(), willShow_buf__argsSerializer.length());
-    willShow_buf__argsSerializer.release();
-    return; }
+        const willShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let willShowTmpBuf : InterceptionShowCallback | undefined
+        if ((willShowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const willShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const willShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const willShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            willShowTmpBuf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
+                const willShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                willShowTmpBuf_BufArgsSerializer.writeInt32(willShowTmpBuf_BufResource.resourceId);
+                willShowTmpBuf_BufArgsSerializer.writePointer(willShowTmpBuf_BufCall);
+                willShowTmpBuf_BufArgsSerializer.writePointer(willShowTmpBuf_BufCallSync);
+                if (from instanceof NavDestinationContext) {
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    const fromForIdx0  = from as NavDestinationContext;
+                    NavDestinationContext_serializer.write(willShowTmpBuf_BufArgsSerializer, fromForIdx0);
+                } else if (from instanceof NavBar) {
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    const fromForIdx1  = from as NavBar;
+                    willShowTmpBuf_BufArgsSerializer.writeString(fromForIdx1);
+                }
+                if (to instanceof NavDestinationContext) {
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    const toForIdx0  = to as NavDestinationContext;
+                    NavDestinationContext_serializer.write(willShowTmpBuf_BufArgsSerializer, toForIdx0);
+                } else if (to instanceof NavBar) {
+                    willShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    const toForIdx1  = to as NavBar;
+                    willShowTmpBuf_BufArgsSerializer.writeString(toForIdx1);
+                }
+                willShowTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
+                willShowTmpBuf_BufArgsSerializer.writeBoolean(isAnimated);
+                InteropNativeModule._CallCallback(1852781814, willShowTmpBuf_BufArgsSerializer.asBuffer(), willShowTmpBuf_BufArgsSerializer.length());
+                willShowTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const willShow_result : InterceptionShowCallback | undefined = willShow_buf
-        const didShow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let didShow_buf : InterceptionShowCallback | undefined
-        if ((didShow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const didShow_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const didShow_buf__call : KPointer = valueDeserializer.readPointer()
-            const didShow_buf__callSync : KPointer = valueDeserializer.readPointer()
-            didShow_buf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => { 
-    const didShow_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    didShow_buf__argsSerializer.writeInt32(didShow_buf__resource.resourceId);
-    didShow_buf__argsSerializer.writePointer(didShow_buf__call);
-    didShow_buf__argsSerializer.writePointer(didShow_buf__callSync);
-    let from_type : int32 = RuntimeType.UNDEFINED;
-    from_type = runtimeType(from);
-    if (RuntimeType.OBJECT == from_type) {
-        didShow_buf__argsSerializer.writeInt8((0).toChar());
-        const from_0  = from as NavDestinationContext;
-        NavDestinationContext_serializer.write(didShow_buf__argsSerializer, from_0);
-    }
-    else if (RuntimeType.STRING == from_type) {
-        didShow_buf__argsSerializer.writeInt8((1).toChar());
-        const from_1  = from as NavBar;
-        didShow_buf__argsSerializer.writeString(from_1);
-    }
-    let to_type : int32 = RuntimeType.UNDEFINED;
-    to_type = runtimeType(to);
-    if (RuntimeType.OBJECT == to_type) {
-        didShow_buf__argsSerializer.writeInt8((0).toChar());
-        const to_0  = to as NavDestinationContext;
-        NavDestinationContext_serializer.write(didShow_buf__argsSerializer, to_0);
-    }
-    else if (RuntimeType.STRING == to_type) {
-        didShow_buf__argsSerializer.writeInt8((1).toChar());
-        const to_1  = to as NavBar;
-        didShow_buf__argsSerializer.writeString(to_1);
-    }
-    didShow_buf__argsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
-    didShow_buf__argsSerializer.writeBoolean(isAnimated);
-    InteropNativeModule._CallCallback(1852781814, didShow_buf__argsSerializer.asBuffer(), didShow_buf__argsSerializer.length());
-    didShow_buf__argsSerializer.release();
-    return; }
+        const willShowTmpResult : InterceptionShowCallback | undefined = willShowTmpBuf
+        const didShowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let didShowTmpBuf : InterceptionShowCallback | undefined
+        if ((didShowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const didShowTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const didShowTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const didShowTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            didShowTmpBuf = (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
+                const didShowTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                didShowTmpBuf_BufArgsSerializer.writeInt32(didShowTmpBuf_BufResource.resourceId);
+                didShowTmpBuf_BufArgsSerializer.writePointer(didShowTmpBuf_BufCall);
+                didShowTmpBuf_BufArgsSerializer.writePointer(didShowTmpBuf_BufCallSync);
+                if (from instanceof NavDestinationContext) {
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    const fromForIdx0  = from as NavDestinationContext;
+                    NavDestinationContext_serializer.write(didShowTmpBuf_BufArgsSerializer, fromForIdx0);
+                } else if (from instanceof NavBar) {
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    const fromForIdx1  = from as NavBar;
+                    didShowTmpBuf_BufArgsSerializer.writeString(fromForIdx1);
+                }
+                if (to instanceof NavDestinationContext) {
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((0).toChar());
+                    const toForIdx0  = to as NavDestinationContext;
+                    NavDestinationContext_serializer.write(didShowTmpBuf_BufArgsSerializer, toForIdx0);
+                } else if (to instanceof NavBar) {
+                    didShowTmpBuf_BufArgsSerializer.writeInt8((1).toChar());
+                    const toForIdx1  = to as NavBar;
+                    didShowTmpBuf_BufArgsSerializer.writeString(toForIdx1);
+                }
+                didShowTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
+                didShowTmpBuf_BufArgsSerializer.writeBoolean(isAnimated);
+                InteropNativeModule._CallCallback(1852781814, didShowTmpBuf_BufArgsSerializer.asBuffer(), didShowTmpBuf_BufArgsSerializer.length());
+                didShowTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const didShow_result : InterceptionShowCallback | undefined = didShow_buf
-        const modeChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let modeChange_buf : InterceptionModeCallback | undefined
-        if ((modeChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const modeChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const modeChange_buf__call : KPointer = valueDeserializer.readPointer()
-            const modeChange_buf__callSync : KPointer = valueDeserializer.readPointer()
-            modeChange_buf = (mode: NavigationMode):void => { 
-    const modeChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    modeChange_buf__argsSerializer.writeInt32(modeChange_buf__resource.resourceId);
-    modeChange_buf__argsSerializer.writePointer(modeChange_buf__call);
-    modeChange_buf__argsSerializer.writePointer(modeChange_buf__callSync);
-    modeChange_buf__argsSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(mode));
-    InteropNativeModule._CallCallback(1502213270, modeChange_buf__argsSerializer.asBuffer(), modeChange_buf__argsSerializer.length());
-    modeChange_buf__argsSerializer.release();
-    return; }
+        const didShowTmpResult : InterceptionShowCallback | undefined = didShowTmpBuf
+        const modeChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modeChangeTmpBuf : InterceptionModeCallback | undefined
+        if ((modeChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const modeChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const modeChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const modeChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            modeChangeTmpBuf = (mode: NavigationMode):void => {
+                const modeChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                modeChangeTmpBuf_BufArgsSerializer.writeInt32(modeChangeTmpBuf_BufResource.resourceId);
+                modeChangeTmpBuf_BufArgsSerializer.writePointer(modeChangeTmpBuf_BufCall);
+                modeChangeTmpBuf_BufArgsSerializer.writePointer(modeChangeTmpBuf_BufCallSync);
+                modeChangeTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(mode));
+                InteropNativeModule._CallCallback(1502213270, modeChangeTmpBuf_BufArgsSerializer.asBuffer(), modeChangeTmpBuf_BufArgsSerializer.length());
+                modeChangeTmpBuf_BufArgsSerializer.release();
+                return;
+            }
         }
-        const modeChange_result : InterceptionModeCallback | undefined = modeChange_buf
-        let value : NavigationInterception = ({willShow: willShow_result, didShow: didShow_result, modeChange: modeChange_result} as NavigationInterception)
+        const modeChangeTmpResult : InterceptionModeCallback | undefined = modeChangeTmpBuf
+        let value : NavigationInterception = ({willShow: willShowTmpResult, didShow: didShowTmpResult, modeChange: modeChangeTmpResult} as NavigationInterception)
         return value
     }
 }
 export class NavigationOptions_serializer {
     public static write(buffer: SerializerBase, value: NavigationOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_launchMode  = value.launchMode
-        let value_launchMode_type : int32 = RuntimeType.UNDEFINED
-        value_launchMode_type = runtimeType(value_launchMode)
-        valueSerializer.writeInt8((value_launchMode_type).toChar())
-        if ((value_launchMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_launchMode_value  = (value_launchMode as LaunchMode)
-            valueSerializer.writeInt32(TypeChecker.LaunchMode_ToNumeric(value_launchMode_value))
+        const valueHolderForLaunchMode  = value.launchMode
+        if (valueHolderForLaunchMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLaunchModeTmpValue  = (valueHolderForLaunchMode as LaunchMode)
+            valueSerializer.writeInt32(TypeChecker.LaunchMode_ToNumeric(valueHolderForLaunchModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_animated  = value.animated
-        let value_animated_type : int32 = RuntimeType.UNDEFINED
-        value_animated_type = runtimeType(value_animated)
-        valueSerializer.writeInt8((value_animated_type).toChar())
-        if ((value_animated_type) != (RuntimeType.UNDEFINED)) {
-            const value_animated_value  = value_animated!
-            valueSerializer.writeBoolean(value_animated_value)
+        const valueHolderForAnimated  = value.animated
+        if (valueHolderForAnimated !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAnimatedTmpValue  = valueHolderForAnimated!
+            valueSerializer.writeBoolean(valueHolderForAnimatedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const launchMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let launchMode_buf : LaunchMode | undefined
-        if ((launchMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            launchMode_buf = TypeChecker.LaunchMode_FromNumeric(valueDeserializer.readInt32())
+        const launchModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let launchModeTmpBuf : LaunchMode | undefined
+        if ((launchModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            launchModeTmpBuf = TypeChecker.LaunchMode_FromNumeric(valueDeserializer.readInt32())
         }
-        const launchMode_result : LaunchMode | undefined = launchMode_buf
-        const animated_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let animated_buf : boolean | undefined
-        if ((animated_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            animated_buf = valueDeserializer.readBoolean()
+        const launchModeTmpResult : LaunchMode | undefined = launchModeTmpBuf
+        const animatedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let animatedTmpBuf : boolean | undefined
+        if ((animatedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            animatedTmpBuf = valueDeserializer.readBoolean()
         }
-        const animated_result : boolean | undefined = animated_buf
-        let value : NavigationOptions = ({launchMode: launchMode_result, animated: animated_result} as NavigationOptions)
+        const animatedTmpResult : boolean | undefined = animatedTmpBuf
+        let value : NavigationOptions = ({launchMode: launchModeTmpResult, animated: animatedTmpResult} as NavigationOptions)
         return value
     }
 }
@@ -3067,203 +3978,180 @@ export class NavPathInfo_serializer {
 export class PopInfo_serializer {
     public static write(buffer: SerializerBase, value: PopInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_info  = value.info
-        NavPathInfo_serializer.write(valueSerializer, value_info)
-        const value_result  = value.result
-        valueSerializer.holdAndWriteObject(value_result)
+        const valueHolderForInfo  = value.info
+        NavPathInfo_serializer.write(valueSerializer, valueHolderForInfo)
+        const valueHolderForResult  = value.result
+        valueSerializer.holdAndWriteObject(valueHolderForResult)
     }
     public static read(buffer: DeserializerBase): PopInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const info_result : NavPathInfo = (NavPathInfo_serializer.read(valueDeserializer) as NavPathInfo)
-        const result_result : Object = (valueDeserializer.readObject() as object)
-        let value : PopInfo = ({info: info_result, result: result_result} as PopInfo)
+        const infoTmpResult : NavPathInfo = (NavPathInfo_serializer.read(valueDeserializer) as NavPathInfo)
+        const resultTmpResult : Object = (valueDeserializer.readObject() as object)
+        let value : PopInfo = ({info: infoTmpResult, result: resultTmpResult} as PopInfo)
         return value
     }
 }
 export class NavigationCommonTitle_serializer {
     public static write(buffer: SerializerBase, value: NavigationCommonTitle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_main  = value.main
-        let value_main_type : int32 = RuntimeType.UNDEFINED
-        value_main_type = runtimeType(value_main)
-        if (RuntimeType.STRING == value_main_type) {
+        const valueHolderForMain  = value.main
+        if (valueHolderForMain instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_main_0  = value_main as string
-            valueSerializer.writeString(value_main_0)
-        }
-        else if (RuntimeType.OBJECT == value_main_type) {
+            const valueHolderForMainForIdx0  = valueHolderForMain as string
+            valueSerializer.writeString(valueHolderForMainForIdx0)
+        } else if (valueHolderForMain instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_main_1  = value_main as Resource
-            Resource_serializer.write(valueSerializer, value_main_1)
+            const valueHolderForMainForIdx1  = valueHolderForMain as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForMainForIdx1)
         }
-        const value_sub  = value.sub
-        let value_sub_type : int32 = RuntimeType.UNDEFINED
-        value_sub_type = runtimeType(value_sub)
-        if (RuntimeType.STRING == value_sub_type) {
+        const valueHolderForSub  = value.sub
+        if (valueHolderForSub instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_sub_0  = value_sub as string
-            valueSerializer.writeString(value_sub_0)
-        }
-        else if (RuntimeType.OBJECT == value_sub_type) {
+            const valueHolderForSubForIdx0  = valueHolderForSub as string
+            valueSerializer.writeString(valueHolderForSubForIdx0)
+        } else if (valueHolderForSub instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_sub_1  = value_sub as Resource
-            Resource_serializer.write(valueSerializer, value_sub_1)
+            const valueHolderForSubForIdx1  = valueHolderForSub as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForSubForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): NavigationCommonTitle {
         let valueDeserializer : DeserializerBase = buffer
-        const main_buf_selector : int32 = valueDeserializer.readInt8()
-        let main_buf : string | Resource | undefined
-        if (main_buf_selector == (0).toChar()) {
-            main_buf = (valueDeserializer.readString() as string)
+        const mainTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let mainTmpBuf : string | Resource | undefined
+        if (mainTmpBufUnionSelector == (0).toChar()) {
+            mainTmpBuf = (valueDeserializer.readString() as string)
+        } else if (mainTmpBufUnionSelector == (1).toChar()) {
+            mainTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for mainTmpBuf has to be chosen through deserialisation.")
         }
-        else if (main_buf_selector == (1).toChar()) {
-            main_buf = Resource_serializer.read(valueDeserializer)
+        const mainTmpResult : string | Resource = (mainTmpBuf as string | Resource)
+        const subTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let subTmpBuf : string | Resource | undefined
+        if (subTmpBufUnionSelector == (0).toChar()) {
+            subTmpBuf = (valueDeserializer.readString() as string)
+        } else if (subTmpBufUnionSelector == (1).toChar()) {
+            subTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for subTmpBuf has to be chosen through deserialisation.")
         }
-        else {
-            throw new Error("One of the branches for main_buf has to be chosen through deserialisation.")
-        }
-        const main_result : string | Resource = (main_buf as string | Resource)
-        const sub_buf_selector : int32 = valueDeserializer.readInt8()
-        let sub_buf : string | Resource | undefined
-        if (sub_buf_selector == (0).toChar()) {
-            sub_buf = (valueDeserializer.readString() as string)
-        }
-        else if (sub_buf_selector == (1).toChar()) {
-            sub_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for sub_buf has to be chosen through deserialisation.")
-        }
-        const sub_result : string | Resource = (sub_buf as string | Resource)
-        let value : NavigationCommonTitle = ({main: main_result, sub: sub_result} as NavigationCommonTitle)
+        const subTmpResult : string | Resource = (subTmpBuf as string | Resource)
+        let value : NavigationCommonTitle = ({main: mainTmpResult, sub: subTmpResult} as NavigationCommonTitle)
         return value
     }
 }
 export class NavigationMenuItem_serializer {
     public static write(buffer: SerializerBase, value: NavigationMenuItem): void {
         let valueSerializer : SerializerBase = buffer
-        const value_value  = value.value
-        let value_value_type : int32 = RuntimeType.UNDEFINED
-        value_value_type = runtimeType(value_value)
-        if (RuntimeType.STRING == value_value_type) {
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_value_0  = value_value as string
-            valueSerializer.writeString(value_value_0)
-        }
-        else if (RuntimeType.OBJECT == value_value_type) {
+            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            valueSerializer.writeString(valueHolderForValueForIdx0)
+        } else if (valueHolderForValue instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_value_1  = value_value as Resource
-            Resource_serializer.write(valueSerializer, value_value_1)
+            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_symbolIcon  = value.symbolIcon
-        let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
-        valueSerializer.writeInt8((value_symbolIcon_type).toChar())
-        if ((value_symbolIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolIcon_value)
+        const valueHolderForSymbolIcon  = value.symbolIcon
+        if (valueHolderForSymbolIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
+            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_isEnabled  = value.isEnabled
-        let value_isEnabled_type : int32 = RuntimeType.UNDEFINED
-        value_isEnabled_type = runtimeType(value_isEnabled)
-        valueSerializer.writeInt8((value_isEnabled_type).toChar())
-        if ((value_isEnabled_type) != (RuntimeType.UNDEFINED)) {
-            const value_isEnabled_value  = value_isEnabled!
-            valueSerializer.writeBoolean(value_isEnabled_value)
+        const valueHolderForIsEnabled  = value.isEnabled
+        if (valueHolderForIsEnabled !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsEnabledTmpValue  = valueHolderForIsEnabled!
+            valueSerializer.writeBoolean(valueHolderForIsEnabledTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_action  = value.action
-        let value_action_type : int32 = RuntimeType.UNDEFINED
-        value_action_type = runtimeType(value_action)
-        valueSerializer.writeInt8((value_action_type).toChar())
-        if ((value_action_type) != (RuntimeType.UNDEFINED)) {
-            const value_action_value  = value_action!
-            valueSerializer.holdAndWriteCallback(value_action_value)
+        const valueHolderForAction  = value.action
+        if (valueHolderForAction !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionTmpValue  = valueHolderForAction!
+            valueSerializer.holdAndWriteCallback(valueHolderForActionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationMenuItem {
         let valueDeserializer : DeserializerBase = buffer
-        const value_buf_selector : int32 = valueDeserializer.readInt8()
-        let value_buf : string | Resource | undefined
-        if (value_buf_selector == (0).toChar()) {
-            value_buf = (valueDeserializer.readString() as string)
+        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let valueTmpBuf : string | Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toChar()) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        } else if (valueTmpBufUnionSelector == (1).toChar()) {
+            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
         }
-        else if (value_buf_selector == (1).toChar()) {
-            value_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-        }
-        const value_result : string | Resource = (value_buf as string | Resource)
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : string | Resource | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
+        const valueTmpResult : string | Resource = (valueTmpBuf as string | Resource)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : string | Resource | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
+        }
+        const iconTmpResult : string | Resource | undefined = iconTmpBuf
+        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let symbolIconTmpBuf : SymbolGlyphModifier | undefined
+        if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            symbolIconTmpBuf = SymbolGlyphModifier_serializer.read(valueDeserializer)
+        }
+        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
+        const isEnabledTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isEnabledTmpBuf : boolean | undefined
+        if ((isEnabledTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isEnabledTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isEnabledTmpResult : boolean | undefined = isEnabledTmpBuf
+        const actionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionTmpBuf : (() => void) | undefined
+        if ((actionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const actionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const actionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const actionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            actionTmpBuf = ():void => {
+                const actionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
+                actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
+                actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(-1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
+                actionTmpBuf_BufArgsSerializer.release();
+                return;
             }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
-            }
-            icon_buf = (icon_buf_ as string | Resource)
         }
-        const icon_result : string | Resource | undefined = icon_buf
-        const symbolIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIcon_buf : SymbolGlyphModifier | undefined
-        if ((symbolIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            symbolIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
-        }
-        const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
-        const isEnabled_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isEnabled_buf : boolean | undefined
-        if ((isEnabled_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isEnabled_buf = valueDeserializer.readBoolean()
-        }
-        const isEnabled_result : boolean | undefined = isEnabled_buf
-        const action_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let action_buf : (() => void) | undefined
-        if ((action_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const action_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const action_buf__call : KPointer = valueDeserializer.readPointer()
-            const action_buf__callSync : KPointer = valueDeserializer.readPointer()
-            action_buf = ():void => { 
-    const action_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    action_buf__argsSerializer.writeInt32(action_buf__resource.resourceId);
-    action_buf__argsSerializer.writePointer(action_buf__call);
-    action_buf__argsSerializer.writePointer(action_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, action_buf__argsSerializer.asBuffer(), action_buf__argsSerializer.length());
-    action_buf__argsSerializer.release();
-    return; }
-        }
-        const action_result : (() => void) | undefined = action_buf
-        let value : NavigationMenuItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, isEnabled: isEnabled_result, action: action_result} as NavigationMenuItem)
+        const actionTmpResult : (() => void) | undefined = actionTmpBuf
+        let value : NavigationMenuItem = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, isEnabled: isEnabledTmpResult, action: actionTmpResult} as NavigationMenuItem)
         return value
     }
 }
@@ -3281,688 +4169,618 @@ export class NavigationTransitionProxy_serializer {
 export class ToolbarItem_serializer {
     public static write(buffer: SerializerBase, value: ToolbarItem): void {
         let valueSerializer : SerializerBase = buffer
-        const value_value  = value.value
-        let value_value_type : int32 = RuntimeType.UNDEFINED
-        value_value_type = runtimeType(value_value)
-        if (RuntimeType.STRING == value_value_type) {
+        const valueHolderForValue  = value.value
+        if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_value_0  = value_value as string
-            valueSerializer.writeString(value_value_0)
-        }
-        else if (RuntimeType.OBJECT == value_value_type) {
+            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            valueSerializer.writeString(valueHolderForValueForIdx0)
+        } else if (valueHolderForValue instanceof Resource) {
             valueSerializer.writeInt8((1).toChar())
-            const value_value_1  = value_value as Resource
-            Resource_serializer.write(valueSerializer, value_value_1)
+            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_symbolIcon  = value.symbolIcon
-        let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
-        valueSerializer.writeInt8((value_symbolIcon_type).toChar())
-        if ((value_symbolIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, value_symbolIcon_value)
+        const valueHolderForSymbolIcon  = value.symbolIcon
+        if (valueHolderForSymbolIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
+            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_action  = value.action
-        let value_action_type : int32 = RuntimeType.UNDEFINED
-        value_action_type = runtimeType(value_action)
-        valueSerializer.writeInt8((value_action_type).toChar())
-        if ((value_action_type) != (RuntimeType.UNDEFINED)) {
-            const value_action_value  = value_action!
-            valueSerializer.holdAndWriteCallback(value_action_value)
+        const valueHolderForAction  = value.action
+        if (valueHolderForAction !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionTmpValue  = valueHolderForAction!
+            valueSerializer.holdAndWriteCallback(valueHolderForActionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_status  = value.status
-        let value_status_type : int32 = RuntimeType.UNDEFINED
-        value_status_type = runtimeType(value_status)
-        valueSerializer.writeInt8((value_status_type).toChar())
-        if ((value_status_type) != (RuntimeType.UNDEFINED)) {
-            const value_status_value  = (value_status as ToolbarItemStatus)
-            valueSerializer.writeInt32(TypeChecker.ToolbarItemStatus_ToNumeric(value_status_value))
+        const valueHolderForStatus  = value.status
+        if (valueHolderForStatus !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStatusTmpValue  = (valueHolderForStatus as ToolbarItemStatus)
+            valueSerializer.writeInt32(TypeChecker.ToolbarItemStatus_ToNumeric(valueHolderForStatusTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_activeIcon  = value.activeIcon
-        let value_activeIcon_type : int32 = RuntimeType.UNDEFINED
-        value_activeIcon_type = runtimeType(value_activeIcon)
-        valueSerializer.writeInt8((value_activeIcon_type).toChar())
-        if ((value_activeIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_activeIcon_value  = value_activeIcon!
-            let value_activeIcon_value_type : int32 = RuntimeType.UNDEFINED
-            value_activeIcon_value_type = runtimeType(value_activeIcon_value)
-            if (RuntimeType.STRING == value_activeIcon_value_type) {
+        const valueHolderForActiveIcon  = value.activeIcon
+        if (valueHolderForActiveIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActiveIconTmpValue  = valueHolderForActiveIcon!
+            if (valueHolderForActiveIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_activeIcon_value_0  = value_activeIcon_value as string
-                valueSerializer.writeString(value_activeIcon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_activeIcon_value_type) {
+                const valueHolderForActiveIconTmpValueForIdx0  = valueHolderForActiveIconTmpValue as string
+                valueSerializer.writeString(valueHolderForActiveIconTmpValueForIdx0)
+            } else if (valueHolderForActiveIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_activeIcon_value_1  = value_activeIcon_value as Resource
-                Resource_serializer.write(valueSerializer, value_activeIcon_value_1)
+                const valueHolderForActiveIconTmpValueForIdx1  = valueHolderForActiveIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForActiveIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_activeSymbolIcon  = value.activeSymbolIcon
-        let value_activeSymbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_activeSymbolIcon_type = runtimeType(value_activeSymbolIcon)
-        valueSerializer.writeInt8((value_activeSymbolIcon_type).toChar())
-        if ((value_activeSymbolIcon_type) != (RuntimeType.UNDEFINED)) {
-            const value_activeSymbolIcon_value  = value_activeSymbolIcon!
-            SymbolGlyphModifier_serializer.write(valueSerializer, value_activeSymbolIcon_value)
+        const valueHolderForActiveSymbolIcon  = value.activeSymbolIcon
+        if (valueHolderForActiveSymbolIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActiveSymbolIconTmpValue  = valueHolderForActiveSymbolIcon!
+            SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForActiveSymbolIconTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ToolbarItem {
         let valueDeserializer : DeserializerBase = buffer
-        const value_buf_selector : int32 = valueDeserializer.readInt8()
-        let value_buf : string | Resource | undefined
-        if (value_buf_selector == (0).toChar()) {
-            value_buf = (valueDeserializer.readString() as string)
+        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let valueTmpBuf : string | Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toChar()) {
+            valueTmpBuf = (valueDeserializer.readString() as string)
+        } else if (valueTmpBufUnionSelector == (1).toChar()) {
+            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
         }
-        else if (value_buf_selector == (1).toChar()) {
-            value_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
-        }
-        const value_result : ResourceStr = (value_buf as string | Resource)
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : ResourceStr | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
+        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : ResourceStr | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
+        }
+        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
+        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let symbolIconTmpBuf : SymbolGlyphModifier | undefined
+        if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            symbolIconTmpBuf = SymbolGlyphModifier_serializer.read(valueDeserializer)
+        }
+        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
+        const actionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionTmpBuf : (() => void) | undefined
+        if ((actionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const actionTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const actionTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const actionTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            actionTmpBuf = ():void => {
+                const actionTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
+                actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
+                actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(-1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
+                actionTmpBuf_BufArgsSerializer.release();
+                return;
             }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
+        }
+        const actionTmpResult : (() => void) | undefined = actionTmpBuf
+        const statusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let statusTmpBuf : ToolbarItemStatus | undefined
+        if ((statusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            statusTmpBuf = TypeChecker.ToolbarItemStatus_FromNumeric(valueDeserializer.readInt32())
+        }
+        const statusTmpResult : ToolbarItemStatus | undefined = statusTmpBuf
+        const activeIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let activeIconTmpBuf : ResourceStr | undefined
+        if ((activeIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const activeIconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let activeIconTmpBuf_ : string | Resource | undefined
+            if (activeIconTmpBuf_UnionSelector == (0).toChar()) {
+                activeIconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (activeIconTmpBuf_UnionSelector == (1).toChar()) {
+                activeIconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for activeIconTmpBuf_ has to be chosen through deserialisation.")
             }
-            icon_buf = (icon_buf_ as string | Resource)
+            activeIconTmpBuf = (activeIconTmpBuf_ as string | Resource)
         }
-        const icon_result : ResourceStr | undefined = icon_buf
-        const symbolIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIcon_buf : SymbolGlyphModifier | undefined
-        if ((symbolIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            symbolIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
+        const activeIconTmpResult : ResourceStr | undefined = activeIconTmpBuf
+        const activeSymbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let activeSymbolIconTmpBuf : SymbolGlyphModifier | undefined
+        if ((activeSymbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            activeSymbolIconTmpBuf = SymbolGlyphModifier_serializer.read(valueDeserializer)
         }
-        const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
-        const action_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let action_buf : (() => void) | undefined
-        if ((action_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const action_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const action_buf__call : KPointer = valueDeserializer.readPointer()
-            const action_buf__callSync : KPointer = valueDeserializer.readPointer()
-            action_buf = ():void => { 
-    const action_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    action_buf__argsSerializer.writeInt32(action_buf__resource.resourceId);
-    action_buf__argsSerializer.writePointer(action_buf__call);
-    action_buf__argsSerializer.writePointer(action_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, action_buf__argsSerializer.asBuffer(), action_buf__argsSerializer.length());
-    action_buf__argsSerializer.release();
-    return; }
-        }
-        const action_result : (() => void) | undefined = action_buf
-        const status_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let status_buf : ToolbarItemStatus | undefined
-        if ((status_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            status_buf = TypeChecker.ToolbarItemStatus_FromNumeric(valueDeserializer.readInt32())
-        }
-        const status_result : ToolbarItemStatus | undefined = status_buf
-        const activeIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let activeIcon_buf : ResourceStr | undefined
-        if ((activeIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const activeIcon_buf__selector : int32 = valueDeserializer.readInt8()
-            let activeIcon_buf_ : string | Resource | undefined
-            if (activeIcon_buf__selector == (0).toChar()) {
-                activeIcon_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (activeIcon_buf__selector == (1).toChar()) {
-                activeIcon_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for activeIcon_buf_ has to be chosen through deserialisation.")
-            }
-            activeIcon_buf = (activeIcon_buf_ as string | Resource)
-        }
-        const activeIcon_result : ResourceStr | undefined = activeIcon_buf
-        const activeSymbolIcon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let activeSymbolIcon_buf : SymbolGlyphModifier | undefined
-        if ((activeSymbolIcon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            activeSymbolIcon_buf = SymbolGlyphModifier_serializer.read(valueDeserializer)
-        }
-        const activeSymbolIcon_result : SymbolGlyphModifier | undefined = activeSymbolIcon_buf
-        let value : ToolbarItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, action: action_result, status: status_result, activeIcon: activeIcon_result, activeSymbolIcon: activeSymbolIcon_result} as ToolbarItem)
+        const activeSymbolIconTmpResult : SymbolGlyphModifier | undefined = activeSymbolIconTmpBuf
+        let value : ToolbarItem = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, action: actionTmpResult, status: statusTmpResult, activeIcon: activeIconTmpResult, activeSymbolIcon: activeSymbolIconTmpResult} as ToolbarItem)
         return value
     }
 }
 export class MoreButtonOptions_serializer {
     public static write(buffer: SerializerBase, value: MoreButtonOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        const valueHolderForBackgroundBlurStyle  = value.backgroundBlurStyle
+        if (valueHolderForBackgroundBlurStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleTmpValue  = (valueHolderForBackgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(valueHolderForBackgroundBlurStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
-        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
-        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
-            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
+        const valueHolderForBackgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue  = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundEffect  = value.backgroundEffect
-        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
-        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundEffect_value  = value_backgroundEffect!
-            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
+        const valueHolderForBackgroundEffect  = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue  = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): MoreButtonOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleTmpBuf : BlurStyle | undefined
+        if ((backgroundBlurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleTmpBuf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleTmpResult : BlurStyle | undefined = backgroundBlurStyleTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptionsTmpBuf : BackgroundBlurStyleOptions | undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
-        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
-        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleOptionsTmpResult : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffectTmpBuf : BackgroundEffectOptions | undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
-        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
-        let value : MoreButtonOptions = ({backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result} as MoreButtonOptions)
+        const backgroundEffectTmpResult : BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        let value : MoreButtonOptions = ({backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult} as MoreButtonOptions)
         return value
     }
 }
 export class NavigationCustomTitle_serializer {
     public static write(buffer: SerializerBase, value: NavigationCustomTitle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_builder  = value.builder
-        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder))
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        if (TypeChecker.isTitleHeight(value_height)) {
+        const valueHolderForBuilder  = value.builder
+        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForBuilder))
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight instanceof TitleHeight) {
             valueSerializer.writeInt8((0).toChar())
-            const value_height_0  = value_height as TitleHeight
-            valueSerializer.writeInt32(TypeChecker.TitleHeight_ToNumeric(value_height_0))
-        }
-        else if ((RuntimeType.STRING == value_height_type) || (RuntimeType.NUMBER == value_height_type) || (RuntimeType.OBJECT == value_height_type)) {
+            const valueHolderForHeightForIdx0  = valueHolderForHeight as TitleHeight
+            valueSerializer.writeInt32(TypeChecker.TitleHeight_ToNumeric(valueHolderForHeightForIdx0))
+        } else if (valueHolderForHeight instanceof Length) {
             valueSerializer.writeInt8((1).toChar())
-            const value_height_1  = value_height as Length
-            let value_height_1_type : int32 = RuntimeType.UNDEFINED
-            value_height_1_type = runtimeType(value_height_1)
-            if (RuntimeType.STRING == value_height_1_type) {
+            const valueHolderForHeightForIdx1  = valueHolderForHeight as Length
+            if (valueHolderForHeightForIdx1 instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_1_0  = value_height_1 as string
-                valueSerializer.writeString(value_height_1_0)
-            }
-            else if (RuntimeType.NUMBER == value_height_1_type) {
+                const valueHolderForHeightForIdx1ForIdx0  = valueHolderForHeightForIdx1 as string
+                valueSerializer.writeString(valueHolderForHeightForIdx1ForIdx0)
+            } else if (valueHolderForHeightForIdx1 instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_1_1  = value_height_1 as number
-                valueSerializer.writeNumber(value_height_1_1)
-            }
-            else if (RuntimeType.OBJECT == value_height_1_type) {
+                const valueHolderForHeightForIdx1ForIdx1  = valueHolderForHeightForIdx1 as number
+                valueSerializer.writeNumber(valueHolderForHeightForIdx1ForIdx1)
+            } else if (valueHolderForHeightForIdx1 instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_height_1_2  = value_height_1 as Resource
-                Resource_serializer.write(valueSerializer, value_height_1_2)
+                const valueHolderForHeightForIdx1ForIdx2  = valueHolderForHeightForIdx1 as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightForIdx1ForIdx2)
             }
         }
     }
     public static read(buffer: DeserializerBase): NavigationCustomTitle {
         let valueDeserializer : DeserializerBase = buffer
-        const builder_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const builder_buf_call : KPointer = valueDeserializer.readPointer()
-        const builder_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const builder_result : CustomBuilder = ():void => { 
-    const builder_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    builder_buf_argsSerializer.writeInt32(builder_buf_resource.resourceId);
-    builder_buf_argsSerializer.writePointer(builder_buf_call);
-    builder_buf_argsSerializer.writePointer(builder_buf_callSync);
-    InteropNativeModule._CallCallback(737226752, builder_buf_argsSerializer.asBuffer(), builder_buf_argsSerializer.length());
-    builder_buf_argsSerializer.release();
-    return; }
-        const height_buf_selector : int32 = valueDeserializer.readInt8()
-        let height_buf : TitleHeight | Length | undefined
-        if (height_buf_selector == (0).toChar()) {
-            height_buf = TypeChecker.TitleHeight_FromNumeric(valueDeserializer.readInt32())
+        const builderTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const builderTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const builderTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const builderTmpResult : CustomBuilder = ():void => {
+            const builderTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
+            builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
+            builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCallSync);
+            InteropNativeModule._CallCallback(737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
+            builderTmpBufBufArgsSerializer.release();
+            return;
         }
-        else if (height_buf_selector == (1).toChar()) {
-            const height_buf_u_selector : int32 = valueDeserializer.readInt8()
-            let height_buf_u : string | number | Resource | undefined
-            if (height_buf_u_selector == (0).toChar()) {
-                height_buf_u = (valueDeserializer.readString() as string)
+        const heightTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let heightTmpBuf : TitleHeight | Length | undefined
+        if (heightTmpBufUnionSelector == (0).toChar()) {
+            heightTmpBuf = TypeChecker.TitleHeight_FromNumeric(valueDeserializer.readInt32())
+        } else if (heightTmpBufUnionSelector == (1).toChar()) {
+            const heightTmpBufBufUUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufBufU : string | number | Resource | undefined
+            if (heightTmpBufBufUUnionSelector == (0).toChar()) {
+                heightTmpBufBufU = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufBufUUnionSelector == (1).toChar()) {
+                heightTmpBufBufU = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBufBufUUnionSelector == (2).toChar()) {
+                heightTmpBufBufU = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for heightTmpBufBufU has to be chosen through deserialisation.")
             }
-            else if (height_buf_u_selector == (1).toChar()) {
-                height_buf_u = (valueDeserializer.readNumber() as number)
-            }
-            else if (height_buf_u_selector == (2).toChar()) {
-                height_buf_u = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_u has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_u as string | number | Resource)
+            heightTmpBuf = (heightTmpBufBufU as string | number | Resource)
+        } else {
+            throw new Error("One of the branches for heightTmpBuf has to be chosen through deserialisation.")
         }
-        else {
-            throw new Error("One of the branches for height_buf has to be chosen through deserialisation.")
-        }
-        const height_result : TitleHeight | Length = (height_buf as TitleHeight | Length)
-        let value : NavigationCustomTitle = ({builder: builder_result, height: height_result} as NavigationCustomTitle)
+        const heightTmpResult : TitleHeight | Length = (heightTmpBuf as TitleHeight | Length)
+        let value : NavigationCustomTitle = ({builder: builderTmpResult, height: heightTmpResult} as NavigationCustomTitle)
         return value
     }
 }
 export class NavigationTitleOptions_serializer {
     public static write(buffer: SerializerBase, value: NavigationTitleOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
+        const valueHolderForBackgroundColor  = value.backgroundColor
+        if (valueHolderForBackgroundColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
+            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundColorTmpValueForIdx0))
+            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        const valueHolderForBackgroundBlurStyle  = value.backgroundBlurStyle
+        if (valueHolderForBackgroundBlurStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleTmpValue  = (valueHolderForBackgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(valueHolderForBackgroundBlurStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
-        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
-        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
-            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
+        const valueHolderForBackgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue  = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundEffect  = value.backgroundEffect
-        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
-        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundEffect_value  = value_backgroundEffect!
-            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
+        const valueHolderForBackgroundEffect  = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue  = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_barStyle  = value.barStyle
-        let value_barStyle_type : int32 = RuntimeType.UNDEFINED
-        value_barStyle_type = runtimeType(value_barStyle)
-        valueSerializer.writeInt8((value_barStyle_type).toChar())
-        if ((value_barStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_barStyle_value  = (value_barStyle as BarStyle)
-            valueSerializer.writeInt32(TypeChecker.BarStyle_ToNumeric(value_barStyle_value))
+        const valueHolderForBarStyle  = value.barStyle
+        if (valueHolderForBarStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBarStyleTmpValue  = (valueHolderForBarStyle as BarStyle)
+            valueSerializer.writeInt32(TypeChecker.BarStyle_ToNumeric(valueHolderForBarStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_paddingStart  = value.paddingStart
-        let value_paddingStart_type : int32 = RuntimeType.UNDEFINED
-        value_paddingStart_type = runtimeType(value_paddingStart)
-        valueSerializer.writeInt8((value_paddingStart_type).toChar())
-        if ((value_paddingStart_type) != (RuntimeType.UNDEFINED)) {
-            const value_paddingStart_value  = value_paddingStart!
-            LengthMetrics_serializer.write(valueSerializer, value_paddingStart_value)
+        const valueHolderForPaddingStart  = value.paddingStart
+        if (valueHolderForPaddingStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPaddingStartTmpValue  = valueHolderForPaddingStart!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_paddingEnd  = value.paddingEnd
-        let value_paddingEnd_type : int32 = RuntimeType.UNDEFINED
-        value_paddingEnd_type = runtimeType(value_paddingEnd)
-        valueSerializer.writeInt8((value_paddingEnd_type).toChar())
-        if ((value_paddingEnd_type) != (RuntimeType.UNDEFINED)) {
-            const value_paddingEnd_value  = value_paddingEnd!
-            LengthMetrics_serializer.write(valueSerializer, value_paddingEnd_value)
+        const valueHolderForPaddingEnd  = value.paddingEnd
+        if (valueHolderForPaddingEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPaddingEndTmpValue  = valueHolderForPaddingEnd!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_mainTitleModifier  = value.mainTitleModifier
-        let value_mainTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        value_mainTitleModifier_type = runtimeType(value_mainTitleModifier)
-        valueSerializer.writeInt8((value_mainTitleModifier_type).toChar())
-        if ((value_mainTitleModifier_type) != (RuntimeType.UNDEFINED)) {
-            const value_mainTitleModifier_value  = value_mainTitleModifier!
-            TextModifier_serializer.write(valueSerializer, value_mainTitleModifier_value)
+        const valueHolderForMainTitleModifier  = value.mainTitleModifier
+        if (valueHolderForMainTitleModifier !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMainTitleModifierTmpValue  = valueHolderForMainTitleModifier!
+            TextModifier_serializer.write(valueSerializer, valueHolderForMainTitleModifierTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_subTitleModifier  = value.subTitleModifier
-        let value_subTitleModifier_type : int32 = RuntimeType.UNDEFINED
-        value_subTitleModifier_type = runtimeType(value_subTitleModifier)
-        valueSerializer.writeInt8((value_subTitleModifier_type).toChar())
-        if ((value_subTitleModifier_type) != (RuntimeType.UNDEFINED)) {
-            const value_subTitleModifier_value  = value_subTitleModifier!
-            TextModifier_serializer.write(valueSerializer, value_subTitleModifier_value)
+        const valueHolderForSubTitleModifier  = value.subTitleModifier
+        if (valueHolderForSubTitleModifier !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSubTitleModifierTmpValue  = valueHolderForSubTitleModifier!
+            TextModifier_serializer.write(valueSerializer, valueHolderForSubTitleModifierTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        const valueHolderForEnableHoverMode  = value.enableHoverMode
+        if (valueHolderForEnableHoverMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableHoverModeTmpValue  = valueHolderForEnableHoverMode!
+            valueSerializer.writeBoolean(valueHolderForEnableHoverModeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationTitleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColorTmpBuf : ResourceColor | undefined
+        if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
+                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
         }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
+        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleTmpBuf : BlurStyle | undefined
+        if ((backgroundBlurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleTmpBuf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleTmpResult : BlurStyle | undefined = backgroundBlurStyleTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptionsTmpBuf : BackgroundBlurStyleOptions | undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
-        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
-        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleOptionsTmpResult : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffectTmpBuf : BackgroundEffectOptions | undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
-        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
-        const barStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let barStyle_buf : BarStyle | undefined
-        if ((barStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            barStyle_buf = TypeChecker.BarStyle_FromNumeric(valueDeserializer.readInt32())
+        const backgroundEffectTmpResult : BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const barStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let barStyleTmpBuf : BarStyle | undefined
+        if ((barStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            barStyleTmpBuf = TypeChecker.BarStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const barStyle_result : BarStyle | undefined = barStyle_buf
-        const paddingStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paddingStart_buf : LengthMetrics | undefined
-        if ((paddingStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            paddingStart_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const barStyleTmpResult : BarStyle | undefined = barStyleTmpBuf
+        const paddingStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paddingStartTmpBuf : LengthMetrics | undefined
+        if ((paddingStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paddingStartTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const paddingStart_result : LengthMetrics | undefined = paddingStart_buf
-        const paddingEnd_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paddingEnd_buf : LengthMetrics | undefined
-        if ((paddingEnd_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            paddingEnd_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const paddingStartTmpResult : LengthMetrics | undefined = paddingStartTmpBuf
+        const paddingEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paddingEndTmpBuf : LengthMetrics | undefined
+        if ((paddingEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paddingEndTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const paddingEnd_result : LengthMetrics | undefined = paddingEnd_buf
-        const mainTitleModifier_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mainTitleModifier_buf : TextModifier | undefined
-        if ((mainTitleModifier_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            mainTitleModifier_buf = TextModifier_serializer.read(valueDeserializer)
+        const paddingEndTmpResult : LengthMetrics | undefined = paddingEndTmpBuf
+        const mainTitleModifierTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mainTitleModifierTmpBuf : TextModifier | undefined
+        if ((mainTitleModifierTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            mainTitleModifierTmpBuf = TextModifier_serializer.read(valueDeserializer)
         }
-        const mainTitleModifier_result : TextModifier | undefined = mainTitleModifier_buf
-        const subTitleModifier_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let subTitleModifier_buf : TextModifier | undefined
-        if ((subTitleModifier_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            subTitleModifier_buf = TextModifier_serializer.read(valueDeserializer)
+        const mainTitleModifierTmpResult : TextModifier | undefined = mainTitleModifierTmpBuf
+        const subTitleModifierTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let subTitleModifierTmpBuf : TextModifier | undefined
+        if ((subTitleModifierTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            subTitleModifierTmpBuf = TextModifier_serializer.read(valueDeserializer)
         }
-        const subTitleModifier_result : TextModifier | undefined = subTitleModifier_buf
-        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableHoverMode_buf : boolean | undefined
-        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
+        const subTitleModifierTmpResult : TextModifier | undefined = subTitleModifierTmpBuf
+        const enableHoverModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverModeTmpBuf : boolean | undefined
+        if ((enableHoverModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableHoverModeTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, barStyle: barStyle_result, paddingStart: paddingStart_result, paddingEnd: paddingEnd_result, mainTitleModifier: mainTitleModifier_result, subTitleModifier: subTitleModifier_result, enableHoverMode: enableHoverMode_result} as NavigationTitleOptions)
+        const enableHoverModeTmpResult : boolean | undefined = enableHoverModeTmpBuf
+        let value : NavigationTitleOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, barStyle: barStyleTmpResult, paddingStart: paddingStartTmpResult, paddingEnd: paddingEndTmpResult, mainTitleModifier: mainTitleModifierTmpResult, subTitleModifier: subTitleModifierTmpResult, enableHoverMode: enableHoverModeTmpResult} as NavigationTitleOptions)
         return value
     }
 }
 export class NavigationMenuOptions_serializer {
     public static write(buffer: SerializerBase, value: NavigationMenuOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_moreButtonOptions  = value.moreButtonOptions
-        let value_moreButtonOptions_type : int32 = RuntimeType.UNDEFINED
-        value_moreButtonOptions_type = runtimeType(value_moreButtonOptions)
-        valueSerializer.writeInt8((value_moreButtonOptions_type).toChar())
-        if ((value_moreButtonOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_moreButtonOptions_value  = value_moreButtonOptions!
-            MoreButtonOptions_serializer.write(valueSerializer, value_moreButtonOptions_value)
+        const valueHolderForMoreButtonOptions  = value.moreButtonOptions
+        if (valueHolderForMoreButtonOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMoreButtonOptionsTmpValue  = valueHolderForMoreButtonOptions!
+            MoreButtonOptions_serializer.write(valueSerializer, valueHolderForMoreButtonOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const moreButtonOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let moreButtonOptions_buf : MoreButtonOptions | undefined
-        if ((moreButtonOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            moreButtonOptions_buf = MoreButtonOptions_serializer.read(valueDeserializer)
+        const moreButtonOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let moreButtonOptionsTmpBuf : MoreButtonOptions | undefined
+        if ((moreButtonOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            moreButtonOptionsTmpBuf = MoreButtonOptions_serializer.read(valueDeserializer)
         }
-        const moreButtonOptions_result : MoreButtonOptions | undefined = moreButtonOptions_buf
-        let value : NavigationMenuOptions = ({moreButtonOptions: moreButtonOptions_result} as NavigationMenuOptions)
+        const moreButtonOptionsTmpResult : MoreButtonOptions | undefined = moreButtonOptionsTmpBuf
+        let value : NavigationMenuOptions = ({moreButtonOptions: moreButtonOptionsTmpResult} as NavigationMenuOptions)
         return value
     }
 }
 export class NavigationToolbarOptions_serializer {
     public static write(buffer: SerializerBase, value: NavigationToolbarOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
+        const valueHolderForBackgroundColor  = value.backgroundColor
+        if (valueHolderForBackgroundColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
+            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundColorTmpValueForIdx0))
+            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        const valueHolderForBackgroundBlurStyle  = value.backgroundBlurStyle
+        if (valueHolderForBackgroundBlurStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleTmpValue  = (valueHolderForBackgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(valueHolderForBackgroundBlurStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
-        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
-        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
-            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
+        const valueHolderForBackgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        if (valueHolderForBackgroundBlurStyleOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundBlurStyleOptionsTmpValue  = valueHolderForBackgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, valueHolderForBackgroundBlurStyleOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundEffect  = value.backgroundEffect
-        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
-        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundEffect_value  = value_backgroundEffect!
-            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
+        const valueHolderForBackgroundEffect  = value.backgroundEffect
+        if (valueHolderForBackgroundEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundEffectTmpValue  = valueHolderForBackgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, valueHolderForBackgroundEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_moreButtonOptions  = value.moreButtonOptions
-        let value_moreButtonOptions_type : int32 = RuntimeType.UNDEFINED
-        value_moreButtonOptions_type = runtimeType(value_moreButtonOptions)
-        valueSerializer.writeInt8((value_moreButtonOptions_type).toChar())
-        if ((value_moreButtonOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_moreButtonOptions_value  = value_moreButtonOptions!
-            MoreButtonOptions_serializer.write(valueSerializer, value_moreButtonOptions_value)
+        const valueHolderForMoreButtonOptions  = value.moreButtonOptions
+        if (valueHolderForMoreButtonOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMoreButtonOptionsTmpValue  = valueHolderForMoreButtonOptions!
+            MoreButtonOptions_serializer.write(valueSerializer, valueHolderForMoreButtonOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_barStyle  = value.barStyle
-        let value_barStyle_type : int32 = RuntimeType.UNDEFINED
-        value_barStyle_type = runtimeType(value_barStyle)
-        valueSerializer.writeInt8((value_barStyle_type).toChar())
-        if ((value_barStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_barStyle_value  = (value_barStyle as BarStyle)
-            valueSerializer.writeInt32(TypeChecker.BarStyle_ToNumeric(value_barStyle_value))
+        const valueHolderForBarStyle  = value.barStyle
+        if (valueHolderForBarStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBarStyleTmpValue  = (valueHolderForBarStyle as BarStyle)
+            valueSerializer.writeInt32(TypeChecker.BarStyle_ToNumeric(valueHolderForBarStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_hideItemValue  = value.hideItemValue
-        let value_hideItemValue_type : int32 = RuntimeType.UNDEFINED
-        value_hideItemValue_type = runtimeType(value_hideItemValue)
-        valueSerializer.writeInt8((value_hideItemValue_type).toChar())
-        if ((value_hideItemValue_type) != (RuntimeType.UNDEFINED)) {
-            const value_hideItemValue_value  = value_hideItemValue!
-            valueSerializer.writeBoolean(value_hideItemValue_value)
+        const valueHolderForHideItemValue  = value.hideItemValue
+        if (valueHolderForHideItemValue !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHideItemValueTmpValue  = valueHolderForHideItemValue!
+            valueSerializer.writeBoolean(valueHolderForHideItemValueTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): NavigationToolbarOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColorTmpBuf : ResourceColor | undefined
+        if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
+                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
         }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
+        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleTmpBuf : BlurStyle | undefined
+        if ((backgroundBlurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleTmpBuf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleTmpResult : BlurStyle | undefined = backgroundBlurStyleTmpBuf
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptionsTmpBuf : BackgroundBlurStyleOptions | undefined
+        if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
-        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
-        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        const backgroundBlurStyleOptionsTmpResult : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
+        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffectTmpBuf : BackgroundEffectOptions | undefined
+        if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
-        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
-        const moreButtonOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let moreButtonOptions_buf : MoreButtonOptions | undefined
-        if ((moreButtonOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            moreButtonOptions_buf = MoreButtonOptions_serializer.read(valueDeserializer)
+        const backgroundEffectTmpResult : BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
+        const moreButtonOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let moreButtonOptionsTmpBuf : MoreButtonOptions | undefined
+        if ((moreButtonOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            moreButtonOptionsTmpBuf = MoreButtonOptions_serializer.read(valueDeserializer)
         }
-        const moreButtonOptions_result : MoreButtonOptions | undefined = moreButtonOptions_buf
-        const barStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let barStyle_buf : BarStyle | undefined
-        if ((barStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            barStyle_buf = TypeChecker.BarStyle_FromNumeric(valueDeserializer.readInt32())
+        const moreButtonOptionsTmpResult : MoreButtonOptions | undefined = moreButtonOptionsTmpBuf
+        const barStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let barStyleTmpBuf : BarStyle | undefined
+        if ((barStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            barStyleTmpBuf = TypeChecker.BarStyle_FromNumeric(valueDeserializer.readInt32())
         }
-        const barStyle_result : BarStyle | undefined = barStyle_buf
-        const hideItemValue_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let hideItemValue_buf : boolean | undefined
-        if ((hideItemValue_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            hideItemValue_buf = valueDeserializer.readBoolean()
+        const barStyleTmpResult : BarStyle | undefined = barStyleTmpBuf
+        const hideItemValueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let hideItemValueTmpBuf : boolean | undefined
+        if ((hideItemValueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            hideItemValueTmpBuf = valueDeserializer.readBoolean()
         }
-        const hideItemValue_result : boolean | undefined = hideItemValue_buf
-        let value : NavigationToolbarOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, moreButtonOptions: moreButtonOptions_result, barStyle: barStyle_result, hideItemValue: hideItemValue_result} as NavigationToolbarOptions)
+        const hideItemValueTmpResult : boolean | undefined = hideItemValueTmpBuf
+        let value : NavigationToolbarOptions = ({backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, moreButtonOptions: moreButtonOptionsTmpResult, barStyle: barStyleTmpResult, hideItemValue: hideItemValueTmpResult} as NavigationToolbarOptions)
         return value
     }
 }

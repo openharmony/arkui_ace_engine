@@ -16,13 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Position_serializer, SizeOptions_serializer, Position, ResourceColor, Length, SizeOptions } from "./../component/units"
 import { Resource_serializer, Resource } from "./resource"
 import { Color } from "./../component/enums"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -44,12 +43,12 @@ export class CircleShape implements MaterializedBase {
     }
     static construct(options?: ShapeSize): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            ShapeSize_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ShapeSize_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._CircleShape_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -92,27 +91,22 @@ export class CircleShape implements MaterializedBase {
     }
     private fill_serialize(color: ResourceColor): CircleShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._CircleShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -129,22 +123,18 @@ export class CircleShape implements MaterializedBase {
     }
     private width_serialize(width: Length): CircleShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let width_type : int32 = RuntimeType.UNDEFINED
-        width_type = runtimeType(width)
-        if (RuntimeType.STRING == width_type) {
+        if (width instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const width_0  = width as string
-            thisSerializer.writeString(width_0)
-        }
-        else if (RuntimeType.NUMBER == width_type) {
+            const widthForIdx0  = width as string
+            thisSerializer.writeString(widthForIdx0)
+        } else if (width instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const width_1  = width as number
-            thisSerializer.writeNumber(width_1)
-        }
-        else if (RuntimeType.OBJECT == width_type) {
+            const widthForIdx1  = width as number
+            thisSerializer.writeNumber(widthForIdx1)
+        } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const width_2  = width as Resource
-            Resource_serializer.write(thisSerializer, width_2)
+            const widthForIdx2  = width as Resource
+            Resource_serializer.write(thisSerializer, widthForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._CircleShape_width(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -153,22 +143,18 @@ export class CircleShape implements MaterializedBase {
     }
     private height_serialize(height: Length): CircleShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let height_type : int32 = RuntimeType.UNDEFINED
-        height_type = runtimeType(height)
-        if (RuntimeType.STRING == height_type) {
+        if (height instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const height_0  = height as string
-            thisSerializer.writeString(height_0)
-        }
-        else if (RuntimeType.NUMBER == height_type) {
+            const heightForIdx0  = height as string
+            thisSerializer.writeString(heightForIdx0)
+        } else if (height instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const height_1  = height as number
-            thisSerializer.writeNumber(height_1)
-        }
-        else if (RuntimeType.OBJECT == height_type) {
+            const heightForIdx1  = height as number
+            thisSerializer.writeNumber(heightForIdx1)
+        } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const height_2  = height as Resource
-            Resource_serializer.write(thisSerializer, height_2)
+            const heightForIdx2  = height as Resource
+            Resource_serializer.write(thisSerializer, heightForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._CircleShape_height(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -202,12 +188,12 @@ export class EllipseShape implements MaterializedBase {
     }
     static construct(options?: ShapeSize): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            ShapeSize_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ShapeSize_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._EllipseShape_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -250,27 +236,22 @@ export class EllipseShape implements MaterializedBase {
     }
     private fill_serialize(color: ResourceColor): EllipseShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._EllipseShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -287,22 +268,18 @@ export class EllipseShape implements MaterializedBase {
     }
     private width_serialize(width: Length): EllipseShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let width_type : int32 = RuntimeType.UNDEFINED
-        width_type = runtimeType(width)
-        if (RuntimeType.STRING == width_type) {
+        if (width instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const width_0  = width as string
-            thisSerializer.writeString(width_0)
-        }
-        else if (RuntimeType.NUMBER == width_type) {
+            const widthForIdx0  = width as string
+            thisSerializer.writeString(widthForIdx0)
+        } else if (width instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const width_1  = width as number
-            thisSerializer.writeNumber(width_1)
-        }
-        else if (RuntimeType.OBJECT == width_type) {
+            const widthForIdx1  = width as number
+            thisSerializer.writeNumber(widthForIdx1)
+        } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const width_2  = width as Resource
-            Resource_serializer.write(thisSerializer, width_2)
+            const widthForIdx2  = width as Resource
+            Resource_serializer.write(thisSerializer, widthForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._EllipseShape_width(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -311,22 +288,18 @@ export class EllipseShape implements MaterializedBase {
     }
     private height_serialize(height: Length): EllipseShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let height_type : int32 = RuntimeType.UNDEFINED
-        height_type = runtimeType(height)
-        if (RuntimeType.STRING == height_type) {
+        if (height instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const height_0  = height as string
-            thisSerializer.writeString(height_0)
-        }
-        else if (RuntimeType.NUMBER == height_type) {
+            const heightForIdx0  = height as string
+            thisSerializer.writeString(heightForIdx0)
+        } else if (height instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const height_1  = height as number
-            thisSerializer.writeNumber(height_1)
-        }
-        else if (RuntimeType.OBJECT == height_type) {
+            const heightForIdx1  = height as number
+            thisSerializer.writeNumber(heightForIdx1)
+        } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const height_2  = height as Resource
-            Resource_serializer.write(thisSerializer, height_2)
+            const heightForIdx2  = height as Resource
+            Resource_serializer.write(thisSerializer, heightForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._EllipseShape_height(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -360,12 +333,12 @@ export class PathShape implements MaterializedBase {
     }
     static construct(options?: PathShapeOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            PathShapeOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            PathShapeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._PathShape_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -400,27 +373,22 @@ export class PathShape implements MaterializedBase {
     }
     private fill_serialize(color: ResourceColor): PathShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._PathShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -465,23 +433,20 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     static construct(options?: RectShapeOptions | RoundRectShapeOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            let options_value_type : int32 = RuntimeType.UNDEFINED
-            options_value_type = runtimeType(options_value)
-            if (TypeChecker.isRectShapeOptions(options_value, false)) {
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            if (optionsTmpValue instanceof RectShapeOptions) {
                 thisSerializer.writeInt8((0).toChar())
-                const options_value_0  = options_value as RectShapeOptions
-                RectShapeOptions_serializer.write(thisSerializer, options_value_0)
-            }
-            else if (TypeChecker.isRoundRectShapeOptions(options_value, false, false)) {
+                const optionsTmpValueForIdx0  = optionsTmpValue as RectShapeOptions
+                RectShapeOptions_serializer.write(thisSerializer, optionsTmpValueForIdx0)
+            } else if (optionsTmpValue instanceof RoundRectShapeOptions) {
                 thisSerializer.writeInt8((1).toChar())
-                const options_value_1  = options_value as RoundRectShapeOptions
-                RoundRectShapeOptions_serializer.write(thisSerializer, options_value_1)
+                const optionsTmpValueForIdx1  = optionsTmpValue as RoundRectShapeOptions
+                RoundRectShapeOptions_serializer.write(thisSerializer, optionsTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -539,27 +504,22 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private fill_serialize(color: ResourceColor): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let color_type : int32 = RuntimeType.UNDEFINED
-        color_type = runtimeType(color)
-        if (TypeChecker.isColor(color)) {
+        if (color instanceof Color) {
             thisSerializer.writeInt8((0).toChar())
-            const color_0  = color as Color
-            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
-        }
-        else if (RuntimeType.NUMBER == color_type) {
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(colorForIdx0))
+        } else if (color instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const color_1  = color as number
-            thisSerializer.writeNumber(color_1)
-        }
-        else if (RuntimeType.STRING == color_type) {
+            const colorForIdx1  = color as number
+            thisSerializer.writeNumber(colorForIdx1)
+        } else if (color instanceof string) {
             thisSerializer.writeInt8((2).toChar())
-            const color_2  = color as string
-            thisSerializer.writeString(color_2)
-        }
-        else if (RuntimeType.OBJECT == color_type) {
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
             thisSerializer.writeInt8((3).toChar())
-            const color_3  = color as Resource
-            Resource_serializer.write(thisSerializer, color_3)
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -576,22 +536,18 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private width_serialize(width: Length): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let width_type : int32 = RuntimeType.UNDEFINED
-        width_type = runtimeType(width)
-        if (RuntimeType.STRING == width_type) {
+        if (width instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const width_0  = width as string
-            thisSerializer.writeString(width_0)
-        }
-        else if (RuntimeType.NUMBER == width_type) {
+            const widthForIdx0  = width as string
+            thisSerializer.writeString(widthForIdx0)
+        } else if (width instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const width_1  = width as number
-            thisSerializer.writeNumber(width_1)
-        }
-        else if (RuntimeType.OBJECT == width_type) {
+            const widthForIdx1  = width as number
+            thisSerializer.writeNumber(widthForIdx1)
+        } else if (width instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const width_2  = width as Resource
-            Resource_serializer.write(thisSerializer, width_2)
+            const widthForIdx2  = width as Resource
+            Resource_serializer.write(thisSerializer, widthForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_width(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -600,22 +556,18 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private height_serialize(height: Length): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let height_type : int32 = RuntimeType.UNDEFINED
-        height_type = runtimeType(height)
-        if (RuntimeType.STRING == height_type) {
+        if (height instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const height_0  = height as string
-            thisSerializer.writeString(height_0)
-        }
-        else if (RuntimeType.NUMBER == height_type) {
+            const heightForIdx0  = height as string
+            thisSerializer.writeString(heightForIdx0)
+        } else if (height instanceof number) {
             thisSerializer.writeInt8((1).toChar())
-            const height_1  = height as number
-            thisSerializer.writeNumber(height_1)
-        }
-        else if (RuntimeType.OBJECT == height_type) {
+            const heightForIdx1  = height as number
+            thisSerializer.writeNumber(heightForIdx1)
+        } else if (height instanceof Resource) {
             thisSerializer.writeInt8((2).toChar())
-            const height_2  = height as Resource
-            Resource_serializer.write(thisSerializer, height_2)
+            const heightForIdx2  = height as Resource
+            Resource_serializer.write(thisSerializer, heightForIdx2)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_height(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -632,17 +584,14 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private radiusWidth_serialize(rWidth: number | string): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let rWidth_type : int32 = RuntimeType.UNDEFINED
-        rWidth_type = runtimeType(rWidth)
-        if (RuntimeType.NUMBER == rWidth_type) {
+        if (rWidth instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const rWidth_0  = rWidth as number
-            thisSerializer.writeNumber(rWidth_0)
-        }
-        else if (RuntimeType.STRING == rWidth_type) {
+            const rWidthForIdx0  = rWidth as number
+            thisSerializer.writeNumber(rWidthForIdx0)
+        } else if (rWidth instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const rWidth_1  = rWidth as string
-            thisSerializer.writeString(rWidth_1)
+            const rWidthForIdx1  = rWidth as string
+            thisSerializer.writeString(rWidthForIdx1)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_radiusWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -651,17 +600,14 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private radiusHeight_serialize(rHeight: number | string): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let rHeight_type : int32 = RuntimeType.UNDEFINED
-        rHeight_type = runtimeType(rHeight)
-        if (RuntimeType.NUMBER == rHeight_type) {
+        if (rHeight instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const rHeight_0  = rHeight as number
-            thisSerializer.writeNumber(rHeight_0)
-        }
-        else if (RuntimeType.STRING == rHeight_type) {
+            const rHeightForIdx0  = rHeight as number
+            thisSerializer.writeNumber(rHeightForIdx0)
+        } else if (rHeight instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const rHeight_1  = rHeight as string
-            thisSerializer.writeString(rHeight_1)
+            const rHeightForIdx1  = rHeight as string
+            thisSerializer.writeString(rHeightForIdx1)
         }
         const retval  = ArkUIGeneratedNativeModule._RectShape_radiusHeight(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -670,35 +616,28 @@ export class RectShapeInternal implements MaterializedBase,RectShape {
     }
     private radius_serialize(radius: number | string | Array<number | string>): RectShape {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let radius_type : int32 = RuntimeType.UNDEFINED
-        radius_type = runtimeType(radius)
-        if (RuntimeType.NUMBER == radius_type) {
+        if (radius instanceof number) {
             thisSerializer.writeInt8((0).toChar())
-            const radius_0  = radius as number
-            thisSerializer.writeNumber(radius_0)
-        }
-        else if (RuntimeType.STRING == radius_type) {
+            const radiusForIdx0  = radius as number
+            thisSerializer.writeNumber(radiusForIdx0)
+        } else if (radius instanceof string) {
             thisSerializer.writeInt8((1).toChar())
-            const radius_1  = radius as string
-            thisSerializer.writeString(radius_1)
-        }
-        else if (RuntimeType.OBJECT == radius_type) {
+            const radiusForIdx1  = radius as string
+            thisSerializer.writeString(radiusForIdx1)
+        } else if (TypeChecker.isArray_Union_Number_String(radius)) {
             thisSerializer.writeInt8((2).toChar())
-            const radius_2  = radius as Array<number | string>
-            thisSerializer.writeInt32((radius_2.length).toInt())
-            for (let radius_2_counter_i = 0; radius_2_counter_i < radius_2.length; radius_2_counter_i++) {
-                const radius_2_element : number | string = radius_2[radius_2_counter_i]
-                let radius_2_element_type : int32 = RuntimeType.UNDEFINED
-                radius_2_element_type = runtimeType(radius_2_element)
-                if (RuntimeType.NUMBER == radius_2_element_type) {
+            const radiusForIdx2  = radius as Array<number | string>
+            thisSerializer.writeInt32((radiusForIdx2.length).toInt())
+            for (let radiusForIdx2CounterI = 0; radiusForIdx2CounterI < radiusForIdx2.length; radiusForIdx2CounterI++) {
+                const radiusForIdx2TmpElement : number | string = radiusForIdx2[radiusForIdx2CounterI]
+                if (radiusForIdx2TmpElement instanceof number) {
                     thisSerializer.writeInt8((0).toChar())
-                    const radius_2_element_0  = radius_2_element as number
-                    thisSerializer.writeNumber(radius_2_element_0)
-                }
-                else if (RuntimeType.STRING == radius_2_element_type) {
+                    const radiusForIdx2TmpElementForIdx0  = radiusForIdx2TmpElement as number
+                    thisSerializer.writeNumber(radiusForIdx2TmpElementForIdx0)
+                } else if (radiusForIdx2TmpElement instanceof string) {
                     thisSerializer.writeInt8((1).toChar())
-                    const radius_2_element_1  = radius_2_element as string
-                    thisSerializer.writeString(radius_2_element_1)
+                    const radiusForIdx2TmpElementForIdx1  = radiusForIdx2TmpElement as string
+                    thisSerializer.writeString(radiusForIdx2TmpElementForIdx1)
                 }
             }
         }
@@ -769,427 +708,365 @@ export class RectShape_serializer {
 export class PathShapeOptions_serializer {
     public static write(buffer: SerializerBase, value: PathShapeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_commands  = value.commands
-        let value_commands_type : int32 = RuntimeType.UNDEFINED
-        value_commands_type = runtimeType(value_commands)
-        valueSerializer.writeInt8((value_commands_type).toChar())
-        if ((value_commands_type) != (RuntimeType.UNDEFINED)) {
-            const value_commands_value  = value_commands!
-            valueSerializer.writeString(value_commands_value)
+        const valueHolderForCommands  = value.commands
+        if (valueHolderForCommands !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCommandsTmpValue  = valueHolderForCommands!
+            valueSerializer.writeString(valueHolderForCommandsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PathShapeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const commands_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let commands_buf : string | undefined
-        if ((commands_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            commands_buf = (valueDeserializer.readString() as string)
+        const commandsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let commandsTmpBuf : string | undefined
+        if ((commandsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            commandsTmpBuf = (valueDeserializer.readString() as string)
         }
-        const commands_result : string | undefined = commands_buf
-        let value : PathShapeOptions = ({commands: commands_result} as PathShapeOptions)
+        const commandsTmpResult : string | undefined = commandsTmpBuf
+        let value : PathShapeOptions = ({commands: commandsTmpResult} as PathShapeOptions)
         return value
     }
 }
 export class RoundRectShapeOptions_serializer {
     public static write(buffer: SerializerBase, value: RoundRectShapeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.NUMBER == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_0)
-            }
-            else if (RuntimeType.STRING == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as string
-                valueSerializer.writeString(value_width_value_1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.NUMBER == value_height_value_type) {
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_0)
-            }
-            else if (RuntimeType.STRING == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as string
-                valueSerializer.writeString(value_height_value_1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_radiusWidth  = value.radiusWidth
-        let value_radiusWidth_type : int32 = RuntimeType.UNDEFINED
-        value_radiusWidth_type = runtimeType(value_radiusWidth)
-        valueSerializer.writeInt8((value_radiusWidth_type).toChar())
-        if ((value_radiusWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_radiusWidth_value  = value_radiusWidth!
-            let value_radiusWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_radiusWidth_value_type = runtimeType(value_radiusWidth_value)
-            if (RuntimeType.NUMBER == value_radiusWidth_value_type) {
+        const valueHolderForRadiusWidth  = value.radiusWidth
+        if (valueHolderForRadiusWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusWidthTmpValue  = valueHolderForRadiusWidth!
+            if (valueHolderForRadiusWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_radiusWidth_value_0  = value_radiusWidth_value as number
-                valueSerializer.writeNumber(value_radiusWidth_value_0)
-            }
-            else if (RuntimeType.STRING == value_radiusWidth_value_type) {
+                const valueHolderForRadiusWidthTmpValueForIdx0  = valueHolderForRadiusWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForRadiusWidthTmpValueForIdx0)
+            } else if (valueHolderForRadiusWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_radiusWidth_value_1  = value_radiusWidth_value as string
-                valueSerializer.writeString(value_radiusWidth_value_1)
+                const valueHolderForRadiusWidthTmpValueForIdx1  = valueHolderForRadiusWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForRadiusWidthTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_radiusHeight  = value.radiusHeight
-        let value_radiusHeight_type : int32 = RuntimeType.UNDEFINED
-        value_radiusHeight_type = runtimeType(value_radiusHeight)
-        valueSerializer.writeInt8((value_radiusHeight_type).toChar())
-        if ((value_radiusHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_radiusHeight_value  = value_radiusHeight!
-            let value_radiusHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_radiusHeight_value_type = runtimeType(value_radiusHeight_value)
-            if (RuntimeType.NUMBER == value_radiusHeight_value_type) {
+        const valueHolderForRadiusHeight  = value.radiusHeight
+        if (valueHolderForRadiusHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusHeightTmpValue  = valueHolderForRadiusHeight!
+            if (valueHolderForRadiusHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_radiusHeight_value_0  = value_radiusHeight_value as number
-                valueSerializer.writeNumber(value_radiusHeight_value_0)
-            }
-            else if (RuntimeType.STRING == value_radiusHeight_value_type) {
+                const valueHolderForRadiusHeightTmpValueForIdx0  = valueHolderForRadiusHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForRadiusHeightTmpValueForIdx0)
+            } else if (valueHolderForRadiusHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_radiusHeight_value_1  = value_radiusHeight_value as string
-                valueSerializer.writeString(value_radiusHeight_value_1)
+                const valueHolderForRadiusHeightTmpValueForIdx1  = valueHolderForRadiusHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForRadiusHeightTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): RoundRectShapeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | string | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : number | string | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : number | string | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : number | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as number | string)
+            widthTmpBuf = (widthTmpBuf_ as number | string)
         }
-        const width_result : number | string | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | string | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : number | string | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : number | string | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : number | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as number | string)
+            heightTmpBuf = (heightTmpBuf_ as number | string)
         }
-        const height_result : number | string | undefined = height_buf
-        const radiusWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusWidth_buf : number | string | undefined
-        if ((radiusWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radiusWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let radiusWidth_buf_ : number | string | undefined
-            if (radiusWidth_buf__selector == (0).toChar()) {
-                radiusWidth_buf_ = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number | string | undefined = heightTmpBuf
+        const radiusWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusWidthTmpBuf : number | string | undefined
+        if ((radiusWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusWidthTmpBuf_ : number | string | undefined
+            if (radiusWidthTmpBuf_UnionSelector == (0).toChar()) {
+                radiusWidthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (radiusWidthTmpBuf_UnionSelector == (1).toChar()) {
+                radiusWidthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for radiusWidthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (radiusWidth_buf__selector == (1).toChar()) {
-                radiusWidth_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for radiusWidth_buf_ has to be chosen through deserialisation.")
-            }
-            radiusWidth_buf = (radiusWidth_buf_ as number | string)
+            radiusWidthTmpBuf = (radiusWidthTmpBuf_ as number | string)
         }
-        const radiusWidth_result : number | string | undefined = radiusWidth_buf
-        const radiusHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusHeight_buf : number | string | undefined
-        if ((radiusHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radiusHeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let radiusHeight_buf_ : number | string | undefined
-            if (radiusHeight_buf__selector == (0).toChar()) {
-                radiusHeight_buf_ = (valueDeserializer.readNumber() as number)
+        const radiusWidthTmpResult : number | string | undefined = radiusWidthTmpBuf
+        const radiusHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusHeightTmpBuf : number | string | undefined
+        if ((radiusHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusHeightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusHeightTmpBuf_ : number | string | undefined
+            if (radiusHeightTmpBuf_UnionSelector == (0).toChar()) {
+                radiusHeightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (radiusHeightTmpBuf_UnionSelector == (1).toChar()) {
+                radiusHeightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for radiusHeightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (radiusHeight_buf__selector == (1).toChar()) {
-                radiusHeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for radiusHeight_buf_ has to be chosen through deserialisation.")
-            }
-            radiusHeight_buf = (radiusHeight_buf_ as number | string)
+            radiusHeightTmpBuf = (radiusHeightTmpBuf_ as number | string)
         }
-        const radiusHeight_result : number | string | undefined = radiusHeight_buf
-        let value : RoundRectShapeOptions = ({width: width_result, height: height_result, radiusWidth: radiusWidth_result, radiusHeight: radiusHeight_result} as RoundRectShapeOptions)
+        const radiusHeightTmpResult : number | string | undefined = radiusHeightTmpBuf
+        let value : RoundRectShapeOptions = ({width: widthTmpResult, height: heightTmpResult, radiusWidth: radiusWidthTmpResult, radiusHeight: radiusHeightTmpResult} as RoundRectShapeOptions)
         return value
     }
 }
 export class ShapeSize_serializer {
     public static write(buffer: SerializerBase, value: ShapeSize): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.NUMBER == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_0)
-            }
-            else if (RuntimeType.STRING == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as string
-                valueSerializer.writeString(value_width_value_1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.NUMBER == value_height_value_type) {
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_0)
-            }
-            else if (RuntimeType.STRING == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as string
-                valueSerializer.writeString(value_height_value_1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ShapeSize {
         let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | string | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : number | string | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : number | string | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : number | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as number | string)
+            widthTmpBuf = (widthTmpBuf_ as number | string)
         }
-        const width_result : number | string | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | string | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : number | string | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : number | string | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : number | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as number | string)
+            heightTmpBuf = (heightTmpBuf_ as number | string)
         }
-        const height_result : number | string | undefined = height_buf
-        let value : ShapeSize = ({width: width_result, height: height_result} as ShapeSize)
+        const heightTmpResult : number | string | undefined = heightTmpBuf
+        let value : ShapeSize = ({width: widthTmpResult, height: heightTmpResult} as ShapeSize)
         return value
     }
 }
 export class RectShapeOptions_serializer {
     public static write(buffer: SerializerBase, value: RectShapeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.NUMBER == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_0)
-            }
-            else if (RuntimeType.STRING == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as string
-                valueSerializer.writeString(value_width_value_1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.NUMBER == value_height_value_type) {
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_0)
-            }
-            else if (RuntimeType.STRING == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as string
-                valueSerializer.writeString(value_height_value_1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
-            const value_radius_value  = value_radius!
-            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (RuntimeType.NUMBER == value_radius_value_type) {
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            if (valueHolderForRadiusTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_radius_value_0  = value_radius_value as number
-                valueSerializer.writeNumber(value_radius_value_0)
-            }
-            else if (RuntimeType.STRING == value_radius_value_type) {
+                const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as number
+                valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0)
+            } else if (valueHolderForRadiusTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_radius_value_1  = value_radius_value as string
-                valueSerializer.writeString(value_radius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_radius_value_type) {
+                const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as string
+                valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx1)
+            } else if (TypeChecker.isArray_Union_Number_String(valueHolderForRadiusTmpValue)) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_radius_value_2  = value_radius_value as Array<number | string>
-                valueSerializer.writeInt32((value_radius_value_2.length).toInt())
-                for (let value_radius_value_2_counter_i = 0; value_radius_value_2_counter_i < value_radius_value_2.length; value_radius_value_2_counter_i++) {
-                    const value_radius_value_2_element : number | string = value_radius_value_2[value_radius_value_2_counter_i]
-                    let value_radius_value_2_element_type : int32 = RuntimeType.UNDEFINED
-                    value_radius_value_2_element_type = runtimeType(value_radius_value_2_element)
-                    if (RuntimeType.NUMBER == value_radius_value_2_element_type) {
+                const valueHolderForRadiusTmpValueForIdx2  = valueHolderForRadiusTmpValue as Array<number | string>
+                valueSerializer.writeInt32((valueHolderForRadiusTmpValueForIdx2.length).toInt())
+                for (let valueHolderForRadiusTmpValueForIdx2CounterI = 0; valueHolderForRadiusTmpValueForIdx2CounterI < valueHolderForRadiusTmpValueForIdx2.length; valueHolderForRadiusTmpValueForIdx2CounterI++) {
+                    const valueHolderForRadiusTmpValueForIdx2TmpElement : number | string = valueHolderForRadiusTmpValueForIdx2[valueHolderForRadiusTmpValueForIdx2CounterI]
+                    if (valueHolderForRadiusTmpValueForIdx2TmpElement instanceof number) {
                         valueSerializer.writeInt8((0).toChar())
-                        const value_radius_value_2_element_0  = value_radius_value_2_element as number
-                        valueSerializer.writeNumber(value_radius_value_2_element_0)
-                    }
-                    else if (RuntimeType.STRING == value_radius_value_2_element_type) {
+                        const valueHolderForRadiusTmpValueForIdx2TmpElementForIdx0  = valueHolderForRadiusTmpValueForIdx2TmpElement as number
+                        valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx2TmpElementForIdx0)
+                    } else if (valueHolderForRadiusTmpValueForIdx2TmpElement instanceof string) {
                         valueSerializer.writeInt8((1).toChar())
-                        const value_radius_value_2_element_1  = value_radius_value_2_element as string
-                        valueSerializer.writeString(value_radius_value_2_element_1)
+                        const valueHolderForRadiusTmpValueForIdx2TmpElementForIdx1  = valueHolderForRadiusTmpValueForIdx2TmpElement as string
+                        valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx2TmpElementForIdx1)
                     }
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): RectShapeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | string | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : number | string | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : number | string | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : number | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as number | string)
+            widthTmpBuf = (widthTmpBuf_ as number | string)
         }
-        const width_result : number | string | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | string | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : number | string | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : number | string | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : number | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as number | string)
+            heightTmpBuf = (heightTmpBuf_ as number | string)
         }
-        const height_result : number | string | undefined = height_buf
-        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radius_buf : number | string | Array<number | string> | undefined
-        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : number | string | Array<number | string> | undefined
-            if (radius_buf__selector == (0).toChar()) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (radius_buf__selector == (1).toChar()) {
-                radius_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (radius_buf__selector == (2).toChar()) {
-                const radius_buf__u_length : int32 = valueDeserializer.readInt32()
-                let radius_buf__u : Array<number | string> = new Array<number | string>(radius_buf__u_length)
-                for (let radius_buf__u_i = 0; radius_buf__u_i < radius_buf__u_length; radius_buf__u_i++) {
-                    const radius_buf__u_buf_selector : int32 = valueDeserializer.readInt8()
-                    let radius_buf__u_buf : number | string | undefined
-                    if (radius_buf__u_buf_selector == (0).toChar()) {
-                        radius_buf__u_buf = (valueDeserializer.readNumber() as number)
+        const heightTmpResult : number | string | undefined = heightTmpBuf
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : number | string | Array<number | string> | undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusTmpBuf_ : number | string | Array<number | string> | undefined
+            if (radiusTmpBuf_UnionSelector == (0).toChar()) {
+                radiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (radiusTmpBuf_UnionSelector == (1).toChar()) {
+                radiusTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (radiusTmpBuf_UnionSelector == (2).toChar()) {
+                const radiusTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
+                let radiusTmpBuf_BufU : Array<number | string> = new Array<number | string>(radiusTmpBuf_BufULength)
+                for (let radiusTmpBuf_BufUBufCounterI = 0; radiusTmpBuf_BufUBufCounterI < radiusTmpBuf_BufULength; radiusTmpBuf_BufUBufCounterI++) {
+                    const radiusTmpBuf_BufUTempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                    let radiusTmpBuf_BufUTempBuf : number | string | undefined
+                    if (radiusTmpBuf_BufUTempBufUnionSelector == (0).toChar()) {
+                        radiusTmpBuf_BufUTempBuf = (valueDeserializer.readNumber() as number)
+                    } else if (radiusTmpBuf_BufUTempBufUnionSelector == (1).toChar()) {
+                        radiusTmpBuf_BufUTempBuf = (valueDeserializer.readString() as string)
+                    } else {
+                        throw new Error("One of the branches for radiusTmpBuf_BufUTempBuf has to be chosen through deserialisation.")
                     }
-                    else if (radius_buf__u_buf_selector == (1).toChar()) {
-                        radius_buf__u_buf = (valueDeserializer.readString() as string)
-                    }
-                    else {
-                        throw new Error("One of the branches for radius_buf__u_buf has to be chosen through deserialisation.")
-                    }
-                    radius_buf__u[radius_buf__u_i] = (radius_buf__u_buf as number | string)
+                    radiusTmpBuf_BufU[radiusTmpBuf_BufUBufCounterI] = (radiusTmpBuf_BufUTempBuf as number | string)
                 }
-                radius_buf_ = radius_buf__u
+                radiusTmpBuf_ = radiusTmpBuf_BufU
+            } else {
+                throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            else {
-                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
-            }
-            radius_buf = (radius_buf_ as number | string | Array<number | string>)
+            radiusTmpBuf = (radiusTmpBuf_ as number | string | Array<number | string>)
         }
-        const radius_result : number | string | Array<number | string> | undefined = radius_buf
-        let value : RectShapeOptions = ({width: width_result, height: height_result, radius: radius_result} as RectShapeOptions)
+        const radiusTmpResult : number | string | Array<number | string> | undefined = radiusTmpBuf
+        let value : RectShapeOptions = ({width: widthTmpResult, height: heightTmpResult, radius: radiusTmpResult} as RectShapeOptions)
         return value
     }
 }

@@ -3,16 +3,16 @@ import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id
 
 import { memo as memo } from "@koalaui/runtime/annotations";
 
-function main(): void {}
+function main() {}
 
-@memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type): void => {
-  const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id__@test/HQ/memo-interface-property-type.ets"))), 0);
+@memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
+  const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id__@test/input/HQ/memo-interface-property-type.ets"))), 0);
   if (__memo_scope.unchanged) {
     __memo_scope.cached;
     return;
   }
   let a: A = {
-    arg_memo_type: ((): void => {}),
+    arg_memo_type: (() => {}),
   };
   {
     __memo_scope.recache();

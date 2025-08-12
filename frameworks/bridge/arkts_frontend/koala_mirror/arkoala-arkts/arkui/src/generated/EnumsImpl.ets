@@ -1,4 +1,38 @@
 import { int32, float32 } from "@koalaui/common"
+export namespace uiObserver {
+    export enum NavDestinationState {
+        ON_SHOWN = 0,
+        ON_HIDDEN = 1,
+        ON_APPEAR = 2,
+        ON_DISAPPEAR = 3,
+        ON_WILL_SHOW = 4,
+        ON_WILL_HIDE = 5,
+        ON_WILL_APPEAR = 6,
+        ON_WILL_DISAPPEAR = 7,
+        ON_BACKPRESS = 100
+    }
+}
+export namespace uiObserver {
+    export enum RouterPageState {
+        ABOUT_TO_APPEAR = 0,
+        ABOUT_TO_DISAPPEAR = 1,
+        ON_PAGE_SHOW = 2,
+        ON_PAGE_HIDE = 3,
+        ON_BACK_PRESS = 4
+    }
+}
+export namespace uiObserver {
+    export enum ScrollEventType {
+        SCROLL_START = 0,
+        SCROLL_STOP = 1
+    }
+}
+export namespace uiObserver {
+    export enum TabContentState {
+        ON_SHOW = 0,
+        ON_HIDE = 1
+    }
+}
 export namespace curves {
     export enum Curve {
         LINEAR = 0,
@@ -679,6 +713,12 @@ export enum LengthUnit {
 export enum LengthMetricsUnit {
     DEFAULT = 0,
     PX = 1
+}
+export enum AttributeUpdaterFlag {
+    INITIAL = 0,
+    UPDATE = 1,
+    SKIP = 2,
+    RESET = 3
 }
 export enum BadgePosition {
     RIGHT_TOP = 0,
@@ -2080,27 +2120,6 @@ export enum LoadingProgressStyle {
     ORBITAL = 2,
     Orbital = 2
 }
-export enum LocationIconStyle {
-    FULL_FILLED = 0,
-    LINES = 1
-}
-export enum LocationDescription {
-    CURRENT_LOCATION = 0,
-    ADD_LOCATION = 1,
-    SELECT_LOCATION = 2,
-    SHARE_LOCATION = 3,
-    SEND_LOCATION = 4,
-    LOCATING = 5,
-    LOCATION = 6,
-    SEND_CURRENT_LOCATION = 7,
-    RELOCATION = 8,
-    PUNCH_IN = 9,
-    CURRENT_POSITION = 10
-}
-export enum LocationButtonOnClickResult {
-    SUCCESS = 0,
-    TEMPORARY_AUTHORIZATION_FAILED = 1
-}
 export enum SubMenuExpandingMode {
     SIDE_EXPAND = 0,
     EMBEDDED_EXPAND = 1,
@@ -2889,6 +2908,9 @@ export enum WebElementType {
 }
 export enum WebResponseType {
     LONG_PRESS = 1
+}
+export enum AudioSessionType {
+    AMBIENT = 3
 }
 export enum PerfMonitorActionType {
     LAST_DOWN = 0,

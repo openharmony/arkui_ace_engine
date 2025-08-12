@@ -77,8 +77,7 @@
   KOALA_INTEROP_TYPEDEF(func, lang, "KFloatArray", "[F", "float[]") \
   KOALA_INTEROP_TYPEDEF(func, lang, "KFloat*", "[F", "float[]") \
   KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringPtr", "Lstd/core/String;", "String", "Ljava/lang/String;", "String") \
-  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringArray", "[Lstd/core/String;", "String[]", "[Ljava/lang/String;", "String[]") \
-  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KLength", "Lstd/core/String;", "String", "Ljava/lang/String;", "String")
+  KOALA_INTEROP_TYPEDEF_LS(func, lang, "KStringArray", "[Lstd/core/String;", "String[]", "[Ljava/lang/String;", "String[]")
 
 std::string sigType(const std::string &type) {
 #if KOALA_USE_PANDA_VM

@@ -17,22 +17,23 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { VoidCallback, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
+import { Bindable_Number_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { IndicatorComponentController_serializer, IndicatorComponentController } from "./indicatorcomponent"
 import { curves_ICurve_serializer, curves } from "./../generated/ohos.curves"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 import { LengthMetrics, LengthMetrics_serializer } from "./../generated/arkui.Graphics"
 export interface SwiperContentTransitionProxy {
     selectedIndex: number
@@ -208,51 +209,48 @@ export class SwiperController implements MaterializedBase {
     }
     private changeIndex_serialize(index: number, animationMode?: SwiperAnimationMode | boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let animationMode_type : int32 = RuntimeType.UNDEFINED
-        animationMode_type = runtimeType(animationMode)
-        thisSerializer.writeInt8((animationMode_type).toChar())
-        if ((animationMode_type) != (RuntimeType.UNDEFINED)) {
-            const animationMode_value  = animationMode!
-            let animationMode_value_type : int32 = RuntimeType.UNDEFINED
-            animationMode_value_type = runtimeType(animationMode_value)
-            if (TypeChecker.isSwiperAnimationMode(animationMode_value)) {
+        if (animationMode !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animationModeTmpValue  = animationMode!
+            if (animationModeTmpValue instanceof SwiperAnimationMode) {
                 thisSerializer.writeInt8((0).toChar())
-                const animationMode_value_0  = animationMode_value as SwiperAnimationMode
-                thisSerializer.writeInt32(TypeChecker.SwiperAnimationMode_ToNumeric(animationMode_value_0))
-            }
-            else if (RuntimeType.BOOLEAN == animationMode_value_type) {
+                const animationModeTmpValueForIdx0  = animationModeTmpValue as SwiperAnimationMode
+                thisSerializer.writeInt32(TypeChecker.SwiperAnimationMode_ToNumeric(animationModeTmpValueForIdx0))
+            } else if (animationModeTmpValue instanceof boolean) {
                 thisSerializer.writeInt8((1).toChar())
-                const animationMode_value_1  = animationMode_value as boolean
-                thisSerializer.writeBoolean(animationMode_value_1)
+                const animationModeTmpValueForIdx1  = animationModeTmpValue as boolean
+                thisSerializer.writeBoolean(animationModeTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private finishAnimation_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let callback__type : int32 = RuntimeType.UNDEFINED
-        callback__type = runtimeType(callback_)
-        thisSerializer.writeInt8((callback__type).toChar())
-        if ((callback__type) != (RuntimeType.UNDEFINED)) {
-            const callback__value  = callback_!
-            thisSerializer.holdAndWriteCallback(callback__value)
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private preloadItems_serialize(indices: Array<number> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let indices_type : int32 = RuntimeType.UNDEFINED
-        indices_type = runtimeType(indices)
-        thisSerializer.writeInt8((indices_type).toChar())
-        if ((indices_type) != (RuntimeType.UNDEFINED)) {
-            const indices_value  = indices!
-            thisSerializer.writeInt32((indices_value.length).toInt())
-            for (let indices_value_counter_i = 0; indices_value_counter_i < indices_value.length; indices_value_counter_i++) {
-                const indices_value_element : number = indices_value[indices_value_counter_i]
-                thisSerializer.writeNumber(indices_value_element)
+        if (indices !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const indicesTmpValue  = indices!
+            thisSerializer.writeInt32((indicesTmpValue.length).toInt())
+            for (let indicesTmpValueCounterI = 0; indicesTmpValueCounterI < indicesTmpValue.length; indicesTmpValueCounterI++) {
+                const indicesTmpValueTmpElement : number = indicesTmpValue[indicesTmpValueCounterI]
+                thisSerializer.writeNumber(indicesTmpValueTmpElement)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
         ArkUIGeneratedNativeModule._SwiperController_preloadItems(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -267,535 +265,510 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSwiperPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Swiper_construct(peerId, flags)
-        const _peer  = new ArkSwiperPeer(_peerPtr, peerId, "Swiper", flags)
+        const _peer  = new ArkSwiperPeer(_peerPtr, peerId, 'Swiper', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setSwiperOptionsAttribute(controller?: SwiperController): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let controller_type : int32 = RuntimeType.UNDEFINED
-        controller_type = runtimeType(controller)
-        thisSerializer.writeInt8((controller_type).toChar())
-        if ((controller_type) != (RuntimeType.UNDEFINED)) {
-            const controller_value  = controller!
-            SwiperController_serializer.write(thisSerializer, controller_value)
+        if (controller !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const controllerTmpValue  = controller!
+            SwiperController_serializer.write(thisSerializer, controllerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperInterface_setSwiperOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setIndexAttribute(value: number | undefined): void {
+    setIndexAttribute(value: number | Bindable<number> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable<number>) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<number>
+                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIntervalAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setInterval(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIndicatorAttribute(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isIndicatorComponentController(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof IndicatorComponentController) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as IndicatorComponentController
-                IndicatorComponentController_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isDotIndicator(value_value))) {
+                const valueTmpValueForIdx0  = valueTmpValue as IndicatorComponentController
+                IndicatorComponentController_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof DotIndicator) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as DotIndicator
-                DotIndicator_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isDigitIndicator(value_value))) {
+                const valueTmpValueForIdx1  = valueTmpValue as DotIndicator
+                DotIndicator_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof DigitIndicator) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as DigitIndicator
-                DigitIndicator_serializer.write(thisSerializer, value_value_2)
-            }
-            else if (RuntimeType.BOOLEAN == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as DigitIndicator
+                DigitIndicator_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof boolean) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as boolean
-                thisSerializer.writeBoolean(value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setIndicator(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLoopAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDurationAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setDuration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setVerticalAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setVertical(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setItemSpaceAttribute(value: number | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setItemSpace(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisplayModeAttribute(value: SwiperDisplayMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SwiperDisplayMode)
-            thisSerializer.writeInt32(TypeChecker.SwiperDisplayMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SwiperDisplayMode)
+            thisSerializer.writeInt32(TypeChecker.SwiperDisplayMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisplayMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCachedCount0Attribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setCachedCount0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEffectModeAttribute(value: EdgeEffect | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as EdgeEffect)
-            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as EdgeEffect)
+            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setEffectMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisableSwipeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisableSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCurveAttribute(value: curves.Curve | string | curves.ICurve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.iscurves_Curve(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof curves.Curve) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as curves.Curve
-                thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as curves.Curve
+                thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof curves.ICurve) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as curves.ICurve
-                curves_ICurve_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as curves.ICurve
+                curves_ICurve_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnChangeAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnSelectedAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnUnselectedAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnUnselected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAnimationStartAttribute(value: OnSwiperAnimationStartCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnAnimationStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnAnimationEndAttribute(value: OnSwiperAnimationEndCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnAnimationEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnGestureSwipeAttribute(value: OnSwiperGestureSwipeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnGestureSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNestedScrollAttribute(value: SwiperNestedScrollMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as SwiperNestedScrollMode)
-            thisSerializer.writeInt32(TypeChecker.SwiperNestedScrollMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as SwiperNestedScrollMode)
+            thisSerializer.writeInt32(TypeChecker.SwiperNestedScrollMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCustomContentTransitionAttribute(value: SwiperContentAnimatedTransition | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            SwiperContentAnimatedTransition_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            SwiperContentAnimatedTransition_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setCustomContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnContentDidScrollAttribute(value: ContentDidScrollCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnContentDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIndicatorInteractiveAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setIndicatorInteractive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPageFlipModeAttribute(value: PageFlipMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as PageFlipMode)
-            thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as PageFlipMode)
+            thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setPageFlipMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnContentWillScrollAttribute(value: ContentWillScrollCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnContentWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoPlayAttribute(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let autoPlay_type : int32 = RuntimeType.UNDEFINED
-        autoPlay_type = runtimeType(autoPlay)
-        thisSerializer.writeInt8((autoPlay_type).toChar())
-        if ((autoPlay_type) != (RuntimeType.UNDEFINED)) {
-            const autoPlay_value  = autoPlay!
-            thisSerializer.writeBoolean(autoPlay_value)
+        if (autoPlay !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const autoPlayTmpValue  = autoPlay!
+            thisSerializer.writeBoolean(autoPlayTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            AutoPlayOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            AutoPlayOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setAutoPlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisplayArrowAttribute(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ArrowStyle) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ArrowStyle
-                ArrowStyle_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (RuntimeType.BOOLEAN == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as ArrowStyle
+                ArrowStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof boolean) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as boolean
-                thisSerializer.writeBoolean(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as boolean
+                thisSerializer.writeBoolean(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let isHoverShow_type : int32 = RuntimeType.UNDEFINED
-        isHoverShow_type = runtimeType(isHoverShow)
-        thisSerializer.writeInt8((isHoverShow_type).toChar())
-        if ((isHoverShow_type) != (RuntimeType.UNDEFINED)) {
-            const isHoverShow_value  = isHoverShow!
-            thisSerializer.writeBoolean(isHoverShow_value)
+        if (isHoverShow !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isHoverShowTmpValue  = isHoverShow!
+            thisSerializer.writeBoolean(isHoverShowTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisplayArrow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCachedCount1Attribute(count: number | undefined, isShown: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let count_type : int32 = RuntimeType.UNDEFINED
-        count_type = runtimeType(count)
-        thisSerializer.writeInt8((count_type).toChar())
-        if ((count_type) != (RuntimeType.UNDEFINED)) {
-            const count_value  = count!
-            thisSerializer.writeNumber(count_value)
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue  = count!
+            thisSerializer.writeNumber(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let isShown_type : int32 = RuntimeType.UNDEFINED
-        isShown_type = runtimeType(isShown)
-        thisSerializer.writeInt8((isShown_type).toChar())
-        if ((isShown_type) != (RuntimeType.UNDEFINED)) {
-            const isShown_value  = isShown!
-            thisSerializer.writeBoolean(isShown_value)
+        if (isShown !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isShownTmpValue  = isShown!
+            thisSerializer.writeBoolean(isShownTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setCachedCount1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDisplayCountAttribute(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof SwiperAutoFill) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as SwiperAutoFill
-                SwiperAutoFill_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as SwiperAutoFill
+                SwiperAutoFill_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let swipeByGroup_type : int32 = RuntimeType.UNDEFINED
-        swipeByGroup_type = runtimeType(swipeByGroup)
-        thisSerializer.writeInt8((swipeByGroup_type).toChar())
-        if ((swipeByGroup_type) != (RuntimeType.UNDEFINED)) {
-            const swipeByGroup_value  = swipeByGroup!
-            thisSerializer.writeBoolean(swipeByGroup_value)
+        if (swipeByGroup !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const swipeByGroupTmpValue  = swipeByGroup!
+            thisSerializer.writeBoolean(swipeByGroupTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisplayCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPrevMarginAttribute(value: Length | undefined, ignoreBlank?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let ignoreBlank_type : int32 = RuntimeType.UNDEFINED
-        ignoreBlank_type = runtimeType(ignoreBlank)
-        thisSerializer.writeInt8((ignoreBlank_type).toChar())
-        if ((ignoreBlank_type) != (RuntimeType.UNDEFINED)) {
-            const ignoreBlank_value  = ignoreBlank!
-            thisSerializer.writeBoolean(ignoreBlank_value)
+        if (ignoreBlank !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const ignoreBlankTmpValue  = ignoreBlank!
+            thisSerializer.writeBoolean(ignoreBlankTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setPrevMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNextMarginAttribute(value: Length | undefined, ignoreBlank?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let ignoreBlank_type : int32 = RuntimeType.UNDEFINED
-        ignoreBlank_type = runtimeType(ignoreBlank)
-        thisSerializer.writeInt8((ignoreBlank_type).toChar())
-        if ((ignoreBlank_type) != (RuntimeType.UNDEFINED)) {
-            const ignoreBlank_value  = ignoreBlank!
-            thisSerializer.writeBoolean(ignoreBlank_value)
+        if (ignoreBlank !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const ignoreBlankTmpValue  = ignoreBlank!
+            thisSerializer.writeBoolean(ignoreBlankTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setNextMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    set_onChangeEvent_indexAttribute(callback_: ((index: number | undefined) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._SwiperAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -834,7 +807,7 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
-    index(value: number | undefined): this {
+    index(value: number | Bindable<number> | undefined): this {
         throw new Error("Unimplemented method index")
     }
     interval(value: number | undefined): this {
@@ -924,15 +897,12 @@ export interface SwiperAttribute extends CommonMethod {
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         throw new Error("Unimplemented method nextMargin")
     }
-    _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
-        throw new Error("Unimplemented method _onChangeEvent_index")
-    }
     attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
-    index_value?: number | undefined
+    index_value?: number | Bindable<number> | undefined
     interval_value?: number | undefined
     indicator_value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
     loop_value?: boolean | undefined
@@ -957,7 +927,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
     attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
-    public index(value: number | undefined): this {
+    public index(value: number | Bindable<number> | undefined): this {
         return this
     }
     public interval(value: number | undefined): this {
@@ -1047,62 +1017,8 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         return this
     }
-    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
-        throw new Error("Unimplemented")
-    }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: SwiperAttribute): void {
-        super.apply(target)
-        if (this.index_value !== undefined)
-            target.index(this.index_value!)
-        if (this.interval_value !== undefined)
-            target.interval(this.interval_value!)
-        if (this.indicator_value !== undefined)
-            target.indicator(this.indicator_value!)
-        if (this.loop_value !== undefined)
-            target.loop(this.loop_value!)
-        if (this.duration_value !== undefined)
-            target.duration(this.duration_value!)
-        if (this.vertical_value !== undefined)
-            target.vertical(this.vertical_value!)
-        if (this.itemSpace_value !== undefined)
-            target.itemSpace(this.itemSpace_value!)
-        if (this.displayMode_value !== undefined)
-            target.displayMode(this.displayMode_value!)
-        if (this.cachedCount_value !== undefined)
-            target.cachedCount(this.cachedCount_value!)
-        if (this.effectMode_value !== undefined)
-            target.effectMode(this.effectMode_value!)
-        if (this.disableSwipe_value !== undefined)
-            target.disableSwipe(this.disableSwipe_value!)
-        if (this.curve_value !== undefined)
-            target.curve(this.curve_value!)
-        if (this.onChange_value !== undefined)
-            target.onChange(this.onChange_value!)
-        if (this.onSelected_value !== undefined)
-            target.onSelected(this.onSelected_value!)
-        if (this.onUnselected_value !== undefined)
-            target.onUnselected(this.onUnselected_value!)
-        if (this.onAnimationStart_value !== undefined)
-            target.onAnimationStart(this.onAnimationStart_value!)
-        if (this.onAnimationEnd_value !== undefined)
-            target.onAnimationEnd(this.onAnimationEnd_value!)
-        if (this.onGestureSwipe_value !== undefined)
-            target.onGestureSwipe(this.onGestureSwipe_value!)
-        if (this.nestedScroll_value !== undefined)
-            target.nestedScroll(this.nestedScroll_value!)
-        if (this.customContentTransition_value !== undefined)
-            target.customContentTransition(this.customContentTransition_value!)
-        if (this.onContentDidScroll_value !== undefined)
-            target.onContentDidScroll(this.onContentDidScroll_value!)
-        if (this.indicatorInteractive_value !== undefined)
-            target.indicatorInteractive(this.indicatorInteractive_value!)
-        if (this.pageFlipMode_value !== undefined)
-            target.pageFlipMode(this.pageFlipMode_value!)
-        if (this.onContentWillScroll_value !== undefined)
-            target.onContentWillScroll(this.onContentWillScroll_value!)
     }
 }
 export interface SwiperContentAnimatedTransition {
@@ -1129,9 +1045,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public index(value: number | undefined): this {
+    public index(value: number | Bindable<number> | undefined): this {
         if (this.checkPriority("index")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (number | Bindable<number> | undefined)
             this.getPeer()?.setIndexAttribute(value_casted)
             return this
         }
@@ -1375,16 +1291,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
-        if (this.checkPriority("_onChangeEvent_index")) {
-            const callback__casted = callback_ as (((index: number | undefined) => void))
-            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
-            return
-        }
-        return
-    }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -1392,26 +1299,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         super.applyAttributesFinish()
     }
 }
-export function withSwiperStyle(receiver: SwiperAttribute, modifier: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkSwiperStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Swiper")
-// export function Swiper(
-//     controller?: SwiperController,
-//     @memo
-//     content_?: () => void,
-// ): SwiperAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Swiper(
@@ -1427,295 +1314,1353 @@ export function Swiper(
     NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (_: ArkSwiperPeer): void => {
         receiver.setSwiperOptions(controller)
         style?.(receiver)
-        withSwiperStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute {
+export class SwiperModifier extends CommonMethodModifier implements SwiperAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _index_flag?: boolean
-    _index0_value?: number | undefined
-    _interval_flag?: boolean
-    _interval0_value?: number | undefined
-    _indicator_flag?: boolean
-    _indicator0_value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
-    _loop_flag?: boolean
-    _loop0_value?: boolean | undefined
-    _duration_flag?: boolean
-    _duration0_value?: number | undefined
-    _vertical_flag?: boolean
-    _vertical0_value?: boolean | undefined
-    _itemSpace_flag?: boolean
-    _itemSpace0_value?: number | string | undefined
-    _displayMode_flag?: boolean
-    _displayMode0_value?: SwiperDisplayMode | undefined
-    _cachedCount_flag?: boolean
-    _cachedCount0_value?: number | undefined
-    _cachedCount1_value?: boolean | undefined
-    _effectMode_flag?: boolean
-    _effectMode0_value?: EdgeEffect | undefined
-    _disableSwipe_flag?: boolean
-    _disableSwipe0_value?: boolean | undefined
-    _curve_flag?: boolean
-    _curve0_value?: curves.Curve | string | curves.ICurve | undefined
-    _onChange_flag?: boolean
-    _onChange0_value?: ((value0: number) => void) | undefined
-    _onSelected_flag?: boolean
-    _onSelected0_value?: ((value0: number) => void) | undefined
-    _onUnselected_flag?: boolean
-    _onUnselected0_value?: ((value0: number) => void) | undefined
-    _onAnimationStart_flag?: boolean
-    _onAnimationStart0_value?: OnSwiperAnimationStartCallback | undefined
-    _onAnimationEnd_flag?: boolean
-    _onAnimationEnd0_value?: OnSwiperAnimationEndCallback | undefined
-    _onGestureSwipe_flag?: boolean
-    _onGestureSwipe0_value?: OnSwiperGestureSwipeCallback | undefined
-    _nestedScroll_flag?: boolean
-    _nestedScroll0_value?: SwiperNestedScrollMode | undefined
-    _customContentTransition_flag?: boolean
-    _customContentTransition0_value?: SwiperContentAnimatedTransition | undefined
-    _onContentDidScroll_flag?: boolean
-    _onContentDidScroll0_value?: ContentDidScrollCallback | undefined
-    _indicatorInteractive_flag?: boolean
-    _indicatorInteractive0_value?: boolean | undefined
-    _pageFlipMode_flag?: boolean
-    _pageFlipMode0_value?: PageFlipMode | undefined
-    _onContentWillScroll_flag?: boolean
-    _onContentWillScroll0_value?: ContentWillScrollCallback | undefined
-    _autoPlay_flag?: boolean
-    _autoPlay0_value?: boolean | undefined
-    _autoPlay1_value?: AutoPlayOptions | undefined
-    _displayArrow_flag?: boolean
-    _displayArrow0_value?: ArrowStyle | boolean | undefined
-    _displayArrow1_value?: boolean | undefined
-    _displayCount_flag?: boolean
-    _displayCount0_value?: number | string | SwiperAutoFill | undefined
-    _displayCount1_value?: boolean | undefined
-    _prevMargin_flag?: boolean
-    _prevMargin0_value?: Length | undefined
-    _prevMargin1_value?: boolean | undefined
-    _nextMargin_flag?: boolean
-    _nextMargin0_value?: Length | undefined
-    _nextMargin1_value?: boolean | undefined
-    __onChangeEvent_index_flag?: boolean
-    __onChangeEvent_index0_value?: ((index: number | undefined) => void)
-    applyModifierPatch(component: SwiperAttribute): void {
-        if (this._index_flag)
-            component.index((this._index0_value as number | undefined))
-        if (this._interval_flag)
-            component.interval((this._interval0_value as number | undefined))
-        if (this._indicator_flag)
-            component.indicator((this._indicator0_value as IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined))
-        if (this._loop_flag)
-            component.loop((this._loop0_value as boolean | undefined))
-        if (this._duration_flag)
-            component.duration((this._duration0_value as number | undefined))
-        if (this._vertical_flag)
-            component.vertical((this._vertical0_value as boolean | undefined))
-        if (this._itemSpace_flag)
-            component.itemSpace((this._itemSpace0_value as number | string | undefined))
-        if (this._displayMode_flag)
-            component.displayMode((this._displayMode0_value as SwiperDisplayMode | undefined))
-        if (this._cachedCount_flag)
-            component.cachedCount((this._cachedCount0_value as number | undefined), (this._cachedCount1_value as boolean | undefined))
-        if (this._effectMode_flag)
-            component.effectMode((this._effectMode0_value as EdgeEffect | undefined))
-        if (this._disableSwipe_flag)
-            component.disableSwipe((this._disableSwipe0_value as boolean | undefined))
-        if (this._curve_flag)
-            component.curve((this._curve0_value as curves.Curve | string | curves.ICurve | undefined))
-        if (this._onChange_flag)
-            component.onChange((this._onChange0_value as ((value0: number) => void) | undefined))
-        if (this._onSelected_flag)
-            component.onSelected((this._onSelected0_value as ((value0: number) => void) | undefined))
-        if (this._onUnselected_flag)
-            component.onUnselected((this._onUnselected0_value as ((value0: number) => void) | undefined))
-        if (this._onAnimationStart_flag)
-            component.onAnimationStart((this._onAnimationStart0_value as OnSwiperAnimationStartCallback | undefined))
-        if (this._onAnimationEnd_flag)
-            component.onAnimationEnd((this._onAnimationEnd0_value as OnSwiperAnimationEndCallback | undefined))
-        if (this._onGestureSwipe_flag)
-            component.onGestureSwipe((this._onGestureSwipe0_value as OnSwiperGestureSwipeCallback | undefined))
-        if (this._nestedScroll_flag)
-            component.nestedScroll((this._nestedScroll0_value as SwiperNestedScrollMode | undefined))
-        if (this._customContentTransition_flag)
-            component.customContentTransition((this._customContentTransition0_value as SwiperContentAnimatedTransition | undefined))
-        if (this._onContentDidScroll_flag)
-            component.onContentDidScroll((this._onContentDidScroll0_value as ContentDidScrollCallback | undefined))
-        if (this._indicatorInteractive_flag)
-            component.indicatorInteractive((this._indicatorInteractive0_value as boolean | undefined))
-        if (this._pageFlipMode_flag)
-            component.pageFlipMode((this._pageFlipMode0_value as PageFlipMode | undefined))
-        if (this._onContentWillScroll_flag)
-            component.onContentWillScroll((this._onContentWillScroll0_value as ContentWillScrollCallback | undefined))
-        if (this._autoPlay_flag)
-            component.autoPlay((this._autoPlay0_value as boolean | undefined), (this._autoPlay1_value as AutoPlayOptions | undefined))
-        if (this._displayArrow_flag)
-            component.displayArrow((this._displayArrow0_value as ArrowStyle | boolean | undefined), (this._displayArrow1_value as boolean | undefined))
-        if (this._displayCount_flag)
-            component.displayCount((this._displayCount0_value as number | string | SwiperAutoFill | undefined), (this._displayCount1_value as boolean | undefined))
-        if (this._prevMargin_flag)
-            component.prevMargin((this._prevMargin0_value as Length | undefined), (this._prevMargin1_value as boolean | undefined))
-        if (this._nextMargin_flag)
-            component.nextMargin((this._nextMargin0_value as Length | undefined), (this._nextMargin1_value as boolean | undefined))
+    _index_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _index_0_0value?: number | Bindable<number> | undefined
+    _interval_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _interval_0_0value?: number | undefined
+    _indicator_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _indicator_0_0value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
+    _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _loop_0_0value?: boolean | undefined
+    _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _duration_0_0value?: number | undefined
+    _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _vertical_0_0value?: boolean | undefined
+    _itemSpace_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _itemSpace_0_0value?: number | string | undefined
+    _displayMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _displayMode_0_0value?: SwiperDisplayMode | undefined
+    _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cachedCount_0_0value?: number | undefined
+    _effectMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _effectMode_0_0value?: EdgeEffect | undefined
+    _disableSwipe_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _disableSwipe_0_0value?: boolean | undefined
+    _curve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _curve_0_0value?: curves.Curve | string | curves.ICurve | undefined
+    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onChange_0_0value?: ((value0: number) => void) | undefined
+    _onSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onSelected_0_0value?: ((value0: number) => void) | undefined
+    _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onUnselected_0_0value?: ((value0: number) => void) | undefined
+    _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAnimationStart_0_0value?: OnSwiperAnimationStartCallback | undefined
+    _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onAnimationEnd_0_0value?: OnSwiperAnimationEndCallback | undefined
+    _onGestureSwipe_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onGestureSwipe_0_0value?: OnSwiperGestureSwipeCallback | undefined
+    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _nestedScroll_0_0value?: SwiperNestedScrollMode | undefined
+    _customContentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _customContentTransition_0_0value?: SwiperContentAnimatedTransition | undefined
+    _onContentDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onContentDidScroll_0_0value?: ContentDidScrollCallback | undefined
+    _indicatorInteractive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _indicatorInteractive_0_0value?: boolean | undefined
+    _pageFlipMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pageFlipMode_0_0value?: PageFlipMode | undefined
+    _onContentWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onContentWillScroll_0_0value?: ContentWillScrollCallback | undefined
+    _autoPlay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoPlay_0_0value?: boolean | undefined
+    _autoPlay_0_1value?: AutoPlayOptions | undefined
+    _displayArrow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _displayArrow_0_0value?: ArrowStyle | boolean | undefined
+    _displayArrow_0_1value?: boolean | undefined
+    _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _cachedCount_1_0value?: number | undefined
+    _cachedCount_1_1value?: boolean | undefined
+    _displayCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _displayCount_0_0value?: number | string | SwiperAutoFill | undefined
+    _displayCount_0_1value?: boolean | undefined
+    _prevMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _prevMargin_0_0value?: Length | undefined
+    _prevMargin_0_1value?: boolean | undefined
+    _nextMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _nextMargin_0_0value?: Length | undefined
+    _nextMargin_0_1value?: boolean | undefined
+    applyModifierPatch(peer: ArkSwiperPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._index_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._index_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIndexAttribute((this._index_0_0value as number | Bindable<number> | undefined));
+                    this._index_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._index_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._index_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIndexAttribute((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (this._interval_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._interval_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIntervalAttribute((this._interval_0_0value as number | undefined));
+                    this._interval_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._interval_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._interval_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIntervalAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._indicator_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._indicator_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIndicatorAttribute((this._indicator_0_0value as IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined));
+                    this._indicator_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._indicator_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._indicator_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIndicatorAttribute((undefined as IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined));
+                }
+            }
+        }
+        if (this._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLoopAttribute((this._loop_0_0value as boolean | undefined));
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._loop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLoopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._duration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._duration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDurationAttribute((this._duration_0_0value as number | undefined));
+                    this._duration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._duration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._duration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDurationAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setVerticalAttribute((this._vertical_0_0value as boolean | undefined));
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setVerticalAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._itemSpace_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._itemSpace_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setItemSpaceAttribute((this._itemSpace_0_0value as number | string | undefined));
+                    this._itemSpace_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._itemSpace_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._itemSpace_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setItemSpaceAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._displayMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._displayMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDisplayModeAttribute((this._displayMode_0_0value as SwiperDisplayMode | undefined));
+                    this._displayMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._displayMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._displayMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDisplayModeAttribute((undefined as SwiperDisplayMode | undefined));
+                }
+            }
+        }
+        if (this._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cachedCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCachedCount0Attribute((this._cachedCount_0_0value as number | undefined));
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCachedCount0Attribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._effectMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._effectMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEffectModeAttribute((this._effectMode_0_0value as EdgeEffect | undefined));
+                    this._effectMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._effectMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._effectMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEffectModeAttribute((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (this._disableSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._disableSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDisableSwipeAttribute((this._disableSwipe_0_0value as boolean | undefined));
+                    this._disableSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._disableSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._disableSwipe_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDisableSwipeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._curve_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._curve_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCurveAttribute((this._curve_0_0value as curves.Curve | string | curves.ICurve | undefined));
+                    this._curve_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._curve_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._curve_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCurveAttribute((undefined as curves.Curve | string | curves.ICurve | undefined));
+                }
+            }
+        }
+        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: number) => void) | undefined));
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnChangeAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onSelected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: number) => void) | undefined));
+                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onSelected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnSelectedAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onUnselected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: number) => void) | undefined));
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnUnselectedAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAnimationStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAnimationStartAttribute((this._onAnimationStart_0_0value as OnSwiperAnimationStartCallback | undefined));
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAnimationStartAttribute((undefined as OnSwiperAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (this._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onAnimationEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnAnimationEndAttribute((this._onAnimationEnd_0_0value as OnSwiperAnimationEndCallback | undefined));
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnAnimationEndAttribute((undefined as OnSwiperAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (this._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onGestureSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnGestureSwipeAttribute((this._onGestureSwipe_0_0value as OnSwiperGestureSwipeCallback | undefined));
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnGestureSwipeAttribute((undefined as OnSwiperGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as SwiperNestedScrollMode | undefined));
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNestedScrollAttribute((undefined as SwiperNestedScrollMode | undefined));
+                }
+            }
+        }
+        if (this._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._customContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCustomContentTransitionAttribute((this._customContentTransition_0_0value as SwiperContentAnimatedTransition | undefined));
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._customContentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCustomContentTransitionAttribute((undefined as SwiperContentAnimatedTransition | undefined));
+                }
+            }
+        }
+        if (this._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnContentDidScrollAttribute((this._onContentDidScroll_0_0value as ContentDidScrollCallback | undefined));
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnContentDidScrollAttribute((undefined as ContentDidScrollCallback | undefined));
+                }
+            }
+        }
+        if (this._indicatorInteractive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._indicatorInteractive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIndicatorInteractiveAttribute((this._indicatorInteractive_0_0value as boolean | undefined));
+                    this._indicatorInteractive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._indicatorInteractive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._indicatorInteractive_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIndicatorInteractiveAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pageFlipMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPageFlipModeAttribute((this._pageFlipMode_0_0value as PageFlipMode | undefined));
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPageFlipModeAttribute((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (this._onContentWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onContentWillScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnContentWillScrollAttribute((this._onContentWillScroll_0_0value as ContentWillScrollCallback | undefined));
+                    this._onContentWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onContentWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onContentWillScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnContentWillScrollAttribute((undefined as ContentWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (this._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoPlayAttribute((this._autoPlay_0_0value as boolean | undefined), (this._autoPlay_0_1value as AutoPlayOptions | undefined));
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoPlay_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoPlayAttribute((undefined as boolean | undefined), (undefined as AutoPlayOptions | undefined));
+                }
+            }
+        }
+        if (this._displayArrow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._displayArrow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDisplayArrowAttribute((this._displayArrow_0_0value as ArrowStyle | boolean | undefined), (this._displayArrow_0_1value as boolean | undefined));
+                    this._displayArrow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._displayArrow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._displayArrow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDisplayArrowAttribute((undefined as ArrowStyle | boolean | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (this._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._cachedCount_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as number | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCachedCount1Attribute((undefined as number | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._displayCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._displayCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDisplayCountAttribute((this._displayCount_0_0value as number | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined));
+                    this._displayCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._displayCount_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._displayCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDisplayCountAttribute((undefined as number | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (this._prevMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._prevMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPrevMarginAttribute((this._prevMargin_0_0value as Length | undefined), (this._prevMargin_0_1value as boolean | undefined));
+                    this._prevMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._prevMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._prevMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPrevMarginAttribute((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (this._nextMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._nextMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNextMarginAttribute((this._nextMargin_0_0value as Length | undefined), (this._nextMargin_0_1value as boolean | undefined));
+                    this._nextMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._nextMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._nextMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNextMarginAttribute((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
     }
-    public index(value: number | undefined): this {
-        this._index_flag = true
-        this._index0_value = value
+    mergeModifier(modifier: SwiperModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._index_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._index_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.index(modifier._index_0_0value);
+                    break;
+                }
+                default: {
+                    this.index((undefined as number | Bindable<number> | undefined));
+                }
+            }
+        }
+        if (modifier._interval_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._interval_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.interval(modifier._interval_0_0value);
+                    break;
+                }
+                default: {
+                    this.interval((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._indicator_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._indicator_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.indicator(modifier._indicator_0_0value);
+                    break;
+                }
+                default: {
+                    this.indicator((undefined as IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined));
+                }
+            }
+        }
+        if (modifier._loop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._loop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.loop(modifier._loop_0_0value);
+                    break;
+                }
+                default: {
+                    this.loop((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._duration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._duration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.duration(modifier._duration_0_0value);
+                    break;
+                }
+                default: {
+                    this.duration((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.vertical(modifier._vertical_0_0value);
+                    break;
+                }
+                default: {
+                    this.vertical((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._itemSpace_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._itemSpace_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.itemSpace(modifier._itemSpace_0_0value);
+                    break;
+                }
+                default: {
+                    this.itemSpace((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._displayMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._displayMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.displayMode(modifier._displayMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.displayMode((undefined as SwiperDisplayMode | undefined));
+                }
+            }
+        }
+        if (modifier._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cachedCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cachedCount(modifier._cachedCount_0_0value);
+                    break;
+                }
+                default: {
+                    this.cachedCount((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._effectMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._effectMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.effectMode(modifier._effectMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.effectMode((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (modifier._disableSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._disableSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.disableSwipe(modifier._disableSwipe_0_0value);
+                    break;
+                }
+                default: {
+                    this.disableSwipe((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._curve_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._curve_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.curve(modifier._curve_0_0value);
+                    break;
+                }
+                default: {
+                    this.curve((undefined as curves.Curve | string | curves.ICurve | undefined));
+                }
+            }
+        }
+        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onChange(modifier._onChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onSelected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onSelected(modifier._onSelected_0_0value);
+                    break;
+                }
+                default: {
+                    this.onSelected((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onUnselected_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onUnselected(modifier._onUnselected_0_0value);
+                    break;
+                }
+                default: {
+                    this.onUnselected((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAnimationStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAnimationStart(modifier._onAnimationStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAnimationStart((undefined as OnSwiperAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onAnimationEnd_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onAnimationEnd(modifier._onAnimationEnd_0_0value);
+                    break;
+                }
+                default: {
+                    this.onAnimationEnd((undefined as OnSwiperAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onGestureSwipe_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onGestureSwipe(modifier._onGestureSwipe_0_0value);
+                    break;
+                }
+                default: {
+                    this.onGestureSwipe((undefined as OnSwiperGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.nestedScroll(modifier._nestedScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.nestedScroll((undefined as SwiperNestedScrollMode | undefined));
+                }
+            }
+        }
+        if (modifier._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._customContentTransition_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.customContentTransition(modifier._customContentTransition_0_0value);
+                    break;
+                }
+                default: {
+                    this.customContentTransition((undefined as SwiperContentAnimatedTransition | undefined));
+                }
+            }
+        }
+        if (modifier._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onContentDidScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onContentDidScroll(modifier._onContentDidScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onContentDidScroll((undefined as ContentDidScrollCallback | undefined));
+                }
+            }
+        }
+        if (modifier._indicatorInteractive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._indicatorInteractive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.indicatorInteractive(modifier._indicatorInteractive_0_0value);
+                    break;
+                }
+                default: {
+                    this.indicatorInteractive((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pageFlipMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pageFlipMode(modifier._pageFlipMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.pageFlipMode((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (modifier._onContentWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onContentWillScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onContentWillScroll(modifier._onContentWillScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.onContentWillScroll((undefined as ContentWillScrollCallback | undefined));
+                }
+            }
+        }
+        if (modifier._autoPlay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoPlay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoPlay(modifier._autoPlay_0_0value, modifier._autoPlay_0_1value);
+                    break;
+                }
+                default: {
+                    this.autoPlay((undefined as boolean | undefined), (undefined as AutoPlayOptions | undefined));
+                }
+            }
+        }
+        if (modifier._displayArrow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._displayArrow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.displayArrow(modifier._displayArrow_0_0value, modifier._displayArrow_0_1value);
+                    break;
+                }
+                default: {
+                    this.displayArrow((undefined as ArrowStyle | boolean | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._cachedCount_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.cachedCount(modifier._cachedCount_1_0value, modifier._cachedCount_1_1value);
+                    break;
+                }
+                default: {
+                    this.cachedCount((undefined as number | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._displayCount_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._displayCount_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.displayCount(modifier._displayCount_0_0value, modifier._displayCount_0_1value);
+                    break;
+                }
+                default: {
+                    this.displayCount((undefined as number | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._prevMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._prevMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.prevMargin(modifier._prevMargin_0_0value, modifier._prevMargin_0_1value);
+                    break;
+                }
+                default: {
+                    this.prevMargin((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._nextMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._nextMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.nextMargin(modifier._nextMargin_0_0value, modifier._nextMargin_0_1value);
+                    break;
+                }
+                default: {
+                    this.nextMargin((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+    }
+    index(value: number | Bindable<number> | undefined): this {
+        if (((this._index_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._index_0_flag = AttributeUpdaterFlag.UPDATE
+            this._index_0_0value = value
+        } else
+        {
+            this._index_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public interval(value: number | undefined): this {
-        this._interval_flag = true
-        this._interval0_value = value
+    interval(value: number | undefined): this {
+        if (((this._interval_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._interval_0_0value) !== (value)))
+        {
+            this._interval_0_flag = AttributeUpdaterFlag.UPDATE
+            this._interval_0_0value = value
+        } else
+        {
+            this._interval_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
-        this._indicator_flag = true
-        this._indicator0_value = value
+    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
+        if (((this._indicator_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._indicator_0_flag = AttributeUpdaterFlag.UPDATE
+            this._indicator_0_0value = value
+        } else
+        {
+            this._indicator_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public loop(value: boolean | undefined): this {
-        this._loop_flag = true
-        this._loop0_value = value
+    loop(value: boolean | undefined): this {
+        if (((this._loop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._loop_0_0value) !== (value)))
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._loop_0_0value = value
+        } else
+        {
+            this._loop_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public duration(value: number | undefined): this {
-        this._duration_flag = true
-        this._duration0_value = value
+    duration(value: number | undefined): this {
+        if (((this._duration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._duration_0_0value) !== (value)))
+        {
+            this._duration_0_flag = AttributeUpdaterFlag.UPDATE
+            this._duration_0_0value = value
+        } else
+        {
+            this._duration_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public vertical(value: boolean | undefined): this {
-        this._vertical_flag = true
-        this._vertical0_value = value
+    vertical(value: boolean | undefined): this {
+        if (((this._vertical_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._vertical_0_0value) !== (value)))
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
+            this._vertical_0_0value = value
+        } else
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public itemSpace(value: number | string | undefined): this {
-        this._itemSpace_flag = true
-        this._itemSpace0_value = value
+    itemSpace(value: number | string | undefined): this {
+        if (((this._itemSpace_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._itemSpace_0_0value) !== (value)))
+        {
+            this._itemSpace_0_flag = AttributeUpdaterFlag.UPDATE
+            this._itemSpace_0_0value = value
+        } else
+        {
+            this._itemSpace_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public displayMode(value: SwiperDisplayMode | undefined): this {
-        this._displayMode_flag = true
-        this._displayMode0_value = value
+    displayMode(value: SwiperDisplayMode | undefined): this {
+        if (((this._displayMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._displayMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._displayMode_0_0value = value
+        } else
+        {
+            this._displayMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public cachedCount(count: number | undefined, isShown: boolean | undefined): this {
-        this._cachedCount_flag = true
-        this._cachedCount0_value = count
-        this._cachedCount1_value = isShown
+    cachedCount(value: number | undefined): this {
+        if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
+        {
+            this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._cachedCount_0_0value = value
+        } else
+        {
+            this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public effectMode(value: EdgeEffect | undefined): this {
-        this._effectMode_flag = true
-        this._effectMode0_value = value
+    effectMode(value: EdgeEffect | undefined): this {
+        if (((this._effectMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._effectMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._effectMode_0_0value = value
+        } else
+        {
+            this._effectMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public disableSwipe(value: boolean | undefined): this {
-        this._disableSwipe_flag = true
-        this._disableSwipe0_value = value
+    disableSwipe(value: boolean | undefined): this {
+        if (((this._disableSwipe_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._disableSwipe_0_0value) !== (value)))
+        {
+            this._disableSwipe_0_flag = AttributeUpdaterFlag.UPDATE
+            this._disableSwipe_0_0value = value
+        } else
+        {
+            this._disableSwipe_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
-        this._curve_flag = true
-        this._curve0_value = value
+    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
+        if (((this._curve_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._curve_0_flag = AttributeUpdaterFlag.UPDATE
+            this._curve_0_0value = value
+        } else
+        {
+            this._curve_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
-        this._onChange_flag = true
-        this._onChange0_value = value
+    onChange(value: ((value0: number) => void) | undefined): this {
+        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onChange_0_0value = value
+        } else
+        {
+            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onSelected(value: ((value0: number) => void) | undefined): this {
-        this._onSelected_flag = true
-        this._onSelected0_value = value
+    onSelected(value: ((value0: number) => void) | undefined): this {
+        if (((this._onSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onSelected_0_0value = value
+        } else
+        {
+            this._onSelected_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onUnselected(value: ((value0: number) => void) | undefined): this {
-        this._onUnselected_flag = true
-        this._onUnselected0_value = value
+    onUnselected(value: ((value0: number) => void) | undefined): this {
+        if (((this._onUnselected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onUnselected_0_0value = value
+        } else
+        {
+            this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
-        this._onAnimationStart_flag = true
-        this._onAnimationStart0_value = value
+    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
+        if (((this._onAnimationStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAnimationStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAnimationStart_0_0value = value
+        } else
+        {
+            this._onAnimationStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
-        this._onAnimationEnd_flag = true
-        this._onAnimationEnd0_value = value
+    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
+        if (((this._onAnimationEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onAnimationEnd_0_0value = value
+        } else
+        {
+            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
-        this._onGestureSwipe_flag = true
-        this._onGestureSwipe0_value = value
+    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
+        if (((this._onGestureSwipe_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onGestureSwipe_0_0value = value
+        } else
+        {
+            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public nestedScroll(value: SwiperNestedScrollMode | undefined): this {
-        this._nestedScroll_flag = true
-        this._nestedScroll0_value = value
+    nestedScroll(value: SwiperNestedScrollMode | undefined): this {
+        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._nestedScroll_0_0value = value
+        } else
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
-        this._customContentTransition_flag = true
-        this._customContentTransition0_value = value
+    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
+        if (((this._customContentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._customContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
+            this._customContentTransition_0_0value = value
+        } else
+        {
+            this._customContentTransition_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
-        this._onContentDidScroll_flag = true
-        this._onContentDidScroll0_value = value
+    onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
+        if (((this._onContentDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onContentDidScroll_0_0value = value
+        } else
+        {
+            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public indicatorInteractive(value: boolean | undefined): this {
-        this._indicatorInteractive_flag = true
-        this._indicatorInteractive0_value = value
+    indicatorInteractive(value: boolean | undefined): this {
+        if (((this._indicatorInteractive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._indicatorInteractive_0_0value) !== (value)))
+        {
+            this._indicatorInteractive_0_flag = AttributeUpdaterFlag.UPDATE
+            this._indicatorInteractive_0_0value = value
+        } else
+        {
+            this._indicatorInteractive_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pageFlipMode(value: PageFlipMode | undefined): this {
-        this._pageFlipMode_flag = true
-        this._pageFlipMode0_value = value
+    pageFlipMode(value: PageFlipMode | undefined): this {
+        if (((this._pageFlipMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pageFlipMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pageFlipMode_0_0value = value
+        } else
+        {
+            this._pageFlipMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
-        this._onContentWillScroll_flag = true
-        this._onContentWillScroll0_value = value
+    onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
+        if (((this._onContentWillScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onContentWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onContentWillScroll_0_0value = value
+        } else
+        {
+            this._onContentWillScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
-        this._autoPlay_flag = true
-        this._autoPlay0_value = autoPlay
-        this._autoPlay1_value = options
+    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
+        if (((this._autoPlay_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoPlay_0_0value) !== (autoPlay)) || (true))
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoPlay_0_0value = autoPlay
+            this._autoPlay_0_1value = options
+        } else
+        {
+            this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
-        this._displayArrow_flag = true
-        this._displayArrow0_value = value
-        this._displayArrow1_value = isHoverShow
+    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
+        if (((this._displayArrow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._displayArrow_0_1value) !== (isHoverShow)))
+        {
+            this._displayArrow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._displayArrow_0_0value = value
+            this._displayArrow_0_1value = isHoverShow
+        } else
+        {
+            this._displayArrow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
-        this._displayCount_flag = true
-        this._displayCount0_value = value
-        this._displayCount1_value = swipeByGroup
+    cachedCount(count: number | undefined, isShown: boolean | undefined): this {
+        if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (isShown)))
+        {
+            this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
+            this._cachedCount_1_0value = count
+            this._cachedCount_1_1value = isShown
+        } else
+        {
+            this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        this._prevMargin_flag = true
-        this._prevMargin0_value = value
-        this._prevMargin1_value = ignoreBlank
+    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+        if (((this._displayCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._displayCount_0_1value) !== (swipeByGroup)))
+        {
+            this._displayCount_0_flag = AttributeUpdaterFlag.UPDATE
+            this._displayCount_0_0value = value
+            this._displayCount_0_1value = swipeByGroup
+        } else
+        {
+            this._displayCount_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        this._nextMargin_flag = true
-        this._nextMargin0_value = value
-        this._nextMargin1_value = ignoreBlank
+    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        if (((this._prevMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._prevMargin_0_1value) !== (ignoreBlank)))
+        {
+            this._prevMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._prevMargin_0_0value = value
+            this._prevMargin_0_1value = ignoreBlank
+        } else
+        {
+            this._prevMargin_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
+    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        if (((this._nextMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._nextMargin_0_1value) !== (ignoreBlank)))
+        {
+            this._nextMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._nextMargin_0_0value = value
+            this._nextMargin_0_1value = ignoreBlank
+        } else
+        {
+            this._nextMargin_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1909,19 +2854,19 @@ export class DigitIndicator {
 export class SwiperAnimationEvent_serializer {
     public static write(buffer: SerializerBase, value: SwiperAnimationEvent): void {
         let valueSerializer : SerializerBase = buffer
-        const value_currentOffset  = value.currentOffset
-        valueSerializer.writeNumber(value_currentOffset)
-        const value_targetOffset  = value.targetOffset
-        valueSerializer.writeNumber(value_targetOffset)
-        const value_velocity  = value.velocity
-        valueSerializer.writeNumber(value_velocity)
+        const valueHolderForCurrentOffset  = value.currentOffset
+        valueSerializer.writeNumber(valueHolderForCurrentOffset)
+        const valueHolderForTargetOffset  = value.targetOffset
+        valueSerializer.writeNumber(valueHolderForTargetOffset)
+        const valueHolderForVelocity  = value.velocity
+        valueSerializer.writeNumber(valueHolderForVelocity)
     }
     public static read(buffer: DeserializerBase): SwiperAnimationEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const currentOffset_result : number = (valueDeserializer.readNumber() as number)
-        const targetOffset_result : number = (valueDeserializer.readNumber() as number)
-        const velocity_result : number = (valueDeserializer.readNumber() as number)
-        let value : SwiperAnimationEvent = ({currentOffset: currentOffset_result, targetOffset: targetOffset_result, velocity: velocity_result} as SwiperAnimationEvent)
+        const currentOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const targetOffsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        const velocityTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : SwiperAnimationEvent = ({currentOffset: currentOffsetTmpResult, targetOffset: targetOffsetTmpResult, velocity: velocityTmpResult} as SwiperAnimationEvent)
         return value
     }
 }
@@ -1939,19 +2884,19 @@ export class SwiperContentTransitionProxy_serializer {
 export class SwiperContentWillScrollResult_serializer {
     public static write(buffer: SerializerBase, value: SwiperContentWillScrollResult): void {
         let valueSerializer : SerializerBase = buffer
-        const value_currentIndex  = value.currentIndex
-        valueSerializer.writeNumber(value_currentIndex)
-        const value_comingIndex  = value.comingIndex
-        valueSerializer.writeNumber(value_comingIndex)
-        const value_offset  = value.offset
-        valueSerializer.writeNumber(value_offset)
+        const valueHolderForCurrentIndex  = value.currentIndex
+        valueSerializer.writeNumber(valueHolderForCurrentIndex)
+        const valueHolderForComingIndex  = value.comingIndex
+        valueSerializer.writeNumber(valueHolderForComingIndex)
+        const valueHolderForOffset  = value.offset
+        valueSerializer.writeNumber(valueHolderForOffset)
     }
     public static read(buffer: DeserializerBase): SwiperContentWillScrollResult {
         let valueDeserializer : DeserializerBase = buffer
-        const currentIndex_result : number = (valueDeserializer.readNumber() as number)
-        const comingIndex_result : number = (valueDeserializer.readNumber() as number)
-        const offset_result : number = (valueDeserializer.readNumber() as number)
-        let value : SwiperContentWillScrollResult = ({currentIndex: currentIndex_result, comingIndex: comingIndex_result, offset: offset_result} as SwiperContentWillScrollResult)
+        const currentIndexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const comingIndexTmpResult : number = (valueDeserializer.readNumber() as number)
+        const offsetTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : SwiperContentWillScrollResult = ({currentIndex: currentIndexTmpResult, comingIndex: comingIndexTmpResult, offset: offsetTmpResult} as SwiperContentWillScrollResult)
         return value
     }
 }
@@ -1969,618 +2914,533 @@ export class SwiperController_serializer {
 export class AutoPlayOptions_serializer {
     public static write(buffer: SerializerBase, value: AutoPlayOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_stopWhenTouched  = value.stopWhenTouched
-        valueSerializer.writeBoolean(value_stopWhenTouched)
+        const valueHolderForStopWhenTouched  = value.stopWhenTouched
+        valueSerializer.writeBoolean(valueHolderForStopWhenTouched)
     }
     public static read(buffer: DeserializerBase): AutoPlayOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const stopWhenTouched_result : boolean = valueDeserializer.readBoolean()
-        let value : AutoPlayOptions = ({stopWhenTouched: stopWhenTouched_result} as AutoPlayOptions)
+        const stopWhenTouchedTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : AutoPlayOptions = ({stopWhenTouched: stopWhenTouchedTmpResult} as AutoPlayOptions)
         return value
     }
 }
 export class SwiperAutoFill_serializer {
     public static write(buffer: SerializerBase, value: SwiperAutoFill): void {
         let valueSerializer : SerializerBase = buffer
-        const value_minSize  = value.minSize
-        let value_minSize_type : int32 = RuntimeType.UNDEFINED
-        value_minSize_type = runtimeType(value_minSize)
-        if (RuntimeType.STRING == value_minSize_type) {
+        const valueHolderForMinSize  = value.minSize
+        if (valueHolderForMinSize instanceof string) {
             valueSerializer.writeInt8((0).toChar())
-            const value_minSize_0  = value_minSize as string
-            valueSerializer.writeString(value_minSize_0)
-        }
-        else if (RuntimeType.NUMBER == value_minSize_type) {
+            const valueHolderForMinSizeForIdx0  = valueHolderForMinSize as string
+            valueSerializer.writeString(valueHolderForMinSizeForIdx0)
+        } else if (valueHolderForMinSize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_minSize_1  = value_minSize as number
-            valueSerializer.writeNumber(value_minSize_1)
+            const valueHolderForMinSizeForIdx1  = valueHolderForMinSize as number
+            valueSerializer.writeNumber(valueHolderForMinSizeForIdx1)
         }
     }
     public static read(buffer: DeserializerBase): SwiperAutoFill {
         let valueDeserializer : DeserializerBase = buffer
-        const minSize_buf_selector : int32 = valueDeserializer.readInt8()
-        let minSize_buf : string | number | undefined
-        if (minSize_buf_selector == (0).toChar()) {
-            minSize_buf = (valueDeserializer.readString() as string)
+        const minSizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let minSizeTmpBuf : string | number | undefined
+        if (minSizeTmpBufUnionSelector == (0).toChar()) {
+            minSizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (minSizeTmpBufUnionSelector == (1).toChar()) {
+            minSizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else {
+            throw new Error("One of the branches for minSizeTmpBuf has to be chosen through deserialisation.")
         }
-        else if (minSize_buf_selector == (1).toChar()) {
-            minSize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else {
-            throw new Error("One of the branches for minSize_buf has to be chosen through deserialisation.")
-        }
-        const minSize_result : VP = (minSize_buf as string | number)
-        let value : SwiperAutoFill = ({minSize: minSize_result} as SwiperAutoFill)
+        const minSizeTmpResult : VP = (minSizeTmpBuf as string | number)
+        let value : SwiperAutoFill = ({minSize: minSizeTmpResult} as SwiperAutoFill)
         return value
     }
 }
 export class SwiperContentAnimatedTransition_serializer {
     public static write(buffer: SerializerBase, value: SwiperContentAnimatedTransition): void {
         let valueSerializer : SerializerBase = buffer
-        const value_timeout  = value.timeout
-        let value_timeout_type : int32 = RuntimeType.UNDEFINED
-        value_timeout_type = runtimeType(value_timeout)
-        valueSerializer.writeInt8((value_timeout_type).toChar())
-        if ((value_timeout_type) != (RuntimeType.UNDEFINED)) {
-            const value_timeout_value  = value_timeout!
-            valueSerializer.writeNumber(value_timeout_value)
+        const valueHolderForTimeout  = value.timeout
+        if (valueHolderForTimeout !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTimeoutTmpValue  = valueHolderForTimeout!
+            valueSerializer.writeNumber(valueHolderForTimeoutTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_transition  = value.transition
-        valueSerializer.holdAndWriteCallback(value_transition)
+        const valueHolderForTransition  = value.transition
+        valueSerializer.holdAndWriteCallback(valueHolderForTransition)
     }
     public static read(buffer: DeserializerBase): SwiperContentAnimatedTransition {
         let valueDeserializer : DeserializerBase = buffer
-        const timeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let timeout_buf : number | undefined
-        if ((timeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            timeout_buf = (valueDeserializer.readNumber() as number)
+        const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let timeoutTmpBuf : number | undefined
+        if ((timeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            timeoutTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const timeout_result : number | undefined = timeout_buf
-        const transition_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const transition_buf_call : KPointer = valueDeserializer.readPointer()
-        const transition_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const transition_result : ((value0: SwiperContentTransitionProxy) => void) = (value0: SwiperContentTransitionProxy):void => { 
-    const transition_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    transition_buf_argsSerializer.writeInt32(transition_buf_resource.resourceId);
-    transition_buf_argsSerializer.writePointer(transition_buf_call);
-    transition_buf_argsSerializer.writePointer(transition_buf_callSync);
-    SwiperContentTransitionProxy_serializer.write(transition_buf_argsSerializer, value0);
-    InteropNativeModule._CallCallback(-416053361, transition_buf_argsSerializer.asBuffer(), transition_buf_argsSerializer.length());
-    transition_buf_argsSerializer.release();
-    return; }
-        let value : SwiperContentAnimatedTransition = ({timeout: timeout_result, transition: transition_result} as SwiperContentAnimatedTransition)
+        const timeoutTmpResult : number | undefined = timeoutTmpBuf
+        const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = (value0: SwiperContentTransitionProxy):void => {
+            const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
+            transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
+            SwiperContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, value0);
+            InteropNativeModule._CallCallback(-416053361, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            transitionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        let value : SwiperContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as SwiperContentAnimatedTransition)
         return value
     }
 }
 export class ArrowStyle_serializer {
     public static write(buffer: SerializerBase, value: ArrowStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_showBackground  = value.showBackground
-        let value_showBackground_type : int32 = RuntimeType.UNDEFINED
-        value_showBackground_type = runtimeType(value_showBackground)
-        valueSerializer.writeInt8((value_showBackground_type).toChar())
-        if ((value_showBackground_type) != (RuntimeType.UNDEFINED)) {
-            const value_showBackground_value  = value_showBackground!
-            valueSerializer.writeBoolean(value_showBackground_value)
+        const valueHolderForShowBackground  = value.showBackground
+        if (valueHolderForShowBackground !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowBackgroundTmpValue  = valueHolderForShowBackground!
+            valueSerializer.writeBoolean(valueHolderForShowBackgroundTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_isSidebarMiddle  = value.isSidebarMiddle
-        let value_isSidebarMiddle_type : int32 = RuntimeType.UNDEFINED
-        value_isSidebarMiddle_type = runtimeType(value_isSidebarMiddle)
-        valueSerializer.writeInt8((value_isSidebarMiddle_type).toChar())
-        if ((value_isSidebarMiddle_type) != (RuntimeType.UNDEFINED)) {
-            const value_isSidebarMiddle_value  = value_isSidebarMiddle!
-            valueSerializer.writeBoolean(value_isSidebarMiddle_value)
+        const valueHolderForIsSidebarMiddle  = value.isSidebarMiddle
+        if (valueHolderForIsSidebarMiddle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsSidebarMiddleTmpValue  = valueHolderForIsSidebarMiddle!
+            valueSerializer.writeBoolean(valueHolderForIsSidebarMiddleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundSize  = value.backgroundSize
-        let value_backgroundSize_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundSize_type = runtimeType(value_backgroundSize)
-        valueSerializer.writeInt8((value_backgroundSize_type).toChar())
-        if ((value_backgroundSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundSize_value  = value_backgroundSize!
-            let value_backgroundSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundSize_value_type = runtimeType(value_backgroundSize_value)
-            if (RuntimeType.STRING == value_backgroundSize_value_type) {
+        const valueHolderForBackgroundSize  = value.backgroundSize
+        if (valueHolderForBackgroundSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundSizeTmpValue  = valueHolderForBackgroundSize!
+            if (valueHolderForBackgroundSizeTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_backgroundSize_value_0  = value_backgroundSize_value as string
-                valueSerializer.writeString(value_backgroundSize_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_backgroundSize_value_type) {
+                const valueHolderForBackgroundSizeTmpValueForIdx0  = valueHolderForBackgroundSizeTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundSizeTmpValueForIdx0)
+            } else if (valueHolderForBackgroundSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_backgroundSize_value_1  = value_backgroundSize_value as number
-                valueSerializer.writeNumber(value_backgroundSize_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundSize_value_type) {
+                const valueHolderForBackgroundSizeTmpValueForIdx1  = valueHolderForBackgroundSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBackgroundSizeTmpValueForIdx1)
+            } else if (valueHolderForBackgroundSizeTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_backgroundSize_value_2  = value_backgroundSize_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundSize_value_2)
+                const valueHolderForBackgroundSizeTmpValueForIdx2  = valueHolderForBackgroundSizeTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundSizeTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
+        const valueHolderForBackgroundColor  = value.backgroundColor
+        if (valueHolderForBackgroundColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
+            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundColorTmpValueForIdx0))
+            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
+                valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
+            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_arrowSize  = value.arrowSize
-        let value_arrowSize_type : int32 = RuntimeType.UNDEFINED
-        value_arrowSize_type = runtimeType(value_arrowSize)
-        valueSerializer.writeInt8((value_arrowSize_type).toChar())
-        if ((value_arrowSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowSize_value  = value_arrowSize!
-            let value_arrowSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowSize_value_type = runtimeType(value_arrowSize_value)
-            if (RuntimeType.STRING == value_arrowSize_value_type) {
+        const valueHolderForArrowSize  = value.arrowSize
+        if (valueHolderForArrowSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForArrowSizeTmpValue  = valueHolderForArrowSize!
+            if (valueHolderForArrowSizeTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_arrowSize_value_0  = value_arrowSize_value as string
-                valueSerializer.writeString(value_arrowSize_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowSize_value_type) {
+                const valueHolderForArrowSizeTmpValueForIdx0  = valueHolderForArrowSizeTmpValue as string
+                valueSerializer.writeString(valueHolderForArrowSizeTmpValueForIdx0)
+            } else if (valueHolderForArrowSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_arrowSize_value_1  = value_arrowSize_value as number
-                valueSerializer.writeNumber(value_arrowSize_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowSize_value_type) {
+                const valueHolderForArrowSizeTmpValueForIdx1  = valueHolderForArrowSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForArrowSizeTmpValueForIdx1)
+            } else if (valueHolderForArrowSizeTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_arrowSize_value_2  = value_arrowSize_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowSize_value_2)
+                const valueHolderForArrowSizeTmpValueForIdx2  = valueHolderForArrowSizeTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForArrowSizeTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_arrowColor  = value.arrowColor
-        let value_arrowColor_type : int32 = RuntimeType.UNDEFINED
-        value_arrowColor_type = runtimeType(value_arrowColor)
-        valueSerializer.writeInt8((value_arrowColor_type).toChar())
-        if ((value_arrowColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowColor_value  = value_arrowColor!
-            let value_arrowColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowColor_value_type = runtimeType(value_arrowColor_value)
-            if (TypeChecker.isColor(value_arrowColor_value)) {
+        const valueHolderForArrowColor  = value.arrowColor
+        if (valueHolderForArrowColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForArrowColorTmpValue  = valueHolderForArrowColor!
+            if (valueHolderForArrowColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_arrowColor_value_0  = value_arrowColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_arrowColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_arrowColor_value_type) {
+                const valueHolderForArrowColorTmpValueForIdx0  = valueHolderForArrowColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForArrowColorTmpValueForIdx0))
+            } else if (valueHolderForArrowColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_arrowColor_value_1  = value_arrowColor_value as number
-                valueSerializer.writeNumber(value_arrowColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_arrowColor_value_type) {
+                const valueHolderForArrowColorTmpValueForIdx1  = valueHolderForArrowColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForArrowColorTmpValueForIdx1)
+            } else if (valueHolderForArrowColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_arrowColor_value_2  = value_arrowColor_value as string
-                valueSerializer.writeString(value_arrowColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_arrowColor_value_type) {
+                const valueHolderForArrowColorTmpValueForIdx2  = valueHolderForArrowColorTmpValue as string
+                valueSerializer.writeString(valueHolderForArrowColorTmpValueForIdx2)
+            } else if (valueHolderForArrowColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_arrowColor_value_3  = value_arrowColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowColor_value_3)
+                const valueHolderForArrowColorTmpValueForIdx3  = valueHolderForArrowColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForArrowColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ArrowStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const showBackground_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showBackground_buf : boolean | undefined
-        if ((showBackground_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showBackground_buf = valueDeserializer.readBoolean()
+        const showBackgroundTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showBackgroundTmpBuf : boolean | undefined
+        if ((showBackgroundTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showBackgroundTmpBuf = valueDeserializer.readBoolean()
         }
-        const showBackground_result : boolean | undefined = showBackground_buf
-        const isSidebarMiddle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let isSidebarMiddle_buf : boolean | undefined
-        if ((isSidebarMiddle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            isSidebarMiddle_buf = valueDeserializer.readBoolean()
+        const showBackgroundTmpResult : boolean | undefined = showBackgroundTmpBuf
+        const isSidebarMiddleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isSidebarMiddleTmpBuf : boolean | undefined
+        if ((isSidebarMiddleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isSidebarMiddleTmpBuf = valueDeserializer.readBoolean()
         }
-        const isSidebarMiddle_result : boolean | undefined = isSidebarMiddle_buf
-        const backgroundSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundSize_buf : Length | undefined
-        if ((backgroundSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundSize_buf_ : string | number | Resource | undefined
-            if (backgroundSize_buf__selector == (0).toChar()) {
-                backgroundSize_buf_ = (valueDeserializer.readString() as string)
+        const isSidebarMiddleTmpResult : boolean | undefined = isSidebarMiddleTmpBuf
+        const backgroundSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundSizeTmpBuf : Length | undefined
+        if ((backgroundSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundSizeTmpBuf_ : string | number | Resource | undefined
+            if (backgroundSizeTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundSizeTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundSizeTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (backgroundSizeTmpBuf_UnionSelector == (2).toChar()) {
+                backgroundSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (backgroundSize_buf__selector == (1).toChar()) {
-                backgroundSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundSize_buf__selector == (2).toChar()) {
-                backgroundSize_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundSize_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundSize_buf = (backgroundSize_buf_ as string | number | Resource)
+            backgroundSizeTmpBuf = (backgroundSizeTmpBuf_ as string | number | Resource)
         }
-        const backgroundSize_result : Length | undefined = backgroundSize_buf
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const backgroundSizeTmpResult : Length | undefined = backgroundSizeTmpBuf
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColorTmpBuf : ResourceColor | undefined
+        if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
+                backgroundColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
+                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
+                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | number | string | Resource)
         }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const arrowSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowSize_buf : Length | undefined
-        if ((arrowSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowSize_buf_ : string | number | Resource | undefined
-            if (arrowSize_buf__selector == (0).toChar()) {
-                arrowSize_buf_ = (valueDeserializer.readString() as string)
+        const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
+        const arrowSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowSizeTmpBuf : Length | undefined
+        if ((arrowSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const arrowSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let arrowSizeTmpBuf_ : string | number | Resource | undefined
+            if (arrowSizeTmpBuf_UnionSelector == (0).toChar()) {
+                arrowSizeTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (arrowSizeTmpBuf_UnionSelector == (1).toChar()) {
+                arrowSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (arrowSizeTmpBuf_UnionSelector == (2).toChar()) {
+                arrowSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for arrowSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (arrowSize_buf__selector == (1).toChar()) {
-                arrowSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowSize_buf__selector == (2).toChar()) {
-                arrowSize_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowSize_buf_ has to be chosen through deserialisation.")
-            }
-            arrowSize_buf = (arrowSize_buf_ as string | number | Resource)
+            arrowSizeTmpBuf = (arrowSizeTmpBuf_ as string | number | Resource)
         }
-        const arrowSize_result : Length | undefined = arrowSize_buf
-        const arrowColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowColor_buf : ResourceColor | undefined
-        if ((arrowColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowColor_buf_ : Color | number | string | Resource | undefined
-            if (arrowColor_buf__selector == (0).toChar()) {
-                arrowColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const arrowSizeTmpResult : Length | undefined = arrowSizeTmpBuf
+        const arrowColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowColorTmpBuf : ResourceColor | undefined
+        if ((arrowColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const arrowColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let arrowColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (arrowColorTmpBuf_UnionSelector == (0).toChar()) {
+                arrowColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (arrowColorTmpBuf_UnionSelector == (1).toChar()) {
+                arrowColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (arrowColorTmpBuf_UnionSelector == (2).toChar()) {
+                arrowColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (arrowColorTmpBuf_UnionSelector == (3).toChar()) {
+                arrowColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for arrowColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (arrowColor_buf__selector == (1).toChar()) {
-                arrowColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowColor_buf__selector == (2).toChar()) {
-                arrowColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowColor_buf__selector == (3).toChar()) {
-                arrowColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowColor_buf_ has to be chosen through deserialisation.")
-            }
-            arrowColor_buf = (arrowColor_buf_ as Color | number | string | Resource)
+            arrowColorTmpBuf = (arrowColorTmpBuf_ as Color | number | string | Resource)
         }
-        const arrowColor_result : ResourceColor | undefined = arrowColor_buf
-        let value : ArrowStyle = ({showBackground: showBackground_result, isSidebarMiddle: isSidebarMiddle_result, backgroundSize: backgroundSize_result, backgroundColor: backgroundColor_result, arrowSize: arrowSize_result, arrowColor: arrowColor_result} as ArrowStyle)
+        const arrowColorTmpResult : ResourceColor | undefined = arrowColorTmpBuf
+        let value : ArrowStyle = ({showBackground: showBackgroundTmpResult, isSidebarMiddle: isSidebarMiddleTmpResult, backgroundSize: backgroundSizeTmpResult, backgroundColor: backgroundColorTmpResult, arrowSize: arrowSizeTmpResult, arrowColor: arrowColorTmpResult} as ArrowStyle)
         return value
     }
 }
 export class DotIndicator_serializer {
     public static write(buffer: SerializerBase, value: DotIndicator): void {
         let valueSerializer : SerializerBase = buffer
-        const value__left  = value._left
-        let value__left_type : int32 = RuntimeType.UNDEFINED
-        value__left_type = runtimeType(value__left)
-        valueSerializer.writeInt8((value__left_type).toChar())
-        if ((value__left_type) != (RuntimeType.UNDEFINED)) {
-            const value__left_value  = value__left!
-            let value__left_value_type : int32 = RuntimeType.UNDEFINED
-            value__left_value_type = runtimeType(value__left_value)
-            if (RuntimeType.STRING == value__left_value_type) {
+        const valueHolderFor_left  = value._left
+        if (valueHolderFor_left !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_leftTmpValue  = valueHolderFor_left!
+            if (valueHolderFor_leftTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__left_value_0  = value__left_value as string
-                valueSerializer.writeString(value__left_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__left_value_type) {
+                const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
+                valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
+            } else if (valueHolderFor_leftTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__left_value_1  = value__left_value as number
-                valueSerializer.writeNumber(value__left_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__left_value_type) {
+                const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_leftTmpValueForIdx1)
+            } else if (valueHolderFor_leftTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__left_value_2  = value__left_value as Resource
-                Resource_serializer.write(valueSerializer, value__left_value_2)
+                const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__top  = value._top
-        let value__top_type : int32 = RuntimeType.UNDEFINED
-        value__top_type = runtimeType(value__top)
-        valueSerializer.writeInt8((value__top_type).toChar())
-        if ((value__top_type) != (RuntimeType.UNDEFINED)) {
-            const value__top_value  = value__top!
-            let value__top_value_type : int32 = RuntimeType.UNDEFINED
-            value__top_value_type = runtimeType(value__top_value)
-            if (RuntimeType.STRING == value__top_value_type) {
+        const valueHolderFor_top  = value._top
+        if (valueHolderFor_top !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_topTmpValue  = valueHolderFor_top!
+            if (valueHolderFor_topTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__top_value_0  = value__top_value as string
-                valueSerializer.writeString(value__top_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__top_value_type) {
+                const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
+                valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
+            } else if (valueHolderFor_topTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__top_value_1  = value__top_value as number
-                valueSerializer.writeNumber(value__top_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__top_value_type) {
+                const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_topTmpValueForIdx1)
+            } else if (valueHolderFor_topTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__top_value_2  = value__top_value as Resource
-                Resource_serializer.write(valueSerializer, value__top_value_2)
+                const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__right  = value._right
-        let value__right_type : int32 = RuntimeType.UNDEFINED
-        value__right_type = runtimeType(value__right)
-        valueSerializer.writeInt8((value__right_type).toChar())
-        if ((value__right_type) != (RuntimeType.UNDEFINED)) {
-            const value__right_value  = value__right!
-            let value__right_value_type : int32 = RuntimeType.UNDEFINED
-            value__right_value_type = runtimeType(value__right_value)
-            if (RuntimeType.STRING == value__right_value_type) {
+        const valueHolderFor_right  = value._right
+        if (valueHolderFor_right !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_rightTmpValue  = valueHolderFor_right!
+            if (valueHolderFor_rightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__right_value_0  = value__right_value as string
-                valueSerializer.writeString(value__right_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__right_value_type) {
+                const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
+                valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
+            } else if (valueHolderFor_rightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__right_value_1  = value__right_value as number
-                valueSerializer.writeNumber(value__right_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__right_value_type) {
+                const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_rightTmpValueForIdx1)
+            } else if (valueHolderFor_rightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__right_value_2  = value__right_value as Resource
-                Resource_serializer.write(valueSerializer, value__right_value_2)
+                const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__bottom  = value._bottom
-        let value__bottom_type : int32 = RuntimeType.UNDEFINED
-        value__bottom_type = runtimeType(value__bottom)
-        valueSerializer.writeInt8((value__bottom_type).toChar())
-        if ((value__bottom_type) != (RuntimeType.UNDEFINED)) {
-            const value__bottom_value  = value__bottom!
-            let value__bottom_value_type : int32 = RuntimeType.UNDEFINED
-            value__bottom_value_type = runtimeType(value__bottom_value)
-            if (RuntimeType.STRING == value__bottom_value_type) {
+        const valueHolderFor_bottom  = value._bottom
+        if (valueHolderFor_bottom !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
+            if (valueHolderFor_bottomTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__bottom_value_0  = value__bottom_value as string
-                valueSerializer.writeString(value__bottom_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__bottom_value_type) {
+                const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
+                valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
+            } else if (valueHolderFor_bottomTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__bottom_value_1  = value__bottom_value as number
-                valueSerializer.writeNumber(value__bottom_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__bottom_value_type) {
+                const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_bottomTmpValueForIdx1)
+            } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__bottom_value_2  = value__bottom_value as Resource
-                Resource_serializer.write(valueSerializer, value__bottom_value_2)
+                const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__start  = value._start
-        let value__start_type : int32 = RuntimeType.UNDEFINED
-        value__start_type = runtimeType(value__start)
-        valueSerializer.writeInt8((value__start_type).toChar())
-        if ((value__start_type) != (RuntimeType.UNDEFINED)) {
-            const value__start_value  = value__start!
-            LengthMetrics_serializer.write(valueSerializer, value__start_value)
+        const valueHolderFor_start  = value._start
+        if (valueHolderFor_start !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_startTmpValue  = valueHolderFor_start!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_startTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__end  = value._end
-        let value__end_type : int32 = RuntimeType.UNDEFINED
-        value__end_type = runtimeType(value__end)
-        valueSerializer.writeInt8((value__end_type).toChar())
-        if ((value__end_type) != (RuntimeType.UNDEFINED)) {
-            const value__end_value  = value__end!
-            LengthMetrics_serializer.write(valueSerializer, value__end_value)
+        const valueHolderFor_end  = value._end
+        if (valueHolderFor_end !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_endTmpValue  = valueHolderFor_end!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_endTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__itemWidth  = value._itemWidth
-        let value__itemWidth_type : int32 = RuntimeType.UNDEFINED
-        value__itemWidth_type = runtimeType(value__itemWidth)
-        valueSerializer.writeInt8((value__itemWidth_type).toChar())
-        if ((value__itemWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value__itemWidth_value  = value__itemWidth!
-            let value__itemWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value__itemWidth_value_type = runtimeType(value__itemWidth_value)
-            if (RuntimeType.STRING == value__itemWidth_value_type) {
+        const valueHolderFor_itemWidth  = value._itemWidth
+        if (valueHolderFor_itemWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_itemWidthTmpValue  = valueHolderFor_itemWidth!
+            if (valueHolderFor_itemWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__itemWidth_value_0  = value__itemWidth_value as string
-                valueSerializer.writeString(value__itemWidth_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__itemWidth_value_type) {
+                const valueHolderFor_itemWidthTmpValueForIdx0  = valueHolderFor_itemWidthTmpValue as string
+                valueSerializer.writeString(valueHolderFor_itemWidthTmpValueForIdx0)
+            } else if (valueHolderFor_itemWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__itemWidth_value_1  = value__itemWidth_value as number
-                valueSerializer.writeNumber(value__itemWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__itemWidth_value_type) {
+                const valueHolderFor_itemWidthTmpValueForIdx1  = valueHolderFor_itemWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_itemWidthTmpValueForIdx1)
+            } else if (valueHolderFor_itemWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__itemWidth_value_2  = value__itemWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value__itemWidth_value_2)
+                const valueHolderFor_itemWidthTmpValueForIdx2  = valueHolderFor_itemWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_itemWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__itemHeight  = value._itemHeight
-        let value__itemHeight_type : int32 = RuntimeType.UNDEFINED
-        value__itemHeight_type = runtimeType(value__itemHeight)
-        valueSerializer.writeInt8((value__itemHeight_type).toChar())
-        if ((value__itemHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value__itemHeight_value  = value__itemHeight!
-            let value__itemHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value__itemHeight_value_type = runtimeType(value__itemHeight_value)
-            if (RuntimeType.STRING == value__itemHeight_value_type) {
+        const valueHolderFor_itemHeight  = value._itemHeight
+        if (valueHolderFor_itemHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_itemHeightTmpValue  = valueHolderFor_itemHeight!
+            if (valueHolderFor_itemHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__itemHeight_value_0  = value__itemHeight_value as string
-                valueSerializer.writeString(value__itemHeight_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__itemHeight_value_type) {
+                const valueHolderFor_itemHeightTmpValueForIdx0  = valueHolderFor_itemHeightTmpValue as string
+                valueSerializer.writeString(valueHolderFor_itemHeightTmpValueForIdx0)
+            } else if (valueHolderFor_itemHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__itemHeight_value_1  = value__itemHeight_value as number
-                valueSerializer.writeNumber(value__itemHeight_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__itemHeight_value_type) {
+                const valueHolderFor_itemHeightTmpValueForIdx1  = valueHolderFor_itemHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_itemHeightTmpValueForIdx1)
+            } else if (valueHolderFor_itemHeightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__itemHeight_value_2  = value__itemHeight_value as Resource
-                Resource_serializer.write(valueSerializer, value__itemHeight_value_2)
+                const valueHolderFor_itemHeightTmpValueForIdx2  = valueHolderFor_itemHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_itemHeightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedItemWidth  = value._selectedItemWidth
-        let value__selectedItemWidth_type : int32 = RuntimeType.UNDEFINED
-        value__selectedItemWidth_type = runtimeType(value__selectedItemWidth)
-        valueSerializer.writeInt8((value__selectedItemWidth_type).toChar())
-        if ((value__selectedItemWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedItemWidth_value  = value__selectedItemWidth!
-            let value__selectedItemWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value__selectedItemWidth_value_type = runtimeType(value__selectedItemWidth_value)
-            if (RuntimeType.STRING == value__selectedItemWidth_value_type) {
+        const valueHolderFor_selectedItemWidth  = value._selectedItemWidth
+        if (valueHolderFor_selectedItemWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedItemWidthTmpValue  = valueHolderFor_selectedItemWidth!
+            if (valueHolderFor_selectedItemWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__selectedItemWidth_value_0  = value__selectedItemWidth_value as string
-                valueSerializer.writeString(value__selectedItemWidth_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__selectedItemWidth_value_type) {
+                const valueHolderFor_selectedItemWidthTmpValueForIdx0  = valueHolderFor_selectedItemWidthTmpValue as string
+                valueSerializer.writeString(valueHolderFor_selectedItemWidthTmpValueForIdx0)
+            } else if (valueHolderFor_selectedItemWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__selectedItemWidth_value_1  = value__selectedItemWidth_value as number
-                valueSerializer.writeNumber(value__selectedItemWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__selectedItemWidth_value_type) {
+                const valueHolderFor_selectedItemWidthTmpValueForIdx1  = valueHolderFor_selectedItemWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_selectedItemWidthTmpValueForIdx1)
+            } else if (valueHolderFor_selectedItemWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__selectedItemWidth_value_2  = value__selectedItemWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value__selectedItemWidth_value_2)
+                const valueHolderFor_selectedItemWidthTmpValueForIdx2  = valueHolderFor_selectedItemWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedItemHeight  = value._selectedItemHeight
-        let value__selectedItemHeight_type : int32 = RuntimeType.UNDEFINED
-        value__selectedItemHeight_type = runtimeType(value__selectedItemHeight)
-        valueSerializer.writeInt8((value__selectedItemHeight_type).toChar())
-        if ((value__selectedItemHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedItemHeight_value  = value__selectedItemHeight!
-            let value__selectedItemHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value__selectedItemHeight_value_type = runtimeType(value__selectedItemHeight_value)
-            if (RuntimeType.STRING == value__selectedItemHeight_value_type) {
+        const valueHolderFor_selectedItemHeight  = value._selectedItemHeight
+        if (valueHolderFor_selectedItemHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedItemHeightTmpValue  = valueHolderFor_selectedItemHeight!
+            if (valueHolderFor_selectedItemHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__selectedItemHeight_value_0  = value__selectedItemHeight_value as string
-                valueSerializer.writeString(value__selectedItemHeight_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__selectedItemHeight_value_type) {
+                const valueHolderFor_selectedItemHeightTmpValueForIdx0  = valueHolderFor_selectedItemHeightTmpValue as string
+                valueSerializer.writeString(valueHolderFor_selectedItemHeightTmpValueForIdx0)
+            } else if (valueHolderFor_selectedItemHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__selectedItemHeight_value_1  = value__selectedItemHeight_value as number
-                valueSerializer.writeNumber(value__selectedItemHeight_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__selectedItemHeight_value_type) {
+                const valueHolderFor_selectedItemHeightTmpValueForIdx1  = valueHolderFor_selectedItemHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_selectedItemHeightTmpValueForIdx1)
+            } else if (valueHolderFor_selectedItemHeightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__selectedItemHeight_value_2  = value__selectedItemHeight_value as Resource
-                Resource_serializer.write(valueSerializer, value__selectedItemHeight_value_2)
+                const valueHolderFor_selectedItemHeightTmpValueForIdx2  = valueHolderFor_selectedItemHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemHeightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__mask  = value._mask
-        let value__mask_type : int32 = RuntimeType.UNDEFINED
-        value__mask_type = runtimeType(value__mask)
-        valueSerializer.writeInt8((value__mask_type).toChar())
-        if ((value__mask_type) != (RuntimeType.UNDEFINED)) {
-            const value__mask_value  = value__mask!
-            valueSerializer.writeBoolean(value__mask_value)
+        const valueHolderFor_mask  = value._mask
+        if (valueHolderFor_mask !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_maskTmpValue  = valueHolderFor_mask!
+            valueSerializer.writeBoolean(valueHolderFor_maskTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__color  = value._color
-        let value__color_type : int32 = RuntimeType.UNDEFINED
-        value__color_type = runtimeType(value__color)
-        valueSerializer.writeInt8((value__color_type).toChar())
-        if ((value__color_type) != (RuntimeType.UNDEFINED)) {
-            const value__color_value  = value__color!
-            let value__color_value_type : int32 = RuntimeType.UNDEFINED
-            value__color_value_type = runtimeType(value__color_value)
-            if (TypeChecker.isColor(value__color_value)) {
+        const valueHolderFor_color  = value._color
+        if (valueHolderFor_color !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_colorTmpValue  = valueHolderFor_color!
+            if (valueHolderFor_colorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__color_value_0  = value__color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value__color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value__color_value_type) {
+                const valueHolderFor_colorTmpValueForIdx0  = valueHolderFor_colorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderFor_colorTmpValueForIdx0))
+            } else if (valueHolderFor_colorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__color_value_1  = value__color_value as number
-                valueSerializer.writeNumber(value__color_value_1)
-            }
-            else if (RuntimeType.STRING == value__color_value_type) {
+                const valueHolderFor_colorTmpValueForIdx1  = valueHolderFor_colorTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_colorTmpValueForIdx1)
+            } else if (valueHolderFor_colorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__color_value_2  = value__color_value as string
-                valueSerializer.writeString(value__color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value__color_value_type) {
+                const valueHolderFor_colorTmpValueForIdx2  = valueHolderFor_colorTmpValue as string
+                valueSerializer.writeString(valueHolderFor_colorTmpValueForIdx2)
+            } else if (valueHolderFor_colorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value__color_value_3  = value__color_value as Resource
-                Resource_serializer.write(valueSerializer, value__color_value_3)
+                const valueHolderFor_colorTmpValueForIdx3  = valueHolderFor_colorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_colorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedColor  = value._selectedColor
-        let value__selectedColor_type : int32 = RuntimeType.UNDEFINED
-        value__selectedColor_type = runtimeType(value__selectedColor)
-        valueSerializer.writeInt8((value__selectedColor_type).toChar())
-        if ((value__selectedColor_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedColor_value  = value__selectedColor!
-            let value__selectedColor_value_type : int32 = RuntimeType.UNDEFINED
-            value__selectedColor_value_type = runtimeType(value__selectedColor_value)
-            if (TypeChecker.isColor(value__selectedColor_value)) {
+        const valueHolderFor_selectedColor  = value._selectedColor
+        if (valueHolderFor_selectedColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedColorTmpValue  = valueHolderFor_selectedColor!
+            if (valueHolderFor_selectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__selectedColor_value_0  = value__selectedColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value__selectedColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value__selectedColor_value_type) {
+                const valueHolderFor_selectedColorTmpValueForIdx0  = valueHolderFor_selectedColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderFor_selectedColorTmpValueForIdx0))
+            } else if (valueHolderFor_selectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__selectedColor_value_1  = value__selectedColor_value as number
-                valueSerializer.writeNumber(value__selectedColor_value_1)
-            }
-            else if (RuntimeType.STRING == value__selectedColor_value_type) {
+                const valueHolderFor_selectedColorTmpValueForIdx1  = valueHolderFor_selectedColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_selectedColorTmpValueForIdx1)
+            } else if (valueHolderFor_selectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__selectedColor_value_2  = value__selectedColor_value as string
-                valueSerializer.writeString(value__selectedColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value__selectedColor_value_type) {
+                const valueHolderFor_selectedColorTmpValueForIdx2  = valueHolderFor_selectedColorTmpValue as string
+                valueSerializer.writeString(valueHolderFor_selectedColorTmpValueForIdx2)
+            } else if (valueHolderFor_selectedColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value__selectedColor_value_3  = value__selectedColor_value as Resource
-                Resource_serializer.write(valueSerializer, value__selectedColor_value_3)
+                const valueHolderFor_selectedColorTmpValueForIdx3  = valueHolderFor_selectedColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_selectedColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__maxDisplayCount  = value._maxDisplayCount
-        let value__maxDisplayCount_type : int32 = RuntimeType.UNDEFINED
-        value__maxDisplayCount_type = runtimeType(value__maxDisplayCount)
-        valueSerializer.writeInt8((value__maxDisplayCount_type).toChar())
-        if ((value__maxDisplayCount_type) != (RuntimeType.UNDEFINED)) {
-            const value__maxDisplayCount_value  = value__maxDisplayCount!
-            valueSerializer.writeNumber(value__maxDisplayCount_value)
+        const valueHolderFor_maxDisplayCount  = value._maxDisplayCount
+        if (valueHolderFor_maxDisplayCount !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_maxDisplayCountTmpValue  = valueHolderFor_maxDisplayCount!
+            valueSerializer.writeNumber(valueHolderFor_maxDisplayCountTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__space  = value._space
-        let value__space_type : int32 = RuntimeType.UNDEFINED
-        value__space_type = runtimeType(value__space)
-        valueSerializer.writeInt8((value__space_type).toChar())
-        if ((value__space_type) != (RuntimeType.UNDEFINED)) {
-            const value__space_value  = value__space!
-            LengthMetrics_serializer.write(valueSerializer, value__space_value)
+        const valueHolderFor_space  = value._space
+        if (valueHolderFor_space !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_spaceTmpValue  = valueHolderFor_space!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_spaceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DotIndicator {
@@ -2590,191 +3450,165 @@ export class DotIndicator_serializer {
 export class DigitIndicator_serializer {
     public static write(buffer: SerializerBase, value: DigitIndicator): void {
         let valueSerializer : SerializerBase = buffer
-        const value__left  = value._left
-        let value__left_type : int32 = RuntimeType.UNDEFINED
-        value__left_type = runtimeType(value__left)
-        valueSerializer.writeInt8((value__left_type).toChar())
-        if ((value__left_type) != (RuntimeType.UNDEFINED)) {
-            const value__left_value  = value__left!
-            let value__left_value_type : int32 = RuntimeType.UNDEFINED
-            value__left_value_type = runtimeType(value__left_value)
-            if (RuntimeType.STRING == value__left_value_type) {
+        const valueHolderFor_left  = value._left
+        if (valueHolderFor_left !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_leftTmpValue  = valueHolderFor_left!
+            if (valueHolderFor_leftTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__left_value_0  = value__left_value as string
-                valueSerializer.writeString(value__left_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__left_value_type) {
+                const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
+                valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
+            } else if (valueHolderFor_leftTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__left_value_1  = value__left_value as number
-                valueSerializer.writeNumber(value__left_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__left_value_type) {
+                const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_leftTmpValueForIdx1)
+            } else if (valueHolderFor_leftTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__left_value_2  = value__left_value as Resource
-                Resource_serializer.write(valueSerializer, value__left_value_2)
+                const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__top  = value._top
-        let value__top_type : int32 = RuntimeType.UNDEFINED
-        value__top_type = runtimeType(value__top)
-        valueSerializer.writeInt8((value__top_type).toChar())
-        if ((value__top_type) != (RuntimeType.UNDEFINED)) {
-            const value__top_value  = value__top!
-            let value__top_value_type : int32 = RuntimeType.UNDEFINED
-            value__top_value_type = runtimeType(value__top_value)
-            if (RuntimeType.STRING == value__top_value_type) {
+        const valueHolderFor_top  = value._top
+        if (valueHolderFor_top !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_topTmpValue  = valueHolderFor_top!
+            if (valueHolderFor_topTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__top_value_0  = value__top_value as string
-                valueSerializer.writeString(value__top_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__top_value_type) {
+                const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
+                valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
+            } else if (valueHolderFor_topTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__top_value_1  = value__top_value as number
-                valueSerializer.writeNumber(value__top_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__top_value_type) {
+                const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_topTmpValueForIdx1)
+            } else if (valueHolderFor_topTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__top_value_2  = value__top_value as Resource
-                Resource_serializer.write(valueSerializer, value__top_value_2)
+                const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__right  = value._right
-        let value__right_type : int32 = RuntimeType.UNDEFINED
-        value__right_type = runtimeType(value__right)
-        valueSerializer.writeInt8((value__right_type).toChar())
-        if ((value__right_type) != (RuntimeType.UNDEFINED)) {
-            const value__right_value  = value__right!
-            let value__right_value_type : int32 = RuntimeType.UNDEFINED
-            value__right_value_type = runtimeType(value__right_value)
-            if (RuntimeType.STRING == value__right_value_type) {
+        const valueHolderFor_right  = value._right
+        if (valueHolderFor_right !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_rightTmpValue  = valueHolderFor_right!
+            if (valueHolderFor_rightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__right_value_0  = value__right_value as string
-                valueSerializer.writeString(value__right_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__right_value_type) {
+                const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
+                valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
+            } else if (valueHolderFor_rightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__right_value_1  = value__right_value as number
-                valueSerializer.writeNumber(value__right_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__right_value_type) {
+                const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_rightTmpValueForIdx1)
+            } else if (valueHolderFor_rightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__right_value_2  = value__right_value as Resource
-                Resource_serializer.write(valueSerializer, value__right_value_2)
+                const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__bottom  = value._bottom
-        let value__bottom_type : int32 = RuntimeType.UNDEFINED
-        value__bottom_type = runtimeType(value__bottom)
-        valueSerializer.writeInt8((value__bottom_type).toChar())
-        if ((value__bottom_type) != (RuntimeType.UNDEFINED)) {
-            const value__bottom_value  = value__bottom!
-            let value__bottom_value_type : int32 = RuntimeType.UNDEFINED
-            value__bottom_value_type = runtimeType(value__bottom_value)
-            if (RuntimeType.STRING == value__bottom_value_type) {
+        const valueHolderFor_bottom  = value._bottom
+        if (valueHolderFor_bottom !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
+            if (valueHolderFor_bottomTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__bottom_value_0  = value__bottom_value as string
-                valueSerializer.writeString(value__bottom_value_0)
-            }
-            else if (RuntimeType.NUMBER == value__bottom_value_type) {
+                const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
+                valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
+            } else if (valueHolderFor_bottomTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__bottom_value_1  = value__bottom_value as number
-                valueSerializer.writeNumber(value__bottom_value_1)
-            }
-            else if (RuntimeType.OBJECT == value__bottom_value_type) {
+                const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_bottomTmpValueForIdx1)
+            } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__bottom_value_2  = value__bottom_value as Resource
-                Resource_serializer.write(valueSerializer, value__bottom_value_2)
+                const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__start  = value._start
-        let value__start_type : int32 = RuntimeType.UNDEFINED
-        value__start_type = runtimeType(value__start)
-        valueSerializer.writeInt8((value__start_type).toChar())
-        if ((value__start_type) != (RuntimeType.UNDEFINED)) {
-            const value__start_value  = value__start!
-            LengthMetrics_serializer.write(valueSerializer, value__start_value)
+        const valueHolderFor_start  = value._start
+        if (valueHolderFor_start !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_startTmpValue  = valueHolderFor_start!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_startTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__end  = value._end
-        let value__end_type : int32 = RuntimeType.UNDEFINED
-        value__end_type = runtimeType(value__end)
-        valueSerializer.writeInt8((value__end_type).toChar())
-        if ((value__end_type) != (RuntimeType.UNDEFINED)) {
-            const value__end_value  = value__end!
-            LengthMetrics_serializer.write(valueSerializer, value__end_value)
+        const valueHolderFor_end  = value._end
+        if (valueHolderFor_end !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_endTmpValue  = valueHolderFor_end!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_endTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__fontColor  = value._fontColor
-        let value__fontColor_type : int32 = RuntimeType.UNDEFINED
-        value__fontColor_type = runtimeType(value__fontColor)
-        valueSerializer.writeInt8((value__fontColor_type).toChar())
-        if ((value__fontColor_type) != (RuntimeType.UNDEFINED)) {
-            const value__fontColor_value  = value__fontColor!
-            let value__fontColor_value_type : int32 = RuntimeType.UNDEFINED
-            value__fontColor_value_type = runtimeType(value__fontColor_value)
-            if (TypeChecker.isColor(value__fontColor_value)) {
+        const valueHolderFor_fontColor  = value._fontColor
+        if (valueHolderFor_fontColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_fontColorTmpValue  = valueHolderFor_fontColor!
+            if (valueHolderFor_fontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__fontColor_value_0  = value__fontColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value__fontColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value__fontColor_value_type) {
+                const valueHolderFor_fontColorTmpValueForIdx0  = valueHolderFor_fontColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderFor_fontColorTmpValueForIdx0))
+            } else if (valueHolderFor_fontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__fontColor_value_1  = value__fontColor_value as number
-                valueSerializer.writeNumber(value__fontColor_value_1)
-            }
-            else if (RuntimeType.STRING == value__fontColor_value_type) {
+                const valueHolderFor_fontColorTmpValueForIdx1  = valueHolderFor_fontColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_fontColorTmpValueForIdx1)
+            } else if (valueHolderFor_fontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__fontColor_value_2  = value__fontColor_value as string
-                valueSerializer.writeString(value__fontColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value__fontColor_value_type) {
+                const valueHolderFor_fontColorTmpValueForIdx2  = valueHolderFor_fontColorTmpValue as string
+                valueSerializer.writeString(valueHolderFor_fontColorTmpValueForIdx2)
+            } else if (valueHolderFor_fontColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value__fontColor_value_3  = value__fontColor_value as Resource
-                Resource_serializer.write(valueSerializer, value__fontColor_value_3)
+                const valueHolderFor_fontColorTmpValueForIdx3  = valueHolderFor_fontColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_fontColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedFontColor  = value._selectedFontColor
-        let value__selectedFontColor_type : int32 = RuntimeType.UNDEFINED
-        value__selectedFontColor_type = runtimeType(value__selectedFontColor)
-        valueSerializer.writeInt8((value__selectedFontColor_type).toChar())
-        if ((value__selectedFontColor_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedFontColor_value  = value__selectedFontColor!
-            let value__selectedFontColor_value_type : int32 = RuntimeType.UNDEFINED
-            value__selectedFontColor_value_type = runtimeType(value__selectedFontColor_value)
-            if (TypeChecker.isColor(value__selectedFontColor_value)) {
+        const valueHolderFor_selectedFontColor  = value._selectedFontColor
+        if (valueHolderFor_selectedFontColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedFontColorTmpValue  = valueHolderFor_selectedFontColor!
+            if (valueHolderFor_selectedFontColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__selectedFontColor_value_0  = value__selectedFontColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value__selectedFontColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value__selectedFontColor_value_type) {
+                const valueHolderFor_selectedFontColorTmpValueForIdx0  = valueHolderFor_selectedFontColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderFor_selectedFontColorTmpValueForIdx0))
+            } else if (valueHolderFor_selectedFontColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__selectedFontColor_value_1  = value__selectedFontColor_value as number
-                valueSerializer.writeNumber(value__selectedFontColor_value_1)
-            }
-            else if (RuntimeType.STRING == value__selectedFontColor_value_type) {
+                const valueHolderFor_selectedFontColorTmpValueForIdx1  = valueHolderFor_selectedFontColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderFor_selectedFontColorTmpValueForIdx1)
+            } else if (valueHolderFor_selectedFontColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__selectedFontColor_value_2  = value__selectedFontColor_value as string
-                valueSerializer.writeString(value__selectedFontColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value__selectedFontColor_value_type) {
+                const valueHolderFor_selectedFontColorTmpValueForIdx2  = valueHolderFor_selectedFontColorTmpValue as string
+                valueSerializer.writeString(valueHolderFor_selectedFontColorTmpValueForIdx2)
+            } else if (valueHolderFor_selectedFontColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value__selectedFontColor_value_3  = value__selectedFontColor_value as Resource
-                Resource_serializer.write(valueSerializer, value__selectedFontColor_value_3)
+                const valueHolderFor_selectedFontColorTmpValueForIdx3  = valueHolderFor_selectedFontColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_selectedFontColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__digitFont  = value._digitFont
-        let value__digitFont_type : int32 = RuntimeType.UNDEFINED
-        value__digitFont_type = runtimeType(value__digitFont)
-        valueSerializer.writeInt8((value__digitFont_type).toChar())
-        if ((value__digitFont_type) != (RuntimeType.UNDEFINED)) {
-            const value__digitFont_value  = value__digitFont!
-            Font_serializer.write(valueSerializer, value__digitFont_value)
+        const valueHolderFor_digitFont  = value._digitFont
+        if (valueHolderFor_digitFont !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_digitFontTmpValue  = valueHolderFor_digitFont!
+            Font_serializer.write(valueSerializer, valueHolderFor_digitFontTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedDigitFont  = value._selectedDigitFont
-        let value__selectedDigitFont_type : int32 = RuntimeType.UNDEFINED
-        value__selectedDigitFont_type = runtimeType(value__selectedDigitFont)
-        valueSerializer.writeInt8((value__selectedDigitFont_type).toChar())
-        if ((value__selectedDigitFont_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedDigitFont_value  = value__selectedDigitFont!
-            Font_serializer.write(valueSerializer, value__selectedDigitFont_value)
+        const valueHolderFor_selectedDigitFont  = value._selectedDigitFont
+        if (valueHolderFor_selectedDigitFont !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedDigitFontTmpValue  = valueHolderFor_selectedDigitFont!
+            Font_serializer.write(valueSerializer, valueHolderFor_selectedDigitFontTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): DigitIndicator {

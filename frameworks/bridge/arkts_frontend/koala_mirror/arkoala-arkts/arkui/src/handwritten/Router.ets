@@ -171,9 +171,9 @@ export interface Router {
 
     getParam(key: string): Object | undefined
 
-    depth: number
+    readonly depth: number
 
-    routerPage: RouterPage
+    readonly routerPage: RouterPage
 
     onPageTransitionEnd(pageId: int32, targetVisibility: RouterTransitionVisibility): void
     schedulePageTransition(pageId: int32, transition: PageTransition): void
@@ -201,20 +201,8 @@ class RouterImpl implements Router {
         return this.stack.length
     }
 
-    set depth(depth: number) {
-        /*
-            TODO SHOPPING: readonly properties don't work
-         */
-    }
-
     get routerPage(): RouterPage {
         return new RouterPage(this.stack.length, this.state.url)
-    }
-
-    set routerPage(page: RouterPage) {
-        /*
-            TODO SHOPPING: readonly properties don't work
-         */
     }
 
     resolve(route: string): Promise<UserView> {
@@ -446,6 +434,6 @@ export function WithRouterTransitionState(
     transition: RouterTransitionState | undefined,
     @memo
     content: () => void
-) {
+): void {
     contextLocalScope(CURRENT_ROUTER_TRANSITION, transition, content)
 }

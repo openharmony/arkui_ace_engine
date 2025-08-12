@@ -16,12 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Size_serializer, Vector2_serializer, Frame_serializer, Vector3_serializer, Size, Vector2, Frame, Vector3, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, LengthMetricsUnit, DrawContext, DrawContextInternal } from "./arkui.Graphics"
 import { EdgeStyles_serializer, Edges_serializer, EdgeStyles, Edges } from "./../component/units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -485,12 +484,12 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
     }
     private insertChildAfter_serialize(child: RenderNode, sibling: RenderNode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let sibling_type : int32 = RuntimeType.UNDEFINED
-        sibling_type = runtimeType(sibling)
-        thisSerializer.writeInt8((sibling_type).toChar())
-        if ((sibling_type) != (RuntimeType.UNDEFINED)) {
-            const sibling_value  = sibling!
-            RenderNode_serializer.write(thisSerializer, sibling_value)
+        if (sibling !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const siblingTmpValue  = sibling!
+            RenderNode_serializer.write(thisSerializer, siblingTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RenderNode_insertChildAfter(this.peer!.ptr, toPeerPtr(child), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -506,8 +505,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
         const returnResult : RenderNode | undefined = buffer
@@ -518,8 +516,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
         const returnResult : RenderNode | undefined = buffer
@@ -530,8 +527,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
         const returnResult : RenderNode | undefined = buffer
@@ -542,8 +538,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
         const returnResult : RenderNode | undefined = buffer
@@ -666,23 +661,23 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
     private getTransform_serialize(): [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ] {
         const retval  = ArkUIGeneratedNativeModule._RenderNode_getTransform(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_value0 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value1 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value2 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value3 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value4 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value5 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value6 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value7 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value8 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value9 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value10 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value11 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value12 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value13 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value14 : number = (retvalDeserializer.readNumber() as number)
-        const buffer_value15 : number = (retvalDeserializer.readNumber() as number)
-        const returnResult : [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ] = ([buffer_value0, buffer_value1, buffer_value2, buffer_value3, buffer_value4, buffer_value5, buffer_value6, buffer_value7, buffer_value8, buffer_value9, buffer_value10, buffer_value11, buffer_value12, buffer_value13, buffer_value14, buffer_value15] as [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ])
+        const bufferValue0 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue1 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue2 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue3 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue4 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue5 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue6 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue7 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue8 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue9 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue10 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue11 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue12 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue13 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue14 : number = (retvalDeserializer.readNumber() as number)
+        const bufferValue15 : number = (retvalDeserializer.readNumber() as number)
+        const returnResult : [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ] = ([bufferValue0, bufferValue1, bufferValue2, bufferValue3, bufferValue4, bufferValue5, bufferValue6, bufferValue7, bufferValue8, bufferValue9, bufferValue10, bufferValue11, bufferValue12, bufferValue13, bufferValue14, bufferValue15] as [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ])
         return returnResult
     }
     private setTransform_serialize(transform: [ number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number ]): void {
@@ -858,22 +853,22 @@ export interface BorderRadiuses_graphics {
 export class BorderRadiuses_graphics_serializer {
     public static write(buffer: SerializerBase, value: BorderRadiuses_graphics): void {
         let valueSerializer : SerializerBase = buffer
-        const value_topLeft  = value.topLeft
-        valueSerializer.writeNumber(value_topLeft)
-        const value_topRight  = value.topRight
-        valueSerializer.writeNumber(value_topRight)
-        const value_bottomLeft  = value.bottomLeft
-        valueSerializer.writeNumber(value_bottomLeft)
-        const value_bottomRight  = value.bottomRight
-        valueSerializer.writeNumber(value_bottomRight)
+        const valueHolderForTopLeft  = value.topLeft
+        valueSerializer.writeNumber(valueHolderForTopLeft)
+        const valueHolderForTopRight  = value.topRight
+        valueSerializer.writeNumber(valueHolderForTopRight)
+        const valueHolderForBottomLeft  = value.bottomLeft
+        valueSerializer.writeNumber(valueHolderForBottomLeft)
+        const valueHolderForBottomRight  = value.bottomRight
+        valueSerializer.writeNumber(valueHolderForBottomRight)
     }
     public static read(buffer: DeserializerBase): BorderRadiuses_graphics {
         let valueDeserializer : DeserializerBase = buffer
-        const topLeft_result : number = (valueDeserializer.readNumber() as number)
-        const topRight_result : number = (valueDeserializer.readNumber() as number)
-        const bottomLeft_result : number = (valueDeserializer.readNumber() as number)
-        const bottomRight_result : number = (valueDeserializer.readNumber() as number)
-        let value : BorderRadiuses_graphics = ({topLeft: topLeft_result, topRight: topRight_result, bottomLeft: bottomLeft_result, bottomRight: bottomRight_result} as BorderRadiuses_graphics)
+        const topLeftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const topRightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const bottomLeftTmpResult : number = (valueDeserializer.readNumber() as number)
+        const bottomRightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : BorderRadiuses_graphics = ({topLeft: topLeftTmpResult, topRight: topRightTmpResult, bottomLeft: bottomLeftTmpResult, bottomRight: bottomRightTmpResult} as BorderRadiuses_graphics)
         return value
     }
 }

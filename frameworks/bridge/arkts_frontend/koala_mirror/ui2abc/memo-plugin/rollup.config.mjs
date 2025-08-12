@@ -19,21 +19,11 @@ import terser from "@rollup/plugin-terser"
 
 const ENABLE_SOURCE_MAPS = false;  // Enable for debugging
 
-export default [
-    buildPlugin({
-        src: "./src/ParserTransformer.ts",
-        dst: "./lib/ParserTransformer.js",
-    }),
-    buildPlugin({
-        src: "./src/MemoTransformer.ts",
-        dst: "./lib/MemoTransformer.js",
-    }),
-    buildPlugin({
-        src: "./src/entry.ts",
-        dst: "./lib/entry.js",
-        minimize: false,
-    }),
-]
+export default buildPlugin({
+    src: "./src/entry.ts",
+    dst: "./lib/entry.js",
+    minimize: false,
+})
 
 /** @return {import("rollup").RollupOptions} */
 function buildPlugin({ src, dst, minimize = false }) {
@@ -50,7 +40,6 @@ function buildPlugin({ src, dst, minimize = false }) {
                     }
                 }),
                 replaceLibarktsImport()
-
             ],
             sourcemap: ENABLE_SOURCE_MAPS,
             banner: APACHE_LICENSE_HEADER(),
@@ -99,11 +88,10 @@ function APACHE_LICENSE_HEADER() {
 function replaceLibarktsImport() {
     const REQUIRE_PATTERN = `require('@koalaui/libarkts');`
     return {
-        name: "replace-librkts-import",
+        name: "replace-libarkts-import",
         generateBundle(options, bundle) {
             for (const [fileName, asset] of Object.entries(bundle)) {
                 if (!asset.code) continue
-                if (fileName !== "entry.js") continue
                 asset.code = asset.code.replace(REQUIRE_PATTERN, `require(process.env.LIBARKTS_PATH ?? "../../libarkts/lib/libarkts.js")`)
             }
         }

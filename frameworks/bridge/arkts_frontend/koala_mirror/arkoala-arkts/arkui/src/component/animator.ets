@@ -17,19 +17,20 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { AnimationStatus, FillMode, PlayMode } from "./enums"
 import { curves } from "./../generated/ohos.curves"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class FrictionMotionInternal {
     public static fromPtr(ptr: KPointer): FrictionMotion {
         return new FrictionMotion(false, false, false, ptr)
@@ -133,7 +134,7 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkAnimatorPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Animator_construct(peerId, flags)
-        const _peer  = new ArkAnimatorPeer(_peerPtr, peerId, "Animator", flags)
+        const _peer  = new ArkAnimatorPeer(_peerPtr, peerId, 'Animator', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -142,184 +143,180 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
     }
     setStateAttribute(value: AnimationStatus | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as AnimationStatus)
-            thisSerializer.writeInt32(TypeChecker.AnimationStatus_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as AnimationStatus)
+            thisSerializer.writeInt32(TypeChecker.AnimationStatus_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setState(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDurationAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setDuration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCurveAttribute(value: curves.Curve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as curves.Curve)
-            thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as curves.Curve)
+            thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDelayAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setDelay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFillModeAttribute(value: FillMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as FillMode)
-            thisSerializer.writeInt32(TypeChecker.FillMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FillMode)
+            thisSerializer.writeInt32(TypeChecker.FillMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setFillMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setIterationsAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setIterations(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPlayModeAttribute(value: PlayMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as PlayMode)
-            thisSerializer.writeInt32(TypeChecker.PlayMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as PlayMode)
+            thisSerializer.writeInt32(TypeChecker.PlayMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setPlayMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMotionAttribute(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isSpringMotion(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof SpringMotion) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as SpringMotion
-                SpringMotion_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (TypeChecker.isFrictionMotion(value_value)) {
+                const valueTmpValueForIdx0  = valueTmpValue as SpringMotion
+                SpringMotion_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof FrictionMotion) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as FrictionMotion
-                FrictionMotion_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isScrollMotion(value_value)) {
+                const valueTmpValueForIdx1  = valueTmpValue as FrictionMotion
+                FrictionMotion_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof ScrollMotion) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as ScrollMotion
-                ScrollMotion_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as ScrollMotion
+                ScrollMotion_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setMotion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnStartAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPauseAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnPause(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnRepeatAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnRepeat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnCancelAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnCancel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFinishAttribute(value: (() => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnFrameAttribute(value: ((value: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setOnFrame(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -432,37 +429,6 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
     }
     public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: AnimatorAttribute): void {
-        super.apply(target)
-        if (this.state_value !== undefined)
-            target.state(this.state_value!)
-        if (this.duration_value !== undefined)
-            target.duration(this.duration_value!)
-        if (this.curve_value !== undefined)
-            target.curve(this.curve_value!)
-        if (this.delay_value !== undefined)
-            target.delay(this.delay_value!)
-        if (this.fillMode_value !== undefined)
-            target.fillMode(this.fillMode_value!)
-        if (this.iterations_value !== undefined)
-            target.iterations(this.iterations_value!)
-        if (this.playMode_value !== undefined)
-            target.playMode(this.playMode_value!)
-        if (this.motion_value !== undefined)
-            target.motion(this.motion_value!)
-        if (this.onStart_value !== undefined)
-            target.onStart(this.onStart_value!)
-        if (this.onPause_value !== undefined)
-            target.onPause(this.onPause_value!)
-        if (this.onRepeat_value !== undefined)
-            target.onRepeat(this.onRepeat_value!)
-        if (this.onCancel_value !== undefined)
-            target.onCancel(this.onCancel_value!)
-        if (this.onFinish_value !== undefined)
-            target.onFinish(this.onFinish_value!)
-        if (this.onFrame_value !== undefined)
-            target.onFrame(this.onFrame_value!)
     }
 }
 
@@ -591,7 +557,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         return this
     }
     public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -599,26 +564,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         super.applyAttributesFinish()
     }
 }
-export function withAnimatorStyle(receiver: AnimatorAttribute, modifier: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkAnimatorStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Animator")
-// export function Animator(
-//     value: string,
-//     @memo
-//     content_?: () => void,
-// ): AnimatorAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Animator(
@@ -634,143 +579,636 @@ export function Animator(
     NodeAttach<ArkAnimatorPeer>((): ArkAnimatorPeer => ArkAnimatorPeer.create(receiver), (_: ArkAnimatorPeer): void => {
         receiver.setAnimatorOptions(value)
         style?.(receiver)
-        withAnimatorStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkAnimatorSet extends ArkCommonMethodSet implements AnimatorAttribute {
+export class AnimatorModifier extends CommonMethodModifier implements AnimatorAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _state_flag?: boolean
-    _state0_value?: AnimationStatus | undefined
-    _duration_flag?: boolean
-    _duration0_value?: number | undefined
-    _curve_flag?: boolean
-    _curve0_value?: curves.Curve | undefined
-    _delay_flag?: boolean
-    _delay0_value?: number | undefined
-    _fillMode_flag?: boolean
-    _fillMode0_value?: FillMode | undefined
-    _iterations_flag?: boolean
-    _iterations0_value?: number | undefined
-    _playMode_flag?: boolean
-    _playMode0_value?: PlayMode | undefined
-    _motion_flag?: boolean
-    _motion0_value?: SpringMotion | FrictionMotion | ScrollMotion | undefined
-    _onStart_flag?: boolean
-    _onStart0_value?: (() => void) | undefined
-    _onPause_flag?: boolean
-    _onPause0_value?: (() => void) | undefined
-    _onRepeat_flag?: boolean
-    _onRepeat0_value?: (() => void) | undefined
-    _onCancel_flag?: boolean
-    _onCancel0_value?: (() => void) | undefined
-    _onFinish_flag?: boolean
-    _onFinish0_value?: (() => void) | undefined
-    _onFrame_flag?: boolean
-    _onFrame0_value?: ((value: number) => void) | undefined
-    applyModifierPatch(component: AnimatorAttribute): void {
-        if (this._state_flag)
-            component.state((this._state0_value as AnimationStatus | undefined))
-        if (this._duration_flag)
-            component.duration((this._duration0_value as number | undefined))
-        if (this._curve_flag)
-            component.curve((this._curve0_value as curves.Curve | undefined))
-        if (this._delay_flag)
-            component.delay((this._delay0_value as number | undefined))
-        if (this._fillMode_flag)
-            component.fillMode((this._fillMode0_value as FillMode | undefined))
-        if (this._iterations_flag)
-            component.iterations((this._iterations0_value as number | undefined))
-        if (this._playMode_flag)
-            component.playMode((this._playMode0_value as PlayMode | undefined))
-        if (this._motion_flag)
-            component.motion((this._motion0_value as SpringMotion | FrictionMotion | ScrollMotion | undefined))
-        if (this._onStart_flag)
-            component.onStart((this._onStart0_value as (() => void) | undefined))
-        if (this._onPause_flag)
-            component.onPause((this._onPause0_value as (() => void) | undefined))
-        if (this._onRepeat_flag)
-            component.onRepeat((this._onRepeat0_value as (() => void) | undefined))
-        if (this._onCancel_flag)
-            component.onCancel((this._onCancel0_value as (() => void) | undefined))
-        if (this._onFinish_flag)
-            component.onFinish((this._onFinish0_value as (() => void) | undefined))
-        if (this._onFrame_flag)
-            component.onFrame((this._onFrame0_value as ((value: number) => void) | undefined))
+    _state_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _state_0_0value?: AnimationStatus | undefined
+    _duration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _duration_0_0value?: number | undefined
+    _curve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _curve_0_0value?: curves.Curve | undefined
+    _delay_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _delay_0_0value?: number | undefined
+    _fillMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fillMode_0_0value?: FillMode | undefined
+    _iterations_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _iterations_0_0value?: number | undefined
+    _playMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _playMode_0_0value?: PlayMode | undefined
+    _motion_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _motion_0_0value?: SpringMotion | FrictionMotion | ScrollMotion | undefined
+    _onStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onStart_0_0value?: (() => void) | undefined
+    _onPause_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPause_0_0value?: (() => void) | undefined
+    _onRepeat_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onRepeat_0_0value?: (() => void) | undefined
+    _onCancel_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onCancel_0_0value?: (() => void) | undefined
+    _onFinish_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFinish_0_0value?: (() => void) | undefined
+    _onFrame_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFrame_0_0value?: ((value: number) => void) | undefined
+    applyModifierPatch(peer: ArkAnimatorPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._state_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._state_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStateAttribute((this._state_0_0value as AnimationStatus | undefined));
+                    this._state_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._state_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._state_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStateAttribute((undefined as AnimationStatus | undefined));
+                }
+            }
+        }
+        if (this._duration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._duration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDurationAttribute((this._duration_0_0value as number | undefined));
+                    this._duration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._duration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._duration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDurationAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._curve_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._curve_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCurveAttribute((this._curve_0_0value as curves.Curve | undefined));
+                    this._curve_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._curve_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._curve_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCurveAttribute((undefined as curves.Curve | undefined));
+                }
+            }
+        }
+        if (this._delay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._delay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDelayAttribute((this._delay_0_0value as number | undefined));
+                    this._delay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._delay_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._delay_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDelayAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._fillMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fillMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFillModeAttribute((this._fillMode_0_0value as FillMode | undefined));
+                    this._fillMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fillMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fillMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFillModeAttribute((undefined as FillMode | undefined));
+                }
+            }
+        }
+        if (this._iterations_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._iterations_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setIterationsAttribute((this._iterations_0_0value as number | undefined));
+                    this._iterations_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._iterations_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._iterations_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setIterationsAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._playMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._playMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPlayModeAttribute((this._playMode_0_0value as PlayMode | undefined));
+                    this._playMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._playMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._playMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPlayModeAttribute((undefined as PlayMode | undefined));
+                }
+            }
+        }
+        if (this._motion_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._motion_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMotionAttribute((this._motion_0_0value as SpringMotion | FrictionMotion | ScrollMotion | undefined));
+                    this._motion_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._motion_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._motion_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMotionAttribute((undefined as SpringMotion | FrictionMotion | ScrollMotion | undefined));
+                }
+            }
+        }
+        if (this._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnStartAttribute((this._onStart_0_0value as (() => void) | undefined));
+                    this._onStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnStartAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onPause_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPause_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPauseAttribute((this._onPause_0_0value as (() => void) | undefined));
+                    this._onPause_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPause_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPause_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPauseAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onRepeat_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onRepeat_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnRepeatAttribute((this._onRepeat_0_0value as (() => void) | undefined));
+                    this._onRepeat_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onRepeat_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onRepeat_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnRepeatAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onCancel_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onCancel_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnCancelAttribute((this._onCancel_0_0value as (() => void) | undefined));
+                    this._onCancel_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onCancel_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onCancel_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnCancelAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFinishAttribute((this._onFinish_0_0value as (() => void) | undefined));
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFinish_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFinishAttribute((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (this._onFrame_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFrame_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFrameAttribute((this._onFrame_0_0value as ((value: number) => void) | undefined));
+                    this._onFrame_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFrame_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFrame_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFrameAttribute((undefined as ((value: number) => void) | undefined));
+                }
+            }
+        }
     }
-    public state(value: AnimationStatus | undefined): this {
-        this._state_flag = true
-        this._state0_value = value
+    mergeModifier(modifier: AnimatorModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._state_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._state_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.state(modifier._state_0_0value);
+                    break;
+                }
+                default: {
+                    this.state((undefined as AnimationStatus | undefined));
+                }
+            }
+        }
+        if (modifier._duration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._duration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.duration(modifier._duration_0_0value);
+                    break;
+                }
+                default: {
+                    this.duration((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._curve_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._curve_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.curve(modifier._curve_0_0value);
+                    break;
+                }
+                default: {
+                    this.curve((undefined as curves.Curve | undefined));
+                }
+            }
+        }
+        if (modifier._delay_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._delay_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.delay(modifier._delay_0_0value);
+                    break;
+                }
+                default: {
+                    this.delay((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._fillMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fillMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fillMode(modifier._fillMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.fillMode((undefined as FillMode | undefined));
+                }
+            }
+        }
+        if (modifier._iterations_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._iterations_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.iterations(modifier._iterations_0_0value);
+                    break;
+                }
+                default: {
+                    this.iterations((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._playMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._playMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.playMode(modifier._playMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.playMode((undefined as PlayMode | undefined));
+                }
+            }
+        }
+        if (modifier._motion_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._motion_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.motion(modifier._motion_0_0value);
+                    break;
+                }
+                default: {
+                    this.motion((undefined as SpringMotion | FrictionMotion | ScrollMotion | undefined));
+                }
+            }
+        }
+        if (modifier._onStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onStart(modifier._onStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onStart((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onPause_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPause_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPause(modifier._onPause_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPause((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onRepeat_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onRepeat_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onRepeat(modifier._onRepeat_0_0value);
+                    break;
+                }
+                default: {
+                    this.onRepeat((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onCancel_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onCancel_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onCancel(modifier._onCancel_0_0value);
+                    break;
+                }
+                default: {
+                    this.onCancel((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onFinish_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFinish_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFinish(modifier._onFinish_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFinish((undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onFrame_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFrame_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFrame(modifier._onFrame_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFrame((undefined as ((value: number) => void) | undefined));
+                }
+            }
+        }
+    }
+    state(value: AnimationStatus | undefined): this {
+        if (((this._state_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._state_0_flag = AttributeUpdaterFlag.UPDATE
+            this._state_0_0value = value
+        } else
+        {
+            this._state_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public duration(value: number | undefined): this {
-        this._duration_flag = true
-        this._duration0_value = value
+    duration(value: number | undefined): this {
+        if (((this._duration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._duration_0_0value) !== (value)))
+        {
+            this._duration_0_flag = AttributeUpdaterFlag.UPDATE
+            this._duration_0_0value = value
+        } else
+        {
+            this._duration_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public curve(value: curves.Curve | undefined): this {
-        this._curve_flag = true
-        this._curve0_value = value
+    curve(value: curves.Curve | undefined): this {
+        if (((this._curve_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._curve_0_flag = AttributeUpdaterFlag.UPDATE
+            this._curve_0_0value = value
+        } else
+        {
+            this._curve_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public delay(value: number | undefined): this {
-        this._delay_flag = true
-        this._delay0_value = value
+    delay(value: number | undefined): this {
+        if (((this._delay_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._delay_0_0value) !== (value)))
+        {
+            this._delay_0_flag = AttributeUpdaterFlag.UPDATE
+            this._delay_0_0value = value
+        } else
+        {
+            this._delay_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fillMode(value: FillMode | undefined): this {
-        this._fillMode_flag = true
-        this._fillMode0_value = value
+    fillMode(value: FillMode | undefined): this {
+        if (((this._fillMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fillMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fillMode_0_0value = value
+        } else
+        {
+            this._fillMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public iterations(value: number | undefined): this {
-        this._iterations_flag = true
-        this._iterations0_value = value
+    iterations(value: number | undefined): this {
+        if (((this._iterations_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._iterations_0_0value) !== (value)))
+        {
+            this._iterations_0_flag = AttributeUpdaterFlag.UPDATE
+            this._iterations_0_0value = value
+        } else
+        {
+            this._iterations_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public playMode(value: PlayMode | undefined): this {
-        this._playMode_flag = true
-        this._playMode0_value = value
+    playMode(value: PlayMode | undefined): this {
+        if (((this._playMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._playMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._playMode_0_0value = value
+        } else
+        {
+            this._playMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this {
-        this._motion_flag = true
-        this._motion0_value = value
+    motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this {
+        if (((this._motion_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._motion_0_flag = AttributeUpdaterFlag.UPDATE
+            this._motion_0_0value = value
+        } else
+        {
+            this._motion_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onStart(value: (() => void) | undefined): this {
-        this._onStart_flag = true
-        this._onStart0_value = value
+    onStart(value: (() => void) | undefined): this {
+        if (((this._onStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onStart_0_0value = value
+        } else
+        {
+            this._onStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onPause(value: (() => void) | undefined): this {
-        this._onPause_flag = true
-        this._onPause0_value = value
+    onPause(value: (() => void) | undefined): this {
+        if (((this._onPause_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPause_0_0value = value
+        } else
+        {
+            this._onPause_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onRepeat(value: (() => void) | undefined): this {
-        this._onRepeat_flag = true
-        this._onRepeat0_value = value
+    onRepeat(value: (() => void) | undefined): this {
+        if (((this._onRepeat_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onRepeat_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onRepeat_0_0value = value
+        } else
+        {
+            this._onRepeat_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onCancel(value: (() => void) | undefined): this {
-        this._onCancel_flag = true
-        this._onCancel0_value = value
+    onCancel(value: (() => void) | undefined): this {
+        if (((this._onCancel_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onCancel_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onCancel_0_0value = value
+        } else
+        {
+            this._onCancel_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
-        this._onFinish_flag = true
-        this._onFinish0_value = value
+    onFinish(value: (() => void) | undefined): this {
+        if (((this._onFinish_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFinish_0_0value = value
+        } else
+        {
+            this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onFrame(value: ((value: number) => void) | undefined): this {
-        this._onFrame_flag = true
-        this._onFrame0_value = value
+    onFrame(value: ((value: number) => void) | undefined): this {
+        if (((this._onFrame_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFrame_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFrame_0_0value = value
+        } else
+        {
+            this._onFrame_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

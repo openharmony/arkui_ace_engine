@@ -15,7 +15,7 @@
 
 import * as util from "../../test-util"
 import * as arkts from "../../../src/arkts-api"
-import { assert } from "chai"
+import { assert } from "@koalaui/harness"
 
 suite(util.basename(__filename), () => {
     test("annotated-function-1", function() {

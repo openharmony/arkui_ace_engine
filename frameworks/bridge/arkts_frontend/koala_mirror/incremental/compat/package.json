@@ -25,11 +25,7 @@
         "clean": "rimraf build dist",
         "compile": "ets-tsc -b .",
         "compile:release": "ets-tsc -b .",
-        "compile:ohos": "ets-tsc -b ./tsconfig-ohos.json",
-        "compile:all": "npm run compile && npm run compile:ohos",
-        "build:compat": "npm run build:compat:inc",
-        "build:compat:inc": "fast-arktsc --config ./arktsconfig.json --compiler ../tools/panda/arkts/arktsc --link-name ./build/compat.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
-        "build:compat:inc:ui2abc": "fast-arktsc --config ./arktsconfig.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/compat.abc && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/abc/build.ninja"
+        "build": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig.json --compiler ../tools/panda/arkts/ui2abc --link-name ./build/compat.abc --simultaneous && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/abc/build.ninja"
     },
     "keywords": [],
     "dependencies": {},

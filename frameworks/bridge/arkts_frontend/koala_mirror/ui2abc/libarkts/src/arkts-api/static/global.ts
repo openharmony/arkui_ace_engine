@@ -48,6 +48,7 @@ export class global {
 
     // Improve: rename to context when the pointer valued one is eliminated
     public static compilerContext: Context
+    public static isContextGenerateAbcForExternalSourceFiles: boolean = false
 
     private static _es2panda: Es2pandaNativeModule | undefined = undefined
     public static get es2panda(): Es2pandaNativeModule {

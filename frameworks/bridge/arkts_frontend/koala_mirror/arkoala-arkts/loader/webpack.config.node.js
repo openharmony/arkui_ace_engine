@@ -20,7 +20,7 @@ const DefinePlugin = require("webpack").DefinePlugin
 const minimize = !process.env.WEBPACK_NO_MINIMIZE
 
 /** @returns {import("webpack").WebpackOptionsNormalized} */
-const makeConfig = ({ os, arch, tsconfig }) => ({
+const makeConfig = ({ os, arch, tsconfig, srcLang }) => ({
     target: "node",
     entry: `./src/loader.ts`,
     output: {
@@ -48,7 +48,7 @@ const makeConfig = ({ os, arch, tsconfig }) => ({
 
     plugins: [
         new CopyPlugin({
-            patterns: copyPluginPatterns(os, arch)
+            patterns: copyPluginPatterns(os, arch, srcLang)
         }),
         new DefinePlugin({
             'LOAD_NATIVE': `require("./ArkoalaLoader.node")`
@@ -68,28 +68,51 @@ function getExt(os) {
     }
 }
 
-function copyPluginPatterns(os, arch) {
+function copyPluginPatterns(os, arch, srcLang) {
     const patterns = []
-    patterns.push({
-        from: path.resolve(`../framework/native/build-node-host-vmloader/ArkoalaLoader.node`),
-        to: "."
-    })
-    patterns.push({
-        from: path.resolve(`../framework/native/build-node-host-vmloader/libvmloader.${ getExt(os) }`),
-        to: "."
-    })
-    patterns.push({
-        from: path.resolve(`../framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ets.${ getExt(os) }`),
-        to: `./libArkoalaNative_ets.${ getExt(os) }`
-    })
-    patterns.push({
-        from: path.resolve(`../framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ani.${ getExt(os) }`),
-        to: `./libArkoalaNative_ani.${ getExt(os) }`
-    })
-    patterns.push({
-        from: path.resolve(`../framework/native/build-panda-host/libace_compatible_mock.${ getExt(os) }`),
-        to: `./libace_compatible_mock.${ getExt(os) }`
-    })
+    if (srcLang == "arkts") {
+        patterns.push({
+            from: path.resolve(`../framework/native/build-node-host-vmloader/ArkoalaLoader.node`),
+            to: "."
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-node-host-vmloader/libvmloader.${ getExt(os) }`),
+            to: "."
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ets.${ getExt(os) }`),
+            to: `./libArkoalaNative_ets.${ getExt(os) }`
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ani.${ getExt(os) }`),
+            to: `./libArkoalaNative_ani.${ getExt(os) }`
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-panda-host/libace_compatible_mock.${ getExt(os) }`),
+            to: `./libace_compatible_mock.${ getExt(os) }`
+        })
+    }
+    else if (srcLang == "kotlin") {
+        patterns.push({
+            from: path.resolve(`../framework/native/build-node-host-vmloader-kotlin/ArkoalaLoader.node`),
+            to: "."
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-node-host-vmloader-kotlin/libvmloader.${ getExt(os) }`),
+            to: "."
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-kotlin-host/libArkoalaNative_${os}_${arch}_kotlin.${ getExt(os) }`),
+            to: `./libArkoalaNative_${os}_${arch}_kotlin.${ getExt(os) }`
+        })
+        patterns.push({
+            from: path.resolve(`../framework/native/build-kotlin-host/libace_compatible_mock.${ getExt(os) }`),
+            to: `./libace_compatible_mock.${ getExt(os) }`
+        })
+    }
+    else {
+        throw new Error(`loader: Unknown srcLang: ${srcLang}`)
+    }
     return patterns
 }
 
@@ -102,6 +125,7 @@ module.exports = env => {
     const os = env.os || oses[process.platform] || process.platform
     const arch = (env.arch || process.arch)
     const tsconfig = env.tsconfig || ""
+    const srcLang = env.srcLang || "arkts"
 
-    return makeConfig({os, arch, tsconfig})
+    return makeConfig({os, arch, tsconfig, srcLang })
 }

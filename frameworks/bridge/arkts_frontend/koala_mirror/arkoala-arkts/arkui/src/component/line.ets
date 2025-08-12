@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonShapeMethodSet, ArkCommonMethodSet } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonShapeMethodModifier, CommonMethodModifier } from "./common"
 import { Length } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
@@ -30,6 +30,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -37,112 +38,96 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkLinePeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Line_construct(peerId, flags)
-        const _peer  = new ArkLinePeer(_peerPtr, peerId, "Line", flags)
+        const _peer  = new ArkLinePeer(_peerPtr, peerId, 'Line', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setLineOptionsAttribute(options?: LineOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            LineOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            LineOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LineInterface_setLineOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStartPointAttribute(value: ShapePoint | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            const value_value_0  = value_value[0]
-            let value_value_0_type : int32 = RuntimeType.UNDEFINED
-            value_value_0_type = runtimeType(value_value_0)
-            if (RuntimeType.STRING == value_value_0_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            const valueTmpValue_0  = valueTmpValue[0]
+            if (valueTmpValue_0 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0_0  = value_value_0 as string
-                thisSerializer.writeString(value_value_0_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_0_type) {
+                const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
+                thisSerializer.writeString(valueTmpValue_0ForIdx0)
+            } else if (valueTmpValue_0 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_0_1  = value_value_0 as number
-                thisSerializer.writeNumber(value_value_0_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_0_type) {
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
+                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+            } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_0_2  = value_value_0 as Resource
-                Resource_serializer.write(thisSerializer, value_value_0_2)
+                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
-            const value_value_1  = value_value[1]
-            let value_value_1_type : int32 = RuntimeType.UNDEFINED
-            value_value_1_type = runtimeType(value_value_1)
-            if (RuntimeType.STRING == value_value_1_type) {
+            const valueTmpValue_1  = valueTmpValue[1]
+            if (valueTmpValue_1 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_1_0  = value_value_1 as string
-                thisSerializer.writeString(value_value_1_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_1_type) {
+                const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
+                thisSerializer.writeString(valueTmpValue_1ForIdx0)
+            } else if (valueTmpValue_1 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1_1  = value_value_1 as number
-                thisSerializer.writeNumber(value_value_1_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_1_type) {
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
+                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+            } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_1_2  = value_value_1 as Resource
-                Resource_serializer.write(thisSerializer, value_value_1_2)
+                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LineAttribute_setStartPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEndPointAttribute(value: ShapePoint | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            const value_value_0  = value_value[0]
-            let value_value_0_type : int32 = RuntimeType.UNDEFINED
-            value_value_0_type = runtimeType(value_value_0)
-            if (RuntimeType.STRING == value_value_0_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            const valueTmpValue_0  = valueTmpValue[0]
+            if (valueTmpValue_0 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0_0  = value_value_0 as string
-                thisSerializer.writeString(value_value_0_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_0_type) {
+                const valueTmpValue_0ForIdx0  = valueTmpValue_0 as string
+                thisSerializer.writeString(valueTmpValue_0ForIdx0)
+            } else if (valueTmpValue_0 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_0_1  = value_value_0 as number
-                thisSerializer.writeNumber(value_value_0_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_0_type) {
+                const valueTmpValue_0ForIdx1  = valueTmpValue_0 as number
+                thisSerializer.writeNumber(valueTmpValue_0ForIdx1)
+            } else if (valueTmpValue_0 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_0_2  = value_value_0 as Resource
-                Resource_serializer.write(thisSerializer, value_value_0_2)
+                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
-            const value_value_1  = value_value[1]
-            let value_value_1_type : int32 = RuntimeType.UNDEFINED
-            value_value_1_type = runtimeType(value_value_1)
-            if (RuntimeType.STRING == value_value_1_type) {
+            const valueTmpValue_1  = valueTmpValue[1]
+            if (valueTmpValue_1 instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_1_0  = value_value_1 as string
-                thisSerializer.writeString(value_value_1_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_1_type) {
+                const valueTmpValue_1ForIdx0  = valueTmpValue_1 as string
+                thisSerializer.writeString(valueTmpValue_1ForIdx0)
+            } else if (valueTmpValue_1 instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1_1  = value_value_1 as number
-                thisSerializer.writeNumber(value_value_1_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_1_type) {
+                const valueTmpValue_1ForIdx1  = valueTmpValue_1 as number
+                thisSerializer.writeNumber(valueTmpValue_1ForIdx1)
+            } else if (valueTmpValue_1 instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_1_2  = value_value_1 as Resource
-                Resource_serializer.write(thisSerializer, value_value_1_2)
+                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LineAttribute_setEndPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -178,13 +163,6 @@ export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttri
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: LineAttribute): void {
-        super.apply(target)
-        if (this.startPoint_value !== undefined)
-            target.startPoint(this.startPoint_value!)
-        if (this.endPoint_value !== undefined)
-            target.endPoint(this.endPoint_value!)
-    }
 }
 
 export class ArkLineComponent extends ArkCommonShapeMethodComponent implements LineAttribute {
@@ -216,7 +194,6 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -224,26 +201,6 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         super.applyAttributesFinish()
     }
 }
-export function withLineStyle(receiver: LineAttribute, modifier: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkLineStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Line")
-// export function Line(
-//     options?: LineOptions,
-//     @memo
-//     content_?: () => void,
-// ): LineAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Line(
@@ -259,35 +216,108 @@ export function Line(
     NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (_: ArkLinePeer): void => {
         receiver.setLineOptions(options)
         style?.(receiver)
-        withLineStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkLineSet extends ArkCommonShapeMethodSet implements LineAttribute {
+export class LineModifier extends CommonShapeMethodModifier implements LineAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _startPoint_flag?: boolean
-    _startPoint0_value?: ShapePoint | undefined
-    _endPoint_flag?: boolean
-    _endPoint0_value?: ShapePoint | undefined
-    applyModifierPatch(component: LineAttribute): void {
-        if (this._startPoint_flag)
-            component.startPoint((this._startPoint0_value as ShapePoint | undefined))
-        if (this._endPoint_flag)
-            component.endPoint((this._endPoint0_value as ShapePoint | undefined))
+    _startPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _startPoint_0_0value?: ShapePoint | undefined
+    _endPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _endPoint_0_0value?: ShapePoint | undefined
+    applyModifierPatch(peer: ArkLinePeer): void {
+        super.applyModifierPatch(peer)
+        if (this._startPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._startPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStartPointAttribute((this._startPoint_0_0value as ShapePoint | undefined));
+                    this._startPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._startPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._startPoint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStartPointAttribute((undefined as ShapePoint | undefined));
+                }
+            }
+        }
+        if (this._endPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._endPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEndPointAttribute((this._endPoint_0_0value as ShapePoint | undefined));
+                    this._endPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._endPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._endPoint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEndPointAttribute((undefined as ShapePoint | undefined));
+                }
+            }
+        }
     }
-    public startPoint(value: ShapePoint | undefined): this {
-        this._startPoint_flag = true
-        this._startPoint0_value = value
+    mergeModifier(modifier: LineModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._startPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._startPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.startPoint(modifier._startPoint_0_0value);
+                    break;
+                }
+                default: {
+                    this.startPoint((undefined as ShapePoint | undefined));
+                }
+            }
+        }
+        if (modifier._endPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._endPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.endPoint(modifier._endPoint_0_0value);
+                    break;
+                }
+                default: {
+                    this.endPoint((undefined as ShapePoint | undefined));
+                }
+            }
+        }
+    }
+    startPoint(value: ShapePoint | undefined): this {
+        if (((this._startPoint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._startPoint_0_flag = AttributeUpdaterFlag.UPDATE
+            this._startPoint_0_0value = value
+        } else
+        {
+            this._startPoint_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public endPoint(value: ShapePoint | undefined): this {
-        this._endPoint_flag = true
-        this._endPoint0_value = value
+    endPoint(value: ShapePoint | undefined): this {
+        if (((this._endPoint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._endPoint_0_flag = AttributeUpdaterFlag.UPDATE
+            this._endPoint_0_0value = value
+        } else
+        {
+            this._endPoint_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {

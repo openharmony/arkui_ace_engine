@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback, wrapCallback, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
+import { GlobalScope } from "./GlobalScope"
 export class curves_ICurve_serializer {
     public static write(buffer: SerializerBase, value: curves.ICurve): void {
         let valueSerializer : SerializerBase = buffer
@@ -38,7 +38,7 @@ export namespace curves {
     export interface ICurve {
         interpolate(fraction: number): number
     }
-    export class ICurveInternal implements MaterializedBase,curves.ICurve {
+    export class ICurveInternal implements MaterializedBase,ICurve {
         peer?: Finalizable | undefined = undefined
         public getPeer(): Finalizable | undefined {
             return this.peer
@@ -95,5 +95,29 @@ export namespace curves {
         Smooth = 11,
         FRICTION = 12,
         Friction = 12
+    }
+    export function initCurve(curve?: Curve | undefined): ICurve {
+        return GlobalScope.curves_initCurve(curve)
+    }
+    export function stepsCurve(count: number, end: boolean): ICurve {
+        return GlobalScope.curves_stepsCurve(count, end)
+    }
+    export function customCurve(interpolate: ((fraction: number) => number)): ICurve {
+        return GlobalScope.curves_customCurve(interpolate)
+    }
+    export function cubicBezierCurve(x1: number, y1: number, x2: number, y2: number): ICurve {
+        return GlobalScope.curves_cubicBezierCurve(x1, y1, x2, y2)
+    }
+    export function springCurve(velocity: number, mass: number, stiffness: number, damping: number): ICurve {
+        return GlobalScope.curves_springCurve(velocity, mass, stiffness, damping)
+    }
+    export function springMotion(response?: number | undefined, dampingFraction?: number | undefined, overlapDuration?: number | undefined): ICurve {
+        return GlobalScope.curves_springMotion(response, dampingFraction, overlapDuration)
+    }
+    export function responsiveSpringMotion(response?: number | undefined, dampingFraction?: number | undefined, overlapDuration?: number | undefined): ICurve {
+        return GlobalScope.curves_responsiveSpringMotion(response, dampingFraction, overlapDuration)
+    }
+    export function interpolatingSpring(velocity: number, mass: number, stiffness: number, damping: number): ICurve {
+        return GlobalScope.curves_interpolatingSpring(velocity, mass, stiffness, damping)
     }
 }

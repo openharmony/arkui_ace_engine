@@ -16,167 +16,273 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, KInt, KBoolean, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
+import { Resource, Resource_serializer } from "./resource"
+import { TypeChecker } from "#components"
+import { CallbackTransformer } from "./../CallbackTransformer"
 import { GlobalScope } from "./GlobalScope"
+export interface FontOptions {
+    familyName: string | Resource;
+    familySrc: string | Resource;
+}
+export interface FontInfo {
+    path: string;
+    postScriptName: string;
+    fullName: string;
+    family: string;
+    subfamily: string;
+    weight: number;
+    width: number;
+    italic: boolean;
+    monoSpace: boolean;
+    symbolic: boolean;
+}
 export class font_UIFontAdjustInfo_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontAdjustInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_weight  = value.weight
-        valueSerializer.writeNumber(value_weight)
-        const value_to  = value.to
-        valueSerializer.writeNumber(value_to)
+        const valueHolderForWeight  = value.weight
+        valueSerializer.writeNumber(valueHolderForWeight)
+        const valueHolderForTo  = value.to
+        valueSerializer.writeNumber(valueHolderForTo)
     }
     public static read(buffer: DeserializerBase): font.UIFontAdjustInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const weight_result : number = (valueDeserializer.readNumber() as number)
-        const to_result : number = (valueDeserializer.readNumber() as number)
-        let value : font.UIFontAdjustInfo = ({weight: weight_result, to: to_result} as font.UIFontAdjustInfo)
+        const weightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const toTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : font.UIFontAdjustInfo = ({weight: weightTmpResult, to: toTmpResult} as font.UIFontAdjustInfo)
         return value
     }
 }
 export class font_UIFontAliasInfo_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontAliasInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_name  = value.name
-        valueSerializer.writeString(value_name)
-        const value_weight  = value.weight
-        valueSerializer.writeNumber(value_weight)
+        const valueHolderForName  = value.name
+        valueSerializer.writeString(valueHolderForName)
+        const valueHolderForWeight  = value.weight
+        valueSerializer.writeNumber(valueHolderForWeight)
     }
     public static read(buffer: DeserializerBase): font.UIFontAliasInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const name_result : string = (valueDeserializer.readString() as string)
-        const weight_result : number = (valueDeserializer.readNumber() as number)
-        let value : font.UIFontAliasInfo = ({name: name_result, weight: weight_result} as font.UIFontAliasInfo)
+        const nameTmpResult : string = (valueDeserializer.readString() as string)
+        const weightTmpResult : number = (valueDeserializer.readNumber() as number)
+        let value : font.UIFontAliasInfo = ({name: nameTmpResult, weight: weightTmpResult} as font.UIFontAliasInfo)
         return value
     }
 }
 export class font_UIFontConfig_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontConfig): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fontDir  = value.fontDir
-        valueSerializer.writeInt32((value_fontDir.length).toInt())
-        for (let value_fontDir_counter_i = 0; value_fontDir_counter_i < value_fontDir.length; value_fontDir_counter_i++) {
-            const value_fontDir_element : string = value_fontDir[value_fontDir_counter_i]
-            valueSerializer.writeString(value_fontDir_element)
+        const valueHolderForFontDir  = value.fontDir
+        valueSerializer.writeInt32((valueHolderForFontDir.length).toInt())
+        for (let valueHolderForFontDirCounterI = 0; valueHolderForFontDirCounterI < valueHolderForFontDir.length; valueHolderForFontDirCounterI++) {
+            const valueHolderForFontDirTmpElement : string = valueHolderForFontDir[valueHolderForFontDirCounterI]
+            valueSerializer.writeString(valueHolderForFontDirTmpElement)
         }
-        const value_generic  = value.generic
-        valueSerializer.writeInt32((value_generic.length).toInt())
-        for (let value_generic_counter_i = 0; value_generic_counter_i < value_generic.length; value_generic_counter_i++) {
-            const value_generic_element : font.UIFontGenericInfo = value_generic[value_generic_counter_i]
-            font_UIFontGenericInfo_serializer.write(valueSerializer, value_generic_element)
+        const valueHolderForGeneric  = value.generic
+        valueSerializer.writeInt32((valueHolderForGeneric.length).toInt())
+        for (let valueHolderForGenericCounterI = 0; valueHolderForGenericCounterI < valueHolderForGeneric.length; valueHolderForGenericCounterI++) {
+            const valueHolderForGenericTmpElement : font.UIFontGenericInfo = valueHolderForGeneric[valueHolderForGenericCounterI]
+            font_UIFontGenericInfo_serializer.write(valueSerializer, valueHolderForGenericTmpElement)
         }
-        const value_fallbackGroups  = value.fallbackGroups
-        valueSerializer.writeInt32((value_fallbackGroups.length).toInt())
-        for (let value_fallbackGroups_counter_i = 0; value_fallbackGroups_counter_i < value_fallbackGroups.length; value_fallbackGroups_counter_i++) {
-            const value_fallbackGroups_element : font.UIFontFallbackGroupInfo = value_fallbackGroups[value_fallbackGroups_counter_i]
-            font_UIFontFallbackGroupInfo_serializer.write(valueSerializer, value_fallbackGroups_element)
+        const valueHolderForFallbackGroups  = value.fallbackGroups
+        valueSerializer.writeInt32((valueHolderForFallbackGroups.length).toInt())
+        for (let valueHolderForFallbackGroupsCounterI = 0; valueHolderForFallbackGroupsCounterI < valueHolderForFallbackGroups.length; valueHolderForFallbackGroupsCounterI++) {
+            const valueHolderForFallbackGroupsTmpElement : font.UIFontFallbackGroupInfo = valueHolderForFallbackGroups[valueHolderForFallbackGroupsCounterI]
+            font_UIFontFallbackGroupInfo_serializer.write(valueSerializer, valueHolderForFallbackGroupsTmpElement)
         }
     }
     public static read(buffer: DeserializerBase): font.UIFontConfig {
         let valueDeserializer : DeserializerBase = buffer
-        const fontDir_buf_length : int32 = valueDeserializer.readInt32()
-        let fontDir_buf : Array<string> = new Array<string>(fontDir_buf_length)
-        for (let fontDir_buf_i = 0; fontDir_buf_i < fontDir_buf_length; fontDir_buf_i++) {
-            fontDir_buf[fontDir_buf_i] = (valueDeserializer.readString() as string)
+        const fontDirTmpBufLength : int32 = valueDeserializer.readInt32()
+        let fontDirTmpBuf : Array<string> = new Array<string>(fontDirTmpBufLength)
+        for (let fontDirTmpBufBufCounterI = 0; fontDirTmpBufBufCounterI < fontDirTmpBufLength; fontDirTmpBufBufCounterI++) {
+            fontDirTmpBuf[fontDirTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
-        const fontDir_result : Array<string> = fontDir_buf
-        const generic_buf_length : int32 = valueDeserializer.readInt32()
-        let generic_buf : Array<font.UIFontGenericInfo> = new Array<font.UIFontGenericInfo>(generic_buf_length)
-        for (let generic_buf_i = 0; generic_buf_i < generic_buf_length; generic_buf_i++) {
-            generic_buf[generic_buf_i] = font_UIFontGenericInfo_serializer.read(valueDeserializer)
+        const fontDirTmpResult : Array<string> = fontDirTmpBuf
+        const genericTmpBufLength : int32 = valueDeserializer.readInt32()
+        let genericTmpBuf : Array<font.UIFontGenericInfo> = new Array<font.UIFontGenericInfo>(genericTmpBufLength)
+        for (let genericTmpBufBufCounterI = 0; genericTmpBufBufCounterI < genericTmpBufLength; genericTmpBufBufCounterI++) {
+            genericTmpBuf[genericTmpBufBufCounterI] = font_UIFontGenericInfo_serializer.read(valueDeserializer)
         }
-        const generic_result : Array<font.UIFontGenericInfo> = generic_buf
-        const fallbackGroups_buf_length : int32 = valueDeserializer.readInt32()
-        let fallbackGroups_buf : Array<font.UIFontFallbackGroupInfo> = new Array<font.UIFontFallbackGroupInfo>(fallbackGroups_buf_length)
-        for (let fallbackGroups_buf_i = 0; fallbackGroups_buf_i < fallbackGroups_buf_length; fallbackGroups_buf_i++) {
-            fallbackGroups_buf[fallbackGroups_buf_i] = font_UIFontFallbackGroupInfo_serializer.read(valueDeserializer)
+        const genericTmpResult : Array<font.UIFontGenericInfo> = genericTmpBuf
+        const fallbackGroupsTmpBufLength : int32 = valueDeserializer.readInt32()
+        let fallbackGroupsTmpBuf : Array<font.UIFontFallbackGroupInfo> = new Array<font.UIFontFallbackGroupInfo>(fallbackGroupsTmpBufLength)
+        for (let fallbackGroupsTmpBufBufCounterI = 0; fallbackGroupsTmpBufBufCounterI < fallbackGroupsTmpBufLength; fallbackGroupsTmpBufBufCounterI++) {
+            fallbackGroupsTmpBuf[fallbackGroupsTmpBufBufCounterI] = font_UIFontFallbackGroupInfo_serializer.read(valueDeserializer)
         }
-        const fallbackGroups_result : Array<font.UIFontFallbackGroupInfo> = fallbackGroups_buf
-        let value : font.UIFontConfig = ({fontDir: fontDir_result, generic: generic_result, fallbackGroups: fallbackGroups_result} as font.UIFontConfig)
+        const fallbackGroupsTmpResult : Array<font.UIFontFallbackGroupInfo> = fallbackGroupsTmpBuf
+        let value : font.UIFontConfig = ({fontDir: fontDirTmpResult, generic: genericTmpResult, fallbackGroups: fallbackGroupsTmpResult} as font.UIFontConfig)
         return value
     }
 }
 export class font_UIFontFallbackGroupInfo_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontFallbackGroupInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fontSetName  = value.fontSetName
-        valueSerializer.writeString(value_fontSetName)
-        const value_fallback  = value.fallback
-        valueSerializer.writeInt32((value_fallback.length).toInt())
-        for (let value_fallback_counter_i = 0; value_fallback_counter_i < value_fallback.length; value_fallback_counter_i++) {
-            const value_fallback_element : font.UIFontFallbackInfo = value_fallback[value_fallback_counter_i]
-            font_UIFontFallbackInfo_serializer.write(valueSerializer, value_fallback_element)
+        const valueHolderForFontSetName  = value.fontSetName
+        valueSerializer.writeString(valueHolderForFontSetName)
+        const valueHolderForFallback  = value.fallback
+        valueSerializer.writeInt32((valueHolderForFallback.length).toInt())
+        for (let valueHolderForFallbackCounterI = 0; valueHolderForFallbackCounterI < valueHolderForFallback.length; valueHolderForFallbackCounterI++) {
+            const valueHolderForFallbackTmpElement : font.UIFontFallbackInfo = valueHolderForFallback[valueHolderForFallbackCounterI]
+            font_UIFontFallbackInfo_serializer.write(valueSerializer, valueHolderForFallbackTmpElement)
         }
     }
     public static read(buffer: DeserializerBase): font.UIFontFallbackGroupInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const fontSetName_result : string = (valueDeserializer.readString() as string)
-        const fallback_buf_length : int32 = valueDeserializer.readInt32()
-        let fallback_buf : Array<font.UIFontFallbackInfo> = new Array<font.UIFontFallbackInfo>(fallback_buf_length)
-        for (let fallback_buf_i = 0; fallback_buf_i < fallback_buf_length; fallback_buf_i++) {
-            fallback_buf[fallback_buf_i] = font_UIFontFallbackInfo_serializer.read(valueDeserializer)
+        const fontSetNameTmpResult : string = (valueDeserializer.readString() as string)
+        const fallbackTmpBufLength : int32 = valueDeserializer.readInt32()
+        let fallbackTmpBuf : Array<font.UIFontFallbackInfo> = new Array<font.UIFontFallbackInfo>(fallbackTmpBufLength)
+        for (let fallbackTmpBufBufCounterI = 0; fallbackTmpBufBufCounterI < fallbackTmpBufLength; fallbackTmpBufBufCounterI++) {
+            fallbackTmpBuf[fallbackTmpBufBufCounterI] = font_UIFontFallbackInfo_serializer.read(valueDeserializer)
         }
-        const fallback_result : Array<font.UIFontFallbackInfo> = fallback_buf
-        let value : font.UIFontFallbackGroupInfo = ({fontSetName: fontSetName_result, fallback: fallback_result} as font.UIFontFallbackGroupInfo)
+        const fallbackTmpResult : Array<font.UIFontFallbackInfo> = fallbackTmpBuf
+        let value : font.UIFontFallbackGroupInfo = ({fontSetName: fontSetNameTmpResult, fallback: fallbackTmpResult} as font.UIFontFallbackGroupInfo)
         return value
     }
 }
 export class font_UIFontFallbackInfo_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontFallbackInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_language  = value.language
-        valueSerializer.writeString(value_language)
-        const value_family  = value.family
-        valueSerializer.writeString(value_family)
+        const valueHolderForLanguage  = value.language
+        valueSerializer.writeString(valueHolderForLanguage)
+        const valueHolderForFamily  = value.family
+        valueSerializer.writeString(valueHolderForFamily)
     }
     public static read(buffer: DeserializerBase): font.UIFontFallbackInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const language_result : string = (valueDeserializer.readString() as string)
-        const family_result : string = (valueDeserializer.readString() as string)
-        let value : font.UIFontFallbackInfo = ({language: language_result, family: family_result} as font.UIFontFallbackInfo)
+        const languageTmpResult : string = (valueDeserializer.readString() as string)
+        const familyTmpResult : string = (valueDeserializer.readString() as string)
+        let value : font.UIFontFallbackInfo = ({language: languageTmpResult, family: familyTmpResult} as font.UIFontFallbackInfo)
         return value
     }
 }
 export class font_UIFontGenericInfo_serializer {
     public static write(buffer: SerializerBase, value: font.UIFontGenericInfo): void {
         let valueSerializer : SerializerBase = buffer
-        const value_family  = value.family
-        valueSerializer.writeString(value_family)
-        const value_alias  = value.alias
-        valueSerializer.writeInt32((value_alias.length).toInt())
-        for (let value_alias_counter_i = 0; value_alias_counter_i < value_alias.length; value_alias_counter_i++) {
-            const value_alias_element : font.UIFontAliasInfo = value_alias[value_alias_counter_i]
-            font_UIFontAliasInfo_serializer.write(valueSerializer, value_alias_element)
+        const valueHolderForFamily  = value.family
+        valueSerializer.writeString(valueHolderForFamily)
+        const valueHolderForAlias  = value.alias
+        valueSerializer.writeInt32((valueHolderForAlias.length).toInt())
+        for (let valueHolderForAliasCounterI = 0; valueHolderForAliasCounterI < valueHolderForAlias.length; valueHolderForAliasCounterI++) {
+            const valueHolderForAliasTmpElement : font.UIFontAliasInfo = valueHolderForAlias[valueHolderForAliasCounterI]
+            font_UIFontAliasInfo_serializer.write(valueSerializer, valueHolderForAliasTmpElement)
         }
-        const value_adjust  = value.adjust
-        valueSerializer.writeInt32((value_adjust.length).toInt())
-        for (let value_adjust_counter_i = 0; value_adjust_counter_i < value_adjust.length; value_adjust_counter_i++) {
-            const value_adjust_element : font.UIFontAdjustInfo = value_adjust[value_adjust_counter_i]
-            font_UIFontAdjustInfo_serializer.write(valueSerializer, value_adjust_element)
+        const valueHolderForAdjust  = value.adjust
+        valueSerializer.writeInt32((valueHolderForAdjust.length).toInt())
+        for (let valueHolderForAdjustCounterI = 0; valueHolderForAdjustCounterI < valueHolderForAdjust.length; valueHolderForAdjustCounterI++) {
+            const valueHolderForAdjustTmpElement : font.UIFontAdjustInfo = valueHolderForAdjust[valueHolderForAdjustCounterI]
+            font_UIFontAdjustInfo_serializer.write(valueSerializer, valueHolderForAdjustTmpElement)
         }
     }
     public static read(buffer: DeserializerBase): font.UIFontGenericInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const family_result : string = (valueDeserializer.readString() as string)
-        const alias_buf_length : int32 = valueDeserializer.readInt32()
-        let alias_buf : Array<font.UIFontAliasInfo> = new Array<font.UIFontAliasInfo>(alias_buf_length)
-        for (let alias_buf_i = 0; alias_buf_i < alias_buf_length; alias_buf_i++) {
-            alias_buf[alias_buf_i] = font_UIFontAliasInfo_serializer.read(valueDeserializer)
+        const familyTmpResult : string = (valueDeserializer.readString() as string)
+        const aliasTmpBufLength : int32 = valueDeserializer.readInt32()
+        let aliasTmpBuf : Array<font.UIFontAliasInfo> = new Array<font.UIFontAliasInfo>(aliasTmpBufLength)
+        for (let aliasTmpBufBufCounterI = 0; aliasTmpBufBufCounterI < aliasTmpBufLength; aliasTmpBufBufCounterI++) {
+            aliasTmpBuf[aliasTmpBufBufCounterI] = font_UIFontAliasInfo_serializer.read(valueDeserializer)
         }
-        const alias_result : Array<font.UIFontAliasInfo> = alias_buf
-        const adjust_buf_length : int32 = valueDeserializer.readInt32()
-        let adjust_buf : Array<font.UIFontAdjustInfo> = new Array<font.UIFontAdjustInfo>(adjust_buf_length)
-        for (let adjust_buf_i = 0; adjust_buf_i < adjust_buf_length; adjust_buf_i++) {
-            adjust_buf[adjust_buf_i] = font_UIFontAdjustInfo_serializer.read(valueDeserializer)
+        const aliasTmpResult : Array<font.UIFontAliasInfo> = aliasTmpBuf
+        const adjustTmpBufLength : int32 = valueDeserializer.readInt32()
+        let adjustTmpBuf : Array<font.UIFontAdjustInfo> = new Array<font.UIFontAdjustInfo>(adjustTmpBufLength)
+        for (let adjustTmpBufBufCounterI = 0; adjustTmpBufBufCounterI < adjustTmpBufLength; adjustTmpBufBufCounterI++) {
+            adjustTmpBuf[adjustTmpBufBufCounterI] = font_UIFontAdjustInfo_serializer.read(valueDeserializer)
         }
-        const adjust_result : Array<font.UIFontAdjustInfo> = adjust_buf
-        let value : font.UIFontGenericInfo = ({family: family_result, alias: alias_result, adjust: adjust_result} as font.UIFontGenericInfo)
+        const adjustTmpResult : Array<font.UIFontAdjustInfo> = adjustTmpBuf
+        let value : font.UIFontGenericInfo = ({family: familyTmpResult, alias: aliasTmpResult, adjust: adjustTmpResult} as font.UIFontGenericInfo)
+        return value
+    }
+}
+export class FontInfo_serializer {
+    public static write(buffer: SerializerBase, value: FontInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForPath  = value.path
+        valueSerializer.writeString(valueHolderForPath)
+        const valueHolderForPostScriptName  = value.postScriptName
+        valueSerializer.writeString(valueHolderForPostScriptName)
+        const valueHolderForFullName  = value.fullName
+        valueSerializer.writeString(valueHolderForFullName)
+        const valueHolderForFamily  = value.family
+        valueSerializer.writeString(valueHolderForFamily)
+        const valueHolderForSubfamily  = value.subfamily
+        valueSerializer.writeString(valueHolderForSubfamily)
+        const valueHolderForWeight  = value.weight
+        valueSerializer.writeNumber(valueHolderForWeight)
+        const valueHolderForWidth  = value.width
+        valueSerializer.writeNumber(valueHolderForWidth)
+        const valueHolderForItalic  = value.italic
+        valueSerializer.writeBoolean(valueHolderForItalic)
+        const valueHolderForMonoSpace  = value.monoSpace
+        valueSerializer.writeBoolean(valueHolderForMonoSpace)
+        const valueHolderForSymbolic  = value.symbolic
+        valueSerializer.writeBoolean(valueHolderForSymbolic)
+    }
+    public static read(buffer: DeserializerBase): FontInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const pathTmpResult : string = (valueDeserializer.readString() as string)
+        const postScriptNameTmpResult : string = (valueDeserializer.readString() as string)
+        const fullNameTmpResult : string = (valueDeserializer.readString() as string)
+        const familyTmpResult : string = (valueDeserializer.readString() as string)
+        const subfamilyTmpResult : string = (valueDeserializer.readString() as string)
+        const weightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const widthTmpResult : number = (valueDeserializer.readNumber() as number)
+        const italicTmpResult : boolean = valueDeserializer.readBoolean()
+        const monoSpaceTmpResult : boolean = valueDeserializer.readBoolean()
+        const symbolicTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : FontInfo = ({path: pathTmpResult, postScriptName: postScriptNameTmpResult, fullName: fullNameTmpResult, family: familyTmpResult, subfamily: subfamilyTmpResult, weight: weightTmpResult, width: widthTmpResult, italic: italicTmpResult, monoSpace: monoSpaceTmpResult, symbolic: symbolicTmpResult} as FontInfo)
+        return value
+    }
+}
+export class FontOptions_serializer {
+    public static write(buffer: SerializerBase, value: FontOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFamilyName  = value.familyName
+        if (valueHolderForFamilyName instanceof string) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForFamilyNameForIdx0  = valueHolderForFamilyName as string
+            valueSerializer.writeString(valueHolderForFamilyNameForIdx0)
+        } else if (valueHolderForFamilyName instanceof Resource) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForFamilyNameForIdx1  = valueHolderForFamilyName as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFamilyNameForIdx1)
+        }
+        const valueHolderForFamilySrc  = value.familySrc
+        if (valueHolderForFamilySrc instanceof string) {
+            valueSerializer.writeInt8((0).toChar())
+            const valueHolderForFamilySrcForIdx0  = valueHolderForFamilySrc as string
+            valueSerializer.writeString(valueHolderForFamilySrcForIdx0)
+        } else if (valueHolderForFamilySrc instanceof Resource) {
+            valueSerializer.writeInt8((1).toChar())
+            const valueHolderForFamilySrcForIdx1  = valueHolderForFamilySrc as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFamilySrcForIdx1)
+        }
+    }
+    public static read(buffer: DeserializerBase): FontOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const familyNameTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let familyNameTmpBuf : string | Resource | undefined
+        if (familyNameTmpBufUnionSelector == (0).toChar()) {
+            familyNameTmpBuf = (valueDeserializer.readString() as string)
+        } else if (familyNameTmpBufUnionSelector == (1).toChar()) {
+            familyNameTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for familyNameTmpBuf has to be chosen through deserialisation.")
+        }
+        const familyNameTmpResult : string | Resource = (familyNameTmpBuf as string | Resource)
+        const familySrcTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let familySrcTmpBuf : string | Resource | undefined
+        if (familySrcTmpBufUnionSelector == (0).toChar()) {
+            familySrcTmpBuf = (valueDeserializer.readString() as string)
+        } else if (familySrcTmpBufUnionSelector == (1).toChar()) {
+            familySrcTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for familySrcTmpBuf has to be chosen through deserialisation.")
+        }
+        const familySrcTmpResult : string | Resource = (familySrcTmpBuf as string | Resource)
+        let value : FontOptions = ({familyName: familyNameTmpResult, familySrc: familySrcTmpResult} as FontOptions)
         return value
     }
 }

@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Want_serializer, Want } from "./../generated/ohos.app.ability.Want"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ErrorCallback, BusinessError } from "./../generated/ohos.base"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { EmbeddedType } from "./enums"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,7 +39,7 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkEmbeddedComponentPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._EmbeddedComponent_construct(peerId, flags)
-        const _peer  = new ArkEmbeddedComponentPeer(_peerPtr, peerId, "EmbeddedComponent", flags)
+        const _peer  = new ArkEmbeddedComponentPeer(_peerPtr, peerId, 'EmbeddedComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -50,24 +51,24 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     }
     setOnTerminatedAttribute(value: ((value0: TerminationInfo) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_setOnTerminated(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnErrorAttribute(value: ErrorCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._EmbeddedComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -96,13 +97,6 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: EmbeddedComponentAttribute): void {
-        super.apply(target)
-        if (this.onTerminated_value !== undefined)
-            target.onTerminated(this.onTerminated_value!)
-        if (this.onError_value !== undefined)
-            target.onError(this.onError_value!)
     }
 }
 
@@ -136,7 +130,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         return this
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -144,26 +137,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         super.applyAttributesFinish()
     }
 }
-export function withEmbeddedComponentStyle(receiver: EmbeddedComponentAttribute, modifier: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkEmbeddedComponentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("EmbeddedComponent")
-// export function EmbeddedComponent(
-//     loader: Want, type: EmbeddedType,
-//     @memo
-//     content_?: () => void,
-// ): EmbeddedComponentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function EmbeddedComponent(
@@ -179,35 +152,108 @@ export function EmbeddedComponent(
     NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (_: ArkEmbeddedComponentPeer): void => {
         receiver.setEmbeddedComponentOptions(loader,type)
         style?.(receiver)
-        withEmbeddedComponentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkEmbeddedComponentSet extends ArkCommonMethodSet implements EmbeddedComponentAttribute {
+export class EmbeddedComponentModifier extends CommonMethodModifier implements EmbeddedComponentAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _onTerminated_flag?: boolean
-    _onTerminated0_value?: ((value0: TerminationInfo) => void) | undefined
-    _onError_flag?: boolean
-    _onError0_value?: ErrorCallback | undefined
-    applyModifierPatch(component: EmbeddedComponentAttribute): void {
-        if (this._onTerminated_flag)
-            component.onTerminated((this._onTerminated0_value as ((value0: TerminationInfo) => void) | undefined))
-        if (this._onError_flag)
-            component.onError((this._onError0_value as ErrorCallback | undefined))
+    _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
+    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onError_0_0value?: ErrorCallback | undefined
+    applyModifierPatch(peer: ArkEmbeddedComponentPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onTerminated_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnTerminatedAttribute((this._onTerminated_0_0value as ((value0: TerminationInfo) => void) | undefined));
+                    this._onTerminated_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onTerminated_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onTerminated_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnTerminatedAttribute((undefined as ((value0: TerminationInfo) => void) | undefined));
+                }
+            }
+        }
+        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as ErrorCallback | undefined));
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnErrorAttribute((undefined as ErrorCallback | undefined));
+                }
+            }
+        }
     }
-    public onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        this._onTerminated_flag = true
-        this._onTerminated0_value = value
+    mergeModifier(modifier: EmbeddedComponentModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onTerminated_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onTerminated(modifier._onTerminated_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTerminated((undefined as ((value0: TerminationInfo) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onError_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onError(modifier._onError_0_0value);
+                    break;
+                }
+                default: {
+                    this.onError((undefined as ErrorCallback | undefined));
+                }
+            }
+        }
+    }
+    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
+        if (((this._onTerminated_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onTerminated_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onTerminated_0_0value = value
+        } else
+        {
+            this._onTerminated_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onError(value: ErrorCallback | undefined): this {
-        this._onError_flag = true
-        this._onError0_value = value
+    onError(value: ErrorCallback | undefined): this {
+        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onError_0_0value = value
+        } else
+        {
+            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

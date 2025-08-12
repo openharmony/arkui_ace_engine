@@ -184,8 +184,11 @@ suite(util.basename(__filename), () => {
                                 arkts.factory.createIdentifier(
                                     'f'
                                 ),
-                                [],undefined,
-
+                                [],
+                                undefined,
+                                false,
+                                false,
+                                undefined,
                             )
                         )
                     ]

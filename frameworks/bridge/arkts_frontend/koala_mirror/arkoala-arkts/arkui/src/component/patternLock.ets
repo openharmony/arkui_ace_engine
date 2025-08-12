@@ -17,21 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Length, ResourceColor } from "./units"
 import { Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { LengthMetrics, LengthMetrics_serializer } from "./../generated/arkui.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class PatternLockControllerInternal {
     public static fromPtr(ptr: KPointer): PatternLockController {
         return new PatternLockController(ptr)
@@ -78,322 +79,286 @@ export class ArkPatternLockPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkPatternLockPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._PatternLock_construct(peerId, flags)
-        const _peer  = new ArkPatternLockPeer(_peerPtr, peerId, "PatternLock", flags)
+        const _peer  = new ArkPatternLockPeer(_peerPtr, peerId, 'PatternLock', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setPatternLockOptionsAttribute(controller?: PatternLockController): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let controller_type : int32 = RuntimeType.UNDEFINED
-        controller_type = runtimeType(controller)
-        thisSerializer.writeInt8((controller_type).toChar())
-        if ((controller_type) != (RuntimeType.UNDEFINED)) {
-            const controller_value  = controller!
-            PatternLockController_serializer.write(thisSerializer, controller_value)
+        if (controller !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const controllerTmpValue  = controller!
+            PatternLockController_serializer.write(thisSerializer, controllerTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockInterface_setPatternLockOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSideLengthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setSideLength(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCircleRadiusAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setCircleRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRegularColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setRegularColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setSelectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setActiveColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setActiveColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPathColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPathStrokeWidthAttribute(value: number | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setPathStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnPatternCompleteAttribute(value: ((input: Array<number>) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setOnPatternComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAutoResetAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setAutoReset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnDotConnectAttribute(value: ((value0: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setOnDotConnect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setActivateCircleStyleAttribute(value: CircleStyleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            CircleStyleOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            CircleStyleOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setActivateCircleStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSkipUnselectedPointAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._PatternLockAttribute_setSkipUnselectedPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -507,35 +472,6 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: PatternLockAttribute): void {
-        super.apply(target)
-        if (this.sideLength_value !== undefined)
-            target.sideLength(this.sideLength_value!)
-        if (this.circleRadius_value !== undefined)
-            target.circleRadius(this.circleRadius_value!)
-        if (this.backgroundColor_value !== undefined)
-            target.backgroundColor(this.backgroundColor_value!)
-        if (this.regularColor_value !== undefined)
-            target.regularColor(this.regularColor_value!)
-        if (this.selectedColor_value !== undefined)
-            target.selectedColor(this.selectedColor_value!)
-        if (this.activeColor_value !== undefined)
-            target.activeColor(this.activeColor_value!)
-        if (this.pathColor_value !== undefined)
-            target.pathColor(this.pathColor_value!)
-        if (this.pathStrokeWidth_value !== undefined)
-            target.pathStrokeWidth(this.pathStrokeWidth_value!)
-        if (this.onPatternComplete_value !== undefined)
-            target.onPatternComplete(this.onPatternComplete_value!)
-        if (this.autoReset_value !== undefined)
-            target.autoReset(this.autoReset_value!)
-        if (this.onDotConnect_value !== undefined)
-            target.onDotConnect(this.onDotConnect_value!)
-        if (this.activateCircleStyle_value !== undefined)
-            target.activateCircleStyle(this.activateCircleStyle_value!)
-        if (this.skipUnselectedPoint_value !== undefined)
-            target.skipUnselectedPoint(this.skipUnselectedPoint_value!)
     }
 }
 
@@ -656,7 +592,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -664,26 +599,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
         super.applyAttributesFinish()
     }
 }
-export function withPatternLockStyle(receiver: PatternLockAttribute, modifier: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkPatternLockStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("PatternLock")
-// export function PatternLock(
-//     controller?: PatternLockController,
-//     @memo
-//     content_?: () => void,
-// ): PatternLockAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function PatternLock(
@@ -699,134 +614,592 @@ export function PatternLock(
     NodeAttach<ArkPatternLockPeer>((): ArkPatternLockPeer => ArkPatternLockPeer.create(receiver), (_: ArkPatternLockPeer): void => {
         receiver.setPatternLockOptions(controller)
         style?.(receiver)
-        withPatternLockStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkPatternLockSet extends ArkCommonMethodSet implements PatternLockAttribute {
+export class PatternLockModifier extends CommonMethodModifier implements PatternLockAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _sideLength_flag?: boolean
-    _sideLength0_value?: Length | undefined
-    _circleRadius_flag?: boolean
-    _circleRadius0_value?: Length | undefined
-    _backgroundColor_flag?: boolean
-    _backgroundColor0_value?: ResourceColor | undefined
-    _regularColor_flag?: boolean
-    _regularColor0_value?: ResourceColor | undefined
-    _selectedColor_flag?: boolean
-    _selectedColor0_value?: ResourceColor | undefined
-    _activeColor_flag?: boolean
-    _activeColor0_value?: ResourceColor | undefined
-    _pathColor_flag?: boolean
-    _pathColor0_value?: ResourceColor | undefined
-    _pathStrokeWidth_flag?: boolean
-    _pathStrokeWidth0_value?: number | string | undefined
-    _onPatternComplete_flag?: boolean
-    _onPatternComplete0_value?: ((input: Array<number>) => void) | undefined
-    _autoReset_flag?: boolean
-    _autoReset0_value?: boolean | undefined
-    _onDotConnect_flag?: boolean
-    _onDotConnect0_value?: ((value0: number) => void) | undefined
-    _activateCircleStyle_flag?: boolean
-    _activateCircleStyle0_value?: CircleStyleOptions | undefined
-    _skipUnselectedPoint_flag?: boolean
-    _skipUnselectedPoint0_value?: boolean | undefined
-    applyModifierPatch(component: PatternLockAttribute): void {
-        if (this._sideLength_flag)
-            component.sideLength((this._sideLength0_value as Length | undefined))
-        if (this._circleRadius_flag)
-            component.circleRadius((this._circleRadius0_value as Length | undefined))
-        if (this._backgroundColor_flag)
-            component.backgroundColor((this._backgroundColor0_value as ResourceColor | undefined))
-        if (this._regularColor_flag)
-            component.regularColor((this._regularColor0_value as ResourceColor | undefined))
-        if (this._selectedColor_flag)
-            component.selectedColor((this._selectedColor0_value as ResourceColor | undefined))
-        if (this._activeColor_flag)
-            component.activeColor((this._activeColor0_value as ResourceColor | undefined))
-        if (this._pathColor_flag)
-            component.pathColor((this._pathColor0_value as ResourceColor | undefined))
-        if (this._pathStrokeWidth_flag)
-            component.pathStrokeWidth((this._pathStrokeWidth0_value as number | string | undefined))
-        if (this._onPatternComplete_flag)
-            component.onPatternComplete((this._onPatternComplete0_value as ((input: Array<number>) => void) | undefined))
-        if (this._autoReset_flag)
-            component.autoReset((this._autoReset0_value as boolean | undefined))
-        if (this._onDotConnect_flag)
-            component.onDotConnect((this._onDotConnect0_value as ((value0: number) => void) | undefined))
-        if (this._activateCircleStyle_flag)
-            component.activateCircleStyle((this._activateCircleStyle0_value as CircleStyleOptions | undefined))
-        if (this._skipUnselectedPoint_flag)
-            component.skipUnselectedPoint((this._skipUnselectedPoint0_value as boolean | undefined))
+    _sideLength_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _sideLength_0_0value?: Length | undefined
+    _circleRadius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _circleRadius_0_0value?: Length | undefined
+    _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backgroundColor_0_0value?: ResourceColor | undefined
+    _regularColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _regularColor_0_0value?: ResourceColor | undefined
+    _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedColor_0_0value?: ResourceColor | undefined
+    _activeColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _activeColor_0_0value?: ResourceColor | undefined
+    _pathColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pathColor_0_0value?: ResourceColor | undefined
+    _pathStrokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _pathStrokeWidth_0_0value?: number | string | undefined
+    _onPatternComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onPatternComplete_0_0value?: ((input: Array<number>) => void) | undefined
+    _autoReset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _autoReset_0_0value?: boolean | undefined
+    _onDotConnect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDotConnect_0_0value?: ((value0: number) => void) | undefined
+    _activateCircleStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _activateCircleStyle_0_0value?: CircleStyleOptions | undefined
+    _skipUnselectedPoint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _skipUnselectedPoint_0_0value?: boolean | undefined
+    applyModifierPatch(peer: ArkPatternLockPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._sideLength_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._sideLength_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSideLengthAttribute((this._sideLength_0_0value as Length | undefined));
+                    this._sideLength_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._sideLength_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._sideLength_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSideLengthAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._circleRadius_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._circleRadius_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCircleRadiusAttribute((this._circleRadius_0_0value as Length | undefined));
+                    this._circleRadius_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._circleRadius_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._circleRadius_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCircleRadiusAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | undefined));
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._regularColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._regularColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setRegularColorAttribute((this._regularColor_0_0value as ResourceColor | undefined));
+                    this._regularColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._regularColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._regularColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setRegularColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedColorAttribute((this._selectedColor_0_0value as ResourceColor | undefined));
+                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._activeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._activeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setActiveColorAttribute((this._activeColor_0_0value as ResourceColor | undefined));
+                    this._activeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._activeColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._activeColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setActiveColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._pathColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pathColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPathColorAttribute((this._pathColor_0_0value as ResourceColor | undefined));
+                    this._pathColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pathColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pathColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPathColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._pathStrokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._pathStrokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPathStrokeWidthAttribute((this._pathStrokeWidth_0_0value as number | string | undefined));
+                    this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPathStrokeWidthAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._onPatternComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onPatternComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnPatternCompleteAttribute((this._onPatternComplete_0_0value as ((input: Array<number>) => void) | undefined));
+                    this._onPatternComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onPatternComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onPatternComplete_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnPatternCompleteAttribute((undefined as ((input: Array<number>) => void) | undefined));
+                }
+            }
+        }
+        if (this._autoReset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._autoReset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAutoResetAttribute((this._autoReset_0_0value as boolean | undefined));
+                    this._autoReset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._autoReset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._autoReset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAutoResetAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._onDotConnect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDotConnect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDotConnectAttribute((this._onDotConnect_0_0value as ((value0: number) => void) | undefined));
+                    this._onDotConnect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDotConnect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDotConnect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDotConnectAttribute((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._activateCircleStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._activateCircleStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setActivateCircleStyleAttribute((this._activateCircleStyle_0_0value as CircleStyleOptions | undefined));
+                    this._activateCircleStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._activateCircleStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._activateCircleStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setActivateCircleStyleAttribute((undefined as CircleStyleOptions | undefined));
+                }
+            }
+        }
+        if (this._skipUnselectedPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._skipUnselectedPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSkipUnselectedPointAttribute((this._skipUnselectedPoint_0_0value as boolean | undefined));
+                    this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSkipUnselectedPointAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
-    public sideLength(value: Length | undefined): this {
-        this._sideLength_flag = true
-        this._sideLength0_value = value
+    mergeModifier(modifier: PatternLockModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._sideLength_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._sideLength_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.sideLength(modifier._sideLength_0_0value);
+                    break;
+                }
+                default: {
+                    this.sideLength((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._circleRadius_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._circleRadius_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.circleRadius(modifier._circleRadius_0_0value);
+                    break;
+                }
+                default: {
+                    this.circleRadius((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backgroundColor(modifier._backgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.backgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._regularColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._regularColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.regularColor(modifier._regularColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.regularColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedColor(modifier._selectedColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._activeColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._activeColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.activeColor(modifier._activeColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.activeColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._pathColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pathColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pathColor(modifier._pathColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.pathColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._pathStrokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._pathStrokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.pathStrokeWidth(modifier._pathStrokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.pathStrokeWidth((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._onPatternComplete_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onPatternComplete_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onPatternComplete(modifier._onPatternComplete_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPatternComplete((undefined as ((input: Array<number>) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._autoReset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._autoReset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.autoReset(modifier._autoReset_0_0value);
+                    break;
+                }
+                default: {
+                    this.autoReset((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._onDotConnect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDotConnect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDotConnect(modifier._onDotConnect_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDotConnect((undefined as ((value0: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._activateCircleStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._activateCircleStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.activateCircleStyle(modifier._activateCircleStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.activateCircleStyle((undefined as CircleStyleOptions | undefined));
+                }
+            }
+        }
+        if (modifier._skipUnselectedPoint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._skipUnselectedPoint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.skipUnselectedPoint(modifier._skipUnselectedPoint_0_0value);
+                    break;
+                }
+                default: {
+                    this.skipUnselectedPoint((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    sideLength(value: Length | undefined): this {
+        if (((this._sideLength_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._sideLength_0_flag = AttributeUpdaterFlag.UPDATE
+            this._sideLength_0_0value = value
+        } else
+        {
+            this._sideLength_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public circleRadius(value: Length | undefined): this {
-        this._circleRadius_flag = true
-        this._circleRadius0_value = value
+    circleRadius(value: Length | undefined): this {
+        if (((this._circleRadius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._circleRadius_0_flag = AttributeUpdaterFlag.UPDATE
+            this._circleRadius_0_0value = value
+        } else
+        {
+            this._circleRadius_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
-        this._backgroundColor_flag = true
-        this._backgroundColor0_value = value
+    backgroundColor(value: ResourceColor | undefined): this {
+        if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backgroundColor_0_0value = value
+        } else
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public regularColor(value: ResourceColor | undefined): this {
-        this._regularColor_flag = true
-        this._regularColor0_value = value
+    regularColor(value: ResourceColor | undefined): this {
+        if (((this._regularColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._regularColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._regularColor_0_0value = value
+        } else
+        {
+            this._regularColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
-        this._selectedColor_flag = true
-        this._selectedColor0_value = value
+    selectedColor(value: ResourceColor | undefined): this {
+        if (((this._selectedColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedColor_0_0value = value
+        } else
+        {
+            this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public activeColor(value: ResourceColor | undefined): this {
-        this._activeColor_flag = true
-        this._activeColor0_value = value
+    activeColor(value: ResourceColor | undefined): this {
+        if (((this._activeColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._activeColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._activeColor_0_0value = value
+        } else
+        {
+            this._activeColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pathColor(value: ResourceColor | undefined): this {
-        this._pathColor_flag = true
-        this._pathColor0_value = value
+    pathColor(value: ResourceColor | undefined): this {
+        if (((this._pathColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._pathColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pathColor_0_0value = value
+        } else
+        {
+            this._pathColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public pathStrokeWidth(value: number | string | undefined): this {
-        this._pathStrokeWidth_flag = true
-        this._pathStrokeWidth0_value = value
+    pathStrokeWidth(value: number | string | undefined): this {
+        if (((this._pathStrokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pathStrokeWidth_0_0value) !== (value)))
+        {
+            this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._pathStrokeWidth_0_0value = value
+        } else
+        {
+            this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
-        this._onPatternComplete_flag = true
-        this._onPatternComplete0_value = value
+    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+        if (((this._onPatternComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onPatternComplete_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onPatternComplete_0_0value = value
+        } else
+        {
+            this._onPatternComplete_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public autoReset(value: boolean | undefined): this {
-        this._autoReset_flag = true
-        this._autoReset0_value = value
+    autoReset(value: boolean | undefined): this {
+        if (((this._autoReset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._autoReset_0_0value) !== (value)))
+        {
+            this._autoReset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._autoReset_0_0value = value
+        } else
+        {
+            this._autoReset_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onDotConnect(value: ((value0: number) => void) | undefined): this {
-        this._onDotConnect_flag = true
-        this._onDotConnect0_value = value
+    onDotConnect(value: ((value0: number) => void) | undefined): this {
+        if (((this._onDotConnect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDotConnect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDotConnect_0_0value = value
+        } else
+        {
+            this._onDotConnect_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public activateCircleStyle(value: CircleStyleOptions | undefined): this {
-        this._activateCircleStyle_flag = true
-        this._activateCircleStyle0_value = value
+    activateCircleStyle(value: CircleStyleOptions | undefined): this {
+        if (((this._activateCircleStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._activateCircleStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._activateCircleStyle_0_0value = value
+        } else
+        {
+            this._activateCircleStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public skipUnselectedPoint(value: boolean | undefined): this {
-        this._skipUnselectedPoint_flag = true
-        this._skipUnselectedPoint0_value = value
+    skipUnselectedPoint(value: boolean | undefined): this {
+        if (((this._skipUnselectedPoint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._skipUnselectedPoint_0_0value) !== (value)))
+        {
+            this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.UPDATE
+            this._skipUnselectedPoint_0_0value = value
+        } else
+        {
+            this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -847,108 +1220,95 @@ export class PatternLockController_serializer {
 export class CircleStyleOptions_serializer {
     public static write(buffer: SerializerBase, value: CircleStyleOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0))
+            } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_color_value_3  = value_color_value as Resource
-                Resource_serializer.write(valueSerializer, value_color_value_3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
-            const value_radius_value  = value_radius!
-            LengthMetrics_serializer.write(valueSerializer, value_radius_value)
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_enableWaveEffect  = value.enableWaveEffect
-        let value_enableWaveEffect_type : int32 = RuntimeType.UNDEFINED
-        value_enableWaveEffect_type = runtimeType(value_enableWaveEffect)
-        valueSerializer.writeInt8((value_enableWaveEffect_type).toChar())
-        if ((value_enableWaveEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableWaveEffect_value  = value_enableWaveEffect!
-            valueSerializer.writeBoolean(value_enableWaveEffect_value)
+        const valueHolderForEnableWaveEffect  = value.enableWaveEffect
+        if (valueHolderForEnableWaveEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableWaveEffectTmpValue  = valueHolderForEnableWaveEffect!
+            valueSerializer.writeBoolean(valueHolderForEnableWaveEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_enableForeground  = value.enableForeground
-        let value_enableForeground_type : int32 = RuntimeType.UNDEFINED
-        value_enableForeground_type = runtimeType(value_enableForeground)
-        valueSerializer.writeInt8((value_enableForeground_type).toChar())
-        if ((value_enableForeground_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableForeground_value  = value_enableForeground!
-            valueSerializer.writeBoolean(value_enableForeground_value)
+        const valueHolderForEnableForeground  = value.enableForeground
+        if (valueHolderForEnableForeground !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableForegroundTmpValue  = valueHolderForEnableForeground!
+            valueSerializer.writeBoolean(valueHolderForEnableForegroundTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CircleStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == (0).toChar()) {
-                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == (2).toChar()) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == (3).toChar()) {
-                color_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radius_buf : LengthMetrics | undefined
-        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            radius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : LengthMetrics | undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
-        const radius_result : LengthMetrics | undefined = radius_buf
-        const enableWaveEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableWaveEffect_buf : boolean | undefined
-        if ((enableWaveEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableWaveEffect_buf = valueDeserializer.readBoolean()
+        const radiusTmpResult : LengthMetrics | undefined = radiusTmpBuf
+        const enableWaveEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableWaveEffectTmpBuf : boolean | undefined
+        if ((enableWaveEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableWaveEffectTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableWaveEffect_result : boolean | undefined = enableWaveEffect_buf
-        const enableForeground_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableForeground_buf : boolean | undefined
-        if ((enableForeground_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableForeground_buf = valueDeserializer.readBoolean()
+        const enableWaveEffectTmpResult : boolean | undefined = enableWaveEffectTmpBuf
+        const enableForegroundTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableForegroundTmpBuf : boolean | undefined
+        if ((enableForegroundTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableForegroundTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableForeground_result : boolean | undefined = enableForeground_buf
-        let value : CircleStyleOptions = ({color: color_result, radius: radius_result, enableWaveEffect: enableWaveEffect_result, enableForeground: enableForeground_result} as CircleStyleOptions)
+        const enableForegroundTmpResult : boolean | undefined = enableForegroundTmpBuf
+        let value : CircleStyleOptions = ({color: colorTmpResult, radius: radiusTmpResult, enableWaveEffect: enableWaveEffectTmpResult, enableForeground: enableForegroundTmpResult} as CircleStyleOptions)
         return value
     }
 }

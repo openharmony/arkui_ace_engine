@@ -16,10 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -135,2126 +134,1666 @@ export class ThemeControl_serializer {
 export class Colors_serializer {
     public static write(buffer: SerializerBase, value: Colors): void {
         let valueSerializer : SerializerBase = buffer
-        const value_brand  = value.brand
-        let value_brand_type : int32 = RuntimeType.UNDEFINED
-        value_brand_type = runtimeType(value_brand)
-        if (TypeChecker.isColor(value_brand)) {
+        const valueHolderForBrand  = value.brand
+        if (valueHolderForBrand instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_brand_0  = value_brand as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_brand_0))
-        }
-        else if (RuntimeType.NUMBER == value_brand_type) {
+            const valueHolderForBrandForIdx0  = valueHolderForBrand as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBrandForIdx0))
+        } else if (valueHolderForBrand instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_brand_1  = value_brand as number
-            valueSerializer.writeNumber(value_brand_1)
-        }
-        else if (RuntimeType.STRING == value_brand_type) {
+            const valueHolderForBrandForIdx1  = valueHolderForBrand as number
+            valueSerializer.writeNumber(valueHolderForBrandForIdx1)
+        } else if (valueHolderForBrand instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_brand_2  = value_brand as string
-            valueSerializer.writeString(value_brand_2)
-        }
-        else if (RuntimeType.OBJECT == value_brand_type) {
+            const valueHolderForBrandForIdx2  = valueHolderForBrand as string
+            valueSerializer.writeString(valueHolderForBrandForIdx2)
+        } else if (valueHolderForBrand instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_brand_3  = value_brand as Resource
-            Resource_serializer.write(valueSerializer, value_brand_3)
+            const valueHolderForBrandForIdx3  = valueHolderForBrand as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBrandForIdx3)
         }
-        const value_warning  = value.warning
-        let value_warning_type : int32 = RuntimeType.UNDEFINED
-        value_warning_type = runtimeType(value_warning)
-        if (TypeChecker.isColor(value_warning)) {
+        const valueHolderForWarning  = value.warning
+        if (valueHolderForWarning instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_warning_0  = value_warning as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_warning_0))
-        }
-        else if (RuntimeType.NUMBER == value_warning_type) {
+            const valueHolderForWarningForIdx0  = valueHolderForWarning as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForWarningForIdx0))
+        } else if (valueHolderForWarning instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_warning_1  = value_warning as number
-            valueSerializer.writeNumber(value_warning_1)
-        }
-        else if (RuntimeType.STRING == value_warning_type) {
+            const valueHolderForWarningForIdx1  = valueHolderForWarning as number
+            valueSerializer.writeNumber(valueHolderForWarningForIdx1)
+        } else if (valueHolderForWarning instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_warning_2  = value_warning as string
-            valueSerializer.writeString(value_warning_2)
-        }
-        else if (RuntimeType.OBJECT == value_warning_type) {
+            const valueHolderForWarningForIdx2  = valueHolderForWarning as string
+            valueSerializer.writeString(valueHolderForWarningForIdx2)
+        } else if (valueHolderForWarning instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_warning_3  = value_warning as Resource
-            Resource_serializer.write(valueSerializer, value_warning_3)
+            const valueHolderForWarningForIdx3  = valueHolderForWarning as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForWarningForIdx3)
         }
-        const value_alert  = value.alert
-        let value_alert_type : int32 = RuntimeType.UNDEFINED
-        value_alert_type = runtimeType(value_alert)
-        if (TypeChecker.isColor(value_alert)) {
+        const valueHolderForAlert  = value.alert
+        if (valueHolderForAlert instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_alert_0  = value_alert as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_alert_0))
-        }
-        else if (RuntimeType.NUMBER == value_alert_type) {
+            const valueHolderForAlertForIdx0  = valueHolderForAlert as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForAlertForIdx0))
+        } else if (valueHolderForAlert instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_alert_1  = value_alert as number
-            valueSerializer.writeNumber(value_alert_1)
-        }
-        else if (RuntimeType.STRING == value_alert_type) {
+            const valueHolderForAlertForIdx1  = valueHolderForAlert as number
+            valueSerializer.writeNumber(valueHolderForAlertForIdx1)
+        } else if (valueHolderForAlert instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_alert_2  = value_alert as string
-            valueSerializer.writeString(value_alert_2)
-        }
-        else if (RuntimeType.OBJECT == value_alert_type) {
+            const valueHolderForAlertForIdx2  = valueHolderForAlert as string
+            valueSerializer.writeString(valueHolderForAlertForIdx2)
+        } else if (valueHolderForAlert instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_alert_3  = value_alert as Resource
-            Resource_serializer.write(valueSerializer, value_alert_3)
+            const valueHolderForAlertForIdx3  = valueHolderForAlert as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForAlertForIdx3)
         }
-        const value_confirm  = value.confirm
-        let value_confirm_type : int32 = RuntimeType.UNDEFINED
-        value_confirm_type = runtimeType(value_confirm)
-        if (TypeChecker.isColor(value_confirm)) {
+        const valueHolderForConfirm  = value.confirm
+        if (valueHolderForConfirm instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_confirm_0  = value_confirm as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_confirm_0))
-        }
-        else if (RuntimeType.NUMBER == value_confirm_type) {
+            const valueHolderForConfirmForIdx0  = valueHolderForConfirm as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForConfirmForIdx0))
+        } else if (valueHolderForConfirm instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_confirm_1  = value_confirm as number
-            valueSerializer.writeNumber(value_confirm_1)
-        }
-        else if (RuntimeType.STRING == value_confirm_type) {
+            const valueHolderForConfirmForIdx1  = valueHolderForConfirm as number
+            valueSerializer.writeNumber(valueHolderForConfirmForIdx1)
+        } else if (valueHolderForConfirm instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_confirm_2  = value_confirm as string
-            valueSerializer.writeString(value_confirm_2)
-        }
-        else if (RuntimeType.OBJECT == value_confirm_type) {
+            const valueHolderForConfirmForIdx2  = valueHolderForConfirm as string
+            valueSerializer.writeString(valueHolderForConfirmForIdx2)
+        } else if (valueHolderForConfirm instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_confirm_3  = value_confirm as Resource
-            Resource_serializer.write(valueSerializer, value_confirm_3)
+            const valueHolderForConfirmForIdx3  = valueHolderForConfirm as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForConfirmForIdx3)
         }
-        const value_fontPrimary  = value.fontPrimary
-        let value_fontPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_fontPrimary_type = runtimeType(value_fontPrimary)
-        if (TypeChecker.isColor(value_fontPrimary)) {
+        const valueHolderForFontPrimary  = value.fontPrimary
+        if (valueHolderForFontPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontPrimary_0  = value_fontPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontPrimary_type) {
+            const valueHolderForFontPrimaryForIdx0  = valueHolderForFontPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontPrimaryForIdx0))
+        } else if (valueHolderForFontPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontPrimary_1  = value_fontPrimary as number
-            valueSerializer.writeNumber(value_fontPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_fontPrimary_type) {
+            const valueHolderForFontPrimaryForIdx1  = valueHolderForFontPrimary as number
+            valueSerializer.writeNumber(valueHolderForFontPrimaryForIdx1)
+        } else if (valueHolderForFontPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontPrimary_2  = value_fontPrimary as string
-            valueSerializer.writeString(value_fontPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontPrimary_type) {
+            const valueHolderForFontPrimaryForIdx2  = valueHolderForFontPrimary as string
+            valueSerializer.writeString(valueHolderForFontPrimaryForIdx2)
+        } else if (valueHolderForFontPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontPrimary_3  = value_fontPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_fontPrimary_3)
+            const valueHolderForFontPrimaryForIdx3  = valueHolderForFontPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontPrimaryForIdx3)
         }
-        const value_fontSecondary  = value.fontSecondary
-        let value_fontSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_fontSecondary_type = runtimeType(value_fontSecondary)
-        if (TypeChecker.isColor(value_fontSecondary)) {
+        const valueHolderForFontSecondary  = value.fontSecondary
+        if (valueHolderForFontSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontSecondary_0  = value_fontSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontSecondary_type) {
+            const valueHolderForFontSecondaryForIdx0  = valueHolderForFontSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontSecondaryForIdx0))
+        } else if (valueHolderForFontSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontSecondary_1  = value_fontSecondary as number
-            valueSerializer.writeNumber(value_fontSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_fontSecondary_type) {
+            const valueHolderForFontSecondaryForIdx1  = valueHolderForFontSecondary as number
+            valueSerializer.writeNumber(valueHolderForFontSecondaryForIdx1)
+        } else if (valueHolderForFontSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontSecondary_2  = value_fontSecondary as string
-            valueSerializer.writeString(value_fontSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontSecondary_type) {
+            const valueHolderForFontSecondaryForIdx2  = valueHolderForFontSecondary as string
+            valueSerializer.writeString(valueHolderForFontSecondaryForIdx2)
+        } else if (valueHolderForFontSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontSecondary_3  = value_fontSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_fontSecondary_3)
+            const valueHolderForFontSecondaryForIdx3  = valueHolderForFontSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontSecondaryForIdx3)
         }
-        const value_fontTertiary  = value.fontTertiary
-        let value_fontTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_fontTertiary_type = runtimeType(value_fontTertiary)
-        if (TypeChecker.isColor(value_fontTertiary)) {
+        const valueHolderForFontTertiary  = value.fontTertiary
+        if (valueHolderForFontTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontTertiary_0  = value_fontTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontTertiary_type) {
+            const valueHolderForFontTertiaryForIdx0  = valueHolderForFontTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontTertiaryForIdx0))
+        } else if (valueHolderForFontTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontTertiary_1  = value_fontTertiary as number
-            valueSerializer.writeNumber(value_fontTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_fontTertiary_type) {
+            const valueHolderForFontTertiaryForIdx1  = valueHolderForFontTertiary as number
+            valueSerializer.writeNumber(valueHolderForFontTertiaryForIdx1)
+        } else if (valueHolderForFontTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontTertiary_2  = value_fontTertiary as string
-            valueSerializer.writeString(value_fontTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontTertiary_type) {
+            const valueHolderForFontTertiaryForIdx2  = valueHolderForFontTertiary as string
+            valueSerializer.writeString(valueHolderForFontTertiaryForIdx2)
+        } else if (valueHolderForFontTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontTertiary_3  = value_fontTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_fontTertiary_3)
+            const valueHolderForFontTertiaryForIdx3  = valueHolderForFontTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontTertiaryForIdx3)
         }
-        const value_fontFourth  = value.fontFourth
-        let value_fontFourth_type : int32 = RuntimeType.UNDEFINED
-        value_fontFourth_type = runtimeType(value_fontFourth)
-        if (TypeChecker.isColor(value_fontFourth)) {
+        const valueHolderForFontFourth  = value.fontFourth
+        if (valueHolderForFontFourth instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontFourth_0  = value_fontFourth as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontFourth_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontFourth_type) {
+            const valueHolderForFontFourthForIdx0  = valueHolderForFontFourth as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontFourthForIdx0))
+        } else if (valueHolderForFontFourth instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontFourth_1  = value_fontFourth as number
-            valueSerializer.writeNumber(value_fontFourth_1)
-        }
-        else if (RuntimeType.STRING == value_fontFourth_type) {
+            const valueHolderForFontFourthForIdx1  = valueHolderForFontFourth as number
+            valueSerializer.writeNumber(valueHolderForFontFourthForIdx1)
+        } else if (valueHolderForFontFourth instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontFourth_2  = value_fontFourth as string
-            valueSerializer.writeString(value_fontFourth_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontFourth_type) {
+            const valueHolderForFontFourthForIdx2  = valueHolderForFontFourth as string
+            valueSerializer.writeString(valueHolderForFontFourthForIdx2)
+        } else if (valueHolderForFontFourth instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontFourth_3  = value_fontFourth as Resource
-            Resource_serializer.write(valueSerializer, value_fontFourth_3)
+            const valueHolderForFontFourthForIdx3  = valueHolderForFontFourth as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontFourthForIdx3)
         }
-        const value_fontEmphasize  = value.fontEmphasize
-        let value_fontEmphasize_type : int32 = RuntimeType.UNDEFINED
-        value_fontEmphasize_type = runtimeType(value_fontEmphasize)
-        if (TypeChecker.isColor(value_fontEmphasize)) {
+        const valueHolderForFontEmphasize  = value.fontEmphasize
+        if (valueHolderForFontEmphasize instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontEmphasize_0  = value_fontEmphasize as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontEmphasize_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontEmphasize_type) {
+            const valueHolderForFontEmphasizeForIdx0  = valueHolderForFontEmphasize as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontEmphasizeForIdx0))
+        } else if (valueHolderForFontEmphasize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontEmphasize_1  = value_fontEmphasize as number
-            valueSerializer.writeNumber(value_fontEmphasize_1)
-        }
-        else if (RuntimeType.STRING == value_fontEmphasize_type) {
+            const valueHolderForFontEmphasizeForIdx1  = valueHolderForFontEmphasize as number
+            valueSerializer.writeNumber(valueHolderForFontEmphasizeForIdx1)
+        } else if (valueHolderForFontEmphasize instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontEmphasize_2  = value_fontEmphasize as string
-            valueSerializer.writeString(value_fontEmphasize_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontEmphasize_type) {
+            const valueHolderForFontEmphasizeForIdx2  = valueHolderForFontEmphasize as string
+            valueSerializer.writeString(valueHolderForFontEmphasizeForIdx2)
+        } else if (valueHolderForFontEmphasize instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontEmphasize_3  = value_fontEmphasize as Resource
-            Resource_serializer.write(valueSerializer, value_fontEmphasize_3)
+            const valueHolderForFontEmphasizeForIdx3  = valueHolderForFontEmphasize as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontEmphasizeForIdx3)
         }
-        const value_fontOnPrimary  = value.fontOnPrimary
-        let value_fontOnPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_fontOnPrimary_type = runtimeType(value_fontOnPrimary)
-        if (TypeChecker.isColor(value_fontOnPrimary)) {
+        const valueHolderForFontOnPrimary  = value.fontOnPrimary
+        if (valueHolderForFontOnPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontOnPrimary_0  = value_fontOnPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontOnPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontOnPrimary_type) {
+            const valueHolderForFontOnPrimaryForIdx0  = valueHolderForFontOnPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontOnPrimaryForIdx0))
+        } else if (valueHolderForFontOnPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontOnPrimary_1  = value_fontOnPrimary as number
-            valueSerializer.writeNumber(value_fontOnPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_fontOnPrimary_type) {
+            const valueHolderForFontOnPrimaryForIdx1  = valueHolderForFontOnPrimary as number
+            valueSerializer.writeNumber(valueHolderForFontOnPrimaryForIdx1)
+        } else if (valueHolderForFontOnPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontOnPrimary_2  = value_fontOnPrimary as string
-            valueSerializer.writeString(value_fontOnPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontOnPrimary_type) {
+            const valueHolderForFontOnPrimaryForIdx2  = valueHolderForFontOnPrimary as string
+            valueSerializer.writeString(valueHolderForFontOnPrimaryForIdx2)
+        } else if (valueHolderForFontOnPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontOnPrimary_3  = value_fontOnPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_fontOnPrimary_3)
+            const valueHolderForFontOnPrimaryForIdx3  = valueHolderForFontOnPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontOnPrimaryForIdx3)
         }
-        const value_fontOnSecondary  = value.fontOnSecondary
-        let value_fontOnSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_fontOnSecondary_type = runtimeType(value_fontOnSecondary)
-        if (TypeChecker.isColor(value_fontOnSecondary)) {
+        const valueHolderForFontOnSecondary  = value.fontOnSecondary
+        if (valueHolderForFontOnSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontOnSecondary_0  = value_fontOnSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontOnSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontOnSecondary_type) {
+            const valueHolderForFontOnSecondaryForIdx0  = valueHolderForFontOnSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontOnSecondaryForIdx0))
+        } else if (valueHolderForFontOnSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontOnSecondary_1  = value_fontOnSecondary as number
-            valueSerializer.writeNumber(value_fontOnSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_fontOnSecondary_type) {
+            const valueHolderForFontOnSecondaryForIdx1  = valueHolderForFontOnSecondary as number
+            valueSerializer.writeNumber(valueHolderForFontOnSecondaryForIdx1)
+        } else if (valueHolderForFontOnSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontOnSecondary_2  = value_fontOnSecondary as string
-            valueSerializer.writeString(value_fontOnSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontOnSecondary_type) {
+            const valueHolderForFontOnSecondaryForIdx2  = valueHolderForFontOnSecondary as string
+            valueSerializer.writeString(valueHolderForFontOnSecondaryForIdx2)
+        } else if (valueHolderForFontOnSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontOnSecondary_3  = value_fontOnSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_fontOnSecondary_3)
+            const valueHolderForFontOnSecondaryForIdx3  = valueHolderForFontOnSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontOnSecondaryForIdx3)
         }
-        const value_fontOnTertiary  = value.fontOnTertiary
-        let value_fontOnTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_fontOnTertiary_type = runtimeType(value_fontOnTertiary)
-        if (TypeChecker.isColor(value_fontOnTertiary)) {
+        const valueHolderForFontOnTertiary  = value.fontOnTertiary
+        if (valueHolderForFontOnTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontOnTertiary_0  = value_fontOnTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontOnTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontOnTertiary_type) {
+            const valueHolderForFontOnTertiaryForIdx0  = valueHolderForFontOnTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontOnTertiaryForIdx0))
+        } else if (valueHolderForFontOnTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontOnTertiary_1  = value_fontOnTertiary as number
-            valueSerializer.writeNumber(value_fontOnTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_fontOnTertiary_type) {
+            const valueHolderForFontOnTertiaryForIdx1  = valueHolderForFontOnTertiary as number
+            valueSerializer.writeNumber(valueHolderForFontOnTertiaryForIdx1)
+        } else if (valueHolderForFontOnTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontOnTertiary_2  = value_fontOnTertiary as string
-            valueSerializer.writeString(value_fontOnTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontOnTertiary_type) {
+            const valueHolderForFontOnTertiaryForIdx2  = valueHolderForFontOnTertiary as string
+            valueSerializer.writeString(valueHolderForFontOnTertiaryForIdx2)
+        } else if (valueHolderForFontOnTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontOnTertiary_3  = value_fontOnTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_fontOnTertiary_3)
+            const valueHolderForFontOnTertiaryForIdx3  = valueHolderForFontOnTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontOnTertiaryForIdx3)
         }
-        const value_fontOnFourth  = value.fontOnFourth
-        let value_fontOnFourth_type : int32 = RuntimeType.UNDEFINED
-        value_fontOnFourth_type = runtimeType(value_fontOnFourth)
-        if (TypeChecker.isColor(value_fontOnFourth)) {
+        const valueHolderForFontOnFourth  = value.fontOnFourth
+        if (valueHolderForFontOnFourth instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_fontOnFourth_0  = value_fontOnFourth as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_fontOnFourth_0))
-        }
-        else if (RuntimeType.NUMBER == value_fontOnFourth_type) {
+            const valueHolderForFontOnFourthForIdx0  = valueHolderForFontOnFourth as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForFontOnFourthForIdx0))
+        } else if (valueHolderForFontOnFourth instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_fontOnFourth_1  = value_fontOnFourth as number
-            valueSerializer.writeNumber(value_fontOnFourth_1)
-        }
-        else if (RuntimeType.STRING == value_fontOnFourth_type) {
+            const valueHolderForFontOnFourthForIdx1  = valueHolderForFontOnFourth as number
+            valueSerializer.writeNumber(valueHolderForFontOnFourthForIdx1)
+        } else if (valueHolderForFontOnFourth instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_fontOnFourth_2  = value_fontOnFourth as string
-            valueSerializer.writeString(value_fontOnFourth_2)
-        }
-        else if (RuntimeType.OBJECT == value_fontOnFourth_type) {
+            const valueHolderForFontOnFourthForIdx2  = valueHolderForFontOnFourth as string
+            valueSerializer.writeString(valueHolderForFontOnFourthForIdx2)
+        } else if (valueHolderForFontOnFourth instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_fontOnFourth_3  = value_fontOnFourth as Resource
-            Resource_serializer.write(valueSerializer, value_fontOnFourth_3)
+            const valueHolderForFontOnFourthForIdx3  = valueHolderForFontOnFourth as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForFontOnFourthForIdx3)
         }
-        const value_iconPrimary  = value.iconPrimary
-        let value_iconPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_iconPrimary_type = runtimeType(value_iconPrimary)
-        if (TypeChecker.isColor(value_iconPrimary)) {
+        const valueHolderForIconPrimary  = value.iconPrimary
+        if (valueHolderForIconPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconPrimary_0  = value_iconPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconPrimary_type) {
+            const valueHolderForIconPrimaryForIdx0  = valueHolderForIconPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconPrimaryForIdx0))
+        } else if (valueHolderForIconPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconPrimary_1  = value_iconPrimary as number
-            valueSerializer.writeNumber(value_iconPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_iconPrimary_type) {
+            const valueHolderForIconPrimaryForIdx1  = valueHolderForIconPrimary as number
+            valueSerializer.writeNumber(valueHolderForIconPrimaryForIdx1)
+        } else if (valueHolderForIconPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconPrimary_2  = value_iconPrimary as string
-            valueSerializer.writeString(value_iconPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconPrimary_type) {
+            const valueHolderForIconPrimaryForIdx2  = valueHolderForIconPrimary as string
+            valueSerializer.writeString(valueHolderForIconPrimaryForIdx2)
+        } else if (valueHolderForIconPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconPrimary_3  = value_iconPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_iconPrimary_3)
+            const valueHolderForIconPrimaryForIdx3  = valueHolderForIconPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconPrimaryForIdx3)
         }
-        const value_iconSecondary  = value.iconSecondary
-        let value_iconSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_iconSecondary_type = runtimeType(value_iconSecondary)
-        if (TypeChecker.isColor(value_iconSecondary)) {
+        const valueHolderForIconSecondary  = value.iconSecondary
+        if (valueHolderForIconSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconSecondary_0  = value_iconSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconSecondary_type) {
+            const valueHolderForIconSecondaryForIdx0  = valueHolderForIconSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconSecondaryForIdx0))
+        } else if (valueHolderForIconSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconSecondary_1  = value_iconSecondary as number
-            valueSerializer.writeNumber(value_iconSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_iconSecondary_type) {
+            const valueHolderForIconSecondaryForIdx1  = valueHolderForIconSecondary as number
+            valueSerializer.writeNumber(valueHolderForIconSecondaryForIdx1)
+        } else if (valueHolderForIconSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconSecondary_2  = value_iconSecondary as string
-            valueSerializer.writeString(value_iconSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconSecondary_type) {
+            const valueHolderForIconSecondaryForIdx2  = valueHolderForIconSecondary as string
+            valueSerializer.writeString(valueHolderForIconSecondaryForIdx2)
+        } else if (valueHolderForIconSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconSecondary_3  = value_iconSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_iconSecondary_3)
+            const valueHolderForIconSecondaryForIdx3  = valueHolderForIconSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconSecondaryForIdx3)
         }
-        const value_iconTertiary  = value.iconTertiary
-        let value_iconTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_iconTertiary_type = runtimeType(value_iconTertiary)
-        if (TypeChecker.isColor(value_iconTertiary)) {
+        const valueHolderForIconTertiary  = value.iconTertiary
+        if (valueHolderForIconTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconTertiary_0  = value_iconTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconTertiary_type) {
+            const valueHolderForIconTertiaryForIdx0  = valueHolderForIconTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconTertiaryForIdx0))
+        } else if (valueHolderForIconTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconTertiary_1  = value_iconTertiary as number
-            valueSerializer.writeNumber(value_iconTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_iconTertiary_type) {
+            const valueHolderForIconTertiaryForIdx1  = valueHolderForIconTertiary as number
+            valueSerializer.writeNumber(valueHolderForIconTertiaryForIdx1)
+        } else if (valueHolderForIconTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconTertiary_2  = value_iconTertiary as string
-            valueSerializer.writeString(value_iconTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconTertiary_type) {
+            const valueHolderForIconTertiaryForIdx2  = valueHolderForIconTertiary as string
+            valueSerializer.writeString(valueHolderForIconTertiaryForIdx2)
+        } else if (valueHolderForIconTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconTertiary_3  = value_iconTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_iconTertiary_3)
+            const valueHolderForIconTertiaryForIdx3  = valueHolderForIconTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconTertiaryForIdx3)
         }
-        const value_iconFourth  = value.iconFourth
-        let value_iconFourth_type : int32 = RuntimeType.UNDEFINED
-        value_iconFourth_type = runtimeType(value_iconFourth)
-        if (TypeChecker.isColor(value_iconFourth)) {
+        const valueHolderForIconFourth  = value.iconFourth
+        if (valueHolderForIconFourth instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconFourth_0  = value_iconFourth as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconFourth_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconFourth_type) {
+            const valueHolderForIconFourthForIdx0  = valueHolderForIconFourth as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconFourthForIdx0))
+        } else if (valueHolderForIconFourth instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconFourth_1  = value_iconFourth as number
-            valueSerializer.writeNumber(value_iconFourth_1)
-        }
-        else if (RuntimeType.STRING == value_iconFourth_type) {
+            const valueHolderForIconFourthForIdx1  = valueHolderForIconFourth as number
+            valueSerializer.writeNumber(valueHolderForIconFourthForIdx1)
+        } else if (valueHolderForIconFourth instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconFourth_2  = value_iconFourth as string
-            valueSerializer.writeString(value_iconFourth_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconFourth_type) {
+            const valueHolderForIconFourthForIdx2  = valueHolderForIconFourth as string
+            valueSerializer.writeString(valueHolderForIconFourthForIdx2)
+        } else if (valueHolderForIconFourth instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconFourth_3  = value_iconFourth as Resource
-            Resource_serializer.write(valueSerializer, value_iconFourth_3)
+            const valueHolderForIconFourthForIdx3  = valueHolderForIconFourth as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconFourthForIdx3)
         }
-        const value_iconEmphasize  = value.iconEmphasize
-        let value_iconEmphasize_type : int32 = RuntimeType.UNDEFINED
-        value_iconEmphasize_type = runtimeType(value_iconEmphasize)
-        if (TypeChecker.isColor(value_iconEmphasize)) {
+        const valueHolderForIconEmphasize  = value.iconEmphasize
+        if (valueHolderForIconEmphasize instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconEmphasize_0  = value_iconEmphasize as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconEmphasize_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconEmphasize_type) {
+            const valueHolderForIconEmphasizeForIdx0  = valueHolderForIconEmphasize as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconEmphasizeForIdx0))
+        } else if (valueHolderForIconEmphasize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconEmphasize_1  = value_iconEmphasize as number
-            valueSerializer.writeNumber(value_iconEmphasize_1)
-        }
-        else if (RuntimeType.STRING == value_iconEmphasize_type) {
+            const valueHolderForIconEmphasizeForIdx1  = valueHolderForIconEmphasize as number
+            valueSerializer.writeNumber(valueHolderForIconEmphasizeForIdx1)
+        } else if (valueHolderForIconEmphasize instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconEmphasize_2  = value_iconEmphasize as string
-            valueSerializer.writeString(value_iconEmphasize_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconEmphasize_type) {
+            const valueHolderForIconEmphasizeForIdx2  = valueHolderForIconEmphasize as string
+            valueSerializer.writeString(valueHolderForIconEmphasizeForIdx2)
+        } else if (valueHolderForIconEmphasize instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconEmphasize_3  = value_iconEmphasize as Resource
-            Resource_serializer.write(valueSerializer, value_iconEmphasize_3)
+            const valueHolderForIconEmphasizeForIdx3  = valueHolderForIconEmphasize as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconEmphasizeForIdx3)
         }
-        const value_iconSubEmphasize  = value.iconSubEmphasize
-        let value_iconSubEmphasize_type : int32 = RuntimeType.UNDEFINED
-        value_iconSubEmphasize_type = runtimeType(value_iconSubEmphasize)
-        if (TypeChecker.isColor(value_iconSubEmphasize)) {
+        const valueHolderForIconSubEmphasize  = value.iconSubEmphasize
+        if (valueHolderForIconSubEmphasize instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconSubEmphasize_0  = value_iconSubEmphasize as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconSubEmphasize_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconSubEmphasize_type) {
+            const valueHolderForIconSubEmphasizeForIdx0  = valueHolderForIconSubEmphasize as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconSubEmphasizeForIdx0))
+        } else if (valueHolderForIconSubEmphasize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconSubEmphasize_1  = value_iconSubEmphasize as number
-            valueSerializer.writeNumber(value_iconSubEmphasize_1)
-        }
-        else if (RuntimeType.STRING == value_iconSubEmphasize_type) {
+            const valueHolderForIconSubEmphasizeForIdx1  = valueHolderForIconSubEmphasize as number
+            valueSerializer.writeNumber(valueHolderForIconSubEmphasizeForIdx1)
+        } else if (valueHolderForIconSubEmphasize instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconSubEmphasize_2  = value_iconSubEmphasize as string
-            valueSerializer.writeString(value_iconSubEmphasize_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconSubEmphasize_type) {
+            const valueHolderForIconSubEmphasizeForIdx2  = valueHolderForIconSubEmphasize as string
+            valueSerializer.writeString(valueHolderForIconSubEmphasizeForIdx2)
+        } else if (valueHolderForIconSubEmphasize instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconSubEmphasize_3  = value_iconSubEmphasize as Resource
-            Resource_serializer.write(valueSerializer, value_iconSubEmphasize_3)
+            const valueHolderForIconSubEmphasizeForIdx3  = valueHolderForIconSubEmphasize as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconSubEmphasizeForIdx3)
         }
-        const value_iconOnPrimary  = value.iconOnPrimary
-        let value_iconOnPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_iconOnPrimary_type = runtimeType(value_iconOnPrimary)
-        if (TypeChecker.isColor(value_iconOnPrimary)) {
+        const valueHolderForIconOnPrimary  = value.iconOnPrimary
+        if (valueHolderForIconOnPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconOnPrimary_0  = value_iconOnPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconOnPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconOnPrimary_type) {
+            const valueHolderForIconOnPrimaryForIdx0  = valueHolderForIconOnPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconOnPrimaryForIdx0))
+        } else if (valueHolderForIconOnPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconOnPrimary_1  = value_iconOnPrimary as number
-            valueSerializer.writeNumber(value_iconOnPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_iconOnPrimary_type) {
+            const valueHolderForIconOnPrimaryForIdx1  = valueHolderForIconOnPrimary as number
+            valueSerializer.writeNumber(valueHolderForIconOnPrimaryForIdx1)
+        } else if (valueHolderForIconOnPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconOnPrimary_2  = value_iconOnPrimary as string
-            valueSerializer.writeString(value_iconOnPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconOnPrimary_type) {
+            const valueHolderForIconOnPrimaryForIdx2  = valueHolderForIconOnPrimary as string
+            valueSerializer.writeString(valueHolderForIconOnPrimaryForIdx2)
+        } else if (valueHolderForIconOnPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconOnPrimary_3  = value_iconOnPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_iconOnPrimary_3)
+            const valueHolderForIconOnPrimaryForIdx3  = valueHolderForIconOnPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconOnPrimaryForIdx3)
         }
-        const value_iconOnSecondary  = value.iconOnSecondary
-        let value_iconOnSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_iconOnSecondary_type = runtimeType(value_iconOnSecondary)
-        if (TypeChecker.isColor(value_iconOnSecondary)) {
+        const valueHolderForIconOnSecondary  = value.iconOnSecondary
+        if (valueHolderForIconOnSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconOnSecondary_0  = value_iconOnSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconOnSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconOnSecondary_type) {
+            const valueHolderForIconOnSecondaryForIdx0  = valueHolderForIconOnSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconOnSecondaryForIdx0))
+        } else if (valueHolderForIconOnSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconOnSecondary_1  = value_iconOnSecondary as number
-            valueSerializer.writeNumber(value_iconOnSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_iconOnSecondary_type) {
+            const valueHolderForIconOnSecondaryForIdx1  = valueHolderForIconOnSecondary as number
+            valueSerializer.writeNumber(valueHolderForIconOnSecondaryForIdx1)
+        } else if (valueHolderForIconOnSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconOnSecondary_2  = value_iconOnSecondary as string
-            valueSerializer.writeString(value_iconOnSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconOnSecondary_type) {
+            const valueHolderForIconOnSecondaryForIdx2  = valueHolderForIconOnSecondary as string
+            valueSerializer.writeString(valueHolderForIconOnSecondaryForIdx2)
+        } else if (valueHolderForIconOnSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconOnSecondary_3  = value_iconOnSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_iconOnSecondary_3)
+            const valueHolderForIconOnSecondaryForIdx3  = valueHolderForIconOnSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconOnSecondaryForIdx3)
         }
-        const value_iconOnTertiary  = value.iconOnTertiary
-        let value_iconOnTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_iconOnTertiary_type = runtimeType(value_iconOnTertiary)
-        if (TypeChecker.isColor(value_iconOnTertiary)) {
+        const valueHolderForIconOnTertiary  = value.iconOnTertiary
+        if (valueHolderForIconOnTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconOnTertiary_0  = value_iconOnTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconOnTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconOnTertiary_type) {
+            const valueHolderForIconOnTertiaryForIdx0  = valueHolderForIconOnTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconOnTertiaryForIdx0))
+        } else if (valueHolderForIconOnTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconOnTertiary_1  = value_iconOnTertiary as number
-            valueSerializer.writeNumber(value_iconOnTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_iconOnTertiary_type) {
+            const valueHolderForIconOnTertiaryForIdx1  = valueHolderForIconOnTertiary as number
+            valueSerializer.writeNumber(valueHolderForIconOnTertiaryForIdx1)
+        } else if (valueHolderForIconOnTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconOnTertiary_2  = value_iconOnTertiary as string
-            valueSerializer.writeString(value_iconOnTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconOnTertiary_type) {
+            const valueHolderForIconOnTertiaryForIdx2  = valueHolderForIconOnTertiary as string
+            valueSerializer.writeString(valueHolderForIconOnTertiaryForIdx2)
+        } else if (valueHolderForIconOnTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconOnTertiary_3  = value_iconOnTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_iconOnTertiary_3)
+            const valueHolderForIconOnTertiaryForIdx3  = valueHolderForIconOnTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconOnTertiaryForIdx3)
         }
-        const value_iconOnFourth  = value.iconOnFourth
-        let value_iconOnFourth_type : int32 = RuntimeType.UNDEFINED
-        value_iconOnFourth_type = runtimeType(value_iconOnFourth)
-        if (TypeChecker.isColor(value_iconOnFourth)) {
+        const valueHolderForIconOnFourth  = value.iconOnFourth
+        if (valueHolderForIconOnFourth instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_iconOnFourth_0  = value_iconOnFourth as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_iconOnFourth_0))
-        }
-        else if (RuntimeType.NUMBER == value_iconOnFourth_type) {
+            const valueHolderForIconOnFourthForIdx0  = valueHolderForIconOnFourth as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForIconOnFourthForIdx0))
+        } else if (valueHolderForIconOnFourth instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_iconOnFourth_1  = value_iconOnFourth as number
-            valueSerializer.writeNumber(value_iconOnFourth_1)
-        }
-        else if (RuntimeType.STRING == value_iconOnFourth_type) {
+            const valueHolderForIconOnFourthForIdx1  = valueHolderForIconOnFourth as number
+            valueSerializer.writeNumber(valueHolderForIconOnFourthForIdx1)
+        } else if (valueHolderForIconOnFourth instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_iconOnFourth_2  = value_iconOnFourth as string
-            valueSerializer.writeString(value_iconOnFourth_2)
-        }
-        else if (RuntimeType.OBJECT == value_iconOnFourth_type) {
+            const valueHolderForIconOnFourthForIdx2  = valueHolderForIconOnFourth as string
+            valueSerializer.writeString(valueHolderForIconOnFourthForIdx2)
+        } else if (valueHolderForIconOnFourth instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_iconOnFourth_3  = value_iconOnFourth as Resource
-            Resource_serializer.write(valueSerializer, value_iconOnFourth_3)
+            const valueHolderForIconOnFourthForIdx3  = valueHolderForIconOnFourth as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForIconOnFourthForIdx3)
         }
-        const value_backgroundPrimary  = value.backgroundPrimary
-        let value_backgroundPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundPrimary_type = runtimeType(value_backgroundPrimary)
-        if (TypeChecker.isColor(value_backgroundPrimary)) {
+        const valueHolderForBackgroundPrimary  = value.backgroundPrimary
+        if (valueHolderForBackgroundPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_backgroundPrimary_0  = value_backgroundPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_backgroundPrimary_type) {
+            const valueHolderForBackgroundPrimaryForIdx0  = valueHolderForBackgroundPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundPrimaryForIdx0))
+        } else if (valueHolderForBackgroundPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_backgroundPrimary_1  = value_backgroundPrimary as number
-            valueSerializer.writeNumber(value_backgroundPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_backgroundPrimary_type) {
+            const valueHolderForBackgroundPrimaryForIdx1  = valueHolderForBackgroundPrimary as number
+            valueSerializer.writeNumber(valueHolderForBackgroundPrimaryForIdx1)
+        } else if (valueHolderForBackgroundPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_backgroundPrimary_2  = value_backgroundPrimary as string
-            valueSerializer.writeString(value_backgroundPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_backgroundPrimary_type) {
+            const valueHolderForBackgroundPrimaryForIdx2  = valueHolderForBackgroundPrimary as string
+            valueSerializer.writeString(valueHolderForBackgroundPrimaryForIdx2)
+        } else if (valueHolderForBackgroundPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_backgroundPrimary_3  = value_backgroundPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_backgroundPrimary_3)
+            const valueHolderForBackgroundPrimaryForIdx3  = valueHolderForBackgroundPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBackgroundPrimaryForIdx3)
         }
-        const value_backgroundSecondary  = value.backgroundSecondary
-        let value_backgroundSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundSecondary_type = runtimeType(value_backgroundSecondary)
-        if (TypeChecker.isColor(value_backgroundSecondary)) {
+        const valueHolderForBackgroundSecondary  = value.backgroundSecondary
+        if (valueHolderForBackgroundSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_backgroundSecondary_0  = value_backgroundSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_backgroundSecondary_type) {
+            const valueHolderForBackgroundSecondaryForIdx0  = valueHolderForBackgroundSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundSecondaryForIdx0))
+        } else if (valueHolderForBackgroundSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_backgroundSecondary_1  = value_backgroundSecondary as number
-            valueSerializer.writeNumber(value_backgroundSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_backgroundSecondary_type) {
+            const valueHolderForBackgroundSecondaryForIdx1  = valueHolderForBackgroundSecondary as number
+            valueSerializer.writeNumber(valueHolderForBackgroundSecondaryForIdx1)
+        } else if (valueHolderForBackgroundSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_backgroundSecondary_2  = value_backgroundSecondary as string
-            valueSerializer.writeString(value_backgroundSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_backgroundSecondary_type) {
+            const valueHolderForBackgroundSecondaryForIdx2  = valueHolderForBackgroundSecondary as string
+            valueSerializer.writeString(valueHolderForBackgroundSecondaryForIdx2)
+        } else if (valueHolderForBackgroundSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_backgroundSecondary_3  = value_backgroundSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_backgroundSecondary_3)
+            const valueHolderForBackgroundSecondaryForIdx3  = valueHolderForBackgroundSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBackgroundSecondaryForIdx3)
         }
-        const value_backgroundTertiary  = value.backgroundTertiary
-        let value_backgroundTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundTertiary_type = runtimeType(value_backgroundTertiary)
-        if (TypeChecker.isColor(value_backgroundTertiary)) {
+        const valueHolderForBackgroundTertiary  = value.backgroundTertiary
+        if (valueHolderForBackgroundTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_backgroundTertiary_0  = value_backgroundTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_backgroundTertiary_type) {
+            const valueHolderForBackgroundTertiaryForIdx0  = valueHolderForBackgroundTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundTertiaryForIdx0))
+        } else if (valueHolderForBackgroundTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_backgroundTertiary_1  = value_backgroundTertiary as number
-            valueSerializer.writeNumber(value_backgroundTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_backgroundTertiary_type) {
+            const valueHolderForBackgroundTertiaryForIdx1  = valueHolderForBackgroundTertiary as number
+            valueSerializer.writeNumber(valueHolderForBackgroundTertiaryForIdx1)
+        } else if (valueHolderForBackgroundTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_backgroundTertiary_2  = value_backgroundTertiary as string
-            valueSerializer.writeString(value_backgroundTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_backgroundTertiary_type) {
+            const valueHolderForBackgroundTertiaryForIdx2  = valueHolderForBackgroundTertiary as string
+            valueSerializer.writeString(valueHolderForBackgroundTertiaryForIdx2)
+        } else if (valueHolderForBackgroundTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_backgroundTertiary_3  = value_backgroundTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_backgroundTertiary_3)
+            const valueHolderForBackgroundTertiaryForIdx3  = valueHolderForBackgroundTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBackgroundTertiaryForIdx3)
         }
-        const value_backgroundFourth  = value.backgroundFourth
-        let value_backgroundFourth_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundFourth_type = runtimeType(value_backgroundFourth)
-        if (TypeChecker.isColor(value_backgroundFourth)) {
+        const valueHolderForBackgroundFourth  = value.backgroundFourth
+        if (valueHolderForBackgroundFourth instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_backgroundFourth_0  = value_backgroundFourth as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundFourth_0))
-        }
-        else if (RuntimeType.NUMBER == value_backgroundFourth_type) {
+            const valueHolderForBackgroundFourthForIdx0  = valueHolderForBackgroundFourth as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundFourthForIdx0))
+        } else if (valueHolderForBackgroundFourth instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_backgroundFourth_1  = value_backgroundFourth as number
-            valueSerializer.writeNumber(value_backgroundFourth_1)
-        }
-        else if (RuntimeType.STRING == value_backgroundFourth_type) {
+            const valueHolderForBackgroundFourthForIdx1  = valueHolderForBackgroundFourth as number
+            valueSerializer.writeNumber(valueHolderForBackgroundFourthForIdx1)
+        } else if (valueHolderForBackgroundFourth instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_backgroundFourth_2  = value_backgroundFourth as string
-            valueSerializer.writeString(value_backgroundFourth_2)
-        }
-        else if (RuntimeType.OBJECT == value_backgroundFourth_type) {
+            const valueHolderForBackgroundFourthForIdx2  = valueHolderForBackgroundFourth as string
+            valueSerializer.writeString(valueHolderForBackgroundFourthForIdx2)
+        } else if (valueHolderForBackgroundFourth instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_backgroundFourth_3  = value_backgroundFourth as Resource
-            Resource_serializer.write(valueSerializer, value_backgroundFourth_3)
+            const valueHolderForBackgroundFourthForIdx3  = valueHolderForBackgroundFourth as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBackgroundFourthForIdx3)
         }
-        const value_backgroundEmphasize  = value.backgroundEmphasize
-        let value_backgroundEmphasize_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEmphasize_type = runtimeType(value_backgroundEmphasize)
-        if (TypeChecker.isColor(value_backgroundEmphasize)) {
+        const valueHolderForBackgroundEmphasize  = value.backgroundEmphasize
+        if (valueHolderForBackgroundEmphasize instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_backgroundEmphasize_0  = value_backgroundEmphasize as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundEmphasize_0))
-        }
-        else if (RuntimeType.NUMBER == value_backgroundEmphasize_type) {
+            const valueHolderForBackgroundEmphasizeForIdx0  = valueHolderForBackgroundEmphasize as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForBackgroundEmphasizeForIdx0))
+        } else if (valueHolderForBackgroundEmphasize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_backgroundEmphasize_1  = value_backgroundEmphasize as number
-            valueSerializer.writeNumber(value_backgroundEmphasize_1)
-        }
-        else if (RuntimeType.STRING == value_backgroundEmphasize_type) {
+            const valueHolderForBackgroundEmphasizeForIdx1  = valueHolderForBackgroundEmphasize as number
+            valueSerializer.writeNumber(valueHolderForBackgroundEmphasizeForIdx1)
+        } else if (valueHolderForBackgroundEmphasize instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_backgroundEmphasize_2  = value_backgroundEmphasize as string
-            valueSerializer.writeString(value_backgroundEmphasize_2)
-        }
-        else if (RuntimeType.OBJECT == value_backgroundEmphasize_type) {
+            const valueHolderForBackgroundEmphasizeForIdx2  = valueHolderForBackgroundEmphasize as string
+            valueSerializer.writeString(valueHolderForBackgroundEmphasizeForIdx2)
+        } else if (valueHolderForBackgroundEmphasize instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_backgroundEmphasize_3  = value_backgroundEmphasize as Resource
-            Resource_serializer.write(valueSerializer, value_backgroundEmphasize_3)
+            const valueHolderForBackgroundEmphasizeForIdx3  = valueHolderForBackgroundEmphasize as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForBackgroundEmphasizeForIdx3)
         }
-        const value_compForegroundPrimary  = value.compForegroundPrimary
-        let value_compForegroundPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_compForegroundPrimary_type = runtimeType(value_compForegroundPrimary)
-        if (TypeChecker.isColor(value_compForegroundPrimary)) {
+        const valueHolderForCompForegroundPrimary  = value.compForegroundPrimary
+        if (valueHolderForCompForegroundPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compForegroundPrimary_0  = value_compForegroundPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compForegroundPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compForegroundPrimary_type) {
+            const valueHolderForCompForegroundPrimaryForIdx0  = valueHolderForCompForegroundPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompForegroundPrimaryForIdx0))
+        } else if (valueHolderForCompForegroundPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compForegroundPrimary_1  = value_compForegroundPrimary as number
-            valueSerializer.writeNumber(value_compForegroundPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_compForegroundPrimary_type) {
+            const valueHolderForCompForegroundPrimaryForIdx1  = valueHolderForCompForegroundPrimary as number
+            valueSerializer.writeNumber(valueHolderForCompForegroundPrimaryForIdx1)
+        } else if (valueHolderForCompForegroundPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compForegroundPrimary_2  = value_compForegroundPrimary as string
-            valueSerializer.writeString(value_compForegroundPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compForegroundPrimary_type) {
+            const valueHolderForCompForegroundPrimaryForIdx2  = valueHolderForCompForegroundPrimary as string
+            valueSerializer.writeString(valueHolderForCompForegroundPrimaryForIdx2)
+        } else if (valueHolderForCompForegroundPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compForegroundPrimary_3  = value_compForegroundPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_compForegroundPrimary_3)
+            const valueHolderForCompForegroundPrimaryForIdx3  = valueHolderForCompForegroundPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompForegroundPrimaryForIdx3)
         }
-        const value_compBackgroundPrimary  = value.compBackgroundPrimary
-        let value_compBackgroundPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundPrimary_type = runtimeType(value_compBackgroundPrimary)
-        if (TypeChecker.isColor(value_compBackgroundPrimary)) {
+        const valueHolderForCompBackgroundPrimary  = value.compBackgroundPrimary
+        if (valueHolderForCompBackgroundPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundPrimary_0  = value_compBackgroundPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundPrimary_type) {
+            const valueHolderForCompBackgroundPrimaryForIdx0  = valueHolderForCompBackgroundPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundPrimaryForIdx0))
+        } else if (valueHolderForCompBackgroundPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundPrimary_1  = value_compBackgroundPrimary as number
-            valueSerializer.writeNumber(value_compBackgroundPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundPrimary_type) {
+            const valueHolderForCompBackgroundPrimaryForIdx1  = valueHolderForCompBackgroundPrimary as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundPrimaryForIdx1)
+        } else if (valueHolderForCompBackgroundPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundPrimary_2  = value_compBackgroundPrimary as string
-            valueSerializer.writeString(value_compBackgroundPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundPrimary_type) {
+            const valueHolderForCompBackgroundPrimaryForIdx2  = valueHolderForCompBackgroundPrimary as string
+            valueSerializer.writeString(valueHolderForCompBackgroundPrimaryForIdx2)
+        } else if (valueHolderForCompBackgroundPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundPrimary_3  = value_compBackgroundPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundPrimary_3)
+            const valueHolderForCompBackgroundPrimaryForIdx3  = valueHolderForCompBackgroundPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundPrimaryForIdx3)
         }
-        const value_compBackgroundPrimaryTran  = value.compBackgroundPrimaryTran
-        let value_compBackgroundPrimaryTran_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundPrimaryTran_type = runtimeType(value_compBackgroundPrimaryTran)
-        if (TypeChecker.isColor(value_compBackgroundPrimaryTran)) {
+        const valueHolderForCompBackgroundPrimaryTran  = value.compBackgroundPrimaryTran
+        if (valueHolderForCompBackgroundPrimaryTran instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundPrimaryTran_0  = value_compBackgroundPrimaryTran as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundPrimaryTran_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundPrimaryTran_type) {
+            const valueHolderForCompBackgroundPrimaryTranForIdx0  = valueHolderForCompBackgroundPrimaryTran as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundPrimaryTranForIdx0))
+        } else if (valueHolderForCompBackgroundPrimaryTran instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundPrimaryTran_1  = value_compBackgroundPrimaryTran as number
-            valueSerializer.writeNumber(value_compBackgroundPrimaryTran_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundPrimaryTran_type) {
+            const valueHolderForCompBackgroundPrimaryTranForIdx1  = valueHolderForCompBackgroundPrimaryTran as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundPrimaryTranForIdx1)
+        } else if (valueHolderForCompBackgroundPrimaryTran instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundPrimaryTran_2  = value_compBackgroundPrimaryTran as string
-            valueSerializer.writeString(value_compBackgroundPrimaryTran_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundPrimaryTran_type) {
+            const valueHolderForCompBackgroundPrimaryTranForIdx2  = valueHolderForCompBackgroundPrimaryTran as string
+            valueSerializer.writeString(valueHolderForCompBackgroundPrimaryTranForIdx2)
+        } else if (valueHolderForCompBackgroundPrimaryTran instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundPrimaryTran_3  = value_compBackgroundPrimaryTran as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundPrimaryTran_3)
+            const valueHolderForCompBackgroundPrimaryTranForIdx3  = valueHolderForCompBackgroundPrimaryTran as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundPrimaryTranForIdx3)
         }
-        const value_compBackgroundPrimaryContrary  = value.compBackgroundPrimaryContrary
-        let value_compBackgroundPrimaryContrary_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundPrimaryContrary_type = runtimeType(value_compBackgroundPrimaryContrary)
-        if (TypeChecker.isColor(value_compBackgroundPrimaryContrary)) {
+        const valueHolderForCompBackgroundPrimaryContrary  = value.compBackgroundPrimaryContrary
+        if (valueHolderForCompBackgroundPrimaryContrary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundPrimaryContrary_0  = value_compBackgroundPrimaryContrary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundPrimaryContrary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundPrimaryContrary_type) {
+            const valueHolderForCompBackgroundPrimaryContraryForIdx0  = valueHolderForCompBackgroundPrimaryContrary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundPrimaryContraryForIdx0))
+        } else if (valueHolderForCompBackgroundPrimaryContrary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundPrimaryContrary_1  = value_compBackgroundPrimaryContrary as number
-            valueSerializer.writeNumber(value_compBackgroundPrimaryContrary_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundPrimaryContrary_type) {
+            const valueHolderForCompBackgroundPrimaryContraryForIdx1  = valueHolderForCompBackgroundPrimaryContrary as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundPrimaryContraryForIdx1)
+        } else if (valueHolderForCompBackgroundPrimaryContrary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundPrimaryContrary_2  = value_compBackgroundPrimaryContrary as string
-            valueSerializer.writeString(value_compBackgroundPrimaryContrary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundPrimaryContrary_type) {
+            const valueHolderForCompBackgroundPrimaryContraryForIdx2  = valueHolderForCompBackgroundPrimaryContrary as string
+            valueSerializer.writeString(valueHolderForCompBackgroundPrimaryContraryForIdx2)
+        } else if (valueHolderForCompBackgroundPrimaryContrary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundPrimaryContrary_3  = value_compBackgroundPrimaryContrary as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundPrimaryContrary_3)
+            const valueHolderForCompBackgroundPrimaryContraryForIdx3  = valueHolderForCompBackgroundPrimaryContrary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundPrimaryContraryForIdx3)
         }
-        const value_compBackgroundGray  = value.compBackgroundGray
-        let value_compBackgroundGray_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundGray_type = runtimeType(value_compBackgroundGray)
-        if (TypeChecker.isColor(value_compBackgroundGray)) {
+        const valueHolderForCompBackgroundGray  = value.compBackgroundGray
+        if (valueHolderForCompBackgroundGray instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundGray_0  = value_compBackgroundGray as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundGray_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundGray_type) {
+            const valueHolderForCompBackgroundGrayForIdx0  = valueHolderForCompBackgroundGray as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundGrayForIdx0))
+        } else if (valueHolderForCompBackgroundGray instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundGray_1  = value_compBackgroundGray as number
-            valueSerializer.writeNumber(value_compBackgroundGray_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundGray_type) {
+            const valueHolderForCompBackgroundGrayForIdx1  = valueHolderForCompBackgroundGray as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundGrayForIdx1)
+        } else if (valueHolderForCompBackgroundGray instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundGray_2  = value_compBackgroundGray as string
-            valueSerializer.writeString(value_compBackgroundGray_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundGray_type) {
+            const valueHolderForCompBackgroundGrayForIdx2  = valueHolderForCompBackgroundGray as string
+            valueSerializer.writeString(valueHolderForCompBackgroundGrayForIdx2)
+        } else if (valueHolderForCompBackgroundGray instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundGray_3  = value_compBackgroundGray as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundGray_3)
+            const valueHolderForCompBackgroundGrayForIdx3  = valueHolderForCompBackgroundGray as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundGrayForIdx3)
         }
-        const value_compBackgroundSecondary  = value.compBackgroundSecondary
-        let value_compBackgroundSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundSecondary_type = runtimeType(value_compBackgroundSecondary)
-        if (TypeChecker.isColor(value_compBackgroundSecondary)) {
+        const valueHolderForCompBackgroundSecondary  = value.compBackgroundSecondary
+        if (valueHolderForCompBackgroundSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundSecondary_0  = value_compBackgroundSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundSecondary_type) {
+            const valueHolderForCompBackgroundSecondaryForIdx0  = valueHolderForCompBackgroundSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundSecondaryForIdx0))
+        } else if (valueHolderForCompBackgroundSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundSecondary_1  = value_compBackgroundSecondary as number
-            valueSerializer.writeNumber(value_compBackgroundSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundSecondary_type) {
+            const valueHolderForCompBackgroundSecondaryForIdx1  = valueHolderForCompBackgroundSecondary as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundSecondaryForIdx1)
+        } else if (valueHolderForCompBackgroundSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundSecondary_2  = value_compBackgroundSecondary as string
-            valueSerializer.writeString(value_compBackgroundSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundSecondary_type) {
+            const valueHolderForCompBackgroundSecondaryForIdx2  = valueHolderForCompBackgroundSecondary as string
+            valueSerializer.writeString(valueHolderForCompBackgroundSecondaryForIdx2)
+        } else if (valueHolderForCompBackgroundSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundSecondary_3  = value_compBackgroundSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundSecondary_3)
+            const valueHolderForCompBackgroundSecondaryForIdx3  = valueHolderForCompBackgroundSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundSecondaryForIdx3)
         }
-        const value_compBackgroundTertiary  = value.compBackgroundTertiary
-        let value_compBackgroundTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundTertiary_type = runtimeType(value_compBackgroundTertiary)
-        if (TypeChecker.isColor(value_compBackgroundTertiary)) {
+        const valueHolderForCompBackgroundTertiary  = value.compBackgroundTertiary
+        if (valueHolderForCompBackgroundTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundTertiary_0  = value_compBackgroundTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundTertiary_type) {
+            const valueHolderForCompBackgroundTertiaryForIdx0  = valueHolderForCompBackgroundTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundTertiaryForIdx0))
+        } else if (valueHolderForCompBackgroundTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundTertiary_1  = value_compBackgroundTertiary as number
-            valueSerializer.writeNumber(value_compBackgroundTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundTertiary_type) {
+            const valueHolderForCompBackgroundTertiaryForIdx1  = valueHolderForCompBackgroundTertiary as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundTertiaryForIdx1)
+        } else if (valueHolderForCompBackgroundTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundTertiary_2  = value_compBackgroundTertiary as string
-            valueSerializer.writeString(value_compBackgroundTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundTertiary_type) {
+            const valueHolderForCompBackgroundTertiaryForIdx2  = valueHolderForCompBackgroundTertiary as string
+            valueSerializer.writeString(valueHolderForCompBackgroundTertiaryForIdx2)
+        } else if (valueHolderForCompBackgroundTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundTertiary_3  = value_compBackgroundTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundTertiary_3)
+            const valueHolderForCompBackgroundTertiaryForIdx3  = valueHolderForCompBackgroundTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundTertiaryForIdx3)
         }
-        const value_compBackgroundEmphasize  = value.compBackgroundEmphasize
-        let value_compBackgroundEmphasize_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundEmphasize_type = runtimeType(value_compBackgroundEmphasize)
-        if (TypeChecker.isColor(value_compBackgroundEmphasize)) {
+        const valueHolderForCompBackgroundEmphasize  = value.compBackgroundEmphasize
+        if (valueHolderForCompBackgroundEmphasize instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundEmphasize_0  = value_compBackgroundEmphasize as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundEmphasize_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundEmphasize_type) {
+            const valueHolderForCompBackgroundEmphasizeForIdx0  = valueHolderForCompBackgroundEmphasize as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundEmphasizeForIdx0))
+        } else if (valueHolderForCompBackgroundEmphasize instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundEmphasize_1  = value_compBackgroundEmphasize as number
-            valueSerializer.writeNumber(value_compBackgroundEmphasize_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundEmphasize_type) {
+            const valueHolderForCompBackgroundEmphasizeForIdx1  = valueHolderForCompBackgroundEmphasize as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundEmphasizeForIdx1)
+        } else if (valueHolderForCompBackgroundEmphasize instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundEmphasize_2  = value_compBackgroundEmphasize as string
-            valueSerializer.writeString(value_compBackgroundEmphasize_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundEmphasize_type) {
+            const valueHolderForCompBackgroundEmphasizeForIdx2  = valueHolderForCompBackgroundEmphasize as string
+            valueSerializer.writeString(valueHolderForCompBackgroundEmphasizeForIdx2)
+        } else if (valueHolderForCompBackgroundEmphasize instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundEmphasize_3  = value_compBackgroundEmphasize as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundEmphasize_3)
+            const valueHolderForCompBackgroundEmphasizeForIdx3  = valueHolderForCompBackgroundEmphasize as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundEmphasizeForIdx3)
         }
-        const value_compBackgroundNeutral  = value.compBackgroundNeutral
-        let value_compBackgroundNeutral_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundNeutral_type = runtimeType(value_compBackgroundNeutral)
-        if (TypeChecker.isColor(value_compBackgroundNeutral)) {
+        const valueHolderForCompBackgroundNeutral  = value.compBackgroundNeutral
+        if (valueHolderForCompBackgroundNeutral instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundNeutral_0  = value_compBackgroundNeutral as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundNeutral_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundNeutral_type) {
+            const valueHolderForCompBackgroundNeutralForIdx0  = valueHolderForCompBackgroundNeutral as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundNeutralForIdx0))
+        } else if (valueHolderForCompBackgroundNeutral instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundNeutral_1  = value_compBackgroundNeutral as number
-            valueSerializer.writeNumber(value_compBackgroundNeutral_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundNeutral_type) {
+            const valueHolderForCompBackgroundNeutralForIdx1  = valueHolderForCompBackgroundNeutral as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundNeutralForIdx1)
+        } else if (valueHolderForCompBackgroundNeutral instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundNeutral_2  = value_compBackgroundNeutral as string
-            valueSerializer.writeString(value_compBackgroundNeutral_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundNeutral_type) {
+            const valueHolderForCompBackgroundNeutralForIdx2  = valueHolderForCompBackgroundNeutral as string
+            valueSerializer.writeString(valueHolderForCompBackgroundNeutralForIdx2)
+        } else if (valueHolderForCompBackgroundNeutral instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundNeutral_3  = value_compBackgroundNeutral as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundNeutral_3)
+            const valueHolderForCompBackgroundNeutralForIdx3  = valueHolderForCompBackgroundNeutral as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundNeutralForIdx3)
         }
-        const value_compEmphasizeSecondary  = value.compEmphasizeSecondary
-        let value_compEmphasizeSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_compEmphasizeSecondary_type = runtimeType(value_compEmphasizeSecondary)
-        if (TypeChecker.isColor(value_compEmphasizeSecondary)) {
+        const valueHolderForCompEmphasizeSecondary  = value.compEmphasizeSecondary
+        if (valueHolderForCompEmphasizeSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compEmphasizeSecondary_0  = value_compEmphasizeSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compEmphasizeSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compEmphasizeSecondary_type) {
+            const valueHolderForCompEmphasizeSecondaryForIdx0  = valueHolderForCompEmphasizeSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompEmphasizeSecondaryForIdx0))
+        } else if (valueHolderForCompEmphasizeSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compEmphasizeSecondary_1  = value_compEmphasizeSecondary as number
-            valueSerializer.writeNumber(value_compEmphasizeSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_compEmphasizeSecondary_type) {
+            const valueHolderForCompEmphasizeSecondaryForIdx1  = valueHolderForCompEmphasizeSecondary as number
+            valueSerializer.writeNumber(valueHolderForCompEmphasizeSecondaryForIdx1)
+        } else if (valueHolderForCompEmphasizeSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compEmphasizeSecondary_2  = value_compEmphasizeSecondary as string
-            valueSerializer.writeString(value_compEmphasizeSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compEmphasizeSecondary_type) {
+            const valueHolderForCompEmphasizeSecondaryForIdx2  = valueHolderForCompEmphasizeSecondary as string
+            valueSerializer.writeString(valueHolderForCompEmphasizeSecondaryForIdx2)
+        } else if (valueHolderForCompEmphasizeSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compEmphasizeSecondary_3  = value_compEmphasizeSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_compEmphasizeSecondary_3)
+            const valueHolderForCompEmphasizeSecondaryForIdx3  = valueHolderForCompEmphasizeSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompEmphasizeSecondaryForIdx3)
         }
-        const value_compEmphasizeTertiary  = value.compEmphasizeTertiary
-        let value_compEmphasizeTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_compEmphasizeTertiary_type = runtimeType(value_compEmphasizeTertiary)
-        if (TypeChecker.isColor(value_compEmphasizeTertiary)) {
+        const valueHolderForCompEmphasizeTertiary  = value.compEmphasizeTertiary
+        if (valueHolderForCompEmphasizeTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compEmphasizeTertiary_0  = value_compEmphasizeTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compEmphasizeTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compEmphasizeTertiary_type) {
+            const valueHolderForCompEmphasizeTertiaryForIdx0  = valueHolderForCompEmphasizeTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompEmphasizeTertiaryForIdx0))
+        } else if (valueHolderForCompEmphasizeTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compEmphasizeTertiary_1  = value_compEmphasizeTertiary as number
-            valueSerializer.writeNumber(value_compEmphasizeTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_compEmphasizeTertiary_type) {
+            const valueHolderForCompEmphasizeTertiaryForIdx1  = valueHolderForCompEmphasizeTertiary as number
+            valueSerializer.writeNumber(valueHolderForCompEmphasizeTertiaryForIdx1)
+        } else if (valueHolderForCompEmphasizeTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compEmphasizeTertiary_2  = value_compEmphasizeTertiary as string
-            valueSerializer.writeString(value_compEmphasizeTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compEmphasizeTertiary_type) {
+            const valueHolderForCompEmphasizeTertiaryForIdx2  = valueHolderForCompEmphasizeTertiary as string
+            valueSerializer.writeString(valueHolderForCompEmphasizeTertiaryForIdx2)
+        } else if (valueHolderForCompEmphasizeTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compEmphasizeTertiary_3  = value_compEmphasizeTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_compEmphasizeTertiary_3)
+            const valueHolderForCompEmphasizeTertiaryForIdx3  = valueHolderForCompEmphasizeTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompEmphasizeTertiaryForIdx3)
         }
-        const value_compDivider  = value.compDivider
-        let value_compDivider_type : int32 = RuntimeType.UNDEFINED
-        value_compDivider_type = runtimeType(value_compDivider)
-        if (TypeChecker.isColor(value_compDivider)) {
+        const valueHolderForCompDivider  = value.compDivider
+        if (valueHolderForCompDivider instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compDivider_0  = value_compDivider as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compDivider_0))
-        }
-        else if (RuntimeType.NUMBER == value_compDivider_type) {
+            const valueHolderForCompDividerForIdx0  = valueHolderForCompDivider as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompDividerForIdx0))
+        } else if (valueHolderForCompDivider instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compDivider_1  = value_compDivider as number
-            valueSerializer.writeNumber(value_compDivider_1)
-        }
-        else if (RuntimeType.STRING == value_compDivider_type) {
+            const valueHolderForCompDividerForIdx1  = valueHolderForCompDivider as number
+            valueSerializer.writeNumber(valueHolderForCompDividerForIdx1)
+        } else if (valueHolderForCompDivider instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compDivider_2  = value_compDivider as string
-            valueSerializer.writeString(value_compDivider_2)
-        }
-        else if (RuntimeType.OBJECT == value_compDivider_type) {
+            const valueHolderForCompDividerForIdx2  = valueHolderForCompDivider as string
+            valueSerializer.writeString(valueHolderForCompDividerForIdx2)
+        } else if (valueHolderForCompDivider instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compDivider_3  = value_compDivider as Resource
-            Resource_serializer.write(valueSerializer, value_compDivider_3)
+            const valueHolderForCompDividerForIdx3  = valueHolderForCompDivider as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompDividerForIdx3)
         }
-        const value_compCommonContrary  = value.compCommonContrary
-        let value_compCommonContrary_type : int32 = RuntimeType.UNDEFINED
-        value_compCommonContrary_type = runtimeType(value_compCommonContrary)
-        if (TypeChecker.isColor(value_compCommonContrary)) {
+        const valueHolderForCompCommonContrary  = value.compCommonContrary
+        if (valueHolderForCompCommonContrary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compCommonContrary_0  = value_compCommonContrary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compCommonContrary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compCommonContrary_type) {
+            const valueHolderForCompCommonContraryForIdx0  = valueHolderForCompCommonContrary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompCommonContraryForIdx0))
+        } else if (valueHolderForCompCommonContrary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compCommonContrary_1  = value_compCommonContrary as number
-            valueSerializer.writeNumber(value_compCommonContrary_1)
-        }
-        else if (RuntimeType.STRING == value_compCommonContrary_type) {
+            const valueHolderForCompCommonContraryForIdx1  = valueHolderForCompCommonContrary as number
+            valueSerializer.writeNumber(valueHolderForCompCommonContraryForIdx1)
+        } else if (valueHolderForCompCommonContrary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compCommonContrary_2  = value_compCommonContrary as string
-            valueSerializer.writeString(value_compCommonContrary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compCommonContrary_type) {
+            const valueHolderForCompCommonContraryForIdx2  = valueHolderForCompCommonContrary as string
+            valueSerializer.writeString(valueHolderForCompCommonContraryForIdx2)
+        } else if (valueHolderForCompCommonContrary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compCommonContrary_3  = value_compCommonContrary as Resource
-            Resource_serializer.write(valueSerializer, value_compCommonContrary_3)
+            const valueHolderForCompCommonContraryForIdx3  = valueHolderForCompCommonContrary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompCommonContraryForIdx3)
         }
-        const value_compBackgroundFocus  = value.compBackgroundFocus
-        let value_compBackgroundFocus_type : int32 = RuntimeType.UNDEFINED
-        value_compBackgroundFocus_type = runtimeType(value_compBackgroundFocus)
-        if (TypeChecker.isColor(value_compBackgroundFocus)) {
+        const valueHolderForCompBackgroundFocus  = value.compBackgroundFocus
+        if (valueHolderForCompBackgroundFocus instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compBackgroundFocus_0  = value_compBackgroundFocus as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compBackgroundFocus_0))
-        }
-        else if (RuntimeType.NUMBER == value_compBackgroundFocus_type) {
+            const valueHolderForCompBackgroundFocusForIdx0  = valueHolderForCompBackgroundFocus as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompBackgroundFocusForIdx0))
+        } else if (valueHolderForCompBackgroundFocus instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compBackgroundFocus_1  = value_compBackgroundFocus as number
-            valueSerializer.writeNumber(value_compBackgroundFocus_1)
-        }
-        else if (RuntimeType.STRING == value_compBackgroundFocus_type) {
+            const valueHolderForCompBackgroundFocusForIdx1  = valueHolderForCompBackgroundFocus as number
+            valueSerializer.writeNumber(valueHolderForCompBackgroundFocusForIdx1)
+        } else if (valueHolderForCompBackgroundFocus instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compBackgroundFocus_2  = value_compBackgroundFocus as string
-            valueSerializer.writeString(value_compBackgroundFocus_2)
-        }
-        else if (RuntimeType.OBJECT == value_compBackgroundFocus_type) {
+            const valueHolderForCompBackgroundFocusForIdx2  = valueHolderForCompBackgroundFocus as string
+            valueSerializer.writeString(valueHolderForCompBackgroundFocusForIdx2)
+        } else if (valueHolderForCompBackgroundFocus instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compBackgroundFocus_3  = value_compBackgroundFocus as Resource
-            Resource_serializer.write(valueSerializer, value_compBackgroundFocus_3)
+            const valueHolderForCompBackgroundFocusForIdx3  = valueHolderForCompBackgroundFocus as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompBackgroundFocusForIdx3)
         }
-        const value_compFocusedPrimary  = value.compFocusedPrimary
-        let value_compFocusedPrimary_type : int32 = RuntimeType.UNDEFINED
-        value_compFocusedPrimary_type = runtimeType(value_compFocusedPrimary)
-        if (TypeChecker.isColor(value_compFocusedPrimary)) {
+        const valueHolderForCompFocusedPrimary  = value.compFocusedPrimary
+        if (valueHolderForCompFocusedPrimary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compFocusedPrimary_0  = value_compFocusedPrimary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compFocusedPrimary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compFocusedPrimary_type) {
+            const valueHolderForCompFocusedPrimaryForIdx0  = valueHolderForCompFocusedPrimary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompFocusedPrimaryForIdx0))
+        } else if (valueHolderForCompFocusedPrimary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compFocusedPrimary_1  = value_compFocusedPrimary as number
-            valueSerializer.writeNumber(value_compFocusedPrimary_1)
-        }
-        else if (RuntimeType.STRING == value_compFocusedPrimary_type) {
+            const valueHolderForCompFocusedPrimaryForIdx1  = valueHolderForCompFocusedPrimary as number
+            valueSerializer.writeNumber(valueHolderForCompFocusedPrimaryForIdx1)
+        } else if (valueHolderForCompFocusedPrimary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compFocusedPrimary_2  = value_compFocusedPrimary as string
-            valueSerializer.writeString(value_compFocusedPrimary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compFocusedPrimary_type) {
+            const valueHolderForCompFocusedPrimaryForIdx2  = valueHolderForCompFocusedPrimary as string
+            valueSerializer.writeString(valueHolderForCompFocusedPrimaryForIdx2)
+        } else if (valueHolderForCompFocusedPrimary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compFocusedPrimary_3  = value_compFocusedPrimary as Resource
-            Resource_serializer.write(valueSerializer, value_compFocusedPrimary_3)
+            const valueHolderForCompFocusedPrimaryForIdx3  = valueHolderForCompFocusedPrimary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompFocusedPrimaryForIdx3)
         }
-        const value_compFocusedSecondary  = value.compFocusedSecondary
-        let value_compFocusedSecondary_type : int32 = RuntimeType.UNDEFINED
-        value_compFocusedSecondary_type = runtimeType(value_compFocusedSecondary)
-        if (TypeChecker.isColor(value_compFocusedSecondary)) {
+        const valueHolderForCompFocusedSecondary  = value.compFocusedSecondary
+        if (valueHolderForCompFocusedSecondary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compFocusedSecondary_0  = value_compFocusedSecondary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compFocusedSecondary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compFocusedSecondary_type) {
+            const valueHolderForCompFocusedSecondaryForIdx0  = valueHolderForCompFocusedSecondary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompFocusedSecondaryForIdx0))
+        } else if (valueHolderForCompFocusedSecondary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compFocusedSecondary_1  = value_compFocusedSecondary as number
-            valueSerializer.writeNumber(value_compFocusedSecondary_1)
-        }
-        else if (RuntimeType.STRING == value_compFocusedSecondary_type) {
+            const valueHolderForCompFocusedSecondaryForIdx1  = valueHolderForCompFocusedSecondary as number
+            valueSerializer.writeNumber(valueHolderForCompFocusedSecondaryForIdx1)
+        } else if (valueHolderForCompFocusedSecondary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compFocusedSecondary_2  = value_compFocusedSecondary as string
-            valueSerializer.writeString(value_compFocusedSecondary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compFocusedSecondary_type) {
+            const valueHolderForCompFocusedSecondaryForIdx2  = valueHolderForCompFocusedSecondary as string
+            valueSerializer.writeString(valueHolderForCompFocusedSecondaryForIdx2)
+        } else if (valueHolderForCompFocusedSecondary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compFocusedSecondary_3  = value_compFocusedSecondary as Resource
-            Resource_serializer.write(valueSerializer, value_compFocusedSecondary_3)
+            const valueHolderForCompFocusedSecondaryForIdx3  = valueHolderForCompFocusedSecondary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompFocusedSecondaryForIdx3)
         }
-        const value_compFocusedTertiary  = value.compFocusedTertiary
-        let value_compFocusedTertiary_type : int32 = RuntimeType.UNDEFINED
-        value_compFocusedTertiary_type = runtimeType(value_compFocusedTertiary)
-        if (TypeChecker.isColor(value_compFocusedTertiary)) {
+        const valueHolderForCompFocusedTertiary  = value.compFocusedTertiary
+        if (valueHolderForCompFocusedTertiary instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_compFocusedTertiary_0  = value_compFocusedTertiary as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_compFocusedTertiary_0))
-        }
-        else if (RuntimeType.NUMBER == value_compFocusedTertiary_type) {
+            const valueHolderForCompFocusedTertiaryForIdx0  = valueHolderForCompFocusedTertiary as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForCompFocusedTertiaryForIdx0))
+        } else if (valueHolderForCompFocusedTertiary instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_compFocusedTertiary_1  = value_compFocusedTertiary as number
-            valueSerializer.writeNumber(value_compFocusedTertiary_1)
-        }
-        else if (RuntimeType.STRING == value_compFocusedTertiary_type) {
+            const valueHolderForCompFocusedTertiaryForIdx1  = valueHolderForCompFocusedTertiary as number
+            valueSerializer.writeNumber(valueHolderForCompFocusedTertiaryForIdx1)
+        } else if (valueHolderForCompFocusedTertiary instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_compFocusedTertiary_2  = value_compFocusedTertiary as string
-            valueSerializer.writeString(value_compFocusedTertiary_2)
-        }
-        else if (RuntimeType.OBJECT == value_compFocusedTertiary_type) {
+            const valueHolderForCompFocusedTertiaryForIdx2  = valueHolderForCompFocusedTertiary as string
+            valueSerializer.writeString(valueHolderForCompFocusedTertiaryForIdx2)
+        } else if (valueHolderForCompFocusedTertiary instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_compFocusedTertiary_3  = value_compFocusedTertiary as Resource
-            Resource_serializer.write(valueSerializer, value_compFocusedTertiary_3)
+            const valueHolderForCompFocusedTertiaryForIdx3  = valueHolderForCompFocusedTertiary as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForCompFocusedTertiaryForIdx3)
         }
-        const value_interactiveHover  = value.interactiveHover
-        let value_interactiveHover_type : int32 = RuntimeType.UNDEFINED
-        value_interactiveHover_type = runtimeType(value_interactiveHover)
-        if (TypeChecker.isColor(value_interactiveHover)) {
+        const valueHolderForInteractiveHover  = value.interactiveHover
+        if (valueHolderForInteractiveHover instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactiveHover_0  = value_interactiveHover as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactiveHover_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactiveHover_type) {
+            const valueHolderForInteractiveHoverForIdx0  = valueHolderForInteractiveHover as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractiveHoverForIdx0))
+        } else if (valueHolderForInteractiveHover instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactiveHover_1  = value_interactiveHover as number
-            valueSerializer.writeNumber(value_interactiveHover_1)
-        }
-        else if (RuntimeType.STRING == value_interactiveHover_type) {
+            const valueHolderForInteractiveHoverForIdx1  = valueHolderForInteractiveHover as number
+            valueSerializer.writeNumber(valueHolderForInteractiveHoverForIdx1)
+        } else if (valueHolderForInteractiveHover instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactiveHover_2  = value_interactiveHover as string
-            valueSerializer.writeString(value_interactiveHover_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactiveHover_type) {
+            const valueHolderForInteractiveHoverForIdx2  = valueHolderForInteractiveHover as string
+            valueSerializer.writeString(valueHolderForInteractiveHoverForIdx2)
+        } else if (valueHolderForInteractiveHover instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactiveHover_3  = value_interactiveHover as Resource
-            Resource_serializer.write(valueSerializer, value_interactiveHover_3)
+            const valueHolderForInteractiveHoverForIdx3  = valueHolderForInteractiveHover as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractiveHoverForIdx3)
         }
-        const value_interactivePressed  = value.interactivePressed
-        let value_interactivePressed_type : int32 = RuntimeType.UNDEFINED
-        value_interactivePressed_type = runtimeType(value_interactivePressed)
-        if (TypeChecker.isColor(value_interactivePressed)) {
+        const valueHolderForInteractivePressed  = value.interactivePressed
+        if (valueHolderForInteractivePressed instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactivePressed_0  = value_interactivePressed as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactivePressed_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactivePressed_type) {
+            const valueHolderForInteractivePressedForIdx0  = valueHolderForInteractivePressed as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractivePressedForIdx0))
+        } else if (valueHolderForInteractivePressed instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactivePressed_1  = value_interactivePressed as number
-            valueSerializer.writeNumber(value_interactivePressed_1)
-        }
-        else if (RuntimeType.STRING == value_interactivePressed_type) {
+            const valueHolderForInteractivePressedForIdx1  = valueHolderForInteractivePressed as number
+            valueSerializer.writeNumber(valueHolderForInteractivePressedForIdx1)
+        } else if (valueHolderForInteractivePressed instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactivePressed_2  = value_interactivePressed as string
-            valueSerializer.writeString(value_interactivePressed_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactivePressed_type) {
+            const valueHolderForInteractivePressedForIdx2  = valueHolderForInteractivePressed as string
+            valueSerializer.writeString(valueHolderForInteractivePressedForIdx2)
+        } else if (valueHolderForInteractivePressed instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactivePressed_3  = value_interactivePressed as Resource
-            Resource_serializer.write(valueSerializer, value_interactivePressed_3)
+            const valueHolderForInteractivePressedForIdx3  = valueHolderForInteractivePressed as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractivePressedForIdx3)
         }
-        const value_interactiveFocus  = value.interactiveFocus
-        let value_interactiveFocus_type : int32 = RuntimeType.UNDEFINED
-        value_interactiveFocus_type = runtimeType(value_interactiveFocus)
-        if (TypeChecker.isColor(value_interactiveFocus)) {
+        const valueHolderForInteractiveFocus  = value.interactiveFocus
+        if (valueHolderForInteractiveFocus instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactiveFocus_0  = value_interactiveFocus as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactiveFocus_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactiveFocus_type) {
+            const valueHolderForInteractiveFocusForIdx0  = valueHolderForInteractiveFocus as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractiveFocusForIdx0))
+        } else if (valueHolderForInteractiveFocus instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactiveFocus_1  = value_interactiveFocus as number
-            valueSerializer.writeNumber(value_interactiveFocus_1)
-        }
-        else if (RuntimeType.STRING == value_interactiveFocus_type) {
+            const valueHolderForInteractiveFocusForIdx1  = valueHolderForInteractiveFocus as number
+            valueSerializer.writeNumber(valueHolderForInteractiveFocusForIdx1)
+        } else if (valueHolderForInteractiveFocus instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactiveFocus_2  = value_interactiveFocus as string
-            valueSerializer.writeString(value_interactiveFocus_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactiveFocus_type) {
+            const valueHolderForInteractiveFocusForIdx2  = valueHolderForInteractiveFocus as string
+            valueSerializer.writeString(valueHolderForInteractiveFocusForIdx2)
+        } else if (valueHolderForInteractiveFocus instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactiveFocus_3  = value_interactiveFocus as Resource
-            Resource_serializer.write(valueSerializer, value_interactiveFocus_3)
+            const valueHolderForInteractiveFocusForIdx3  = valueHolderForInteractiveFocus as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractiveFocusForIdx3)
         }
-        const value_interactiveActive  = value.interactiveActive
-        let value_interactiveActive_type : int32 = RuntimeType.UNDEFINED
-        value_interactiveActive_type = runtimeType(value_interactiveActive)
-        if (TypeChecker.isColor(value_interactiveActive)) {
+        const valueHolderForInteractiveActive  = value.interactiveActive
+        if (valueHolderForInteractiveActive instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactiveActive_0  = value_interactiveActive as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactiveActive_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactiveActive_type) {
+            const valueHolderForInteractiveActiveForIdx0  = valueHolderForInteractiveActive as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractiveActiveForIdx0))
+        } else if (valueHolderForInteractiveActive instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactiveActive_1  = value_interactiveActive as number
-            valueSerializer.writeNumber(value_interactiveActive_1)
-        }
-        else if (RuntimeType.STRING == value_interactiveActive_type) {
+            const valueHolderForInteractiveActiveForIdx1  = valueHolderForInteractiveActive as number
+            valueSerializer.writeNumber(valueHolderForInteractiveActiveForIdx1)
+        } else if (valueHolderForInteractiveActive instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactiveActive_2  = value_interactiveActive as string
-            valueSerializer.writeString(value_interactiveActive_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactiveActive_type) {
+            const valueHolderForInteractiveActiveForIdx2  = valueHolderForInteractiveActive as string
+            valueSerializer.writeString(valueHolderForInteractiveActiveForIdx2)
+        } else if (valueHolderForInteractiveActive instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactiveActive_3  = value_interactiveActive as Resource
-            Resource_serializer.write(valueSerializer, value_interactiveActive_3)
+            const valueHolderForInteractiveActiveForIdx3  = valueHolderForInteractiveActive as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractiveActiveForIdx3)
         }
-        const value_interactiveSelect  = value.interactiveSelect
-        let value_interactiveSelect_type : int32 = RuntimeType.UNDEFINED
-        value_interactiveSelect_type = runtimeType(value_interactiveSelect)
-        if (TypeChecker.isColor(value_interactiveSelect)) {
+        const valueHolderForInteractiveSelect  = value.interactiveSelect
+        if (valueHolderForInteractiveSelect instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactiveSelect_0  = value_interactiveSelect as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactiveSelect_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactiveSelect_type) {
+            const valueHolderForInteractiveSelectForIdx0  = valueHolderForInteractiveSelect as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractiveSelectForIdx0))
+        } else if (valueHolderForInteractiveSelect instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactiveSelect_1  = value_interactiveSelect as number
-            valueSerializer.writeNumber(value_interactiveSelect_1)
-        }
-        else if (RuntimeType.STRING == value_interactiveSelect_type) {
+            const valueHolderForInteractiveSelectForIdx1  = valueHolderForInteractiveSelect as number
+            valueSerializer.writeNumber(valueHolderForInteractiveSelectForIdx1)
+        } else if (valueHolderForInteractiveSelect instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactiveSelect_2  = value_interactiveSelect as string
-            valueSerializer.writeString(value_interactiveSelect_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactiveSelect_type) {
+            const valueHolderForInteractiveSelectForIdx2  = valueHolderForInteractiveSelect as string
+            valueSerializer.writeString(valueHolderForInteractiveSelectForIdx2)
+        } else if (valueHolderForInteractiveSelect instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactiveSelect_3  = value_interactiveSelect as Resource
-            Resource_serializer.write(valueSerializer, value_interactiveSelect_3)
+            const valueHolderForInteractiveSelectForIdx3  = valueHolderForInteractiveSelect as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractiveSelectForIdx3)
         }
-        const value_interactiveClick  = value.interactiveClick
-        let value_interactiveClick_type : int32 = RuntimeType.UNDEFINED
-        value_interactiveClick_type = runtimeType(value_interactiveClick)
-        if (TypeChecker.isColor(value_interactiveClick)) {
+        const valueHolderForInteractiveClick  = value.interactiveClick
+        if (valueHolderForInteractiveClick instanceof Color) {
             valueSerializer.writeInt8((0).toChar())
-            const value_interactiveClick_0  = value_interactiveClick as Color
-            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_interactiveClick_0))
-        }
-        else if (RuntimeType.NUMBER == value_interactiveClick_type) {
+            const valueHolderForInteractiveClickForIdx0  = valueHolderForInteractiveClick as Color
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForInteractiveClickForIdx0))
+        } else if (valueHolderForInteractiveClick instanceof number) {
             valueSerializer.writeInt8((1).toChar())
-            const value_interactiveClick_1  = value_interactiveClick as number
-            valueSerializer.writeNumber(value_interactiveClick_1)
-        }
-        else if (RuntimeType.STRING == value_interactiveClick_type) {
+            const valueHolderForInteractiveClickForIdx1  = valueHolderForInteractiveClick as number
+            valueSerializer.writeNumber(valueHolderForInteractiveClickForIdx1)
+        } else if (valueHolderForInteractiveClick instanceof string) {
             valueSerializer.writeInt8((2).toChar())
-            const value_interactiveClick_2  = value_interactiveClick as string
-            valueSerializer.writeString(value_interactiveClick_2)
-        }
-        else if (RuntimeType.OBJECT == value_interactiveClick_type) {
+            const valueHolderForInteractiveClickForIdx2  = valueHolderForInteractiveClick as string
+            valueSerializer.writeString(valueHolderForInteractiveClickForIdx2)
+        } else if (valueHolderForInteractiveClick instanceof Resource) {
             valueSerializer.writeInt8((3).toChar())
-            const value_interactiveClick_3  = value_interactiveClick as Resource
-            Resource_serializer.write(valueSerializer, value_interactiveClick_3)
+            const valueHolderForInteractiveClickForIdx3  = valueHolderForInteractiveClick as Resource
+            Resource_serializer.write(valueSerializer, valueHolderForInteractiveClickForIdx3)
         }
     }
     public static read(buffer: DeserializerBase): Colors {
         let valueDeserializer : DeserializerBase = buffer
-        const brand_buf_selector : int32 = valueDeserializer.readInt8()
-        let brand_buf : Color | number | string | Resource | undefined
-        if (brand_buf_selector == (0).toChar()) {
-            brand_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (brand_buf_selector == (1).toChar()) {
-            brand_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (brand_buf_selector == (2).toChar()) {
-            brand_buf = (valueDeserializer.readString() as string)
-        }
-        else if (brand_buf_selector == (3).toChar()) {
-            brand_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for brand_buf has to be chosen through deserialisation.")
-        }
-        const brand_result : ResourceColor = (brand_buf as Color | number | string | Resource)
-        const warning_buf_selector : int32 = valueDeserializer.readInt8()
-        let warning_buf : Color | number | string | Resource | undefined
-        if (warning_buf_selector == (0).toChar()) {
-            warning_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (warning_buf_selector == (1).toChar()) {
-            warning_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (warning_buf_selector == (2).toChar()) {
-            warning_buf = (valueDeserializer.readString() as string)
-        }
-        else if (warning_buf_selector == (3).toChar()) {
-            warning_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for warning_buf has to be chosen through deserialisation.")
-        }
-        const warning_result : ResourceColor = (warning_buf as Color | number | string | Resource)
-        const alert_buf_selector : int32 = valueDeserializer.readInt8()
-        let alert_buf : Color | number | string | Resource | undefined
-        if (alert_buf_selector == (0).toChar()) {
-            alert_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (alert_buf_selector == (1).toChar()) {
-            alert_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (alert_buf_selector == (2).toChar()) {
-            alert_buf = (valueDeserializer.readString() as string)
-        }
-        else if (alert_buf_selector == (3).toChar()) {
-            alert_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for alert_buf has to be chosen through deserialisation.")
-        }
-        const alert_result : ResourceColor = (alert_buf as Color | number | string | Resource)
-        const confirm_buf_selector : int32 = valueDeserializer.readInt8()
-        let confirm_buf : Color | number | string | Resource | undefined
-        if (confirm_buf_selector == (0).toChar()) {
-            confirm_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (confirm_buf_selector == (1).toChar()) {
-            confirm_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (confirm_buf_selector == (2).toChar()) {
-            confirm_buf = (valueDeserializer.readString() as string)
-        }
-        else if (confirm_buf_selector == (3).toChar()) {
-            confirm_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for confirm_buf has to be chosen through deserialisation.")
-        }
-        const confirm_result : ResourceColor = (confirm_buf as Color | number | string | Resource)
-        const fontPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontPrimary_buf : Color | number | string | Resource | undefined
-        if (fontPrimary_buf_selector == (0).toChar()) {
-            fontPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontPrimary_buf_selector == (1).toChar()) {
-            fontPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontPrimary_buf_selector == (2).toChar()) {
-            fontPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontPrimary_buf_selector == (3).toChar()) {
-            fontPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontPrimary_buf has to be chosen through deserialisation.")
-        }
-        const fontPrimary_result : ResourceColor = (fontPrimary_buf as Color | number | string | Resource)
-        const fontSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontSecondary_buf : Color | number | string | Resource | undefined
-        if (fontSecondary_buf_selector == (0).toChar()) {
-            fontSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontSecondary_buf_selector == (1).toChar()) {
-            fontSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontSecondary_buf_selector == (2).toChar()) {
-            fontSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontSecondary_buf_selector == (3).toChar()) {
-            fontSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontSecondary_buf has to be chosen through deserialisation.")
-        }
-        const fontSecondary_result : ResourceColor = (fontSecondary_buf as Color | number | string | Resource)
-        const fontTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontTertiary_buf : Color | number | string | Resource | undefined
-        if (fontTertiary_buf_selector == (0).toChar()) {
-            fontTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontTertiary_buf_selector == (1).toChar()) {
-            fontTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontTertiary_buf_selector == (2).toChar()) {
-            fontTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontTertiary_buf_selector == (3).toChar()) {
-            fontTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontTertiary_buf has to be chosen through deserialisation.")
-        }
-        const fontTertiary_result : ResourceColor = (fontTertiary_buf as Color | number | string | Resource)
-        const fontFourth_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontFourth_buf : Color | number | string | Resource | undefined
-        if (fontFourth_buf_selector == (0).toChar()) {
-            fontFourth_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontFourth_buf_selector == (1).toChar()) {
-            fontFourth_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontFourth_buf_selector == (2).toChar()) {
-            fontFourth_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontFourth_buf_selector == (3).toChar()) {
-            fontFourth_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontFourth_buf has to be chosen through deserialisation.")
-        }
-        const fontFourth_result : ResourceColor = (fontFourth_buf as Color | number | string | Resource)
-        const fontEmphasize_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontEmphasize_buf : Color | number | string | Resource | undefined
-        if (fontEmphasize_buf_selector == (0).toChar()) {
-            fontEmphasize_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontEmphasize_buf_selector == (1).toChar()) {
-            fontEmphasize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontEmphasize_buf_selector == (2).toChar()) {
-            fontEmphasize_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontEmphasize_buf_selector == (3).toChar()) {
-            fontEmphasize_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontEmphasize_buf has to be chosen through deserialisation.")
-        }
-        const fontEmphasize_result : ResourceColor = (fontEmphasize_buf as Color | number | string | Resource)
-        const fontOnPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontOnPrimary_buf : Color | number | string | Resource | undefined
-        if (fontOnPrimary_buf_selector == (0).toChar()) {
-            fontOnPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontOnPrimary_buf_selector == (1).toChar()) {
-            fontOnPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontOnPrimary_buf_selector == (2).toChar()) {
-            fontOnPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontOnPrimary_buf_selector == (3).toChar()) {
-            fontOnPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontOnPrimary_buf has to be chosen through deserialisation.")
-        }
-        const fontOnPrimary_result : ResourceColor = (fontOnPrimary_buf as Color | number | string | Resource)
-        const fontOnSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontOnSecondary_buf : Color | number | string | Resource | undefined
-        if (fontOnSecondary_buf_selector == (0).toChar()) {
-            fontOnSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontOnSecondary_buf_selector == (1).toChar()) {
-            fontOnSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontOnSecondary_buf_selector == (2).toChar()) {
-            fontOnSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontOnSecondary_buf_selector == (3).toChar()) {
-            fontOnSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontOnSecondary_buf has to be chosen through deserialisation.")
-        }
-        const fontOnSecondary_result : ResourceColor = (fontOnSecondary_buf as Color | number | string | Resource)
-        const fontOnTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontOnTertiary_buf : Color | number | string | Resource | undefined
-        if (fontOnTertiary_buf_selector == (0).toChar()) {
-            fontOnTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontOnTertiary_buf_selector == (1).toChar()) {
-            fontOnTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontOnTertiary_buf_selector == (2).toChar()) {
-            fontOnTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontOnTertiary_buf_selector == (3).toChar()) {
-            fontOnTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontOnTertiary_buf has to be chosen through deserialisation.")
-        }
-        const fontOnTertiary_result : ResourceColor = (fontOnTertiary_buf as Color | number | string | Resource)
-        const fontOnFourth_buf_selector : int32 = valueDeserializer.readInt8()
-        let fontOnFourth_buf : Color | number | string | Resource | undefined
-        if (fontOnFourth_buf_selector == (0).toChar()) {
-            fontOnFourth_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (fontOnFourth_buf_selector == (1).toChar()) {
-            fontOnFourth_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (fontOnFourth_buf_selector == (2).toChar()) {
-            fontOnFourth_buf = (valueDeserializer.readString() as string)
-        }
-        else if (fontOnFourth_buf_selector == (3).toChar()) {
-            fontOnFourth_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for fontOnFourth_buf has to be chosen through deserialisation.")
-        }
-        const fontOnFourth_result : ResourceColor = (fontOnFourth_buf as Color | number | string | Resource)
-        const iconPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconPrimary_buf : Color | number | string | Resource | undefined
-        if (iconPrimary_buf_selector == (0).toChar()) {
-            iconPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconPrimary_buf_selector == (1).toChar()) {
-            iconPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconPrimary_buf_selector == (2).toChar()) {
-            iconPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconPrimary_buf_selector == (3).toChar()) {
-            iconPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconPrimary_buf has to be chosen through deserialisation.")
-        }
-        const iconPrimary_result : ResourceColor = (iconPrimary_buf as Color | number | string | Resource)
-        const iconSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconSecondary_buf : Color | number | string | Resource | undefined
-        if (iconSecondary_buf_selector == (0).toChar()) {
-            iconSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconSecondary_buf_selector == (1).toChar()) {
-            iconSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconSecondary_buf_selector == (2).toChar()) {
-            iconSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconSecondary_buf_selector == (3).toChar()) {
-            iconSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconSecondary_buf has to be chosen through deserialisation.")
-        }
-        const iconSecondary_result : ResourceColor = (iconSecondary_buf as Color | number | string | Resource)
-        const iconTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconTertiary_buf : Color | number | string | Resource | undefined
-        if (iconTertiary_buf_selector == (0).toChar()) {
-            iconTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconTertiary_buf_selector == (1).toChar()) {
-            iconTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconTertiary_buf_selector == (2).toChar()) {
-            iconTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconTertiary_buf_selector == (3).toChar()) {
-            iconTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconTertiary_buf has to be chosen through deserialisation.")
-        }
-        const iconTertiary_result : ResourceColor = (iconTertiary_buf as Color | number | string | Resource)
-        const iconFourth_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconFourth_buf : Color | number | string | Resource | undefined
-        if (iconFourth_buf_selector == (0).toChar()) {
-            iconFourth_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconFourth_buf_selector == (1).toChar()) {
-            iconFourth_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconFourth_buf_selector == (2).toChar()) {
-            iconFourth_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconFourth_buf_selector == (3).toChar()) {
-            iconFourth_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconFourth_buf has to be chosen through deserialisation.")
-        }
-        const iconFourth_result : ResourceColor = (iconFourth_buf as Color | number | string | Resource)
-        const iconEmphasize_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconEmphasize_buf : Color | number | string | Resource | undefined
-        if (iconEmphasize_buf_selector == (0).toChar()) {
-            iconEmphasize_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconEmphasize_buf_selector == (1).toChar()) {
-            iconEmphasize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconEmphasize_buf_selector == (2).toChar()) {
-            iconEmphasize_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconEmphasize_buf_selector == (3).toChar()) {
-            iconEmphasize_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconEmphasize_buf has to be chosen through deserialisation.")
-        }
-        const iconEmphasize_result : ResourceColor = (iconEmphasize_buf as Color | number | string | Resource)
-        const iconSubEmphasize_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconSubEmphasize_buf : Color | number | string | Resource | undefined
-        if (iconSubEmphasize_buf_selector == (0).toChar()) {
-            iconSubEmphasize_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconSubEmphasize_buf_selector == (1).toChar()) {
-            iconSubEmphasize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconSubEmphasize_buf_selector == (2).toChar()) {
-            iconSubEmphasize_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconSubEmphasize_buf_selector == (3).toChar()) {
-            iconSubEmphasize_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconSubEmphasize_buf has to be chosen through deserialisation.")
-        }
-        const iconSubEmphasize_result : ResourceColor = (iconSubEmphasize_buf as Color | number | string | Resource)
-        const iconOnPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconOnPrimary_buf : Color | number | string | Resource | undefined
-        if (iconOnPrimary_buf_selector == (0).toChar()) {
-            iconOnPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconOnPrimary_buf_selector == (1).toChar()) {
-            iconOnPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconOnPrimary_buf_selector == (2).toChar()) {
-            iconOnPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconOnPrimary_buf_selector == (3).toChar()) {
-            iconOnPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconOnPrimary_buf has to be chosen through deserialisation.")
-        }
-        const iconOnPrimary_result : ResourceColor = (iconOnPrimary_buf as Color | number | string | Resource)
-        const iconOnSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconOnSecondary_buf : Color | number | string | Resource | undefined
-        if (iconOnSecondary_buf_selector == (0).toChar()) {
-            iconOnSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconOnSecondary_buf_selector == (1).toChar()) {
-            iconOnSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconOnSecondary_buf_selector == (2).toChar()) {
-            iconOnSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconOnSecondary_buf_selector == (3).toChar()) {
-            iconOnSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconOnSecondary_buf has to be chosen through deserialisation.")
-        }
-        const iconOnSecondary_result : ResourceColor = (iconOnSecondary_buf as Color | number | string | Resource)
-        const iconOnTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconOnTertiary_buf : Color | number | string | Resource | undefined
-        if (iconOnTertiary_buf_selector == (0).toChar()) {
-            iconOnTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconOnTertiary_buf_selector == (1).toChar()) {
-            iconOnTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconOnTertiary_buf_selector == (2).toChar()) {
-            iconOnTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconOnTertiary_buf_selector == (3).toChar()) {
-            iconOnTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconOnTertiary_buf has to be chosen through deserialisation.")
-        }
-        const iconOnTertiary_result : ResourceColor = (iconOnTertiary_buf as Color | number | string | Resource)
-        const iconOnFourth_buf_selector : int32 = valueDeserializer.readInt8()
-        let iconOnFourth_buf : Color | number | string | Resource | undefined
-        if (iconOnFourth_buf_selector == (0).toChar()) {
-            iconOnFourth_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (iconOnFourth_buf_selector == (1).toChar()) {
-            iconOnFourth_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (iconOnFourth_buf_selector == (2).toChar()) {
-            iconOnFourth_buf = (valueDeserializer.readString() as string)
-        }
-        else if (iconOnFourth_buf_selector == (3).toChar()) {
-            iconOnFourth_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for iconOnFourth_buf has to be chosen through deserialisation.")
-        }
-        const iconOnFourth_result : ResourceColor = (iconOnFourth_buf as Color | number | string | Resource)
-        const backgroundPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let backgroundPrimary_buf : Color | number | string | Resource | undefined
-        if (backgroundPrimary_buf_selector == (0).toChar()) {
-            backgroundPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (backgroundPrimary_buf_selector == (1).toChar()) {
-            backgroundPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (backgroundPrimary_buf_selector == (2).toChar()) {
-            backgroundPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (backgroundPrimary_buf_selector == (3).toChar()) {
-            backgroundPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for backgroundPrimary_buf has to be chosen through deserialisation.")
-        }
-        const backgroundPrimary_result : ResourceColor = (backgroundPrimary_buf as Color | number | string | Resource)
-        const backgroundSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let backgroundSecondary_buf : Color | number | string | Resource | undefined
-        if (backgroundSecondary_buf_selector == (0).toChar()) {
-            backgroundSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (backgroundSecondary_buf_selector == (1).toChar()) {
-            backgroundSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (backgroundSecondary_buf_selector == (2).toChar()) {
-            backgroundSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (backgroundSecondary_buf_selector == (3).toChar()) {
-            backgroundSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for backgroundSecondary_buf has to be chosen through deserialisation.")
-        }
-        const backgroundSecondary_result : ResourceColor = (backgroundSecondary_buf as Color | number | string | Resource)
-        const backgroundTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let backgroundTertiary_buf : Color | number | string | Resource | undefined
-        if (backgroundTertiary_buf_selector == (0).toChar()) {
-            backgroundTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (backgroundTertiary_buf_selector == (1).toChar()) {
-            backgroundTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (backgroundTertiary_buf_selector == (2).toChar()) {
-            backgroundTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (backgroundTertiary_buf_selector == (3).toChar()) {
-            backgroundTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for backgroundTertiary_buf has to be chosen through deserialisation.")
-        }
-        const backgroundTertiary_result : ResourceColor = (backgroundTertiary_buf as Color | number | string | Resource)
-        const backgroundFourth_buf_selector : int32 = valueDeserializer.readInt8()
-        let backgroundFourth_buf : Color | number | string | Resource | undefined
-        if (backgroundFourth_buf_selector == (0).toChar()) {
-            backgroundFourth_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (backgroundFourth_buf_selector == (1).toChar()) {
-            backgroundFourth_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (backgroundFourth_buf_selector == (2).toChar()) {
-            backgroundFourth_buf = (valueDeserializer.readString() as string)
-        }
-        else if (backgroundFourth_buf_selector == (3).toChar()) {
-            backgroundFourth_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for backgroundFourth_buf has to be chosen through deserialisation.")
-        }
-        const backgroundFourth_result : ResourceColor = (backgroundFourth_buf as Color | number | string | Resource)
-        const backgroundEmphasize_buf_selector : int32 = valueDeserializer.readInt8()
-        let backgroundEmphasize_buf : Color | number | string | Resource | undefined
-        if (backgroundEmphasize_buf_selector == (0).toChar()) {
-            backgroundEmphasize_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (backgroundEmphasize_buf_selector == (1).toChar()) {
-            backgroundEmphasize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (backgroundEmphasize_buf_selector == (2).toChar()) {
-            backgroundEmphasize_buf = (valueDeserializer.readString() as string)
-        }
-        else if (backgroundEmphasize_buf_selector == (3).toChar()) {
-            backgroundEmphasize_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for backgroundEmphasize_buf has to be chosen through deserialisation.")
-        }
-        const backgroundEmphasize_result : ResourceColor = (backgroundEmphasize_buf as Color | number | string | Resource)
-        const compForegroundPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compForegroundPrimary_buf : Color | number | string | Resource | undefined
-        if (compForegroundPrimary_buf_selector == (0).toChar()) {
-            compForegroundPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compForegroundPrimary_buf_selector == (1).toChar()) {
-            compForegroundPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compForegroundPrimary_buf_selector == (2).toChar()) {
-            compForegroundPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compForegroundPrimary_buf_selector == (3).toChar()) {
-            compForegroundPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compForegroundPrimary_buf has to be chosen through deserialisation.")
-        }
-        const compForegroundPrimary_result : ResourceColor = (compForegroundPrimary_buf as Color | number | string | Resource)
-        const compBackgroundPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundPrimary_buf : Color | number | string | Resource | undefined
-        if (compBackgroundPrimary_buf_selector == (0).toChar()) {
-            compBackgroundPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundPrimary_buf_selector == (1).toChar()) {
-            compBackgroundPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundPrimary_buf_selector == (2).toChar()) {
-            compBackgroundPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundPrimary_buf_selector == (3).toChar()) {
-            compBackgroundPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundPrimary_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundPrimary_result : ResourceColor = (compBackgroundPrimary_buf as Color | number | string | Resource)
-        const compBackgroundPrimaryTran_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundPrimaryTran_buf : Color | number | string | Resource | undefined
-        if (compBackgroundPrimaryTran_buf_selector == (0).toChar()) {
-            compBackgroundPrimaryTran_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundPrimaryTran_buf_selector == (1).toChar()) {
-            compBackgroundPrimaryTran_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundPrimaryTran_buf_selector == (2).toChar()) {
-            compBackgroundPrimaryTran_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundPrimaryTran_buf_selector == (3).toChar()) {
-            compBackgroundPrimaryTran_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundPrimaryTran_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundPrimaryTran_result : ResourceColor = (compBackgroundPrimaryTran_buf as Color | number | string | Resource)
-        const compBackgroundPrimaryContrary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundPrimaryContrary_buf : Color | number | string | Resource | undefined
-        if (compBackgroundPrimaryContrary_buf_selector == (0).toChar()) {
-            compBackgroundPrimaryContrary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundPrimaryContrary_buf_selector == (1).toChar()) {
-            compBackgroundPrimaryContrary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundPrimaryContrary_buf_selector == (2).toChar()) {
-            compBackgroundPrimaryContrary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundPrimaryContrary_buf_selector == (3).toChar()) {
-            compBackgroundPrimaryContrary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundPrimaryContrary_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundPrimaryContrary_result : ResourceColor = (compBackgroundPrimaryContrary_buf as Color | number | string | Resource)
-        const compBackgroundGray_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundGray_buf : Color | number | string | Resource | undefined
-        if (compBackgroundGray_buf_selector == (0).toChar()) {
-            compBackgroundGray_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundGray_buf_selector == (1).toChar()) {
-            compBackgroundGray_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundGray_buf_selector == (2).toChar()) {
-            compBackgroundGray_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundGray_buf_selector == (3).toChar()) {
-            compBackgroundGray_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundGray_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundGray_result : ResourceColor = (compBackgroundGray_buf as Color | number | string | Resource)
-        const compBackgroundSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundSecondary_buf : Color | number | string | Resource | undefined
-        if (compBackgroundSecondary_buf_selector == (0).toChar()) {
-            compBackgroundSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundSecondary_buf_selector == (1).toChar()) {
-            compBackgroundSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundSecondary_buf_selector == (2).toChar()) {
-            compBackgroundSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundSecondary_buf_selector == (3).toChar()) {
-            compBackgroundSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundSecondary_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundSecondary_result : ResourceColor = (compBackgroundSecondary_buf as Color | number | string | Resource)
-        const compBackgroundTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundTertiary_buf : Color | number | string | Resource | undefined
-        if (compBackgroundTertiary_buf_selector == (0).toChar()) {
-            compBackgroundTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundTertiary_buf_selector == (1).toChar()) {
-            compBackgroundTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundTertiary_buf_selector == (2).toChar()) {
-            compBackgroundTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundTertiary_buf_selector == (3).toChar()) {
-            compBackgroundTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundTertiary_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundTertiary_result : ResourceColor = (compBackgroundTertiary_buf as Color | number | string | Resource)
-        const compBackgroundEmphasize_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundEmphasize_buf : Color | number | string | Resource | undefined
-        if (compBackgroundEmphasize_buf_selector == (0).toChar()) {
-            compBackgroundEmphasize_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundEmphasize_buf_selector == (1).toChar()) {
-            compBackgroundEmphasize_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundEmphasize_buf_selector == (2).toChar()) {
-            compBackgroundEmphasize_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundEmphasize_buf_selector == (3).toChar()) {
-            compBackgroundEmphasize_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundEmphasize_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundEmphasize_result : ResourceColor = (compBackgroundEmphasize_buf as Color | number | string | Resource)
-        const compBackgroundNeutral_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundNeutral_buf : Color | number | string | Resource | undefined
-        if (compBackgroundNeutral_buf_selector == (0).toChar()) {
-            compBackgroundNeutral_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundNeutral_buf_selector == (1).toChar()) {
-            compBackgroundNeutral_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundNeutral_buf_selector == (2).toChar()) {
-            compBackgroundNeutral_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundNeutral_buf_selector == (3).toChar()) {
-            compBackgroundNeutral_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundNeutral_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundNeutral_result : ResourceColor = (compBackgroundNeutral_buf as Color | number | string | Resource)
-        const compEmphasizeSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compEmphasizeSecondary_buf : Color | number | string | Resource | undefined
-        if (compEmphasizeSecondary_buf_selector == (0).toChar()) {
-            compEmphasizeSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compEmphasizeSecondary_buf_selector == (1).toChar()) {
-            compEmphasizeSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compEmphasizeSecondary_buf_selector == (2).toChar()) {
-            compEmphasizeSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compEmphasizeSecondary_buf_selector == (3).toChar()) {
-            compEmphasizeSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compEmphasizeSecondary_buf has to be chosen through deserialisation.")
-        }
-        const compEmphasizeSecondary_result : ResourceColor = (compEmphasizeSecondary_buf as Color | number | string | Resource)
-        const compEmphasizeTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compEmphasizeTertiary_buf : Color | number | string | Resource | undefined
-        if (compEmphasizeTertiary_buf_selector == (0).toChar()) {
-            compEmphasizeTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compEmphasizeTertiary_buf_selector == (1).toChar()) {
-            compEmphasizeTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compEmphasizeTertiary_buf_selector == (2).toChar()) {
-            compEmphasizeTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compEmphasizeTertiary_buf_selector == (3).toChar()) {
-            compEmphasizeTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compEmphasizeTertiary_buf has to be chosen through deserialisation.")
-        }
-        const compEmphasizeTertiary_result : ResourceColor = (compEmphasizeTertiary_buf as Color | number | string | Resource)
-        const compDivider_buf_selector : int32 = valueDeserializer.readInt8()
-        let compDivider_buf : Color | number | string | Resource | undefined
-        if (compDivider_buf_selector == (0).toChar()) {
-            compDivider_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compDivider_buf_selector == (1).toChar()) {
-            compDivider_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compDivider_buf_selector == (2).toChar()) {
-            compDivider_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compDivider_buf_selector == (3).toChar()) {
-            compDivider_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compDivider_buf has to be chosen through deserialisation.")
-        }
-        const compDivider_result : ResourceColor = (compDivider_buf as Color | number | string | Resource)
-        const compCommonContrary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compCommonContrary_buf : Color | number | string | Resource | undefined
-        if (compCommonContrary_buf_selector == (0).toChar()) {
-            compCommonContrary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compCommonContrary_buf_selector == (1).toChar()) {
-            compCommonContrary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compCommonContrary_buf_selector == (2).toChar()) {
-            compCommonContrary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compCommonContrary_buf_selector == (3).toChar()) {
-            compCommonContrary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compCommonContrary_buf has to be chosen through deserialisation.")
-        }
-        const compCommonContrary_result : ResourceColor = (compCommonContrary_buf as Color | number | string | Resource)
-        const compBackgroundFocus_buf_selector : int32 = valueDeserializer.readInt8()
-        let compBackgroundFocus_buf : Color | number | string | Resource | undefined
-        if (compBackgroundFocus_buf_selector == (0).toChar()) {
-            compBackgroundFocus_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compBackgroundFocus_buf_selector == (1).toChar()) {
-            compBackgroundFocus_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compBackgroundFocus_buf_selector == (2).toChar()) {
-            compBackgroundFocus_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compBackgroundFocus_buf_selector == (3).toChar()) {
-            compBackgroundFocus_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compBackgroundFocus_buf has to be chosen through deserialisation.")
-        }
-        const compBackgroundFocus_result : ResourceColor = (compBackgroundFocus_buf as Color | number | string | Resource)
-        const compFocusedPrimary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compFocusedPrimary_buf : Color | number | string | Resource | undefined
-        if (compFocusedPrimary_buf_selector == (0).toChar()) {
-            compFocusedPrimary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compFocusedPrimary_buf_selector == (1).toChar()) {
-            compFocusedPrimary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compFocusedPrimary_buf_selector == (2).toChar()) {
-            compFocusedPrimary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compFocusedPrimary_buf_selector == (3).toChar()) {
-            compFocusedPrimary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compFocusedPrimary_buf has to be chosen through deserialisation.")
-        }
-        const compFocusedPrimary_result : ResourceColor = (compFocusedPrimary_buf as Color | number | string | Resource)
-        const compFocusedSecondary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compFocusedSecondary_buf : Color | number | string | Resource | undefined
-        if (compFocusedSecondary_buf_selector == (0).toChar()) {
-            compFocusedSecondary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compFocusedSecondary_buf_selector == (1).toChar()) {
-            compFocusedSecondary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compFocusedSecondary_buf_selector == (2).toChar()) {
-            compFocusedSecondary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compFocusedSecondary_buf_selector == (3).toChar()) {
-            compFocusedSecondary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compFocusedSecondary_buf has to be chosen through deserialisation.")
-        }
-        const compFocusedSecondary_result : ResourceColor = (compFocusedSecondary_buf as Color | number | string | Resource)
-        const compFocusedTertiary_buf_selector : int32 = valueDeserializer.readInt8()
-        let compFocusedTertiary_buf : Color | number | string | Resource | undefined
-        if (compFocusedTertiary_buf_selector == (0).toChar()) {
-            compFocusedTertiary_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (compFocusedTertiary_buf_selector == (1).toChar()) {
-            compFocusedTertiary_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (compFocusedTertiary_buf_selector == (2).toChar()) {
-            compFocusedTertiary_buf = (valueDeserializer.readString() as string)
-        }
-        else if (compFocusedTertiary_buf_selector == (3).toChar()) {
-            compFocusedTertiary_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for compFocusedTertiary_buf has to be chosen through deserialisation.")
-        }
-        const compFocusedTertiary_result : ResourceColor = (compFocusedTertiary_buf as Color | number | string | Resource)
-        const interactiveHover_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactiveHover_buf : Color | number | string | Resource | undefined
-        if (interactiveHover_buf_selector == (0).toChar()) {
-            interactiveHover_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactiveHover_buf_selector == (1).toChar()) {
-            interactiveHover_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactiveHover_buf_selector == (2).toChar()) {
-            interactiveHover_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactiveHover_buf_selector == (3).toChar()) {
-            interactiveHover_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactiveHover_buf has to be chosen through deserialisation.")
-        }
-        const interactiveHover_result : ResourceColor = (interactiveHover_buf as Color | number | string | Resource)
-        const interactivePressed_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactivePressed_buf : Color | number | string | Resource | undefined
-        if (interactivePressed_buf_selector == (0).toChar()) {
-            interactivePressed_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactivePressed_buf_selector == (1).toChar()) {
-            interactivePressed_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactivePressed_buf_selector == (2).toChar()) {
-            interactivePressed_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactivePressed_buf_selector == (3).toChar()) {
-            interactivePressed_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactivePressed_buf has to be chosen through deserialisation.")
-        }
-        const interactivePressed_result : ResourceColor = (interactivePressed_buf as Color | number | string | Resource)
-        const interactiveFocus_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactiveFocus_buf : Color | number | string | Resource | undefined
-        if (interactiveFocus_buf_selector == (0).toChar()) {
-            interactiveFocus_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactiveFocus_buf_selector == (1).toChar()) {
-            interactiveFocus_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactiveFocus_buf_selector == (2).toChar()) {
-            interactiveFocus_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactiveFocus_buf_selector == (3).toChar()) {
-            interactiveFocus_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactiveFocus_buf has to be chosen through deserialisation.")
-        }
-        const interactiveFocus_result : ResourceColor = (interactiveFocus_buf as Color | number | string | Resource)
-        const interactiveActive_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactiveActive_buf : Color | number | string | Resource | undefined
-        if (interactiveActive_buf_selector == (0).toChar()) {
-            interactiveActive_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactiveActive_buf_selector == (1).toChar()) {
-            interactiveActive_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactiveActive_buf_selector == (2).toChar()) {
-            interactiveActive_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactiveActive_buf_selector == (3).toChar()) {
-            interactiveActive_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactiveActive_buf has to be chosen through deserialisation.")
-        }
-        const interactiveActive_result : ResourceColor = (interactiveActive_buf as Color | number | string | Resource)
-        const interactiveSelect_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactiveSelect_buf : Color | number | string | Resource | undefined
-        if (interactiveSelect_buf_selector == (0).toChar()) {
-            interactiveSelect_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactiveSelect_buf_selector == (1).toChar()) {
-            interactiveSelect_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactiveSelect_buf_selector == (2).toChar()) {
-            interactiveSelect_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactiveSelect_buf_selector == (3).toChar()) {
-            interactiveSelect_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactiveSelect_buf has to be chosen through deserialisation.")
-        }
-        const interactiveSelect_result : ResourceColor = (interactiveSelect_buf as Color | number | string | Resource)
-        const interactiveClick_buf_selector : int32 = valueDeserializer.readInt8()
-        let interactiveClick_buf : Color | number | string | Resource | undefined
-        if (interactiveClick_buf_selector == (0).toChar()) {
-            interactiveClick_buf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-        }
-        else if (interactiveClick_buf_selector == (1).toChar()) {
-            interactiveClick_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (interactiveClick_buf_selector == (2).toChar()) {
-            interactiveClick_buf = (valueDeserializer.readString() as string)
-        }
-        else if (interactiveClick_buf_selector == (3).toChar()) {
-            interactiveClick_buf = Resource_serializer.read(valueDeserializer)
-        }
-        else {
-            throw new Error("One of the branches for interactiveClick_buf has to be chosen through deserialisation.")
-        }
-        const interactiveClick_result : ResourceColor = (interactiveClick_buf as Color | number | string | Resource)
-        let value : Colors = ({brand: brand_result, warning: warning_result, alert: alert_result, confirm: confirm_result, fontPrimary: fontPrimary_result, fontSecondary: fontSecondary_result, fontTertiary: fontTertiary_result, fontFourth: fontFourth_result, fontEmphasize: fontEmphasize_result, fontOnPrimary: fontOnPrimary_result, fontOnSecondary: fontOnSecondary_result, fontOnTertiary: fontOnTertiary_result, fontOnFourth: fontOnFourth_result, iconPrimary: iconPrimary_result, iconSecondary: iconSecondary_result, iconTertiary: iconTertiary_result, iconFourth: iconFourth_result, iconEmphasize: iconEmphasize_result, iconSubEmphasize: iconSubEmphasize_result, iconOnPrimary: iconOnPrimary_result, iconOnSecondary: iconOnSecondary_result, iconOnTertiary: iconOnTertiary_result, iconOnFourth: iconOnFourth_result, backgroundPrimary: backgroundPrimary_result, backgroundSecondary: backgroundSecondary_result, backgroundTertiary: backgroundTertiary_result, backgroundFourth: backgroundFourth_result, backgroundEmphasize: backgroundEmphasize_result, compForegroundPrimary: compForegroundPrimary_result, compBackgroundPrimary: compBackgroundPrimary_result, compBackgroundPrimaryTran: compBackgroundPrimaryTran_result, compBackgroundPrimaryContrary: compBackgroundPrimaryContrary_result, compBackgroundGray: compBackgroundGray_result, compBackgroundSecondary: compBackgroundSecondary_result, compBackgroundTertiary: compBackgroundTertiary_result, compBackgroundEmphasize: compBackgroundEmphasize_result, compBackgroundNeutral: compBackgroundNeutral_result, compEmphasizeSecondary: compEmphasizeSecondary_result, compEmphasizeTertiary: compEmphasizeTertiary_result, compDivider: compDivider_result, compCommonContrary: compCommonContrary_result, compBackgroundFocus: compBackgroundFocus_result, compFocusedPrimary: compFocusedPrimary_result, compFocusedSecondary: compFocusedSecondary_result, compFocusedTertiary: compFocusedTertiary_result, interactiveHover: interactiveHover_result, interactivePressed: interactivePressed_result, interactiveFocus: interactiveFocus_result, interactiveActive: interactiveActive_result, interactiveSelect: interactiveSelect_result, interactiveClick: interactiveClick_result} as Colors)
+        const brandTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let brandTmpBuf : Color | number | string | Resource | undefined
+        if (brandTmpBufUnionSelector == (0).toChar()) {
+            brandTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (brandTmpBufUnionSelector == (1).toChar()) {
+            brandTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (brandTmpBufUnionSelector == (2).toChar()) {
+            brandTmpBuf = (valueDeserializer.readString() as string)
+        } else if (brandTmpBufUnionSelector == (3).toChar()) {
+            brandTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for brandTmpBuf has to be chosen through deserialisation.")
+        }
+        const brandTmpResult : ResourceColor = (brandTmpBuf as Color | number | string | Resource)
+        const warningTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let warningTmpBuf : Color | number | string | Resource | undefined
+        if (warningTmpBufUnionSelector == (0).toChar()) {
+            warningTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (warningTmpBufUnionSelector == (1).toChar()) {
+            warningTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (warningTmpBufUnionSelector == (2).toChar()) {
+            warningTmpBuf = (valueDeserializer.readString() as string)
+        } else if (warningTmpBufUnionSelector == (3).toChar()) {
+            warningTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for warningTmpBuf has to be chosen through deserialisation.")
+        }
+        const warningTmpResult : ResourceColor = (warningTmpBuf as Color | number | string | Resource)
+        const alertTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let alertTmpBuf : Color | number | string | Resource | undefined
+        if (alertTmpBufUnionSelector == (0).toChar()) {
+            alertTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (alertTmpBufUnionSelector == (1).toChar()) {
+            alertTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (alertTmpBufUnionSelector == (2).toChar()) {
+            alertTmpBuf = (valueDeserializer.readString() as string)
+        } else if (alertTmpBufUnionSelector == (3).toChar()) {
+            alertTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for alertTmpBuf has to be chosen through deserialisation.")
+        }
+        const alertTmpResult : ResourceColor = (alertTmpBuf as Color | number | string | Resource)
+        const confirmTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let confirmTmpBuf : Color | number | string | Resource | undefined
+        if (confirmTmpBufUnionSelector == (0).toChar()) {
+            confirmTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (confirmTmpBufUnionSelector == (1).toChar()) {
+            confirmTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (confirmTmpBufUnionSelector == (2).toChar()) {
+            confirmTmpBuf = (valueDeserializer.readString() as string)
+        } else if (confirmTmpBufUnionSelector == (3).toChar()) {
+            confirmTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for confirmTmpBuf has to be chosen through deserialisation.")
+        }
+        const confirmTmpResult : ResourceColor = (confirmTmpBuf as Color | number | string | Resource)
+        const fontPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontPrimaryTmpBufUnionSelector == (0).toChar()) {
+            fontPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontPrimaryTmpBufUnionSelector == (1).toChar()) {
+            fontPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontPrimaryTmpBufUnionSelector == (2).toChar()) {
+            fontPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontPrimaryTmpBufUnionSelector == (3).toChar()) {
+            fontPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontPrimaryTmpResult : ResourceColor = (fontPrimaryTmpBuf as Color | number | string | Resource)
+        const fontSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontSecondaryTmpBufUnionSelector == (0).toChar()) {
+            fontSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontSecondaryTmpBufUnionSelector == (1).toChar()) {
+            fontSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontSecondaryTmpBufUnionSelector == (2).toChar()) {
+            fontSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontSecondaryTmpBufUnionSelector == (3).toChar()) {
+            fontSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontSecondaryTmpResult : ResourceColor = (fontSecondaryTmpBuf as Color | number | string | Resource)
+        const fontTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontTertiaryTmpBufUnionSelector == (0).toChar()) {
+            fontTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontTertiaryTmpBufUnionSelector == (1).toChar()) {
+            fontTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontTertiaryTmpBufUnionSelector == (2).toChar()) {
+            fontTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontTertiaryTmpBufUnionSelector == (3).toChar()) {
+            fontTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontTertiaryTmpResult : ResourceColor = (fontTertiaryTmpBuf as Color | number | string | Resource)
+        const fontFourthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontFourthTmpBuf : Color | number | string | Resource | undefined
+        if (fontFourthTmpBufUnionSelector == (0).toChar()) {
+            fontFourthTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontFourthTmpBufUnionSelector == (1).toChar()) {
+            fontFourthTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontFourthTmpBufUnionSelector == (2).toChar()) {
+            fontFourthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontFourthTmpBufUnionSelector == (3).toChar()) {
+            fontFourthTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontFourthTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontFourthTmpResult : ResourceColor = (fontFourthTmpBuf as Color | number | string | Resource)
+        const fontEmphasizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontEmphasizeTmpBuf : Color | number | string | Resource | undefined
+        if (fontEmphasizeTmpBufUnionSelector == (0).toChar()) {
+            fontEmphasizeTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontEmphasizeTmpBufUnionSelector == (1).toChar()) {
+            fontEmphasizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontEmphasizeTmpBufUnionSelector == (2).toChar()) {
+            fontEmphasizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontEmphasizeTmpBufUnionSelector == (3).toChar()) {
+            fontEmphasizeTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontEmphasizeTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontEmphasizeTmpResult : ResourceColor = (fontEmphasizeTmpBuf as Color | number | string | Resource)
+        const fontOnPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontOnPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontOnPrimaryTmpBufUnionSelector == (0).toChar()) {
+            fontOnPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontOnPrimaryTmpBufUnionSelector == (1).toChar()) {
+            fontOnPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontOnPrimaryTmpBufUnionSelector == (2).toChar()) {
+            fontOnPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontOnPrimaryTmpBufUnionSelector == (3).toChar()) {
+            fontOnPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontOnPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontOnPrimaryTmpResult : ResourceColor = (fontOnPrimaryTmpBuf as Color | number | string | Resource)
+        const fontOnSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontOnSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontOnSecondaryTmpBufUnionSelector == (0).toChar()) {
+            fontOnSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontOnSecondaryTmpBufUnionSelector == (1).toChar()) {
+            fontOnSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontOnSecondaryTmpBufUnionSelector == (2).toChar()) {
+            fontOnSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontOnSecondaryTmpBufUnionSelector == (3).toChar()) {
+            fontOnSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontOnSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontOnSecondaryTmpResult : ResourceColor = (fontOnSecondaryTmpBuf as Color | number | string | Resource)
+        const fontOnTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontOnTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (fontOnTertiaryTmpBufUnionSelector == (0).toChar()) {
+            fontOnTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontOnTertiaryTmpBufUnionSelector == (1).toChar()) {
+            fontOnTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontOnTertiaryTmpBufUnionSelector == (2).toChar()) {
+            fontOnTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontOnTertiaryTmpBufUnionSelector == (3).toChar()) {
+            fontOnTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontOnTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontOnTertiaryTmpResult : ResourceColor = (fontOnTertiaryTmpBuf as Color | number | string | Resource)
+        const fontOnFourthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let fontOnFourthTmpBuf : Color | number | string | Resource | undefined
+        if (fontOnFourthTmpBufUnionSelector == (0).toChar()) {
+            fontOnFourthTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (fontOnFourthTmpBufUnionSelector == (1).toChar()) {
+            fontOnFourthTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (fontOnFourthTmpBufUnionSelector == (2).toChar()) {
+            fontOnFourthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (fontOnFourthTmpBufUnionSelector == (3).toChar()) {
+            fontOnFourthTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for fontOnFourthTmpBuf has to be chosen through deserialisation.")
+        }
+        const fontOnFourthTmpResult : ResourceColor = (fontOnFourthTmpBuf as Color | number | string | Resource)
+        const iconPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconPrimaryTmpBufUnionSelector == (0).toChar()) {
+            iconPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconPrimaryTmpBufUnionSelector == (1).toChar()) {
+            iconPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconPrimaryTmpBufUnionSelector == (2).toChar()) {
+            iconPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconPrimaryTmpBufUnionSelector == (3).toChar()) {
+            iconPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconPrimaryTmpResult : ResourceColor = (iconPrimaryTmpBuf as Color | number | string | Resource)
+        const iconSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconSecondaryTmpBufUnionSelector == (0).toChar()) {
+            iconSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconSecondaryTmpBufUnionSelector == (1).toChar()) {
+            iconSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconSecondaryTmpBufUnionSelector == (2).toChar()) {
+            iconSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconSecondaryTmpBufUnionSelector == (3).toChar()) {
+            iconSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconSecondaryTmpResult : ResourceColor = (iconSecondaryTmpBuf as Color | number | string | Resource)
+        const iconTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconTertiaryTmpBufUnionSelector == (0).toChar()) {
+            iconTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconTertiaryTmpBufUnionSelector == (1).toChar()) {
+            iconTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconTertiaryTmpBufUnionSelector == (2).toChar()) {
+            iconTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconTertiaryTmpBufUnionSelector == (3).toChar()) {
+            iconTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconTertiaryTmpResult : ResourceColor = (iconTertiaryTmpBuf as Color | number | string | Resource)
+        const iconFourthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconFourthTmpBuf : Color | number | string | Resource | undefined
+        if (iconFourthTmpBufUnionSelector == (0).toChar()) {
+            iconFourthTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconFourthTmpBufUnionSelector == (1).toChar()) {
+            iconFourthTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconFourthTmpBufUnionSelector == (2).toChar()) {
+            iconFourthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconFourthTmpBufUnionSelector == (3).toChar()) {
+            iconFourthTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconFourthTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconFourthTmpResult : ResourceColor = (iconFourthTmpBuf as Color | number | string | Resource)
+        const iconEmphasizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconEmphasizeTmpBuf : Color | number | string | Resource | undefined
+        if (iconEmphasizeTmpBufUnionSelector == (0).toChar()) {
+            iconEmphasizeTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconEmphasizeTmpBufUnionSelector == (1).toChar()) {
+            iconEmphasizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconEmphasizeTmpBufUnionSelector == (2).toChar()) {
+            iconEmphasizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconEmphasizeTmpBufUnionSelector == (3).toChar()) {
+            iconEmphasizeTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconEmphasizeTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconEmphasizeTmpResult : ResourceColor = (iconEmphasizeTmpBuf as Color | number | string | Resource)
+        const iconSubEmphasizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconSubEmphasizeTmpBuf : Color | number | string | Resource | undefined
+        if (iconSubEmphasizeTmpBufUnionSelector == (0).toChar()) {
+            iconSubEmphasizeTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconSubEmphasizeTmpBufUnionSelector == (1).toChar()) {
+            iconSubEmphasizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconSubEmphasizeTmpBufUnionSelector == (2).toChar()) {
+            iconSubEmphasizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconSubEmphasizeTmpBufUnionSelector == (3).toChar()) {
+            iconSubEmphasizeTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconSubEmphasizeTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconSubEmphasizeTmpResult : ResourceColor = (iconSubEmphasizeTmpBuf as Color | number | string | Resource)
+        const iconOnPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconOnPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconOnPrimaryTmpBufUnionSelector == (0).toChar()) {
+            iconOnPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconOnPrimaryTmpBufUnionSelector == (1).toChar()) {
+            iconOnPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconOnPrimaryTmpBufUnionSelector == (2).toChar()) {
+            iconOnPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconOnPrimaryTmpBufUnionSelector == (3).toChar()) {
+            iconOnPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconOnPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconOnPrimaryTmpResult : ResourceColor = (iconOnPrimaryTmpBuf as Color | number | string | Resource)
+        const iconOnSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconOnSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconOnSecondaryTmpBufUnionSelector == (0).toChar()) {
+            iconOnSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconOnSecondaryTmpBufUnionSelector == (1).toChar()) {
+            iconOnSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconOnSecondaryTmpBufUnionSelector == (2).toChar()) {
+            iconOnSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconOnSecondaryTmpBufUnionSelector == (3).toChar()) {
+            iconOnSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconOnSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconOnSecondaryTmpResult : ResourceColor = (iconOnSecondaryTmpBuf as Color | number | string | Resource)
+        const iconOnTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconOnTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (iconOnTertiaryTmpBufUnionSelector == (0).toChar()) {
+            iconOnTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconOnTertiaryTmpBufUnionSelector == (1).toChar()) {
+            iconOnTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconOnTertiaryTmpBufUnionSelector == (2).toChar()) {
+            iconOnTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconOnTertiaryTmpBufUnionSelector == (3).toChar()) {
+            iconOnTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconOnTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconOnTertiaryTmpResult : ResourceColor = (iconOnTertiaryTmpBuf as Color | number | string | Resource)
+        const iconOnFourthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let iconOnFourthTmpBuf : Color | number | string | Resource | undefined
+        if (iconOnFourthTmpBufUnionSelector == (0).toChar()) {
+            iconOnFourthTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (iconOnFourthTmpBufUnionSelector == (1).toChar()) {
+            iconOnFourthTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (iconOnFourthTmpBufUnionSelector == (2).toChar()) {
+            iconOnFourthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (iconOnFourthTmpBufUnionSelector == (3).toChar()) {
+            iconOnFourthTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for iconOnFourthTmpBuf has to be chosen through deserialisation.")
+        }
+        const iconOnFourthTmpResult : ResourceColor = (iconOnFourthTmpBuf as Color | number | string | Resource)
+        const backgroundPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let backgroundPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (backgroundPrimaryTmpBufUnionSelector == (0).toChar()) {
+            backgroundPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (backgroundPrimaryTmpBufUnionSelector == (1).toChar()) {
+            backgroundPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (backgroundPrimaryTmpBufUnionSelector == (2).toChar()) {
+            backgroundPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (backgroundPrimaryTmpBufUnionSelector == (3).toChar()) {
+            backgroundPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for backgroundPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const backgroundPrimaryTmpResult : ResourceColor = (backgroundPrimaryTmpBuf as Color | number | string | Resource)
+        const backgroundSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let backgroundSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (backgroundSecondaryTmpBufUnionSelector == (0).toChar()) {
+            backgroundSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (backgroundSecondaryTmpBufUnionSelector == (1).toChar()) {
+            backgroundSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (backgroundSecondaryTmpBufUnionSelector == (2).toChar()) {
+            backgroundSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (backgroundSecondaryTmpBufUnionSelector == (3).toChar()) {
+            backgroundSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for backgroundSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const backgroundSecondaryTmpResult : ResourceColor = (backgroundSecondaryTmpBuf as Color | number | string | Resource)
+        const backgroundTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let backgroundTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (backgroundTertiaryTmpBufUnionSelector == (0).toChar()) {
+            backgroundTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (backgroundTertiaryTmpBufUnionSelector == (1).toChar()) {
+            backgroundTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (backgroundTertiaryTmpBufUnionSelector == (2).toChar()) {
+            backgroundTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (backgroundTertiaryTmpBufUnionSelector == (3).toChar()) {
+            backgroundTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for backgroundTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const backgroundTertiaryTmpResult : ResourceColor = (backgroundTertiaryTmpBuf as Color | number | string | Resource)
+        const backgroundFourthTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let backgroundFourthTmpBuf : Color | number | string | Resource | undefined
+        if (backgroundFourthTmpBufUnionSelector == (0).toChar()) {
+            backgroundFourthTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (backgroundFourthTmpBufUnionSelector == (1).toChar()) {
+            backgroundFourthTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (backgroundFourthTmpBufUnionSelector == (2).toChar()) {
+            backgroundFourthTmpBuf = (valueDeserializer.readString() as string)
+        } else if (backgroundFourthTmpBufUnionSelector == (3).toChar()) {
+            backgroundFourthTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for backgroundFourthTmpBuf has to be chosen through deserialisation.")
+        }
+        const backgroundFourthTmpResult : ResourceColor = (backgroundFourthTmpBuf as Color | number | string | Resource)
+        const backgroundEmphasizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let backgroundEmphasizeTmpBuf : Color | number | string | Resource | undefined
+        if (backgroundEmphasizeTmpBufUnionSelector == (0).toChar()) {
+            backgroundEmphasizeTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (backgroundEmphasizeTmpBufUnionSelector == (1).toChar()) {
+            backgroundEmphasizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (backgroundEmphasizeTmpBufUnionSelector == (2).toChar()) {
+            backgroundEmphasizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (backgroundEmphasizeTmpBufUnionSelector == (3).toChar()) {
+            backgroundEmphasizeTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for backgroundEmphasizeTmpBuf has to be chosen through deserialisation.")
+        }
+        const backgroundEmphasizeTmpResult : ResourceColor = (backgroundEmphasizeTmpBuf as Color | number | string | Resource)
+        const compForegroundPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compForegroundPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (compForegroundPrimaryTmpBufUnionSelector == (0).toChar()) {
+            compForegroundPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compForegroundPrimaryTmpBufUnionSelector == (1).toChar()) {
+            compForegroundPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compForegroundPrimaryTmpBufUnionSelector == (2).toChar()) {
+            compForegroundPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compForegroundPrimaryTmpBufUnionSelector == (3).toChar()) {
+            compForegroundPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compForegroundPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compForegroundPrimaryTmpResult : ResourceColor = (compForegroundPrimaryTmpBuf as Color | number | string | Resource)
+        const compBackgroundPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundPrimaryTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundPrimaryTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundPrimaryTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundPrimaryTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundPrimaryTmpResult : ResourceColor = (compBackgroundPrimaryTmpBuf as Color | number | string | Resource)
+        const compBackgroundPrimaryTranTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundPrimaryTranTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundPrimaryTranTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundPrimaryTranTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundPrimaryTranTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundPrimaryTranTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundPrimaryTranTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundPrimaryTranTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundPrimaryTranTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundPrimaryTranTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundPrimaryTranTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundPrimaryTranTmpResult : ResourceColor = (compBackgroundPrimaryTranTmpBuf as Color | number | string | Resource)
+        const compBackgroundPrimaryContraryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundPrimaryContraryTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundPrimaryContraryTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundPrimaryContraryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundPrimaryContraryTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundPrimaryContraryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundPrimaryContraryTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundPrimaryContraryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundPrimaryContraryTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundPrimaryContraryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundPrimaryContraryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundPrimaryContraryTmpResult : ResourceColor = (compBackgroundPrimaryContraryTmpBuf as Color | number | string | Resource)
+        const compBackgroundGrayTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundGrayTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundGrayTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundGrayTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundGrayTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundGrayTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundGrayTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundGrayTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundGrayTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundGrayTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundGrayTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundGrayTmpResult : ResourceColor = (compBackgroundGrayTmpBuf as Color | number | string | Resource)
+        const compBackgroundSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundSecondaryTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundSecondaryTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundSecondaryTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundSecondaryTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundSecondaryTmpResult : ResourceColor = (compBackgroundSecondaryTmpBuf as Color | number | string | Resource)
+        const compBackgroundTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundTertiaryTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundTertiaryTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundTertiaryTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundTertiaryTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundTertiaryTmpResult : ResourceColor = (compBackgroundTertiaryTmpBuf as Color | number | string | Resource)
+        const compBackgroundEmphasizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundEmphasizeTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundEmphasizeTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundEmphasizeTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundEmphasizeTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundEmphasizeTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundEmphasizeTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundEmphasizeTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundEmphasizeTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundEmphasizeTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundEmphasizeTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundEmphasizeTmpResult : ResourceColor = (compBackgroundEmphasizeTmpBuf as Color | number | string | Resource)
+        const compBackgroundNeutralTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundNeutralTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundNeutralTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundNeutralTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundNeutralTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundNeutralTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundNeutralTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundNeutralTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundNeutralTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundNeutralTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundNeutralTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundNeutralTmpResult : ResourceColor = (compBackgroundNeutralTmpBuf as Color | number | string | Resource)
+        const compEmphasizeSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compEmphasizeSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (compEmphasizeSecondaryTmpBufUnionSelector == (0).toChar()) {
+            compEmphasizeSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compEmphasizeSecondaryTmpBufUnionSelector == (1).toChar()) {
+            compEmphasizeSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compEmphasizeSecondaryTmpBufUnionSelector == (2).toChar()) {
+            compEmphasizeSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compEmphasizeSecondaryTmpBufUnionSelector == (3).toChar()) {
+            compEmphasizeSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compEmphasizeSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compEmphasizeSecondaryTmpResult : ResourceColor = (compEmphasizeSecondaryTmpBuf as Color | number | string | Resource)
+        const compEmphasizeTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compEmphasizeTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (compEmphasizeTertiaryTmpBufUnionSelector == (0).toChar()) {
+            compEmphasizeTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compEmphasizeTertiaryTmpBufUnionSelector == (1).toChar()) {
+            compEmphasizeTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compEmphasizeTertiaryTmpBufUnionSelector == (2).toChar()) {
+            compEmphasizeTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compEmphasizeTertiaryTmpBufUnionSelector == (3).toChar()) {
+            compEmphasizeTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compEmphasizeTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compEmphasizeTertiaryTmpResult : ResourceColor = (compEmphasizeTertiaryTmpBuf as Color | number | string | Resource)
+        const compDividerTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compDividerTmpBuf : Color | number | string | Resource | undefined
+        if (compDividerTmpBufUnionSelector == (0).toChar()) {
+            compDividerTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compDividerTmpBufUnionSelector == (1).toChar()) {
+            compDividerTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compDividerTmpBufUnionSelector == (2).toChar()) {
+            compDividerTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compDividerTmpBufUnionSelector == (3).toChar()) {
+            compDividerTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compDividerTmpBuf has to be chosen through deserialisation.")
+        }
+        const compDividerTmpResult : ResourceColor = (compDividerTmpBuf as Color | number | string | Resource)
+        const compCommonContraryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compCommonContraryTmpBuf : Color | number | string | Resource | undefined
+        if (compCommonContraryTmpBufUnionSelector == (0).toChar()) {
+            compCommonContraryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compCommonContraryTmpBufUnionSelector == (1).toChar()) {
+            compCommonContraryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compCommonContraryTmpBufUnionSelector == (2).toChar()) {
+            compCommonContraryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compCommonContraryTmpBufUnionSelector == (3).toChar()) {
+            compCommonContraryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compCommonContraryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compCommonContraryTmpResult : ResourceColor = (compCommonContraryTmpBuf as Color | number | string | Resource)
+        const compBackgroundFocusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compBackgroundFocusTmpBuf : Color | number | string | Resource | undefined
+        if (compBackgroundFocusTmpBufUnionSelector == (0).toChar()) {
+            compBackgroundFocusTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compBackgroundFocusTmpBufUnionSelector == (1).toChar()) {
+            compBackgroundFocusTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compBackgroundFocusTmpBufUnionSelector == (2).toChar()) {
+            compBackgroundFocusTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compBackgroundFocusTmpBufUnionSelector == (3).toChar()) {
+            compBackgroundFocusTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compBackgroundFocusTmpBuf has to be chosen through deserialisation.")
+        }
+        const compBackgroundFocusTmpResult : ResourceColor = (compBackgroundFocusTmpBuf as Color | number | string | Resource)
+        const compFocusedPrimaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compFocusedPrimaryTmpBuf : Color | number | string | Resource | undefined
+        if (compFocusedPrimaryTmpBufUnionSelector == (0).toChar()) {
+            compFocusedPrimaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compFocusedPrimaryTmpBufUnionSelector == (1).toChar()) {
+            compFocusedPrimaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compFocusedPrimaryTmpBufUnionSelector == (2).toChar()) {
+            compFocusedPrimaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compFocusedPrimaryTmpBufUnionSelector == (3).toChar()) {
+            compFocusedPrimaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compFocusedPrimaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compFocusedPrimaryTmpResult : ResourceColor = (compFocusedPrimaryTmpBuf as Color | number | string | Resource)
+        const compFocusedSecondaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compFocusedSecondaryTmpBuf : Color | number | string | Resource | undefined
+        if (compFocusedSecondaryTmpBufUnionSelector == (0).toChar()) {
+            compFocusedSecondaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compFocusedSecondaryTmpBufUnionSelector == (1).toChar()) {
+            compFocusedSecondaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compFocusedSecondaryTmpBufUnionSelector == (2).toChar()) {
+            compFocusedSecondaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compFocusedSecondaryTmpBufUnionSelector == (3).toChar()) {
+            compFocusedSecondaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compFocusedSecondaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compFocusedSecondaryTmpResult : ResourceColor = (compFocusedSecondaryTmpBuf as Color | number | string | Resource)
+        const compFocusedTertiaryTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let compFocusedTertiaryTmpBuf : Color | number | string | Resource | undefined
+        if (compFocusedTertiaryTmpBufUnionSelector == (0).toChar()) {
+            compFocusedTertiaryTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (compFocusedTertiaryTmpBufUnionSelector == (1).toChar()) {
+            compFocusedTertiaryTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (compFocusedTertiaryTmpBufUnionSelector == (2).toChar()) {
+            compFocusedTertiaryTmpBuf = (valueDeserializer.readString() as string)
+        } else if (compFocusedTertiaryTmpBufUnionSelector == (3).toChar()) {
+            compFocusedTertiaryTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for compFocusedTertiaryTmpBuf has to be chosen through deserialisation.")
+        }
+        const compFocusedTertiaryTmpResult : ResourceColor = (compFocusedTertiaryTmpBuf as Color | number | string | Resource)
+        const interactiveHoverTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactiveHoverTmpBuf : Color | number | string | Resource | undefined
+        if (interactiveHoverTmpBufUnionSelector == (0).toChar()) {
+            interactiveHoverTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactiveHoverTmpBufUnionSelector == (1).toChar()) {
+            interactiveHoverTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactiveHoverTmpBufUnionSelector == (2).toChar()) {
+            interactiveHoverTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactiveHoverTmpBufUnionSelector == (3).toChar()) {
+            interactiveHoverTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactiveHoverTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactiveHoverTmpResult : ResourceColor = (interactiveHoverTmpBuf as Color | number | string | Resource)
+        const interactivePressedTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactivePressedTmpBuf : Color | number | string | Resource | undefined
+        if (interactivePressedTmpBufUnionSelector == (0).toChar()) {
+            interactivePressedTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactivePressedTmpBufUnionSelector == (1).toChar()) {
+            interactivePressedTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactivePressedTmpBufUnionSelector == (2).toChar()) {
+            interactivePressedTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactivePressedTmpBufUnionSelector == (3).toChar()) {
+            interactivePressedTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactivePressedTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactivePressedTmpResult : ResourceColor = (interactivePressedTmpBuf as Color | number | string | Resource)
+        const interactiveFocusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactiveFocusTmpBuf : Color | number | string | Resource | undefined
+        if (interactiveFocusTmpBufUnionSelector == (0).toChar()) {
+            interactiveFocusTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactiveFocusTmpBufUnionSelector == (1).toChar()) {
+            interactiveFocusTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactiveFocusTmpBufUnionSelector == (2).toChar()) {
+            interactiveFocusTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactiveFocusTmpBufUnionSelector == (3).toChar()) {
+            interactiveFocusTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactiveFocusTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactiveFocusTmpResult : ResourceColor = (interactiveFocusTmpBuf as Color | number | string | Resource)
+        const interactiveActiveTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactiveActiveTmpBuf : Color | number | string | Resource | undefined
+        if (interactiveActiveTmpBufUnionSelector == (0).toChar()) {
+            interactiveActiveTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactiveActiveTmpBufUnionSelector == (1).toChar()) {
+            interactiveActiveTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactiveActiveTmpBufUnionSelector == (2).toChar()) {
+            interactiveActiveTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactiveActiveTmpBufUnionSelector == (3).toChar()) {
+            interactiveActiveTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactiveActiveTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactiveActiveTmpResult : ResourceColor = (interactiveActiveTmpBuf as Color | number | string | Resource)
+        const interactiveSelectTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactiveSelectTmpBuf : Color | number | string | Resource | undefined
+        if (interactiveSelectTmpBufUnionSelector == (0).toChar()) {
+            interactiveSelectTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactiveSelectTmpBufUnionSelector == (1).toChar()) {
+            interactiveSelectTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactiveSelectTmpBufUnionSelector == (2).toChar()) {
+            interactiveSelectTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactiveSelectTmpBufUnionSelector == (3).toChar()) {
+            interactiveSelectTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactiveSelectTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactiveSelectTmpResult : ResourceColor = (interactiveSelectTmpBuf as Color | number | string | Resource)
+        const interactiveClickTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
+        let interactiveClickTmpBuf : Color | number | string | Resource | undefined
+        if (interactiveClickTmpBufUnionSelector == (0).toChar()) {
+            interactiveClickTmpBuf = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        } else if (interactiveClickTmpBufUnionSelector == (1).toChar()) {
+            interactiveClickTmpBuf = (valueDeserializer.readNumber() as number)
+        } else if (interactiveClickTmpBufUnionSelector == (2).toChar()) {
+            interactiveClickTmpBuf = (valueDeserializer.readString() as string)
+        } else if (interactiveClickTmpBufUnionSelector == (3).toChar()) {
+            interactiveClickTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error("One of the branches for interactiveClickTmpBuf has to be chosen through deserialisation.")
+        }
+        const interactiveClickTmpResult : ResourceColor = (interactiveClickTmpBuf as Color | number | string | Resource)
+        let value : Colors = ({brand: brandTmpResult, warning: warningTmpResult, alert: alertTmpResult, confirm: confirmTmpResult, fontPrimary: fontPrimaryTmpResult, fontSecondary: fontSecondaryTmpResult, fontTertiary: fontTertiaryTmpResult, fontFourth: fontFourthTmpResult, fontEmphasize: fontEmphasizeTmpResult, fontOnPrimary: fontOnPrimaryTmpResult, fontOnSecondary: fontOnSecondaryTmpResult, fontOnTertiary: fontOnTertiaryTmpResult, fontOnFourth: fontOnFourthTmpResult, iconPrimary: iconPrimaryTmpResult, iconSecondary: iconSecondaryTmpResult, iconTertiary: iconTertiaryTmpResult, iconFourth: iconFourthTmpResult, iconEmphasize: iconEmphasizeTmpResult, iconSubEmphasize: iconSubEmphasizeTmpResult, iconOnPrimary: iconOnPrimaryTmpResult, iconOnSecondary: iconOnSecondaryTmpResult, iconOnTertiary: iconOnTertiaryTmpResult, iconOnFourth: iconOnFourthTmpResult, backgroundPrimary: backgroundPrimaryTmpResult, backgroundSecondary: backgroundSecondaryTmpResult, backgroundTertiary: backgroundTertiaryTmpResult, backgroundFourth: backgroundFourthTmpResult, backgroundEmphasize: backgroundEmphasizeTmpResult, compForegroundPrimary: compForegroundPrimaryTmpResult, compBackgroundPrimary: compBackgroundPrimaryTmpResult, compBackgroundPrimaryTran: compBackgroundPrimaryTranTmpResult, compBackgroundPrimaryContrary: compBackgroundPrimaryContraryTmpResult, compBackgroundGray: compBackgroundGrayTmpResult, compBackgroundSecondary: compBackgroundSecondaryTmpResult, compBackgroundTertiary: compBackgroundTertiaryTmpResult, compBackgroundEmphasize: compBackgroundEmphasizeTmpResult, compBackgroundNeutral: compBackgroundNeutralTmpResult, compEmphasizeSecondary: compEmphasizeSecondaryTmpResult, compEmphasizeTertiary: compEmphasizeTertiaryTmpResult, compDivider: compDividerTmpResult, compCommonContrary: compCommonContraryTmpResult, compBackgroundFocus: compBackgroundFocusTmpResult, compFocusedPrimary: compFocusedPrimaryTmpResult, compFocusedSecondary: compFocusedSecondaryTmpResult, compFocusedTertiary: compFocusedTertiaryTmpResult, interactiveHover: interactiveHoverTmpResult, interactivePressed: interactivePressedTmpResult, interactiveFocus: interactiveFocusTmpResult, interactiveActive: interactiveActiveTmpResult, interactiveSelect: interactiveSelectTmpResult, interactiveClick: interactiveClickTmpResult} as Colors)
         return value
     }
 }
 export class CustomTheme_serializer {
     public static write(buffer: SerializerBase, value: CustomTheme): void {
         let valueSerializer : SerializerBase = buffer
-        const value_colors  = value.colors
-        let value_colors_type : int32 = RuntimeType.UNDEFINED
-        value_colors_type = runtimeType(value_colors)
-        valueSerializer.writeInt8((value_colors_type).toChar())
-        if ((value_colors_type) != (RuntimeType.UNDEFINED)) {
-            const value_colors_value  = value_colors!
-            Colors_serializer.write(valueSerializer, value_colors_value)
+        const valueHolderForColors  = value.colors
+        if (valueHolderForColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorsTmpValue  = valueHolderForColors!
+            Colors_serializer.write(valueSerializer, valueHolderForColorsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CustomTheme {
         let valueDeserializer : DeserializerBase = buffer
-        const colors_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colors_buf : Colors | undefined
-        if ((colors_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            colors_buf = Colors_serializer.read(valueDeserializer)
+        const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorsTmpBuf : Colors | undefined
+        if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorsTmpBuf = Colors_serializer.read(valueDeserializer)
         }
-        const colors_result : Colors | undefined = colors_buf
-        let value : CustomTheme = ({colors: colors_result} as CustomTheme)
+        const colorsTmpResult : Colors | undefined = colorsTmpBuf
+        let value : CustomTheme = ({colors: colorsTmpResult} as CustomTheme)
         return value
     }
 }

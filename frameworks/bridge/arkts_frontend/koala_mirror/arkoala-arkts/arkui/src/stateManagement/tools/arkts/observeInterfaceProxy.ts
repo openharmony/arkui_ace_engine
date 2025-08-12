@@ -23,7 +23,8 @@ import { NullableObject } from '../../base/types';
 import { UIUtils } from '../../utils';
 
 export class InterfaceProxyHandler<T extends Object>
-    implements proxy.ProxyHandler<T>, IObservedObject, ISubscribedWatches
+    extends proxy.DefaultProxyHandler<T>
+    implements IObservedObject, ISubscribedWatches
 {
     private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
 
@@ -46,24 +47,23 @@ export class InterfaceProxyHandler<T extends Object>
     public shouldAddRef(): boolean {
         return OBSERVE.shouldAddRef(this.____V1RenderId);
     }
-    public get(target: T, name: string): Any {
-        const value = Reflect.get(target, name) as Any;
+    override get(target: T, name: string): Any {
+        const value = super.get(target, name)
         if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
         return UIUtils.makeObserved(value);
     }
-    public set(target: T, name: string, newValue: Any): boolean {
-        if (Reflect.get(target, name) !== newValue) {
-            const result = Reflect.set(target, name, newValue);
+    override set(target: T, name: string, newValue: Any): boolean {
+        if (super.get(target, name) !== newValue) {
+            const result = super.set(target, name, newValue)
             this.__meta.fireChange();
             this.executeOnSubscribingWatches(name);
             return result;
         }
         return true;
     }
-
-    public invoke(target: T, method: Method, args: FixedArray<Any>): Any {
+    override invoke(target: T, method: Method, args: FixedArray<Any>): Any {
         return method.invoke(target, args);
     }
 }

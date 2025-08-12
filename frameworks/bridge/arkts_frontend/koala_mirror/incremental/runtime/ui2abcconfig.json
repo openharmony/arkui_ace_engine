@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "package": "@koalaui/runtime",
-        "outDir": "build",
+        "outDir": "build/recheck",
         "baseUrl": "./ets",
         "paths": {
             "@koalaui/common": ["../../common/src"],
@@ -9,10 +9,15 @@
             "@koalaui/runtime/annotations": ["../annotations"]
         },
         "plugins": [
+           {
+                "transform": "@koalaui/memo-plugin",
+                "state": "parsed",
+                "contextImport": "../internals",
+                "name": "memo"
+            },
             {
                 "transform": "@koalaui/memo-plugin",
-                "stage": "checked",
-                "contextImport": "../internals",
+                "state": "checked",
                 "name": "memo"
             }
         ]

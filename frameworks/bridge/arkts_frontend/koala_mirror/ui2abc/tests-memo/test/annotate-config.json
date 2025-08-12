@@ -1,0 +1,10 @@
+{
+    "inputDir": "./test",
+    "outputDir": "./test/build/ets",
+    "include": [
+        "./test/common/**/*.ts",
+        "./test/ui2abc/**/*.ts",
+        "./test/utils.ts"
+    ],
+    "exclude": []
+}

@@ -15,12 +15,11 @@
  
 import { IncrementalNode,
     NodeAttach, mutableState, contextLocalValue, ReadonlyTreeNode,
-    memoRoot, updateStateManager,
+    memoRoot, updateStateManager, CONTEXT_ROOT_SCOPE,
 } from "@koalaui/runtime"
 
 import { memo } from "@koalaui/runtime/annotations"
 
-const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope" // not exported due to restart
 class StringerNode extends IncrementalNode {
     constructor(kind: int = 1) {
         super(kind)
@@ -34,12 +33,13 @@ function Stringer(
     @memo
     content?: () => void
 ): void {
-    NodeAttach(():StringerNode => 
-        new StringerNode(), (node: StringerNode): void => {
-        node.data = arg
-        console.log("I am recomputing with arg: ", arg)
-        content?.()
-    })
+    NodeAttach(() => new StringerNode(),
+        (node: StringerNode) => {
+            node.data = arg
+            console.log("I am recomputing with arg: ", arg)
+            content?.()
+        }
+    )
 }
 
 const state = mutableState<Int>(17)

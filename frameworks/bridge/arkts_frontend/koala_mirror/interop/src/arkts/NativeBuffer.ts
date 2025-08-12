@@ -39,7 +39,7 @@ export final class NativeBuffer {
     }
 
     public writeByte(index:int64, value: int32): void {
-        unsafeMemory.writeInt8(this.data + index, value as byte)
+        unsafeMemory.writeInt8(this.data + index, value.toByte())
     }
 }
 

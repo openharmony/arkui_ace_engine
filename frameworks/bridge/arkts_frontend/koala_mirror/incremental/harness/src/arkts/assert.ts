@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { float64toInt32, int32 } from "@koalaui/common"
 
 export class Assert {
     static $_invoke(value: boolean, message?: string) {
@@ -501,8 +501,11 @@ export class Assert {
      * @param haystack   Container string.
      * @param needle   Potential substring of haystack.
      * @param message   Message to display on error.
-     * /
-    static include(haystack: string, needle: string, message?: string): void*/
+     */
+    static include(haystack: string, needle: string, message?: string): void {
+        if (haystack.includes(needle)) return
+        Assert.fail(message ?? `'${needle}' is not in '${haystack}'`)
+    }
 
     /**
      * Asserts that haystack includes needle.
@@ -544,8 +547,11 @@ export class Assert {
      * @param haystack   Container string.
      * @param needle   Potential substring of haystack.
      * @param message   Message to display on error.
-     * /
-    static notInclude(haystack: string, needle: string, message?: string): void;*/
+     */
+    static notInclude(haystack: string, needle: string, message?: string): void {
+        if (!haystack.includes(needle)) return
+        Assert.fail(message ?? `'${needle}' is in '${haystack}'`)
+    }
 
     /**
      * Asserts that haystack does not includes needle.
@@ -787,10 +793,10 @@ function equalArrayContent<T>(actual: Array<T>, expected: Array<T>): boolean {
  * @returns a container size, or -1 if the given container is not supported
  */
 function getContainerSize<T>(container: T): int32 {
-    if (container instanceof Map) return container.size as int32
-    if (container instanceof Set) return container.size as int32
-    if (container instanceof Array) return container.length as int32
-    if (container instanceof String) return container.length as int32
+    if (container instanceof Map) return float64toInt32(container.size)
+    if (container instanceof Set) return float64toInt32(container.size)
+    if (container instanceof Array) return float64toInt32(container.length)
+    if (container instanceof String) return float64toInt32(container.length)
     return -1
 }
 

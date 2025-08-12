@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import { ETSFunctionType, Expression, FunctionSignature, MethodDefinition } from "../../generated"
+import { Expression, MethodDefinition } from "../../generated"
 import {
     Es2pandaMethodDefinitionKind,
     Es2pandaModifierFlags,
-    Es2pandaScriptFunctionFlags
 } from "../../generated/Es2pandaEnums"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
@@ -30,22 +29,14 @@ export function createMethodDefinition(
     isComputed: boolean,
     overloads?: readonly MethodDefinition[]
 ): MethodDefinition {
-    const res = MethodDefinition.createMethodDefinition(
+    return MethodDefinition.createMethodDefinition(
         kind,
         key,
         value,
         modifiers,
         isComputed,
+        overloads,
     )
-    if (overloads) {
-        res.setOverloads(overloads)
-        // Improve: once node utilities are generated, this would be made in methodDefinitionUpdateChildren
-        overloads.forEach(it => {
-            it.setBaseOverloadMethod(res)
-            it.parent = res
-        })
-    }
-    return res
 }
 
 export function updateMethodDefinition(

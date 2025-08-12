@@ -3,11 +3,11 @@ import { __memo_context_type as __memo_context_type, __memo_id_type as __memo_id
 
 import { memo as memo } from "@koalaui/runtime/annotations";
 
-function main(): void {}
+function main() {}
 
 
 @memo() function memo_function(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
-  const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_memo_function_@test/basic/function.ets"))), 0);
+  const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_memo_function_@test/input/basic/function.ets"))), 0);
   if (__memo_scope.unchanged) {
     __memo_scope.cached;
     return;

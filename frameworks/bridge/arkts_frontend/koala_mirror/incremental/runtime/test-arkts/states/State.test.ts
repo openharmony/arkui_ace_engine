@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { float64, int32, hashCodeFromString as key } from "@koalaui/common"
-import { IncrementalNode, State, StateContext, TestNode, testUpdate, ValueTracker } from "../../src"
-import { createStateManager } from "../../src/states/State"
+import { IncrementalNode, State, StateContext, TestNode, testUpdate, ValueTracker } from "../../ets"
+import { createStateManager } from "../../ets/states/State"
 
 function assertNode(state: State<TestNode>, presentation: string) {
-    Assert.isFalse(state.modified) // the same node
-    Assert.equal(state.value.toHierarchy(), presentation)
+    assert.isFalse(state.modified) // the same node
+    assert.equal(state.value.toHierarchy(), presentation)
 }
 
 function assertState<Value>(state: State<Value>, value: Value, modified: boolean = false) {
-    Assert.equal(state.modified, modified)
-    Assert.equal(state.value, value)
-    Assert.equal(state.modified, modified)
+    assert.equal(state.modified, modified)
+    assert.equal(state.value, value)
+    assert.equal(state.modified, modified)
 }
 
 function assertModifiedState<Value>(state: State<Value>, value: Value) {
@@ -35,8 +34,8 @@ function assertModifiedState<Value>(state: State<Value>, value: Value) {
 }
 
 function assertStringsAndCleanup(array: Array<string>, presentation: string) {
-    Assert.isNotEmpty(array)
-    Assert.equal(array.join(" ; "), presentation)
+    assert.isNotEmpty(array)
+    assert.equal(array.join(" ; "), presentation)
     array.splice(0, array.length)
 }
 
@@ -68,15 +67,15 @@ suite("State", () => {
         let manager = createStateManager()
         let state = manager.mutableState(200)
         state.value = 404
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(state, 404)
     })
     test("managed state is not modified on next snapshot update", () => {
         let manager = createStateManager()
         let state = manager.mutableState(200)
         state.value = 404
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, 404)
     })
     test("managed state is not modified if the same value is set", () => {
@@ -85,43 +84,43 @@ suite("State", () => {
         for (let index = 0; index <= 200; index++) {
             state.value = index
         }
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, 200)
     })
     test("unmanaged named state does not exist anymore", () => {
         let manager = createStateManager()
         const state = manager.namedState("named", (): float64 => 200)
-        Assert.equal(state, manager.stateBy<float64>("named")!)
-        Assert.isDefined(manager.stateBy<float64>("named"))
+        assert.equal(state, manager.stateBy<float64>("named")!)
+        assert.isDefined(manager.stateBy<float64>("named"))
         state.dispose()
-        Assert.isUndefined(manager.stateBy<float64>("named"))
+        assert.isUndefined(manager.stateBy<float64>("named"))
         state.dispose()
-        Assert.isUndefined(manager.stateBy<float64>("named"))
+        assert.isUndefined(manager.stateBy<float64>("named"))
     })
     test("managed named state is not modified immediately", () => {
         let manager = createStateManager()
         manager.frozen = true
         manager.namedState("named", (): float64 => 200)
         manager.stateBy<float64>("named")!.value = 404
-        Assert.equal(manager.valueBy<float64>("named"), 200)
-        Assert.isFalse(manager.stateBy<float64>("named")?.modified)
+        assert.equal(manager.valueBy<float64>("named"), 200)
+        assert.isFalse(manager.stateBy<float64>("named")?.modified)
     })
     test("managed named state is modified on first snapshot update", () => {
         let manager = createStateManager()
         manager.namedState("named", (): float64 => 200)
         manager.stateBy<float64>("named")!.value = 404
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(manager.valueBy<float64>("named"), 404)
-        Assert.isTrue(manager.stateBy<float64>("named")?.modified)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(manager.valueBy<float64>("named"), 404)
+        assert.isTrue(manager.stateBy<float64>("named")?.modified)
     })
     test("managed named state is not modified on next snapshot update", () => {
         let manager = createStateManager()
         manager.namedState("named", (): float64 => 200)
         manager.stateBy<float64>("named")!.value = 404
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(manager.valueBy<float64>("named"), 404)
-        Assert.isFalse(manager.stateBy<float64>("named")?.modified)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(manager.valueBy<float64>("named"), 404)
+        assert.isFalse(manager.stateBy<float64>("named")?.modified)
     })
     test("managed named state is not modified if the same value is set", () => {
         let manager = createStateManager()
@@ -129,9 +128,9 @@ suite("State", () => {
         for (let index = 0; index <= 200; index++) {
             manager.stateBy<float64>("named")!.value = index
         }
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(manager.valueBy<float64>("named"), 200)
-        Assert.isFalse(manager.stateBy<float64>("named")?.modified)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(manager.valueBy<float64>("named"), 200)
+        assert.isFalse(manager.stateBy<float64>("named")?.modified)
     })
     test("do not allow to dispose parameter state", () => {
         const name = "parameter"
@@ -141,9 +140,9 @@ suite("State", () => {
             const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
-                Assert.isDefined(state)
-                Assert.equal<State<int32>>(state, param)
-                Assert.throws(() => { state.dispose() })
+                assert.isDefined(state)
+                assert.equal<State<int32>>(state, param)
+                assert.throws(() => { state.dispose() })
                 scope.recache()
             }
             return undefined
@@ -157,8 +156,8 @@ suite("State", () => {
             const param = scope.paramEx<int32>(0, 200, undefined, name, true) // can be found by name
             if (scope.unchanged) { scope.cached } else {
                 const state = manager.stateBy<int32>(name)!
-                Assert.isDefined(state)
-                Assert.equal<State<int32>>(state, param)
+                assert.isDefined(state)
+                assert.equal<State<int32>>(state, param)
                 state.value = 404
                 assertModifiedState(state, 404)
                 // check that modified state is updated
@@ -174,57 +173,57 @@ suite("State", () => {
         const mutableState = manager.mutableState(true)
         const updatableNode = manager.updatableNode(new IncrementalNode(), (_: StateContext) => { mutableState.value })
         // updatable node needs to be recomputed after creation
-        Assert.isTrue(updatableNode.recomputeNeeded)
+        assert.isTrue(updatableNode.recomputeNeeded)
         updatableNode.value
         // updatable node is already computed after accessing
-        Assert.isFalse(updatableNode.recomputeNeeded)
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.isFalse(updatableNode.recomputeNeeded)
+        assert.equal(testUpdate(false, manager), 0)
         // updatable node is already computed because nothing is changed
-        Assert.isFalse(updatableNode.recomputeNeeded)
+        assert.isFalse(updatableNode.recomputeNeeded)
         mutableState.value = !mutableState.value
         // updatable node does not know that the mutable state is changed
-        Assert.isFalse(updatableNode.recomputeNeeded)
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.isFalse(updatableNode.recomputeNeeded)
+        assert.equal(testUpdate(false, manager), 1)
         // updatable node needs to be recomputed because the mutable state is changed
-        Assert.isTrue(updatableNode.recomputeNeeded)
+        assert.isTrue(updatableNode.recomputeNeeded)
     })
     test("updatable node should not use StateManager.updateSnapshot()", () => {
         const manager = createStateManager()
         const state = manager.updatableNode(new IncrementalNode(), (_: StateContext) => {
             manager.updateSnapshot()
         })
-        Assert.throws(() => { state.value })
+        assert.throws(() => { state.value })
     })
     test("updatable node should not use StateManager.updatableNode(...)", () => {
         const manager = createStateManager()
         const state = manager.updatableNode(new IncrementalNode(), (_: StateContext) => {
             manager.updatableNode(new IncrementalNode(), (_: StateContext) => { })
         })
-        Assert.throws(() => { state.value })
+        assert.throws(() => { state.value })
     })
     test("updatable node should not use StateManager.computableState(...)", () => {
         const manager = createStateManager()
         const state = manager.updatableNode(new IncrementalNode(), (_: StateContext) => { manager.updateSnapshot() })
-        Assert.throws(() => { state.value })
+        assert.throws(() => { state.value })
     })
     test("computable state should be recomputable state", () => {
         const manager = createStateManager()
         const mutableState = manager.mutableState(true)
         const computableState = manager.computableState((_: StateContext) => mutableState.value)
         // computable state needs to be recomputed after creation
-        Assert.isTrue(computableState.recomputeNeeded)
+        assert.isTrue(computableState.recomputeNeeded)
         computableState.value
         // computable state is already computed after accessing
-        Assert.isFalse(computableState.recomputeNeeded)
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.isFalse(computableState.recomputeNeeded)
+        assert.equal(testUpdate(false, manager), 0)
         // computable state is already computed because nothing is changed
-        Assert.isFalse(computableState.recomputeNeeded)
+        assert.isFalse(computableState.recomputeNeeded)
         mutableState.value = !mutableState.value
         // computable state does not know that the mutable state is changed
-        Assert.isFalse(computableState.recomputeNeeded)
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.isFalse(computableState.recomputeNeeded)
+        assert.equal(testUpdate(false, manager), 1)
         // computable state needs to be recomputed because the mutable state is changed
-        Assert.isTrue(computableState.recomputeNeeded)
+        assert.isTrue(computableState.recomputeNeeded)
     })
     test("computable state should not use StateManager.updateSnapshot()", () => {
         const manager = createStateManager()
@@ -232,12 +231,12 @@ suite("State", () => {
             manager.updateSnapshot()
             return undefined
         })
-        Assert.throws(() => { state.value })
+        assert.throws(() => { state.value })
     })
     test("computable state should not use StateManager.updatableNode(...)", () => {
         const manager = createStateManager()
         const state = manager.computableState((_: StateContext) => manager.updatableNode(new IncrementalNode(), (_: StateContext) => { }))
-        Assert.throws(() => { state.value })
+        assert.throws(() => { state.value })
     })
     test("computable state depends on managed state", () => {
         let manager = createStateManager()
@@ -261,12 +260,12 @@ suite("State", () => {
         assertState<string>(result, "<= NAME =>")
         assertStringsAndCleanup(computing, "main ; left ; name ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState<string>(result, "<= NAME =>")
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         name.value = "Sergey Malenkov"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState<string>(result, "<= Sergey Malenkov =>")
         assertStringsAndCleanup(computing, "main ; name")
     })
@@ -293,12 +292,12 @@ suite("State", () => {
         assertState<string>(result, "<= NAME =>")
         assertStringsAndCleanup(computing, "main ; left ; name ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState<string>(result, "<= NAME =>")
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         manager.stateBy<string>("global")!.value = "Sergey Malenkov"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState<string>(result, "<= Sergey Malenkov =>")
         assertStringsAndCleanup(computing, "main ; name")
     })
@@ -326,13 +325,13 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "main ; left ; name ; right")
         // computable state is not modified
         assertState<string>(result, "<= 1 =>")
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState<string>(result, "<= 2 =>")
         assertStringsAndCleanup(computing, "main ; name")
         // compute state on next snapshot update
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState<string>(result, "<= 3 =>")
         assertStringsAndCleanup(computing, "main ; name")
     })
@@ -360,13 +359,13 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "main ; left ; name ; right")
         // computable state is not modified
         assertState<string>(result, "<= 1 =>")
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState<string>(result, "<= 2 =>")
         assertStringsAndCleanup(computing, "main ; name")
         // compute state on next snapshot update
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState<string>(result, "<= 3 =>")
         assertStringsAndCleanup(computing, "main ; name")
     })
@@ -390,10 +389,10 @@ suite("State", () => {
                         computing.push("compute:inner:true")
                         return "true"
                     }, (old: string | undefined) => {
-                        Assert.isUndefined(context.stateBy<boolean>("false"))
-                        Assert.isDefined(context.stateBy<boolean>("true"))
-                        Assert.isTrue(context.valueBy<boolean>("true"))
-                        Assert.equal(old, "true")
+                        assert.isUndefined(context.stateBy<boolean>("false"))
+                        assert.isDefined(context.stateBy<boolean>("true"))
+                        assert.isTrue(context.valueBy<boolean>("true"))
+                        assert.equal(old, "true")
                         computing.push("cleanup:inner:true")
                     })
                 }, (_: string | undefined) => { computing.push("cleanup:true") })
@@ -404,10 +403,10 @@ suite("State", () => {
                         computing.push("compute:inner:false")
                         return "false"
                     }, (old: string | undefined) => {
-                        Assert.isUndefined(context.stateBy<boolean>("true"))
-                        Assert.isDefined(context.stateBy<boolean>("false"))
-                        Assert.isFalse(context.valueBy<boolean>("false"))
-                        Assert.equal(old, "false")
+                        assert.isUndefined(context.stateBy<boolean>("true"))
+                        assert.isDefined(context.stateBy<boolean>("false"))
+                        assert.isFalse(context.valueBy<boolean>("false"))
+                        assert.equal(old, "false")
                         computing.push("cleanup:inner:false")
                     })
                 }, (_: string | undefined) => { computing.push("cleanup:false") })
@@ -415,47 +414,47 @@ suite("State", () => {
         })
         let condition = manager.namedState("condition", () => true)
         // initial computation
-        Assert.equal(result.value, "value is true")
+        assert.equal(result.value, "value is true")
         assertStringsAndCleanup(computing, "compute:value ; compute:condition ; compute:true ; compute:inner:true")
         // condition changed from true to false
         condition.value = false
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "value is false")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "value is false")
         assertStringsAndCleanup(computing, "compute:condition ; compute:false ; compute:inner:false ; cleanup:true ; cleanup:inner:true")
         // condition changed from false to true
         condition.value = true
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "value is true")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "value is true")
         assertStringsAndCleanup(computing, "compute:condition ; compute:true ; compute:inner:true ; cleanup:false ; cleanup:inner:false")
     })
     test("global named state must be created only once", () => {
         let manager = createStateManager()
         let created = manager.namedState("named", (): int32 => 200)
         let existed = manager.namedState("named", (): int32 => {
-            Assert.fail()
+            assert.fail()
             return 200
         })
-        Assert.equal(created, existed)
-        Assert.equal(created, manager.stateBy<int32>("named")!)
-        Assert.equal(existed, manager.stateBy<int32>("named")!)
+        assert.equal(created, existed)
+        assert.equal(created, manager.stateBy<int32>("named")!)
+        assert.equal(existed, manager.stateBy<int32>("named")!)
     })
     test("local named state must be created only once", () => {
         createStateManager().computableState((context: StateContext) => {
             let created = context.namedState("named", (): int32 => 200)
             let existed = context.namedState("named", (): int32 => {
-                Assert.fail()
+                assert.fail()
                 return 200
             })
-            Assert.equal(created, existed)
-            Assert.equal(created, context.stateBy<int32>("named")!)
-            Assert.equal(existed, context.stateBy<int32>("named")!)
+            assert.equal(created, existed)
+            assert.equal(created, context.stateBy<int32>("named")!)
+            assert.equal(existed, context.stateBy<int32>("named")!)
             return undefined
         }).value
     })
     test("global named state must not be created when creating another one", () => {
         let manager = createStateManager()
         manager.namedState("named", () => {
-            Assert.throws(() => {
+            assert.throws(() => {
                 manager.namedState("unnamed", () => 200)
             })
             return 200
@@ -464,7 +463,7 @@ suite("State", () => {
     test("local named state must not be created when creating another one", () => {
         createStateManager().computableState((context: StateContext) => {
             context.namedState("named", (): float64 => {
-                Assert.throws(() => {
+                assert.throws(() => {
                     context.namedState("unnamed", (): float64 => 200)
                 })
                 return 200
@@ -476,7 +475,7 @@ suite("State", () => {
         const manager = createStateManager()
         const mutable = manager.mutableState<string>("value")
         manager.namedState("prohibited", () => {
-            Assert.throws(() => { mutable.dispose() })
+            assert.throws(() => { mutable.dispose() })
             return mutable.value
         })
     })
@@ -485,7 +484,7 @@ suite("State", () => {
         const mutable = manager.mutableState<string>("value")
         const state = manager.computableState((context: StateContext) => {
             context.namedState("prohibited", () => {
-                Assert.throws(() => { mutable.dispose() })
+                assert.throws(() => { mutable.dispose() })
                 return mutable.value
             })
             return undefined
@@ -497,8 +496,8 @@ suite("State", () => {
         const manager = createStateManager()
         const named = manager.namedState("state", () => "value")
         manager.namedState("prohibited", () => {
-            Assert.equal(named, manager.stateBy<string>("state")!)
-            Assert.throws(() => { named.dispose() })
+            assert.equal(named, manager.stateBy<string>("state")!)
+            assert.throws(() => { named.dispose() })
             return named.value
         })
     })
@@ -507,8 +506,8 @@ suite("State", () => {
         const state = manager.computableState((context: StateContext) => {
             const named = context.namedState("state", () => "")
             context.namedState("prohibited", () => {
-                Assert.equal(named, manager.stateBy<string>("state")!)
-                Assert.throws(() => { named.dispose() })
+                assert.equal(named, manager.stateBy<string>("state")!)
+                assert.throws(() => { named.dispose() })
                 return named.value
             })
             return undefined
@@ -520,7 +519,7 @@ suite("State", () => {
         const manager = createStateManager()
         const mutable = manager.mutableState<string>("value")
         const state = manager.computableState((_: StateContext) => {
-            Assert.throws(() => { mutable.dispose() })
+            assert.throws(() => { mutable.dispose() })
             return undefined
         })
         state.value
@@ -530,7 +529,7 @@ suite("State", () => {
         const manager = createStateManager()
         const named = manager.namedState("state", () => "")
         const state = manager.computableState((_: StateContext) => {
-            Assert.throws(() => { named.dispose() })
+            assert.throws(() => { named.dispose() })
             return undefined
         })
         state.value
@@ -540,7 +539,7 @@ suite("State", () => {
         const manager = createStateManager()
         const state = manager.computableState((context: StateContext) => {
             const named = context.namedState("state", () => "")
-            Assert.throws(() => { named.dispose() })
+            assert.throws(() => { named.dispose() })
             return undefined
         })
         state.value
@@ -549,8 +548,8 @@ suite("State", () => {
     test("do not allow to update snapshot when updating computable state", () => {
         const manager = createStateManager()
         const state = manager.computableState((context: StateContext) => {
-            Assert.equal(context, manager)
-            Assert.throws(() => { manager.updateSnapshot() })
+            assert.equal(context, manager)
+            assert.throws(() => { manager.updateSnapshot() })
             return undefined
         })
         state.value
@@ -559,8 +558,8 @@ suite("State", () => {
     test("do not allow to create updatable node when updating computable state", () => {
         const manager = createStateManager()
         const state = manager.computableState((context: StateContext) => {
-            Assert.equal(context, manager)
-            Assert.throws(() => { manager.updatableNode(new TestNode(), (_: StateContext) => { }) })
+            assert.equal(context, manager)
+            assert.throws(() => { manager.updatableNode(new TestNode(), (_: StateContext) => { }) })
             return undefined
         })
         state.value
@@ -569,7 +568,7 @@ suite("State", () => {
     test("computable state must not compute something when creating local named state", () => {
         createStateManager().computableState((context: StateContext) => {
             context.namedState("name", () => {
-                Assert.throws(() => {
+                assert.throws(() => {
                     context.compute(key("compute"), () => 200)
                 })
                 return "NAME"
@@ -588,7 +587,7 @@ suite("State", () => {
         assertState<string>(computable, "NAME")
         // do not update result when snapshot updated
         mutable.value = "Sergey Malenkov"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertState<string>(computable, "NAME")
     })
     test("computable state from specific scope must be forgotten on dispose automatically", () => {
@@ -604,18 +603,18 @@ suite("State", () => {
         // ensure that initial state is managed
         state.value = -10
         assertState(initial, -1)
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(state, -10)
         assertModifiedState(initial, -10)
         // dispose first inner scope
-        Assert.strictEqual(computable.value, initial)
+        assert.strictEqual(computable.value, initial)
         selector.value = false
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.notStrictEqual(computable.value, initial)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.notStrictEqual(computable.value, initial)
         // ensure that initial state is not managed
         assertState(initial, -10)
         state.value = -100
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertState(initial, -10)
     })
     test("named state from specific scope must be forgotten on dispose automatically", () => {
@@ -631,13 +630,13 @@ suite("State", () => {
         // ensure that initial state is managed
         initial.value = -10
         assertState(initial, -1)
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(initial, -10)
         // dispose first inner scope
-        Assert.strictEqual(computable.value, initial)
+        assert.strictEqual(computable.value, initial)
         selector.value = false
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.notStrictEqual(computable.value, initial)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.notStrictEqual(computable.value, initial)
         // ensure that initial state is not managed
         assertState(initial, -10)
         initial.value = -100
@@ -656,13 +655,13 @@ suite("State", () => {
         // ensure that initial state is managed
         initial.value = -10
         assertState(initial, -1)
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(initial, -10)
         // dispose first inner scope
-        Assert.strictEqual(computable.value, initial)
+        assert.strictEqual(computable.value, initial)
         selector.value = false
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.notStrictEqual(computable.value, initial)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.notStrictEqual(computable.value, initial)
         // ensure that initial state is not managed
         assertState(initial, -10)
         initial.value = -100
@@ -672,117 +671,117 @@ suite("State", () => {
         const manager = createStateManager()
         const state = manager.mutableState(0 as float64)
         const increment = () => {
-            Assert.throws(() => { state.value++ })
+            assert.throws(() => { state.value++ })
             return state.value
         }
         const computable = manager.computableState((context: StateContext): float64 =>
             context.compute(key("a"), increment) +
             context.compute(key("b"), increment) +
             context.compute(key("c"), increment))
-        Assert.equal(computable.value, 0)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(computable.value, 0)
+        assert.equal(computable.value, 0)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computable.value, 0)
         state.value++
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, 3)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, 3)
     })
     test("allow to compute once within a leaf scope", () => {
         const computable = createStateManager().computableState((context: StateContext) =>
             context.compute(key("leaf"), () =>
                 context.compute(key("allowed"), (): float64 => 0, undefined, true),
                 undefined, true))
-        Assert.equal(computable.value, 0)
+        assert.equal(computable.value, 0)
     })
     test("create global mutable state in local context", () => {
         const manager = createStateManager()
         const computable = manager.computableState((context: StateContext) => context.mutableState(0 as float64, true))
         const globalState = computable.value
-        Assert.equal<string>("GlobalState=0", globalState.toString())
+        assert.equal<string>("GlobalState=0", globalState.toString())
         globalState.value = 1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal<string>("GlobalState,modified=1", globalState.toString())
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal<string>("GlobalState,modified=1", globalState.toString())
+        assert.equal(testUpdate(false, manager), 0)
         computable.dispose()
-        Assert.equal<string>("GlobalState=1", globalState.toString())
+        assert.equal<string>("GlobalState=1", globalState.toString())
         globalState.dispose()
-        Assert.equal<string>("GlobalState,disposed=1", globalState.toString())
+        assert.equal<string>("GlobalState,disposed=1", globalState.toString())
     })
     test("create local mutable state in local context within remember", () => {
         const manager = createStateManager()
         const computable = manager.computableState((context: StateContext) => context.compute(0, () => context.mutableState(0 as float64, false), undefined, true))
         const localState = computable.value
-        Assert.equal<string>("LocalState=0", localState.toString())
+        assert.equal<string>("LocalState=0", localState.toString())
         localState.value = 1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal<string>("LocalState,modified=1", localState.toString())
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal<string>("LocalState,modified=1", localState.toString())
+        assert.equal(testUpdate(false, manager), 0)
         computable.dispose()
-        Assert.equal<string>("LocalState,disposed=1", localState.toString())
+        assert.equal<string>("LocalState,disposed=1", localState.toString())
         localState.dispose()
-        Assert.equal<string>("LocalState,disposed=1", localState.toString())
+        assert.equal<string>("LocalState,disposed=1", localState.toString())
     })
     test("create global named state in local context", () => {
         const manager = createStateManager()
         const computable = manager.computableState((context: StateContext) => {
             const state = context.namedState("global", (): int32 => 0, true)
-            Assert.equal(state, manager.stateBy<int32>("global")!)
-            Assert.isDefined(manager.stateBy<int32>("global", true))
-            Assert.isUndefined(manager.stateBy<int32>("global", false))
+            assert.equal(state, manager.stateBy<int32>("global")!)
+            assert.isDefined(manager.stateBy<int32>("global", true))
+            assert.isUndefined(manager.stateBy<int32>("global", false))
             return state
         })
         const globalState = computable.value
-        Assert.equal(globalState, manager.stateBy<int32>("global")!)
-        Assert.equal<string>("GlobalState(global)=0", globalState.toString())
+        assert.equal(globalState, manager.stateBy<int32>("global")!)
+        assert.equal<string>("GlobalState(global)=0", globalState.toString())
         globalState.value = 1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal<string>("GlobalState(global),modified=1", globalState.toString())
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal<string>("GlobalState(global),modified=1", globalState.toString())
+        assert.equal(testUpdate(false, manager), 0)
         computable.dispose()
-        Assert.equal<string>("GlobalState(global)=1", globalState.toString())
+        assert.equal<string>("GlobalState(global)=1", globalState.toString())
         globalState.dispose()
-        Assert.equal<string>("GlobalState(global),disposed=1", globalState.toString())
+        assert.equal<string>("GlobalState(global),disposed=1", globalState.toString())
     })
     test("create local named state in local context", () => {
         const manager = createStateManager()
         const globalState = manager.namedState("global", (): float64 => Number.MAX_SAFE_INTEGER + 1)
         const computable = manager.computableState((context: StateContext) => {
-            Assert.equal(globalState, manager.stateBy<float64>("global")!)
-            Assert.isDefined(manager.stateBy<float64>("global", true))
-            Assert.isUndefined(manager.stateBy<float64>("global", false))
+            assert.equal(globalState, manager.stateBy<float64>("global")!)
+            assert.isDefined(manager.stateBy<float64>("global", true))
+            assert.isUndefined(manager.stateBy<float64>("global", false))
             const state = context.namedState("local", (): float64 => 0, false)
-            Assert.equal(state, manager.stateBy<float64>("local")!)
-            Assert.isUndefined(manager.stateBy<float64>("local", true))
-            Assert.isDefined(manager.stateBy<float64>("local", false))
+            assert.equal(state, manager.stateBy<float64>("local")!)
+            assert.isUndefined(manager.stateBy<float64>("local", true))
+            assert.isDefined(manager.stateBy<float64>("local", false))
             return state
         })
         const localState = computable.value
-        Assert.isUndefined(manager.stateBy<float64>("local"))
-        Assert.equal<string>("LocalState(local)=0", localState.toString())
+        assert.isUndefined(manager.stateBy<float64>("local"))
+        assert.equal<string>("LocalState(local)=0", localState.toString())
         localState.value = 1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal<string>("LocalState(local),modified=1", localState.toString())
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal<string>("LocalState(local),modified=1", localState.toString())
+        assert.equal(testUpdate(false, manager), 0)
         computable.dispose()
-        Assert.equal<string>("LocalState(local),disposed=1", localState.toString())
+        assert.equal<string>("LocalState(local),disposed=1", localState.toString())
         localState.dispose()
-        Assert.equal<string>("LocalState(local),disposed=1", localState.toString())
+        assert.equal<string>("LocalState(local),disposed=1", localState.toString())
     })
     test("prohibit to create local mutable state in global context", () => {
-        Assert.throws(() => { createStateManager().mutableState(0, false) })
+        assert.throws(() => { createStateManager().mutableState(0, false) })
     })
     test("prohibit to create local named state in global context", () => {
-        Assert.throws(() => { createStateManager().namedState("name", (): int32 => 0, false) })
+        assert.throws(() => { createStateManager().namedState("name", (): int32 => 0, false) })
     })
     test("prohibit to create local mutable state in local context", () => {
         const computable = createStateManager().computableState((context: StateContext) => context.mutableState(0, false))
-        Assert.throws(() => { computable.value })
+        assert.throws(() => { computable.value })
     })
     test("prohibit to compute within a leaf scope", () => {
         const computable = createStateManager().computableState((context: StateContext) =>
             context.compute(key("leaf"), () =>
                 context.compute(key("prohibit"), (): float64 => 0),
                 undefined, true))
-        Assert.throws(() => { computable.value })
+        assert.throws(() => { computable.value })
     })
     test("prohibit to build tree within a leaf scope", () => {
         const computable = createStateManager().updatableNode(new TestNode(), (context: StateContext) => {
@@ -791,14 +790,14 @@ suite("State", () => {
                 return undefined
             }, undefined, true)
         })
-        Assert.throws(() => { computable.value })
+        assert.throws(() => { computable.value })
     })
     test("prohibit to build tree within a computable state", () => {
         const computable = createStateManager().computableState((context: StateContext) => {
             context.attach(key("prohibit"), () => new TestNode(), () => { })
             return undefined
         })
-        Assert.throws(() => { computable.value })
+        assert.throws(() => { computable.value })
     })
     test("leaf scope must not depend on managed state", () => {
         const manager = createStateManager()
@@ -816,9 +815,9 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "computable ; name")
         // compute state only when snapshot updated
         state.value = -1
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertState(computable, 0)
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
     })
     test("0. amount of modified states including computable states that have dependants", () => {
         const manager = createStateManager()
@@ -833,19 +832,19 @@ suite("State", () => {
             stateCounter++
             return computable.value
         })
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(computableCounter, 0) // computable is not recomputed
-        Assert.equal(stateCounter, 0) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computableCounter, 0) // computable is not recomputed
+        assert.equal(stateCounter, 0) // state is not recomputed
         assertState(state, false)
-        Assert.equal(computableCounter, 1) // computable is recomputed
-        Assert.equal(stateCounter, 1) // state is recomputed
+        assert.equal(computableCounter, 1) // computable is recomputed
+        assert.equal(stateCounter, 1) // state is recomputed
         mutable.value = true
-        Assert.equal(testUpdate(false, manager), 2)
-        Assert.equal(computableCounter, 2) // computable is recomputed automatically
-        Assert.equal(stateCounter, 1) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 2)
+        assert.equal(computableCounter, 2) // computable is recomputed automatically
+        assert.equal(stateCounter, 1) // state is not recomputed
         assertModifiedState(state, true)
-        Assert.equal(computableCounter, 2) // computable is not recomputed
-        Assert.equal(stateCounter, 2) // state is recomputed by request
+        assert.equal(computableCounter, 2) // computable is not recomputed
+        assert.equal(stateCounter, 2) // state is recomputed by request
     })
     test("1. amount of modified states including computable states that have dependants", () => {
         const manager = createStateManager()
@@ -861,19 +860,19 @@ suite("State", () => {
             stateCounter++
             return computable.value
         })
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(computableCounter, 0) // computable is not recomputed
-        Assert.equal(stateCounter, 0) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computableCounter, 0) // computable is not recomputed
+        assert.equal(stateCounter, 0) // state is not recomputed
         assertState(state, false)
-        Assert.equal(computableCounter, 1) // computable is recomputed
-        Assert.equal(stateCounter, 1) // state is recomputed
+        assert.equal(computableCounter, 1) // computable is recomputed
+        assert.equal(stateCounter, 1) // state is recomputed
         mutable.value = true
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computableCounter, 2) // computable is recomputed automatically
-        Assert.equal(stateCounter, 1) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computableCounter, 2) // computable is recomputed automatically
+        assert.equal(stateCounter, 1) // state is not recomputed
         assertState(state, false)
-        Assert.equal(computableCounter, 2) // computable is not recomputed
-        Assert.equal(stateCounter, 1) // state is not recomputed because computable is not modified
+        assert.equal(computableCounter, 2) // computable is not recomputed
+        assert.equal(stateCounter, 1) // state is not recomputed because computable is not modified
     })
     test("2. amount of modified states including computable states that have dependants", () => {
         const manager = createStateManager()
@@ -889,19 +888,19 @@ suite("State", () => {
             const value = computable.value
             return value && false
         })
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(computableCounter, 0) // computable is not recomputed
-        Assert.equal(stateCounter, 0) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computableCounter, 0) // computable is not recomputed
+        assert.equal(stateCounter, 0) // state is not recomputed
         assertState(state, false)
-        Assert.equal(computableCounter, 1) // computable is recomputed
-        Assert.equal(stateCounter, 1) // state is recomputed
+        assert.equal(computableCounter, 1) // computable is recomputed
+        assert.equal(stateCounter, 1) // state is recomputed
         mutable.value = true
-        Assert.equal(testUpdate(false, manager), 2)
-        Assert.equal(computableCounter, 2) // computable is recomputed automatically
-        Assert.equal(stateCounter, 1) // state is not recomputed
+        assert.equal(testUpdate(false, manager), 2)
+        assert.equal(computableCounter, 2) // computable is recomputed automatically
+        assert.equal(stateCounter, 1) // state is not recomputed
         assertState(state, false)
-        Assert.equal(computableCounter, 2) // computable is not recomputed
-        Assert.equal(stateCounter, 2) // state is recomputed by request but it is not modified
+        assert.equal(computableCounter, 2) // computable is not recomputed
+        assert.equal(stateCounter, 2) // state is recomputed by request but it is not modified
     })
     test("do not recompute by state if it was not used during last computation", () => {
         const manager = createStateManager()
@@ -914,37 +913,37 @@ suite("State", () => {
             return stateB.value ? stateT.value : stateF.value
         })
         // initial computation
-        Assert.equal(computable.value, 1)
+        assert.equal(computable.value, 1)
         assertStringsAndCleanup(computing, "recomputed")
         // do not recompute if nothing changed
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(computable.value, 1)
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(computable.value, 1)
+        assert.isEmpty(computing)
         // recompute if used stateT changed
         stateT.value = -1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, -1)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -1)
         assertStringsAndCleanup(computing, "recomputed")
         // do not recompute if stateF changed
         stateF.value = -2
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, -1)
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -1)
+        assert.isEmpty(computing)
         // switch flag and recompute
         stateB.value = false
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, -2)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, -2)
         assertStringsAndCleanup(computing, "recomputed")
         // recompute if used stateF changed
         stateF.value = 2
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, 2)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, 2)
         assertStringsAndCleanup(computing, "recomputed")
         // do not recompute if stateT changed
         stateT.value = 1
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(computable.value, 2)
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(computable.value, 2)
+        assert.isEmpty(computing)
     })
     test("build and update simple tree", () => {
         let manager = createStateManager()
@@ -957,49 +956,49 @@ suite("State", () => {
         let secondNode: TestNode
         let root = manager.updatableNode(rootNode, (context: StateContext) => {
             computing.push("update root")
-            Assert.equal(context.node, rootNode)
+            assert.equal(context.node, rootNode)
             context.compute(key("init"), () => {
                 computing.push("init root")
-                Assert.equal(context.node, rootNode)
+                assert.equal(context.node, rootNode)
                 rootNode.content = "root"
                 return undefined
             })
             if (count.value < 40) {
                 context.attach(key("first"), () => {
                     computing.push("create first")
-                    Assert.equal(context.node, undefined)
+                    assert.equal(context.node, undefined)
                     return firstNode = new TestNode()
                 }, () => {
                     computing.push("update first")
-                    Assert.equal(context.node, firstNode)
+                    assert.equal(context.node, firstNode)
                     context.compute(key("init"), () => {
                         computing.push("init first")
-                        Assert.equal(context.node, firstNode)
+                        assert.equal(context.node, firstNode)
                         firstNode.content = first.value
                         return undefined
                     })
                 }, () => {
                     computing.push("detach&dispose first")
-                    Assert.equal(context.node, firstNode)
+                    assert.equal(context.node, firstNode)
                 })
             }
             if (count.value > 20) {
                 context.attach(key("second"), () => {
                     computing.push("create second")
-                    Assert.equal(context.node, undefined)
+                    assert.equal(context.node, undefined)
                     return secondNode = new TestNode()
                 }, () => {
                     computing.push("update second")
-                    Assert.equal(context.node, secondNode)
+                    assert.equal(context.node, secondNode)
                     context.compute(key("init"), () => {
                         computing.push("init second")
-                        Assert.equal(context.node, secondNode)
+                        assert.equal(context.node, secondNode)
                         secondNode.content = second.value
                         return undefined
                     })
                 }, () => {
                     computing.push("detach&dispose second")
-                    Assert.equal(context.node, secondNode)
+                    assert.equal(context.node, secondNode)
                 })
             }
         })
@@ -1010,16 +1009,16 @@ suite("State", () => {
 
         assertStringsAndCleanup(computing, "update root ; init root ; create first ; update first ; init first ; create second ; update second ; init second")
 
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertNode(root,
             "root\n" +
             "  first node\n" +
             "  second node")
 
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
 
         count.value = 20
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  first node")
@@ -1027,15 +1026,15 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; detach&dispose second")
 
         second.value = "last node"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  first node")
 
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
 
         count.value = 40
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  last node")
@@ -1043,7 +1042,7 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; create second ; update second ; init second ; detach&dispose first")
 
         count.value = 30
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  first node\n" +
@@ -1052,7 +1051,7 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; create first ; update first ; init first")
 
         count.value = 40
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  last node")
@@ -1060,7 +1059,7 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; detach&dispose first")
 
         second.value = "second node"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  second node")
@@ -1079,68 +1078,68 @@ suite("State", () => {
         let leafNode: TestNode
         let root = manager.updatableNode(rootNode, (context: StateContext) => {
             computing.push("update root")
-            Assert.equal(context.node, rootNode)
+            assert.equal(context.node, rootNode)
             context.compute(key("init"), () => {
                 computing.push("init root")
-                Assert.equal(context.node, rootNode)
+                assert.equal(context.node, rootNode)
                 rootNode.content = "root"
                 return undefined
             })
             if (context.valueBy<string>("parent").length > 0) {
                 context.attach(key("parent"), () => {
                     computing.push("create parent")
-                    Assert.equal(context.node, undefined)
+                    assert.equal(context.node, undefined)
                     return parentNode = new TestNode()
                 }, () => {
                     computing.push("update parent")
-                    Assert.equal(context.node, parentNode)
+                    assert.equal(context.node, parentNode)
                     context.compute(key("init"), () => {
                         computing.push("init parent")
-                        Assert.equal(context.node, parentNode)
+                        assert.equal(context.node, parentNode)
                         parentNode.content = context.valueBy<string>("parent")
                         return undefined
                     })
                     if (context.valueBy<string>("child").length > 0) {
                         context.attach(key("child"), () => {
                             computing.push("create child")
-                            Assert.equal(context.node, undefined)
+                            assert.equal(context.node, undefined)
                             return childNode = new TestNode()
                         }, () => {
                             computing.push("update child")
-                            Assert.equal(context.node, childNode)
+                            assert.equal(context.node, childNode)
                             context.compute(key("init"), () => {
                                 computing.push("init child")
-                                Assert.equal(context.node, childNode)
+                                assert.equal(context.node, childNode)
                                 childNode.content = context.valueBy<string>("child")
                                 return undefined
                             })
                             if (context.valueBy<string>("leaf").length > 0) {
                                 context.attach(key("leaf"), () => {
                                     computing.push("create leaf")
-                                    Assert.equal(context.node, undefined)
+                                    assert.equal(context.node, undefined)
                                     return leafNode = new TestNode()
                                 }, () => {
                                     computing.push("update leaf")
-                                    Assert.equal(context.node, leafNode)
+                                    assert.equal(context.node, leafNode)
                                     context.compute(key("init"), () => {
                                         computing.push("init leaf")
-                                        Assert.equal(context.node, leafNode)
+                                        assert.equal(context.node, leafNode)
                                         leafNode.content = context.valueBy<string>("leaf")
                                         return undefined
                                     })
                                 }, () => {
                                     computing.push("detach&dispose leaf")
-                                    Assert.equal(context.node, leafNode)
+                                    assert.equal(context.node, leafNode)
                                 })
                             }
                         }, () => {
                             computing.push("detach&dispose child")
-                            Assert.equal(context.node, childNode)
+                            assert.equal(context.node, childNode)
                         })
                     }
                 }, () => {
                     computing.push("detach&dispose parent")
-                    Assert.equal(context.node, parentNode)
+                    assert.equal(context.node, parentNode)
                 })
             }
         })
@@ -1152,17 +1151,17 @@ suite("State", () => {
 
         assertStringsAndCleanup(computing, "update root ; init root ; create parent ; update parent ; init parent ; create child ; update child ; init child ; create leaf ; update leaf ; init leaf")
 
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertNode(root,
             "root\n" +
             "  parent\n" +
             "    child\n" +
             "      leaf")
 
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
 
         manager.stateBy<string>("leaf")!.value = "leaf node"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  parent\n" +
@@ -1172,21 +1171,21 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; update parent ; update child ; update leaf ; init leaf")
 
         manager.stateBy<string>("parent")!.value = ""
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root")
 
         assertStringsAndCleanup(computing, "update root ; detach&dispose parent ; detach&dispose child ; detach&dispose leaf")
 
         manager.stateBy<string>("child")!.value = "child node"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root")
 
-        Assert.isEmpty(computing)
+        assert.isEmpty(computing)
 
         manager.stateBy<string>("parent")!.value = "parent node"
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  parent node\n" +
@@ -1196,7 +1195,7 @@ suite("State", () => {
         assertStringsAndCleanup(computing, "update root ; create parent ; update parent ; init parent ; create child ; update child ; init child ; create leaf ; update leaf ; init leaf")
 
         manager.stateBy<string>("leaf")!.value = ""
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertNode(root,
             "root\n" +
             "  parent node\n" +
@@ -1210,7 +1209,7 @@ suite("State", () => {
         manager.scheduleCallback(() => { state.value = 10 })
         assertState(state, 0)
         // first frame
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState(state, 10)
     })
     test("schedule state updating to the second next frame", () => {
@@ -1219,10 +1218,10 @@ suite("State", () => {
         manager.scheduleCallback(() => { manager.scheduleCallback(() => { state.value = 10 }) })
         assertState(state, 0)
         // first frame
-        Assert.equal(testUpdate(true, manager), 0)
+        assert.equal(testUpdate(true, manager), 0)
         assertState(state, 0)
         // second frame
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState(state, 10)
     })
     test("schedule state updating to the third next frame", () => {
@@ -1231,13 +1230,13 @@ suite("State", () => {
         manager.scheduleCallback(() => { manager.scheduleCallback(() => { manager.scheduleCallback(() => { state.value = 10 }) }) })
         assertState(state, 0)
         // first frame
-        Assert.equal(testUpdate(true, manager), 0)
+        assert.equal(testUpdate(true, manager), 0)
         assertState(state, 0)
         // second frame
-        Assert.equal(testUpdate(true, manager), 0)
+        assert.equal(testUpdate(true, manager), 0)
         assertState(state, 0)
         // third frame
-        Assert.equal(testUpdate(true, manager), 1)
+        assert.equal(testUpdate(true, manager), 1)
         assertModifiedState(state, 10)
     })
 })
@@ -1263,7 +1262,7 @@ suite("Equivalent", () => {
         const manager = createStateManager()
         const state = manager.mutableState(age16, undefined, Data.equivalent)
         assertState(state, age16)
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, age16)
     })
     test("state is modified on first snapshot update", () => {
@@ -1271,11 +1270,11 @@ suite("Equivalent", () => {
         const state = manager.mutableState(age16, undefined, Data.equivalent)
         assertState(state, age16)
         const age64 = new Data("age", 64)
-        Assert.notEqual(age16, age64)
+        assert.notEqual(age16, age64)
         state.value = age64
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(state, age64)
-        Assert.notEqual(state.value, age16)
+        assert.notEqual(state.value, age16)
     })
     test("state is not modified on next snapshot update", () => {
         const manager = createStateManager()
@@ -1283,10 +1282,10 @@ suite("Equivalent", () => {
         assertState(state, age16)
         const age64 = new Data("age", 64)
         state.value = age64
-        Assert.equal(testUpdate(false, manager), 1)
+        assert.equal(testUpdate(false, manager), 1)
         assertModifiedState(state, age64)
-        Assert.notEqual(state.value, age16)
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.notEqual(state.value, age16)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, age64)
     })
     test("state is not modified if values are equivalent, but returns new value", () => {
@@ -1294,12 +1293,12 @@ suite("Equivalent", () => {
         const state = manager.mutableState(age16, undefined, Data.equivalent)
         assertState(state, age16)
         const equal = new Data("age", 16)
-        Assert.notEqual(equal, age16)
-        Assert.isTrue(Data.equivalent(equal, age16))
+        assert.notEqual(equal, age16)
+        assert.isTrue(Data.equivalent(equal, age16))
         state.value = equal
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, equal)
-        Assert.notEqual(state.value, age16)
+        assert.notEqual(state.value, age16)
     })
     test("frozen state is not modified if values are equivalent, but returns new value", () => {
         const manager = createStateManager()
@@ -1307,12 +1306,12 @@ suite("Equivalent", () => {
         const state = manager.mutableState(age16, undefined, Data.equivalent)
         assertState(state, age16)
         const equal = new Data("age", 16)
-        Assert.notEqual(equal, age16)
-        Assert.isTrue(Data.equivalent(equal, age16))
+        assert.notEqual(equal, age16)
+        assert.isTrue(Data.equivalent(equal, age16))
         state.value = equal
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, equal)
-        Assert.notEqual(state.value, age16)
+        assert.notEqual(state.value, age16)
     })
     test("state is not modified if the equivalent value is set, but returns new value", () => {
         const manager = createStateManager()
@@ -1322,7 +1321,7 @@ suite("Equivalent", () => {
         for (let age = 0; age <= 16; age++) {
             state.value = value = new Data("age", age)
         }
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, value)
     })
     test("frozen state is not modified if the equivalent value is set, but returns new value", () => {
@@ -1334,7 +1333,7 @@ suite("Equivalent", () => {
         for (let age = 0; age <= 16; age++) {
             state.value = value = new Data("age", age)
         }
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, value)
     })
 })
@@ -1374,8 +1373,8 @@ suite("ValueTracker", () => {
             throw new Error("cannot set " + value)
         }))
         assertState(state, 5)
-        Assert.throws(() => { state.value = 404 })
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.throws(() => { state.value = 404 })
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, 5)
     })
     test("disable state modification silently", () => {
@@ -1383,7 +1382,7 @@ suite("ValueTracker", () => {
         const state = manager.mutableState(5, undefined, undefined, onUpdate((_: int32) => 5))
         assertState(state, 5)
         state.value = 404
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, 5)
     })
     test("disposed state ignores tracker", () => {
@@ -1391,7 +1390,7 @@ suite("ValueTracker", () => {
         const state = manager.mutableState(5, undefined, undefined, onUpdate((_: int32) => 5))
         assertState(state, 5)
         state.value = 404
-        Assert.equal(testUpdate(false, manager), 0)
+        assert.equal(testUpdate(false, manager), 0)
         assertState(state, 5)
         state.dispose()
         state.value = 999
@@ -1403,13 +1402,13 @@ suite("ArrayState", () => {
     test("managed array state supports #at getter", () => {
         const manager = createStateManager()
         const array = manager.arrayState(Array.of<string>("one", "two", "three"))
-        Assert.equal(array.length, 3)
-        Assert.equal(array.at(0), "one")
-        Assert.equal(array.at(1), "two")
-        Assert.equal(array.at(2), "three")
-        Assert.equal(array.at(-1), "three")
-        Assert.equal(array.at(-2), "two")
-        Assert.equal(array.at(-3), "one")
+        assert.equal(array.length, 3)
+        assert.equal(array.at(0), "one")
+        assert.equal(array.at(1), "two")
+        assert.equal(array.at(2), "three")
+        assert.equal(array.at(-1), "three")
+        assert.equal(array.at(-2), "two")
+        assert.equal(array.at(-3), "one")
     })
     test("computable state depends on managed array state", () => {
         const manager = createStateManager()
@@ -1438,31 +1437,31 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= 1: item =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= 1: item =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= 1: item =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         state.value = 2
         array.set(0, "value")
-        Assert.equal(testUpdate(false, manager), 2)
-        Assert.equal(result.value, "<= 2: value =>")
+        assert.equal(testUpdate(false, manager), 2)
+        assert.equal(result.value, "<= 2: value =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         state.value = 3
         array.set(0, "value")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= 3: value =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= 3: value =>")
         assertStringsAndCleanup(computing, "outer ; center")
         // compute state only when snapshot updated
         state.value = 4
         array.length = 0
-        Assert.equal(testUpdate(false, manager), 2)
-        Assert.equal(result.value, "<= 4:  =>")
+        assert.equal(testUpdate(false, manager), 2)
+        assert.equal(result.value, "<= 4:  =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= 4:  =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= 4:  =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #copyWithin", () => {
         const manager = createStateManager()
@@ -1489,28 +1488,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         array.copyWithin(0, 1, 2)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= two two three =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= two two three =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         array.copyWithin(2, 0, 1)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= two two two =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= two two two =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         array.copyWithin(1, 2, 0)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= two two two =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= two two two =>")
+        assert.isEmpty(computing)
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= two two two =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= two two two =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #fill", () => {
         const manager = createStateManager()
@@ -1537,28 +1536,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         array.fill("X", 1, 2)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one X three =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one X three =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         array.fill("X")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= X X X =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= X X X =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         array.fill("X", 1)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= X X X =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= X X X =>")
+        assert.isEmpty(computing)
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= X X X =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= X X X =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #pop", () => {
         const manager = createStateManager()
@@ -1585,28 +1584,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= first last =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= first last =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= first last =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.pop(), "last")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= first =>")
+        assert.equal(array.pop(), "last")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= first =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.equal(array.pop(), "first")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<=  =>")
+        assert.equal(array.pop(), "first")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<=  =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.isUndefined(array.pop())
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.isUndefined(array.pop())
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #push", () => {
         const manager = createStateManager()
@@ -1633,28 +1632,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<=  =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.push(), 0)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(array.push(), 0)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.push("one"), 1)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one =>")
+        assert.equal(array.push("one"), 1)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.equal(array.push("two", "three"), 3)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one two three =>")
+        assert.equal(array.push("two", "three"), 3)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #reverse", () => {
         const manager = createStateManager()
@@ -1681,18 +1680,18 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         array.reverse()
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= three two one =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= three two one =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= three two one =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= three two one =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #shift", () => {
         const manager = createStateManager()
@@ -1719,28 +1718,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= first last =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= first last =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= first last =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.shift(), "first")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= last =>")
+        assert.equal(array.shift(), "first")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= last =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.equal(array.shift(), "last")
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<=  =>")
+        assert.equal(array.shift(), "last")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<=  =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.isUndefined(array.shift())
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.isUndefined(array.shift())
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
     })
     test("computable state depends on managed array state #sort", () => {
         const manager = createStateManager()
@@ -1767,29 +1766,29 @@ suite("ArrayState", () => {
         assertState<string>(result, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
         array.sort()
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one three two =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one three two =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
         array.sort()
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one three two =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one three two =>")
+        assert.isEmpty(computing)
 /* Improve: [TID 00edbb] F/ets: Failed to create the collator for en (US)
         // compute state only when snapshot updated
         array.sort((s1: string, s2: string) => s1.length < s2.length ? -1 : s1.length > s2.length ? 1 : s1.localeCompare(s2))
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one two three =>")
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one two three =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= one two three =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= one two three =>")
+        assert.isEmpty(computing)
 */
     })
     test("computable state depends on managed array state #unshift", () => {
@@ -1817,28 +1816,28 @@ suite("ArrayState", () => {
         assertState<string>(result, "<=  =>")
         assertStringsAndCleanup(computing, "outer ; left ; center ; inner ; right")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.unshift(), 0)
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<=  =>")
-        Assert.isEmpty(computing)
+        assert.equal(array.unshift(), 0)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<=  =>")
+        assert.isEmpty(computing)
         // compute state only when snapshot updated
-        Assert.equal(array.unshift("one"), 1)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= one =>")
+        assert.equal(array.unshift("one"), 1)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= one =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // compute state only when snapshot updated
-        Assert.equal(array.unshift("two", "three"), 3)
-        Assert.equal(testUpdate(false, manager), 1)
-        Assert.equal(result.value, "<= two three one =>")
+        assert.equal(array.unshift("two", "three"), 3)
+        assert.equal(testUpdate(false, manager), 1)
+        assert.equal(result.value, "<= two three one =>")
         assertStringsAndCleanup(computing, "outer ; center ; inner")
         // computable state is not modified
-        Assert.equal(testUpdate(false, manager), 0)
-        Assert.equal(result.value, "<= two three one =>")
-        Assert.isEmpty(computing)
+        assert.equal(testUpdate(false, manager), 0)
+        assert.equal(result.value, "<= two three one =>")
+        assert.isEmpty(computing)
     })
 })
 export const __ARKTEST__ = "states/State.test"

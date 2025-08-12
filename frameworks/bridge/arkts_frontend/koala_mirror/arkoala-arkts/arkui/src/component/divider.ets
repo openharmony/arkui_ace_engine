@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { ResourceColor } from "./units"
 import { Color, LineCapStyle } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
@@ -31,6 +31,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkDividerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,7 +39,7 @@ export class ArkDividerPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkDividerPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Divider_construct(peerId, flags)
-        const _peer  = new ArkDividerPeer(_peerPtr, peerId, "Divider", flags)
+        const _peer  = new ArkDividerPeer(_peerPtr, peerId, 'Divider', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -47,80 +48,72 @@ export class ArkDividerPeer extends ArkCommonMethodPeer {
     }
     setVerticalAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DividerAttribute_setVertical(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DividerAttribute_setColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStrokeWidthAttribute(value: number | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DividerAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLineCapAttribute(value: LineCapStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as LineCapStyle)
-            thisSerializer.writeInt32(TypeChecker.LineCapStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as LineCapStyle)
+            thisSerializer.writeInt32(TypeChecker.LineCapStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DividerAttribute_setLineCap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -163,17 +156,6 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: DividerAttribute): void {
-        super.apply(target)
-        if (this.vertical_value !== undefined)
-            target.vertical(this.vertical_value!)
-        if (this.color_value !== undefined)
-            target.color(this.color_value!)
-        if (this.strokeWidth_value !== undefined)
-            target.strokeWidth(this.strokeWidth_value!)
-        if (this.lineCap_value !== undefined)
-            target.lineCap(this.lineCap_value!)
     }
 }
 
@@ -221,7 +203,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
         return this
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -229,26 +210,6 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
         super.applyAttributesFinish()
     }
 }
-export function withDividerStyle(receiver: DividerAttribute, modifier: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkDividerStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Divider")
-// export function Divider(
-//     
-//     @memo
-//     content_?: () => void,
-// ): DividerAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Divider(
@@ -264,53 +225,196 @@ export function Divider(
     NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (_: ArkDividerPeer): void => {
         receiver.setDividerOptions()
         style?.(receiver)
-        withDividerStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkDividerSet extends ArkCommonMethodSet implements DividerAttribute {
+export class DividerModifier extends CommonMethodModifier implements DividerAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _vertical_flag?: boolean
-    _vertical0_value?: boolean | undefined
-    _color_flag?: boolean
-    _color0_value?: ResourceColor | undefined
-    _strokeWidth_flag?: boolean
-    _strokeWidth0_value?: number | string | undefined
-    _lineCap_flag?: boolean
-    _lineCap0_value?: LineCapStyle | undefined
-    applyModifierPatch(component: DividerAttribute): void {
-        if (this._vertical_flag)
-            component.vertical((this._vertical0_value as boolean | undefined))
-        if (this._color_flag)
-            component.color((this._color0_value as ResourceColor | undefined))
-        if (this._strokeWidth_flag)
-            component.strokeWidth((this._strokeWidth0_value as number | string | undefined))
-        if (this._lineCap_flag)
-            component.lineCap((this._lineCap0_value as LineCapStyle | undefined))
+    _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _vertical_0_0value?: boolean | undefined
+    _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _color_0_0value?: ResourceColor | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: number | string | undefined
+    _lineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _lineCap_0_0value?: LineCapStyle | undefined
+    applyModifierPatch(peer: ArkDividerPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setVerticalAttribute((this._vertical_0_0value as boolean | undefined));
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._vertical_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setVerticalAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorAttribute((this._color_0_0value as ResourceColor | undefined));
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._color_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as number | string | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setStrokeWidthAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._lineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._lineCap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLineCapAttribute((this._lineCap_0_0value as LineCapStyle | undefined));
+                    this._lineCap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._lineCap_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._lineCap_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLineCapAttribute((undefined as LineCapStyle | undefined));
+                }
+            }
+        }
     }
-    public vertical(value: boolean | undefined): this {
-        this._vertical_flag = true
-        this._vertical0_value = value
+    mergeModifier(modifier: DividerModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._vertical_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.vertical(modifier._vertical_0_0value);
+                    break;
+                }
+                default: {
+                    this.vertical((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.color(modifier._color_0_0value);
+                    break;
+                }
+                default: {
+                    this.color((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._strokeWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.strokeWidth((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._lineCap_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._lineCap_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.lineCap(modifier._lineCap_0_0value);
+                    break;
+                }
+                default: {
+                    this.lineCap((undefined as LineCapStyle | undefined));
+                }
+            }
+        }
+    }
+    vertical(value: boolean | undefined): this {
+        if (((this._vertical_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._vertical_0_0value) !== (value)))
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
+            this._vertical_0_0value = value
+        } else
+        {
+            this._vertical_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public color(value: ResourceColor | undefined): this {
-        this._color_flag = true
-        this._color0_value = value
+    color(value: ResourceColor | undefined): this {
+        if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._color_0_flag = AttributeUpdaterFlag.UPDATE
+            this._color_0_0value = value
+        } else
+        {
+            this._color_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public strokeWidth(value: number | string | undefined): this {
-        this._strokeWidth_flag = true
-        this._strokeWidth0_value = value
+    strokeWidth(value: number | string | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeWidth_0_0value) !== (value)))
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
+        } else
+        {
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public lineCap(value: LineCapStyle | undefined): this {
-        this._lineCap_flag = true
-        this._lineCap0_value = value
+    lineCap(value: LineCapStyle | undefined): this {
+        if (((this._lineCap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._lineCap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._lineCap_0_0value = value
+        } else
+        {
+            this._lineCap_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

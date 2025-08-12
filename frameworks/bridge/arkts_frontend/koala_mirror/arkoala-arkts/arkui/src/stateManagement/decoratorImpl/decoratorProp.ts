@@ -25,7 +25,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { UIUtils } from '../utils';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../handwritten/component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { WatchFunc } from './decoratorWatch';
 /**
@@ -114,7 +114,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         if (sourceValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
-            // TODO: this order need to be checked again
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {

@@ -27,18 +27,17 @@ import {
     Measurable,
     SizeResult,
     PageLifeCycle,
-    LayoutCallback,
-    CommonMethod
+    LayoutCallback
 } from "../../generated"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { rememberDisposable, remember, mutableState, MutableState, NodeAttach, RunEffect } from "@koalaui/runtime"
+import { memo } from "@koalaui/runtime/annotations"
+import { rememberDisposable, remember, rememberMutableState, mutableState, MutableState, NodeAttach, RunEffect } from "@koalaui/runtime"
 import { addPartialUpdate } from '../../ArkUIEntry'
 import { CurrentRouterTransitionState, RouterTransitionVisibility } from "../Router";
 import { PeerNode } from "../../PeerNode";
 import { PageTransitionEnter, PageTransitionExit } from "../ArkPageTransition"
 import { ExtendableComponent, UIContext } from './extendableComponent'
-
 export interface AttributeModifier<T> {
+
     isUpdater(): boolean;
     applyNormalAttribute(instance: T): void;
     applyPressedAttribute(instance: T): void;
@@ -88,7 +87,7 @@ export abstract class BaseCustomComponent extends ExtendableComponent {
 export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT extends Object> extends BaseCustomComponent {
     @memo
     static $_instantiate<S extends CustomComponent<S, OptionsS>, OptionsS extends Object>(
-        @memo builder: ((instance: S) => void) | undefined,
+        @memo attributeApplier: ((instance: S) => void) | undefined,
         factory: () => S,
         options?: OptionsS,
         reuseId?: string,
@@ -120,26 +119,26 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
                     node.setOnReuse(() => {
                         receiver.aboutToReuse(receiver.__toRecord(options))
                     })
-                    receiver.__buildWrapper(builder, options, content)
+                    receiver.__buildWrapper(attributeApplier, options, content)
                 },
                 reuseId
             )
         } else {
             const receiver = create()
-            receiver.__buildWrapper(builder, options, content)
+            receiver.__buildWrapper(attributeApplier, options, content)
         }
     }
 
     @memo
     private __buildWrapper(
-        @memo builder: ((instance: T) => void) | undefined,
-        options?: OptionsT,
-        @memo content?: () => void
+        @memo attributeApplier: ((instance: T) => void) | undefined,
+        options: OptionsT|undefined,
+        @memo content: (() => void) | undefined
     ): void {
         NodeAttach<PeerNode>(
             (): PeerNode => ArkComponentRootPeer.create(),
             (node: PeerNode): void => {
-                const appeared = remember<MutableState<boolean>>(
+                const ready = remember<MutableState<boolean>>(
                     (): MutableState<boolean> => {
                         const state = mutableState(false)
                         addPartialUpdate(() => {
@@ -149,20 +148,29 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
                         return state
                     }
                 )
-                if (!appeared.value) {
+                if (!ready.value) {
                     return
                 }
 
                 if (this.isEntry()) {
+                    const visible = rememberMutableState<boolean>(false)
                     const state = CurrentRouterTransitionState()
                     if (state) {
                         RunEffect<RouterTransitionVisibility>(state.visibility, (visibility: RouterTransitionVisibility): void => {
                             switch (visibility.valueOf()) {
+                                case RouterTransitionVisibility.Visible.valueOf():
                                 case RouterTransitionVisibility.Showing.valueOf():
-                                    this.onPageShow()
+                                    if (!visible.value) {
+                                        visible.value = true
+                                        this.onPageShow()
+                                    }
                                     break
+                                case RouterTransitionVisibility.Hidden.valueOf():
                                 case RouterTransitionVisibility.Hiding.valueOf():
-                                    this.onPageHide()
+                                    if (visible.value) {
+                                        visible.value = false
+                                        this.onPageHide()
+                                    }
                                     break
                                 default: break
                             }
@@ -170,10 +178,8 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
                     }
                     this.pageTransition()
                 }
-
-                builder?.(this as T)
                 this.__updateStruct(options)
-                this._build(builder, content, options)
+                this._build(attributeApplier, content, options)
                 this.onDidBuild()
             }
         )
@@ -194,7 +200,7 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
     /**
      * This method is used when the component is going to be reused
      */
-    protected __toRecord(initializers?: OptionsT): Record<string, Object> {
+    protected __toRecord(initializers?: Object): Record<string, Object> {
         return {}
     }
 
@@ -265,5 +271,3 @@ export interface IPropertySubscriber { }
 export interface ISinglePropertyChangeSubscriber { }
 
 export interface CustomComponentV2 {}
-
-export type CustomStyles = (instance:CommonMethod) => void

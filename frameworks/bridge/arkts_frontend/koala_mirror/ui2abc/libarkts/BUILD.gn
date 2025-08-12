@@ -63,7 +63,8 @@ shared_library("es2panda_lib") {
     ]
 
     deps = [
-        ":regenerate"
+        "$ui2abc_root:ui2abc_install(${host_toolchain})",
+        ":regenerate(${host_toolchain})"
     ]
 
     configs -= [ "//build/config/compiler:compiler" ]
@@ -269,7 +270,6 @@ group("es2panda") {
 
 npm_cmd("libarkts.js") {
     deps = [
-        "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
         ":regenerate"
     ]
     outputs = [
@@ -281,7 +281,7 @@ npm_cmd("libarkts.js") {
 
 group("libarkts") {
     deps = [
-        ":es2panda_lib",
-        ":libarkts.js(${host_toolchain})"
+      ":es2panda_lib",
+      ":libarkts.js(${host_toolchain})"
     ]
 }

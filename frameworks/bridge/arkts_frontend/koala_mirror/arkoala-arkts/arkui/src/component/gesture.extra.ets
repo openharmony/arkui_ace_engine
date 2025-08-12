@@ -16,11 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Gesture_serializer, GestureMode, GestureType, Gesture, GestureInternal, LongPressGestureHandlerOptions, GestureEvent, GestureEventInternal, PanGestureOptions_serializer, PanGestureOptions, PanGestureOptionsInternal, PanGestureHandlerOptions, PinchGestureHandlerOptions, TapGestureParameters_serializer, TapGestureParameters, PanDirection } from "./gesture"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -42,19 +41,16 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
     static construct(mode: GestureMode, gesture: Array<GestureType>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((gesture.length).toInt())
-        for (let gesture_counter_i = 0; gesture_counter_i < gesture.length; gesture_counter_i++) {
-            const gesture_element : GestureType = gesture[gesture_counter_i]
-            let gesture_element_type : int32 = RuntimeType.UNDEFINED
-            gesture_element_type = runtimeType(gesture_element)
-            if (TypeChecker.isGesture(gesture_element)) {
+        for (let gestureCounterI = 0; gestureCounterI < gesture.length; gestureCounterI++) {
+            const gestureTmpElement : GestureType = gesture[gestureCounterI]
+            if (gestureTmpElement instanceof Gesture) {
                 thisSerializer.writeInt8((0).toChar())
-                const gesture_element_0  = gesture_element as Gesture
-                Gesture_serializer.write(thisSerializer, gesture_element_0)
-            }
-            else if (RuntimeType.OBJECT == gesture_element_type) {
+                const gestureTmpElementForIdx0  = gestureTmpElement as Gesture
+                Gesture_serializer.write(thisSerializer, gestureTmpElementForIdx0)
+            } else if (gestureTmpElement instanceof object) {
                 thisSerializer.writeInt8((1).toChar())
-                const gesture_element_1  = gesture_element as object
-                thisSerializer.writeCustomObject("object", gesture_element_1)
+                const gestureTmpElementForIdx1  = gestureTmpElement as object
+                thisSerializer.writeCustomObject('object', gestureTmpElementForIdx1)
             }
         }
         const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_construct(TypeChecker.GestureMode_ToNumeric(mode), thisSerializer.asBuffer(), thisSerializer.length())
@@ -179,17 +175,14 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
     }
     static construct(value: PanGestureInterface_Invoke_Literal | PanGestureOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        if (TypeChecker.isPanGestureInterface_Invoke_Literal(value, false, false, false)) {
+        if (value instanceof PanGestureInterface_Invoke_Literal) {
             thisSerializer.writeInt8((0).toChar())
-            const value_0  = value as PanGestureInterface_Invoke_Literal
-            PanGestureInterface_Invoke_Literal_serializer.write(thisSerializer, value_0)
-        }
-        else if (TypeChecker.isPanGestureOptions(value)) {
+            const valueForIdx0  = value as PanGestureInterface_Invoke_Literal
+            PanGestureInterface_Invoke_Literal_serializer.write(thisSerializer, valueForIdx0)
+        } else if (value instanceof PanGestureOptions) {
             thisSerializer.writeInt8((1).toChar())
-            const value_1  = value as PanGestureOptions
-            PanGestureOptions_serializer.write(thisSerializer, value_1)
+            const valueForIdx1  = value as PanGestureOptions
+            PanGestureOptions_serializer.write(thisSerializer, valueForIdx1)
         }
         const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -468,150 +461,142 @@ export class TapGestureInterface_serializer {
 export class LongPressGestureInterface_Invoke_Literal_serializer {
     public static write(buffer: SerializerBase, value: LongPressGestureInterface_Invoke_Literal): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_repeat  = value.repeat
-        let value_repeat_type : int32 = RuntimeType.UNDEFINED
-        value_repeat_type = runtimeType(value_repeat)
-        valueSerializer.writeInt8((value_repeat_type).toChar())
-        if ((value_repeat_type) != (RuntimeType.UNDEFINED)) {
-            const value_repeat_value  = value_repeat!
-            valueSerializer.writeBoolean(value_repeat_value)
+        const valueHolderForRepeat  = value.repeat
+        if (valueHolderForRepeat !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRepeatTmpValue  = valueHolderForRepeat!
+            valueSerializer.writeBoolean(valueHolderForRepeatTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_duration  = value.duration
-        let value_duration_type : int32 = RuntimeType.UNDEFINED
-        value_duration_type = runtimeType(value_duration)
-        valueSerializer.writeInt8((value_duration_type).toChar())
-        if ((value_duration_type) != (RuntimeType.UNDEFINED)) {
-            const value_duration_value  = value_duration!
-            valueSerializer.writeNumber(value_duration_value)
+        const valueHolderForDuration  = value.duration
+        if (valueHolderForDuration !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDurationTmpValue  = valueHolderForDuration!
+            valueSerializer.writeNumber(valueHolderForDurationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): LongPressGestureInterface_Invoke_Literal {
         let valueDeserializer : DeserializerBase = buffer
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const repeat_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let repeat_buf : boolean | undefined
-        if ((repeat_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            repeat_buf = valueDeserializer.readBoolean()
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const repeatTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let repeatTmpBuf : boolean | undefined
+        if ((repeatTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            repeatTmpBuf = valueDeserializer.readBoolean()
         }
-        const repeat_result : boolean | undefined = repeat_buf
-        const duration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let duration_buf : number | undefined
-        if ((duration_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            duration_buf = (valueDeserializer.readNumber() as number)
+        const repeatTmpResult : boolean | undefined = repeatTmpBuf
+        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let durationTmpBuf : number | undefined
+        if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            durationTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const duration_result : number | undefined = duration_buf
-        let value : LongPressGestureInterface_Invoke_Literal = ({fingers: fingers_result, repeat: repeat_result, duration: duration_result} as LongPressGestureInterface_Invoke_Literal)
+        const durationTmpResult : number | undefined = durationTmpBuf
+        let value : LongPressGestureInterface_Invoke_Literal = ({fingers: fingersTmpResult, repeat: repeatTmpResult, duration: durationTmpResult} as LongPressGestureInterface_Invoke_Literal)
         return value
     }
 }
 export class PanGestureInterface_Invoke_Literal_serializer {
     public static write(buffer: SerializerBase, value: PanGestureInterface_Invoke_Literal): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_direction  = value.direction
-        let value_direction_type : int32 = RuntimeType.UNDEFINED
-        value_direction_type = runtimeType(value_direction)
-        valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
-            const value_direction_value  = (value_direction as PanDirection)
-            valueSerializer.writeInt32(TypeChecker.PanDirection_ToNumeric(value_direction_value))
+        const valueHolderForDirection  = value.direction
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as PanDirection)
+            valueSerializer.writeInt32(TypeChecker.PanDirection_ToNumeric(valueHolderForDirectionTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_distance  = value.distance
-        let value_distance_type : int32 = RuntimeType.UNDEFINED
-        value_distance_type = runtimeType(value_distance)
-        valueSerializer.writeInt8((value_distance_type).toChar())
-        if ((value_distance_type) != (RuntimeType.UNDEFINED)) {
-            const value_distance_value  = value_distance!
-            valueSerializer.writeNumber(value_distance_value)
+        const valueHolderForDistance  = value.distance
+        if (valueHolderForDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceTmpValue  = valueHolderForDistance!
+            valueSerializer.writeNumber(valueHolderForDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PanGestureInterface_Invoke_Literal {
         let valueDeserializer : DeserializerBase = buffer
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let direction_buf : PanDirection | undefined
-        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            direction_buf = TypeChecker.PanDirection_FromNumeric(valueDeserializer.readInt32())
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : PanDirection | undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = TypeChecker.PanDirection_FromNumeric(valueDeserializer.readInt32())
         }
-        const direction_result : PanDirection | undefined = direction_buf
-        const distance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distance_buf : number | undefined
-        if ((distance_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            distance_buf = (valueDeserializer.readNumber() as number)
+        const directionTmpResult : PanDirection | undefined = directionTmpBuf
+        const distanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceTmpBuf : number | undefined
+        if ((distanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distanceTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const distance_result : number | undefined = distance_buf
-        let value : PanGestureInterface_Invoke_Literal = ({fingers: fingers_result, direction: direction_result, distance: distance_result} as PanGestureInterface_Invoke_Literal)
+        const distanceTmpResult : number | undefined = distanceTmpBuf
+        let value : PanGestureInterface_Invoke_Literal = ({fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult} as PanGestureInterface_Invoke_Literal)
         return value
     }
 }
 export class PinchGestureInterface_Invoke_Literal_serializer {
     public static write(buffer: SerializerBase, value: PinchGestureInterface_Invoke_Literal): void {
         let valueSerializer : SerializerBase = buffer
-        const value_fingers  = value.fingers
-        let value_fingers_type : int32 = RuntimeType.UNDEFINED
-        value_fingers_type = runtimeType(value_fingers)
-        valueSerializer.writeInt8((value_fingers_type).toChar())
-        if ((value_fingers_type) != (RuntimeType.UNDEFINED)) {
-            const value_fingers_value  = value_fingers!
-            valueSerializer.writeNumber(value_fingers_value)
+        const valueHolderForFingers  = value.fingers
+        if (valueHolderForFingers !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFingersTmpValue  = valueHolderForFingers!
+            valueSerializer.writeNumber(valueHolderForFingersTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_distance  = value.distance
-        let value_distance_type : int32 = RuntimeType.UNDEFINED
-        value_distance_type = runtimeType(value_distance)
-        valueSerializer.writeInt8((value_distance_type).toChar())
-        if ((value_distance_type) != (RuntimeType.UNDEFINED)) {
-            const value_distance_value  = value_distance!
-            valueSerializer.writeNumber(value_distance_value)
+        const valueHolderForDistance  = value.distance
+        if (valueHolderForDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceTmpValue  = valueHolderForDistance!
+            valueSerializer.writeNumber(valueHolderForDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): PinchGestureInterface_Invoke_Literal {
         let valueDeserializer : DeserializerBase = buffer
-        const fingers_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fingers_buf : number | undefined
-        if ((fingers_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fingers_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fingersTmpBuf : number | undefined
+        if ((fingersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fingersTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const fingers_result : number | undefined = fingers_buf
-        const distance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let distance_buf : number | undefined
-        if ((distance_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            distance_buf = (valueDeserializer.readNumber() as number)
+        const fingersTmpResult : number | undefined = fingersTmpBuf
+        const distanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceTmpBuf : number | undefined
+        if ((distanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            distanceTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const distance_result : number | undefined = distance_buf
-        let value : PinchGestureInterface_Invoke_Literal = ({fingers: fingers_result, distance: distance_result} as PinchGestureInterface_Invoke_Literal)
+        const distanceTmpResult : number | undefined = distanceTmpBuf
+        let value : PinchGestureInterface_Invoke_Literal = ({fingers: fingersTmpResult, distance: distanceTmpResult} as PinchGestureInterface_Invoke_Literal)
         return value
     }
 }

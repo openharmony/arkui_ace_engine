@@ -15,4 +15,11 @@
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 
-const x = @memo () => 1
+class C {
+    public x: number
+    constructor(x: number) {
+        this.x = x
+    }
+}
+
+const x = @memo () => new C(1.0)

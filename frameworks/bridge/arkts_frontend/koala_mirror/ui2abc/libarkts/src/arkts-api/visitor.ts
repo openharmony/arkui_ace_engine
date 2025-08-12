@@ -221,7 +221,8 @@ export function visitEachChild(
             nodeVisitor(node.super, visitor),
             nodesVisitor(node.body, visitor),
             node.modifiers,
-            node.modifierFlags
+            node.modifierFlags,
+            node.annotations,
         )
     }
     if (isMethodDefinition(node)) {
@@ -246,7 +247,9 @@ export function visitEachChild(
             node.flags,
             node.modifierFlags,
             nodeVisitor(node.id, visitor),
-            nodesVisitor(node.annotations, visitor)
+            nodesVisitor(node.annotations, visitor),
+            node.getSignaturePointer(),
+            node.getPreferredReturnTypePointer(),
         )
     }
     if (isETSParameterExpression(node)) {
@@ -422,6 +425,7 @@ export function visitEachChild(
         return factory.updateETSUnionType(
             node,
             nodesVisitor(node.types, visitor),
+            nodesVisitor(node.annotations, visitor),
         )
     }
     if (isETSFunctionType(node)) {

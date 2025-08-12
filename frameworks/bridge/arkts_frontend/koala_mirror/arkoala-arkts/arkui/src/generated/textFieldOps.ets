@@ -16,31 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
 import { LayoutPolicy_serializer, LayoutPolicy, LayoutPolicyInternal } from "./../component/common"
 import { Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, EdgeStyles_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, ResourceStr, Length, Padding, LocalizedPadding, BorderOptions, EdgeWidths, LocalizedEdgeWidths, ResourceColor, EdgeColors, LocalizedEdgeColors, EdgeStyles, BorderRadiuses, LocalizedBorderRadiuses } from "./../component/units"
 import { Color, BorderStyle } from "./../component/enums"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 export class TextFieldOps {
     private static registerTextFieldValueCallback_serialize(node: KPointer, value: ResourceStr, callback: TextFieldValueCallback): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        if (RuntimeType.STRING == value_type) {
+        if (value instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const value_0  = value as string
-            thisSerializer.writeString(value_0)
-        }
-        else if (RuntimeType.OBJECT == value_type) {
+            const valueForIdx0  = value as string
+            thisSerializer.writeString(valueForIdx0)
+        } else if (value instanceof Resource) {
             thisSerializer.writeInt8((1).toChar())
-            const value_1  = value as Resource
-            Resource_serializer.write(thisSerializer, value_1)
+            const valueForIdx1  = value as Resource
+            Resource_serializer.write(thisSerializer, valueForIdx1)
         }
         thisSerializer.holdAndWriteCallback(callback)
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_registerTextFieldValueCallback(node, thisSerializer.asBuffer(), thisSerializer.length())
@@ -49,39 +45,32 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetWidth_serialize(node: KPointer, value?: Length | LayoutPolicy): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Length
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isLayoutPolicy(value_value)) {
+            } else if (valueTmpValue instanceof LayoutPolicy) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as LayoutPolicy
-                LayoutPolicy_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as LayoutPolicy
+                LayoutPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetWidth(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -89,39 +78,32 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetHeight_serialize(node: KPointer, value?: Length | LayoutPolicy): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Length
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isLayoutPolicy(value_value)) {
+            } else if (valueTmpValue instanceof LayoutPolicy) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as LayoutPolicy
-                LayoutPolicy_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as LayoutPolicy
+                LayoutPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetHeight(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -129,44 +111,36 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetPadding_serialize(node: KPointer, value?: Padding | Length | LocalizedPadding): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isPadding(value_value, true, false, true, false)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Padding) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Padding
-                Padding_serializer.write(thisSerializer, value_value_0)
-            }
-            else if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                const valueTmpValueForIdx0  = valueTmpValue as Padding
+                Padding_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Length
-                let value_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_value_1_type = runtimeType(value_value_1)
-                if (RuntimeType.STRING == value_value_1_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as Length
+                if (valueTmpValueForIdx1 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_1_0  = value_value_1 as string
-                    thisSerializer.writeString(value_value_1_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_1_type) {
+                    const valueTmpValueForIdx1ForIdx0  = valueTmpValueForIdx1 as string
+                    thisSerializer.writeString(valueTmpValueForIdx1ForIdx0)
+                } else if (valueTmpValueForIdx1 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_1_1  = value_value_1 as number
-                    thisSerializer.writeNumber(value_value_1_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_1_type) {
+                    const valueTmpValueForIdx1ForIdx1  = valueTmpValueForIdx1 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx1ForIdx1)
+                } else if (valueTmpValueForIdx1 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_1_2  = value_value_1 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_1_2)
+                    const valueTmpValueForIdx1ForIdx2  = valueTmpValueForIdx1 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx1ForIdx2)
                 }
-            }
-            else if (TypeChecker.isLocalizedPadding(value_value, true, false, true, false)) {
+            } else if (valueTmpValue instanceof LocalizedPadding) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as LocalizedPadding
-                LocalizedPadding_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedPadding
+                LocalizedPadding_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetPadding(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -174,44 +148,36 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetMargin_serialize(node: KPointer, value?: Padding | Length | LocalizedPadding): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isPadding(value_value, true, false, true, false)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Padding) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Padding
-                Padding_serializer.write(thisSerializer, value_value_0)
-            }
-            else if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+                const valueTmpValueForIdx0  = valueTmpValue as Padding
+                Padding_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Length
-                let value_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_value_1_type = runtimeType(value_value_1)
-                if (RuntimeType.STRING == value_value_1_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as Length
+                if (valueTmpValueForIdx1 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_1_0  = value_value_1 as string
-                    thisSerializer.writeString(value_value_1_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_1_type) {
+                    const valueTmpValueForIdx1ForIdx0  = valueTmpValueForIdx1 as string
+                    thisSerializer.writeString(valueTmpValueForIdx1ForIdx0)
+                } else if (valueTmpValueForIdx1 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_1_1  = value_value_1 as number
-                    thisSerializer.writeNumber(value_value_1_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_1_type) {
+                    const valueTmpValueForIdx1ForIdx1  = valueTmpValueForIdx1 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx1ForIdx1)
+                } else if (valueTmpValueForIdx1 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_1_2  = value_value_1 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_1_2)
+                    const valueTmpValueForIdx1ForIdx2  = valueTmpValueForIdx1 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx1ForIdx2)
                 }
-            }
-            else if (TypeChecker.isLocalizedPadding(value_value, true, false, true, false)) {
+            } else if (valueTmpValue instanceof LocalizedPadding) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as LocalizedPadding
-                LocalizedPadding_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedPadding
+                LocalizedPadding_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetMargin(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -219,12 +185,12 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBorder_serialize(node: KPointer, value?: BorderOptions): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            BorderOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            BorderOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBorder(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -232,44 +198,36 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBorderWidth_serialize(node: KPointer, value?: Length | EdgeWidths | LocalizedEdgeWidths): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Length
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isEdgeWidths(value_value, true, false, true, false)) {
+            } else if (valueTmpValue instanceof EdgeWidths) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as EdgeWidths
-                EdgeWidths_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isLocalizedEdgeWidths(value_value, true, false, true, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as EdgeWidths
+                EdgeWidths_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof LocalizedEdgeWidths) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as LocalizedEdgeWidths
-                LocalizedEdgeWidths_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdgeWidths
+                LocalizedEdgeWidths_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBorderWidth(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -277,49 +235,40 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBorderColor_serialize(node: KPointer, value?: ResourceColor | EdgeColors | LocalizedEdgeColors): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((TypeChecker.isColor(value_value)) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ResourceColor) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ResourceColor
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (TypeChecker.isColor(value_value_0)) {
+                const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
+                if (valueTmpValueForIdx0 instanceof Color) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as Color
-                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
+                    thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0ForIdx0))
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((3).toChar())
-                    const value_value_0_3  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_3)
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
-            }
-            else if (TypeChecker.isEdgeColors(value_value, true, false, true, false)) {
+            } else if (valueTmpValue instanceof EdgeColors) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as EdgeColors
-                EdgeColors_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isLocalizedEdgeColors(value_value, true, false, true, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as EdgeColors
+                EdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof LocalizedEdgeColors) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as LocalizedEdgeColors
-                LocalizedEdgeColors_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedEdgeColors
+                LocalizedEdgeColors_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBorderColor(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -327,23 +276,20 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBorderStyle_serialize(node: KPointer, value?: BorderStyle | EdgeStyles): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isBorderStyle(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof BorderStyle) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as BorderStyle
-                thisSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as BorderStyle
+                thisSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof EdgeStyles) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as EdgeStyles
-                EdgeStyles_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as EdgeStyles
+                EdgeStyles_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBorderStyle(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -351,44 +297,36 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBorderRadius_serialize(node: KPointer, value?: Length | BorderRadiuses | LocalizedBorderRadiuses): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.NUMBER == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Length
-                let value_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_value_0_type = runtimeType(value_value_0)
-                if (RuntimeType.STRING == value_value_0_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toChar())
-                    const value_value_0_0  = value_value_0 as string
-                    thisSerializer.writeString(value_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toChar())
-                    const value_value_0_1  = value_value_0 as number
-                    thisSerializer.writeNumber(value_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toChar())
-                    const value_value_0_2  = value_value_0 as Resource
-                    Resource_serializer.write(thisSerializer, value_value_0_2)
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_value, false, false, false, false)) {
+            } else if (valueTmpValue instanceof BorderRadiuses) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as BorderRadiuses
-                BorderRadiuses_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (TypeChecker.isLocalizedBorderRadiuses(value_value, false, false, false, false)) {
+                const valueTmpValueForIdx1  = valueTmpValue as BorderRadiuses
+                BorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof LocalizedBorderRadiuses) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as LocalizedBorderRadiuses
-                LocalizedBorderRadiuses_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBorderRadius(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -396,33 +334,28 @@ export class TextFieldOps {
     }
     private static textFieldOpsSetBackgroundColor_serialize(node: KPointer, value?: ResourceColor): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval  = ArkUIGeneratedNativeModule._TextFieldOps_textFieldOpsSetBackgroundColor(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

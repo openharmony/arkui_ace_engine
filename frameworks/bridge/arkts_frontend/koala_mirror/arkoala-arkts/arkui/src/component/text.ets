@@ -19,13 +19,12 @@
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
 import { LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, MenuType } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { LengthMetrics_serializer, LengthMetrics } from "./../generated/arkui.Graphics"
-import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Font_serializer, ResourceColor, Length, Font, VoidCallback } from "./units"
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from "./richEditor"
 import { ComponentBase } from "./../ComponentBase"
@@ -33,9 +32,11 @@ import { PeerNode } from "./../PeerNode"
 import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight, TextOverflow } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CustomBuilder } from "./builder"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         return new TextController(ptr)
@@ -90,823 +91,763 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTextPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Text_construct(peerId, flags)
-        const _peer  = new ArkTextPeer(_peerPtr, peerId, "Text", flags)
+        const _peer  = new ArkTextPeer(_peerPtr, peerId, 'Text', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let content_type : int32 = RuntimeType.UNDEFINED
-        content_type = runtimeType(content)
-        thisSerializer.writeInt8((content_type).toChar())
-        if ((content_type) != (RuntimeType.UNDEFINED)) {
-            const content_value  = content!
-            let content_value_type : int32 = RuntimeType.UNDEFINED
-            content_value_type = runtimeType(content_value)
-            if (RuntimeType.STRING == content_value_type) {
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue  = content!
+            if (contentTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const content_value_0  = content_value as string
-                thisSerializer.writeString(content_value_0)
-            }
-            else if (RuntimeType.OBJECT == content_value_type) {
+                const contentTmpValueForIdx0  = contentTmpValue as string
+                thisSerializer.writeString(contentTmpValueForIdx0)
+            } else if (contentTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const content_value_1  = content_value as Resource
-                Resource_serializer.write(thisSerializer, content_value_1)
+                const contentTmpValueForIdx1  = contentTmpValue as Resource
+                Resource_serializer.write(thisSerializer, contentTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextInterface_setTextOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontSizeAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinFontSizeAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxFontSizeAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinFontScaleAttribute(value: number | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxFontScaleAttribute(value: number | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMaxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontStyleAttribute(value: FontStyle | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as FontStyle)
-            thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FontStyle)
+            thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLineSpacingAttribute(value: LengthMetrics | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            LengthMetrics_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setLineSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextAlignAttribute(value: TextAlign | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as TextAlign)
-            thisSerializer.writeInt32(TypeChecker.TextAlign_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextAlign)
+            thisSerializer.writeInt32(TypeChecker.TextAlign_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLineHeightAttribute(value: number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setLineHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextOverflowAttribute(value: TextOverflowOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextOverflowOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextOverflowOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontFamilyAttribute(value: string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMaxLinesAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeNumber(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMaxLines(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDecorationAttribute(value: DecorationStyleInterface | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            DecorationStyleInterface_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            DecorationStyleInterface_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLetterSpacingAttribute(value: number | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setLetterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextCaseAttribute(value: TextCase | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as TextCase)
-            thisSerializer.writeInt32(TypeChecker.TextCase_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextCase)
+            thisSerializer.writeInt32(TypeChecker.TextCase_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextCase(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBaselineOffsetAttribute(value: number | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setBaselineOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCopyOptionAttribute(value: CopyOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as CopyOptions)
-            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as CopyOptions)
+            thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setCopyOption(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDraggableAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setDraggable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextShadowAttribute(value: ShadowOptions | Array<ShadowOptions> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isShadowOptions(value_value, false, false, false, false, false, false)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ShadowOptions) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ShadowOptions
-                ShadowOptions_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isArray_ShadowOptions(value_value))) {
+                const valueTmpValueForIdx0  = valueTmpValue as ShadowOptions
+                ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (TypeChecker.isArray_ShadowOptions(valueTmpValue)) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as Array<ShadowOptions>
-                thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
-                    ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
+                const valueTmpValueForIdx1  = valueTmpValue as Array<ShadowOptions>
+                thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
+                for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
+                    const valueTmpValueForIdx1TmpElement : ShadowOptions = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
+                    ShadowOptions_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElement)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHeightAdaptivePolicyAttribute(value: TextHeightAdaptivePolicy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as TextHeightAdaptivePolicy)
-            thisSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextHeightAdaptivePolicy)
+            thisSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setHeightAdaptivePolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextIndentAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_2)
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextIndent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setWordBreakAttribute(value: WordBreak | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as WordBreak)
-            thisSerializer.writeInt32(TypeChecker.WordBreak_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as WordBreak)
+            thisSerializer.writeInt32(TypeChecker.WordBreak_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setWordBreak(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLineBreakStrategyAttribute(value: LineBreakStrategy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as LineBreakStrategy)
-            thisSerializer.writeInt32(TypeChecker.LineBreakStrategy_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as LineBreakStrategy)
+            thisSerializer.writeInt32(TypeChecker.LineBreakStrategy_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setLineBreakStrategy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnCopyAttribute(value: ((value: string) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCaretColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setCaretColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectedBackgroundColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setSelectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEllipsisModeAttribute(value: EllipsisMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as EllipsisMode)
-            thisSerializer.writeInt32(TypeChecker.EllipsisMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as EllipsisMode)
+            thisSerializer.writeInt32(TypeChecker.EllipsisMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setEllipsisMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableDataDetectorAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setEnableDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDataDetectorConfigAttribute(value: TextDataDetectorConfig | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextDataDetectorConfig_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextDataDetectorConfig_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setDataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnTextSelectionChangeAttribute(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setOnTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontFeatureAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeString(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontFeature(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMarqueeOptionsAttribute(value: TextMarqueeOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            TextMarqueeOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            TextMarqueeOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setMarqueeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnMarqueeStateChangeAttribute(value: ((value0: MarqueeState) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setOnMarqueeStateChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPrivacySensitiveAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setPrivacySensitive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setTextSelectableAttribute(value: TextSelectableMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as TextSelectableMode)
-            thisSerializer.writeInt32(TypeChecker.TextSelectableMode_ToNumeric(value_value))
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextSelectableMode)
+            thisSerializer.writeInt32(TypeChecker.TextSelectableMode_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextSelectable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEditMenuOptionsAttribute(value: EditMenuOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            EditMenuOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            EditMenuOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setEditMenuOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setHalfLeadingAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setHalfLeading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableHapticFeedbackAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeBoolean(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontAttribute(fontValue: Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let fontValue_type : int32 = RuntimeType.UNDEFINED
-        fontValue_type = runtimeType(fontValue)
-        thisSerializer.writeInt8((fontValue_type).toChar())
-        if ((fontValue_type) != (RuntimeType.UNDEFINED)) {
-            const fontValue_value  = fontValue!
-            Font_serializer.write(thisSerializer, fontValue_value)
+        if (fontValue !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const fontValueTmpValue  = fontValue!
+            Font_serializer.write(thisSerializer, fontValueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            FontSettingOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            FontSettingOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontWeightAttribute(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let weight_type : int32 = RuntimeType.UNDEFINED
-        weight_type = runtimeType(weight)
-        thisSerializer.writeInt8((weight_type).toChar())
-        if ((weight_type) != (RuntimeType.UNDEFINED)) {
-            const weight_value  = weight!
-            let weight_value_type : int32 = RuntimeType.UNDEFINED
-            weight_value_type = runtimeType(weight_value)
-            if (RuntimeType.NUMBER == weight_value_type) {
+        if (weight !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const weightTmpValue  = weight!
+            if (weightTmpValue instanceof number) {
                 thisSerializer.writeInt8((0).toChar())
-                const weight_value_0  = weight_value as number
-                thisSerializer.writeNumber(weight_value_0)
-            }
-            else if (TypeChecker.isFontWeight(weight_value)) {
+                const weightTmpValueForIdx0  = weightTmpValue as number
+                thisSerializer.writeNumber(weightTmpValueForIdx0)
+            } else if (weightTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toChar())
-                const weight_value_1  = weight_value as FontWeight
-                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(weight_value_1))
-            }
-            else if (RuntimeType.STRING == weight_value_type) {
+                const weightTmpValueForIdx1  = weightTmpValue as FontWeight
+                thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(weightTmpValueForIdx1))
+            } else if (weightTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const weight_value_2  = weight_value as string
-                thisSerializer.writeString(weight_value_2)
+                const weightTmpValueForIdx2  = weightTmpValue as string
+                thisSerializer.writeString(weightTmpValueForIdx2)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            FontSettingOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            FontSettingOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelectionAttribute(selectionStart: number | undefined, selectionEnd: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let selectionStart_type : int32 = RuntimeType.UNDEFINED
-        selectionStart_type = runtimeType(selectionStart)
-        thisSerializer.writeInt8((selectionStart_type).toChar())
-        if ((selectionStart_type) != (RuntimeType.UNDEFINED)) {
-            const selectionStart_value  = selectionStart!
-            thisSerializer.writeNumber(selectionStart_value)
+        if (selectionStart !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionStartTmpValue  = selectionStart!
+            thisSerializer.writeNumber(selectionStartTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let selectionEnd_type : int32 = RuntimeType.UNDEFINED
-        selectionEnd_type = runtimeType(selectionEnd)
-        thisSerializer.writeInt8((selectionEnd_type).toChar())
-        if ((selectionEnd_type) != (RuntimeType.UNDEFINED)) {
-            const selectionEnd_value  = selectionEnd!
-            thisSerializer.writeNumber(selectionEnd_value)
+        if (selectionEnd !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectionEndTmpValue  = selectionEnd!
+            thisSerializer.writeNumber(selectionEndTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setSelection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindSelectionMenuAttribute(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let spanType_type : int32 = RuntimeType.UNDEFINED
-        spanType_type = runtimeType(spanType)
-        thisSerializer.writeInt8((spanType_type).toChar())
-        if ((spanType_type) != (RuntimeType.UNDEFINED)) {
-            const spanType_value  = (spanType as TextSpanType)
-            thisSerializer.writeInt32(TypeChecker.TextSpanType_ToNumeric(spanType_value))
+        if (spanType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const spanTypeTmpValue  = (spanType as TextSpanType)
+            thisSerializer.writeInt32(TypeChecker.TextSpanType_ToNumeric(spanTypeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let content_type : int32 = RuntimeType.UNDEFINED
-        content_type = runtimeType(content)
-        thisSerializer.writeInt8((content_type).toChar())
-        if ((content_type) != (RuntimeType.UNDEFINED)) {
-            const content_value  = content!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue  = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let responseType_type : int32 = RuntimeType.UNDEFINED
-        responseType_type = runtimeType(responseType)
-        thisSerializer.writeInt8((responseType_type).toChar())
-        if ((responseType_type) != (RuntimeType.UNDEFINED)) {
-            const responseType_value  = (responseType as TextResponseType)
-            thisSerializer.writeInt32(TypeChecker.TextResponseType_ToNumeric(responseType_value))
+        if (responseType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTypeTmpValue  = (responseType as TextResponseType)
+            thisSerializer.writeInt32(TypeChecker.TextResponseType_ToNumeric(responseTypeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            SelectionMenuOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            SelectionMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setBindSelectionMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1219,87 +1160,6 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: TextAttribute): void {
-        super.apply(target)
-        if (this.fontColor_value !== undefined)
-            target.fontColor(this.fontColor_value!)
-        if (this.fontSize_value !== undefined)
-            target.fontSize(this.fontSize_value!)
-        if (this.minFontSize_value !== undefined)
-            target.minFontSize(this.minFontSize_value!)
-        if (this.maxFontSize_value !== undefined)
-            target.maxFontSize(this.maxFontSize_value!)
-        if (this.minFontScale_value !== undefined)
-            target.minFontScale(this.minFontScale_value!)
-        if (this.maxFontScale_value !== undefined)
-            target.maxFontScale(this.maxFontScale_value!)
-        if (this.fontStyle_value !== undefined)
-            target.fontStyle(this.fontStyle_value!)
-        if (this.lineSpacing_value !== undefined)
-            target.lineSpacing(this.lineSpacing_value!)
-        if (this.textAlign_value !== undefined)
-            target.textAlign(this.textAlign_value!)
-        if (this.lineHeight_value !== undefined)
-            target.lineHeight(this.lineHeight_value!)
-        if (this.textOverflow_value !== undefined)
-            target.textOverflow(this.textOverflow_value!)
-        if (this.fontFamily_value !== undefined)
-            target.fontFamily(this.fontFamily_value!)
-        if (this.maxLines_value !== undefined)
-            target.maxLines(this.maxLines_value!)
-        if (this.decoration_value !== undefined)
-            target.decoration(this.decoration_value!)
-        if (this.letterSpacing_value !== undefined)
-            target.letterSpacing(this.letterSpacing_value!)
-        if (this.textCase_value !== undefined)
-            target.textCase(this.textCase_value!)
-        if (this.baselineOffset_value !== undefined)
-            target.baselineOffset(this.baselineOffset_value!)
-        if (this.copyOption_value !== undefined)
-            target.copyOption(this.copyOption_value!)
-        if (this.draggable_value !== undefined)
-            target.draggable(this.draggable_value!)
-        if (this.textShadow_value !== undefined)
-            target.textShadow(this.textShadow_value!)
-        if (this.heightAdaptivePolicy_value !== undefined)
-            target.heightAdaptivePolicy(this.heightAdaptivePolicy_value!)
-        if (this.textIndent_value !== undefined)
-            target.textIndent(this.textIndent_value!)
-        if (this.wordBreak_value !== undefined)
-            target.wordBreak(this.wordBreak_value!)
-        if (this.lineBreakStrategy_value !== undefined)
-            target.lineBreakStrategy(this.lineBreakStrategy_value!)
-        if (this.onCopy_value !== undefined)
-            target.onCopy(this.onCopy_value!)
-        if (this.caretColor_value !== undefined)
-            target.caretColor(this.caretColor_value!)
-        if (this.selectedBackgroundColor_value !== undefined)
-            target.selectedBackgroundColor(this.selectedBackgroundColor_value!)
-        if (this.ellipsisMode_value !== undefined)
-            target.ellipsisMode(this.ellipsisMode_value!)
-        if (this.enableDataDetector_value !== undefined)
-            target.enableDataDetector(this.enableDataDetector_value!)
-        if (this.dataDetectorConfig_value !== undefined)
-            target.dataDetectorConfig(this.dataDetectorConfig_value!)
-        if (this.onTextSelectionChange_value !== undefined)
-            target.onTextSelectionChange(this.onTextSelectionChange_value!)
-        if (this.fontFeature_value !== undefined)
-            target.fontFeature(this.fontFeature_value!)
-        if (this.marqueeOptions_value !== undefined)
-            target.marqueeOptions(this.marqueeOptions_value!)
-        if (this.onMarqueeStateChange_value !== undefined)
-            target.onMarqueeStateChange(this.onMarqueeStateChange_value!)
-        if (this.privacySensitive_value !== undefined)
-            target.privacySensitive(this.privacySensitive_value!)
-        if (this.textSelectable_value !== undefined)
-            target.textSelectable(this.textSelectable_value!)
-        if (this.editMenuOptions_value !== undefined)
-            target.editMenuOptions(this.editMenuOptions_value!)
-        if (this.halfLeading_value !== undefined)
-            target.halfLeading(this.halfLeading_value!)
-        if (this.enableHapticFeedback_value !== undefined)
-            target.enableHapticFeedback(this.enableHapticFeedback_value!)
     }
 }
 export enum TextSpanType {
@@ -1700,7 +1560,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -1708,26 +1567,6 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         super.applyAttributesFinish()
     }
 }
-export function withTextStyle(receiver: TextAttribute, modifier: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkTextStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Text")
-// export function Text(
-//     content?: string | Resource, value?: TextOptions,
-//     @memo
-//     content_?: () => void,
-// ): TextAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Text(
@@ -1743,416 +1582,1924 @@ export function Text(
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer): void => {
         receiver.setTextOptions(content,value)
         style?.(receiver)
-        withTextStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkTextSet extends ArkCommonMethodSet implements TextAttribute {
+export class TextModifier extends CommonMethodModifier implements TextAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _fontColor_flag?: boolean
-    _fontColor0_value?: ResourceColor | undefined
-    _fontSize_flag?: boolean
-    _fontSize0_value?: number | string | Resource | undefined
-    _minFontSize_flag?: boolean
-    _minFontSize0_value?: number | string | Resource | undefined
-    _maxFontSize_flag?: boolean
-    _maxFontSize0_value?: number | string | Resource | undefined
-    _minFontScale_flag?: boolean
-    _minFontScale0_value?: number | Resource | undefined
-    _maxFontScale_flag?: boolean
-    _maxFontScale0_value?: number | Resource | undefined
-    _fontStyle_flag?: boolean
-    _fontStyle0_value?: FontStyle | undefined
-    _lineSpacing_flag?: boolean
-    _lineSpacing0_value?: LengthMetrics | undefined
-    _textAlign_flag?: boolean
-    _textAlign0_value?: TextAlign | undefined
-    _lineHeight_flag?: boolean
-    _lineHeight0_value?: number | string | Resource | undefined
-    _textOverflow_flag?: boolean
-    _textOverflow0_value?: TextOverflowOptions | undefined
-    _fontFamily_flag?: boolean
-    _fontFamily0_value?: string | Resource | undefined
-    _maxLines_flag?: boolean
-    _maxLines0_value?: number | undefined
-    _decoration_flag?: boolean
-    _decoration0_value?: DecorationStyleInterface | undefined
-    _letterSpacing_flag?: boolean
-    _letterSpacing0_value?: number | string | undefined
-    _textCase_flag?: boolean
-    _textCase0_value?: TextCase | undefined
-    _baselineOffset_flag?: boolean
-    _baselineOffset0_value?: number | string | undefined
-    _copyOption_flag?: boolean
-    _copyOption0_value?: CopyOptions | undefined
-    _draggable_flag?: boolean
-    _draggable0_value?: boolean | undefined
-    _textShadow_flag?: boolean
-    _textShadow0_value?: ShadowOptions | Array<ShadowOptions> | undefined
-    _heightAdaptivePolicy_flag?: boolean
-    _heightAdaptivePolicy0_value?: TextHeightAdaptivePolicy | undefined
-    _textIndent_flag?: boolean
-    _textIndent0_value?: Length | undefined
-    _wordBreak_flag?: boolean
-    _wordBreak0_value?: WordBreak | undefined
-    _lineBreakStrategy_flag?: boolean
-    _lineBreakStrategy0_value?: LineBreakStrategy | undefined
-    _onCopy_flag?: boolean
-    _onCopy0_value?: ((value: string) => void) | undefined
-    _caretColor_flag?: boolean
-    _caretColor0_value?: ResourceColor | undefined
-    _selectedBackgroundColor_flag?: boolean
-    _selectedBackgroundColor0_value?: ResourceColor | undefined
-    _ellipsisMode_flag?: boolean
-    _ellipsisMode0_value?: EllipsisMode | undefined
-    _enableDataDetector_flag?: boolean
-    _enableDataDetector0_value?: boolean | undefined
-    _dataDetectorConfig_flag?: boolean
-    _dataDetectorConfig0_value?: TextDataDetectorConfig | undefined
-    _onTextSelectionChange_flag?: boolean
-    _onTextSelectionChange0_value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
-    _fontFeature_flag?: boolean
-    _fontFeature0_value?: string | undefined
-    _marqueeOptions_flag?: boolean
-    _marqueeOptions0_value?: TextMarqueeOptions | undefined
-    _onMarqueeStateChange_flag?: boolean
-    _onMarqueeStateChange0_value?: ((value0: MarqueeState) => void) | undefined
-    _privacySensitive_flag?: boolean
-    _privacySensitive0_value?: boolean | undefined
-    _textSelectable_flag?: boolean
-    _textSelectable0_value?: TextSelectableMode | undefined
-    _editMenuOptions_flag?: boolean
-    _editMenuOptions0_value?: EditMenuOptions | undefined
-    _halfLeading_flag?: boolean
-    _halfLeading0_value?: boolean | undefined
-    _enableHapticFeedback_flag?: boolean
-    _enableHapticFeedback0_value?: boolean | undefined
-    _font_flag?: boolean
-    _font0_value?: Font | undefined
-    _font1_value?: FontSettingOptions | undefined
-    _fontWeight_flag?: boolean
-    _fontWeight0_value?: number | FontWeight | string | undefined
-    _fontWeight1_value?: FontSettingOptions | undefined
-    _selection_flag?: boolean
-    _selection0_value?: number | undefined
-    _selection1_value?: number | undefined
-    _bindSelectionMenu_flag?: boolean
-    _bindSelectionMenu0_value?: TextSpanType | undefined
-    _bindSelectionMenu1_value?: CustomBuilder | undefined
-    _bindSelectionMenu2_value?: TextResponseType | undefined
-    _bindSelectionMenu3_value?: SelectionMenuOptions | undefined
-    applyModifierPatch(component: TextAttribute): void {
-        if (this._fontColor_flag)
-            component.fontColor((this._fontColor0_value as ResourceColor | undefined))
-        if (this._fontSize_flag)
-            component.fontSize((this._fontSize0_value as number | string | Resource | undefined))
-        if (this._minFontSize_flag)
-            component.minFontSize((this._minFontSize0_value as number | string | Resource | undefined))
-        if (this._maxFontSize_flag)
-            component.maxFontSize((this._maxFontSize0_value as number | string | Resource | undefined))
-        if (this._minFontScale_flag)
-            component.minFontScale((this._minFontScale0_value as number | Resource | undefined))
-        if (this._maxFontScale_flag)
-            component.maxFontScale((this._maxFontScale0_value as number | Resource | undefined))
-        if (this._fontStyle_flag)
-            component.fontStyle((this._fontStyle0_value as FontStyle | undefined))
-        if (this._lineSpacing_flag)
-            component.lineSpacing((this._lineSpacing0_value as LengthMetrics | undefined))
-        if (this._textAlign_flag)
-            component.textAlign((this._textAlign0_value as TextAlign | undefined))
-        if (this._lineHeight_flag)
-            component.lineHeight((this._lineHeight0_value as number | string | Resource | undefined))
-        if (this._textOverflow_flag)
-            component.textOverflow((this._textOverflow0_value as TextOverflowOptions | undefined))
-        if (this._fontFamily_flag)
-            component.fontFamily((this._fontFamily0_value as string | Resource | undefined))
-        if (this._maxLines_flag)
-            component.maxLines((this._maxLines0_value as number | undefined))
-        if (this._decoration_flag)
-            component.decoration((this._decoration0_value as DecorationStyleInterface | undefined))
-        if (this._letterSpacing_flag)
-            component.letterSpacing((this._letterSpacing0_value as number | string | undefined))
-        if (this._textCase_flag)
-            component.textCase((this._textCase0_value as TextCase | undefined))
-        if (this._baselineOffset_flag)
-            component.baselineOffset((this._baselineOffset0_value as number | string | undefined))
-        if (this._copyOption_flag)
-            component.copyOption((this._copyOption0_value as CopyOptions | undefined))
-        if (this._draggable_flag)
-            component.draggable((this._draggable0_value as boolean | undefined))
-        if (this._textShadow_flag)
-            component.textShadow((this._textShadow0_value as ShadowOptions | Array<ShadowOptions> | undefined))
-        if (this._heightAdaptivePolicy_flag)
-            component.heightAdaptivePolicy((this._heightAdaptivePolicy0_value as TextHeightAdaptivePolicy | undefined))
-        if (this._textIndent_flag)
-            component.textIndent((this._textIndent0_value as Length | undefined))
-        if (this._wordBreak_flag)
-            component.wordBreak((this._wordBreak0_value as WordBreak | undefined))
-        if (this._lineBreakStrategy_flag)
-            component.lineBreakStrategy((this._lineBreakStrategy0_value as LineBreakStrategy | undefined))
-        if (this._onCopy_flag)
-            component.onCopy((this._onCopy0_value as ((value: string) => void) | undefined))
-        if (this._caretColor_flag)
-            component.caretColor((this._caretColor0_value as ResourceColor | undefined))
-        if (this._selectedBackgroundColor_flag)
-            component.selectedBackgroundColor((this._selectedBackgroundColor0_value as ResourceColor | undefined))
-        if (this._ellipsisMode_flag)
-            component.ellipsisMode((this._ellipsisMode0_value as EllipsisMode | undefined))
-        if (this._enableDataDetector_flag)
-            component.enableDataDetector((this._enableDataDetector0_value as boolean | undefined))
-        if (this._dataDetectorConfig_flag)
-            component.dataDetectorConfig((this._dataDetectorConfig0_value as TextDataDetectorConfig | undefined))
-        if (this._onTextSelectionChange_flag)
-            component.onTextSelectionChange((this._onTextSelectionChange0_value as ((selectionStart: number,selectionEnd: number) => void) | undefined))
-        if (this._fontFeature_flag)
-            component.fontFeature((this._fontFeature0_value as string | undefined))
-        if (this._marqueeOptions_flag)
-            component.marqueeOptions((this._marqueeOptions0_value as TextMarqueeOptions | undefined))
-        if (this._onMarqueeStateChange_flag)
-            component.onMarqueeStateChange((this._onMarqueeStateChange0_value as ((value0: MarqueeState) => void) | undefined))
-        if (this._privacySensitive_flag)
-            component.privacySensitive((this._privacySensitive0_value as boolean | undefined))
-        if (this._textSelectable_flag)
-            component.textSelectable((this._textSelectable0_value as TextSelectableMode | undefined))
-        if (this._editMenuOptions_flag)
-            component.editMenuOptions((this._editMenuOptions0_value as EditMenuOptions | undefined))
-        if (this._halfLeading_flag)
-            component.halfLeading((this._halfLeading0_value as boolean | undefined))
-        if (this._enableHapticFeedback_flag)
-            component.enableHapticFeedback((this._enableHapticFeedback0_value as boolean | undefined))
-        if (this._font_flag)
-            component.font((this._font0_value as Font | undefined), (this._font1_value as FontSettingOptions | undefined))
-        if (this._fontWeight_flag)
-            component.fontWeight((this._fontWeight0_value as number | FontWeight | string | undefined), (this._fontWeight1_value as FontSettingOptions | undefined))
-        if (this._selection_flag)
-            component.selection((this._selection0_value as number | undefined), (this._selection1_value as number | undefined))
-        if (this._bindSelectionMenu_flag)
-            component.bindSelectionMenu((this._bindSelectionMenu0_value as TextSpanType | undefined), (this._bindSelectionMenu1_value as CustomBuilder | undefined), (this._bindSelectionMenu2_value as TextResponseType | undefined), (this._bindSelectionMenu3_value as SelectionMenuOptions | undefined))
+    _fontColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontColor_0_0value?: ResourceColor | undefined
+    _fontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontSize_0_0value?: number | string | Resource | undefined
+    _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minFontSize_0_0value?: number | string | Resource | undefined
+    _maxFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxFontSize_0_0value?: number | string | Resource | undefined
+    _minFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minFontScale_0_0value?: number | Resource | undefined
+    _maxFontScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxFontScale_0_0value?: number | Resource | undefined
+    _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontStyle_0_0value?: FontStyle | undefined
+    _lineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _lineSpacing_0_0value?: LengthMetrics | undefined
+    _textAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textAlign_0_0value?: TextAlign | undefined
+    _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _lineHeight_0_0value?: number | string | Resource | undefined
+    _textOverflow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textOverflow_0_0value?: TextOverflowOptions | undefined
+    _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontFamily_0_0value?: string | Resource | undefined
+    _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxLines_0_0value?: number | undefined
+    _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _decoration_0_0value?: DecorationStyleInterface | undefined
+    _letterSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _letterSpacing_0_0value?: number | string | undefined
+    _textCase_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textCase_0_0value?: TextCase | undefined
+    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _baselineOffset_0_0value?: number | string | undefined
+    _copyOption_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _copyOption_0_0value?: CopyOptions | undefined
+    _draggable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _draggable_0_0value?: boolean | undefined
+    _textShadow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textShadow_0_0value?: ShadowOptions | Array<ShadowOptions> | undefined
+    _heightAdaptivePolicy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _heightAdaptivePolicy_0_0value?: TextHeightAdaptivePolicy | undefined
+    _textIndent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textIndent_0_0value?: Length | undefined
+    _wordBreak_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _wordBreak_0_0value?: WordBreak | undefined
+    _lineBreakStrategy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _lineBreakStrategy_0_0value?: LineBreakStrategy | undefined
+    _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onCopy_0_0value?: ((value: string) => void) | undefined
+    _caretColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _caretColor_0_0value?: ResourceColor | undefined
+    _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedBackgroundColor_0_0value?: ResourceColor | undefined
+    _ellipsisMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _ellipsisMode_0_0value?: EllipsisMode | undefined
+    _enableDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableDataDetector_0_0value?: boolean | undefined
+    _dataDetectorConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
+    _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onTextSelectionChange_0_0value?: ((selectionStart: number,selectionEnd: number) => void) | undefined
+    _fontFeature_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontFeature_0_0value?: string | undefined
+    _marqueeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _marqueeOptions_0_0value?: TextMarqueeOptions | undefined
+    _onMarqueeStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onMarqueeStateChange_0_0value?: ((value0: MarqueeState) => void) | undefined
+    _privacySensitive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _privacySensitive_0_0value?: boolean | undefined
+    _textSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textSelectable_0_0value?: TextSelectableMode | undefined
+    _editMenuOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _editMenuOptions_0_0value?: EditMenuOptions | undefined
+    _halfLeading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _halfLeading_0_0value?: boolean | undefined
+    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableHapticFeedback_0_0value?: boolean | undefined
+    _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _font_0_0value?: Font | undefined
+    _font_0_1value?: FontSettingOptions | undefined
+    _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fontWeight_0_0value?: number | FontWeight | string | undefined
+    _fontWeight_0_1value?: FontSettingOptions | undefined
+    _selection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selection_0_0value?: number | undefined
+    _selection_0_1value?: number | undefined
+    _bindSelectionMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _bindSelectionMenu_0_0value?: TextSpanType | undefined
+    _bindSelectionMenu_0_1value?: CustomBuilder | undefined
+    _bindSelectionMenu_0_2value?: TextResponseType | undefined
+    _bindSelectionMenu_0_3value?: SelectionMenuOptions | undefined
+    applyModifierPatch(peer: ArkTextPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontSizeAttribute((this._fontSize_0_0value as number | string | Resource | undefined));
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontSizeAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._minFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minFontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinFontSizeAttribute((this._minFontSize_0_0value as number | string | Resource | undefined));
+                    this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinFontSizeAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._maxFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxFontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxFontSizeAttribute((this._maxFontSize_0_0value as number | string | Resource | undefined));
+                    this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxFontSizeAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinFontScaleAttribute((this._minFontScale_0_0value as number | Resource | undefined));
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinFontScaleAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (this._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxFontScaleAttribute((this._maxFontScale_0_0value as number | Resource | undefined));
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxFontScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxFontScaleAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (this._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontStyleAttribute((this._fontStyle_0_0value as FontStyle | undefined));
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontStyleAttribute((undefined as FontStyle | undefined));
+                }
+            }
+        }
+        if (this._lineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._lineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLineSpacingAttribute((this._lineSpacing_0_0value as LengthMetrics | undefined));
+                    this._lineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._lineSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._lineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLineSpacingAttribute((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (this._textAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextAlignAttribute((this._textAlign_0_0value as TextAlign | undefined));
+                    this._textAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextAlignAttribute((undefined as TextAlign | undefined));
+                }
+            }
+        }
+        if (this._lineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._lineHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLineHeightAttribute((this._lineHeight_0_0value as number | string | Resource | undefined));
+                    this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._lineHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._lineHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLineHeightAttribute((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (this._textOverflow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textOverflow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextOverflowAttribute((this._textOverflow_0_0value as TextOverflowOptions | undefined));
+                    this._textOverflow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textOverflow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textOverflow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextOverflowAttribute((undefined as TextOverflowOptions | undefined));
+                }
+            }
+        }
+        if (this._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontFamily_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as string | Resource | undefined));
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontFamily_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontFamilyAttribute((undefined as string | Resource | undefined));
+                }
+            }
+        }
+        if (this._maxLines_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxLines_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxLinesAttribute((this._maxLines_0_0value as number | undefined));
+                    this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxLines_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxLines_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxLinesAttribute((undefined as number | undefined));
+                }
+            }
+        }
+        if (this._decoration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._decoration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDecorationAttribute((this._decoration_0_0value as DecorationStyleInterface | undefined));
+                    this._decoration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._decoration_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._decoration_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDecorationAttribute((undefined as DecorationStyleInterface | undefined));
+                }
+            }
+        }
+        if (this._letterSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._letterSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLetterSpacingAttribute((this._letterSpacing_0_0value as number | string | undefined));
+                    this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._letterSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._letterSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLetterSpacingAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._textCase_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textCase_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextCaseAttribute((this._textCase_0_0value as TextCase | undefined));
+                    this._textCase_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textCase_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textCase_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextCaseAttribute((undefined as TextCase | undefined));
+                }
+            }
+        }
+        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as number | string | undefined));
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBaselineOffsetAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._copyOption_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._copyOption_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCopyOptionAttribute((this._copyOption_0_0value as CopyOptions | undefined));
+                    this._copyOption_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._copyOption_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._copyOption_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCopyOptionAttribute((undefined as CopyOptions | undefined));
+                }
+            }
+        }
+        if (this._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._draggable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDraggableAttribute((this._draggable_0_0value as boolean | undefined));
+                    this._draggable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._draggable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._draggable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDraggableAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextShadowAttribute((this._textShadow_0_0value as ShadowOptions | Array<ShadowOptions> | undefined));
+                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textShadow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textShadow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextShadowAttribute((undefined as ShadowOptions | Array<ShadowOptions> | undefined));
+                }
+            }
+        }
+        if (this._heightAdaptivePolicy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._heightAdaptivePolicy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHeightAdaptivePolicyAttribute((this._heightAdaptivePolicy_0_0value as TextHeightAdaptivePolicy | undefined));
+                    this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHeightAdaptivePolicyAttribute((undefined as TextHeightAdaptivePolicy | undefined));
+                }
+            }
+        }
+        if (this._textIndent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textIndent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextIndentAttribute((this._textIndent_0_0value as Length | undefined));
+                    this._textIndent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textIndent_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textIndent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextIndentAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._wordBreak_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._wordBreak_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setWordBreakAttribute((this._wordBreak_0_0value as WordBreak | undefined));
+                    this._wordBreak_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._wordBreak_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._wordBreak_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setWordBreakAttribute((undefined as WordBreak | undefined));
+                }
+            }
+        }
+        if (this._lineBreakStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._lineBreakStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setLineBreakStrategyAttribute((this._lineBreakStrategy_0_0value as LineBreakStrategy | undefined));
+                    this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setLineBreakStrategyAttribute((undefined as LineBreakStrategy | undefined));
+                }
+            }
+        }
+        if (this._onCopy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onCopy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnCopyAttribute((this._onCopy_0_0value as ((value: string) => void) | undefined));
+                    this._onCopy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onCopy_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onCopy_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnCopyAttribute((undefined as ((value: string) => void) | undefined));
+                }
+            }
+        }
+        if (this._caretColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._caretColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCaretColorAttribute((this._caretColor_0_0value as ResourceColor | undefined));
+                    this._caretColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._caretColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._caretColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCaretColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._selectedBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedBackgroundColorAttribute((this._selectedBackgroundColor_0_0value as ResourceColor | undefined));
+                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (this._ellipsisMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._ellipsisMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEllipsisModeAttribute((this._ellipsisMode_0_0value as EllipsisMode | undefined));
+                    this._ellipsisMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._ellipsisMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._ellipsisMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEllipsisModeAttribute((undefined as EllipsisMode | undefined));
+                }
+            }
+        }
+        if (this._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableDataDetectorAttribute((this._enableDataDetector_0_0value as boolean | undefined));
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableDataDetectorAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._dataDetectorConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDataDetectorConfigAttribute((this._dataDetectorConfig_0_0value as TextDataDetectorConfig | undefined));
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
+                }
+            }
+        }
+        if (this._onTextSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onTextSelectionChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnTextSelectionChangeAttribute((this._onTextSelectionChange_0_0value as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnTextSelectionChangeAttribute((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                }
+            }
+        }
+        if (this._fontFeature_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontFeature_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontFeatureAttribute((this._fontFeature_0_0value as string | undefined));
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontFeature_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontFeatureAttribute((undefined as string | undefined));
+                }
+            }
+        }
+        if (this._marqueeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._marqueeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMarqueeOptionsAttribute((this._marqueeOptions_0_0value as TextMarqueeOptions | undefined));
+                    this._marqueeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._marqueeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._marqueeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMarqueeOptionsAttribute((undefined as TextMarqueeOptions | undefined));
+                }
+            }
+        }
+        if (this._onMarqueeStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onMarqueeStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnMarqueeStateChangeAttribute((this._onMarqueeStateChange_0_0value as ((value0: MarqueeState) => void) | undefined));
+                    this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnMarqueeStateChangeAttribute((undefined as ((value0: MarqueeState) => void) | undefined));
+                }
+            }
+        }
+        if (this._privacySensitive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._privacySensitive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setPrivacySensitiveAttribute((this._privacySensitive_0_0value as boolean | undefined));
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._privacySensitive_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setPrivacySensitiveAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._textSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textSelectable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextSelectableAttribute((this._textSelectable_0_0value as TextSelectableMode | undefined));
+                    this._textSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textSelectable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextSelectableAttribute((undefined as TextSelectableMode | undefined));
+                }
+            }
+        }
+        if (this._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._editMenuOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
+                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
+                }
+            }
+        }
+        if (this._halfLeading_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._halfLeading_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setHalfLeadingAttribute((this._halfLeading_0_0value as boolean | undefined));
+                    this._halfLeading_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._halfLeading_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._halfLeading_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setHalfLeadingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontAttribute((this._font_0_0value as Font | undefined), (this._font_0_1value as FontSettingOptions | undefined));
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._font_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._font_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontAttribute((undefined as Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined), (this._fontWeight_0_1value as FontSettingOptions | undefined));
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (this._selection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectionAttribute((this._selection_0_0value as number | undefined), (this._selection_0_1value as number | undefined));
+                    this._selection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectionAttribute((undefined as number | undefined), (undefined as number | undefined));
+                }
+            }
+        }
+        if (this._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._bindSelectionMenu_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as TextSpanType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as TextResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptions | undefined));
+                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBindSelectionMenuAttribute((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                }
+            }
+        }
     }
-    public fontColor(value: ResourceColor | undefined): this {
-        this._fontColor_flag = true
-        this._fontColor0_value = value
+    mergeModifier(modifier: TextModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontColor(modifier._fontColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._fontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontSize(modifier._fontSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontSize((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._minFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minFontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minFontSize(modifier._minFontSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.minFontSize((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._maxFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxFontSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxFontSize(modifier._maxFontSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxFontSize((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._minFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minFontScale(modifier._minFontScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.minFontScale((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._maxFontScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxFontScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxFontScale(modifier._maxFontScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxFontScale((undefined as number | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._fontStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontStyle(modifier._fontStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontStyle((undefined as FontStyle | undefined));
+                }
+            }
+        }
+        if (modifier._lineSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._lineSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.lineSpacing(modifier._lineSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.lineSpacing((undefined as LengthMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._textAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textAlign(modifier._textAlign_0_0value);
+                    break;
+                }
+                default: {
+                    this.textAlign((undefined as TextAlign | undefined));
+                }
+            }
+        }
+        if (modifier._lineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._lineHeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.lineHeight(modifier._lineHeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.lineHeight((undefined as number | string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._textOverflow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textOverflow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textOverflow(modifier._textOverflow_0_0value);
+                    break;
+                }
+                default: {
+                    this.textOverflow((undefined as TextOverflowOptions | undefined));
+                }
+            }
+        }
+        if (modifier._fontFamily_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontFamily_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontFamily(modifier._fontFamily_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontFamily((undefined as string | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._maxLines_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxLines_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxLines(modifier._maxLines_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxLines((undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._decoration_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._decoration_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.decoration(modifier._decoration_0_0value);
+                    break;
+                }
+                default: {
+                    this.decoration((undefined as DecorationStyleInterface | undefined));
+                }
+            }
+        }
+        if (modifier._letterSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._letterSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.letterSpacing(modifier._letterSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.letterSpacing((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._textCase_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textCase_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textCase(modifier._textCase_0_0value);
+                    break;
+                }
+                default: {
+                    this.textCase((undefined as TextCase | undefined));
+                }
+            }
+        }
+        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._baselineOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.baselineOffset(modifier._baselineOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.baselineOffset((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._copyOption_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._copyOption_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.copyOption(modifier._copyOption_0_0value);
+                    break;
+                }
+                default: {
+                    this.copyOption((undefined as CopyOptions | undefined));
+                }
+            }
+        }
+        if (modifier._draggable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._draggable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.draggable(modifier._draggable_0_0value);
+                    break;
+                }
+                default: {
+                    this.draggable((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._textShadow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textShadow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textShadow(modifier._textShadow_0_0value);
+                    break;
+                }
+                default: {
+                    this.textShadow((undefined as ShadowOptions | Array<ShadowOptions> | undefined));
+                }
+            }
+        }
+        if (modifier._heightAdaptivePolicy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._heightAdaptivePolicy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.heightAdaptivePolicy(modifier._heightAdaptivePolicy_0_0value);
+                    break;
+                }
+                default: {
+                    this.heightAdaptivePolicy((undefined as TextHeightAdaptivePolicy | undefined));
+                }
+            }
+        }
+        if (modifier._textIndent_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textIndent_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textIndent(modifier._textIndent_0_0value);
+                    break;
+                }
+                default: {
+                    this.textIndent((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._wordBreak_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._wordBreak_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.wordBreak(modifier._wordBreak_0_0value);
+                    break;
+                }
+                default: {
+                    this.wordBreak((undefined as WordBreak | undefined));
+                }
+            }
+        }
+        if (modifier._lineBreakStrategy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._lineBreakStrategy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.lineBreakStrategy(modifier._lineBreakStrategy_0_0value);
+                    break;
+                }
+                default: {
+                    this.lineBreakStrategy((undefined as LineBreakStrategy | undefined));
+                }
+            }
+        }
+        if (modifier._onCopy_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onCopy_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onCopy(modifier._onCopy_0_0value);
+                    break;
+                }
+                default: {
+                    this.onCopy((undefined as ((value: string) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._caretColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._caretColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.caretColor(modifier._caretColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.caretColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._selectedBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedBackgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedBackgroundColor(modifier._selectedBackgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedBackgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (modifier._ellipsisMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._ellipsisMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.ellipsisMode(modifier._ellipsisMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.ellipsisMode((undefined as EllipsisMode | undefined));
+                }
+            }
+        }
+        if (modifier._enableDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableDataDetector(modifier._enableDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._dataDetectorConfig_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._dataDetectorConfig_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.dataDetectorConfig(modifier._dataDetectorConfig_0_0value);
+                    break;
+                }
+                default: {
+                    this.dataDetectorConfig((undefined as TextDataDetectorConfig | undefined));
+                }
+            }
+        }
+        if (modifier._onTextSelectionChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onTextSelectionChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onTextSelectionChange(modifier._onTextSelectionChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTextSelectionChange((undefined as ((selectionStart: number,selectionEnd: number) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._fontFeature_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontFeature_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontFeature(modifier._fontFeature_0_0value);
+                    break;
+                }
+                default: {
+                    this.fontFeature((undefined as string | undefined));
+                }
+            }
+        }
+        if (modifier._marqueeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._marqueeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.marqueeOptions(modifier._marqueeOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.marqueeOptions((undefined as TextMarqueeOptions | undefined));
+                }
+            }
+        }
+        if (modifier._onMarqueeStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onMarqueeStateChange_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onMarqueeStateChange(modifier._onMarqueeStateChange_0_0value);
+                    break;
+                }
+                default: {
+                    this.onMarqueeStateChange((undefined as ((value0: MarqueeState) => void) | undefined));
+                }
+            }
+        }
+        if (modifier._privacySensitive_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._privacySensitive_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.privacySensitive(modifier._privacySensitive_0_0value);
+                    break;
+                }
+                default: {
+                    this.privacySensitive((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._textSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textSelectable_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textSelectable(modifier._textSelectable_0_0value);
+                    break;
+                }
+                default: {
+                    this.textSelectable((undefined as TextSelectableMode | undefined));
+                }
+            }
+        }
+        if (modifier._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._editMenuOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.editMenuOptions(modifier._editMenuOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.editMenuOptions((undefined as EditMenuOptions | undefined));
+                }
+            }
+        }
+        if (modifier._halfLeading_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._halfLeading_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.halfLeading(modifier._halfLeading_0_0value);
+                    break;
+                }
+                default: {
+                    this.halfLeading((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableHapticFeedback_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableHapticFeedback((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.font(modifier._font_0_0value, modifier._font_0_1value);
+                    break;
+                }
+                default: {
+                    this.font((undefined as Font | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._fontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._fontWeight_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.fontWeight(modifier._fontWeight_0_0value, modifier._fontWeight_0_1value);
+                    break;
+                }
+                default: {
+                    this.fontWeight((undefined as number | FontWeight | string | undefined), (undefined as FontSettingOptions | undefined | undefined));
+                }
+            }
+        }
+        if (modifier._selection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selection(modifier._selection_0_0value, modifier._selection_0_1value);
+                    break;
+                }
+                default: {
+                    this.selection((undefined as number | undefined), (undefined as number | undefined));
+                }
+            }
+        }
+        if (modifier._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._bindSelectionMenu_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.bindSelectionMenu(modifier._bindSelectionMenu_0_0value, modifier._bindSelectionMenu_0_1value, modifier._bindSelectionMenu_0_2value, modifier._bindSelectionMenu_0_3value);
+                    break;
+                }
+                default: {
+                    this.bindSelectionMenu((undefined as TextSpanType | undefined), (undefined as CustomBuilder | undefined), (undefined as TextResponseType | undefined), (undefined as SelectionMenuOptions | undefined | undefined));
+                }
+            }
+        }
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        if (((this._fontColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontColor_0_0value = value
+        } else
+        {
+            this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
-        this._fontSize_flag = true
-        this._fontSize0_value = value
+    fontSize(value: number | string | Resource | undefined): this {
+        if (((this._fontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontSize_0_0value = value
+        } else
+        {
+            this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
-        this._minFontSize_flag = true
-        this._minFontSize0_value = value
+    minFontSize(value: number | string | Resource | undefined): this {
+        if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minFontSize_0_0value = value
+        } else
+        {
+            this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
-        this._maxFontSize_flag = true
-        this._maxFontSize0_value = value
+    maxFontSize(value: number | string | Resource | undefined): this {
+        if (((this._maxFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxFontSize_0_0value = value
+        } else
+        {
+            this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
-        this._minFontScale_flag = true
-        this._minFontScale0_value = value
+    minFontScale(value: number | Resource | undefined): this {
+        if (((this._minFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minFontScale_0_0value = value
+        } else
+        {
+            this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
-        this._maxFontScale_flag = true
-        this._maxFontScale0_value = value
+    maxFontScale(value: number | Resource | undefined): this {
+        if (((this._maxFontScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxFontScale_0_0value = value
+        } else
+        {
+            this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
-        this._fontStyle_flag = true
-        this._fontStyle0_value = value
+    fontStyle(value: FontStyle | undefined): this {
+        if (((this._fontStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontStyle_0_0value = value
+        } else
+        {
+            this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public lineSpacing(value: LengthMetrics | undefined): this {
-        this._lineSpacing_flag = true
-        this._lineSpacing0_value = value
+    lineSpacing(value: LengthMetrics | undefined): this {
+        if (((this._lineSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._lineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._lineSpacing_0_0value = value
+        } else
+        {
+            this._lineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textAlign(value: TextAlign | undefined): this {
-        this._textAlign_flag = true
-        this._textAlign0_value = value
+    textAlign(value: TextAlign | undefined): this {
+        if (((this._textAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textAlign_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textAlign_0_0value = value
+        } else
+        {
+            this._textAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
-        this._lineHeight_flag = true
-        this._lineHeight0_value = value
+    lineHeight(value: number | string | Resource | undefined): this {
+        if (((this._lineHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._lineHeight_0_0value = value
+        } else
+        {
+            this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textOverflow(value: TextOverflowOptions | undefined): this {
-        this._textOverflow_flag = true
-        this._textOverflow0_value = value
+    textOverflow(value: TextOverflowOptions | undefined): this {
+        if (((this._textOverflow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textOverflow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textOverflow_0_0value = value
+        } else
+        {
+            this._textOverflow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
-        this._fontFamily_flag = true
-        this._fontFamily0_value = value
+    fontFamily(value: string | Resource | undefined): this {
+        if (((this._fontFamily_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontFamily_0_0value = value
+        } else
+        {
+            this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public maxLines(value: number | undefined): this {
-        this._maxLines_flag = true
-        this._maxLines0_value = value
+    maxLines(value: number | undefined): this {
+        if (((this._maxLines_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxLines_0_0value) !== (value)))
+        {
+            this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxLines_0_0value = value
+        } else
+        {
+            this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public decoration(value: DecorationStyleInterface | undefined): this {
-        this._decoration_flag = true
-        this._decoration0_value = value
+    decoration(value: DecorationStyleInterface | undefined): this {
+        if (((this._decoration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
+            this._decoration_0_0value = value
+        } else
+        {
+            this._decoration_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
-        this._letterSpacing_flag = true
-        this._letterSpacing0_value = value
+    letterSpacing(value: number | string | undefined): this {
+        if (((this._letterSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._letterSpacing_0_0value) !== (value)))
+        {
+            this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._letterSpacing_0_0value = value
+        } else
+        {
+            this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textCase(value: TextCase | undefined): this {
-        this._textCase_flag = true
-        this._textCase0_value = value
+    textCase(value: TextCase | undefined): this {
+        if (((this._textCase_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textCase_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textCase_0_0value = value
+        } else
+        {
+            this._textCase_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public baselineOffset(value: number | string | undefined): this {
-        this._baselineOffset_flag = true
-        this._baselineOffset0_value = value
+    baselineOffset(value: number | string | undefined): this {
+        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._baselineOffset_0_0value) !== (value)))
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._baselineOffset_0_0value = value
+        } else
+        {
+            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
-        this._copyOption_flag = true
-        this._copyOption0_value = value
+    copyOption(value: CopyOptions | undefined): this {
+        if (((this._copyOption_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
+            this._copyOption_0_0value = value
+        } else
+        {
+            this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public draggable(value: boolean | undefined): this {
-        this._draggable_flag = true
-        this._draggable0_value = value
+    draggable(value: boolean | undefined): this {
+        if (((this._draggable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._draggable_0_0value) !== (value)))
+        {
+            this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._draggable_0_0value = value
+        } else
+        {
+            this._draggable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
-        this._textShadow_flag = true
-        this._textShadow0_value = value
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        if (((this._textShadow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textShadow_0_0value = value
+        } else
+        {
+            this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
-        this._heightAdaptivePolicy_flag = true
-        this._heightAdaptivePolicy0_value = value
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+        if (((this._heightAdaptivePolicy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._heightAdaptivePolicy_0_0value = value
+        } else
+        {
+            this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textIndent(value: Length | undefined): this {
-        this._textIndent_flag = true
-        this._textIndent0_value = value
+    textIndent(value: Length | undefined): this {
+        if (((this._textIndent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textIndent_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textIndent_0_0value = value
+        } else
+        {
+            this._textIndent_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public wordBreak(value: WordBreak | undefined): this {
-        this._wordBreak_flag = true
-        this._wordBreak0_value = value
+    wordBreak(value: WordBreak | undefined): this {
+        if (((this._wordBreak_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._wordBreak_0_flag = AttributeUpdaterFlag.UPDATE
+            this._wordBreak_0_0value = value
+        } else
+        {
+            this._wordBreak_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public lineBreakStrategy(value: LineBreakStrategy | undefined): this {
-        this._lineBreakStrategy_flag = true
-        this._lineBreakStrategy0_value = value
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+        if (((this._lineBreakStrategy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._lineBreakStrategy_0_0value = value
+        } else
+        {
+            this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onCopy(value: ((value: string) => void) | undefined): this {
-        this._onCopy_flag = true
-        this._onCopy0_value = value
+    onCopy(value: ((value: string) => void) | undefined): this {
+        if (((this._onCopy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onCopy_0_0value = value
+        } else
+        {
+            this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public caretColor(value: ResourceColor | undefined): this {
-        this._caretColor_flag = true
-        this._caretColor0_value = value
+    caretColor(value: ResourceColor | undefined): this {
+        if (((this._caretColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._caretColor_0_0value = value
+        } else
+        {
+            this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
-        this._selectedBackgroundColor_flag = true
-        this._selectedBackgroundColor0_value = value
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
+        if (((this._selectedBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedBackgroundColor_0_0value = value
+        } else
+        {
+            this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public ellipsisMode(value: EllipsisMode | undefined): this {
-        this._ellipsisMode_flag = true
-        this._ellipsisMode0_value = value
+    ellipsisMode(value: EllipsisMode | undefined): this {
+        if (((this._ellipsisMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._ellipsisMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._ellipsisMode_0_0value = value
+        } else
+        {
+            this._ellipsisMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableDataDetector(value: boolean | undefined): this {
-        this._enableDataDetector_flag = true
-        this._enableDataDetector0_value = value
+    enableDataDetector(value: boolean | undefined): this {
+        if (((this._enableDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDataDetector_0_0value) !== (value)))
+        {
+            this._enableDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableDataDetector_0_0value = value
+        } else
+        {
+            this._enableDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
-        this._dataDetectorConfig_flag = true
-        this._dataDetectorConfig0_value = value
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        if (((this._dataDetectorConfig_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.UPDATE
+            this._dataDetectorConfig_0_0value = value
+        } else
+        {
+            this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
-        this._onTextSelectionChange_flag = true
-        this._onTextSelectionChange0_value = value
+    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+        if (((this._onTextSelectionChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onTextSelectionChange_0_0value = value
+        } else
+        {
+            this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontFeature(value: string | undefined): this {
-        this._fontFeature_flag = true
-        this._fontFeature0_value = value
+    fontFeature(value: string | undefined): this {
+        if (((this._fontFeature_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fontFeature_0_0value) !== (value)))
+        {
+            this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontFeature_0_0value = value
+        } else
+        {
+            this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public marqueeOptions(value: TextMarqueeOptions | undefined): this {
-        this._marqueeOptions_flag = true
-        this._marqueeOptions0_value = value
+    marqueeOptions(value: TextMarqueeOptions | undefined): this {
+        if (((this._marqueeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._marqueeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._marqueeOptions_0_0value = value
+        } else
+        {
+            this._marqueeOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this {
-        this._onMarqueeStateChange_flag = true
-        this._onMarqueeStateChange0_value = value
+    onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this {
+        if (((this._onMarqueeStateChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onMarqueeStateChange_0_0value = value
+        } else
+        {
+            this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
-        this._privacySensitive_flag = true
-        this._privacySensitive0_value = value
+    privacySensitive(value: boolean | undefined): this {
+        if (((this._privacySensitive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._privacySensitive_0_0value) !== (value)))
+        {
+            this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
+            this._privacySensitive_0_0value = value
+        } else
+        {
+            this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public textSelectable(value: TextSelectableMode | undefined): this {
-        this._textSelectable_flag = true
-        this._textSelectable0_value = value
+    textSelectable(value: TextSelectableMode | undefined): this {
+        if (((this._textSelectable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textSelectable_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textSelectable_0_0value = value
+        } else
+        {
+            this._textSelectable_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
-        this._editMenuOptions_flag = true
-        this._editMenuOptions0_value = value
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        if (((this._editMenuOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._editMenuOptions_0_0value = value
+        } else
+        {
+            this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public halfLeading(value: boolean | undefined): this {
-        this._halfLeading_flag = true
-        this._halfLeading0_value = value
+    halfLeading(value: boolean | undefined): this {
+        if (((this._halfLeading_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._halfLeading_0_0value) !== (value)))
+        {
+            this._halfLeading_0_flag = AttributeUpdaterFlag.UPDATE
+            this._halfLeading_0_0value = value
+        } else
+        {
+            this._halfLeading_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
-        this._enableHapticFeedback_flag = true
-        this._enableHapticFeedback0_value = value
+    enableHapticFeedback(value: boolean | undefined): this {
+        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
+        {
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableHapticFeedback_0_0value = value
+        } else
+        {
+            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
-        this._font_flag = true
-        this._font0_value = fontValue
-        this._font1_value = options
+    font(fontValue: Font | undefined, options?: FontSettingOptions): this {
+        if (((this._font_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._font_0_flag = AttributeUpdaterFlag.UPDATE
+            this._font_0_0value = fontValue
+            this._font_0_1value = options
+        } else
+        {
+            this._font_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
-        this._fontWeight_flag = true
-        this._fontWeight0_value = weight
-        this._fontWeight1_value = options
+    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+        if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fontWeight_0_0value = weight
+            this._fontWeight_0_1value = options
+        } else
+        {
+            this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
-        this._selection_flag = true
-        this._selection0_value = selectionStart
-        this._selection1_value = selectionEnd
+    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+        if (((this._selection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._selection_0_0value) !== (selectionStart)) || ((this._selection_0_1value) !== (selectionEnd)))
+        {
+            this._selection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selection_0_0value = selectionStart
+            this._selection_0_1value = selectionEnd
+        } else
+        {
+            this._selection_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
-        this._bindSelectionMenu_flag = true
-        this._bindSelectionMenu0_value = spanType
-        this._bindSelectionMenu1_value = content
-        this._bindSelectionMenu2_value = responseType
-        this._bindSelectionMenu3_value = options
+    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
+        if (((this._bindSelectionMenu_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true) || (true) || (true))
+        {
+            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.UPDATE
+            this._bindSelectionMenu_0_0value = spanType
+            this._bindSelectionMenu_0_1value = content
+            this._bindSelectionMenu_0_2value = responseType
+            this._bindSelectionMenu_0_3value = options
+        } else
+        {
+            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -2173,129 +3520,123 @@ export class TextController_serializer {
 export class TextOptions_serializer {
     public static write(buffer: SerializerBase, value: TextOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_controller  = value.controller
-        TextController_serializer.write(valueSerializer, value_controller)
+        const valueHolderForController  = value.controller
+        TextController_serializer.write(valueSerializer, valueHolderForController)
     }
     public static read(buffer: DeserializerBase): TextOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const controller_result : TextController = (TextController_serializer.read(valueDeserializer) as TextController)
-        let value : TextOptions = ({controller: controller_result} as TextOptions)
+        const controllerTmpResult : TextController = (TextController_serializer.read(valueDeserializer) as TextController)
+        let value : TextOptions = ({controller: controllerTmpResult} as TextOptions)
         return value
     }
 }
 export class TextOverflowOptions_serializer {
     public static write(buffer: SerializerBase, value: TextOverflowOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_overflow  = value.overflow
-        valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow))
+        const valueHolderForOverflow  = value.overflow
+        valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(valueHolderForOverflow))
     }
     public static read(buffer: DeserializerBase): TextOverflowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const overflow_result : TextOverflow = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
-        let value : TextOverflowOptions = ({overflow: overflow_result} as TextOverflowOptions)
+        const overflowTmpResult : TextOverflow = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
+        let value : TextOverflowOptions = ({overflow: overflowTmpResult} as TextOverflowOptions)
         return value
     }
 }
 export class TextMarqueeOptions_serializer {
     public static write(buffer: SerializerBase, value: TextMarqueeOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_start  = value.start
-        valueSerializer.writeBoolean(value_start)
-        const value_step  = value.step
-        let value_step_type : int32 = RuntimeType.UNDEFINED
-        value_step_type = runtimeType(value_step)
-        valueSerializer.writeInt8((value_step_type).toChar())
-        if ((value_step_type) != (RuntimeType.UNDEFINED)) {
-            const value_step_value  = value_step!
-            valueSerializer.writeNumber(value_step_value)
+        const valueHolderForStart  = value.start
+        valueSerializer.writeBoolean(valueHolderForStart)
+        const valueHolderForStep  = value.step
+        if (valueHolderForStep !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStepTmpValue  = valueHolderForStep!
+            valueSerializer.writeNumber(valueHolderForStepTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_loop  = value.loop
-        let value_loop_type : int32 = RuntimeType.UNDEFINED
-        value_loop_type = runtimeType(value_loop)
-        valueSerializer.writeInt8((value_loop_type).toChar())
-        if ((value_loop_type) != (RuntimeType.UNDEFINED)) {
-            const value_loop_value  = value_loop!
-            valueSerializer.writeNumber(value_loop_value)
+        const valueHolderForLoop  = value.loop
+        if (valueHolderForLoop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLoopTmpValue  = valueHolderForLoop!
+            valueSerializer.writeNumber(valueHolderForLoopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fromStart  = value.fromStart
-        let value_fromStart_type : int32 = RuntimeType.UNDEFINED
-        value_fromStart_type = runtimeType(value_fromStart)
-        valueSerializer.writeInt8((value_fromStart_type).toChar())
-        if ((value_fromStart_type) != (RuntimeType.UNDEFINED)) {
-            const value_fromStart_value  = value_fromStart!
-            valueSerializer.writeBoolean(value_fromStart_value)
+        const valueHolderForFromStart  = value.fromStart
+        if (valueHolderForFromStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFromStartTmpValue  = valueHolderForFromStart!
+            valueSerializer.writeBoolean(valueHolderForFromStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_delay  = value.delay
-        let value_delay_type : int32 = RuntimeType.UNDEFINED
-        value_delay_type = runtimeType(value_delay)
-        valueSerializer.writeInt8((value_delay_type).toChar())
-        if ((value_delay_type) != (RuntimeType.UNDEFINED)) {
-            const value_delay_value  = value_delay!
-            valueSerializer.writeNumber(value_delay_value)
+        const valueHolderForDelay  = value.delay
+        if (valueHolderForDelay !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDelayTmpValue  = valueHolderForDelay!
+            valueSerializer.writeNumber(valueHolderForDelayTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_fadeout  = value.fadeout
-        let value_fadeout_type : int32 = RuntimeType.UNDEFINED
-        value_fadeout_type = runtimeType(value_fadeout)
-        valueSerializer.writeInt8((value_fadeout_type).toChar())
-        if ((value_fadeout_type) != (RuntimeType.UNDEFINED)) {
-            const value_fadeout_value  = value_fadeout!
-            valueSerializer.writeBoolean(value_fadeout_value)
+        const valueHolderForFadeout  = value.fadeout
+        if (valueHolderForFadeout !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFadeoutTmpValue  = valueHolderForFadeout!
+            valueSerializer.writeBoolean(valueHolderForFadeoutTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_marqueeStartPolicy  = value.marqueeStartPolicy
-        let value_marqueeStartPolicy_type : int32 = RuntimeType.UNDEFINED
-        value_marqueeStartPolicy_type = runtimeType(value_marqueeStartPolicy)
-        valueSerializer.writeInt8((value_marqueeStartPolicy_type).toChar())
-        if ((value_marqueeStartPolicy_type) != (RuntimeType.UNDEFINED)) {
-            const value_marqueeStartPolicy_value  = (value_marqueeStartPolicy as MarqueeStartPolicy)
-            valueSerializer.writeInt32(TypeChecker.MarqueeStartPolicy_ToNumeric(value_marqueeStartPolicy_value))
+        const valueHolderForMarqueeStartPolicy  = value.marqueeStartPolicy
+        if (valueHolderForMarqueeStartPolicy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarqueeStartPolicyTmpValue  = (valueHolderForMarqueeStartPolicy as MarqueeStartPolicy)
+            valueSerializer.writeInt32(TypeChecker.MarqueeStartPolicy_ToNumeric(valueHolderForMarqueeStartPolicyTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TextMarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const start_result : boolean = valueDeserializer.readBoolean()
-        const step_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let step_buf : number | undefined
-        if ((step_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            step_buf = (valueDeserializer.readNumber() as number)
+        const startTmpResult : boolean = valueDeserializer.readBoolean()
+        const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stepTmpBuf : number | undefined
+        if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stepTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const step_result : number | undefined = step_buf
-        const loop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let loop_buf : number | undefined
-        if ((loop_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            loop_buf = (valueDeserializer.readNumber() as number)
+        const stepTmpResult : number | undefined = stepTmpBuf
+        const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let loopTmpBuf : number | undefined
+        if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            loopTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const loop_result : number | undefined = loop_buf
-        const fromStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fromStart_buf : boolean | undefined
-        if ((fromStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fromStart_buf = valueDeserializer.readBoolean()
+        const loopTmpResult : number | undefined = loopTmpBuf
+        const fromStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fromStartTmpBuf : boolean | undefined
+        if ((fromStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fromStartTmpBuf = valueDeserializer.readBoolean()
         }
-        const fromStart_result : boolean | undefined = fromStart_buf
-        const delay_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delay_buf : number | undefined
-        if ((delay_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            delay_buf = (valueDeserializer.readNumber() as number)
+        const fromStartTmpResult : boolean | undefined = fromStartTmpBuf
+        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let delayTmpBuf : number | undefined
+        if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            delayTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const delay_result : number | undefined = delay_buf
-        const fadeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fadeout_buf : boolean | undefined
-        if ((fadeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            fadeout_buf = valueDeserializer.readBoolean()
+        const delayTmpResult : number | undefined = delayTmpBuf
+        const fadeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fadeoutTmpBuf : boolean | undefined
+        if ((fadeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fadeoutTmpBuf = valueDeserializer.readBoolean()
         }
-        const fadeout_result : boolean | undefined = fadeout_buf
-        const marqueeStartPolicy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let marqueeStartPolicy_buf : MarqueeStartPolicy | undefined
-        if ((marqueeStartPolicy_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            marqueeStartPolicy_buf = TypeChecker.MarqueeStartPolicy_FromNumeric(valueDeserializer.readInt32())
+        const fadeoutTmpResult : boolean | undefined = fadeoutTmpBuf
+        const marqueeStartPolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marqueeStartPolicyTmpBuf : MarqueeStartPolicy | undefined
+        if ((marqueeStartPolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            marqueeStartPolicyTmpBuf = TypeChecker.MarqueeStartPolicy_FromNumeric(valueDeserializer.readInt32())
         }
-        const marqueeStartPolicy_result : MarqueeStartPolicy | undefined = marqueeStartPolicy_buf
-        let value : TextMarqueeOptions = ({start: start_result, step: step_result, loop: loop_result, fromStart: fromStart_result, delay: delay_result, fadeout: fadeout_result, marqueeStartPolicy: marqueeStartPolicy_result} as TextMarqueeOptions)
+        const marqueeStartPolicyTmpResult : MarqueeStartPolicy | undefined = marqueeStartPolicyTmpBuf
+        let value : TextMarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, delay: delayTmpResult, fadeout: fadeoutTmpResult, marqueeStartPolicy: marqueeStartPolicyTmpResult} as TextMarqueeOptions)
         return value
     }
 }

@@ -16,7 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 import { Es2pandaTokenType } from "@koalaui/libarkts"
 
-import { DecoratorNames, DecoratorParameters, hasDecorator } from "./property-translators/utils"
+import { DecoratorNames, DecoratorParameters, hasDecorator } from "./utils"
 import { CustomComponentNames, getComponentPackage, getDecoratorPackage, getRuntimePackage, Importer, ImportingTransformer, InternalAnnotations } from "./utils"
 import { annotation, classMethods, isAnnotation } from "./common/arkts-utils"
 
@@ -64,7 +64,7 @@ function thisPropertyMethodCall(property: arkts.ClassProperty, method: string, a
 }
 
 function thisPropertyMethodCallExpr(property: arkts.ClassProperty, method: string, args: readonly arkts.Expression[] = []): arkts.CallExpression {
-    return arkts.factory.createCallExpression(fieldOf(fieldOf(arkts.factory.createThisExpression(), backingFieldNameOf(property)), method), args, undefined)
+    return arkts.factory.createCallExpression(fieldOf(fieldOf(arkts.factory.createThisExpression(), backingFieldNameOf(property)), method), args, undefined, false, false, undefined)
 }
 
 function createWrappedProperty(
@@ -104,7 +104,7 @@ function createWrappedProperty(
                         arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,
                         false,
                         false
-                    ), [], undefined
+                    ), [], undefined, false, false, undefined,
                 )
             )
         ]),
@@ -138,7 +138,10 @@ function createWrappedProperty(
                 [
                     arkts.factory.createIdentifier("value"),
                 ],
-                undefined
+                undefined,
+                false,
+                false,
+                undefined,
             )
         )
     ]
@@ -305,7 +308,11 @@ function createWatchCall(clazz: arkts.ClassDeclaration, methodName: string, prop
         arkts.factory.createCallExpression(
             fieldOf(arkts.factory.createThisExpression(), methodName),
             parameters,
-            undefined)
+            undefined,
+            false,
+            false,
+            undefined,
+        )
     )
 }
 
@@ -549,6 +556,9 @@ function callStatementsOnce(statements: arkts.Statement[]): arkts.Statement {
         arkts.factory.createCallExpression(
             arkts.factory.createIdentifier("once"),
             [ arkts.factory.createArrowFunctionExpression(lambda) ],
+            undefined,
+            false,
+            false,
             undefined,
         )
     )

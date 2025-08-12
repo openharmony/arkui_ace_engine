@@ -132,8 +132,8 @@ npm_cmd("arkui_build") {
     ]
     project_path = rebase_path("./arkui")
     target_out_path = rebase_path("$target_out_dir/arkui.abc")
-    built_file_path = rebase_path("./arkui/build-m3-impl/arkui-m3.abc")
-    run_tasks = [ "build:m3" ]
+    built_file_path = rebase_path("./arkui/build/arkui.abc")
+    run_tasks = [ "build" ]
 }
 
 npm_cmd("arkoala_link") {
@@ -143,7 +143,7 @@ npm_cmd("arkoala_link") {
     project_path = rebase_path(".")
     target_out_path = rebase_path("$target_out_dir")
     built_file_path = rebase_path("build/bootPandaFiles/arkoala.abc")
-    run_tasks = [ "link:arkoala:m3" ]
+    run_tasks = [ "link" ]
 
     deps = [
       ":arkui_build"

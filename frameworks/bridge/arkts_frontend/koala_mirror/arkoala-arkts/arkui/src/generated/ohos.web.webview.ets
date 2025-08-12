@@ -16,9 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback, wrapCallback, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./resource"
@@ -27,16 +26,16 @@ import { ComponentBuilder } from "@koalaui/builderLambda"
 export class webview_WebHeader_serializer {
     public static write(buffer: SerializerBase, value: webview.WebHeader): void {
         let valueSerializer : SerializerBase = buffer
-        const value_headerKey  = value.headerKey
-        valueSerializer.writeString(value_headerKey)
-        const value_headerValue  = value.headerValue
-        valueSerializer.writeString(value_headerValue)
+        const valueHolderForHeaderKey  = value.headerKey
+        valueSerializer.writeString(valueHolderForHeaderKey)
+        const valueHolderForHeaderValue  = value.headerValue
+        valueSerializer.writeString(valueHolderForHeaderValue)
     }
     public static read(buffer: DeserializerBase): webview.WebHeader {
         let valueDeserializer : DeserializerBase = buffer
-        const headerKey_result : string = (valueDeserializer.readString() as string)
-        const headerValue_result : string = (valueDeserializer.readString() as string)
-        let value : webview.WebHeader = ({headerKey: headerKey_result, headerValue: headerValue_result} as webview.WebHeader)
+        const headerKeyTmpResult : string = (valueDeserializer.readString() as string)
+        const headerValueTmpResult : string = (valueDeserializer.readString() as string)
+        let value : webview.WebHeader = ({headerKey: headerKeyTmpResult, headerValue: headerValueTmpResult} as webview.WebHeader)
         return value
     }
 }
@@ -90,28 +89,25 @@ export namespace webview {
         }
         private loadUrl_serialize(url: string | Resource, headers?: Array<WebHeader>): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
-            let url_type : int32 = RuntimeType.UNDEFINED
-            url_type = runtimeType(url)
-            if (RuntimeType.STRING == url_type) {
+            if (url instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const url_0  = url as string
-                thisSerializer.writeString(url_0)
-            }
-            else if (RuntimeType.OBJECT == url_type) {
+                const urlForIdx0  = url as string
+                thisSerializer.writeString(urlForIdx0)
+            } else if (url instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const url_1  = url as Resource
-                Resource_serializer.write(thisSerializer, url_1)
+                const urlForIdx1  = url as Resource
+                Resource_serializer.write(thisSerializer, urlForIdx1)
             }
-            let headers_type : int32 = RuntimeType.UNDEFINED
-            headers_type = runtimeType(headers)
-            thisSerializer.writeInt8((headers_type).toChar())
-            if ((headers_type) != (RuntimeType.UNDEFINED)) {
-                const headers_value  = headers!
-                thisSerializer.writeInt32((headers_value.length).toInt())
-                for (let headers_value_counter_i = 0; headers_value_counter_i < headers_value.length; headers_value_counter_i++) {
-                    const headers_value_element : WebHeader = headers_value[headers_value_counter_i]
-                    webview_WebHeader_serializer.write(thisSerializer, headers_value_element)
+            if (headers !== undefined) {
+                thisSerializer.writeInt8(RuntimeType.OBJECT)
+                const headersTmpValue  = headers!
+                thisSerializer.writeInt32((headersTmpValue.length).toInt())
+                for (let headersTmpValueCounterI = 0; headersTmpValueCounterI < headersTmpValue.length; headersTmpValueCounterI++) {
+                    const headersTmpValueTmpElement : WebHeader = headersTmpValue[headersTmpValueCounterI]
+                    webview_WebHeader_serializer.write(thisSerializer, headersTmpValueTmpElement)
                 }
+            } else {
+                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
             ArkUIGeneratedNativeModule._webview_WebviewController_loadUrl(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
             thisSerializer.release()

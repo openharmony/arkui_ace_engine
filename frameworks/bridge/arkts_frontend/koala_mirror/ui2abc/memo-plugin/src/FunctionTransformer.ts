@@ -34,6 +34,7 @@ import {
     castParameters,
     getName,
     getParams,
+    getReturnTypeAnnotation,
     isMemo,
     isMemoizable,
     memoizableHasReceiver,
@@ -209,6 +210,8 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
                 scriptFunction.modifierFlags,
                 scriptFunction.id,
                 scriptFunction.annotations,
+                scriptFunction.getSignaturePointer(),
+                scriptFunction.getPreferredReturnTypePointer(),
             )
         }
 
@@ -217,7 +220,7 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         const [body, parameterIdentifiers, memoParametersDeclaration, syntheticReturnStatement] = updateFunctionBody(
             afterInternalsTransformer,
             castParameters(scriptFunction.params),
-            scriptFunction.returnTypeAnnotation,
+            getReturnTypeAnnotation(scriptFunction),
             hasReceiver,
             isStatic,
             isStableThis,
@@ -245,6 +248,8 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
             scriptFunction.modifierFlags,
             scriptFunction.id,
             scriptFunction.annotations,
+            scriptFunction.getSignaturePointer(),
+            scriptFunction.getPreferredReturnTypePointer(),
         )
     }
 

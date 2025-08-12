@@ -190,6 +190,14 @@ KNativePointer impl_ContextErrorMessage(KNativePointer contextPtr)
 }
 KOALA_INTEROP_1(ContextErrorMessage, KNativePointer, KNativePointer)
 
+KNativePointer impl_GetAllErrorMessages(KNativePointer contextPtr)
+{
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
+
+    return StageArena::strdup(GetImpl()->GetAllErrorMessages(context));
+}
+KOALA_INTEROP_1(GetAllErrorMessages, KNativePointer, KNativePointer)
+
 /*
 KNativePointer impl_CallExpressionSignature(KNativePointer context, KNativePointer classInstance)
 {
@@ -394,15 +402,83 @@ void impl_DestroyGlobalContext(KNativePointer globalContextPtr) {
 }
 KOALA_INTEROP_V1(DestroyGlobalContext, KNativePointer)
 
+// All these "Checker_" bridges are related to checker namespace in es2panda, so work with them carefully
+// Checker.Type does reset on recheck, so modifying them makes no sence
+// It seems that compiler does not provide API to convert Checker.Type to ir.Type
+KNativePointer impl_Checker_ScriptFunctionSignature(KNativePointer context, KNativePointer node)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    return GetImpl()->ScriptFunctionSignature(_context, _node);
+}
+KOALA_INTEROP_2(Checker_ScriptFunctionSignature, KNativePointer, KNativePointer, KNativePointer)
+
+void impl_Checker_ScriptFunctionSetSignature(KNativePointer context, KNativePointer node, KNativePointer signature)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    auto _signature = reinterpret_cast<es2panda_Signature*>(signature);
+    GetImpl()->ScriptFunctionSetSignature(_context, _node, _signature);
+    return;
+}
+KOALA_INTEROP_V3(Checker_ScriptFunctionSetSignature, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_Checker_SignatureReturnType(KNativePointer context, KNativePointer signature)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _signature = reinterpret_cast<es2panda_Signature*>(signature);
+    return GetImpl()->SignatureReturnType(_context, _signature);
+}
+KOALA_INTEROP_2(Checker_SignatureReturnType, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_Checker_ScriptFunctionGetPreferredReturnType(KNativePointer context, KNativePointer node)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    return GetImpl()->ScriptFunctionGetPreferredReturnType(_context, _node);
+}
+KOALA_INTEROP_2(Checker_ScriptFunctionGetPreferredReturnType, KNativePointer, KNativePointer, KNativePointer)
+
+void impl_Checker_ScriptFunctionSetPreferredReturnType(KNativePointer context, KNativePointer node, KNativePointer type)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    auto _type = reinterpret_cast<es2panda_Type*>(type);
+    GetImpl()->ScriptFunctionSetPreferredReturnType(_context, _node, _type);
+    return;
+}
+KOALA_INTEROP_V3(Checker_ScriptFunctionSetPreferredReturnType, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_Checker_TypeToString(KNativePointer context, KNativePointer type)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _type = reinterpret_cast<es2panda_Type*>(type);
+    auto result = GetImpl()->TypeToStringConst(_context, _type);
+    return StageArena::strdup(result);
+}
+KOALA_INTEROP_2(Checker_TypeToString, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_Checker_TypeNodeGetType(KNativePointer context, KNativePointer astNode)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _astNode = reinterpret_cast<es2panda_AstNode*>(astNode);
+    return GetImpl()->TypeNodeGetType(_context, _astNode);
+}
+KOALA_INTEROP_2(Checker_TypeNodeGetType, KNativePointer, KNativePointer, KNativePointer)
+
 // From koala-wrapper
 // Improve: check if some code should be generated
 
 std::set<std::string> globalStructInfo;
+#ifdef _GLIBCXX_HAS_GTHREADS
 std::mutex g_structMutex;
+#endif
 
 void impl_InsertGlobalStructInfo(KNativePointer contextPtr, KStringPtr& instancePtr)
 {
+#ifdef _GLIBCXX_HAS_GTHREADS
     std::lock_guard<std::mutex> lock(g_structMutex);
+#endif
     globalStructInfo.insert(getStringCopy(instancePtr));
     return;
 }
@@ -410,7 +486,9 @@ KOALA_INTEROP_V2(InsertGlobalStructInfo, KNativePointer, KStringPtr);
 
 KBoolean impl_HasGlobalStructInfo(KNativePointer contextPtr, KStringPtr& instancePtr)
 {
+#ifdef _GLIBCXX_HAS_GTHREADS
     std::lock_guard<std::mutex> lock(g_structMutex);
+#endif
     return globalStructInfo.count(getStringCopy(instancePtr));
 }
 KOALA_INTEROP_2(HasGlobalStructInfo, KBoolean, KNativePointer, KStringPtr);
@@ -594,7 +672,7 @@ KInt impl_GenerateTsDeclarationsFromContext(KNativePointer contextPtr, KStringPt
                                             KBoolean exportAll, KBoolean isolated, KStringPtr &recordFile)
 {
     auto context = reinterpret_cast<es2panda_Context *>(contextPtr);
-    return GetImpl()->GenerateTsDeclarationsFromContext(context, outputDeclEts.data(), outputEts.data(), exportAll, isolated, recordFile.data() );
+    return GetImpl()->GenerateTsDeclarationsFromContext(context, outputDeclEts.data(), outputEts.data(), exportAll, isolated, recordFile.data());
 }
 KOALA_INTEROP_6(GenerateTsDeclarationsFromContext, KInt, KNativePointer, KStringPtr, KStringPtr, KBoolean, KBoolean, KStringPtr)
 
@@ -621,3 +699,12 @@ KNativePointer impl_CreateContextGenerateAbcForExternalSourceFiles(
         config, fileNamesCount, argv);
 }
 KOALA_INTEROP_3(CreateContextGenerateAbcForExternalSourceFiles, KNativePointer, KNativePointer, KInt, KStringArray)
+
+KNativePointer impl_JsdocStringFromDeclaration(KNativePointer contextPtr, KNativePointer nodePtr)
+{
+    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
+    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
+    return StageArena::strdup(GetImpl()->JsdocStringFromDeclaration(context, node));
+}
+KOALA_INTEROP_2(JsdocStringFromDeclaration, KNativePointer, KNativePointer, KNativePointer)
+

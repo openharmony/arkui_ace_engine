@@ -99,15 +99,6 @@ typedef struct InteropNumber {
   };
 } InteropNumber;
 
-// Binary layout of InteropLength must match that of KLength.
-typedef struct InteropLength
-{
-  InteropInt8 type;
-  InteropFloat32 value;
-  InteropInt32 unit;
-  InteropInt32 resource;
-} InteropLength;
-
 typedef struct InteropCustomObject {
   char kind[20];
   InteropInt32 id;

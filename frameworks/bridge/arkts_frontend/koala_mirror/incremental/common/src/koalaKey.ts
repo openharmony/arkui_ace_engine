@@ -25,6 +25,6 @@ export class KoalaCallsiteKeys {
     }
 
     static asString(key: KoalaCallsiteKey): string {
-        return new Number(key).toString(16)
+        return key.toString(16)
     }
 }

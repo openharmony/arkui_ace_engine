@@ -13,79 +13,77 @@
  * limitations under the License.
  */
 
+
 package global.resource;
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { CallbackKind } from "./peers/CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export interface Resource {
     bundleName: string;
     moduleName: string;
-    id: number;
+    id: int64;
     params?: Array<string>;
-    type?: number;
+    type?: int32;
 }
 export class Resource_serializer {
     public static write(buffer: SerializerBase, value: Resource): void {
         let valueSerializer : SerializerBase = buffer
-        const value_bundleName  = value.bundleName
-        valueSerializer.writeString(value_bundleName)
-        const value_moduleName  = value.moduleName
-        valueSerializer.writeString(value_moduleName)
-        const value_id  = value.id
-        valueSerializer.writeNumber(value_id)
-        const value_params  = value.params
-        let value_params_type : int32 = RuntimeType.UNDEFINED
-        value_params_type = runtimeType(value_params)
-        valueSerializer.writeInt8((value_params_type).toChar())
-        if ((value_params_type) != (RuntimeType.UNDEFINED)) {
-            const value_params_value  = value_params!
-            valueSerializer.writeInt32((value_params_value.length).toInt())
-            for (let value_params_value_counter_i = 0; value_params_value_counter_i < value_params_value.length; value_params_value_counter_i++) {
-                const value_params_value_element : string = value_params_value[value_params_value_counter_i]
-                valueSerializer.writeString(value_params_value_element)
+        const valueHolderForBundleName  = value.bundleName
+        valueSerializer.writeString(valueHolderForBundleName)
+        const valueHolderForModuleName  = value.moduleName
+        valueSerializer.writeString(valueHolderForModuleName)
+        const valueHolderForId  = value.id
+        valueSerializer.writeInt64(valueHolderForId)
+        const valueHolderForParams  = value.params
+        if (valueHolderForParams !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamsTmpValue  = valueHolderForParams!
+            valueSerializer.writeInt32((valueHolderForParamsTmpValue.length).toInt())
+            for (let valueHolderForParamsTmpValueCounterI = 0; valueHolderForParamsTmpValueCounterI < valueHolderForParamsTmpValue.length; valueHolderForParamsTmpValueCounterI++) {
+                const valueHolderForParamsTmpValueTmpElement : string = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
+                valueSerializer.writeString(valueHolderForParamsTmpValueTmpElement)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_type  = value.type
-        let value_type_type : int32 = RuntimeType.UNDEFINED
-        value_type_type = runtimeType(value_type)
-        valueSerializer.writeInt8((value_type_type).toChar())
-        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
-            const value_type_value  = value_type!
-            valueSerializer.writeNumber(value_type_value)
+        const valueHolderForType  = value.type
+        if (valueHolderForType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTypeTmpValue  = valueHolderForType!
+            valueSerializer.writeInt32(valueHolderForTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): Resource {
         let valueDeserializer : DeserializerBase = buffer
-        const bundleName_result : string = (valueDeserializer.readString() as string)
-        const moduleName_result : string = (valueDeserializer.readString() as string)
-        const id_result : number = (valueDeserializer.readNumber() as number)
-        const params_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let params_buf : Array<string> | undefined
-        if ((params_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<string> = new Array<string>(params_buf__length)
-            for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
-                params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
+        const bundleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const moduleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const idTmpResult : int64 = valueDeserializer.readInt64()
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramsTmpBuf : Array<string> | undefined
+        if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const paramsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let paramsTmpBuf_ : Array<string> = new Array<string>(paramsTmpBuf_Length)
+            for (let paramsTmpBuf_BufCounterI = 0; paramsTmpBuf_BufCounterI < paramsTmpBuf_Length; paramsTmpBuf_BufCounterI++) {
+                paramsTmpBuf_[paramsTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
             }
-            params_buf = params_buf_
+            paramsTmpBuf = paramsTmpBuf_
         }
-        const params_result : Array<string> | undefined = params_buf
-        const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let type_buf : number | undefined
-        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            type_buf = (valueDeserializer.readNumber() as number)
+        const paramsTmpResult : Array<string> | undefined = paramsTmpBuf
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let typeTmpBuf : int32 | undefined
+        if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            typeTmpBuf = valueDeserializer.readInt32()
         }
-        const type_result : number | undefined = type_buf
-        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result, params: params_result, type: type_result} as Resource)
+        const typeTmpResult : int32 | undefined = typeTmpBuf
+        let value : Resource = ({bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, id: idTmpResult, params: paramsTmpResult, type: typeTmpResult} as Resource)
         return value
     }
 }

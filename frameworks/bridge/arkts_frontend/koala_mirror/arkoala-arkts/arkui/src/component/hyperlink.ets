@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { int32, int64, float32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
@@ -30,6 +30,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -37,74 +38,63 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkHyperlinkPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._Hyperlink_construct(peerId, flags)
-        const _peer  = new ArkHyperlinkPeer(_peerPtr, peerId, "Hyperlink", flags)
+        const _peer  = new ArkHyperlinkPeer(_peerPtr, peerId, 'Hyperlink', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setHyperlinkOptionsAttribute(address: string | Resource, content?: string | Resource): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let address_type : int32 = RuntimeType.UNDEFINED
-        address_type = runtimeType(address)
-        if (RuntimeType.STRING == address_type) {
+        if (address instanceof string) {
             thisSerializer.writeInt8((0).toChar())
-            const address_0  = address as string
-            thisSerializer.writeString(address_0)
-        }
-        else if (RuntimeType.OBJECT == address_type) {
+            const addressForIdx0  = address as string
+            thisSerializer.writeString(addressForIdx0)
+        } else if (address instanceof Resource) {
             thisSerializer.writeInt8((1).toChar())
-            const address_1  = address as Resource
-            Resource_serializer.write(thisSerializer, address_1)
+            const addressForIdx1  = address as Resource
+            Resource_serializer.write(thisSerializer, addressForIdx1)
         }
-        let content_type : int32 = RuntimeType.UNDEFINED
-        content_type = runtimeType(content)
-        thisSerializer.writeInt8((content_type).toChar())
-        if ((content_type) != (RuntimeType.UNDEFINED)) {
-            const content_value  = content!
-            let content_value_type : int32 = RuntimeType.UNDEFINED
-            content_value_type = runtimeType(content_value)
-            if (RuntimeType.STRING == content_value_type) {
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue  = content!
+            if (contentTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toChar())
-                const content_value_0  = content_value as string
-                thisSerializer.writeString(content_value_0)
-            }
-            else if (RuntimeType.OBJECT == content_value_type) {
+                const contentTmpValueForIdx0  = contentTmpValue as string
+                thisSerializer.writeString(contentTmpValueForIdx0)
+            } else if (contentTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((1).toChar())
-                const content_value_1  = content_value as Resource
-                Resource_serializer.write(thisSerializer, content_value_1)
+                const contentTmpValueForIdx1  = contentTmpValue as Resource
+                Resource_serializer.write(thisSerializer, contentTmpValueForIdx1)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HyperlinkInterface_setHyperlinkOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setColorAttribute(value: Color | number | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isColor(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Color
-                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_value_type) {
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as number
-                thisSerializer.writeNumber(value_value_1)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_3)
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._HyperlinkAttribute_setColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -126,11 +116,6 @@ export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements Hyperlink
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
-    }
-    public apply(target: HyperlinkAttribute): void {
-        super.apply(target)
-        if (this.color_value !== undefined)
-            target.color(this.color_value!)
     }
 }
 
@@ -156,7 +141,6 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -164,26 +148,6 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         super.applyAttributesFinish()
     }
 }
-export function withHyperlinkStyle(receiver: HyperlinkAttribute, modifier: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkHyperlinkStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("Hyperlink")
-// export function Hyperlink(
-//     address: string | Resource, content?: string | Resource,
-//     @memo
-//     content_?: () => void,
-// ): HyperlinkAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function Hyperlink(
@@ -199,26 +163,64 @@ export function Hyperlink(
     NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer): void => {
         receiver.setHyperlinkOptions(address,content)
         style?.(receiver)
-        withHyperlinkStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkHyperlinkSet extends ArkCommonMethodSet implements HyperlinkAttribute {
+export class HyperlinkModifier extends CommonMethodModifier implements HyperlinkAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _color_flag?: boolean
-    _color0_value?: Color | number | string | Resource | undefined
-    applyModifierPatch(component: HyperlinkAttribute): void {
-        if (this._color_flag)
-            component.color((this._color0_value as Color | number | string | Resource | undefined))
+    _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _color_0_0value?: Color | number | string | Resource | undefined
+    applyModifierPatch(peer: ArkHyperlinkPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setColorAttribute((this._color_0_0value as Color | number | string | Resource | undefined));
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._color_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setColorAttribute((undefined as Color | number | string | Resource | undefined));
+                }
+            }
+        }
     }
-    public color(value: Color | number | string | Resource | undefined): this {
-        this._color_flag = true
-        this._color0_value = value
+    mergeModifier(modifier: HyperlinkModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._color_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.color(modifier._color_0_0value);
+                    break;
+                }
+                default: {
+                    this.color((undefined as Color | number | string | Resource | undefined));
+                }
+            }
+        }
+    }
+    color(value: Color | number | string | Resource | undefined): this {
+        if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._color_0_flag = AttributeUpdaterFlag.UPDATE
+            this._color_0_0value = value
+        } else
+        {
+            this._color_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {

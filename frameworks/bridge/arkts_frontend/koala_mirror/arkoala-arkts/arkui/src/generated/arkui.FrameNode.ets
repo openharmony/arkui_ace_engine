@@ -16,13 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Size_serializer, Size } from "./arkui.Graphics"
 import { Position_serializer, Position } from "./../component/units"
 import { UIContext, UIContextInternal } from "./ohos.arkui.UIContext"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -240,6 +239,14 @@ export class FrameNode implements MaterializedBase {
         const type_casted = type as (string)
         return FrameNode.createTypedFrameNode_serialize(type_casted)
     }
+    public createByRawPtr(pointer: FrameNode): KPointer {
+        const pointer_casted = pointer as (FrameNode)
+        return this.createByRawPtr_serialize(pointer_casted)
+    }
+    public unWrapRawPtr(pointer: KPointer): FrameNode {
+        const pointer_casted = pointer as (KPointer)
+        return this.unWrapRawPtr_serialize(pointer_casted)
+    }
     private isModifiable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)
         return retval
@@ -392,6 +399,15 @@ export class FrameNode implements MaterializedBase {
     private recycle_serialize(): void {
         ArkUIGeneratedNativeModule._FrameNode_recycle(this.peer!.ptr)
     }
+    private createByRawPtr_serialize(pointer: FrameNode): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_createByRawPtr(this.peer!.ptr, toPeerPtr(pointer))
+        return retval
+    }
+    private unWrapRawPtr_serialize(pointer: KPointer): FrameNode {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_unWrapRawPtr(this.peer!.ptr, pointer)
+        const obj : FrameNode = FrameNodeInternal.fromPtr(retval)
+        return obj
+    }
 }
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -415,44 +431,43 @@ export class FrameNode_serializer {
 export class CrossLanguageOptions_serializer {
     public static write(buffer: SerializerBase, value: CrossLanguageOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_attributeSetting  = value.attributeSetting
-        let value_attributeSetting_type : int32 = RuntimeType.UNDEFINED
-        value_attributeSetting_type = runtimeType(value_attributeSetting)
-        valueSerializer.writeInt8((value_attributeSetting_type).toChar())
-        if ((value_attributeSetting_type) != (RuntimeType.UNDEFINED)) {
-            const value_attributeSetting_value  = value_attributeSetting!
-            valueSerializer.writeBoolean(value_attributeSetting_value)
+        const valueHolderForAttributeSetting  = value.attributeSetting
+        if (valueHolderForAttributeSetting !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAttributeSettingTmpValue  = valueHolderForAttributeSetting!
+            valueSerializer.writeBoolean(valueHolderForAttributeSettingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CrossLanguageOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const attributeSetting_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let attributeSetting_buf : boolean | undefined
-        if ((attributeSetting_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            attributeSetting_buf = valueDeserializer.readBoolean()
+        const attributeSettingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let attributeSettingTmpBuf : boolean | undefined
+        if ((attributeSettingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            attributeSettingTmpBuf = valueDeserializer.readBoolean()
         }
-        const attributeSetting_result : boolean | undefined = attributeSetting_buf
-        let value : CrossLanguageOptions = ({attributeSetting: attributeSetting_result} as CrossLanguageOptions)
+        const attributeSettingTmpResult : boolean | undefined = attributeSettingTmpBuf
+        let value : CrossLanguageOptions = ({attributeSetting: attributeSettingTmpResult} as CrossLanguageOptions)
         return value
     }
 }
 export class LayoutConstraint_serializer {
     public static write(buffer: SerializerBase, value: LayoutConstraint): void {
         let valueSerializer : SerializerBase = buffer
-        const value_maxSize  = value.maxSize
-        Size_serializer.write(valueSerializer, value_maxSize)
-        const value_minSize  = value.minSize
-        Size_serializer.write(valueSerializer, value_minSize)
-        const value_percentReference  = value.percentReference
-        Size_serializer.write(valueSerializer, value_percentReference)
+        const valueHolderForMaxSize  = value.maxSize
+        Size_serializer.write(valueSerializer, valueHolderForMaxSize)
+        const valueHolderForMinSize  = value.minSize
+        Size_serializer.write(valueSerializer, valueHolderForMinSize)
+        const valueHolderForPercentReference  = value.percentReference
+        Size_serializer.write(valueSerializer, valueHolderForPercentReference)
     }
     public static read(buffer: DeserializerBase): LayoutConstraint {
         let valueDeserializer : DeserializerBase = buffer
-        const maxSize_result : Size = Size_serializer.read(valueDeserializer)
-        const minSize_result : Size = Size_serializer.read(valueDeserializer)
-        const percentReference_result : Size = Size_serializer.read(valueDeserializer)
-        let value : LayoutConstraint = ({maxSize: maxSize_result, minSize: minSize_result, percentReference: percentReference_result} as LayoutConstraint)
+        const maxSizeTmpResult : Size = Size_serializer.read(valueDeserializer)
+        const minSizeTmpResult : Size = Size_serializer.read(valueDeserializer)
+        const percentReferenceTmpResult : Size = Size_serializer.read(valueDeserializer)
+        let value : LayoutConstraint = ({maxSize: maxSizeTmpResult, minSize: minSizeTmpResult, percentReference: percentReferenceTmpResult} as LayoutConstraint)
         return value
     }
 }

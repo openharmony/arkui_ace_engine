@@ -17,23 +17,24 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./../generated/arkui.SymbolGlyphModifier"
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentContent_serializer, ComponentContent } from "./../generated/arkui.ComponentContent"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { CustomBuilder } from "./builder"
 import { VoidCallback, ResourceColor, Length, ResourceStr, Font, Padding, Dimension, LocalizedPadding, Font_serializer, Padding_serializer, LocalizedPadding_serializer } from "./units"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
+import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { Color, TextOverflow, TextHeightAdaptivePolicy, VerticalAlign } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class TabBarSymbolInternal {
     public static fromPtr(ptr: KPointer): TabBarSymbol {
         return new TabBarSymbol(ptr)
@@ -103,8 +104,7 @@ export class TabBarSymbol implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : SymbolGlyphModifier | undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
-        {
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = SymbolGlyphModifier_serializer.read(retvalDeserializer)
         }
         const returnResult : SymbolGlyphModifier | undefined = buffer
@@ -112,12 +112,12 @@ export class TabBarSymbol implements MaterializedBase {
     }
     private setSelected_serialize(selected: SymbolGlyphModifier | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let selected_type : int32 = RuntimeType.UNDEFINED
-        selected_type = runtimeType(selected)
-        thisSerializer.writeInt8((selected_type).toChar())
-        if ((selected_type) != (RuntimeType.UNDEFINED)) {
-            const selected_value  = selected!
-            SymbolGlyphModifier_serializer.write(thisSerializer, selected_value)
+        if (selected !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const selectedTmpValue  = selected!
+            SymbolGlyphModifier_serializer.write(thisSerializer, selectedTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabBarSymbol_setSelected(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -130,7 +130,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTabContentPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._TabContent_construct(peerId, flags)
-        const _peer  = new ArkTabContentPeer(_peerPtr, peerId, "TabContent", flags)
+        const _peer  = new ArkTabContentPeer(_peerPtr, peerId, 'TabContent', flags)
         component?.setPeer(_peer)
         return _peer
     }
@@ -139,72 +139,64 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
     }
     setTabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isComponentContent(value_value)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof ComponentContent) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as ComponentContent
-                ComponentContent_serializer.write(thisSerializer, value_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isSubTabBarStyle(value_value))) {
+                const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
+                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof SubTabBarStyle) {
                 thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as SubTabBarStyle
-                SubTabBarStyle_serializer.write(thisSerializer, value_value_1)
-            }
-            else if (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isBottomTabBarStyle(value_value))) {
+                const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
+                SubTabBarStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof BottomTabBarStyle) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as BottomTabBarStyle
-                BottomTabBarStyle_serializer.write(thisSerializer, value_value_2)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
+                const valueTmpValueForIdx2  = valueTmpValue as BottomTabBarStyle
+                BottomTabBarStyle_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((3).toChar())
-                const value_value_3  = value_value as string
-                thisSerializer.writeString(value_value_3)
-            }
-            else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
+                const valueTmpValueForIdx3  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx3)
+            } else if (valueTmpValue instanceof Resource) {
                 thisSerializer.writeInt8((4).toChar())
-                const value_value_4  = value_value as Resource
-                Resource_serializer.write(thisSerializer, value_value_4)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
+                const valueTmpValueForIdx4  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
+            } else if (valueTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((5).toChar())
-                const value_value_5  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_5))
-            }
-            else if (TypeChecker.isTabBarOptions(value_value, false, false)) {
+                const valueTmpValueForIdx5  = valueTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx5))
+            } else if (valueTmpValue instanceof TabBarOptions) {
                 thisSerializer.writeInt8((6).toChar())
-                const value_value_6  = value_value as TabBarOptions
-                TabBarOptions_serializer.write(thisSerializer, value_value_6)
+                const valueTmpValueForIdx6  = valueTmpValue as TabBarOptions
+                TabBarOptions_serializer.write(thisSerializer, valueTmpValueForIdx6)
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabContentAttribute_setTabBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnWillShowAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabContentAttribute_setOnWillShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnWillHideAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TabContentAttribute_setOnWillHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -278,15 +270,6 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: TabContentAttribute): void {
-        super.apply(target)
-        if (this.tabBar_value !== undefined)
-            target.tabBar(this.tabBar_value!)
-        if (this.onWillShow_value !== undefined)
-            target.onWillShow(this.onWillShow_value!)
-        if (this.onWillHide_value !== undefined)
-            target.onWillHide(this.onWillHide_value!)
-    }
 }
 
 export class ArkTabContentComponent extends ArkCommonMethodComponent implements TabContentAttribute {
@@ -325,7 +308,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -333,26 +315,6 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         super.applyAttributesFinish()
     }
 }
-export function withTabContentStyle(receiver: TabContentAttribute, modifier: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkTabContentStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("TabContent")
-// export function TabContent(
-//     
-//     @memo
-//     content_?: () => void,
-// ): TabContentAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function TabContent(
@@ -368,44 +330,152 @@ export function TabContent(
     NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (_: ArkTabContentPeer): void => {
         receiver.setTabContentOptions()
         style?.(receiver)
-        withTabContentStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkTabContentSet extends ArkCommonMethodSet implements TabContentAttribute {
+export class TabContentModifier extends CommonMethodModifier implements TabContentAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _tabBar_flag?: boolean
-    _tabBar0_value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
-    _onWillShow_flag?: boolean
-    _onWillShow0_value?: VoidCallback | undefined
-    _onWillHide_flag?: boolean
-    _onWillHide0_value?: VoidCallback | undefined
-    applyModifierPatch(component: TabContentAttribute): void {
-        if (this._tabBar_flag)
-            component.tabBar((this._tabBar0_value as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined))
-        if (this._onWillShow_flag)
-            component.onWillShow((this._onWillShow0_value as VoidCallback | undefined))
-        if (this._onWillHide_flag)
-            component.onWillHide((this._onWillHide0_value as VoidCallback | undefined))
+    _tabBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _tabBar_0_0value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
+    _onWillShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillShow_0_0value?: VoidCallback | undefined
+    _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillHide_0_0value?: VoidCallback | undefined
+    applyModifierPatch(peer: ArkTabContentPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._tabBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTabBarAttribute((this._tabBar_0_0value as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._tabBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTabBarAttribute((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                }
+            }
+        }
+        if (this._onWillShow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillShow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillShowAttribute((this._onWillShow_0_0value as VoidCallback | undefined));
+                    this._onWillShow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillShow_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillShow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillShowAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillHide_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillHide_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillHideAttribute((this._onWillHide_0_0value as VoidCallback | undefined));
+                    this._onWillHide_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillHide_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillHide_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillHideAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
     }
-    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
-        this._tabBar_flag = true
-        this._tabBar0_value = value
+    mergeModifier(modifier: TabContentModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._tabBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.tabBar(modifier._tabBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.tabBar((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                }
+            }
+        }
+        if (modifier._onWillShow_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillShow_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillShow(modifier._onWillShow_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillShow((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillHide_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillHide_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillHide(modifier._onWillHide_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillHide((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+    }
+    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+        if (((this._tabBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._tabBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._tabBar_0_0value = value
+        } else
+        {
+            this._tabBar_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onWillShow(value: VoidCallback | undefined): this {
-        this._onWillShow_flag = true
-        this._onWillShow0_value = value
+    onWillShow(value: VoidCallback | undefined): this {
+        if (((this._onWillShow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillShow_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillShow_0_0value = value
+        } else
+        {
+            this._onWillShow_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public onWillHide(value: VoidCallback | undefined): this {
-        this._onWillHide_flag = true
-        this._onWillHide0_value = value
+    onWillHide(value: VoidCallback | undefined): this {
+        if (((this._onWillHide_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillHide_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillHide_0_0value = value
+        } else
+        {
+            this._onWillHide_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -511,934 +581,789 @@ export class TabBarSymbol_serializer {
 export class TabBarIconStyle_serializer {
     public static write(buffer: SerializerBase, value: TabBarIconStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_selectedColor  = value.selectedColor
-        let value_selectedColor_type : int32 = RuntimeType.UNDEFINED
-        value_selectedColor_type = runtimeType(value_selectedColor)
-        valueSerializer.writeInt8((value_selectedColor_type).toChar())
-        if ((value_selectedColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_selectedColor_value  = value_selectedColor!
-            let value_selectedColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_selectedColor_value_type = runtimeType(value_selectedColor_value)
-            if (TypeChecker.isColor(value_selectedColor_value)) {
+        const valueHolderForSelectedColor  = value.selectedColor
+        if (valueHolderForSelectedColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
+            if (valueHolderForSelectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_selectedColor_value_0  = value_selectedColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_selectedColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForSelectedColorTmpValueForIdx0))
+            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_selectedColor_value_1  = value_selectedColor_value as number
-                valueSerializer.writeNumber(value_selectedColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+            } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_selectedColor_value_2  = value_selectedColor_value as string
-                valueSerializer.writeString(value_selectedColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
+                valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
+            } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_selectedColor_value_3  = value_selectedColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_selectedColor_value_3)
+                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_unselectedColor  = value.unselectedColor
-        let value_unselectedColor_type : int32 = RuntimeType.UNDEFINED
-        value_unselectedColor_type = runtimeType(value_unselectedColor)
-        valueSerializer.writeInt8((value_unselectedColor_type).toChar())
-        if ((value_unselectedColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_unselectedColor_value  = value_unselectedColor!
-            let value_unselectedColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_unselectedColor_value_type = runtimeType(value_unselectedColor_value)
-            if (TypeChecker.isColor(value_unselectedColor_value)) {
+        const valueHolderForUnselectedColor  = value.unselectedColor
+        if (valueHolderForUnselectedColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
+            if (valueHolderForUnselectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_unselectedColor_value_0  = value_unselectedColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_unselectedColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForUnselectedColorTmpValueForIdx0))
+            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_unselectedColor_value_1  = value_unselectedColor_value as number
-                valueSerializer.writeNumber(value_unselectedColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+            } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_unselectedColor_value_2  = value_unselectedColor_value as string
-                valueSerializer.writeString(value_unselectedColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
+                valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
+            } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_unselectedColor_value_3  = value_unselectedColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_unselectedColor_value_3)
+                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TabBarIconStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const selectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selectedColor_buf : ResourceColor | undefined
-        if ((selectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const selectedColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let selectedColor_buf_ : Color | number | string | Resource | undefined
-            if (selectedColor_buf__selector == (0).toChar()) {
-                selectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let selectedColorTmpBuf : ResourceColor | undefined
+        if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
+                selectedColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
+                selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
+                selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
+                selectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (selectedColor_buf__selector == (1).toChar()) {
-                selectedColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (selectedColor_buf__selector == (2).toChar()) {
-                selectedColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (selectedColor_buf__selector == (3).toChar()) {
-                selectedColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for selectedColor_buf_ has to be chosen through deserialisation.")
-            }
-            selectedColor_buf = (selectedColor_buf_ as Color | number | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | number | string | Resource)
         }
-        const selectedColor_result : ResourceColor | undefined = selectedColor_buf
-        const unselectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let unselectedColor_buf : ResourceColor | undefined
-        if ((unselectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let unselectedColor_buf_ : Color | number | string | Resource | undefined
-            if (unselectedColor_buf__selector == (0).toChar()) {
-                unselectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
+        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let unselectedColorTmpBuf : ResourceColor | undefined
+        if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
+                unselectedColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
+                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
+                unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
+                unselectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (unselectedColor_buf__selector == (1).toChar()) {
-                unselectedColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (unselectedColor_buf__selector == (2).toChar()) {
-                unselectedColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (unselectedColor_buf__selector == (3).toChar()) {
-                unselectedColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for unselectedColor_buf_ has to be chosen through deserialisation.")
-            }
-            unselectedColor_buf = (unselectedColor_buf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
         }
-        const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
-        let value : TabBarIconStyle = ({selectedColor: selectedColor_result, unselectedColor: unselectedColor_result} as TabBarIconStyle)
+        const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
+        let value : TabBarIconStyle = ({selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarIconStyle)
         return value
     }
 }
 export class TabBarOptions_serializer {
     public static write(buffer: SerializerBase, value: TabBarOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_icon  = value.icon
-        let value_icon_type : int32 = RuntimeType.UNDEFINED
-        value_icon_type = runtimeType(value_icon)
-        valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
-            const value_icon_value  = value_icon!
-            let value_icon_value_type : int32 = RuntimeType.UNDEFINED
-            value_icon_value_type = runtimeType(value_icon_value)
-            if (RuntimeType.STRING == value_icon_value_type) {
+        const valueHolderForIcon  = value.icon
+        if (valueHolderForIcon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_icon_value_0  = value_icon_value as string
-                valueSerializer.writeString(value_icon_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_icon_value_type) {
+                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
+            } else if (valueHolderForIconTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_icon_value_1  = value_icon_value as Resource
-                Resource_serializer.write(valueSerializer, value_icon_value_1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_text  = value.text
-        let value_text_type : int32 = RuntimeType.UNDEFINED
-        value_text_type = runtimeType(value_text)
-        valueSerializer.writeInt8((value_text_type).toChar())
-        if ((value_text_type) != (RuntimeType.UNDEFINED)) {
-            const value_text_value  = value_text!
-            let value_text_value_type : int32 = RuntimeType.UNDEFINED
-            value_text_value_type = runtimeType(value_text_value)
-            if (RuntimeType.STRING == value_text_value_type) {
+        const valueHolderForText  = value.text
+        if (valueHolderForText !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextTmpValue  = valueHolderForText!
+            if (valueHolderForTextTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_text_value_0  = value_text_value as string
-                valueSerializer.writeString(value_text_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_text_value_type) {
+                const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as string
+                valueSerializer.writeString(valueHolderForTextTmpValueForIdx0)
+            } else if (valueHolderForTextTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_text_value_1  = value_text_value as Resource
-                Resource_serializer.write(valueSerializer, value_text_value_1)
+                const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TabBarOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let icon_buf : string | Resource | undefined
-        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const icon_buf__selector : int32 = valueDeserializer.readInt8()
-            let icon_buf_ : string | Resource | undefined
-            if (icon_buf__selector == (0).toChar()) {
-                icon_buf_ = (valueDeserializer.readString() as string)
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let iconTmpBuf : string | Resource | undefined
+        if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBuf_ : string | Resource | undefined
+            if (iconTmpBuf_UnionSelector == (0).toChar()) {
+                iconTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
+                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (icon_buf__selector == (1).toChar()) {
-                icon_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for icon_buf_ has to be chosen through deserialisation.")
-            }
-            icon_buf = (icon_buf_ as string | Resource)
+            iconTmpBuf = (iconTmpBuf_ as string | Resource)
         }
-        const icon_result : string | Resource | undefined = icon_buf
-        const text_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let text_buf : string | Resource | undefined
-        if ((text_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const text_buf__selector : int32 = valueDeserializer.readInt8()
-            let text_buf_ : string | Resource | undefined
-            if (text_buf__selector == (0).toChar()) {
-                text_buf_ = (valueDeserializer.readString() as string)
+        const iconTmpResult : string | Resource | undefined = iconTmpBuf
+        const textTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textTmpBuf : string | Resource | undefined
+        if ((textTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const textTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let textTmpBuf_ : string | Resource | undefined
+            if (textTmpBuf_UnionSelector == (0).toChar()) {
+                textTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (textTmpBuf_UnionSelector == (1).toChar()) {
+                textTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for textTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (text_buf__selector == (1).toChar()) {
-                text_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for text_buf_ has to be chosen through deserialisation.")
-            }
-            text_buf = (text_buf_ as string | Resource)
+            textTmpBuf = (textTmpBuf_ as string | Resource)
         }
-        const text_result : string | Resource | undefined = text_buf
-        let value : TabBarOptions = ({icon: icon_result, text: text_result} as TabBarOptions)
+        const textTmpResult : string | Resource | undefined = textTmpBuf
+        let value : TabBarOptions = ({icon: iconTmpResult, text: textTmpResult} as TabBarOptions)
         return value
     }
 }
 export class BoardStyle_serializer {
     public static write(buffer: SerializerBase, value: BoardStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_borderRadius  = value.borderRadius
-        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderRadius_value  = value_borderRadius!
-            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (RuntimeType.STRING == value_borderRadius_value_type) {
+        const valueHolderForBorderRadius  = value.borderRadius
+        if (valueHolderForBorderRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
+            if (valueHolderForBorderRadiusTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_borderRadius_value_0  = value_borderRadius_value as string
-                valueSerializer.writeString(value_borderRadius_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_borderRadius_value_type) {
+                const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
+                valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_borderRadius_value_1  = value_borderRadius_value as number
-                valueSerializer.writeNumber(value_borderRadius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_borderRadius_value_type) {
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_borderRadius_value_2  = value_borderRadius_value as Resource
-                Resource_serializer.write(valueSerializer, value_borderRadius_value_2)
+                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BoardStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadius_buf : Length | undefined
-        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderRadius_buf_ : string | number | Resource | undefined
-            if (borderRadius_buf__selector == (0).toChar()) {
-                borderRadius_buf_ = (valueDeserializer.readString() as string)
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderRadiusTmpBuf : Length | undefined
+        if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBuf_ : string | number | Resource | undefined
+            if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
+                borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
+                borderRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
+                borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (borderRadius_buf__selector == (1).toChar()) {
-                borderRadius_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (borderRadius_buf__selector == (2).toChar()) {
-                borderRadius_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            borderRadius_buf = (borderRadius_buf_ as string | number | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | number | Resource)
         }
-        const borderRadius_result : Length | undefined = borderRadius_buf
-        let value : BoardStyle = ({borderRadius: borderRadius_result} as BoardStyle)
+        const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
+        let value : BoardStyle = ({borderRadius: borderRadiusTmpResult} as BoardStyle)
         return value
     }
 }
 export class SubTabBarIndicatorStyle_serializer {
     public static write(buffer: SerializerBase, value: SubTabBarIndicatorStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8((value_color_type).toChar())
-        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_color_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForColorTmpValueForIdx0))
+            } else if (valueHolderForColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_color_value_3  = value_color_value as Resource
-                Resource_serializer.write(valueSerializer, value_color_value_3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.STRING == value_height_value_type) {
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as string
-                valueSerializer.writeString(value_height_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_height_value_type) {
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as number
+                valueSerializer.writeNumber(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_height_value_2  = value_height_value as Resource
-                Resource_serializer.write(valueSerializer, value_height_value_2)
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_width_value_type) {
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as number
+                valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_width_value_2  = value_width_value as Resource
-                Resource_serializer.write(valueSerializer, value_width_value_2)
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_borderRadius  = value.borderRadius
-        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderRadius_value  = value_borderRadius!
-            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (RuntimeType.STRING == value_borderRadius_value_type) {
+        const valueHolderForBorderRadius  = value.borderRadius
+        if (valueHolderForBorderRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
+            if (valueHolderForBorderRadiusTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_borderRadius_value_0  = value_borderRadius_value as string
-                valueSerializer.writeString(value_borderRadius_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_borderRadius_value_type) {
+                const valueHolderForBorderRadiusTmpValueForIdx0  = valueHolderForBorderRadiusTmpValue as string
+                valueSerializer.writeString(valueHolderForBorderRadiusTmpValueForIdx0)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_borderRadius_value_1  = value_borderRadius_value as number
-                valueSerializer.writeNumber(value_borderRadius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_borderRadius_value_type) {
+                const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as number
+                valueSerializer.writeNumber(valueHolderForBorderRadiusTmpValueForIdx1)
+            } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_borderRadius_value_2  = value_borderRadius_value as Resource
-                Resource_serializer.write(valueSerializer, value_borderRadius_value_2)
+                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_marginTop  = value.marginTop
-        let value_marginTop_type : int32 = RuntimeType.UNDEFINED
-        value_marginTop_type = runtimeType(value_marginTop)
-        valueSerializer.writeInt8((value_marginTop_type).toChar())
-        if ((value_marginTop_type) != (RuntimeType.UNDEFINED)) {
-            const value_marginTop_value  = value_marginTop!
-            let value_marginTop_value_type : int32 = RuntimeType.UNDEFINED
-            value_marginTop_value_type = runtimeType(value_marginTop_value)
-            if (RuntimeType.STRING == value_marginTop_value_type) {
+        const valueHolderForMarginTop  = value.marginTop
+        if (valueHolderForMarginTop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMarginTopTmpValue  = valueHolderForMarginTop!
+            if (valueHolderForMarginTopTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_marginTop_value_0  = value_marginTop_value as string
-                valueSerializer.writeString(value_marginTop_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_marginTop_value_type) {
+                const valueHolderForMarginTopTmpValueForIdx0  = valueHolderForMarginTopTmpValue as string
+                valueSerializer.writeString(valueHolderForMarginTopTmpValueForIdx0)
+            } else if (valueHolderForMarginTopTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_marginTop_value_1  = value_marginTop_value as number
-                valueSerializer.writeNumber(value_marginTop_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_marginTop_value_type) {
+                const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMarginTopTmpValueForIdx1)
+            } else if (valueHolderForMarginTopTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_marginTop_value_2  = value_marginTop_value as Resource
-                Resource_serializer.write(valueSerializer, value_marginTop_value_2)
+                const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForMarginTopTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SubTabBarIndicatorStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let color_buf : ResourceColor | undefined
-        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == (0).toChar()) {
-                color_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (color_buf__selector == (1).toChar()) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == (2).toChar()) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == (3).toChar()) {
-                color_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+            colorTmpBuf = (colorTmpBuf_ as Color | number | string | Resource)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : Length | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : string | number | Resource | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : Length | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : string | number | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (heightTmpBuf_UnionSelector == (2).toChar()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (height_buf__selector == (2).toChar()) {
-                height_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as string | number | Resource)
+            heightTmpBuf = (heightTmpBuf_ as string | number | Resource)
         }
-        const height_result : Length | undefined = height_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Length | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | Resource | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
+        const heightTmpResult : Length | undefined = heightTmpBuf
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : Length | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : string | number | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (2).toChar()) {
-                width_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number | Resource)
+            widthTmpBuf = (widthTmpBuf_ as string | number | Resource)
         }
-        const width_result : Length | undefined = width_buf
-        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadius_buf : Length | undefined
-        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderRadius_buf_ : string | number | Resource | undefined
-            if (borderRadius_buf__selector == (0).toChar()) {
-                borderRadius_buf_ = (valueDeserializer.readString() as string)
+        const widthTmpResult : Length | undefined = widthTmpBuf
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderRadiusTmpBuf : Length | undefined
+        if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBuf_ : string | number | Resource | undefined
+            if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
+                borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
+                borderRadiusTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
+                borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (borderRadius_buf__selector == (1).toChar()) {
-                borderRadius_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (borderRadius_buf__selector == (2).toChar()) {
-                borderRadius_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            borderRadius_buf = (borderRadius_buf_ as string | number | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | number | Resource)
         }
-        const borderRadius_result : Length | undefined = borderRadius_buf
-        const marginTop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let marginTop_buf : Length | undefined
-        if ((marginTop_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const marginTop_buf__selector : int32 = valueDeserializer.readInt8()
-            let marginTop_buf_ : string | number | Resource | undefined
-            if (marginTop_buf__selector == (0).toChar()) {
-                marginTop_buf_ = (valueDeserializer.readString() as string)
+        const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
+        const marginTopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let marginTopTmpBuf : Length | undefined
+        if ((marginTopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const marginTopTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTopTmpBuf_ : string | number | Resource | undefined
+            if (marginTopTmpBuf_UnionSelector == (0).toChar()) {
+                marginTopTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (marginTopTmpBuf_UnionSelector == (1).toChar()) {
+                marginTopTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (marginTopTmpBuf_UnionSelector == (2).toChar()) {
+                marginTopTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for marginTopTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (marginTop_buf__selector == (1).toChar()) {
-                marginTop_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (marginTop_buf__selector == (2).toChar()) {
-                marginTop_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for marginTop_buf_ has to be chosen through deserialisation.")
-            }
-            marginTop_buf = (marginTop_buf_ as string | number | Resource)
+            marginTopTmpBuf = (marginTopTmpBuf_ as string | number | Resource)
         }
-        const marginTop_result : Length | undefined = marginTop_buf
-        let value : SubTabBarIndicatorStyle = ({color: color_result, height: height_result, width: width_result, borderRadius: borderRadius_result, marginTop: marginTop_result} as SubTabBarIndicatorStyle)
+        const marginTopTmpResult : Length | undefined = marginTopTmpBuf
+        let value : SubTabBarIndicatorStyle = ({color: colorTmpResult, height: heightTmpResult, width: widthTmpResult, borderRadius: borderRadiusTmpResult, marginTop: marginTopTmpResult} as SubTabBarIndicatorStyle)
         return value
     }
 }
 export class TabBarLabelStyle_serializer {
     public static write(buffer: SerializerBase, value: TabBarLabelStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value_overflow  = value.overflow
-        let value_overflow_type : int32 = RuntimeType.UNDEFINED
-        value_overflow_type = runtimeType(value_overflow)
-        valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
-            const value_overflow_value  = (value_overflow as TextOverflow)
-            valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow_value))
+        const valueHolderForOverflow  = value.overflow
+        if (valueHolderForOverflow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOverflowTmpValue  = (valueHolderForOverflow as TextOverflow)
+            valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(valueHolderForOverflowTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_maxLines  = value.maxLines
-        let value_maxLines_type : int32 = RuntimeType.UNDEFINED
-        value_maxLines_type = runtimeType(value_maxLines)
-        valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
-            const value_maxLines_value  = value_maxLines!
-            valueSerializer.writeNumber(value_maxLines_value)
+        const valueHolderForMaxLines  = value.maxLines
+        if (valueHolderForMaxLines !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxLinesTmpValue  = valueHolderForMaxLines!
+            valueSerializer.writeNumber(valueHolderForMaxLinesTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_minFontSize  = value.minFontSize
-        let value_minFontSize_type : int32 = RuntimeType.UNDEFINED
-        value_minFontSize_type = runtimeType(value_minFontSize)
-        valueSerializer.writeInt8((value_minFontSize_type).toChar())
-        if ((value_minFontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_minFontSize_value  = value_minFontSize!
-            let value_minFontSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_minFontSize_value_type = runtimeType(value_minFontSize_value)
-            if (RuntimeType.NUMBER == value_minFontSize_value_type) {
+        const valueHolderForMinFontSize  = value.minFontSize
+        if (valueHolderForMinFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMinFontSizeTmpValue  = valueHolderForMinFontSize!
+            if (valueHolderForMinFontSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_minFontSize_value_0  = value_minFontSize_value as number
-                valueSerializer.writeNumber(value_minFontSize_value_0)
-            }
-            else if ((RuntimeType.STRING == value_minFontSize_value_type) || (RuntimeType.OBJECT == value_minFontSize_value_type)) {
+                const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMinFontSizeTmpValueForIdx0)
+            } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_minFontSize_value_1  = value_minFontSize_value as ResourceStr
-                let value_minFontSize_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_minFontSize_value_1_type = runtimeType(value_minFontSize_value_1)
-                if (RuntimeType.STRING == value_minFontSize_value_1_type) {
+                const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
+                if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_minFontSize_value_1_0  = value_minFontSize_value_1 as string
-                    valueSerializer.writeString(value_minFontSize_value_1_0)
-                }
-                else if (RuntimeType.OBJECT == value_minFontSize_value_1_type) {
+                    const valueHolderForMinFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMinFontSizeTmpValueForIdx1 as string
+                    valueSerializer.writeString(valueHolderForMinFontSizeTmpValueForIdx1ForIdx0)
+                } else if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_minFontSize_value_1_1  = value_minFontSize_value_1 as Resource
-                    Resource_serializer.write(valueSerializer, value_minFontSize_value_1_1)
+                    const valueHolderForMinFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMinFontSizeTmpValueForIdx1 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx1ForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_maxFontSize  = value.maxFontSize
-        let value_maxFontSize_type : int32 = RuntimeType.UNDEFINED
-        value_maxFontSize_type = runtimeType(value_maxFontSize)
-        valueSerializer.writeInt8((value_maxFontSize_type).toChar())
-        if ((value_maxFontSize_type) != (RuntimeType.UNDEFINED)) {
-            const value_maxFontSize_value  = value_maxFontSize!
-            let value_maxFontSize_value_type : int32 = RuntimeType.UNDEFINED
-            value_maxFontSize_value_type = runtimeType(value_maxFontSize_value)
-            if (RuntimeType.NUMBER == value_maxFontSize_value_type) {
+        const valueHolderForMaxFontSize  = value.maxFontSize
+        if (valueHolderForMaxFontSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxFontSizeTmpValue  = valueHolderForMaxFontSize!
+            if (valueHolderForMaxFontSizeTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_maxFontSize_value_0  = value_maxFontSize_value as number
-                valueSerializer.writeNumber(value_maxFontSize_value_0)
-            }
-            else if ((RuntimeType.STRING == value_maxFontSize_value_type) || (RuntimeType.OBJECT == value_maxFontSize_value_type)) {
+                const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as number
+                valueSerializer.writeNumber(valueHolderForMaxFontSizeTmpValueForIdx0)
+            } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_maxFontSize_value_1  = value_maxFontSize_value as ResourceStr
-                let value_maxFontSize_value_1_type : int32 = RuntimeType.UNDEFINED
-                value_maxFontSize_value_1_type = runtimeType(value_maxFontSize_value_1)
-                if (RuntimeType.STRING == value_maxFontSize_value_1_type) {
+                const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
+                if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value_maxFontSize_value_1_0  = value_maxFontSize_value_1 as string
-                    valueSerializer.writeString(value_maxFontSize_value_1_0)
-                }
-                else if (RuntimeType.OBJECT == value_maxFontSize_value_1_type) {
+                    const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMaxFontSizeTmpValueForIdx1 as string
+                    valueSerializer.writeString(valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0)
+                } else if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value_maxFontSize_value_1_1  = value_maxFontSize_value_1 as Resource
-                    Resource_serializer.write(valueSerializer, value_maxFontSize_value_1_1)
+                    const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMaxFontSizeTmpValueForIdx1 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1)
                 }
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_heightAdaptivePolicy  = value.heightAdaptivePolicy
-        let value_heightAdaptivePolicy_type : int32 = RuntimeType.UNDEFINED
-        value_heightAdaptivePolicy_type = runtimeType(value_heightAdaptivePolicy)
-        valueSerializer.writeInt8((value_heightAdaptivePolicy_type).toChar())
-        if ((value_heightAdaptivePolicy_type) != (RuntimeType.UNDEFINED)) {
-            const value_heightAdaptivePolicy_value  = (value_heightAdaptivePolicy as TextHeightAdaptivePolicy)
-            valueSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(value_heightAdaptivePolicy_value))
+        const valueHolderForHeightAdaptivePolicy  = value.heightAdaptivePolicy
+        if (valueHolderForHeightAdaptivePolicy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightAdaptivePolicyTmpValue  = (valueHolderForHeightAdaptivePolicy as TextHeightAdaptivePolicy)
+            valueSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(valueHolderForHeightAdaptivePolicyTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_font  = value.font
-        let value_font_type : int32 = RuntimeType.UNDEFINED
-        value_font_type = runtimeType(value_font)
-        valueSerializer.writeInt8((value_font_type).toChar())
-        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
-            const value_font_value  = value_font!
-            Font_serializer.write(valueSerializer, value_font_value)
+        const valueHolderForFont  = value.font
+        if (valueHolderForFont !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFontTmpValue  = valueHolderForFont!
+            Font_serializer.write(valueSerializer, valueHolderForFontTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_selectedColor  = value.selectedColor
-        let value_selectedColor_type : int32 = RuntimeType.UNDEFINED
-        value_selectedColor_type = runtimeType(value_selectedColor)
-        valueSerializer.writeInt8((value_selectedColor_type).toChar())
-        if ((value_selectedColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_selectedColor_value  = value_selectedColor!
-            let value_selectedColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_selectedColor_value_type = runtimeType(value_selectedColor_value)
-            if (TypeChecker.isColor(value_selectedColor_value)) {
+        const valueHolderForSelectedColor  = value.selectedColor
+        if (valueHolderForSelectedColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
+            if (valueHolderForSelectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_selectedColor_value_0  = value_selectedColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_selectedColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForSelectedColorTmpValueForIdx0))
+            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_selectedColor_value_1  = value_selectedColor_value as number
-                valueSerializer.writeNumber(value_selectedColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+            } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_selectedColor_value_2  = value_selectedColor_value as string
-                valueSerializer.writeString(value_selectedColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_selectedColor_value_type) {
+                const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
+                valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
+            } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_selectedColor_value_3  = value_selectedColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_selectedColor_value_3)
+                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_unselectedColor  = value.unselectedColor
-        let value_unselectedColor_type : int32 = RuntimeType.UNDEFINED
-        value_unselectedColor_type = runtimeType(value_unselectedColor)
-        valueSerializer.writeInt8((value_unselectedColor_type).toChar())
-        if ((value_unselectedColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_unselectedColor_value  = value_unselectedColor!
-            let value_unselectedColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_unselectedColor_value_type = runtimeType(value_unselectedColor_value)
-            if (TypeChecker.isColor(value_unselectedColor_value)) {
+        const valueHolderForUnselectedColor  = value.unselectedColor
+        if (valueHolderForUnselectedColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
+            if (valueHolderForUnselectedColorTmpValue instanceof Color) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_unselectedColor_value_0  = value_unselectedColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_unselectedColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueHolderForUnselectedColorTmpValueForIdx0))
+            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_unselectedColor_value_1  = value_unselectedColor_value as number
-                valueSerializer.writeNumber(value_unselectedColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+            } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_unselectedColor_value_2  = value_unselectedColor_value as string
-                valueSerializer.writeString(value_unselectedColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_unselectedColor_value_type) {
+                const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
+                valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
+            } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((3).toChar())
-                const value_unselectedColor_value_3  = value_unselectedColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_unselectedColor_value_3)
+                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): TabBarLabelStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let overflow_buf : TextOverflow | undefined
-        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            overflow_buf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
+        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let overflowTmpBuf : TextOverflow | undefined
+        if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            overflowTmpBuf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
         }
-        const overflow_result : TextOverflow | undefined = overflow_buf
-        const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxLines_buf : number | undefined
-        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            maxLines_buf = (valueDeserializer.readNumber() as number)
+        const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
+        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maxLinesTmpBuf : number | undefined
+        if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxLinesTmpBuf = (valueDeserializer.readNumber() as number)
         }
-        const maxLines_result : number | undefined = maxLines_buf
-        const minFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minFontSize_buf : number | ResourceStr | undefined
-        if ((minFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const minFontSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let minFontSize_buf_ : number | ResourceStr | undefined
-            if (minFontSize_buf__selector == (0).toChar()) {
-                minFontSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (minFontSize_buf__selector == (1).toChar()) {
-                const minFontSize_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let minFontSize_buf__u : string | Resource | undefined
-                if (minFontSize_buf__u_selector == (0).toChar()) {
-                    minFontSize_buf__u = (valueDeserializer.readString() as string)
+        const maxLinesTmpResult : number | undefined = maxLinesTmpBuf
+        const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let minFontSizeTmpBuf : number | ResourceStr | undefined
+        if ((minFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const minFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let minFontSizeTmpBuf_ : number | ResourceStr | undefined
+            if (minFontSizeTmpBuf_UnionSelector == (0).toChar()) {
+                minFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (minFontSizeTmpBuf_UnionSelector == (1).toChar()) {
+                const minFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let minFontSizeTmpBuf_BufU : string | Resource | undefined
+                if (minFontSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    minFontSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (minFontSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    minFontSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for minFontSizeTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else if (minFontSize_buf__u_selector == (1).toChar()) {
-                    minFontSize_buf__u = Resource_serializer.read(valueDeserializer)
+                minFontSizeTmpBuf_ = (minFontSizeTmpBuf_BufU as string | Resource)
+            } else {
+                throw new Error("One of the branches for minFontSizeTmpBuf_ has to be chosen through deserialisation.")
+            }
+            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as number | ResourceStr)
+        }
+        const minFontSizeTmpResult : number | ResourceStr | undefined = minFontSizeTmpBuf
+        const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let maxFontSizeTmpBuf : number | ResourceStr | undefined
+        if ((maxFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const maxFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let maxFontSizeTmpBuf_ : number | ResourceStr | undefined
+            if (maxFontSizeTmpBuf_UnionSelector == (0).toChar()) {
+                maxFontSizeTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (maxFontSizeTmpBuf_UnionSelector == (1).toChar()) {
+                const maxFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let maxFontSizeTmpBuf_BufU : string | Resource | undefined
+                if (maxFontSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
+                    maxFontSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
+                } else if (maxFontSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
+                    maxFontSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for maxFontSizeTmpBuf_BufU has to be chosen through deserialisation.")
                 }
-                else {
-                    throw new Error("One of the branches for minFontSize_buf__u has to be chosen through deserialisation.")
-                }
-                minFontSize_buf_ = (minFontSize_buf__u as string | Resource)
+                maxFontSizeTmpBuf_ = (maxFontSizeTmpBuf_BufU as string | Resource)
+            } else {
+                throw new Error("One of the branches for maxFontSizeTmpBuf_ has to be chosen through deserialisation.")
             }
-            else {
-                throw new Error("One of the branches for minFontSize_buf_ has to be chosen through deserialisation.")
-            }
-            minFontSize_buf = (minFontSize_buf_ as number | ResourceStr)
+            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as number | ResourceStr)
         }
-        const minFontSize_result : number | ResourceStr | undefined = minFontSize_buf
-        const maxFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxFontSize_buf : number | ResourceStr | undefined
-        if ((maxFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const maxFontSize_buf__selector : int32 = valueDeserializer.readInt8()
-            let maxFontSize_buf_ : number | ResourceStr | undefined
-            if (maxFontSize_buf__selector == (0).toChar()) {
-                maxFontSize_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (maxFontSize_buf__selector == (1).toChar()) {
-                const maxFontSize_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let maxFontSize_buf__u : string | Resource | undefined
-                if (maxFontSize_buf__u_selector == (0).toChar()) {
-                    maxFontSize_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (maxFontSize_buf__u_selector == (1).toChar()) {
-                    maxFontSize_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for maxFontSize_buf__u has to be chosen through deserialisation.")
-                }
-                maxFontSize_buf_ = (maxFontSize_buf__u as string | Resource)
-            }
-            else {
-                throw new Error("One of the branches for maxFontSize_buf_ has to be chosen through deserialisation.")
-            }
-            maxFontSize_buf = (maxFontSize_buf_ as number | ResourceStr)
+        const maxFontSizeTmpResult : number | ResourceStr | undefined = maxFontSizeTmpBuf
+        const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightAdaptivePolicyTmpBuf : TextHeightAdaptivePolicy | undefined
+        if ((heightAdaptivePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            heightAdaptivePolicyTmpBuf = TypeChecker.TextHeightAdaptivePolicy_FromNumeric(valueDeserializer.readInt32())
         }
-        const maxFontSize_result : number | ResourceStr | undefined = maxFontSize_buf
-        const heightAdaptivePolicy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightAdaptivePolicy_buf : TextHeightAdaptivePolicy | undefined
-        if ((heightAdaptivePolicy_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            heightAdaptivePolicy_buf = TypeChecker.TextHeightAdaptivePolicy_FromNumeric(valueDeserializer.readInt32())
+        const heightAdaptivePolicyTmpResult : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicyTmpBuf
+        const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fontTmpBuf : Font | undefined
+        if ((fontTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fontTmpBuf = Font_serializer.read(valueDeserializer)
         }
-        const heightAdaptivePolicy_result : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicy_buf
-        const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let font_buf : Font | undefined
-        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            font_buf = Font_serializer.read(valueDeserializer)
+        const fontTmpResult : Font | undefined = fontTmpBuf
+        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let selectedColorTmpBuf : ResourceColor | undefined
+        if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
+                selectedColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
+                selectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
+                selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
+                selectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | number | string | Resource)
         }
-        const font_result : Font | undefined = font_buf
-        const selectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selectedColor_buf : ResourceColor | undefined
-        if ((selectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const selectedColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let selectedColor_buf_ : Color | number | string | Resource | undefined
-            if (selectedColor_buf__selector == (0).toChar()) {
-                selectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+        const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
+        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let unselectedColorTmpBuf : ResourceColor | undefined
+        if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let unselectedColorTmpBuf_ : Color | number | string | Resource | undefined
+            if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
+                unselectedColorTmpBuf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
+                unselectedColorTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
+                unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
+                unselectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
             }
-            else if (selectedColor_buf__selector == (1).toChar()) {
-                selectedColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (selectedColor_buf__selector == (2).toChar()) {
-                selectedColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (selectedColor_buf__selector == (3).toChar()) {
-                selectedColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for selectedColor_buf_ has to be chosen through deserialisation.")
-            }
-            selectedColor_buf = (selectedColor_buf_ as Color | number | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | number | string | Resource)
         }
-        const selectedColor_result : ResourceColor | undefined = selectedColor_buf
-        const unselectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let unselectedColor_buf : ResourceColor | undefined
-        if ((unselectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let unselectedColor_buf_ : Color | number | string | Resource | undefined
-            if (unselectedColor_buf__selector == (0).toChar()) {
-                unselectedColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (unselectedColor_buf__selector == (1).toChar()) {
-                unselectedColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (unselectedColor_buf__selector == (2).toChar()) {
-                unselectedColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (unselectedColor_buf__selector == (3).toChar()) {
-                unselectedColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for unselectedColor_buf_ has to be chosen through deserialisation.")
-            }
-            unselectedColor_buf = (unselectedColor_buf_ as Color | number | string | Resource)
-        }
-        const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
-        let value : TabBarLabelStyle = ({overflow: overflow_result, maxLines: maxLines_result, minFontSize: minFontSize_result, maxFontSize: maxFontSize_result, heightAdaptivePolicy: heightAdaptivePolicy_result, font: font_result, selectedColor: selectedColor_result, unselectedColor: unselectedColor_result} as TabBarLabelStyle)
+        const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
+        let value : TabBarLabelStyle = ({overflow: overflowTmpResult, maxLines: maxLinesTmpResult, minFontSize: minFontSizeTmpResult, maxFontSize: maxFontSizeTmpResult, heightAdaptivePolicy: heightAdaptivePolicyTmpResult, font: fontTmpResult, selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarLabelStyle)
         return value
     }
 }
 export class BottomTabBarStyle_serializer {
     public static write(buffer: SerializerBase, value: BottomTabBarStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value__icon  = value._icon
-        let value__icon_type : int32 = RuntimeType.UNDEFINED
-        value__icon_type = runtimeType(value__icon)
-        valueSerializer.writeInt8((value__icon_type).toChar())
-        if ((value__icon_type) != (RuntimeType.UNDEFINED)) {
-            const value__icon_value  = value__icon!
-            let value__icon_value_type : int32 = RuntimeType.UNDEFINED
-            value__icon_value_type = runtimeType(value__icon_value)
-            if ((RuntimeType.STRING == value__icon_value_type) || (RuntimeType.OBJECT == value__icon_value_type)) {
+        const valueHolderFor_icon  = value._icon
+        if (valueHolderFor_icon !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_iconTmpValue  = valueHolderFor_icon!
+            if (valueHolderFor_iconTmpValue instanceof ResourceStr) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__icon_value_0  = value__icon_value as ResourceStr
-                let value__icon_value_0_type : int32 = RuntimeType.UNDEFINED
-                value__icon_value_0_type = runtimeType(value__icon_value_0)
-                if (RuntimeType.STRING == value__icon_value_0_type) {
+                const valueHolderFor_iconTmpValueForIdx0  = valueHolderFor_iconTmpValue as ResourceStr
+                if (valueHolderFor_iconTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value__icon_value_0_0  = value__icon_value_0 as string
-                    valueSerializer.writeString(value__icon_value_0_0)
-                }
-                else if (RuntimeType.OBJECT == value__icon_value_0_type) {
+                    const valueHolderFor_iconTmpValueForIdx0ForIdx0  = valueHolderFor_iconTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderFor_iconTmpValueForIdx0ForIdx0)
+                } else if (valueHolderFor_iconTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value__icon_value_0_1  = value__icon_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value__icon_value_0_1)
+                    const valueHolderFor_iconTmpValueForIdx0ForIdx1  = valueHolderFor_iconTmpValueForIdx0 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx0ForIdx1)
                 }
-            }
-            else if (TypeChecker.isTabBarSymbol(value__icon_value, false, false)) {
+            } else if (valueHolderFor_iconTmpValue instanceof TabBarSymbol) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__icon_value_1  = value__icon_value as TabBarSymbol
-                TabBarSymbol_serializer.write(valueSerializer, value__icon_value_1)
+                const valueHolderFor_iconTmpValueForIdx1  = valueHolderFor_iconTmpValue as TabBarSymbol
+                TabBarSymbol_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__text  = value._text
-        let value__text_type : int32 = RuntimeType.UNDEFINED
-        value__text_type = runtimeType(value__text)
-        valueSerializer.writeInt8((value__text_type).toChar())
-        if ((value__text_type) != (RuntimeType.UNDEFINED)) {
-            const value__text_value  = value__text!
-            let value__text_value_type : int32 = RuntimeType.UNDEFINED
-            value__text_value_type = runtimeType(value__text_value)
-            if (RuntimeType.STRING == value__text_value_type) {
+        const valueHolderFor_text  = value._text
+        if (valueHolderFor_text !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_textTmpValue  = valueHolderFor_text!
+            if (valueHolderFor_textTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__text_value_0  = value__text_value as string
-                valueSerializer.writeString(value__text_value_0)
-            }
-            else if (RuntimeType.OBJECT == value__text_value_type) {
+                const valueHolderFor_textTmpValueForIdx0  = valueHolderFor_textTmpValue as string
+                valueSerializer.writeString(valueHolderFor_textTmpValueForIdx0)
+            } else if (valueHolderFor_textTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__text_value_1  = value__text_value as Resource
-                Resource_serializer.write(valueSerializer, value__text_value_1)
+                const valueHolderFor_textTmpValueForIdx1  = valueHolderFor_textTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_textTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__labelStyle  = value._labelStyle
-        let value__labelStyle_type : int32 = RuntimeType.UNDEFINED
-        value__labelStyle_type = runtimeType(value__labelStyle)
-        valueSerializer.writeInt8((value__labelStyle_type).toChar())
-        if ((value__labelStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value__labelStyle_value  = value__labelStyle!
-            TabBarLabelStyle_serializer.write(valueSerializer, value__labelStyle_value)
+        const valueHolderFor_labelStyle  = value._labelStyle
+        if (valueHolderFor_labelStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_labelStyleTmpValue  = valueHolderFor_labelStyle!
+            TabBarLabelStyle_serializer.write(valueSerializer, valueHolderFor_labelStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__padding  = value._padding
-        let value__padding_type : int32 = RuntimeType.UNDEFINED
-        value__padding_type = runtimeType(value__padding)
-        valueSerializer.writeInt8((value__padding_type).toChar())
-        if ((value__padding_type) != (RuntimeType.UNDEFINED)) {
-            const value__padding_value  = value__padding!
-            let value__padding_value_type : int32 = RuntimeType.UNDEFINED
-            value__padding_value_type = runtimeType(value__padding_value)
-            if (TypeChecker.isPadding(value__padding_value, true, false, true, false)) {
+        const valueHolderFor_padding  = value._padding
+        if (valueHolderFor_padding !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
+            if (valueHolderFor_paddingTmpValue instanceof Padding) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__padding_value_0  = value__padding_value as Padding
-                Padding_serializer.write(valueSerializer, value__padding_value_0)
-            }
-            else if ((RuntimeType.STRING == value__padding_value_type) || (RuntimeType.NUMBER == value__padding_value_type) || (RuntimeType.OBJECT == value__padding_value_type)) {
+                const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding
+                Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0)
+            } else if (valueHolderFor_paddingTmpValue instanceof Dimension) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__padding_value_1  = value__padding_value as Dimension
-                let value__padding_value_1_type : int32 = RuntimeType.UNDEFINED
-                value__padding_value_1_type = runtimeType(value__padding_value_1)
-                if (RuntimeType.STRING == value__padding_value_1_type) {
+                const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as Dimension
+                if (valueHolderFor_paddingTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value__padding_value_1_0  = value__padding_value_1 as string
-                    valueSerializer.writeString(value__padding_value_1_0)
-                }
-                else if (RuntimeType.NUMBER == value__padding_value_1_type) {
+                    const valueHolderFor_paddingTmpValueForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx1 as string
+                    valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx1ForIdx0)
+                } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof number) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value__padding_value_1_1  = value__padding_value_1 as number
-                    valueSerializer.writeNumber(value__padding_value_1_1)
-                }
-                else if (RuntimeType.OBJECT == value__padding_value_1_type) {
+                    const valueHolderFor_paddingTmpValueForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx1 as number
+                    valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx1ForIdx1)
+                } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof Resource) {
                     valueSerializer.writeInt8((2).toChar())
-                    const value__padding_value_1_2  = value__padding_value_1 as Resource
-                    Resource_serializer.write(valueSerializer, value__padding_value_1_2)
+                    const valueHolderFor_paddingTmpValueForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx1 as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1ForIdx2)
                 }
-            }
-            else if (TypeChecker.isLocalizedPadding(value__padding_value, true, false, true, false)) {
+            } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__padding_value_2  = value__padding_value as LocalizedPadding
-                LocalizedPadding_serializer.write(valueSerializer, value__padding_value_2)
+                const valueHolderFor_paddingTmpValueForIdx2  = valueHolderFor_paddingTmpValue as LocalizedPadding
+                LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__layoutMode  = value._layoutMode
-        let value__layoutMode_type : int32 = RuntimeType.UNDEFINED
-        value__layoutMode_type = runtimeType(value__layoutMode)
-        valueSerializer.writeInt8((value__layoutMode_type).toChar())
-        if ((value__layoutMode_type) != (RuntimeType.UNDEFINED)) {
-            const value__layoutMode_value  = (value__layoutMode as LayoutMode)
-            valueSerializer.writeInt32(TypeChecker.LayoutMode_ToNumeric(value__layoutMode_value))
+        const valueHolderFor_layoutMode  = value._layoutMode
+        if (valueHolderFor_layoutMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_layoutModeTmpValue  = (valueHolderFor_layoutMode as LayoutMode)
+            valueSerializer.writeInt32(TypeChecker.LayoutMode_ToNumeric(valueHolderFor_layoutModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__verticalAlign  = value._verticalAlign
-        let value__verticalAlign_type : int32 = RuntimeType.UNDEFINED
-        value__verticalAlign_type = runtimeType(value__verticalAlign)
-        valueSerializer.writeInt8((value__verticalAlign_type).toChar())
-        if ((value__verticalAlign_type) != (RuntimeType.UNDEFINED)) {
-            const value__verticalAlign_value  = (value__verticalAlign as VerticalAlign)
-            valueSerializer.writeInt32(TypeChecker.VerticalAlign_ToNumeric(value__verticalAlign_value))
+        const valueHolderFor_verticalAlign  = value._verticalAlign
+        if (valueHolderFor_verticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_verticalAlignTmpValue  = (valueHolderFor_verticalAlign as VerticalAlign)
+            valueSerializer.writeInt32(TypeChecker.VerticalAlign_ToNumeric(valueHolderFor_verticalAlignTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__symmetricExtensible  = value._symmetricExtensible
-        let value__symmetricExtensible_type : int32 = RuntimeType.UNDEFINED
-        value__symmetricExtensible_type = runtimeType(value__symmetricExtensible)
-        valueSerializer.writeInt8((value__symmetricExtensible_type).toChar())
-        if ((value__symmetricExtensible_type) != (RuntimeType.UNDEFINED)) {
-            const value__symmetricExtensible_value  = value__symmetricExtensible!
-            valueSerializer.writeBoolean(value__symmetricExtensible_value)
+        const valueHolderFor_symmetricExtensible  = value._symmetricExtensible
+        if (valueHolderFor_symmetricExtensible !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_symmetricExtensibleTmpValue  = valueHolderFor_symmetricExtensible!
+            valueSerializer.writeBoolean(valueHolderFor_symmetricExtensibleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__id  = value._id
-        let value__id_type : int32 = RuntimeType.UNDEFINED
-        value__id_type = runtimeType(value__id)
-        valueSerializer.writeInt8((value__id_type).toChar())
-        if ((value__id_type) != (RuntimeType.UNDEFINED)) {
-            const value__id_value  = value__id!
-            valueSerializer.writeString(value__id_value)
+        const valueHolderFor_id  = value._id
+        if (valueHolderFor_id !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_idTmpValue  = valueHolderFor_id!
+            valueSerializer.writeString(valueHolderFor_idTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__iconStyle  = value._iconStyle
-        let value__iconStyle_type : int32 = RuntimeType.UNDEFINED
-        value__iconStyle_type = runtimeType(value__iconStyle)
-        valueSerializer.writeInt8((value__iconStyle_type).toChar())
-        if ((value__iconStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value__iconStyle_value  = value__iconStyle!
-            TabBarIconStyle_serializer.write(valueSerializer, value__iconStyle_value)
+        const valueHolderFor_iconStyle  = value._iconStyle
+        if (valueHolderFor_iconStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_iconStyleTmpValue  = valueHolderFor_iconStyle!
+            TabBarIconStyle_serializer.write(valueSerializer, valueHolderFor_iconStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): BottomTabBarStyle {
@@ -1448,115 +1373,101 @@ export class BottomTabBarStyle_serializer {
 export class SubTabBarStyle_serializer {
     public static write(buffer: SerializerBase, value: SubTabBarStyle): void {
         let valueSerializer : SerializerBase = buffer
-        const value__content  = value._content
-        let value__content_type : int32 = RuntimeType.UNDEFINED
-        value__content_type = runtimeType(value__content)
-        valueSerializer.writeInt8((value__content_type).toChar())
-        if ((value__content_type) != (RuntimeType.UNDEFINED)) {
-            const value__content_value  = value__content!
-            let value__content_value_type : int32 = RuntimeType.UNDEFINED
-            value__content_value_type = runtimeType(value__content_value)
-            if (RuntimeType.STRING == value__content_value_type) {
+        const valueHolderFor_content  = value._content
+        if (valueHolderFor_content !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_contentTmpValue  = valueHolderFor_content!
+            if (valueHolderFor_contentTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__content_value_0  = value__content_value as string
-                valueSerializer.writeString(value__content_value_0)
-            }
-            else if (TypeChecker.isResource(value__content_value, false, false, false, false, false)) {
+                const valueHolderFor_contentTmpValueForIdx0  = valueHolderFor_contentTmpValue as string
+                valueSerializer.writeString(valueHolderFor_contentTmpValueForIdx0)
+            } else if (valueHolderFor_contentTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__content_value_1  = value__content_value as Resource
-                Resource_serializer.write(valueSerializer, value__content_value_1)
-            }
-            else if (TypeChecker.isComponentContent(value__content_value)) {
+                const valueHolderFor_contentTmpValueForIdx1  = valueHolderFor_contentTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx1)
+            } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
                 valueSerializer.writeInt8((2).toChar())
-                const value__content_value_2  = value__content_value as ComponentContent
-                ComponentContent_serializer.write(valueSerializer, value__content_value_2)
+                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
+                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__indicator  = value._indicator
-        let value__indicator_type : int32 = RuntimeType.UNDEFINED
-        value__indicator_type = runtimeType(value__indicator)
-        valueSerializer.writeInt8((value__indicator_type).toChar())
-        if ((value__indicator_type) != (RuntimeType.UNDEFINED)) {
-            const value__indicator_value  = value__indicator!
-            SubTabBarIndicatorStyle_serializer.write(valueSerializer, value__indicator_value)
+        const valueHolderFor_indicator  = value._indicator
+        if (valueHolderFor_indicator !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_indicatorTmpValue  = valueHolderFor_indicator!
+            SubTabBarIndicatorStyle_serializer.write(valueSerializer, valueHolderFor_indicatorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__selectedMode  = value._selectedMode
-        let value__selectedMode_type : int32 = RuntimeType.UNDEFINED
-        value__selectedMode_type = runtimeType(value__selectedMode)
-        valueSerializer.writeInt8((value__selectedMode_type).toChar())
-        if ((value__selectedMode_type) != (RuntimeType.UNDEFINED)) {
-            const value__selectedMode_value  = (value__selectedMode as SelectedMode)
-            valueSerializer.writeInt32(TypeChecker.SelectedMode_ToNumeric(value__selectedMode_value))
+        const valueHolderFor_selectedMode  = value._selectedMode
+        if (valueHolderFor_selectedMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_selectedModeTmpValue  = (valueHolderFor_selectedMode as SelectedMode)
+            valueSerializer.writeInt32(TypeChecker.SelectedMode_ToNumeric(valueHolderFor_selectedModeTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__board  = value._board
-        let value__board_type : int32 = RuntimeType.UNDEFINED
-        value__board_type = runtimeType(value__board)
-        valueSerializer.writeInt8((value__board_type).toChar())
-        if ((value__board_type) != (RuntimeType.UNDEFINED)) {
-            const value__board_value  = value__board!
-            BoardStyle_serializer.write(valueSerializer, value__board_value)
+        const valueHolderFor_board  = value._board
+        if (valueHolderFor_board !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_boardTmpValue  = valueHolderFor_board!
+            BoardStyle_serializer.write(valueSerializer, valueHolderFor_boardTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__labelStyle  = value._labelStyle
-        let value__labelStyle_type : int32 = RuntimeType.UNDEFINED
-        value__labelStyle_type = runtimeType(value__labelStyle)
-        valueSerializer.writeInt8((value__labelStyle_type).toChar())
-        if ((value__labelStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value__labelStyle_value  = value__labelStyle!
-            TabBarLabelStyle_serializer.write(valueSerializer, value__labelStyle_value)
+        const valueHolderFor_labelStyle  = value._labelStyle
+        if (valueHolderFor_labelStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_labelStyleTmpValue  = valueHolderFor_labelStyle!
+            TabBarLabelStyle_serializer.write(valueSerializer, valueHolderFor_labelStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__padding  = value._padding
-        let value__padding_type : int32 = RuntimeType.UNDEFINED
-        value__padding_type = runtimeType(value__padding)
-        valueSerializer.writeInt8((value__padding_type).toChar())
-        if ((value__padding_type) != (RuntimeType.UNDEFINED)) {
-            const value__padding_value  = value__padding!
-            let value__padding_value_type : int32 = RuntimeType.UNDEFINED
-            value__padding_value_type = runtimeType(value__padding_value)
-            if ((TypeChecker.isPadding(value__padding_value, false, false, false, false)) || ((RuntimeType.STRING == value__padding_value_type) || (RuntimeType.NUMBER == value__padding_value_type) || (RuntimeType.OBJECT == value__padding_value_type))) {
+        const valueHolderFor_padding  = value._padding
+        if (valueHolderFor_padding !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
+            if (valueHolderFor_paddingTmpValue instanceof Padding | Dimension) {
                 valueSerializer.writeInt8((0).toChar())
-                const value__padding_value_0  = value__padding_value as Padding | Dimension
-                let value__padding_value_0_type : int32 = RuntimeType.UNDEFINED
-                value__padding_value_0_type = runtimeType(value__padding_value_0)
-                if (TypeChecker.isPadding(value__padding_value_0, false, false, false, false)) {
+                const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding | Dimension
+                if (valueHolderFor_paddingTmpValueForIdx0 instanceof Padding) {
                     valueSerializer.writeInt8((0).toChar())
-                    const value__padding_value_0_0  = value__padding_value_0 as Padding
-                    Padding_serializer.write(valueSerializer, value__padding_value_0_0)
-                }
-                else if ((RuntimeType.STRING == value__padding_value_0_type) || (RuntimeType.NUMBER == value__padding_value_0_type) || (RuntimeType.OBJECT == value__padding_value_0_type)) {
+                    const valueHolderFor_paddingTmpValueForIdx0ForIdx0  = valueHolderFor_paddingTmpValueForIdx0 as Padding
+                    Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx0)
+                } else if (valueHolderFor_paddingTmpValueForIdx0 instanceof Dimension) {
                     valueSerializer.writeInt8((1).toChar())
-                    const value__padding_value_0_1  = value__padding_value_0 as Dimension
-                    let value__padding_value_0_1_type : int32 = RuntimeType.UNDEFINED
-                    value__padding_value_0_1_type = runtimeType(value__padding_value_0_1)
-                    if (RuntimeType.STRING == value__padding_value_0_1_type) {
+                    const valueHolderFor_paddingTmpValueForIdx0ForIdx1  = valueHolderFor_paddingTmpValueForIdx0 as Dimension
+                    if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof string) {
                         valueSerializer.writeInt8((0).toChar())
-                        const value__padding_value_0_1_0  = value__padding_value_0_1 as string
-                        valueSerializer.writeString(value__padding_value_0_1_0)
-                    }
-                    else if (RuntimeType.NUMBER == value__padding_value_0_1_type) {
+                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as string
+                        valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0)
+                    } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof number) {
                         valueSerializer.writeInt8((1).toChar())
-                        const value__padding_value_0_1_1  = value__padding_value_0_1 as number
-                        valueSerializer.writeNumber(value__padding_value_0_1_1)
-                    }
-                    else if (RuntimeType.OBJECT == value__padding_value_0_1_type) {
+                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as number
+                        valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1)
+                    } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof Resource) {
                         valueSerializer.writeInt8((2).toChar())
-                        const value__padding_value_0_1_2  = value__padding_value_0_1 as Resource
-                        Resource_serializer.write(valueSerializer, value__padding_value_0_1_2)
+                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as Resource
+                        Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2)
                     }
                 }
-            }
-            else if (TypeChecker.isLocalizedPadding(value__padding_value, false, false, false, false)) {
+            } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
                 valueSerializer.writeInt8((1).toChar())
-                const value__padding_value_1  = value__padding_value as LocalizedPadding
-                LocalizedPadding_serializer.write(valueSerializer, value__padding_value_1)
+                const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as LocalizedPadding
+                LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value__id  = value._id
-        let value__id_type : int32 = RuntimeType.UNDEFINED
-        value__id_type = runtimeType(value__id)
-        valueSerializer.writeInt8((value__id_type).toChar())
-        if ((value__id_type) != (RuntimeType.UNDEFINED)) {
-            const value__id_value  = value__id!
-            valueSerializer.writeString(value__id_value)
+        const valueHolderFor_id  = value._id
+        if (valueHolderFor_id !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderFor_idTmpValue  = valueHolderFor_id!
+            valueSerializer.writeString(valueHolderFor_idTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SubTabBarStyle {

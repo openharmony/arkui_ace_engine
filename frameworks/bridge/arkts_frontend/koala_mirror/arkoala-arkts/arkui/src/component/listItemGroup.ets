@@ -16,9 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ListDividerOptions_serializer, ListDividerOptions } from "./list"
-import { ChildrenMainSize_serializer, ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { ChildrenMainSize_serializer, ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethodModifier } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -31,6 +31,7 @@ import { ComponentBuilder } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
 import { ComponentContent, ComponentContent_serializer } from "./../generated/arkui.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeUpdaterFlag } from "./../generated/AttributeUpdater"
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -38,42 +39,42 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     public static create(component?: ComponentBase, flags: int32 = 0): ArkListItemGroupPeer {
         const peerId  = PeerNode.nextId()
         const _peerPtr  = ArkUIGeneratedNativeModule._ListItemGroup_construct(peerId, flags)
-        const _peer  = new ArkListItemGroupPeer(_peerPtr, peerId, "ListItemGroup", flags)
+        const _peer  = new ArkListItemGroupPeer(_peerPtr, peerId, 'ListItemGroup', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setListItemGroupOptionsAttribute(options?: ListItemGroupOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8((options_type).toChar())
-        if ((options_type) != (RuntimeType.UNDEFINED)) {
-            const options_value  = options!
-            ListItemGroupOptions_serializer.write(thisSerializer, options_value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            ListItemGroupOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListItemGroupInterface_setListItemGroupOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setDividerAttribute(value: ListDividerOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ListDividerOptions_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ListDividerOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListItemGroupAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setChildrenMainSizeAttribute(value: ChildrenMainSize | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            ChildrenMainSize_serializer.write(thisSerializer, value_value)
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ChildrenMainSize_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListItemGroupAttribute_setChildrenMainSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -115,13 +116,6 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
-    public apply(target: ListItemGroupAttribute): void {
-        super.apply(target)
-        if (this.divider_value !== undefined)
-            target.divider(this.divider_value!)
-        if (this.childrenMainSize_value !== undefined)
-            target.childrenMainSize(this.childrenMainSize_value!)
-    }
 }
 
 export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements ListItemGroupAttribute {
@@ -153,7 +147,6 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        this._modifier = value as AttributeModifier<CommonMethod>
         return this
     }
     public applyAttributesFinish(): void {
@@ -161,26 +154,6 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         super.applyAttributesFinish()
     }
 }
-export function withListItemGroupStyle(receiver: ListItemGroupAttribute, modifier: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier !== undefined)
-    {
-        let style  = new ArkListItemGroupStyle()
-        if (modifier!.isUpdater())
-            (modifier! as AttributeUpdater<CommonMethod>).initializeModifier(style)
-        else
-            (modifier! as AttributeModifier<CommonMethod>).applyNormalAttribute(style)
-        style.apply(receiver)
-    }
-}
-// @memo
-// @BuilderLambda("ListItemGroup")
-// export function ListItemGroup(
-//     options?: ListItemGroupOptions,
-//     @memo
-//     content_?: () => void,
-// ): ListItemGroupAttribute {
-//     throw new Error("Not implemented")
-// }
 
 @memo
 export function ListItemGroup(
@@ -196,35 +169,108 @@ export function ListItemGroup(
     NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer): void => {
         receiver.setListItemGroupOptions(options)
         style?.(receiver)
-        withListItemGroupStyle(receiver, receiver._modifier)
         content_?.()
         receiver.applyAttributesFinish()
     })
 }
 
-export class ArkListItemGroupSet extends ArkCommonMethodSet implements ListItemGroupAttribute {
+export class ListItemGroupModifier extends CommonMethodModifier implements ListItemGroupAttribute {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _divider_flag?: boolean
-    _divider0_value?: ListDividerOptions | undefined
-    _childrenMainSize_flag?: boolean
-    _childrenMainSize0_value?: ChildrenMainSize | undefined
-    applyModifierPatch(component: ListItemGroupAttribute): void {
-        if (this._divider_flag)
-            component.divider((this._divider0_value as ListDividerOptions | undefined))
-        if (this._childrenMainSize_flag)
-            component.childrenMainSize((this._childrenMainSize0_value as ChildrenMainSize | undefined))
+    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _divider_0_0value?: ListDividerOptions | undefined
+    _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _childrenMainSize_0_0value?: ChildrenMainSize | undefined
+    applyModifierPatch(peer: ArkListItemGroupPeer): void {
+        super.applyModifierPatch(peer)
+        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setDividerAttribute((this._divider_0_0value as ListDividerOptions | undefined));
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setDividerAttribute((undefined as ListDividerOptions | undefined));
+                }
+            }
+        }
+        if (this._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._childrenMainSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setChildrenMainSizeAttribute((this._childrenMainSize_0_0value as ChildrenMainSize | undefined));
+                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setChildrenMainSizeAttribute((undefined as ChildrenMainSize | undefined));
+                }
+            }
+        }
     }
-    public divider(value: ListDividerOptions | undefined): this {
-        this._divider_flag = true
-        this._divider0_value = value
+    mergeModifier(modifier: ListItemGroupModifier): void {
+        super.mergeModifier(modifier)
+        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._divider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.divider(modifier._divider_0_0value);
+                    break;
+                }
+                default: {
+                    this.divider((undefined as ListDividerOptions | undefined));
+                }
+            }
+        }
+        if (modifier._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._childrenMainSize_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.childrenMainSize(modifier._childrenMainSize_0_0value);
+                    break;
+                }
+                default: {
+                    this.childrenMainSize((undefined as ChildrenMainSize | undefined));
+                }
+            }
+        }
+    }
+    divider(value: ListDividerOptions | undefined): this {
+        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+            this._divider_0_0value = value
+        } else
+        {
+            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
-    public childrenMainSize(value: ChildrenMainSize | undefined): this {
-        this._childrenMainSize_flag = true
-        this._childrenMainSize0_value = value
+    childrenMainSize(value: ChildrenMainSize | undefined): this {
+        if (((this._childrenMainSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
+            this._childrenMainSize_0_0value = value
+        } else
+        {
+            this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -234,142 +280,133 @@ export class ArkListItemGroupSet extends ArkCommonMethodSet implements ListItemG
 export class ListItemGroupOptions_serializer {
     public static write(buffer: SerializerBase, value: ListItemGroupOptions): void {
         let valueSerializer : SerializerBase = buffer
-        const value_header  = value.header
-        let value_header_type : int32 = RuntimeType.UNDEFINED
-        value_header_type = runtimeType(value_header)
-        valueSerializer.writeInt8((value_header_type).toChar())
-        if ((value_header_type) != (RuntimeType.UNDEFINED)) {
-            const value_header_value  = value_header!
-            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_header_value))
+        const valueHolderForHeader  = value.header
+        if (valueHolderForHeader !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeaderTmpValue  = valueHolderForHeader!
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForHeaderTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_headerComponent  = value.headerComponent
-        let value_headerComponent_type : int32 = RuntimeType.UNDEFINED
-        value_headerComponent_type = runtimeType(value_headerComponent)
-        valueSerializer.writeInt8((value_headerComponent_type).toChar())
-        if ((value_headerComponent_type) != (RuntimeType.UNDEFINED)) {
-            const value_headerComponent_value  = value_headerComponent!
-            ComponentContent_serializer.write(valueSerializer, value_headerComponent_value)
+        const valueHolderForHeaderComponent  = value.headerComponent
+        if (valueHolderForHeaderComponent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeaderComponentTmpValue  = valueHolderForHeaderComponent!
+            ComponentContent_serializer.write(valueSerializer, valueHolderForHeaderComponentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_footer  = value.footer
-        let value_footer_type : int32 = RuntimeType.UNDEFINED
-        value_footer_type = runtimeType(value_footer)
-        valueSerializer.writeInt8((value_footer_type).toChar())
-        if ((value_footer_type) != (RuntimeType.UNDEFINED)) {
-            const value_footer_value  = value_footer!
-            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_footer_value))
+        const valueHolderForFooter  = value.footer
+        if (valueHolderForFooter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFooterTmpValue  = valueHolderForFooter!
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForFooterTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_footerComponent  = value.footerComponent
-        let value_footerComponent_type : int32 = RuntimeType.UNDEFINED
-        value_footerComponent_type = runtimeType(value_footerComponent)
-        valueSerializer.writeInt8((value_footerComponent_type).toChar())
-        if ((value_footerComponent_type) != (RuntimeType.UNDEFINED)) {
-            const value_footerComponent_value  = value_footerComponent!
-            ComponentContent_serializer.write(valueSerializer, value_footerComponent_value)
+        const valueHolderForFooterComponent  = value.footerComponent
+        if (valueHolderForFooterComponent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFooterComponentTmpValue  = valueHolderForFooterComponent!
+            ComponentContent_serializer.write(valueSerializer, valueHolderForFooterComponentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_space  = value.space
-        let value_space_type : int32 = RuntimeType.UNDEFINED
-        value_space_type = runtimeType(value_space)
-        valueSerializer.writeInt8((value_space_type).toChar())
-        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
-            const value_space_value  = value_space!
-            let value_space_value_type : int32 = RuntimeType.UNDEFINED
-            value_space_value_type = runtimeType(value_space_value)
-            if (RuntimeType.NUMBER == value_space_value_type) {
+        const valueHolderForSpace  = value.space
+        if (valueHolderForSpace !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpaceTmpValue  = valueHolderForSpace!
+            if (valueHolderForSpaceTmpValue instanceof number) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_space_value_0  = value_space_value as number
-                valueSerializer.writeNumber(value_space_value_0)
-            }
-            else if (RuntimeType.STRING == value_space_value_type) {
+                const valueHolderForSpaceTmpValueForIdx0  = valueHolderForSpaceTmpValue as number
+                valueSerializer.writeNumber(valueHolderForSpaceTmpValueForIdx0)
+            } else if (valueHolderForSpaceTmpValue instanceof string) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_space_value_1  = value_space_value as string
-                valueSerializer.writeString(value_space_value_1)
+                const valueHolderForSpaceTmpValueForIdx1  = valueHolderForSpaceTmpValue as string
+                valueSerializer.writeString(valueHolderForSpaceTmpValueForIdx1)
             }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const value_style  = value.style
-        let value_style_type : int32 = RuntimeType.UNDEFINED
-        value_style_type = runtimeType(value_style)
-        valueSerializer.writeInt8((value_style_type).toChar())
-        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
-            const value_style_value  = (value_style as ListItemGroupStyle)
-            valueSerializer.writeInt32(TypeChecker.ListItemGroupStyle_ToNumeric(value_style_value))
+        const valueHolderForStyle  = value.style
+        if (valueHolderForStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStyleTmpValue  = (valueHolderForStyle as ListItemGroupStyle)
+            valueSerializer.writeInt32(TypeChecker.ListItemGroupStyle_ToNumeric(valueHolderForStyleTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ListItemGroupOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const header_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let header_buf : CustomBuilder | undefined
-        if ((header_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const header_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const header_buf__call : KPointer = valueDeserializer.readPointer()
-            const header_buf__callSync : KPointer = valueDeserializer.readPointer()
-            header_buf = ():void => { 
-    const header_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    header_buf__argsSerializer.writeInt32(header_buf__resource.resourceId);
-    header_buf__argsSerializer.writePointer(header_buf__call);
-    header_buf__argsSerializer.writePointer(header_buf__callSync);
-    InteropNativeModule._CallCallback(737226752, header_buf__argsSerializer.asBuffer(), header_buf__argsSerializer.length());
-    header_buf__argsSerializer.release();
-    return; }
-        }
-        const header_result : CustomBuilder | undefined = header_buf
-        const headerComponent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let headerComponent_buf : ComponentContent | undefined
-        if ((headerComponent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            headerComponent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
-        }
-        const headerComponent_result : ComponentContent | undefined = headerComponent_buf
-        const footer_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let footer_buf : CustomBuilder | undefined
-        if ((footer_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const footer_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const footer_buf__call : KPointer = valueDeserializer.readPointer()
-            const footer_buf__callSync : KPointer = valueDeserializer.readPointer()
-            footer_buf = ():void => { 
-    const footer_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    footer_buf__argsSerializer.writeInt32(footer_buf__resource.resourceId);
-    footer_buf__argsSerializer.writePointer(footer_buf__call);
-    footer_buf__argsSerializer.writePointer(footer_buf__callSync);
-    InteropNativeModule._CallCallback(737226752, footer_buf__argsSerializer.asBuffer(), footer_buf__argsSerializer.length());
-    footer_buf__argsSerializer.release();
-    return; }
-        }
-        const footer_result : CustomBuilder | undefined = footer_buf
-        const footerComponent_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let footerComponent_buf : ComponentContent | undefined
-        if ((footerComponent_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            footerComponent_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
-        }
-        const footerComponent_result : ComponentContent | undefined = footerComponent_buf
-        const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let space_buf : number | string | undefined
-        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const space_buf__selector : int32 = valueDeserializer.readInt8()
-            let space_buf_ : number | string | undefined
-            if (space_buf__selector == (0).toChar()) {
-                space_buf_ = (valueDeserializer.readNumber() as number)
+        const headerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let headerTmpBuf : CustomBuilder | undefined
+        if ((headerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const headerTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const headerTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const headerTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            headerTmpBuf = ():void => {
+                const headerTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                headerTmpBuf_BufArgsSerializer.writeInt32(headerTmpBuf_BufResource.resourceId);
+                headerTmpBuf_BufArgsSerializer.writePointer(headerTmpBuf_BufCall);
+                headerTmpBuf_BufArgsSerializer.writePointer(headerTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(737226752, headerTmpBuf_BufArgsSerializer.asBuffer(), headerTmpBuf_BufArgsSerializer.length());
+                headerTmpBuf_BufArgsSerializer.release();
+                return;
             }
-            else if (space_buf__selector == (1).toChar()) {
-                space_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for space_buf_ has to be chosen through deserialisation.")
-            }
-            space_buf = (space_buf_ as number | string)
         }
-        const space_result : number | string | undefined = space_buf
-        const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let style_buf : ListItemGroupStyle | undefined
-        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            style_buf = TypeChecker.ListItemGroupStyle_FromNumeric(valueDeserializer.readInt32())
+        const headerTmpResult : CustomBuilder | undefined = headerTmpBuf
+        const headerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let headerComponentTmpBuf : ComponentContent | undefined
+        if ((headerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            headerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
-        const style_result : ListItemGroupStyle | undefined = style_buf
-        let value : ListItemGroupOptions = ({header: header_result, headerComponent: headerComponent_result, footer: footer_result, footerComponent: footerComponent_result, space: space_result, style: style_result} as ListItemGroupOptions)
+        const headerComponentTmpResult : ComponentContent | undefined = headerComponentTmpBuf
+        const footerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let footerTmpBuf : CustomBuilder | undefined
+        if ((footerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const footerTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const footerTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const footerTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            footerTmpBuf = ():void => {
+                const footerTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                footerTmpBuf_BufArgsSerializer.writeInt32(footerTmpBuf_BufResource.resourceId);
+                footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCall);
+                footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCallSync);
+                InteropNativeModule._CallCallback(737226752, footerTmpBuf_BufArgsSerializer.asBuffer(), footerTmpBuf_BufArgsSerializer.length());
+                footerTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const footerTmpResult : CustomBuilder | undefined = footerTmpBuf
+        const footerComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let footerComponentTmpBuf : ComponentContent | undefined
+        if ((footerComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            footerComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+        }
+        const footerComponentTmpResult : ComponentContent | undefined = footerComponentTmpBuf
+        const spaceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spaceTmpBuf : number | string | undefined
+        if ((spaceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const spaceTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let spaceTmpBuf_ : number | string | undefined
+            if (spaceTmpBuf_UnionSelector == (0).toChar()) {
+                spaceTmpBuf_ = (valueDeserializer.readNumber() as number)
+            } else if (spaceTmpBuf_UnionSelector == (1).toChar()) {
+                spaceTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for spaceTmpBuf_ has to be chosen through deserialisation.")
+            }
+            spaceTmpBuf = (spaceTmpBuf_ as number | string)
+        }
+        const spaceTmpResult : number | string | undefined = spaceTmpBuf
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let styleTmpBuf : ListItemGroupStyle | undefined
+        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            styleTmpBuf = TypeChecker.ListItemGroupStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const styleTmpResult : ListItemGroupStyle | undefined = styleTmpBuf
+        let value : ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult, footer: footerTmpResult, footerComponent: footerComponentTmpResult, space: spaceTmpResult, style: styleTmpResult} as ListItemGroupOptions)
         return value
     }
 }
