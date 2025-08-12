@@ -160,4 +160,19 @@ HWTEST_F(SnapshotTest, SnapshotTest006, TestSize.Level1)
     ASSERT_NE(options, nullptr);
     EXPECT_EQ(OH_ArkUI_SnapshotOptions_SetScale(options, -1.0f), ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: SnapshotTest007
+ * @tc.desc: Test OH_ArkUI_GetNodeSnapshot function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, SnapshotTest007, TestSize.Level1)
+{
+    OH_PixelmapNative* pixelmap = nullptr;
+    auto options = OH_ArkUI_CreateSnapshotOptions();
+    ASSERT_NE(options, nullptr);
+    OH_ArkUI_SnapshotOptions_SetScale(options, 1.5f);
+    auto result = OH_ArkUI_GetNodeSnapshot(nullptr, options, &pixelmap);
+    EXPECT_EQ(result, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace
