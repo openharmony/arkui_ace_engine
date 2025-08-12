@@ -20,7 +20,8 @@
 #include "common/common_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
-#include "lazy_for_each_module.h"
+#include "syntax/lazy_for_each_module.h"
+#include "syntax/syntax_module.h"
 #include "list/list_children_main_size_module.h"
 #include "load.h"
 #include "log/log.h"
@@ -98,6 +99,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_LazyForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
+        },
+        ani_native_function {
+            "_SyntaxNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",
