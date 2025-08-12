@@ -33,25 +33,31 @@ class ArkResourcesHelper {
 ArkResourcesHelper.COLOR = 10001;
 ArkResourcesHelper.FLOAT = 10002;
 class ArkThemeNativeHelper {
-    static sendThemeToNative(theme, elmtId) {
+    static sendThemeToNative(theme, elmtId, darkSetStatus) {
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme.darkColors);
-        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId);
+        WithTheme.sendThemeToNative(lightColorArray, darkColorArray, elmtId, darkSetStatus);
     }
-    static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy) {
+    static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy, darkSetStatus) {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
         const lightColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
         const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
-        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy );
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, lightColorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus );
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
     }
     static setDefaultTheme(theme) {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
-        const darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        let darkColorArray = [];
+        if(!!theme?.darkColors) {
+            darkColorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.darkColors);
+        }else {
+            darkColorArray = colorArray;
+        }
+        
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         getUINativeModule().theme.setDefaultTheme(colorArray, false);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
@@ -298,10 +304,6 @@ class ArkThemeBase {
             copyTheme.darkColors = {};
             // For properties missing in darkColors, use the values from colors
             Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
-        } else if (customTheme.colors) {
-            // If the user does not provide darkColors, use the values from colors
-            copyTheme.darkColors = {};
-            Object.assign(copyTheme.darkColors, customTheme.colors);
         }
         
         if (customTheme.shapes) {
@@ -528,8 +530,8 @@ if (globalThis.WithTheme !== undefined) {
         const onThemeScopeDestroy = () => {
             ArkThemeScopeManager.getInstance().onScopeDestroy(elmtId);
         };
-        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId, !!cloneTheme?.darkColors);
+        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy, !!cloneTheme?.darkColors);
         ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions !== null && themeOptions !== void 0 ? themeOptions : {}, theme);
     };
     globalThis.WithTheme.pop = function () {
@@ -1072,7 +1074,7 @@ class ArkThemeScopeManager {
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
         this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         this.defaultTheme.bindToScope(0);
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0);
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0, !!cloneTheme?.darkColors);
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
         this.notifyGlobalThemeChanged();
     }
