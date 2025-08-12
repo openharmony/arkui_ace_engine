@@ -233,7 +233,7 @@ public:
     //  TS call JS to update caches.l1Rid4Index_
     // and invalidate container layout following a
     // Repeat.rerender
-    void UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index);
+    void UpdateL1Rid4Index(std::map<int32_t, uint32_t>& l1Rd4Index, std::unordered_set<uint32_t>& ridNeedToRecycle);
 
 
     void SetIsLoop(bool isLoop)

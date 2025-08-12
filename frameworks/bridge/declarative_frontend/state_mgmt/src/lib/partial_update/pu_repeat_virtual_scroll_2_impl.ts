@@ -356,6 +356,12 @@ class __RepeatVirtualScroll2Impl<T> {
     // they are no longer associated with a data item
     private spareRid_: Set<number> = new Set<number>();
 
+    // record the additional spare rid added in addRemovedItemsToSpare()
+    private additionalSpareRid_: Set<number> = new Set<number>();
+
+    // record the rid that need to Call OnRecycle() on C++ side
+    private ridNeedToRecycle_: Set<number> = new Set<number>();
+
     // request container re-layout
     private firstIndexChanged_: number = 0;
 
@@ -630,8 +636,8 @@ class __RepeatVirtualScroll2Impl<T> {
             this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, this.firstIndexChangedInTryFastRelayout_);
             this.firstIndexChangedInTryFastRelayout_ = Number.NaN;
         }
-        RepeatVirtualScroll2Native.updateL1Rid4Index(
-            this.repeatElmtId_, arrLen, this.totalCount(), this.firstIndexChanged_, Array.from(newL1Rid4Index));
+        RepeatVirtualScroll2Native.updateL1Rid4Index(this.repeatElmtId_, arrLen, this.totalCount(),
+            this.firstIndexChanged_, Array.from(newL1Rid4Index), Array.from(this.ridNeedToRecycle_));
 
         this.rerenderOngoing_ = false;
 
@@ -772,9 +778,11 @@ class __RepeatVirtualScroll2Impl<T> {
     }
 
     private addRemovedItemsToSpare(): void {
+        this.additionalSpareRid_.clear();
         for (let oldIndex in this.activeDataItems_) {
             if (this.activeDataItems_[oldIndex].rid) {
                 this.spareRid_.add(this.activeDataItems_[oldIndex].rid);
+                this.additionalSpareRid_.add(this.activeDataItems_[oldIndex].rid);
                 const index = parseInt(oldIndex);
                 this.index4Key_.delete(this.key4Index_.get(index));
                 this.key4Index_.delete(index);
@@ -784,6 +792,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
     private newItemsNeedToRender(
         newActiveDataItems: Array<ActiveDataItem<void | T>>, newL1Rid4Index: Map<number, number>): void {
+        this.ridNeedToRecycle_.clear();
         for (const indexS in newActiveDataItems) {
             const activeIndex = parseInt(indexS);
             const newActiveDataItemAtActiveIndex = newActiveDataItems[activeIndex];
@@ -818,6 +827,11 @@ class __RepeatVirtualScroll2Impl<T> {
 
                 // add to index -> rid map to be sent to C++
                 newL1Rid4Index.set(activeIndex, optRid);
+
+                // if the rid is recycled in current render, notify C++ to call OnRecycle()
+                if (this.additionalSpareRid_.has(optRid)) {
+                    this.ridNeedToRecycle_.add(optRid);
+                }
 
                 // don't need to call getItem here, already checked that the data item exists
                 ridMeta.repeatItem_.updateItem(newActiveDataItemAtActiveIndex.item as T);

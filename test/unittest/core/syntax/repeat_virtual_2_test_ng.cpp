@@ -753,4 +753,57 @@ HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange001, TestSize.Level1)
     repeatNode->NotifyColorModeChange(1);
     EXPECT_TRUE(cacheItem->node_->measureAnyWay_);
 }
+
+/**
+ * @tc.name: UpdateIsL1001
+ * @tc.desc: Test caches.UpdateIsL1
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, UpdateIsL1001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2017, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem0 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    CacheItem cacheItem1 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    cacheItem0->node_ = nullptr;
+    repeatNode->caches_.UpdateIsL1(cacheItem0, false);
+    EXPECT_EQ(cacheItem0->isL1_, false);
+    EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);
+    repeatNode->caches_.UpdateIsL1(cacheItem1, false);
+    EXPECT_EQ(cacheItem1->isL1_, false);
+    EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 1);
+    repeatNode->caches_.UpdateIsL1(cacheItem0, true);
+    EXPECT_EQ(cacheItem0->isL1_, true);
+    EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 1);
+    repeatNode->caches_.UpdateIsL1(cacheItem1, true);
+    EXPECT_EQ(cacheItem1->isL1_, true);
+    EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);
+    repeatNode->caches_.UpdateIsL1(cacheItem1, false, false);
+    EXPECT_EQ(cacheItem1->isL1_, false);
+    EXPECT_EQ(repeatNode->caches_.recycledNodeIds_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdateL1Rid4Index001
+ * @tc.desc: Test caches.UpdateL1Rid4Index
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, UpdateL1Rid4Index001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    RefPtr<UINode> uiNode0 = AceType::MakeRefPtr<FrameNode>("node", 2018, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> uiNode1 = AceType::MakeRefPtr<FrameNode>("node", 2019, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> uiNode2 = AceType::MakeRefPtr<FrameNode>("node", 2020, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem0 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode0, true);
+    CacheItem cacheItem1 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode1, true);
+    CacheItem cacheItem2 = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode2, false);
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem0 }, { 2, cacheItem1 }, { 3, cacheItem2 }
+    };
+    repeatNode->caches_.UpdateL1Rid4Index({ { 1, 2 }, { 2, 3 } }, { 2 });
+    EXPECT_EQ(cacheItem0->isL1_, false);
+    EXPECT_EQ(cacheItem1->isL1_, true);
+    EXPECT_EQ(cacheItem2->isL1_, true);
+}
+
 } // namespace OHOS::Ace::NG
