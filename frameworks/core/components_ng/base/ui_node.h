@@ -124,7 +124,7 @@ public:
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
-    void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
+    virtual void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     void MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
@@ -1091,6 +1091,11 @@ public:
 
     void FindTopNavDestination(RefPtr<FrameNode>& result);
 
+    bool SubtreeWithIgnoreChild() const
+    {
+        return subtreeIgnoreCount_ != 0;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1185,6 +1190,7 @@ protected:
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
+    int32_t subtreeIgnoreCount_ = 0;
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,

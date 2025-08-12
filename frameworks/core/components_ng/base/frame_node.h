@@ -867,7 +867,9 @@ public:
 
     void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
 
-    void PostTaskForIgnore(PipelineContext* pipeline);
+    void PostTaskForIgnore();
+
+    void PostBundle(std::vector<RefPtr<FrameNode>>&& nodes);
 
     bool PostponedTaskForIgnore();
 
@@ -882,6 +884,10 @@ public:
     {
         return delayLayoutChildren_;
     }
+
+    void TraverseForIgnore();
+
+    void TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subtreeCollection, int& subtreeRecheck);
 
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
@@ -1474,6 +1480,9 @@ public:
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
+    void UpdateIgnoreCount(int inc);
+    void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
+        bool addDefaultTransition = false, bool addModalUiextension = false) override;
 
 protected:
     void DumpInfo() override;
