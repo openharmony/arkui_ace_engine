@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_LAZY_FOR_EACH_NODE_ANI_MODIFIER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_LAZY_FOR_EACH_NODE_ANI_MODIFIER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_SYNTAX_NODE_ANI_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_SYNTAX_NODE_ANI_MODIFIER_H
 
 #include "core/interfaces/ani/ani_api.h"
-#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/syntax/arkoala_syntax_node.h"
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructLazyForEachNode(ani_int id)
+ani_long ConstructSyntaxNode(ani_int id)
 {
-    auto node = AceType::MakeRefPtr<ArkoalaLazyNode>(id);
+    auto node = AceType::MakeRefPtr<ArkoalaSyntaxNode>(id);
     CHECK_NULL_RETURN(node, 0);
     node->IncRefCount();
     return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
-const ArkUIAniLazyForEachNodeModifier* GetLazyForEachNodeAniModifier()
+const ArkUIAniSyntaxNodeModifier* GetSyntaxNodeAniModifier()
 {
-    static const ArkUIAniLazyForEachNodeModifier impl = { .constructLazyForEachNode = ConstructLazyForEachNode };
+    static const ArkUIAniSyntaxNodeModifier impl = { .constructSyntaxNode = ConstructSyntaxNode };
     return &impl;
 }
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_LAZY_FOR_EACH_NODE_ANI_MODIFIER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_SYNTAX_NODE_ANI_MODIFIER_H

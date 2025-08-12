@@ -22,7 +22,8 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
-#include "lazy_for_each_module.h"
+#include "syntax/lazy_for_each_module.h"
+#include "syntax/syntax_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -335,6 +336,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_LazyForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
+        },
+        ani_native_function {
+            "_SyntaxNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",

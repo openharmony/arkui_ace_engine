@@ -17,13 +17,14 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
+import { KPointer } from '@koalaui/interop';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
-import { ArkColumnPeer } from '../component/column';
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
 
 /** @memo:intrinsic */
 export function RepeatImpl<T>(
@@ -203,6 +204,21 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
+export class SyntaxNodePeer extends PeerNode {
+    public static create(): SyntaxNodePeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._SyntaxNode_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create SyntaxNodePeer with id: ${peerId}`);
+        }
+        return new SyntaxNodePeer(_peerPtr, peerId, 'SyntaxNode');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
 /** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
@@ -231,7 +247,7 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
+            NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
                 itemBuilder(ri);
             }, _type + repeatId); // using type as reuseKey
         } else {
