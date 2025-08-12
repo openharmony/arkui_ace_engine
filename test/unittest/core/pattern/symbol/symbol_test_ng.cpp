@@ -924,9 +924,10 @@ HWTEST_F(SymbolTestNg, SetShaderStyle001, TestSize.Level1)
     /**
      * @tc.steps: step3. test get shaderStyle property
      */
-    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
 
     auto symbolOptions = textStyle.GetShaderStyle();
         std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
@@ -962,9 +963,10 @@ HWTEST_F(SymbolTestNg, SetShaderStyle002, TestSize.Level1)
     /**
      * @tc.steps: step3. test get shaderStyle property
      */
-    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
 
     auto symbolOptions = textStyle.GetShaderStyle();
     EXPECT_EQ(symbolOptions.size(), gradients.size());
@@ -1000,10 +1002,10 @@ HWTEST_F(SymbolTestNg, SetSymbolShadow001, TestSize.Level1)
     /**
      * @tc.steps: step3. test get symbolShadow property
      */
-    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasSymbolShadow());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
     EXPECT_FLOAT_EQ(textStyle.GetSymbolShadow().radius, 10.0f);
 }
 } // namespace OHOS::Ace::NG
