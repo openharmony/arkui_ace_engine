@@ -915,7 +915,7 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     auto column = GetColumnNode();
     CHECK_NULL_VOID(column);
     auto eventHub = column->GetOrCreateGestureEventHub();
-    if (customTitleSettedShow_) {
+    if (titleMgr_ && titleMgr_->GetIsUpdateTargetNode() && customTitleSettedShow_) {
         eventHub->SetOnTouchTestFunc(nullptr);
         return;
     }
