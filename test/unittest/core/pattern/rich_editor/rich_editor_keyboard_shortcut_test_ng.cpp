@@ -1205,4 +1205,41 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, ShiftMultipleSelection001, TestSize.L
     richEditorPattern->UpdateShiftFlag(keyEvent);
     EXPECT_FALSE(richEditorPattern->shiftFlag_);
 }
+
+/**
+ * @tc.name: HandleDelKeyOnDragging
+ * @tc.desc: test the shortcut for deletion on dragging status
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleDelKeyOnDragging, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_DEL;
+    keyEvent.action = KeyAction::DOWN;
+    richEditorPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+    richEditorPattern->status_ = Status::DRAGGING;
+    EXPECT_TRUE(richEditorPattern->IsShortCutBlocked());
+    richEditorPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+}
 } // namespace OHOS::Ace::NG

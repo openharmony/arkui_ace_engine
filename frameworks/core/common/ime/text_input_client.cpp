@@ -195,6 +195,10 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
+        auto isShortCutBlocked = IsShortCutBlocked();
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a keyboard shortcut, key code: %{public}d, modKeyFlags: %{public}d, "
+            "isBlocked: %{public}d", static_cast<int32_t>(keyEvent.code), modKeyFlags, isShortCutBlocked);
+        CHECK_EQUAL_RETURN(isShortCutBlocked, true, true);
         if (KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_UP, KEY_SHIFT) ||
             KeyComb(keyEvent.code, modKeyFlags) == KeyComb(KeyCode::KEY_DPAD_DOWN, KEY_SHIFT)) {
             this->RecordOriginCaretPosition();
