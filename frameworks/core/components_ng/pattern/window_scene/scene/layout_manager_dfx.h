@@ -26,7 +26,7 @@ struct SessionUIParam;
 }
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t RECORD_LIST_MAX_CAPACITY = 10;
+constexpr uint32_t RECORD_LIST_MAX_CAPACITY = 1;
 
 struct RecordResult {
     uint32_t size = 0;
@@ -36,7 +36,7 @@ struct RecordResult {
 class LayoutManagerDfx {
 public:
     static LayoutManagerDfx* GetInstance();
-    void RecordUIParams(TraverseResult uiParams);
+    void RecordUIParams(TraverseResult res);
     void ExecuteRecordUIParams(TraverseResult& res);
 
 private:
@@ -48,6 +48,7 @@ private:
     std::mutex recordMutex_;
     RecordResult recordRes_;
     int32_t curVsyncCnt_ = 0;
+    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAYOUT_MANAGER_DFX_H
