@@ -569,4 +569,135 @@ HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest016, TestSize.Lev
     EXPECT_TRUE(controller.CheckEmpty(1));
     EXPECT_FALSE(controller.CheckEmpty(2));
 }
+
+/**
+ * @tc.name: PageEventControllerTest017
+ * @tc.desc: test IsHighPriorityNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest017, TestSize.Level1)
+{
+    auto framenode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    PageEventController controller;
+
+    auto result = controller.IsHighPriorityNode(framenode);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AccessibilityManagerUtilsTest018
+ * @tc.desc: test CheckNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest018, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context, nullptr);
+    context->instanceId_ = 1;
+    frameNode->AttachContext(AceType::RawPtr(context), false);
+
+    PageEventController controller;
+    controller.Add(frameNode);
+    auto result = controller.CheckNode(frameNode, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AccessibilityManagerUtilsTest019
+ * @tc.desc: test CheckHighPriorityEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest019, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context, nullptr);
+    context->instanceId_ = 1;
+    frameNode->AttachContext(AceType::RawPtr(context), false);
+    PageEventController controller;
+    controller.Add(frameNode);
+
+    auto result = controller.CheckHighPriorityEmpty(2);
+    EXPECT_TRUE(result);
+
+    result = controller.CheckHighPriorityEmpty(1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccessibilityManagerUtilsTest020
+ * @tc.desc: test DeleteInstanceNodeAllWithPriority
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest020, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    auto context1 = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context1, nullptr);
+    context1->instanceId_ = 1;
+    frameNode1->AttachContext(AceType::RawPtr(context1), false);
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto context2 = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context2, nullptr);
+    context2->instanceId_ = 2;
+    frameNode2->AttachContext(AceType::RawPtr(context2), false);
+    PageEventController controller;
+    controller.Add(frameNode1);
+    controller.Add(frameNode2);
+
+    controller.DeleteInstanceNodeAllWithPriority(frameNode1);
+    auto it = controller.controller_.find(1);
+    EXPECT_EQ(it, controller.controller_.end());
+
+    controller.DeleteInstanceNodeAllWithPriority(frameNode2);
+    it = controller.controller_.find(2);
+    EXPECT_NE(it, controller.controller_.end());
+    auto controllerMap = it->second;
+    auto mapIt = controllerMap.find(frameNode2);
+    EXPECT_EQ(mapIt, controllerMap.end());
+}
+
+/**
+ * @tc.name: AccessibilityManagerUtilsTest021
+ * @tc.desc: test DeleteLowPriorityNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, AccessibilityManagerUtilsTest021, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    auto context1 = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context1, nullptr);
+    context1->instanceId_ = 1;
+    frameNode1->AttachContext(AceType::RawPtr(context1), false);
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode2, nullptr);
+    auto context2 = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(context2, nullptr);
+    context2->instanceId_ = 2;
+    frameNode2->AttachContext(AceType::RawPtr(context2), false);
+    PageEventController controller;
+    controller.Add(frameNode1);
+    controller.Add(frameNode2);
+
+    controller.DeleteLowPriorityNode(1);
+    auto it = controller.controller_.find(1);
+    EXPECT_NE(it, controller.controller_.end());
+    auto controllerMap = it->second;
+    auto mapIt = controllerMap.find(frameNode1);
+    EXPECT_NE(mapIt, controllerMap.end());
+
+    controller.DeleteLowPriorityNode(2);
+    it = controller.controller_.find(2);
+    EXPECT_NE(it, controller.controller_.end());
+    controllerMap = it->second;
+    mapIt = controllerMap.find(frameNode2);
+    EXPECT_EQ(mapIt, controllerMap.end());
+}
 } // namespace OHOS::Ace::NG

@@ -3618,8 +3618,10 @@ void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node,
     }
 
     if (releaseAll) {
-        pageController_.DeleteInstanceNodeAll(node);
-        ReleaseAllCacheAccessibilityEvent(containerId);
+        pageController_.DeleteInstanceNodeAllWithPriority(node);
+        if (pageController_.CheckEmpty(containerId)) {
+            ReleaseAllCacheAccessibilityEvent(containerId);
+        }
     }
 }
 
