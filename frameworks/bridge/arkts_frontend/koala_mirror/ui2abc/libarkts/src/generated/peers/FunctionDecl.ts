@@ -38,6 +38,9 @@ export class FunctionDecl extends ScriptFunction {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    static createFunctionDecl(name: string, node?: AstNode): FunctionDecl {
+        return new FunctionDecl(global.generatedEs2panda._CreateFunctionDecl(global.context, name, passNode(node)))
+    }
     protected readonly brandFunctionDecl: undefined
 }
 export function isFunctionDecl(node: object | undefined): node is FunctionDecl {

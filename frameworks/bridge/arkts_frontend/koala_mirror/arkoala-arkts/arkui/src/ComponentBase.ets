@@ -16,8 +16,8 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
 
 import { PeerNode } from './PeerNode'
 import { ArkUINativeModule } from "#components"
-import { AnimateParam } from './generated'
-import { _animationEnd, _animationStart, UICommonBase } from './handwritten'
+import { AnimateParam } from '#generated'
+import { _animationEnd, _animationStart, UICommonBase } from '#handwritten'
 import { unsafeCast } from "@koalaui/common"
 
 export class ComponentBase implements UICommonBase {

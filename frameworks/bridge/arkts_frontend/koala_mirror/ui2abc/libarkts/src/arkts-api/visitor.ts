@@ -391,7 +391,8 @@ export function visitEachChild(
     if (isObjectExpression(node)) {
         return factory.updateObjectExpression(
             node,
-            nodesVisitor(node.properties, visitor)
+            nodesVisitor(node.properties, visitor),
+            node.getPreferredTypePointer(),
         )
     }
     if (isFunctionExpression(node)) {

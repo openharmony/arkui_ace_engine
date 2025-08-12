@@ -39,4 +39,11 @@ export {
     extension_ScriptFunctionSetSignaturePointer,
     extension_ScriptFunctionGetPreferredReturnTypePointer,
     extension_ScriptFunctionSetPreferredReturnTypePointer,
+    extension_ExpressionGetPreferredTypePointer,
+    extension_ExpressionSetPreferredTypePointer,
+    extension_ProgramGetExternalSources,
+    extension_SourcePositionGetCol,
+    extension_SourcePositionGetLine,
+    extension_SourcePositionToString,
+    extension_NumberLiteralValue,
 } from "./arkts-api/utilities/extensions"

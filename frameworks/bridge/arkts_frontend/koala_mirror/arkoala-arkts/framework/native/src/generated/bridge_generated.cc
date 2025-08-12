@@ -4308,19 +4308,6 @@ void impl_CommonMethod_setRenderFit(Ark_NativePointer thisPtr, KSerializerBuffer
         GetNodeModifiers()->getCommonMethodModifier()->setRenderFit(self, static_cast<Opt_RenderFit*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setRenderFit, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setGestureModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GestureModifier valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = static_cast<Ark_GestureModifier>(GestureModifier_serializer::read(thisDeserializer));
-        }
-        Opt_GestureModifier valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setGestureModifier(self, static_cast<Opt_GestureModifier*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setGestureModifier, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBackgroundBrightness(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -30152,21 +30139,6 @@ Ark_NativePointer impl_GestureGroupInterface_onCancel(Ark_NativePointer thisPtr,
         return GetAccessors()->getGestureGroupInterfaceAccessor()->onCancel(self, static_cast<Callback_Void*>(&eventValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(GestureGroupInterface_onCancel, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_GestureModifier_construct() {
-        return GetAccessors()->getGestureModifierAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(GestureModifier_construct, Ark_NativePointer)
-Ark_NativePointer impl_GestureModifier_getFinalizer() {
-        return GetAccessors()->getGestureModifierAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(GestureModifier_getFinalizer, Ark_NativePointer)
-void impl_GestureModifier_applyGesture(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_GestureModifier self = reinterpret_cast<Ark_GestureModifier>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_UIGestureEvent eventValueTemp = UIGestureEvent_serializer::read(thisDeserializer);;
-        GetAccessors()->getGestureModifierAccessor()->applyGesture(self, static_cast<Ark_UIGestureEvent*>(&eventValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(GestureModifier_applyGesture, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GestureRecognizer_construct() {
         return GetAccessors()->getGestureRecognizerAccessor()->construct();
 }
@@ -30563,38 +30535,6 @@ Ark_Boolean impl_HttpAuthHandler_isHttpAuthInfoSaved(Ark_NativePointer thisPtr) 
         return GetAccessors()->getHttpAuthHandlerAccessor()->isHttpAuthInfoSaved(self);
 }
 KOALA_INTEROP_DIRECT_1(HttpAuthHandler_isHttpAuthInfoSaved, Ark_Boolean, Ark_NativePointer)
-Ark_NativePointer impl_image_PixelMap_construct() {
-        return GetAccessors()->getImage_PixelMapAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(image_PixelMap_construct, Ark_NativePointer)
-Ark_NativePointer impl_image_PixelMap_getFinalizer() {
-        return GetAccessors()->getImage_PixelMapAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(image_PixelMap_getFinalizer, Ark_NativePointer)
-void impl_image_PixelMap_readPixelsToBufferSync(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_image_PixelMap self = reinterpret_cast<Ark_image_PixelMap>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_Buffer dstValueTemp = static_cast<Ark_Buffer>(thisDeserializer.readBuffer());;
-        GetAccessors()->getImage_PixelMapAccessor()->readPixelsToBufferSync(self, static_cast<Ark_Buffer*>(&dstValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(image_PixelMap_readPixelsToBufferSync, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_image_PixelMap_writeBufferToPixels(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_image_PixelMap self = reinterpret_cast<Ark_image_PixelMap>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_Buffer srcValueTemp = static_cast<Ark_Buffer>(thisDeserializer.readBuffer());;
-        GetAccessors()->getImage_PixelMapAccessor()->writeBufferToPixels(self, static_cast<Ark_Buffer*>(&srcValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(image_PixelMap_writeBufferToPixels, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Boolean impl_image_PixelMap_getIsEditable(Ark_NativePointer thisPtr) {
-        Ark_image_PixelMap self = reinterpret_cast<Ark_image_PixelMap>(thisPtr);
-        return GetAccessors()->getImage_PixelMapAccessor()->getIsEditable(self);
-}
-KOALA_INTEROP_DIRECT_1(image_PixelMap_getIsEditable, Ark_Boolean, Ark_NativePointer)
-Ark_Boolean impl_image_PixelMap_getIsStrideAlignment(Ark_NativePointer thisPtr) {
-        Ark_image_PixelMap self = reinterpret_cast<Ark_image_PixelMap>(thisPtr);
-        return GetAccessors()->getImage_PixelMapAccessor()->getIsStrideAlignment(self);
-}
-KOALA_INTEROP_DIRECT_1(image_PixelMap_getIsStrideAlignment, Ark_Boolean, Ark_NativePointer)
 Ark_NativePointer impl_ImageAnalyzerController_construct() {
         return GetAccessors()->getImageAnalyzerControllerAccessor()->construct();
 }
@@ -39724,13 +39664,6 @@ Ark_Boolean impl_GlobalScope_focusControl_requestFocus(const KStringPtr& value) 
         return GetAccessors()->getGlobalScopeAccessor()->focusControl_requestFocus((const Ark_String*) (&value));
 }
 KOALA_INTEROP_1(GlobalScope_focusControl_requestFocus, Ark_Boolean, KStringPtr)
-KInteropReturnBuffer impl_GlobalScope_font_getUIFontConfig() {
-        const auto &retValue = GetAccessors()->getGlobalScopeAccessor()->font_getUIFontConfig();
-        SerializerBase _retSerializer {};
-        font_UIFontConfig_serializer::write(_retSerializer, retValue);
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_0(GlobalScope_font_getUIFontConfig, KInteropReturnBuffer)
 KInteropReturnBuffer impl_GlobalScope_getRectangleById(const KStringPtr& id) {
         const auto &retValue = GetAccessors()->getGlobalScopeAccessor()->getRectangleById((const Ark_String*) (&id));
         SerializerBase _retSerializer {};

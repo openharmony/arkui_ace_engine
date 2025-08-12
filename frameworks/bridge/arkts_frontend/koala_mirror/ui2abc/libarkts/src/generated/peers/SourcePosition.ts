@@ -32,10 +32,16 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { extension_SourcePositionGetCol } from "./../../reexport-for-generated"
+import { extension_SourcePositionGetLine } from "./../../reexport-for-generated"
+import { extension_SourcePositionToString } from "./../../reexport-for-generated"
 
 export class SourcePosition extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    getLine = extension_SourcePositionGetLine
+    getCol = extension_SourcePositionGetCol
+    toString = extension_SourcePositionToString
     protected readonly brandSourcePosition: undefined
 }

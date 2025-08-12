@@ -79,10 +79,15 @@ export function runtimeType<T>(value: T): int32 {
     if (value instanceof Function)
         return RuntimeType.FUNCTION
 
-    if (value instanceof Object)
-        return RuntimeType.OBJECT
+    // slow workaround for enum
+    const typeName = typeof value
+    if (typeName == "number")
+      return RuntimeType.NUMBER
 
-    throw new Error(`bug: ${value} is ${typeof value}`)
+    if (typeName == "string")
+      return RuntimeType.STRING
+
+    return RuntimeType.OBJECT
 }
 
 export function toPeerPtr(value: object): pointer {
@@ -240,9 +245,9 @@ export class SerializerBase implements Disposable {
     final holdAndWriteCallbackForPromiseVoid(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<void>, ResourceId] {
         let resourceId: ResourceId = 0
         const promise = new Promise<void>((resolve: (value: PromiseLike<void>) => void, reject: (err: Error) => void) => {
-            const callback = (err: Error | undefined) => {
+            const callback = (err?: string[] | undefined) => {
                 if (err !== undefined)
-                    reject(err!)
+                    reject(new Error(err!.join(';')))
                 else
                     resolve(Promise.resolve())
             }
@@ -253,9 +258,9 @@ export class SerializerBase implements Disposable {
     final holdAndWriteCallbackForPromise<T>(hold: pointer = 0, release: pointer = 0, call: pointer = 0): [Promise<T>, ResourceId] {
         let resourceId: ResourceId = 0
         const promise = new Promise<T>((resolve: (value: T | PromiseLike<T>) => void, reject: (err: Error) => void) => {
-            const callback = (value?: T | undefined, err?: Error | undefined) => {
+            const callback = (value?: T | undefined, err?: string[] | undefined) => {
                 if (err !== undefined)
-                    reject(err!)
+                    reject(new Error(err!.join(';')))
                 else
                     resolve(value!)
             }
@@ -410,9 +415,10 @@ export class SerializerBase implements Disposable {
         unsafeMemory.writeInt32(pos, encodedLength + 1)
         this._position = pos + encodedLength + 4 + 1
     }
-    final writeBuffer(value: NativeBuffer) {
+    final writeBuffer(value: ArrayBuffer) {
         this.holdAndWriteObject(value)
-        this.writePointer(value.data)
-        this.writeInt64(value.length)
+        const ptr = InteropNativeModule._GetNativeBufferPointer(value)
+        this.writePointer(ptr)
+        this.writeInt64(value.byteLength)
     }
 }

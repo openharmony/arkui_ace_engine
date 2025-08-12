@@ -24,15 +24,15 @@ export class SourcePosition extends ArktsObject {
 
     static create(index: number, line: number): SourcePosition {
         return new SourcePosition(
-            global.es2panda._CreateSourcePosition(global.context, index, line)
+            global.generatedEs2panda._CreateSourcePosition(global.context, index, line)
         );
     }
 
     index(): number {
-        return global.es2panda._SourcePositionIndex(global.context, this.peer);
+        return global.generatedEs2panda._SourcePositionIndex(global.context, this.peer);
     }
 
     line(): number {
-        return global.es2panda._SourcePositionLine(global.context, this.peer);
+        return global.generatedEs2panda._SourcePositionLine(global.context, this.peer);
     }
 }

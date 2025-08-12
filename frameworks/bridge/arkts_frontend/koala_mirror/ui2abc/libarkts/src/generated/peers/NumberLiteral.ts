@@ -34,6 +34,7 @@ import {
 
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
+import { extension_NumberLiteralValue } from "./../../reexport-for-generated"
 
 export class NumberLiteral extends Literal {
     constructor(pointer: KNativePointer) {
@@ -68,6 +69,7 @@ export class NumberLiteral extends Literal {
     get str(): string {
         return unpackString(global.generatedEs2panda._NumberLiteralStrConst(global.context, this.peer))
     }
+    value = extension_NumberLiteralValue
     protected readonly brandNumberLiteral: undefined
 }
 export function isNumberLiteral(node: object | undefined): node is NumberLiteral {

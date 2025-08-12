@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "package": "global",
+        "baseUrl": "./src",
+        "outDir": "build",
+        "paths": {
+        }
+    },
+    "include": ["./src/*.ets"]
+}
+

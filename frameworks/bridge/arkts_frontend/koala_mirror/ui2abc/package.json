@@ -32,6 +32,11 @@
         "tsconfig-paths": "^4.2.0",
         "commander": "^13.1.0"
     },
+    "overrides": {
+        "ts-node": {
+            "@types/node": "^18.0.0"
+        }
+    },
     "scripts": {
         "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/trivial/user && npm run clean --prefix ../incremental/harness && npm run clean --prefix tests-memo",
         "build:all": "npm run compile --prefix libarkts && npm run compile --prefix annotate && npm run build:fast-arktsc && npm run build:plugins && npm run compile:plugins --prefix libarkts && npm run runtime:prepare --prefix memo-plugin",

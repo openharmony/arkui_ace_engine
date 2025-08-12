@@ -788,7 +788,7 @@ class StorageProp<T> implements SubscribedAbstractProperty<T> {
         const entry = this.map.entryOrCreate<T>(this.name, value)
         if (entry.modified) {
             value = entry.get()
-            if (this.map.manager.frozen) {
+            if (this.map.manager.currentScopeId !== undefined) {
                 this.map.manager.scheduleCallback(() => { this.set(value) })
             } else {
                 this.set(value)

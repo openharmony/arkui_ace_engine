@@ -30,12 +30,15 @@ export function memoryStats(): string {
     return `none`
 }
 
-export function launchJob(job: () => void): Promise<void> {
-    return new Promise<void>(resolve => setTimeout(() => {
-            resolve()
-            job()
-        }, 0)
-    )
+export function launchJob(task: () => void): Promise<any> {
+    return new Promise((resolve, reject) => {
+        try {
+            task()
+            resolve(undefined)
+        } catch (error) {
+            reject(error)
+        }
+    })
 }
 
 export class CoroutineLocalValue<T> {

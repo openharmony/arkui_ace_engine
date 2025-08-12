@@ -2,18 +2,23 @@
     "compilerOptions": {
         "package": "arkui",
         "outDir": "build",
-        "baseUrl": "./src",
+        "baseUrl": "./prepared",
         "paths": {
-            "#components": ["./generated/arkts"],
+            "#components": ["./framework/arkts"],
+            "#generated": ["./framework"],
+            "#handwritten": ["./"],
             "#stateMgmtTool": ["./stateManagement/tools/arkts"],
             "arkui.ani": ["./ani/arkts/ArkUIAniModule"],
+            "global.resource": ["../../modules/global.resource/src/resource"],
+            "@ohos.font": ["../../modules/ohos/src/font"],
+            "@ohos.multimedia.image": ["../../modules/ohos.multimedia.image/src"],
             "@ohos.arkui.stateManagement": ["./stateManagement"],
             "@koalaui/interop": ["../../../interop/src/arkts"],
             "@koalaui/common": ["../../../incremental/common/src"],
             "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["../../../incremental/runtime/ets"],
             "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"],
-            "@koalaui/builderLambda": ["./annotations"]
+            "@koalaui/builderLambda": ["./stateAnnotations"]
         },
         "plugins": [
             {
@@ -29,12 +34,14 @@
         ]
     },
     "include": [
-        "./src/ani/arkts/ArkUIAniModule.ts",
-        "./src/stateManagement/**/*.ts",
-        "./src/**/*.ets"
+        "./prepared/ani/arkts/ArkUIAniModule.ts",
+        "./prepared/stateManagement/**/*.ts",
+        "./prepared/**/*.ets"
     ],
     "exclude": [
         "./src/generated/ts/*.ets",
+        "./src/src/**/*.ets",
+        "./src/src/**/*.ts",
         "./src/sdk/**/*.ets"
     ]
 }

@@ -274,32 +274,48 @@ export function memoizableHasReceiver(node: Memoizable): boolean {
     assertIsNever(node)
 }
 
+export function checkReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
+    if (scriptFunction.returnTypeAnnotation) {
+        return true
+    }
+    if (scriptFunction.getSignaturePointer() && arkts.signatureReturnType(scriptFunction.getSignaturePointer())) {
+        return true
+    }
+    if (scriptFunction.getPreferredReturnTypePointer()) {
+        return true
+    }
+    return false
+}
+
 export function getReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
     const returnTypeAnnotation = scriptFunction.returnTypeAnnotation
     if (returnTypeAnnotation) {
         return returnTypeAnnotation
     }
 
-    const signatureReturnType = arkts.tryConvertCheckerTypeToTypeNode(
-        arkts.signatureReturnType(scriptFunction.getSignaturePointer())
-    )
-    if (signatureReturnType) {
-        if (scriptFunction.id) {
-            console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name}`)
-        } else {
-            console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for anonymous @memo function`)
+    const signaturePointer = scriptFunction.getSignaturePointer()
+    if (signaturePointer) {
+        const signatureReturnType = arkts.convertCheckerTypeToTypeNode(
+            arkts.signatureReturnType(signaturePointer)
+        )
+        if (signatureReturnType) {
+            if (scriptFunction.id) {
+                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            } else {
+                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            }
+            return signatureReturnType
         }
-        return signatureReturnType
     }
 
-    const preferredReturnType = arkts.tryConvertCheckerTypeToTypeNode(
+    const preferredReturnType = arkts.convertCheckerTypeToTypeNode(
         scriptFunction.getPreferredReturnTypePointer()
     )
     if (preferredReturnType) {
         if (scriptFunction.id) {
-            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name}`)
+            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
         } else {
-            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for anonymous @memo function`)
+            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
         }
         return preferredReturnType
     }
