@@ -1281,4 +1281,51 @@ HWTEST_F(ScrollBarTestNg, UpdateScrollBarDisplay, TestSize.Level1)
     EXPECT_FALSE(pattern_->controlDistanceChanged_);
     EXPECT_TRUE(pattern_->disappearAnimation_);
 }
+
+/**
+ * @tc.name: UpdateOverlayModifierTest001
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateOverlayModifierTest001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_BAR_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        frameNode->GetRenderContext(), frameNode->geometryNode_, frameNode->paintProperty_);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto paintMethod = ScrollBarPaintMethod(false);
+    ScrollModelNG model;
+    model.Create();
+    scrollNode_ = CreateMainFrameNode();
+    CHECK_NULL_VOID(scrollNode_);
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern_);
+    auto scrollBar = scrollPattern_->GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), theme->GetForegroundColor());
+    model.SetScrollBarColor(Color::BLUE);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+
+    auto inputHub = pattern_->GetInputHub();
+    auto onHover = inputHub->hoverEventActuator_->inputEvents_.front()->GetOnHoverFunc();
+    HoverInfo info;
+    onHover(true, info);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    Color color = Color::BLUE;
+    EXPECT_EQ(scrollBar->GetForegroundColor(), color.BlendColor(theme->GetForegroundHoverBlendColor()));
+    onHover(false, info);
+    paintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+    ViewStackProcessor::GetInstance()->Pop();
+}
 } // namespace OHOS::Ace::NG
