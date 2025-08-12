@@ -569,6 +569,14 @@ SheetKeyboardAvoidMode SheetSideObject::GetAvoidKeyboardModeByDefault() const
 void SheetSideObject::BeforeCreateLayoutWrapper()
 {
     AvoidKeyboard(false);
+
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollablePattern = scrollNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetNeedFullSafeArea(false);
 }
 
 void SheetSideObject::AvoidKeyboard(bool forceAvoid)
