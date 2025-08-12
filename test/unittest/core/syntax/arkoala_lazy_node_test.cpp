@@ -111,4 +111,18 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
     lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_1, SCROLLER_CACHED_COUNT, SCROLLER_CACHED_COUNT, false);
     EXPECT_FALSE(AceType::DynamicCast<FrameNode>(childNode)->IsActive());
 }
+
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    ArkoalaLazyNode::CreateItemCb createItemCb = [this](int32_t idx) {
+        return ColumnModelNG::CreateFrameNode(GetNextId());
+    };
+    ArkoalaLazyNode::UpdateRangeCb updateRangeCb = [](int32_t start, int32_t end) {};
+    lazyNode->SetCallbacks(createItemCb, updateRangeCb);
+    lazyNode->SetTotalCount(TOTAL_COUNT);
+
+    EXPECT_TRUE(lazyNode->GetFrameChildByIndex(INDEX_1, true, false, true));
+    EXPECT_TRUE(lazyNode->GetFrameNode(INDEX_1));
+}
 } // namespace OHOS::Ace::NG
