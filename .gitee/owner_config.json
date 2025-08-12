@@ -13,7 +13,8 @@
             "https://gitee.com/tsj_2020",
             "https://gitee.com/cheng-feiwang",
             "https://gitee.com/huangxiaolinabc123",
-            "https://gitee.com/H-xinwei"
+            "https://gitee.com/H-xinwei",
+            "https://gitee.com/xi-heqiong"
         ],
         "https://gitee.com/arkuiabilitygroup": [
             "https://gitee.com/lmleon",
@@ -178,6 +179,10 @@
         },
         "https://gitee.com/H-xinwei": {
             "info": "[模态类组件 huangxinwei]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/xi-heqiong": {
+            "info": "[模态类组件 xiheqiong]",
             "group": "https://gitee.com/arkui_superman"
         },
         "https://gitee.com/lmleon": {
