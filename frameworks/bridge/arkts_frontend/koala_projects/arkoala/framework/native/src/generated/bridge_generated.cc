@@ -40450,6 +40450,11 @@ void impl_BaseGestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getBaseGestureEventAccessor()->setFingerList(self, (const Array_FingerInfo*)&fingerList_value);
 }
 KOALA_INTEROP_DIRECT_V3(BaseGestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_BaseGestureEvent_getType(Ark_NativePointer thisPtr) {
+        Ark_BaseGestureEvent self = reinterpret_cast<Ark_BaseGestureEvent>(thisPtr);
+        return GetAccessors()->getBaseGestureEventAccessor()->getType(self);
+}
+KOALA_INTEROP_DIRECT_1(BaseGestureEvent_getType, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_TapGestureEvent_ctor() {
         return GetAccessors()->getTapGestureEventAccessor()->ctor();
 }

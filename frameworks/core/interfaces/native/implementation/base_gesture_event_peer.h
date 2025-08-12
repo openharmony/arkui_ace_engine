@@ -26,6 +26,18 @@ protected:
 
 public:
     virtual OHOS::Ace::BaseGestureEvent* GetBaseGestureInfo() = 0;
+
+    void SetRecognizerType(OHOS::Ace::GestureTypeName type)
+    {
+        recognizerType_ = type;
+    }
+
+    OHOS::Ace::GestureTypeName GetRecognizerType() const
+    {
+        return recognizerType_;
+    }
+private:
+    OHOS::Ace::GestureTypeName recognizerType_ = OHOS::Ace::GestureTypeName::UNKNOWN;
 };
 
 namespace OHOS::Ace::NG::GeneratedModifier {

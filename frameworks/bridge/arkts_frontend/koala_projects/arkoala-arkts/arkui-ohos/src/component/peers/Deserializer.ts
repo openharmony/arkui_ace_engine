@@ -23390,7 +23390,26 @@ export class Deserializer extends DeserializerBase {
     readBaseGestureEvent(): BaseGestureEvent {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
-        return BaseGestureEventInternal.fromPtr(ptr)
+        let event = BaseGestureEventInternal.fromPtr(ptr)
+        let recognizerType = event.type
+        switch(recognizerType) {
+            case GestureControl.GestureType.TAP_GESTURE:
+                return TapGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.LONG_PRESS_GESTURE:
+                return LongPressGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PAN_GESTURE:
+                return PanGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PINCH_GESTURE:
+                return PinchGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.SWIPE_GESTURE:
+                return SwipeGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.ROTATION_GESTURE:
+                return RotationGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.CLICK:
+            case GestureControl.GestureType.DRAG:
+            default:
+                return event
+        }
     }
     readBorderImageOption(): BorderImageOption {
         let valueDeserializer : Deserializer = this
