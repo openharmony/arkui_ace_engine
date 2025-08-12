@@ -639,6 +639,29 @@ HWTEST_F(TextTestSevenNg, ToJsonValue001, TestSize.Level1)
     textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("lineSpacing"), "20.00px");
     EXPECT_EQ(json->GetString("onlyBetweenLines"), "true");
+
+    /* *
+     * @tc.steps: step3. create symbolFrameNode.
+     */
+    auto symbolFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(symbolFrameNode, nullptr);
+    auto symbolPattern = symbolFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(symbolPattern, nullptr);
+    auto symbolLayoutProperty = symbolPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolLayoutProperty, nullptr);
+
+    /* *
+     * @tc.steps: step4. run symbol ToJsonValue().
+     */
+    json = JsonUtil::Create(true);
+    std::vector<Color> symbolColorList;
+    symbolColorList.emplace_back(Color::RED);
+    symbolColorList.emplace_back(Color::GREEN);
+    symbolColorList.emplace_back(Color::BLUE);
+    symbolLayoutProperty->UpdateSymbolColorList(symbolColorList);
+    symbolLayoutProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("fontColor"), StringUtils::SymbolColorListToString(symbolColorList));
 }
 
 /**
