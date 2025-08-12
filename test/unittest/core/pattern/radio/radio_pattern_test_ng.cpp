@@ -705,7 +705,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest064, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     
-    pattern->UpdateIndicatorType(false);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
@@ -725,7 +725,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest065, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->UpdateIndicatorType(false);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
@@ -746,7 +746,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest066, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->UpdateIndicatorType(false);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
@@ -1590,7 +1590,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest102, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     
-    pattern->UpdateIndicatorType(true);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
@@ -1611,7 +1611,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest103, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     
-    pattern->UpdateIndicatorType(true);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
@@ -1632,7 +1632,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest104, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->UpdateIndicatorType(true);
+    pattern->UpdateIndicatorType();
     auto hasval = pattern->preTypeIsBuilder_;
     ASSERT_EQ(hasval, false);
 }
