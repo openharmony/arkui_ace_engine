@@ -289,7 +289,15 @@ void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
     if (data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
-    MenuView::ExecuteMenuDisappearAnimation(data);
+    auto menuNode = data.menuNode;
+    CHECK_NULL_VOID(menuNode);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuNodeRenderContext);
+    if (data.isMenuNotShow) {
+        menuNodeRenderContext->UpdateOpacity(0.0f);
+    } else {
+        MenuView::ExecuteMenuDisappearAnimation(data);
+    }
 }
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)

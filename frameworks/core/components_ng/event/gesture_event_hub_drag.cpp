@@ -1649,10 +1649,10 @@ void GestureEventHub::UpdateMenuNode(
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    bool isMenuNotShow =
+    data.isMenuNotShow =
         menuWrapperPattern->GetMenuStatus() == MenuStatus::SHOW && rate == -1.0f && menuPattern->GetIsShowHoverImage();
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
-        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide() || isMenuNotShow) {
+        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
         return;
     }
     auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));

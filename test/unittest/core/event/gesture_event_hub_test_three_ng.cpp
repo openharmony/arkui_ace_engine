@@ -1547,15 +1547,6 @@ HWTEST_F(GestureEventHubTestNg, UpdateMenuNode003, TestSize.Level1)
     menuWrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
     guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
     EXPECT_EQ(data.menuNode, nullptr);
-    menuWrapperPattern->SetHasTransitionEffect(false);
-    menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
-    auto menuNode = menuWrapperPattern->GetMenu();
-    ASSERT_NE(menuNode, nullptr);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    menuPattern->SetIsShowHoverImage(true);
-    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
-    EXPECT_EQ(data.menuNode, nullptr);
 }
 
 /**

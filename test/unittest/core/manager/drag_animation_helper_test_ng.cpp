@@ -911,4 +911,33 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextOffset001, TestSize.Level1)
     EXPECT_NEAR(offset.GetX(), expectX, EPSILON);
     EXPECT_NEAR(offset.GetY(), expectY, EPSILON);
 }
+
+/**
+ * @tc.name: ShowMenuHideAnimation001
+ * @tc.desc: test ShowMenuHideAnimation func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, ShowMenuHideAnimation001, TestSize.Level1)
+{
+    PreparedInfoForDrag data;
+    auto menuNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    data.menuNode = menuNode;
+    data.isMenuNotShow = true;
+    data.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateOpacity(1.0f);
+    DragAnimationHelper::ShowMenuHideAnimation(data);
+    auto opacity = renderContext->GetOpacity().value();
+    EXPECT_TRUE(opacity == 1.0f);
+    data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    DragAnimationHelper::ShowMenuHideAnimation(data);
+    auto opacity1 = renderContext->GetOpacity().value();
+    EXPECT_TRUE(opacity1 == 0.0f);
+    data.isMenuNotShow = false;
+    DragAnimationHelper::ShowMenuHideAnimation(data);
+    auto opacity2 = renderContext->GetOpacity().value();
+    EXPECT_TRUE(opacity2 == 0.0f);
+}
 } // namespace OHOS::Ace::NG
