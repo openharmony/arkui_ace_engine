@@ -353,14 +353,14 @@ void NavDestinationNodeBase::AdjustRenderContextIfNeeded()
 }
 
 OffsetF NavDestinationNodeBase::CalcTranslateForSlideTransition(
-    const SizeF& frameSize, bool isRight, bool isEnter, bool isEnd)
+    const SizeF& paintRect, bool isRight, bool isEnter, bool isEnd)
 {
     if ((isEnd && isEnter) || (!isEnd && !isEnter)) {
         return OffsetF{ 0.0f, 0.0f };
     }
     auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;
-    float width = frameSize.Width();
-    float height = frameSize.Height();
+    float width = paintRect.Width();
+    float height = paintRect.Height();
     if (angle == ROTATION_90 || angle == ROTATION_270) {
         std::swap(width, height);
     }

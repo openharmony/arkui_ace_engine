@@ -968,16 +968,16 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
             CHECK_NULL_VOID(navDestination);
             auto renderContext = navDestination->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            auto frameSize = navDestination->GetGeometryNode()->GetFrameSize();
-            auto translate = navDestination->CalcTranslateForSlideTransition(frameSize, isRight, isEnter, true);
+            auto paintRect = renderContext->GetPaintRectWithoutTransform().GetSize();
+            auto translate = navDestination->CalcTranslateForSlideTransition(paintRect, isRight, isEnter, true);
             renderContext->UpdateTranslateInXY(translate);
         };
         RefPtr<Curve> curve = isRight ? MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f)
             : MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
         auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback());
         auto renderContext = GetRenderContext();
-        auto frameSize = GetGeometryNode()->GetFrameSize();
-        auto translate = CalcTranslateForSlideTransition(frameSize, isRight, isEnter, false);
+        auto paintRect = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto translate = CalcTranslateForSlideTransition(paintRect, isRight, isEnter, false);
         renderContext->UpdateTranslateInXY(translate);
         OnStartOneTransitionAnimation();
         AnimationUtils::Animate(option, translateEvent, option.GetOnFinishEvent());
