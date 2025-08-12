@@ -684,8 +684,6 @@ struct SegmentButtonItem {
       }
     }
     .direction(this.options.direction)
-    .focusScopePriority(this.groupId,
-      Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
     .justifyContent(FlexAlign.Center)
     .padding(this.getButtonPadding())
     .constraintSize({ minHeight: segmentButtonTheme.CONSTRAINT_SIZE_MIN_HEIGHT })
@@ -1086,6 +1084,8 @@ struct SegmentButtonItemArrayComponent {
                   this.calculateBorderRadius()
                 })
             }
+            .focusScopePriority(this.groupId,
+              Math.min(...this.selectedIndexes) === index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
             .type(ButtonType.Normal)
             .stateEffect(false)
             .hoverEffect(HoverEffect.None)
@@ -1588,7 +1588,7 @@ export struct SegmentButton {
               this.doSelectedChangeAnimate = false
             }
           }),
-        PanGesture()
+        PanGesture({direction: PanDirection.Horizontal})
           .onActionStart((event: GestureEvent) => {
             this.isGestureInProgress = true;
             if (this.options === void 0 || this.options.buttons === void 0) {
