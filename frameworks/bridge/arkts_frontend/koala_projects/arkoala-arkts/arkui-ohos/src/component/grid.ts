@@ -22,7 +22,8 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, ArkScrollableCommonMethodComponent, 
+    ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, OnWillScrollCallback, OnScrollCallback, AttributeModifier } from "./common"
 import { Length } from "./units"
 import { Color, BarState, EdgeEffect } from "./enums"
 import { GridAttribute_onItemDragStart_event_type } from "./type-replacements"
@@ -33,8 +34,11 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
+import { GridModifier } from "../GridModifier"
+import { hookGridAttributeModifier } from '../handwritten'
 
 export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
+    _attributeSet?:GridModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -596,42 +600,31 @@ export interface GridAttribute extends ScrollableCommonMethod {
     setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
         return this
     }
-    columnsTemplate(value: string | undefined): this
-    rowsTemplate(value: string | undefined): this
-    columnsGap(value: Length | undefined): this
-    rowsGap(value: Length | undefined): this
-    scrollBarWidth(value: number | string | undefined): this
-    scrollBarColor(value: Color | number | string | undefined): this
-    scrollBar(value: BarState | undefined): this
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    cachedCount(value: number | undefined):this 
-    cachedCount(count: number | undefined, show: boolean | undefined): this
-    editMode(value: boolean | undefined): this
-    multiSelectable(value: boolean | undefined): this
-    maxCount(value: number | undefined): this
-    minCount(value: number | undefined): this
-    cellLength(value: number | undefined): this
-    layoutDirection(value: GridDirection | undefined): this
-    supportAnimation(value: boolean | undefined): this
-    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this
-    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    alignItems(value: GridItemAlignment | undefined): this
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    onReachStart(value: (() => void) | undefined): this
-    onReachEnd(value: (() => void) | undefined): this
-    onScrollStart(value: (() => void) | undefined): this
-    onScrollStop(value: (() => void) | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
+    columnsTemplate(value: string | undefined): this { return this; }
+    rowsTemplate(value: string | undefined): this { return this; }
+    columnsGap(value: Length | undefined): this { return this; }
+    rowsGap(value: Length | undefined): this { return this; }
+    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this { return this;}
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this { return this; }
+    cachedCount(value: number | undefined):this { return this; }
+    cachedCount(count: number | undefined, show: boolean | undefined): this { return this; }
+    editMode(value: boolean | undefined): this { return this; }
+    multiSelectable(value: boolean | undefined): this { return this; }
+    maxCount(value: number | undefined): this { return this; }
+    minCount(value: number | undefined): this { return this; }
+    cellLength(value: number | undefined): this { return this; }
+    layoutDirection(value: GridDirection | undefined): this { return this; }
+    supportAnimation(value: boolean | undefined): this { return this; }
+    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this { return this; }
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this { return this; }
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this { return this; }
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this { return this; }
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this { return this; }
+    alignItems(value: GridItemAlignment | undefined): this { return this; }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
+    onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
+    onDidScroll(value: OnScrollCallback | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {
     columnsTemplate_value?: string | undefined
@@ -1093,7 +1086,11 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<GridAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookGridAttributeModifier(this, modifier)
+        return this
+    }    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

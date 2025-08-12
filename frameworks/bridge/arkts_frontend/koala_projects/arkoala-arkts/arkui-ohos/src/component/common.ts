@@ -70,6 +70,7 @@ import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookC
     hookCustomPropertyImpl
 } from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier } from "../CommonMethodModifier"
+import { ScrollableCommonMethodModifier } from '../ScrollableCommonMethodModifier'
 import { ICurve as ICurve_} from "#external"
 export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
@@ -6621,6 +6622,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ScrollableCommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -9124,23 +9126,23 @@ export enum ContentClipMode {
     SAFE_AREA = 2
 }
 export interface ScrollableCommonMethod extends CommonMethod {
-    scrollBar(value: BarState | undefined): this
-    scrollBarColor(value: Color | number | string | undefined): this
-    scrollBarWidth(value: number | string | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    onReachStart(value: (() => void) | undefined): this
-    onReachEnd(value: (() => void) | undefined): this
-    onScrollStart(value: (() => void) | undefined): this
-    onScrollStop(value: (() => void) | undefined): this
-    flingSpeedLimit(value: number | undefined): this
-    clipContent(value: ContentClipMode | RectShape | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this
+    scrollBar(value: BarState | undefined): this { return this; }
+    scrollBarColor(value: Color | number | string | undefined): this { return this; }
+    scrollBarWidth(value: number | string | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
+    onScroll(value: ((first: number,last: number) => void) | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
+    onScrollStart(value: (() => void) | undefined): this { return this; }
+    onScrollStop(value: (() => void) | undefined): this { return this; }
+    flingSpeedLimit(value: number | undefined): this { return this; }
+    clipContent(value: ContentClipMode | RectShape | undefined): this { return this; }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this { return this; }
+    backToTop(value: boolean | undefined): this { return this; }
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this { return this; }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this { return this; }
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
