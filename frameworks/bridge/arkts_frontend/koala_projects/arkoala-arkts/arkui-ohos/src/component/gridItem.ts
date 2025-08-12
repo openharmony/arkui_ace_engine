@@ -22,15 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { GridItemOpsHandWritten } from "./../handwritten"
+import { GridItemOpsHandWritten, hookGridItemAttributeModifier } from "./../handwritten"
+import { GridItemModifier } from '../GridItemModifier'
 
 export class ArkGridItemPeer extends ArkCommonMethodPeer {
+    _attributeSet?:GridItemModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -167,16 +169,17 @@ export type GridItemInterface = (value?: GridItemOptions) => GridItemAttribute;
 export interface GridItemAttribute extends CommonMethod {
     setGridItemOptions(value?: GridItemOptions): this {
         return this
-    }
-    rowStart(value: number | undefined): this
-    rowEnd(value: number | undefined): this
-    columnStart(value: number | undefined): this
-    columnEnd(value: number | undefined): this
-    forceRebuild(value: boolean | undefined): this
-    selectable(value: boolean | undefined): this
-    selected(value: boolean | Bindable<boolean> | undefined): this
-    onSelect(value: ((isVisible: boolean) => void) | undefined): this
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
+    }    
+    rowStart(value: number | undefined): this {return this;}
+    rowEnd(value: number | undefined): this {return this;}
+    columnStart(value: number | undefined): this {return this;}
+    columnEnd(value: number | undefined): this {return this;}
+    forceRebuild(value: boolean | undefined): this {return this;}
+    selectable(value: boolean | undefined): this {return this;}
+    selected(value: boolean | Bindable<boolean> | undefined): this {return this;}
+    onSelect(value: ((isVisible: boolean) => void) | undefined): this {return this;}
+    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {}
+    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
     rowStart_value?: number | undefined
@@ -306,6 +309,10 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         }
         return
     }
+    public attributeModifier(modifier: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookGridItemAttributeModifier(this, modifier)
+        return this
+    }        
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
