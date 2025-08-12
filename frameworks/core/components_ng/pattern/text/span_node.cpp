@@ -116,7 +116,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("textCase",
             V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
         if (spanItemType == SpanItemType::SYMBOL) {
-            const std::optional<std::vector<Color>> &colorListOptional = fontStyle->GetSymbolColorList();
+            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
             auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
             json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
         } else {
