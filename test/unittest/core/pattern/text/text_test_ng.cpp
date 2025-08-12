@@ -860,6 +860,22 @@ HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnModifyDone004
+ * @tc.desc: Test textEffect is not cleared by OnModifyDone .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnModifyDone004, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(pattern->pManager_, nullptr);
+    pattern->textEffect_ = TextEffect::CreateTextEffect();
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->textEffect_, nullptr);
+}
+
+/**
  * @tc.name: OnDirtyLayoutWrapperSwap001
  * @tc.desc: Test TextPattern OnDirtyLayoutWrapperSwap when skipMeasure is true.
  * @tc.type: FUNC

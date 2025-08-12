@@ -460,20 +460,22 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
     std::vector<RefPtr<ResourceObject>> colorResArr;
     std::vector<RefPtr<ResourceObject>> offsetXResArr;
     std::vector<RefPtr<ResourceObject>> offsetYResArr;
-    if (radiusResArrs != nullptr) {
-        radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
-    }
-    if (colorResArrs != nullptr) {
-        colorResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
-    }
-    if (offsetXResArrs != nullptr) {
-        offsetXResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
-    }
-    if (offsetYResArrs != nullptr) {
-        offsetYResArr =
-        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+    if (SystemProperties::ConfigChangePerform()) {
+        if (radiusResArrs != nullptr) {
+            radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
+        }
+        if (colorResArrs != nullptr) {
+            colorResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
+        }
+        if (offsetXResArrs != nullptr) {
+            offsetXResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
+        }
+        if (offsetYResArrs != nullptr) {
+            offsetYResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+        }
     }
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
@@ -484,11 +486,13 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
-        RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
-        RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
-        Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
+            RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
+            Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        }
         shadowList.at(i) = shadow;
     }
     SpanModelNG::SetTextShadow(frameNode, shadowList);
@@ -768,10 +772,11 @@ void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam)
 template<typename T>
 void ProcessResourceObj(UINode* uinode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(uinode);
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uinode);
     CHECK_NULL_VOID(spanNode);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         spanNode->RegisterResource<T>(key, resObj, value);
     } else {
