@@ -1659,8 +1659,7 @@ void GestureEventHub::UpdateMenuNode(
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    data.isMenuNotShow =
-        menuWrapperPattern->GetMenuStatus() == MenuStatus::SHOW && rate == -1.0f && menuPattern->GetIsShowHoverImage();
+    data.isMenuNotShow = menuWrapperPattern->IsShow() && rate == -1.0f && menuPattern->GetIsShowHoverImage();
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
         menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
         return;

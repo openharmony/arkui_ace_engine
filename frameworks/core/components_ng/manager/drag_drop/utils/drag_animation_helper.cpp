@@ -293,13 +293,7 @@ void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
     if (data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
-    auto menuNode = data.menuNode;
-    CHECK_NULL_VOID(menuNode);
-    auto menuNodeRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(menuNodeRenderContext);
-    if (data.isMenuNotShow) {
-        menuNodeRenderContext->UpdateOpacity(0.0f);
-    } else {
+    if (!data.isMenuNotShow) {
         MenuView::ExecuteMenuDisappearAnimation(data);
     }
 }
@@ -1173,9 +1167,19 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
         data.relativeContainerNode->AddChild(data.textRowNode);
     }
     if (data.menuNode) {
-        auto menuNode = data.menuNode;
-        MenuView::UpdateMenuNodePosition(data);
-        data.relativeContainerNode->AddChild(data.menuNode);
+        MountMenuNode(data);
+    }
+}
+
+void DragAnimationHelper::MountMenuNode(PreparedInfoForDrag& data)
+{
+    auto menuNode = data.menuNode;
+    MenuView::UpdateMenuNodePosition(data);
+    data.relativeContainerNode->AddChild(data.menuNode);
+    if (data.isMenuNotShow) {
+        auto menuNodeRenderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(menuNodeRenderContext);
+        menuNodeRenderContext->UpdateOpacity(0.0f);
     }
 }
 
