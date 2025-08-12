@@ -58,15 +58,15 @@ interface EnvPropsOptions {
  */
 class Environment {
     private static instance_: Environment | undefined = undefined;
-    private props_: Map<string, NullishType> = new Map<string, NullishType>();
+    private props_: Map<string, Any> = new Map<string, Any>();
     private readonly aniEnvironment: AniEnvironment = new AniEnvironment();
-    private ttypeMap_: Map<string, Type> = new Map<string, Type>([
-        ['accessibilityEnabled', Type.from<boolean>()],
-        ['layoutDirection', Type.from<string>()],
-        ['languageCode', Type.from<string>()],
-        ['colorMode', Type.from<number>()],
-        ['fontScale', Type.from<number>()],
-        ['fontWeightScale', Type.from<number>()],
+    private keySet: Set<string> = new Set<string>([
+        'accessibilityEnabled',
+        'layoutDirection',
+        'languageCode',
+        'colorMode',
+        'fontScale',
+        'fontWeightScale',
     ]);
 
     public aboutToBeDeleted(): void {
@@ -87,19 +87,18 @@ class Environment {
     }
 
     public static envProp<T>(key: string, value: T): boolean {
-        if (!Environment.getOrCreate().ttypeMap_.has(key)) {
+        if (!Environment.getOrCreate().keySet.has(key)) {
             return false; // Invalid key
         }
-        const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
-        return Environment.getOrCreate().envPropInternal<T>(key, value, ttype);
+        return Environment.getOrCreate().envPropInternal<T>(key, value);
     }
 
-    private envPropInternal<T>(key: string, value: T, ttype: Type): boolean {
-        if (AppStorage.has(key, ttype)) {
+    private envPropInternal<T>(key: string, value: T): boolean {
+        if (AppStorage.has(key)) {
             return false;
         }
 
-        let tmp: NullishType = undefined;
+        let tmp: Any = undefined;
         switch (key) {
             case 'accessibilityEnabled':
                 tmp = Environment.getOrCreate().aniEnvironment.getAccessibilityEnabled();
@@ -120,14 +119,14 @@ class Environment {
                 tmp = Environment.getOrCreate().aniEnvironment.getLanguageCode();
                 break;
             default:
-                tmp = value as NullishType;
+                tmp = value as Any;
         }
 
         if (tmp === undefined || tmp === -1 || tmp === '') {
-            tmp = value as NullishType;
+            tmp = value as Any;
         }
 
-        const prop = AppStorage.setAndRef(key, tmp as T, ttype);
+        const prop = AppStorage.setAndRef(key, tmp as T);
         if (!prop) {
             return false;
         }
@@ -140,7 +139,6 @@ class Environment {
         properties.forEach((prop) => {
             const key: string = prop.key;
             const defaultValue: number | string | boolean = prop.defaultValue;
-            const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
             Environment.envProp(key, defaultValue);
         });
     }

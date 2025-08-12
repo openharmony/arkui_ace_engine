@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractProperty, SubscribedAbstractProperty, IStorageProperties } from './storageProperty';
-import { StorageBase, StorageProperty } from './storageBase';
+import { AbstractProperty, SubscribedAbstractProperty } from './storageProperty';
+import { StorageProperty } from './storageBase';
 import { InteropStorageBase } from '../interop/interopStorage';
 import { WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
@@ -45,38 +45,27 @@ export class LocalStorage {
     /**
      * Construct new instance of LocalStorage
      * initialize the storage with given properties:
-     * For each property in array:
-     * if given value is assignable to given ttype, add the property to storage:
-     * - set its propertyName
-     * - configure its type as ttype
-     * - set its value
      * If not assignable do not create property with given name in storage.
      *
-     * @param { Record<string, IStorageProperties> } [initializingProperties] - Record of initial properties, their tyoe and value
+     * @param { Record<string, Any> } [initializingProperties] - Record of initial properties, their tyoe and value
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public constructor(initializingProperties?: Record<string, IStorageProperties>) {
+    public constructor(initializingProperties?: Record<string, Any>) {
         if (!initializingProperties) {
             return;
         }
-        const initializingObj = initializingProperties as Record<string, IStorageProperties>;
+        const initializingObj = initializingProperties as Record<string, Any>;
         for (const propName of initializingObj.keys()) {
             const propValue = initializingObj[propName];
             if (propValue != null) {
-                this.store_.createAndSet(propName, propValue.ttype, propValue.value);
+                this.store_.createAndSet(propName, propValue);
             }
         }
     }
 
     /**
-     * case A: if ttype is not specified:
      * Check if LocalStorage has a property with given name
-     * return true if property with given name exists
-     *
-     * case B: if ttype is specified
-     * Check if LocalStorage has a property with given name
-     * and given ttye equals the type configured for this property
      * in the storage.
      *
      * @param { string } propName - searched property
@@ -84,13 +73,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public has(propName: string, ttype?: Type): boolean {
-        const ttypeOpt: Type | undefined = this.store_.getType(propName);
-        let result: boolean = ttypeOpt !== undefined && (ttype === undefined || ttype!.equals(ttypeOpt!));
-        if (!result) {
-            result = this.store_.has(propName);
-        }
-        return result;
+    public has(propName: string): boolean {
+        return this.store_.has(propName);
     }
 
     /**
@@ -102,10 +86,6 @@ export class LocalStorage {
      */
     public keys(): IterableIterator<string> {
         return this.store_.keys();
-    }
-
-    public keySets(): Set<string> {
-        return this.store_.keySet;
     }
 
     /**
@@ -123,17 +103,15 @@ export class LocalStorage {
     /**
      * Returns value of given property
      * return undefined if no property with this name
-     * or if expected ttype can not be assigned from type configured
      * for this property in storage.
      *
      * @param { string } propName - property name
-     * @param {Type} ttype - data type
      * @returns { T | undefined } property value if found or undefined
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public get<T>(propName: string, ttype: Type): T | undefined {
-        return this.store_.get<T>(propName, ttype);
+    public get<T>(propName: string): T | undefined {
+        return this.store_.get<T>(propName);
     }
 
     /**
@@ -153,9 +131,7 @@ export class LocalStorage {
 
     /**
      * case A: if property with given names does not exists in storage, yet:
-     * if given value can be assigned to given ttype, then
      * - create new property
-     * - configure its type to be given ttype
      * - set its initial value to given value
      * otherwise do nothing, return false
      *
@@ -164,37 +140,33 @@ export class LocalStorage {
      *
      * @param propName
      * @param newValue
-     * @param ttype
      * @returns true on 1) create new property and newtValue can be assigned to stated type, or
      * 2) update existing property and newValue can be assigned to type configured for this
      * property in storage.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setOrCreate<T>(propName: string, newValue: T, ttype: Type): boolean {
-        return this.store_.setOrCreate<T>(propName, newValue, ttype);
+    public setOrCreate<T>(propName: string, newValue: T): boolean {
+        return this.store_.setOrCreate<T>(propName, newValue);
     }
 
     /**
      *  Create an AbstractProperty if property with given name already exists in storage
-     * and if given ttype equals the type configured for this property in storage.
      *
      * @param { string } propName LocalStorage property name
-     * @param {Type} ttype - data type
      * @returns { AbstractProperty<T> | undefined } AbstractProperty object if aforementioned conditions are
      * satisfied.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(propName: string, ttype: Type): AbstractProperty<T> | undefined {
-        return this.store_.ref<T>(propName, ttype) as AbstractProperty<T> | undefined;
+    public ref<T>(propName: string): AbstractProperty<T> | undefined {
+        return this.store_.ref<T>(propName) as AbstractProperty<T> | undefined;
     }
 
     /**
      * case A: if property with given name does not exists in storage, yet:
      * if given defaultValue is assignable to given type, then
      * - create new property with given name in storage
-     * - configure its type to be the given ttype
      * - create a AbstractProperty that refers to this storage property
      *   and return it
      * otherwise create no new property in storage, and return undefined.
@@ -209,13 +181,12 @@ export class LocalStorage {
      * @param { string } propName LocalStorage property name
      * @param { T } defaultValue If property does not exist in LocalStorage,
      *        create it with given default value.
-     * @param {Type} ttype - data type
      * @returns { AbstractProperty<T> } AbstractProperty object or undefined as defined above
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(propName: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
-        return this.store_.setAndRef<T>(propName, defaultValue, ttype);
+    public setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T> | undefined {
+        return this.store_.setAndRef<T>(propName, defaultValue);
     }
 
     /**
@@ -223,7 +194,6 @@ export class LocalStorage {
      * (function is depreciated, provided for legacy support)
      *
      * @param { string } propName - name of source property in LocalStorage
-     * @param { Type } ttype - data type
      * @returns { SubscribedAbstractProperty<T> | undefined } @see ref(). SubscribedAbstractProperty is
      *      the sane as AbstractProperty
      * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -231,8 +201,8 @@ export class LocalStorage {
      * @deprecated
      * @since 20
      */
-    public link<T>(propName: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        return this.store_.ref<T>(propName, ttype);
+    public link<T>(propName: string): SubscribedAbstractProperty<T> | undefined {
+        return this.store_.ref<T>(propName);
     }
 
     /**
@@ -242,15 +212,14 @@ export class LocalStorage {
      * @param { string } propName - name of source property in LocalStorage
      * @param { T } defaultValue - value to be used for initializing new property in LocalStorage
      *        default value must be of type T.
-     * @param { Type } ttype - data type
      * @returns { SubscribedAbstractProperty<T> } i@see setAndRef(). SubscribedAbstractProperty is
      *      the sane as AbstractProperty
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @deprecated
      * @since 20
      */
-    public setAndLink<T>(propName: string, defaultValue: T, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        return this.store_.setAndRef<T>(propName, defaultValue, ttype);
+    public setAndLink<T>(propName: string, defaultValue: T): SubscribedAbstractProperty<T> | undefined {
+        return this.store_.setAndRef<T>(propName, defaultValue);
     }
 
     /**
@@ -293,7 +262,6 @@ export class LocalStorage {
      * @param propName
      * @param varName
      * @param defaultValue
-     * @param ttype
      * @param watchFunc
      * @returns
      */
@@ -302,10 +270,9 @@ export class LocalStorage {
         propName: string,
         varName: string,
         defaultValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
-        return this.store_.makeStorageLink<T>(owner, propName, varName, defaultValue, ttype, watchFunc);
+        return this.store_.makeStorageLink<T>(owner, propName, varName, defaultValue, watchFunc);
     }
 
     /**

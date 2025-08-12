@@ -475,20 +475,17 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         propertyNameInAppStorage: string,
         varName: string,
         defaultValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStorageLinkDecoratedVariable<T> {
         const result: IStorageLinkDecoratedVariable<T> | undefined = AppStorage.__makeStorageLink<T>(
             owningView,
             propertyNameInAppStorage,
             varName,
-            uiUtils.makeObserved(defaultValue) as T,
-            ttype,
+            UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
         if (result === undefined) {
-            throw new TypeError(`@LocalStorageLink('${propertyNameInAppStorage}') ${varName}
-                configured Type ${ttype.toString()} does not match property type in storage`);
+            throw new TypeError(`@StorageLink('${propertyNameInAppStorage}') ${varName} failed to makeStorageLink`);
             // error of unutilized variable can not be recovered, must throw.
         }
         return result;
@@ -499,20 +496,19 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         propertyNameInAppStorage: string,
         varName: string,
         defaultValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStorageLinkDecoratedVariable<T> {
         const result: ILocalStorageLinkDecoratedVariable<T> | undefined = owningView.localStorage_.__makeStorageLink<T>(
             owningView,
             propertyNameInAppStorage,
             varName,
-            uiUtils.makeObserved(defaultValue) as T,
-            ttype,
+            UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
         if (result === undefined) {
-            throw new TypeError(`@StorageLink('${propertyNameInAppStorage}') ${varName}
-                configured Type ${ttype.toString()} does not match property type in storage`);
+            throw new TypeError(
+                `@LocalStorageLink('${propertyNameInAppStorage}') ${varName} failed to makeLocalStorageLink`
+            );
             // error of unutilized variable can not be recovered, must throw.
         }
         return result;
@@ -523,14 +519,11 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const ref = AppStorage.setAndRef<T>(propName, uiUtils.makeObserved(initValue), ttype);
+        const ref = AppStorage.setAndRef<T>(propName, UIUtils.makeObserved(initValue));
         if (ref === undefined) {
-            throw new TypeError(
-                `@StoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`
-            );
+            throw new TypeError(`@StoragePropRef('${propName}') ${varName} failed to makeStoragePropRef`);
         }
         return new StoragePropRefDecoratedVariable<T>(
             owningView,
@@ -546,14 +539,11 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         propName: string,
         varName: string,
         initValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T> {
-        const ref = owningView.localStorage_.setAndRef<T>(propName, uiUtils.makeObserved(initValue), ttype);
+        const ref = owningView.localStorage_.setAndRef<T>(propName, UIUtils.makeObserved(initValue));
         if (ref === undefined) {
-            throw new TypeError(
-                `@LocalStoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`
-            );
+            throw new TypeError(`@LocalStoragePropRef('${propName}') ${varName} makeLocalStoragePropRef`);
         }
         return new StoragePropRefDecoratedVariable<T>(
             owningView,
