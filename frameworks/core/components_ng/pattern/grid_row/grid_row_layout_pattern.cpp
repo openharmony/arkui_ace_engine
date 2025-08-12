@@ -21,7 +21,9 @@ namespace {} // namespace
 void GridRowLayoutPattern::OnAttachToFrameNode()
 {
     Pattern::OnAttachToFrameNode();
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline && !callbackId_.has_value()) {
         callbackId_ = pipeline->RegisterSurfaceChangedCallback(
@@ -37,7 +39,8 @@ void GridRowLayoutPattern::OnAttachToFrameNode()
 
 void GridRowLayoutPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (callbackId_.has_value()) {
         pipeline->UnregisterSurfaceChangedCallback(callbackId_.value_or(-1));

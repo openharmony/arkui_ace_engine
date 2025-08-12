@@ -5178,9 +5178,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
             renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
         ACE_LAYOUT_TRACE_END()
     }
-    if (!needSyncRsNode) {
-        ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d] don't needSyncRsNode", tag_.c_str(), nodeId_);
-    }
 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {

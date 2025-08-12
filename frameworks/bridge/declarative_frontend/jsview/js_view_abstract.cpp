@@ -13286,14 +13286,14 @@ void JSViewAbstract::SetPixelRoundMode(const JSCallbackInfo& info)
         return;
     }
     PixelRoundMode pixelRoundMode = static_cast<PixelRoundMode>(index);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetPixelRoundMode(pixelRoundMode);
 }
 
 uint8_t JSViewAbstract::GetPixelRoundMode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
                     : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
 }
