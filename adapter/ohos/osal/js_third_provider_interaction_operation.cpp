@@ -660,7 +660,7 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
     config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
-    config.bundleName = Container::CurrentBundleName();
+    config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
 
     GetHostRectTranslateInfo(config);
 }
@@ -691,7 +691,7 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
         Accessibility::WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     event.SetSource(thirdElementId);
     event.SetEventType(eventType);
-    event.SetBundleName(Container::CurrentBundleName());
+    event.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     // 2. get element from third
     // cut tree id
