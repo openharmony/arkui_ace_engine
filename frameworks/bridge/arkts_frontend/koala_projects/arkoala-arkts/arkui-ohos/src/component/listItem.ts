@@ -206,7 +206,7 @@ export interface ListItemOptions {
     style?: ListItemStyle;
 }
 export interface ListItemAttribute extends CommonMethod {
-    setListItemOptions(value?: ListItemOptions | string): this {
+    setListItemOptions(value?: ListItemOptions | undefined): this {
         return this
     }
     sticky(value: Sticky | undefined): this { return this; }
@@ -225,7 +225,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     selected_value?: boolean | Bindable<boolean> | undefined
     swipeAction_value?: SwipeActionOptions | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
-    public setListItemOptions(value?: ListItemOptions | string): this {
+    public setListItemOptions(value?: ListItemOptions | undefined): this {
         return this
     }
     public sticky(value: Sticky | undefined): this {
