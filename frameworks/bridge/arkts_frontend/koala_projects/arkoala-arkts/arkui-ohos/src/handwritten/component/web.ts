@@ -258,7 +258,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferSslErrorHandlerToDynamic(value: Object): Any {
-        if (!TypeChecker.isWebContextMenuResult(value)) {
+        if (!TypeChecker.isSslErrorHandler(value)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as SslErrorHandler

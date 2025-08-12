@@ -29626,34 +29626,30 @@ void impl_WebAttribute_onSslErrorReceive(Ark_NativePointer thisPtr, KSerializerB
         GetNodeModifiers()->getWebModifier()->setOnSslErrorReceive(self, (const Opt_Callback_Literal_Function_handler_Object_error_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_onSslErrorReceive, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_WebAttribute_onRenderExited0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+
+void impl_WebAttribute_onRenderExited(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength)
+{
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_OnRenderExitedEvent_Void value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent parameter)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_OnRenderExitedEvent_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent parameter)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_OnRenderExitedEvent_Void))))};
+        Opt_Callback_OnRenderExitedEvent_Void valueValueBuf  = {};
+        valueValueBuf .tag =
+            value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType)) {
+            valueValueBuf .value = { thisDeserializer.readCallbackResource(),
+                reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent parameter)>(
+                    thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                        getManagedCallbackCaller(Kind_Callback_OnRenderExitedEvent_Void)))),
+                reinterpret_cast<void (*)(
+                    Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_OnRenderExitedEvent parameter)>(
+                    thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                        getManagedCallbackCallerSync(Kind_Callback_OnRenderExitedEvent_Void)))) };
         }
-        Opt_Callback_OnRenderExitedEvent_Void value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setOnRenderExited0(self, (const Opt_Callback_OnRenderExitedEvent_Void*)&value_value);
+        Opt_Callback_OnRenderExitedEvent_Void valueValue  = valueValueBuf ;
+        GetNodeModifiers()->getWebModifier()->setOnRenderExited(
+            self, static_cast<const Opt_Callback_OnRenderExitedEvent_Void*>(&valueValue) );
 }
-KOALA_INTEROP_DIRECT_V3(WebAttribute_onRenderExited0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_WebAttribute_onRenderExited1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Literal_Object_detail_Boolean value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_Literal_Object_detail event, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Literal_Object_detail_Boolean)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_Literal_Object_detail event, const Callback_Boolean_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Literal_Object_detail_Boolean))))};
-        }
-        Opt_Callback_Literal_Object_detail_Boolean value_value = value_value_buf;;
-        GetNodeModifiers()->getWebModifier()->setOnRenderExited1(self, (const Opt_Callback_Literal_Object_detail_Boolean*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(WebAttribute_onRenderExited1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(WebAttribute_onRenderExited, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_onShowFileSelector(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);

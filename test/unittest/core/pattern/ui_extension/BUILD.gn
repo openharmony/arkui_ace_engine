@@ -328,7 +328,7 @@ ace_unittest("isolated_pattern_test_ng") {
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "accessibility_session_adapter_isolated_component_test_ng.cpp",
-    #"isolated_pattern_test_ng.cpp",
+    "isolated_pattern_test_ng.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [

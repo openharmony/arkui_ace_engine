@@ -15,19 +15,20 @@
 
 #include "core/components/plugin/plugin_sub_container.h"
 
+#include "ability_info.h"
+
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
+#include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
-#include "bridge/arkts_frontend/arkts_plugin_frontend.h"
-#include "ability_info.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -74,7 +75,13 @@ void PluginSubContainer::Initialize(const std::string& codeLanguage)
                 codeLanguage.c_str(), outSidePipelineContext->GetFrontendType());
             return;
         }
-        frontend_ = AceType::MakeRefPtr<ArktsPluginFrontend>(container->GetSharedRuntime());
+        auto arktsPluginFrontend =
+            ArktsFrontendLoader::GetInstance().CreateArktsPluginFrontend(container->GetSharedRuntime());
+        if (arktsPluginFrontend == nullptr) {
+            LOGE("Create arktsPluginFrontend failed.");
+            return;
+        }
+        frontend_ = arktsPluginFrontend;
         frontend_->Initialize(FrontendType::ARK_TS, taskExecutor_);
         TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
         return;

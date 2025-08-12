@@ -2991,6 +2991,7 @@ frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
+frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkwebinarkuireview
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @arkuievent
 interfaces/native/drawable_descriptor.h @arkui_image

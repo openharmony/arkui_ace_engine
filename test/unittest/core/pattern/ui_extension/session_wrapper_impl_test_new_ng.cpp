@@ -1238,12 +1238,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     auto pipeline = PipelineBase::GetCurrentContext();
 
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::UNDEFINED;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::UNDEFINED);
     sessionWrapper->NotifyDisplayArea(displayArea);
 
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
     sessionWrapper->NotifyDisplayArea(displayArea);
     EXPECT_EQ(transaction, transactionController->GetRSTransaction());
 

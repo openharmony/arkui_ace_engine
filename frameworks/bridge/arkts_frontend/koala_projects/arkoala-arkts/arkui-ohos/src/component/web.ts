@@ -37,6 +37,7 @@ import { Position, ResourceStr } from "./units"
 import { PixelMap } from "#external"
 import { PreviewMenuOptions } from "./richEditor"
 import { ArkUIAniModule } from "arkui.ani"
+import { Callback } from "./common"
 
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
@@ -2037,7 +2038,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_onSslErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onRenderExited0Attribute(value: ((parameter: OnRenderExitedEvent) => void) | undefined): void {
+    onRenderExitedAttribute(value: ((parameter: OnRenderExitedEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -2046,19 +2047,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
-        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onRenderExited1Attribute(value: ((event?: Literal_Object_detail) => boolean) | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._WebAttribute_onRenderExited(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onShowFileSelectorAttribute(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): void {
@@ -3604,8 +3593,8 @@ export enum WebResponseType {
     LONG_PRESS = 1
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: Callback<void>;
+    onDisappear?: Callback<void>;
     preview?: CustomBuilder;
     menuType?: MenuType;
     previewMenuOptions?: PreviewMenuOptions;
@@ -3710,7 +3699,7 @@ export interface WebAttribute extends CommonMethod {
     onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void) | undefined): this
     onUrlLoadIntercept(value: ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) | undefined): this
     onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this
-    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this
+    onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this
     onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this
     onFileSelectorShow(value: ((event?: Literal_Function_callback__Object_fileSelector) => void) | undefined): this
     onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void) | undefined): this
@@ -4050,7 +4039,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public onSslErrorReceive(value: ((event?: Literal_Function_handler_Object_error) => void) | undefined): this {
         return this
     }
-    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this {
         return this
     }
     public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean) | undefined): this {
@@ -4686,20 +4675,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined | ((event?: Literal_Object_detail) => boolean) | undefined): this {
+    public onRenderExited(value: ((parameter: OnRenderExitedEvent) => void) | undefined): this {
         if (this.checkPriority("onRenderExited")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (((parameter: OnRenderExitedEvent) => void) | undefined)
-                this.getPeer()?.onRenderExited0Attribute(value_casted)
+                this.getPeer()?.onRenderExitedAttribute(value_casted)
                 return this
-            }
-            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (((event?: Literal_Object_detail) => boolean) | undefined)
-                this.getPeer()?.onRenderExited1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
         }
         return this
     }
