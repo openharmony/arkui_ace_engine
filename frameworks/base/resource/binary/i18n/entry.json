@@ -636,8 +636,8 @@
             "last_updated":"آخر تحديث: %s"
         },
         "switch":{
-            "on":"مشغّل",
-            "off":"مغلق"
+            "on":"تشغيل",
+            "off":"إغلاق"
         },
         "stepper":{
             "skip":"تخطي",
@@ -1482,13 +1482,13 @@
             "last_updated":"Última actualización: %s"
         },
         "switch":{
-            "on":"Activado",
-            "off":"Desactivado"
+            "on":"Sí",
+            "off":"No"
         },
         "stepper":{
             "skip":"Omitir",
             "next":"Siguiente",
-            "start":"Inicio",
+            "start":"Comenzar",
             "back":"Volver"
         },
         "window":{
@@ -1673,7 +1673,7 @@
             "select_all":"Выбрать все",
             "cut":"Вырезать",
             "copy":"Копировать",
-            "search":"Найти",
+            "search":"Поиск",
             "share":"Отправить",
             "translate":"Перевод"
         },
@@ -1682,7 +1682,7 @@
         },
         "switch":{
             "on":"Включено",
-            "off":"Выключено"
+            "off":"Выклю\\u200bчено"
         },
         "stepper":{
             "skip":"Пропустить",
@@ -2023,7 +2023,7 @@
         "textoverlay":{
             "paste":"貼り付け",
             "select_all":"すべて選択",
-            "cut":"切り取り",
+            "cut":"カット",
             "copy":"コピー",
             "search":"検索",
             "share":"共有",
@@ -2033,8 +2033,8 @@
             "last_updated":"最終更新：%s"
         },
         "switch":{
-            "on":"オン",
-            "off":"オフ"
+            "on":"有効",
+            "off":"無効"
         },
         "stepper":{
             "skip":"スキップ",
@@ -2240,7 +2240,7 @@
         },
         "textoverlay":{
             "paste":"Dán",
-            "select_all":"Chọn tất cả",
+            "select_all":"Chọn tất",
             "cut":"Cắt",
             "copy":"Sao chép",
             "search":"Tìm kiếm",
@@ -2252,7 +2252,7 @@
         },
         "switch":{
             "on":"Bật",
-            "off":"Tắt"
+            "off":"Đã tắt"
         },
         "stepper":{
             "skip":"Bỏ qua",
@@ -2569,21 +2569,21 @@
             "last_updated":"Dernière mise à jour : %s"
         },
         "switch":{
-            "on":"Activé",
-            "off":"Désactivé"
+            "on":"Activer",
+            "off":"Désactiver"
         },
         "stepper":{
             "skip":"Ignorer",
             "next":"Suivant",
-            "start":"Démarrer",
-            "back":"Revenir"
+            "start":"Commencer",
+            "back":"Retour"
         },
         "window":{
             "leftSide":"Afficher à gauche",
             "rightSide":"Afficher à droite"
         },
         "navigation":{
-            "back":"Revenir"
+            "back":"Retour"
         },
         "sheet":{
             "close":"Fermer"
