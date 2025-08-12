@@ -102,6 +102,8 @@ public:
     std::pair<size_t, size_t> GetEllipsisTextRange();
     TextLineMetrics GetLineMetrics(size_t lineNumber);
     bool IsIndexAtParagraphEnd(int32_t index);
+    bool DidExceedMaxLinesInner() const;
+    std::string GetDumpInfo() const;
 
 protected:
     std::vector<ParagraphInfo> paragraphs_;

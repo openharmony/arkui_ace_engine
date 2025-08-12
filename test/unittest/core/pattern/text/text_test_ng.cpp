@@ -2261,7 +2261,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, Layout);
-    EXPECT_CALL(*paragraph, DidExceedMaxLines).WillOnce(Return(true));
+    EXPECT_CALL(*paragraph, DidExceedMaxLinesInner).WillOnce(Return(true));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -2315,7 +2315,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
 HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, DidExceedMaxLines).WillOnce(Return(true));
+    EXPECT_CALL(*paragraph, DidExceedMaxLinesInner).WillOnce(Return(true));
     /**
      * @tc.steps: step1. create textFrameNode.
      */

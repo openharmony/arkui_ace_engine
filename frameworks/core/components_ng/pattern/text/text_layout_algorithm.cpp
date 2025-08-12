@@ -967,7 +967,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraphManager_, false);
-    bool didExceedMaxLines = paragraphManager_->DidExceedMaxLines();
+    bool didExceedMaxLines = paragraphManager_->DidExceedMaxLinesInner();
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraphManager_->GetHeight(), maxSize.Height());
     didExceedMaxLines =
         didExceedMaxLines || GreatNotEqual(paragraphManager_->GetLongestLineWithIndent(), maxSize.Width());
@@ -977,7 +977,7 @@ bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
 bool TextLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
 {
     CHECK_NULL_RETURN(paragraphManager_, false);
-    return (paragraphManager_->GetLineCount() > 1) || paragraphManager_->DidExceedMaxLines() ||
+    return (paragraphManager_->GetLineCount() > 1) || paragraphManager_->DidExceedMaxLinesInner() ||
            GreatNotEqual(paragraphManager_->GetLongestLineWithIndent(), maxSize.Width());
 }
 

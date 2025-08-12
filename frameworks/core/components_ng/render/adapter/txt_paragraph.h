@@ -135,6 +135,9 @@ public:
         return paragraphSharedPtr;
     }
 
+    bool DidExceedMaxLinesInner() override;
+    std::string GetDumpInfo() override;
+
 protected:
     virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     ParagraphStyle paraStyle_;
