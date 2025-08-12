@@ -2398,9 +2398,7 @@ HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
 
-    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(std::nullopt);
-    EXPECT_EQ(prevNode1, nullptr);
-    auto nextNode1 = overlayManager->GetBottomOrderFirstNode(std::nullopt);
+    auto nextNode1 = overlayManager->GetNextNodeWithOrder(std::nullopt);
     EXPECT_EQ(nextNode1, nullptr);
 }
 
@@ -2440,10 +2438,8 @@ HWTEST_F(OverlayTestNg, AddFrameNodeWithOrder004, TestSize.Level1)
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
 
     auto overlayNode = frameNode->GetParent();
-    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(std::make_optional(0.0f));
-    EXPECT_EQ(prevNode2->GetId(), overlayNode->GetId());
-    auto nextNode2 = overlayManager->GetBottomOrderFirstNode(std::make_optional(-1.0f));
-    EXPECT_EQ(nextNode2->GetId(), overlayNode->GetId());
+    auto nextNode = overlayManager->GetNextNodeWithOrder(std::make_optional(-1.0f));
+    EXPECT_EQ(nextNode->GetId(), overlayNode->GetId());
 }
 
 /**

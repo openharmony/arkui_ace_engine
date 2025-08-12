@@ -3637,36 +3637,18 @@ void OverlayManager::PopLevelOrder(int32_t nodeId)
     }
 }
 
-RefPtr<FrameNode> OverlayManager::GetPrevNodeWithOrder(std::optional<double> levelOrder)
-{
-    if (!levelOrder.has_value()) {
-        return nullptr;
-    }
-
-    for (auto iter = orderNodesMap_.rbegin(); iter != orderNodesMap_.rend(); iter++) {
-        double order = iter->first;
-        if (order > levelOrder.value()) {
-            continue;
-        }
-
-        auto& nodeVector = iter->second;
-        if (nodeVector.empty()) {
-            continue;
-        }
-
-        auto nodeIter = nodeVector.rbegin();
-        return DynamicCast<FrameNode>(*nodeIter);
-    }
-    return nullptr;
-}
-
-RefPtr<FrameNode> OverlayManager::GetBottomOrderFirstNode(std::optional<double> levelOrder)
+RefPtr<FrameNode> OverlayManager::GetNextNodeWithOrder(const std::optional<double>& levelOrder)
 {
     if (!levelOrder.has_value()) {
         return nullptr;
     }
 
     for (auto iter = orderNodesMap_.begin(); iter != orderNodesMap_.end(); iter++) {
+        double order = iter->first;
+        if (order <= levelOrder.value()) {
+            continue;
+        }
+
         auto& nodeVector = iter->second;
         if (nodeVector.empty()) {
             continue;
@@ -8663,10 +8645,7 @@ void OverlayManager::MountToParentWithOrder(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(rootNode);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "%{public}s node mount to root node", node->GetTag().c_str());
-    if (auto prevNode = GetPrevNodeWithOrder(levelOrder); prevNode) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get prev FrameNode with order. nodeId: %{public}d", prevNode->GetId());
-        node->MountToParentAfter(rootNode, prevNode);
-    } else if (auto nextNode = GetBottomOrderFirstNode(levelOrder); nextNode) {
+    if (auto nextNode = GetNextNodeWithOrder(levelOrder)) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get next FrameNode with order. nodeId: %{public}d", nextNode->GetId());
         node->MountToParentBefore(rootNode, nextNode);
     } else {
@@ -8726,10 +8705,7 @@ bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
         }
         auto serviceContainer = FindChildNodeByKey(child, "AtomicServiceContainerId");
         CHECK_NULL_RETURN(serviceContainer, false);
-        if (auto prevNode = GetPrevNodeWithOrder(levelOrder); prevNode) {
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get prev FrameNode with order. nodeId: %{public}d", prevNode->GetId());
-            serviceContainer->AddChildAfter(node, prevNode);
-        } else if (auto nextNode = GetBottomOrderFirstNode(levelOrder); nextNode) {
+        if (auto nextNode = GetNextNodeWithOrder(levelOrder)) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Get next FrameNode with order. nodeId: %{public}d", nextNode->GetId());
             serviceContainer->AddChildBefore(node, nextNode);
         } else {

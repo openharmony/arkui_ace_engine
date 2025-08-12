@@ -1544,11 +1544,11 @@ HWTEST_F(OverlayManagerTwoTestNg, PopLevelOrder003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder001
- * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.name: OverlayManagerTwoTestNg_GetNextNodeWithOrder001
+ * @tc.desc: Test OverlayManager::GetNextNodeWithOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder001, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, GetNextNodeWithOrder001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node
@@ -1578,17 +1578,17 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder001, TestSize.Level1)
     overlayManager->orderNodesMap_.clear();
 
     overlayManager->orderNodesMap_[0.0] = {};
-    auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
-    EXPECT_EQ(prevNode, nullptr);
+    auto nextNode = overlayManager->GetNextNodeWithOrder(std::nullopt);
+    EXPECT_EQ(nextNode, nullptr);
     overlayManager->orderNodesMap_.erase(0.0);
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder002
- * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.name: OverlayManagerTwoTestNg_GetNextNodeWithOrder002
+ * @tc.desc: Test OverlayManager::GetNextNodeWithOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder002, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, GetNextNodeWithOrder002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node
@@ -1621,16 +1621,16 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder002, TestSize.Level1)
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
     EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
-    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
-    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+    auto nextNode1 = overlayManager->GetNextNodeWithOrder(std::make_optional(0.0));
+    EXPECT_EQ(nextNode1->GetId(), dialogNode_->GetId());
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder003
- * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.name: OverlayManagerTwoTestNg_GetNextNodeWithOrder003
+ * @tc.desc: Test OverlayManager::GetNextNodeWithOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, GetNextNodeWithOrder003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node
@@ -1663,8 +1663,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
     EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
-    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
-    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+    auto nextNode1 = overlayManager->GetNextNodeWithOrder(std::make_optional(0.0));
+    EXPECT_EQ(nextNode1->GetId(), dialogNode_->GetId());
 
     auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     EXPECT_NE(contentNode2_, nullptr);
@@ -1675,16 +1675,16 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder003, TestSize.Level1)
     overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
     EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 2);
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 2);
-    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
-    EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
+    auto nextNode2 = overlayManager->GetNextNodeWithOrder(levelOrder1);
+    EXPECT_EQ(nextNode2->GetId(), dialogNode2_->GetId());
 }
 
 /**
- * @tc.name: OverlayManagerTwoTestNg_GetPrevNodeWithOrder004
- * @tc.desc: Test OverlayManager::GetPrevNodeWithOrder.
+ * @tc.name: OverlayManagerTwoTestNg_GetNextNodeWithOrder004
+ * @tc.desc: Test OverlayManager::GetNextNodeWithOrder.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, GetNextNodeWithOrder004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node
@@ -1714,16 +1714,16 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
     overlayManager->orderNodesMap_.clear();
 
     overlayManager->orderNodesMap_[0.0] = {};
-    auto prevNode = overlayManager->GetPrevNodeWithOrder(std::nullopt);
-    EXPECT_EQ(prevNode, nullptr);
+    auto nextNode = overlayManager->GetNextNodeWithOrder(std::nullopt);
+    EXPECT_EQ(nextNode, nullptr);
     overlayManager->orderNodesMap_.erase(0.0);
 
     auto levelOrder1 = std::make_optional(1.0);
     overlayManager->PutLevelOrder(dialogNode_, levelOrder1);
     EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 1);
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 1);
-    auto prevNode1 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
-    EXPECT_EQ(prevNode1->GetId(), dialogNode_->GetId());
+    auto nextNode1 = overlayManager->GetNextNodeWithOrder(std::make_optional(0.0));
+    EXPECT_EQ(nextNode1->GetId(), dialogNode_->GetId());
 
     auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     EXPECT_NE(contentNode2_, nullptr);
@@ -1734,8 +1734,8 @@ HWTEST_F(OverlayManagerTwoTestNg, GetPrevNodeWithOrder004, TestSize.Level1)
     overlayManager->PutLevelOrder(dialogNode2_, levelOrder2);
     EXPECT_EQ(overlayManager->nodeIdOrderMap_.size(), 2);
     EXPECT_EQ(overlayManager->orderNodesMap_.size(), 2);
-    auto prevNode2 = overlayManager->GetPrevNodeWithOrder(levelOrder1);
-    EXPECT_EQ(prevNode2->GetId(), dialogNode_->GetId());
+    auto nextNode2 = overlayManager->GetNextNodeWithOrder(levelOrder1);
+    EXPECT_EQ(nextNode2->GetId(), dialogNode2_->GetId());
 }
 
 /**
