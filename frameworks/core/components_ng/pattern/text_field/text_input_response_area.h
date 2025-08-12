@@ -80,10 +80,7 @@ class PasswordResponseArea : public TextInputResponseArea {
 public:
     PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
         : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
-    ~PasswordResponseArea()
-    {
-        ClearArea();
-    }
+    ~PasswordResponseArea() = default;
 
     void InitResponseArea() override;
 
@@ -159,10 +156,7 @@ class UnitResponseArea : public TextInputResponseArea {
 public:
     UnitResponseArea(const WeakPtr<Pattern>& hostPattern, const RefPtr<NG::UINode>& unitNode)
         : TextInputResponseArea(hostPattern), unitNode_(std::move(unitNode)) {}
-    ~UnitResponseArea()
-    {
-        ClearArea();
-    }
+    ~UnitResponseArea() = default;
 
     void InitResponseArea() override;
 

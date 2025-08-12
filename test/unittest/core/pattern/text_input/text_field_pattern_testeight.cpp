@@ -1882,6 +1882,16 @@ HWTEST_F(TextFieldPatternTestEight, ProcessResponseArea001, TestSize.Level0)
     layoutProperty->UpdateShowPasswordIcon(false);
     pattern_->ProcessResponseArea();
     EXPECT_FALSE(pattern_->IsShowPasswordIcon());
+
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    pattern_->responseArea_->ClearArea();
+    auto unitResponseArea =
+        AceType::MakeRefPtr<UnitResponseArea>(AceType::WeakClaim(AceType::RawPtr(pattern_)), textFieldNode);
+    unitResponseArea->areaRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    pattern_->responseArea_ = unitResponseArea;
+    pattern_->ProcessResponseArea();
+    EXPECT_EQ(unitResponseArea->areaRect_, RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
