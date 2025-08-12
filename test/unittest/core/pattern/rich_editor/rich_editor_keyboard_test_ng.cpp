@@ -238,6 +238,10 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->RequestCustomKeyboard(), true);
     EXPECT_EQ(textFieldManager->UsingCustomKeyboardAvoid(), true);
     EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, true);
+
+    richEditorPattern->SetCustomKeyboardOption(false);
+    EXPECT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
+    EXPECT_EQ(textFieldManager->UsingCustomKeyboardAvoid(), false);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
 }
 
