@@ -1121,6 +1121,7 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
@@ -1566,6 +1567,9 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
     frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     textSelectOverlay->OnAncestorNodeChanged(frameNodeChangeInfoFlag);
     EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+    auto viewPort = textSelectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1996,6 +2000,7 @@ HWTEST_F(TextTestFiveNg, UpdateParagraph001, TestSize.Level1)
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(spanItem->UpdateParagraph(frameNode, paragraph, true), -1);
@@ -2535,6 +2540,7 @@ HWTEST_F(TextTestFiveNg, InitClickEvent001, TestSize.Level1)
 
     textPattern->textDetectEnable_ = true;
     textPattern->copyOption_ = CopyOptions::InApp;
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     textPattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
     EXPECT_EQ(sysJudgeFunc.value()(gestureInfo, info), GestureJudgeResult::CONTINUE);
@@ -2565,6 +2571,7 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
 
     textPattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
 
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     auto func = textPattern->dataDetectorAdapter_->onClickMenu_;
     ASSERT_NE(func, nullptr);
 
@@ -2691,16 +2698,49 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
  */
 HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow001, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
     RectF rectsForPlaceholders(0, 0, 10, 10);
-    pattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 0, 0, 0.0);
-    auto shadow = textLayoutProperty->GetTextShadow().value();
-    EXPECT_TRUE(shadow.empty());
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, 1, 1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
+}
+
+/**
+ * @tc.name: UpdateRectForSymbolShadow002
+ * @tc.desc: test text_pattern.cpp UpdateRectForSymbolShadow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateRectForSymbolShadow002, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextModelNG text;
+    text.Create(u"text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow({ textShadow });
+    RectF rectsForPlaceholders(0, 0, 10, 10);
+    textPattern->UpdateRectForSymbolShadow(rectsForPlaceholders, -1, -1, 1.0);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
 }
 
 /**
@@ -3285,7 +3325,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
@@ -3305,7 +3345,7 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
 
 /**
  * @tc.name: UnRegisterAfterLayoutCallback001
- * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
@@ -3372,11 +3412,11 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), true);
     /**
-     * @tc.expected: Set EnableAutoSpacing False
+     * @tc.expected: Set EnableAutoSpacing False.
      */
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);

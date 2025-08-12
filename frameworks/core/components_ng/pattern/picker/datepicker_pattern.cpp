@@ -48,7 +48,7 @@ const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
-const int32_t UNOPTION_COUNT = 2;
+const int32_t INVISIBLE_OPTIONS_COUNT = 2;
 const int32_t COLUMNS_SIZE = 3;
 const int32_t COLUMNS_ZERO = 0;
 const int32_t COLUMNS_ONE = 1;
@@ -63,6 +63,7 @@ constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -537,9 +538,21 @@ void DatePickerPattern::UpdateDateOrder()
         dateOrder = orderResult.dateOrder;
     }
     SetDateOrder(dateOrder);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (language == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+        isDirectionSetByAr = true;
+    } else if (isDirectionSetByAr) {
+        layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+        isDirectionSetByAr = false;
+    }
 }
 
-void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext)
+void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext)
 {
     CHECK_NULL_VOID(buttonNode);
     auto updateNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
@@ -547,7 +560,7 @@ void DatePickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonN
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    auto pipeline = updateNode->GetContextRefPtr();
+    auto pipeline = updateNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
@@ -650,10 +663,17 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    pickerProperty->UpdateColor(
-        GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
-    pickerProperty->UpdateDisappearColor(
-        GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(
+            GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateDisappearColor(
+            GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
     if (isPicker_) {
         if (!SystemProperties::ConfigChangePerform()) {
             OnModifyDone();
@@ -908,7 +928,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_MOVE_END) {
-        pattern->SetCurrentIndex(totalOptionCount - UNOPTION_COUNT);
+        pattern->SetCurrentIndex(totalOptionCount - INVISIBLE_OPTIONS_COUNT);
         pattern->InnerHandleScroll(true, false);
         return true;
     }
@@ -2109,14 +2129,14 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
         remainingDays -= daysInMonth;
         return false; // continue to process next month
     };
-    
+
     lunarResult.year = lunarYear;
     for (uint32_t month = MIN_MONTH; month <= MAX_MONTH; ++month) {
         // process regular month
         if (processMonth(month, false)) {
             break;
         }
-        
+
         // process leap month if exists
         if (hasLeapMonth && lunarLeapMonth == month) {
             if (processMonth(month, true)) {
@@ -3151,6 +3171,11 @@ void DatePickerPattern::UpdateDisappearTextStyle(const PickerTextStyle& textStyl
     auto defaultTextStyle = pickerTheme->GetDisappearOptionStyle();
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetDisappearColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetDisappearColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -3171,6 +3196,11 @@ void DatePickerPattern::UpdateNormalTextStyle(const PickerTextStyle& textStyle)
     auto defaultTextStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -3191,6 +3221,11 @@ void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,
@@ -3199,4 +3234,18 @@ void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
         [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
     );
 }
+
+void DatePickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -103,6 +103,7 @@ void GaugeModifier::InitProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
     indicatorChange_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIndicatorChangeValue(false));
+    gaugeUpdate_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
@@ -188,6 +189,8 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         auto indicatorChange = indicatorChange_->Get();
         indicatorChange_->Set(!indicatorChange);
     }
+
+    gaugeUpdate_->Set(!gaugeUpdate_->Get());
 }
 
 

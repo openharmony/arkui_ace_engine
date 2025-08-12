@@ -981,4 +981,46 @@ HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Le
     EXPECT_EQ(layoutFlag, PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test CalendarPickerPattern OnColorConfigurationUpdate function when ConfigChangePerform is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step3. Call OnColorConfigurationUpdate function.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    Color color = layoutProperty->GetColor().value();
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    Color expectColor = calendarTheme->GetEntryFontColor();
+    EXPECT_EQ(color, expectColor);
+}
+
 } // namespace OHOS::Ace::NG

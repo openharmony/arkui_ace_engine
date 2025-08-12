@@ -694,6 +694,21 @@ private:
 
     static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);
 
+    // the interface supports multithreading
+    void SetAccessibilityGroupMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityTextWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityDescriptionWithEventMultiThread();
+
+    // the interface supports multithreading
+    void SetAccessibilityLevelMultiThread(const std::string& backupLevel);
+
+    // the interface supports multithreading
+    void NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType);
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;

@@ -73,7 +73,8 @@ public:
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
     static void RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
         std::string path, std::string fromPath = "", std::string moduleName = "", bool isNavgation = false);
-
+    static void UpdateRecordPath(const std::string& path);
+    static void ReportAllRecord();
 private:
     static std::string GetCurrentTime();
     static bool CheckIsRuleContainsPage(const std::string& ruleType, const std::string& pagePath);
@@ -94,6 +95,7 @@ private:
     int64_t markTime_ = 0;
     std::string name_;
     std::string pagePath_;
+    static std::string recordPath_;
     static std::string currentPath_;
     static std::vector<std::pair<int64_t, std::string>> records_;
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedPerformanceCheck);

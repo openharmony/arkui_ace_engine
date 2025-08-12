@@ -236,14 +236,14 @@ public:
     void SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) override;
     void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) override;
+    void SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) override;
     void SetOnDragSpringLoadingConfiguration(
         const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetOnVisibleChange(
-        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override;
+    void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios,
+        bool isOutOfBoundsAllowed = false) override;
     void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override {};
     void SetOnAreaChanged(

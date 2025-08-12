@@ -106,12 +106,17 @@ public:
         return IsMultiMenu();
     }
 
-    bool IsChildColumnLayout() override
+    bool ChildPreMeasureHelperEnabled() override
     {
-        return IsMultiMenu();
+        return true;
     }
 
-    bool IsChildComponentContent() override
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool IsEnabledContentForFixIdeal()
     {
         return IsMultiMenu();
     }
@@ -382,7 +387,7 @@ public:
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void SetFirstShow()
     {
         isFirstShow_ = true;

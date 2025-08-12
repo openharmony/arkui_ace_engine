@@ -76,9 +76,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     padding(value: Padding | Length): this;
     safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding): this;
     margin(value: Margin | Length): this;
-    background(builder: CustomBuilder, options?: {
-        align?: Alignment;
-    }): this;
+    background(content: CustomBuilder | ResourceColor, options?: BackgroundOptions): this;
     backgroundColor(value: ResourceColor): this;
     backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this;
     backgroundImageSize(value: SizeOptions | ImageSize): this;
@@ -460,6 +458,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
+    enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

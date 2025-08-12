@@ -819,7 +819,8 @@ class RenderNode extends Disposable {
   dispose() {
     super.dispose();
     if (this.nodePtr) {
-      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+          'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
     }
     this._nativeRef?.dispose();
     this.baseNode_?.disposeNode();

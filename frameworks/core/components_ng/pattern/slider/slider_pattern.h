@@ -148,6 +148,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
+    void UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -277,7 +278,13 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
     void CalcSliderValue();
@@ -452,6 +459,8 @@ private:
     void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
     void UpdateStepPointsAccessibilityText(
         RefPtr<FrameNode>& node, uint32_t nodeIndex, SliderModel::SliderShowStepOptions& options);
+
+    void RemoveCallbackOnDetach(FrameNode* frameNode);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

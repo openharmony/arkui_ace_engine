@@ -324,6 +324,7 @@ public:
         return false;
     }
     bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
+    void UpdateIsSingleHandle(bool isSingleHandle);
 
 protected:
     RectF MergeSelectedBoxes(

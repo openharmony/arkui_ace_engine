@@ -205,7 +205,7 @@ void MenuPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(warpperPattern);
         auto isMenuHide = warpperPattern->IsHide();
         TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
-        if (!isMenuHide) {
+        if (menuNode->IsOnMainTree() && !isMenuHide) {
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
@@ -822,7 +822,7 @@ void MenuPattern::AddGroupFooterDivider(RefPtr<UINode>& previousNode, const RefP
         }
     }
     // When the group is not the last item of the menu.
-    if (parent->GetChildIndex(groupNode) < parent->GetChildren().size() - 1) {
+    if (parent->GetChildIndex(groupNode) < static_cast<int32_t>(parent->GetChildren().size()) - 1) {
         UpdateDividerProperty(groupPattern->GetBottomDivider(), property->GetItemGroupDivider());
         if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
             groupPattern->RemoveBottomDivider();
@@ -914,8 +914,7 @@ void MenuPattern::UpdateSelectOptionTextByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    auto childCount = children.size();
-    if (index >= childCount) {
+    if (index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -938,8 +937,7 @@ void MenuPattern::UpdateSelectOptionIconByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    auto childCount = children.size();
-    if (index >= childCount) {
+    if (index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -1810,7 +1808,7 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     auto mainMenuAccessibilityProps = mainMenu->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(mainMenuAccessibilityProps);
     mainMenuAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
-    
+
     ShowStackMainMenuAnimation(mainMenu, host, menuWrapper);
     ShowStackSubMenuAnimation(mainMenu, host);
     isSubMenuShow_ = false;
@@ -2055,7 +2053,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
     });
 
     ShowArrowReverseRotateAnimation();
-    
+
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());

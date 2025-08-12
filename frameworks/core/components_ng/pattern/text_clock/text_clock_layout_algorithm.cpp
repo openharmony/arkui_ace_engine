@@ -54,6 +54,16 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 childConstraint.maxSize.SetHeight(std::numeric_limits<float>::max());
             }
         }
+        if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+            if (layoutPolicy->IsWidthMatch()) {
+                maxSize.SetWidth(constraint->parentIdealSize.Width().value());
+                childConstraint.maxSize.SetWidth(constraint->parentIdealSize.Width().value());
+            }
+            if (layoutPolicy->IsHeightMatch()) {
+                maxSize.SetHeight(constraint->parentIdealSize.Height().value());
+                childConstraint.maxSize.SetHeight(constraint->parentIdealSize.Height().value());
+            }
+        }
         textWrapper->Measure(childConstraint);
     }
 

@@ -1189,4 +1189,27 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest003, TestSize.Level1)
     EXPECT_FALSE(pattern->isFocusTextColorSet_);
     EXPECT_FALSE(pattern->isFocusShadowSet_);
 }
+
+/**
+ * @tc.name: ProgressSafeAreaTest001
+ * @tc.desc: Test LayoutPolicy of ProgressSafeAreaTest001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressSafeAreaTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create progress and get frameNode.
+     * @tc.expected: step1. check frameNode exists and tag is correct.
+     */
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS2, PROGRESS_TYPE_LINEAR);
+    CreateDone();
+    /**
+     * @tc.steps: step2. get childNode of frameNode.
+     * @tc.expected: step2. check whether childNode is empty.
+     */
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->IsEnableMatchParent());
+    EXPECT_TRUE(pattern->IsEnableFix());
+}
 } // namespace OHOS::Ace::NG

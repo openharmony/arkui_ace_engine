@@ -299,6 +299,7 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    JSViewAbstract::JsHeight(info);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
@@ -415,9 +416,13 @@ void JSGrid::SetScrollBar(const JSCallbackInfo& info)
 
 void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(info);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarColor = JSScrollable::ParseBarColor(info, resObj);
     if (!scrollBarColor.empty()) {
         GridModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        GridModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
     }
 }
 

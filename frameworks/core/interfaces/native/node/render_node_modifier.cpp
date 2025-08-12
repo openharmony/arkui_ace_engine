@@ -64,7 +64,7 @@ void AddBuilderNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();
-    CHECK_NULL_VOID(parentNode && parentNode->GetId() == currentNode->GetId());
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
     BuilderUtils::AddBuilderToParent(parentNode, nodes);
@@ -99,7 +99,7 @@ void RemoveBuilderNode(ArkUINodeHandle node, ArkUINodeHandle child)
     auto childRef = Referenced::Claim<UINode>(childNode);
     CHECK_NULL_VOID(childRef);
     auto parentNode = childRef->GetParent();
-    CHECK_NULL_VOID(parentNode && parentNode->GetId() == currentNode->GetId());
+    CHECK_NULL_VOID(parentNode && parentNode == currentNode);
     std::list<RefPtr<UINode>> nodes;
     BuilderUtils::GetBuilderNodes(childRef, nodes);
     BuilderUtils::RemoveBuilderFromParent(parentNode, nodes);
@@ -585,9 +585,10 @@ void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
 
 ArkUI_CharPtr GetNodeTypeInRenderNode(ArkUINodeHandle node)
 {
-    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(currentNode, "");
-    return currentNode->GetTag().c_str();
+    static std::string nodeType = currentNode->GetTag();
+    return nodeType.c_str();
 }
 
 namespace NodeModifier {

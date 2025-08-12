@@ -40,6 +40,8 @@ private:
     void NeedAgingUpdateParams(LayoutWrapper* layoutWrapper);
     void UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines);
     void UpdateMargin(LayoutWrapper* layoutWrapper, RefPtr<SelectTheme> theme);
+    void RemoveParentRestrictionsForFixIdeal(
+        const RefPtr<LayoutProperty> layoutProperty, LayoutConstraintF& childConstraint);
     float fontScale_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);

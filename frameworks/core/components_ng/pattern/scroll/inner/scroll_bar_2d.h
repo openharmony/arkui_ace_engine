@@ -39,11 +39,11 @@ public:
     }
     const ScrollBar& GetVerticalBar() const
     {
-        return vertical_;
+        return *vertical_;
     }
     const ScrollBar& GetHorizontalBar() const
     {
-        return horizontal_;
+        return *horizontal_;
     }
     /**
      * @brief Reset the animation flags for both scroll bars when render finishes.
@@ -67,9 +67,9 @@ private:
 
     ScrollPattern& pattern_;
 
-    ScrollBar vertical_;
-    ScrollBar horizontal_;
-    RefPtr<ScrollBar2DPainter> painter_ = AceType::MakeRefPtr<ScrollBar2DPainter>();
+    RefPtr<ScrollBar> vertical_ = MakeRefPtr<ScrollBar>();
+    RefPtr<ScrollBar> horizontal_ = MakeRefPtr<ScrollBar>();
+    RefPtr<ScrollBar2DPainter> painter_ = MakeRefPtr<ScrollBar2DPainter>();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_INNER_SCROLL_BAR_2D_H

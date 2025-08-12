@@ -71,13 +71,6 @@ private:
     std::string navDestinationId_ = UNDEFINED_ID;
 };
 
-enum LaunchMode {
-    STANDARD = 0,
-    MOVE_TO_TOP_SINGLETON,
-    POP_TO_TOP_SINGLETON,
-    NEW_INSTANCE,
-};
-
 using NavigationInterceptionEvent = std::function<void(const RefPtr<NavDestinationContext>,
     const RefPtr<NavDestinationContext>, NavigationOperation, bool)>;
 class MockNavigationStack : public NavigationStack {

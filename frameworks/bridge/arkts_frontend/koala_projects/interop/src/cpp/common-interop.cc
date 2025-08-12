@@ -138,7 +138,7 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 
 void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
     string* s = reinterpret_cast<string*>(ptr);
-    if (s) memcpy(bytes, s->c_str(), size);
+    if (s) memcpy_s(bytes, size, s->c_str(), size);
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KUInt)
 
@@ -366,6 +366,10 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
+    if (!array || !data) {
+        INTEROP_FATAL("CopyArray called with incorrect nullptr args (array, data):(%p, %p)", array, data);
+    }
+
     memcpy_s(data, length, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,10 +29,19 @@ namespace OHOS::Ace::NG {
 void ListItemGroupPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    // call OnAttachToFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
         SetListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMulti by multi thread
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void ListItemGroupPattern::OnColorConfigurationUpdate()
@@ -894,15 +904,15 @@ WeakPtr<FocusHub> ListItemGroupPattern::GetChildFocusNodeByIndex(int32_t tarInde
 void ListItemGroupPattern::AdjustMountTreeSequence(int32_t footerCount)
 {
     // Adjust the mount tree sequence to header, listitem, footer
-    if (footerIndex_ >= 0 && footerIndex_ < itemStartIndex_) {
+    if (footerIndex_ < itemStartIndex_) {
+        auto footer = footer_.Upgrade();
+        CHECK_NULL_VOID(footer);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto totalChildCount = host->GetTotalChildCount();
         auto childNode = host->GetChildAtIndex(itemStartIndex_);
         CHECK_NULL_VOID(childNode);
-        auto endNode = host->GetChildAtIndex(footerIndex_);
-        CHECK_NULL_VOID(endNode);
-        endNode->MovePosition(-1);
+        footer->MovePosition(-1);
         footerIndex_ = totalChildCount - footerCount;
         itemStartIndex_ -= footerCount;
     }
@@ -1327,38 +1337,5 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
             listPattern->FireFocusInListItemGroup(GetIndexInList());
         }
     }
-}
-
-PaddingPropertyF ListItemGroupPattern::CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
-{
-    bool isVertical = axis_ == Axis::VERTICAL;
-    if (needRotate) {
-        isVertical = !isVertical;
-    }
-    if (isVertical) {
-        safeAreaPadding.top = std::nullopt;
-        safeAreaPadding.bottom = std::nullopt;
-    } else {
-        safeAreaPadding.left = std::nullopt;
-        safeAreaPadding.right = std::nullopt;
-    }
-    return safeAreaPadding;
-}
-
-bool ListItemGroupPattern::AccumulatingTerminateHelper(
-    RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf, LayoutSafeAreaType ignoreType)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    if (!host->GetScrollableAxisSensitive()) {
-        return false;
-    }
-    auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,
-        { .edges = axis_ == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromList, frameRect));
-    return true;
 }
 } // namespace OHOS::Ace::NG

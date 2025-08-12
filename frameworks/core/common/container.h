@@ -54,6 +54,11 @@
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 
+namespace OHOS {
+class IRemoteObject;
+template<typename T>
+class sptr;
+} // namespace OHOS
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -776,6 +781,16 @@ public:
     virtual void UpdateColorMode(uint32_t colorMode) {};
 
     virtual void TriggerModuleSerializer() {};
+
+    virtual sptr<IRemoteObject> GetToken();
+
+    // Get the subFrontend of container
+    virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
+    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
+
+    virtual bool IsArkTsFrontEnd() const { return false; }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

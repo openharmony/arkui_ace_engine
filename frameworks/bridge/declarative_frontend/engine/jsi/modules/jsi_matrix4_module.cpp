@@ -22,7 +22,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "frameworks/base/geometry/ng/point_t.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
+#include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -306,7 +306,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }
-    Matrix4 ret = OHOS::Ace::NG::SetMatrixPolyToPoly(matrix, totalPoint);
+    Matrix4 ret = OHOS::Ace::NG::MatrixUtil::SetMatrixPolyToPoly(matrix, totalPoint);
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, ret));
     return thisObj;
 }

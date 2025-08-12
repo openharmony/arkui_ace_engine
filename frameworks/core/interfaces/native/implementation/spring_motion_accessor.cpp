@@ -44,7 +44,4 @@ const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     return &SpringMotionAccessorImpl;
 }
 
-struct SpringMotionPeer {
-    virtual ~SpringMotionPeer() = default;
-};
 }

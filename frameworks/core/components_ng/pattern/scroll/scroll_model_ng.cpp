@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -43,6 +44,8 @@ void ScrollModelNG::Create()
 
 RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollPattern>());
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -416,6 +419,7 @@ uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -423,7 +427,6 @@ void ScrollModelNG::SetScrollBarColor(const Color& color)
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(color);
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
 int32_t ScrollModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -498,13 +501,13 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
 {
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     auto scrollBar = pattern->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     scrollBar->SetForegroundColor(color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
 }
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
@@ -931,5 +934,17 @@ void ScrollModelNG::SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& 
     auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnZoomStop(std::move(event));
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
+void ScrollModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

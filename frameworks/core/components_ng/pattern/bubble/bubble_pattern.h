@@ -428,6 +428,7 @@ private:
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
     void StartAlphaExitingAnimation(std::function<void()> finish);
+    void UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;

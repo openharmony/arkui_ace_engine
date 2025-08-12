@@ -259,6 +259,7 @@ public:
     float GetCachedHeightInLanes(int32_t idx) const;
     void SetHeightInLanes(int32_t idx, float mainHeight);
     bool HaveRecordIdx(int32_t idx) const;
+    float CalcMaxHeight(int itemCnt);
 
     void InvalidatedOffset() override
     {

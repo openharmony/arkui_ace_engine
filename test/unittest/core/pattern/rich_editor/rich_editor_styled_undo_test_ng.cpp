@@ -286,6 +286,15 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation004, TestSize.Level1)
     EXPECT_EQ(undoRecord.rangeAfter.start, 0);
     EXPECT_EQ(undoRecord.rangeAfter.end, 6);
     EXPECT_TRUE(undoRecord.isOnlyStyleChange);
+
+    richEditorPattern->UpdateParagraphStyle(0, 3, style1);
+    EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 3);
+    undoRecord = undoRecords.back();
+    EXPECT_EQ(undoRecord.rangeBefore.start, 0);
+    EXPECT_EQ(undoRecord.rangeBefore.end, 6);
+    EXPECT_EQ(undoRecord.rangeAfter.start, 0);
+    EXPECT_EQ(undoRecord.rangeAfter.end, 6);
+    EXPECT_TRUE(undoRecord.isOnlyStyleChange);
 }
 
 /**

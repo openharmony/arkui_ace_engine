@@ -677,8 +677,12 @@ private:
     void StopHideTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenOffset(float offset);
-    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarTranslate(const TranslateOptions& options, bool isUserDefined = false);
     void SetTabBarOpacity(float opacity);
+    float GetUserDefinedTranslateY() const
+    {
+        return userDefinedTranslateY_;
+    }
 
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
@@ -778,6 +782,7 @@ private:
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
+    float userDefinedTranslateY_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;

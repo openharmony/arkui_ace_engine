@@ -1044,23 +1044,29 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     std::vector<TouchEvent> emptyHistory;
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
-    bool isScreen = true;
-    auto result =
-        ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-            std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+    auto result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::NORMAL);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, CoordinateType::SCREEN);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
     result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp,
+        CoordinateType::GLOBALDISPLAY);
+    EXPECT_FLOAT_EQ(0.0f, result.x);
+    EXPECT_FLOAT_EQ(0.0f, result.y);
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    emptyCurrent.push_back(TouchEvent {}.SetX(300.0f).SetY(200.0f).SetTime(timeStampThree));
+    auto illegalType = static_cast<CoordinateType>(999);
+    result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, illegalType);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
 }
@@ -1084,14 +1090,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
     auto resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, CoordinateType::SCREEN);
 
     ASSERT_FLOAT_EQ(200.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(300.0f, resampledCoord.y);
 
     SystemProperties::debugEnabled_ = true;
     resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), 2500, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), 2500, CoordinateType::SCREEN);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.y);
 }
@@ -1777,32 +1783,6 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg010, TestSize.Level1)
     EXPECT_TRUE(DumpLog::GetInstance().result_.find("you are already"));
 }
 
-/**
- * @tc.name: UITaskSchedulerTestNg011
- * @tc.desc: FlushRenderTask
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. prepare the environment variables for the function.
-     */
-    UITaskScheduler taskScheduler;
-    FrameInfo frameInfo;
-    bool res = false;
-    taskScheduler.StartRecordFrameInfo(&frameInfo);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
-    frameNode->SetInDestroying();
-    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
-
-    /**
-     * @tc.steps: step2. test FlushLayoutTask.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    taskScheduler.FlushRenderTask(res);
-    EXPECT_NE(res, true);
-}
 
 /**
  * @tc.name: UITaskSchedulerTestNg012
@@ -1856,9 +1836,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg013, TestSize.Level1)
     NG::FrameNode* frameNode2 = ElementRegister::GetInstance()->GetFrameNodePtrById(1);
     taskScheduler2.AddSafeAreaPaddingProcessTask(frameNode2);
     taskScheduler2.FlushSafeAreaPaddingProcess();
-
-    auto res = taskScheduler.RequestFrameOnLayoutCountExceeds();
-    EXPECT_EQ(res, true);
+    taskScheduler.RequestFrameOnLayoutCountExceeds();
 }
 
 /**
@@ -1883,6 +1861,39 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg014, TestSize.Level1)
     taskScheduler.FlushSafeAreaPaddingProcess();
     bool isempty = taskScheduler.safeAreaPaddingProcessTasks_.empty();
     EXPECT_EQ(isempty, true);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg015
+ * @tc.desc: Test FlushAfterModifierTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call FlushAfterModifierTask.
+     */
+    taskScheduler.FlushAfterModifierTask();
+
+    /**
+     * @tc.steps3: Call FlushAfterModifierTask.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 2.
+     */
+    taskScheduler.AddAfterModifierTask([]() {});
+    taskScheduler.AddAfterModifierTask(nullptr);
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 2);
+
+    /**
+     * @tc.steps4: Call FlushAfterModifierTask.
+     * @tc.expected: afterModifierTasks_ in the taskScheduler size is 0.
+     */
+    taskScheduler.FlushAfterModifierTask();
+    EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 0);
 }
 
 /**
@@ -3209,9 +3220,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg233, TestSize.Level1)
 
     context_->dragEvents_[frameNode1].emplace_back(dragPointEvent1);
     context_->dragEvents_[frameNode2].emplace_back(dragPointEvent2);
-
-    context_->FlushDragEvents();
     auto isEmpty = context_->nodeToPointEvent_.empty();
+    EXPECT_TRUE(isEmpty);
+    context_->FlushDragEvents();
+    isEmpty = context_->nodeToPointEvent_.empty();
     EXPECT_FALSE(isEmpty);
     EXPECT_FALSE(context_->canUseLongPredictTask_);
 }

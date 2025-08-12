@@ -30,6 +30,22 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
         V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
+    CreateByFrameNode(frameNode, badgeParameters);
+}
+
+RefPtr<FrameNode> BadgeModelNG::CreateBadgeFrameNode()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    return frameNode;
+}
+
+void BadgeModelNG::CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters)
+{
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();

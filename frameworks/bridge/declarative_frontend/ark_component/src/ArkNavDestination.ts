@@ -82,9 +82,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     }
     return this;
   }
-  toolbarConfiguration(value: any): this {
+  toolbarConfiguration(value: Array<ToolbarItem> | undefined, options?: NavigationToolbarOptions | undefined): this {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationToolBarConfigurationModifier.identity,
-      NavDestinationToolBarConfigurationModifier, value);
+      NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
   backButtonIcon(value: any): this {
@@ -200,16 +205,16 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
 }
 
-class NavDestinationToolBarConfigurationModifier extends ModifierWithKey<Array<ToolbarItem> | undefined> {
-  constructor(value: Array<ToolbarItem> | undefined) {
+class NavDestinationToolBarConfigurationModifier extends ModifierWithKey<ArkNavigationToolBarConfiguration> {
+  constructor(value: ArkNavigationToolBarConfiguration) {
     super(value);
   }
   static identity: Symbol = Symbol('toolbarConfiguration');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navDestination.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff(): boolean {

@@ -82,6 +82,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest002, TestSize.Level1)
 
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
+
     auto* aceNodePtr = frameNodeImpl->GetAceNodePtr();
     EXPECT_TRUE(aceNodePtr);
     auto aceNode = frameNodeImpl->GetAceNode();
@@ -228,7 +229,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
     EXPECT_NE(frameNode->GetParentHandle(), nullptr);
 }
 
-
 /**
  * @tc.name: FrameNodeTestTest008
  * @tc.desc:
@@ -338,7 +338,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest102, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetMeasureCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->measureCallback_, nullptr);
 }
@@ -364,7 +364,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest103, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node)->void {});
+    frameNodeImpl->SetOnNodeDestroyCallback([](RefPtr<FrameNode> node) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->destroyCallback_, nullptr);
 }
@@ -390,8 +390,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest104, TestSize.Level1)
     /**
      * @tc.steps2: set function callback, validate result.
      */
-    frameNodeImpl->SetConfigurationUpdateCallback([](
-        const ConfigurationChange& configurationChange)->void {});
+    frameNodeImpl->SetConfigurationUpdateCallback([](const ConfigurationChange& configurationChange) -> void {});
     auto node = frameNodeImpl->PopAceNode();
     EXPECT_NE(node->configurationUpdateCallback_, nullptr);
 }
@@ -450,8 +449,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest106, TestSize.Level1)
     node->OnWindowFocused();
     node->OnWindowUnfocused();
 
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect,
-        const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);
     EXPECT_NE(node->lastParentOffsetToWindow_, nullptr);
@@ -479,8 +478,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest107, TestSize.Level1)
      * @tc.steps2: build a object to SetOnAreaChangeCallback.
      */
     auto node = frameNodeImpl->PopAceNode();
-    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin,
-        const NG::RectF& rect, const NG::OffsetF& origin) {};
+    NG::OnAreaChangedFunc callback = [](const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                         const NG::OffsetF& origin) {};
     node->lastFrameRect_ = std::make_unique<NG::RectF>();
     node->SetOnAreaChangeCallback(std::move(callback));
     EXPECT_NE(node->lastFrameRect_, nullptr);
@@ -779,5 +778,29 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
      * @tc.excepted: step6 ai function not found and return 2.
      */
     EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest116
+ * @tc.desc: test GetParentGlobalOffsetDuringLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest116, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST116";
+    const int32_t id = 116;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test GetParentGlobalOffsetDuringLayout.
+     */
+    auto offset = frameNode->GetParentGlobalOffsetDuringLayout();
+    EXPECT_TRUE(NearEqual(offset.GetX(), 0.0f));
+    EXPECT_TRUE(NearEqual(offset.GetY(), 0.0f));
 }
 } // namespace OHOS::Ace

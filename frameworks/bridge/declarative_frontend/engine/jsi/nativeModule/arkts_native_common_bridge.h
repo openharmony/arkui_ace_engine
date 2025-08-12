@@ -24,6 +24,8 @@ namespace OHOS::Ace::NG {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class CommonBridge {
 public:
+    static ArkUINativeModuleValue SetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -296,6 +298,8 @@ public:
     static Local<panda::ObjectRef> CreateGestureEventInfo(
         EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
+    static void SetCommonAttributes(
+        Local<panda::ObjectRef>& obj, EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateFingerInfosInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, Local<panda::ObjectRef>& obj);
     static Local<panda::ObjectRef> SetUniqueAttributes(

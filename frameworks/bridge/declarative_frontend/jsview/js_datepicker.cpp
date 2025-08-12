@@ -273,6 +273,7 @@ void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObje
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    pickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
@@ -449,6 +450,7 @@ void JSDatePicker::ParseTextStyle(
     Color textColor;
     if (JSViewAbstract::ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontOptions->IsObject()) {
@@ -978,11 +980,14 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     if (second && second->IsNumber()) {
         dateTime.tm_sec = second->GetInt();
     }
+
+    dateTime.tm_isdst = -1; // Auto considering daylight saving time
     if (!isDatePicker) {
         auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
         auto dateObj = JSDate::New(milliseconds);
         return dateObj;
     }
+
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();

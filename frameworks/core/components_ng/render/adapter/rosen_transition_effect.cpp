@@ -282,13 +282,8 @@ RosenIdentityTransitionEffect::RosenIdentityTransitionEffect() : RosenTransition
     RosenTransitionEffect::SetAnimationOption(identityOption);
 }
 
-#if defined(MODIFIER_NG)
 template<typename Modifier, RSPropertyType PropertyType, typename ValueType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType, ValueType>::SetIdentityValue(ValueType identityValue)
-#else
-template<typename Modifier, typename ValueType>
-void PropertyTransitionEffectTemplate<Modifier, ValueType>::SetIdentityValue(ValueType identityValue)
-#endif
 {
     identityValue_ = identityValue;
     if (!isActive_) {
@@ -296,13 +291,8 @@ void PropertyTransitionEffectTemplate<Modifier, ValueType>::SetIdentityValue(Val
     }
 }
 
-#if defined(MODIFIER_NG)
 template<typename Modifier, RSPropertyType PropertyType, typename ValueType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType, ValueType>::SetActiveValue(ValueType activeValue)
-#else
-template<typename Modifier, typename ValueType>
-void PropertyTransitionEffectTemplate<Modifier, ValueType>::SetActiveValue(ValueType activeValue)
-#endif
 {
     activeValue_ = activeValue;
     if (isActive_) {
@@ -310,15 +300,9 @@ void PropertyTransitionEffectTemplate<Modifier, ValueType>::SetActiveValue(Value
     }
 }
 
-#if defined(MODIFIER_NG)
 template<typename Modifier, RSPropertyType PropertyType, typename ValueType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType, ValueType>::OnAttach(
     const RefPtr<RosenRenderContext>& context, bool activeTransition)
-#else
-template<typename Modifier, typename ValueType>
-void PropertyTransitionEffectTemplate<Modifier, ValueType>::OnAttach(
-    const RefPtr<RosenRenderContext>& context, bool activeTransition)
-#endif
 {
     // record the current status
     isActive_ = activeTransition;
@@ -331,22 +315,13 @@ void PropertyTransitionEffectTemplate<Modifier, ValueType>::OnAttach(
     property_ =
         std::make_shared<Rosen::RSAnimatableProperty<ValueType>>(activeTransition ? activeValue_ : identityValue_);
     // create the modifier and attach it to the context
-#if defined(MODIFIER_NG)
     modifier_ = std::make_shared<Modifier>();
     modifier_->AttachProperty(PropertyType, property_);
-#else
-    modifier_ = std::make_shared<Modifier>(property_);
-#endif
     context->AddModifier(modifier_);
 }
 
-#if defined(MODIFIER_NG)
 template<typename Modifier, RSPropertyType PropertyType, typename ValueType>
 void PropertyTransitionEffectTemplate<Modifier, PropertyType, ValueType>::OnDetach(RosenRenderContext* context)
-#else
-template<typename Modifier, typename ValueType>
-void PropertyTransitionEffectTemplate<Modifier, ValueType>::OnDetach(RosenRenderContext* context)
-#endif
 {
     // remove the modifier
     context->RemoveModifier(modifier_);

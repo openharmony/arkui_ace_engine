@@ -344,15 +344,15 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
         OnAccepted();
         return;
     }
+    if (CheckLimitFinger()) {
+        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
-        return;
-    }
-    if (CheckLimitFinger()) {
-        extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -564,6 +564,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    info.SetClickPointerEvent(touchPoint.GetTouchEventPointerEvent());
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     info.SetInputEventType(inputEventType_);
     info.CopyConvertInfoFrom(touchPoint.convertInfo);
@@ -675,6 +676,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetTargetDisplayId(touchPoint.targetDisplayId);
+    info->SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     if (sysJudge_) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "sysJudge");
         return sysJudge_(gestureInfo_, info);

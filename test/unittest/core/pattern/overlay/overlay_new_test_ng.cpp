@@ -1755,4 +1755,117 @@ HWTEST_F(OverlayNewTestNg, HandleModalShow001, TestSize.Level1)
     const auto& layoutProperty = topModalNode->GetLayoutProperty();
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
 }
+
+/**
+ * @tc.name: HandleModalShow002
+ * @tc.desc: if (modalStyle.isModalRequestFocus)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, HandleModalShow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    ModalStyle modalStyle;
+    modalStyle.isModalRequestFocus = false;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step3. BindContentCover.
+     * @tc.expected: topModalNode is not focus.
+     */
+    ContentCoverParam contentCoverParam;
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, contentCoverParam, targetNode);
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    auto focusHub = topModalNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsCurrentFocus(), false);
+}
+
+/**
+ * @tc.name: GetLastChildNotRemovingForAtm001
+ * @tc.desc: get overlay node in atomicservice
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, GetLastChildNotRemovingForAtm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create atomic node.
+     */
+    auto atomicNode = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    atomicNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. create menubar and content.
+     */
+    auto containerNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerNode->UpdateInspectorId("AtomicServiceContainerId");
+    containerNode->MountToParent(atomicNode);
+
+    auto menubarNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    menubarNode->UpdateInspectorId("AtomicServiceMenubarRowId");
+
+    auto contentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    contentNode->UpdateInspectorId("AtomicServiceStageId");
+
+    contentNode->MountToParent(containerNode);
+    menubarNode->MountToParent(containerNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step3. create overlay node.
+     */
+    auto overlayNode = overlayManager->GetLastChildNotRemovingForAtm(atomicNode);
+    EXPECT_EQ(overlayNode, nullptr);
+
+    auto dialogNode = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    dialogNode->MountToParent(containerNode);
+
+    overlayNode = overlayManager->GetLastChildNotRemovingForAtm(atomicNode);
+    ASSERT_NE(overlayNode, nullptr);
+    containerNode->Clean();
+    auto menubarWrapper = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto contentWrapper = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto dialogNodeInPhone =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    menubarNode->MountToParent(menubarWrapper);
+    contentNode->MountToParent(contentWrapper);
+    contentWrapper->MountToParent(containerNode);
+    dialogNodeInPhone->MountToParent(containerNode);
+    menubarWrapper->MountToParent(containerNode);
+    overlayNode = overlayManager->GetLastChildNotRemovingForAtm(atomicNode);
+    ASSERT_NE(overlayNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

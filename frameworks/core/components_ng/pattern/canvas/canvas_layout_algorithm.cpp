@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -29,19 +30,7 @@ std::optional<SizeF> CanvasLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.IsValid()) {
         canvasSize = contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    // if width or height is matchParent
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    if (layoutProperty) {
-        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
-                canvasSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
-            }
-            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
-                canvasSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
-            }
-        }
-    }
+    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, canvasSize);
     pattern->SetCanvasSize(canvasSize);
     return canvasSize;
 }

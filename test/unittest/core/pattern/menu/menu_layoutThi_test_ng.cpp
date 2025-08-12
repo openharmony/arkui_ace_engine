@@ -477,7 +477,7 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     EXPECT_TRUE(safeAreaManager->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT));
-    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    menuAlgorithm->param_.menuWindowRect = Rect(ZERO, ZERO, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     context->SetWindowModal(WindowModal::CONTAINER_MODAL);
     windowManager->SetWindowGetModeCallBack([]() -> WindowMode {
         return WindowMode::WINDOW_MODE_FLOATING;

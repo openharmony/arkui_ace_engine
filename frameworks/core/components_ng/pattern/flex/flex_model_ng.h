@@ -49,25 +49,15 @@ public:
     void SetJustifyContent(int32_t value) override;
 
     void SetAlignContent(int32_t value) override;
-    void SetWidthLayoutPolicy(uint8_t widthLayoutPolicy) override;
-    void SetHeightLayoutPolicy(uint8_t heightLayoutPolicy) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFlexRow(FrameNode* frameNode);
     static void SetFlexWrap(FrameNode* frameNode);
     static void SetFlexDirection(FrameNode* frameNode, FlexDirection value);
-    static void SetFlexDirection(FrameNode* frameNode, std::optional<FlexDirection>& value);
     static void SetFlexWrapDirection(FrameNode* frameNode, WrapDirection value);
-    static void SetCrossAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>& align);
-    static void SetMainAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>&);
     static void SetFlexJustifyContent(FrameNode* frameNode, int32_t value);
-    static void SetWrapMainAlignment(FrameNode* frameNode, std::optional<WrapAlignment>&);
-    static void SetWrapCrossAlignment(FrameNode* frameNode, std::optional<WrapAlignment>&);
     static void SetFlexAlignItems(FrameNode* frameNode, int32_t value);
     static void SetFlexAlignContent(FrameNode* frameNode, int32_t value);
-    static void SetFlexAlignContent(FrameNode* frameNode, std::optional<WrapAlignment>& alignContent);
-    static void SetWidthLayoutPolicy(FrameNode* frameNode, uint8_t widthLayoutPolicy);
-    static void SetHeightLayoutPolicy(FrameNode* frameNode, uint8_t heightLayoutPolicy);
 
     static int GetFlexWrap(FrameNode* frameNode);
     static int GetFlexDirection(FrameNode* frameNode);

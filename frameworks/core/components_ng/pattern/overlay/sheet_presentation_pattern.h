@@ -92,7 +92,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
         }
@@ -304,7 +304,7 @@ public:
 
     void InitialLayoutProps();
     void UpdateDragBarStatus();
-
+    bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
     bool IsScrollable() const;
     void AvoidAiBar();
 
@@ -349,8 +349,6 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
-    void SetSheetAnimationOption(AnimationOption& option) const;
-
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
     void SetCurrentOffset(float currentOffset)
@@ -365,7 +363,7 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
+        if (height_ != currentHeight || typeChanged_) {
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
@@ -374,11 +372,10 @@ public:
     bool GetWindowButtonRect(NG::RectF& floatButtons);
     bool GetWindowButtonRectForAllAPI(NG::RectF& floatButtons);
 
-    bool IsPcOrPadFreeMultiWindowMode() const;
-
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
-        if (!IsPcOrPadFreeMultiWindowMode()) {
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        if (deviceType != DeviceType::TWO_IN_ONE) {
             TAG_LOGI(AceLogTag::ACE_SHEET, "Bottom offset invalid");
             return;
         }
@@ -816,6 +813,8 @@ public:
     void UpdateMaskBackgroundColorRender();
 
     void UpdateTitleTextColor();
+    void UpdateSheetCloseIcon();
+    void UpdateSheetBackgroundColor();
 
     Color GetMaskBackgroundColor() const
     {
@@ -931,7 +930,7 @@ public:
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
     bool IsSheetBottom() const
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
                  sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }
@@ -1100,12 +1099,12 @@ public:
     void RegisterTitleRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& mainTitleResObj);
     void RegisterDetentSelectionRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterShowCloseRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
-    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
+    void RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode);
     void RegisterShadowRes(const RefPtr<FrameNode>& sheetNode);
-    void UpdateBorderWidthOrColor(const RefPtr<ResourceObject>& resObj,
-        const WeakPtr<FrameNode>& sheetNodeWK);
-    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
-        RefPtr<ResourceObject>& resObjWidth);
+    void UpdateBorderWidth(const RefPtr<FrameNode>& sheetNodeWK);
+    void UpdateBorderColor(const RefPtr<FrameNode>& sheetNodeWK);
+    void RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode);
+    void HandleMultiDetentKeyboardAvoid();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -1169,7 +1168,9 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-    
+
+    SheetType GetSheetTypeFromSheetManager() const;
+
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 

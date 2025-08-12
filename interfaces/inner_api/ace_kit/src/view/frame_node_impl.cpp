@@ -396,4 +396,12 @@ bool FrameNodeImpl::NeedAvoidContainerModal()
     CHECK_NULL_RETURN(avoidInfoMgr, false);
     return avoidInfoMgr->NeedAvoidContainerModal();
 }
+
+NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()
+{
+    NG::OffsetF offset {};
+    CHECK_NULL_RETURN(frameNode_, offset);
+    offset = frameNode_->GetParentGlobalOffsetDuringLayout();
+    return offset;
+}
 } // namespace OHOS::Ace::Kit

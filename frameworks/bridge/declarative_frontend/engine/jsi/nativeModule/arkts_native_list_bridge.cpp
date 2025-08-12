@@ -252,6 +252,38 @@ ArkUINativeModuleValue ListBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetCacheRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> cacheCountArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    std::optional<int32_t> minOpt;
+    std::optional<int32_t> maxOpt;
+    if (cacheCountArg->IsObject(vm)) {
+        auto jsObj = cacheCountArg->ToObject(vm);
+        panda::Local<panda::JSValueRef> min = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "minCacheCount"));
+        panda::Local<panda::JSValueRef> max = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "maxCacheCount"));
+        if (min->IsNumber()) {
+            int32_t num = min->ToNumber(vm)->Value();
+            minOpt = num;
+        }
+        if (max->IsNumber()) {
+            int32_t num = max->ToNumber(vm)->Value();
+            maxOpt = num;
+        }
+    }
+    if (minOpt.has_value() && maxOpt.has_value()) {
+        GetArkUINodeModifiers()->getListModifier()->setCacheRange(nativeNode, minOpt.value(), maxOpt.value());
+    } else {
+        GetArkUINodeModifiers()->getListModifier()->resetCacheRange(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetEnableScrollInteraction(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -560,6 +592,19 @@ ArkUINativeModuleValue ListBridge::SetListScrollBarColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> argColor = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     std::string color = "";
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (!ArkTSUtils::ParseJsString(vm, argColor, color, resObj, nodeInfo) || argColor->IsUndefined() ||
+            color.empty()) {
+            GetArkUINodeModifiers()->getListModifier()->resetListScrollBarColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getListModifier()->setListScrollBarColor(nativeNode, color.c_str());
+            GetArkUINodeModifiers()->getListModifier()->createWithResourceObjScrollBarColor(nativeNode,
+                AceType::RawPtr(resObj));
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (!ArkTSUtils::ParseJsString(vm, argColor, color) || argColor->IsUndefined() || color.empty()) {
         GetArkUINodeModifiers()->getListModifier()->resetListScrollBarColor(nativeNode);
     } else {

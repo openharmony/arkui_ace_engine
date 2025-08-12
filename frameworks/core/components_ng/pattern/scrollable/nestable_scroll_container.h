@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class NestableScrollContainer : public virtual Pattern {
-    DECLARE_ACE_TYPE(NestableScrollContainer, Pattern)
+    DECLARE_ACE_TYPE(NestableScrollContainer, Pattern);
 public:
     NestableScrollContainer() = default;
     ~NestableScrollContainer() override = default;

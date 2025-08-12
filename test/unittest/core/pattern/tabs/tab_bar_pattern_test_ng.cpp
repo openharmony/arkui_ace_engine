@@ -1665,6 +1665,29 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternSetTabBarTranslateAndOpacityTest001, 
 }
 
 /**
+ * @tc.name: SetTabBarTranslate001
+ * @tc.desc: test SetTabBarTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, SetTabBarTranslate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabbar.
+     */
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set translate, test function SetTabBarTranslate.
+     * @tc.expected: userDefinedTranslateY_ is 10.
+     */
+    auto options = TranslateOptions(0.0f, 10.f, 0.0f);
+    tabBarPattern_->SetTabBarTranslate(options, true);
+    EXPECT_EQ(tabBarPattern_->userDefinedTranslateY_, 10.f);
+}
+
+/**
  * @tc.name: StartShowTabBar001
  * @tc.desc: test StartShowTabBar
  * @tc.type: FUNC
@@ -1773,7 +1796,6 @@ HWTEST_F(TabBarPatternTestNg, CancelShowTabBar, TestSize.Level1)
     bool taskExecuted = false;
     tabBarPattern_->showTabBarTask_.Reset([&taskExecuted]() { taskExecuted = true; });
     tabBarPattern_->CancelShowTabBar();
-    // MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->showTabBarTask_);
 }
 
@@ -1823,8 +1845,6 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest004, TestSize.Leve
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->axis_ = Axis::VERTICAL;
-    bool taskExecuted = false;
-    tabBarPattern_->showTabBarTask_.Reset([&taskExecuted]() { taskExecuted = true; });
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
@@ -1851,8 +1871,6 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest005, TestSize.Leve
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->axis_ = Axis::VERTICAL;
-    bool taskExecuted = false;
-    tabBarPattern_->showTabBarTask_.Reset([&taskExecuted]() { taskExecuted = true; });
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
@@ -2768,6 +2786,7 @@ HWTEST_F(TabBarPatternTestNg, GetIndicatorStyle, TestSize.Level1)
     IndicatorStyle indicator;
     OffsetF indicatorOffset;
     EXPECT_EQ(tabBarPattern_->IsValidIndex(tabBarPattern_->swiperStartIndex_), true);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset, firstRect);
 
     IndicatorStyle indicatorStyle1;

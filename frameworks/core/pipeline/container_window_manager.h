@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/system_bar/system_bar_style.h"
+#include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
@@ -41,10 +42,13 @@ using WindowSetSystemBarEnabledCallback = std::function<bool(SystemBarType, std:
 using GetCurrentViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(void)>;
 using GetTargetViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(std::optional<Orientation>,
     std::optional<bool>, std::optional<bool>, std::optional<bool>)>;
+using IsSetOrientationNeededCallback = std::function<bool(std::optional<Orientation>)>;
 using SetRequestedOrientationCallback = std::function<void(std::optional<Orientation>, bool)>;
 using GetRequestedOrientationCallback = std::function<Orientation(void)>;
 using IsFullScreenWindowCallback = std::function<bool(void)>;
 using IsPcOrPadFreeMultiWindowModeCallback = std::function<bool(void)>;
+using GetHeightBreakpoint = std::function<HeightBreakpoint(void)>;
+using GetWidthBreakpoint = std::function<WidthBreakpoint(void)>;
 
 struct DecorButtonStyle {
     int32_t colorMode;
@@ -175,6 +179,11 @@ public:
     void SetGetTargetViewportConfigCallback(GetTargetViewportConfigCallback&& callback)
     {
         getTargetViewportConfigCallback_ = std::move(callback);
+    }
+
+    void SetIsSetOrientationNeededCallback(IsSetOrientationNeededCallback&& callback)
+    {
+        isSetOrientationNeededCallback_ = std::move(callback);
     }
 
     void SetSetRequestedOrientationCallback(SetRequestedOrientationCallback&& callback)
@@ -361,6 +370,14 @@ public:
         std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
         std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator);
 
+    bool IsSetOrientationNeeded(std::optional<Orientation> orientation)
+    {
+        if (isSetOrientationNeededCallback_) {
+            return isSetOrientationNeededCallback_(orientation);
+        }
+        return false;
+    }
+
     void SetRequestedOrientation(std::optional<Orientation> orientation, bool needAnimation = true)
     {
         if (setRequestedOrientationCallback_) {
@@ -412,6 +429,32 @@ public:
         }
     }
 
+    void SetHeightBreakpointCallback(GetHeightBreakpoint&& callback)
+    {
+        getHeightBreakpointCallback_ = std::move(callback);
+    }
+
+    void SetWidthBreakpointCallback(GetWidthBreakpoint&& callback)
+    {
+        getWidthBreakpointCallback_ = std::move(callback);
+    }
+
+    HeightBreakpoint GetHeightBreakpointCallback() const
+    {
+        if (getHeightBreakpointCallback_) {
+            return getHeightBreakpointCallback_();
+        }
+        return HeightBreakpoint::HEIGHT_SM;
+    }
+
+    WidthBreakpoint GetWidthBreakpointCallback() const
+    {
+        if (getWidthBreakpointCallback_) {
+            return getWidthBreakpointCallback_();
+        }
+        return WidthBreakpoint::WIDTH_SM;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -436,6 +479,7 @@ private:
     WindowSetSystemBarEnabledCallback windowSetSystemBarEnabledCallback_;
     GetCurrentViewportConfigCallback getCurrentViewportConfigCallback_;
     GetTargetViewportConfigCallback getTargetViewportConfigCallback_;
+    IsSetOrientationNeededCallback isSetOrientationNeededCallback_;
     SetRequestedOrientationCallback setRequestedOrientationCallback_;
     GetRequestedOrientationCallback getRequestedOrientationCallback_;
     IsFullScreenWindowCallback isFullScreenWindowCallback_;
@@ -443,6 +487,8 @@ private:
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
     WindowCallNativeCallback callNativeCallback_;
     std::function<void(bool)> useImplicitAnimationCallback_;
+    GetHeightBreakpoint getHeightBreakpointCallback_;
+    GetWidthBreakpoint getWidthBreakpointCallback_;
 };
 
 } // namespace OHOS::Ace

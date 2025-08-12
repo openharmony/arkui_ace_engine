@@ -2113,6 +2113,34 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange001, Test
 }
 
 /**
+ * @tc.name: LazyForEachBuilderSetActiveChildRange002
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CreateLazyForEachBuilder
+     * @tc.expected: Create CreateLazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[2].first,
+        LazyForEachCacheChild(-1, lazyForEachBuilder->cachedItems_[2].second));
+    lazyForEachBuilder->expiringItem_.try_emplace(lazyForEachBuilder->cachedItems_[3].first,
+        LazyForEachCacheChild(-1, std::move(lazyForEachBuilder->cachedItems_[3].second)));
+
+    /**
+     * @tc.steps: step2. Invoke SetActiveChildRange function.
+     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
+     */
+    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 1);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 5);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: LazyForEachBuilderGetChildIndex001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -2571,7 +2599,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
      * @tc.steps: step3. Invoke the PaintDebugBoundaryTreeAll function.
      * @tc.expected:  Set condition to true.
      */
+    node->shouldRerender_ = false;
     lazyForEachBuilder->NotifyColorModeChange(1, true);
-    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 3);
+    EXPECT_TRUE(node->measureAnyWay_);
+    EXPECT_TRUE(node->shouldRerender_);
 }
 } // namespace OHOS::Ace::NG

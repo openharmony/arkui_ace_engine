@@ -26,11 +26,15 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
+typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace {
 using InspectorFunc = std::function<void()>;
@@ -58,10 +62,7 @@ class ACE_FORCE_EXPORT ArktsFrontend : public Frontend {
     DECLARE_ACE_TYPE(ArktsFrontend, Frontend);
 
 public:
-    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ani_env*>(runtime))
-    {
-        type_ = FrontendType::ARK_TS;
-    }
+    explicit ArktsFrontend(void* runtime);
     ~ArktsFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
@@ -125,12 +126,9 @@ public:
 
     void UpdateState(Frontend::State state) override {}
 
-    bool OnBackPressed() override
-    {
-        return false;
-    }
-    void OnShow() override {}
-    void OnHide() override {}
+    bool OnBackPressed() override;
+    void OnShow() override;
+    void OnHide() override;
     void OnConfigurationUpdated(const std::string& data) override {}
     void OnSaveAbilityState(std::string& data) override {}
     void OnRestoreAbilityState(const std::string& data) override {}
@@ -211,7 +209,7 @@ public:
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override
     {
-        return nullptr;
+        return accessibilityManager_;
     }
     WindowConfig& GetWindowConfig() override
     {
@@ -271,14 +269,30 @@ public:
     }
 
     ani_object CallGetUIContextFunc();
-    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
+
+    void SetAniContext(int32_t instanceId, ani_ref* context);
+
+    RefPtr<NG::PageRouterManager> GetPageRouterManager()
+    {
+        return pageRouterManager_;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return false;
+    }
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
 
+    void* GetEnv() override;
+    static void PreloadAceModule(void* aniEnv);
+    static void* preloadArkTSRuntime;
+
 private:
+    RefPtr<NG::PageRouterManager> pageRouterManager_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
-    ani_env* env_; // ani_env
-    ani_ref app_;
+    ani_vm* vm_ = nullptr;
+    ani_ref app_ = nullptr;
     bool foregroundFrontend_ = false;
 
     std::unordered_map<int32_t, void*> storageMap_;
@@ -287,6 +301,8 @@ private:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
+    RefPtr<Framework::AccessibilityNodeManager> accessibilityManager_
+        = Framework::AccessibilityNodeManager::Create();
 };
 
 } // namespace OHOS::Ace

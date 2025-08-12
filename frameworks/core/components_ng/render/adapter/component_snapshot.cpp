@@ -29,8 +29,6 @@ namespace {
 
 constexpr std::chrono::duration<int, std::milli> SNAPSHOT_TIMEOUT_DURATION(3000);
 constexpr std::chrono::duration<int, std::milli> CREATE_SNAPSHOT_TIMEOUT_DURATION(80);
-constexpr int32_t CENTER_DIVISOR = 2;
-constexpr int32_t ALPHA_OFFSET = 3;
 
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -182,7 +180,8 @@ bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& opti
     if (layoutDirection == TextDirection::AUTO || layoutDirection == TextDirection::INHERIT) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    bool isRegionMirror = NG::SnapshotRegionMode::LOCALIZED && layoutDirection == TextDirection::RTL;
+    bool isRegionMirror = options.regionMode == NG::SnapshotRegionMode::LOCALIZED &&
+        layoutDirection == TextDirection::RTL;
 
     specifiedAreaRect = Rosen::Drawing::Rect(
         isRegionMirror ? nodeWidth - snapshotRegion.end : snapshotRegion.start,
@@ -232,17 +231,6 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
                 "Image loading failed! ImageId=%{public}d ImageState=%{public}d",
                 imageNode->GetId(), static_cast<int32_t>(imageStateManger->GetCurrentState()));
-        }
-        auto canvasImage = imagePattern->GetCanvasImage();
-        CHECK_NULL_RETURN(canvasImage, result);
-        auto pixelMap = canvasImage->GetPixelMap();
-        CHECK_NULL_RETURN(pixelMap, result);
-        const uint8_t* pixels = pixelMap->GetPixels();
-        CHECK_NULL_RETURN(pixels, result);
-        auto byteCount = pixelMap->GetByteCount();
-        if (*(pixels + byteCount/CENTER_DIVISOR + ALPHA_OFFSET) == 0) {
-            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image's center pixel is transparent, imageCount:%{public}d.",
-                imageCount);
         }
         return result;
     }
@@ -667,6 +655,38 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
     return captureResult;
 }
 
+void ComponentSnapshot::SetRSUIContext(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetAttachedContext()) {
+        return;
+    }
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        CHECK_NULL_VOID(child);
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto context = AceType::DynamicCast<RosenRenderContext>(childFrameNode->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetRSUIContext(rsUIContext);
+        SetRSUIContext(childFrameNode, rsUIContext);
+    }
+}
+
+std::shared_ptr<Rosen::RSUIContext> ComponentSnapshot::GetRSUIContext(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+}
+
 // Note: do not use this method, it's only called in drag procedure process.
 std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     const RefPtr<AceType>& customNode, const SnapshotParam& param)
@@ -689,6 +709,8 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
+    auto rsUIContext = GetRSUIContext(pipeline);
+    SetRSUIContext(node, rsUIContext);
     ACE_SCOPED_TRACE("ComponentSnapshot::CreateSync_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
         node->GetInspectorId().value_or("").c_str());
     std::string imageIds = "";
@@ -778,6 +800,10 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetWithRange_startKey=%s_startId=%d_startRsId=%s_"
+        "endKey=%s_endId=%d_endRsId=%s", GetRangeIDStr(startID).c_str(), startNode->GetId(),
+        std::to_string(rsStartNode->GetId()).c_str(), GetRangeIDStr(endID).c_str(), endNode->GetId(),
+        std::to_string(rsEndNode->GetId()).c_str());
 
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto isSystem = rsInterface.TakeUICaptureInRange(rsStartNode, rsEndNode, isStartRect,

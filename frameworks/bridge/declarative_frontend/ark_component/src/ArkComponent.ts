@@ -232,6 +232,27 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
   }
 }
 
+class BackgroundModifier extends ModifierWithKey<ArkBackground> {
+  constructor(value: ArkBackground) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('background');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackground(node);
+    } else {
+      getUINativeModule().common.setBackground(
+        node, this.value.content, this.value.align, this.value.ignoresLayoutSafeAreaEdges);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.content, this.value.content) ||
+      !isBaseOrResourceEqual(this.stageValue.align, this.value.align) ||
+      !deepCompareArrays(this.stageValue.ignoresLayoutSafeAreaEdges, this.value.ignoresLayoutSafeAreaEdges);
+  }
+}
+
 class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -3578,8 +3599,10 @@ class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().common.resetKeyBoardShortCut(node);
-    } else {
+    } else if (this.value.action === undefined) {
       getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+    } else {
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
     }
   }
   checkObjectDiff(): boolean {
@@ -4465,8 +4488,19 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  background(builder: CustomBuilder, options?: { align?: Alignment }): this {
-    throw new Error('Method not implemented.');
+  background(content: CustomBuilder | ResourceColor, options?: BackgroundOptions): this {
+    let arkBackground = new ArkBackground();
+    if (typeof content === 'function') {
+      throw new Error('Method not implemented.');
+    } else {
+      arkBackground.content = content;
+    }
+    if (typeof options === 'object') {
+      arkBackground.align = options.align;
+      arkBackground.ignoresLayoutSafeAreaEdges = options.ignoresLayoutSafeAreaEdges;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundModifier.identity, BackgroundModifier, arkBackground);
+    return this;
   }
 
   backgroundColor(value: ResourceColor): this {
@@ -5560,6 +5594,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
+    keyboardShortCut.action = action;
     modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }

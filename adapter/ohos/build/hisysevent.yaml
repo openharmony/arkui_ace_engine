@@ -238,10 +238,12 @@ SCROLLABLE_ERROR:
 
 TEXTFIELD_ERROR:
   __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in textfield}
-  PACKAGE_NAME: {type: STRING, desc: application package name}
-  PAGE_URL: {type: STRING, desc: page url}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  FRAME_NODE_ID: {type: INT32, desc: frame node id}
+  FRAME_NODE_DEPTH: {type: INT32, desc: frame node depth}
+  ERROR_TYPE: {type: STRING, desc: error type}
 
 CLIPBOARD_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in clipboard }
-  PACKAGE_NAME: {type: STRING, desc: application package name}
-  PAGE_URL: {type: STRING, desc: page url}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  ERROR_TYPE: {type: STRING, desc: error type}

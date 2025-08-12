@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
+import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 
 import {
@@ -59,7 +59,7 @@ export default function Flex6Test() {
       // Presets a clear action, which is performed after all test cases of the test suite end.
       // This API supports only one parameter: clear action function.
     })
-    //focusable
+    // focusable
     it('ArkUI_Flex_Comp_0461', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusable', '通用属性3')
@@ -216,7 +216,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.margin', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
@@ -239,7 +239,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
@@ -254,7 +254,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 1,
       })
@@ -266,7 +266,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 2,
       })
@@ -278,7 +278,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 3,
       })
@@ -290,7 +290,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 4,
       })
@@ -302,7 +302,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
@@ -318,7 +318,7 @@ export default function Flex6Test() {
 
       await titleSearch('基础属性', 'focusBox.strokeWidth', '通用属性3')
 
-      //取不到focusBox值
+      // 取不到focusBox值
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {

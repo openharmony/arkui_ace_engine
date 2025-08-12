@@ -256,6 +256,15 @@ public:
         return pointerEvent_;
     }
 
+    void SetClickPointerEvent(const std::shared_ptr<MMI::PointerEvent>& clickPointerEvent)
+    {
+        clickPointerEvent_ = clickPointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent>& GetClickPointerEvent() const
+    {
+        return clickPointerEvent_;
+    }
+
     void SetRawGlobalLocation(const Offset& rawGlobalLocation)
     {
         rawGlobalLocation_ = rawGlobalLocation;
@@ -325,6 +334,16 @@ public:
     {
         return lastAction_;
     }
+
+    void SetPassThrough(bool passThrough)
+    {
+        passThrough_ = passThrough;
+    }
+
+    bool GetPassThrough() const
+    {
+        return passThrough_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -377,6 +396,7 @@ private:
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
+    std::shared_ptr<MMI::PointerEvent> clickPointerEvent_;
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
@@ -399,6 +419,7 @@ private:
     float inputYDeltaSlope_ = 0.0f;
     GestureTypeName gestureType_ = GestureTypeName::UNKNOWN;
     std::optional<int32_t> lastAction_;
+    bool passThrough_ = false;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

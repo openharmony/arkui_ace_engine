@@ -57,7 +57,7 @@ ScrollModel* ScrollModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE, Axis::FREE };
+const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE, Axis::NONE, Axis::FREE };
 
 bool ParseJsDimensionArray(
     const JSRef<JSVal>& jsValue, std::vector<Dimension>& result, std::vector<RefPtr<ResourceObject>>& resObjs)
@@ -115,12 +115,6 @@ void JSScroll::Create(const JSCallbackInfo& info)
             ScrollModel::GetInstance()->SetScrollBarProxy(proxy);
         }
     }
-    // init scroll bar
-    std::pair<bool, Color> barColor;
-    barColor.first = false;
-    std::pair<bool, Dimension> barWidth;
-    barWidth.first = false;
-    ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
     JSScrollTheme::ApplyTheme();
 }
 
@@ -429,7 +423,11 @@ void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
     Color color(theme->GetForegroundColor());
-    JSViewAbstract::ParseJsColor(args[0], color);
+    RefPtr<ResourceObject> resObj;
+    JSViewAbstract::ParseJsColor(args[0], color, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
+    }
     ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 

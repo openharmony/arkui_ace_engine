@@ -1163,7 +1163,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
     layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->Reset();
     layoutProperty->calcLayoutConstraint_->selfIdealSize->width_ = CalcLength(COMPONENT_WIDTH);
-    pattern->GetChildContentSize();
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto theme = context->GetTheme<RadioTheme>();
+    pattern->GetChildContentSize(theme);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
 }
@@ -2091,6 +2094,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2150,6 +2156,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2217,6 +2226,9 @@ HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
 
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto childNode = pattern->builderChildNode_;
     ASSERT_NE(childNode, nullptr);
     auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();

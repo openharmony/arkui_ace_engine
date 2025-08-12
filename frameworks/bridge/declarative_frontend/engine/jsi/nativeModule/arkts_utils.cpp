@@ -29,6 +29,7 @@
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
+#include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +45,88 @@ std::string GetModuleNameFromContainer()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+enum class MenuItemType {
+    COPY,
+    PASTE,
+    CUT,
+    SELECT_ALL,
+    UNKNOWN,
+    CAMERA_INPUT,
+    AI_WRITER,
+    TRANSLATE,
+    SHARE,
+    SEARCH,
+    ASK_CELIA
+};
+
+MenuItemType StringToMenuItemType(std::string_view id)
+{
+    static const std::unordered_map<std::string_view, MenuItemType> keyMenuItemMap = {
+        { "OH_DEFAULT_COPY", MenuItemType::COPY },
+        { "OH_DEFAULT_PASTE", MenuItemType::PASTE },
+        { "OH_DEFAULT_CUT", MenuItemType::CUT },
+        { "OH_DEFAULT_SELECT_ALL", MenuItemType::SELECT_ALL },
+        { "OH_DEFAULT_CAMERA_INPUT", MenuItemType::CAMERA_INPUT },
+        { "OH_DEFAULT_AI_WRITE", MenuItemType::AI_WRITER },
+        { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
+        { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
+        { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+        { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
+    };
+
+    auto item = keyMenuItemMap.find(id);
+    return item != keyMenuItemMap.end() ? item->second : MenuItemType::UNKNOWN;
+}
+
+void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
+{
+    auto opType = StringToMenuItemType(id);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    switch (opType) {
+        case MenuItemType::COPY:
+            menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCopySymbolId();
+            break;
+        case MenuItemType::PASTE:
+            menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+            menuOptionsParam.symbolId = theme->GetPasteSymbolId();
+            break;
+        case MenuItemType::CUT:
+            menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCutSymbolId();
+            break;
+        case MenuItemType::SELECT_ALL:
+            menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
+            break;
+        case MenuItemType::CAMERA_INPUT:
+            menuOptionsParam.symbolId = theme->GetCameraInputSymbolId();
+            break;
+        case MenuItemType::AI_WRITER:
+            menuOptionsParam.symbolId = theme->GetAIWriteSymbolId();
+            break;
+        case MenuItemType::TRANSLATE:
+            menuOptionsParam.symbolId = theme->GetTranslateSymbolId();
+            break;
+        case MenuItemType::SHARE:
+            menuOptionsParam.symbolId = theme->GetShareSymbolId();
+            break;
+        case MenuItemType::SEARCH:
+            menuOptionsParam.symbolId = theme->GetSearchSymbolId();
+            break;
+        case MenuItemType::ASK_CELIA:
+            menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
+        default:
+            menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
+            menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
+            break;
+    }
 }
 }
 constexpr int NUM_0 = 0;
@@ -100,8 +183,8 @@ bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
     int32_t resId = resObj->GetId();
     bool hasDarkRes = false;
     auto params = resObj->GetParams();
-    if (resId == -1 && (params.size() > 0)) {
-        hasDarkRes = resourceAdapter->ExistDarkResByName(params[params.size() - 1].value.value(),
+    if (resId == -1 && !params.empty() && params.back().value.has_value()) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params.back().value.value(),
             std::to_string(resObj->GetType()));
     } else {
         hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
@@ -221,15 +304,15 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     return result;
 }
 
-bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
+bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
     NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-    return ParseJsColorAlpha(vm, value, result, resourceObject, nodeInfo, fromTheme);
+    return ParseJsColorAlpha(vm, value, result, resourceObject, nodeInfo);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme)
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
 {
     bool state = false;
     if (value->IsNumber()) {
@@ -247,7 +330,7 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
             CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
             return true;
         }
-        state = ParseJsColorFromResource(vm, value, result, resourceObject, fromTheme);
+        state = ParseJsColorFromResource(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
@@ -368,6 +451,7 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
     auto cardId = CardScope::CurrentId();
     if (cardId != OHOS::Ace::INVALID_CARD_ID) {
         auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
@@ -386,12 +470,12 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
 }
 
 RefPtr<ResourceWrapper> CreateResourceWrapper(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
-    RefPtr<ResourceObject>& resourceObject, bool fromTheme = false)
+    RefPtr<ResourceObject>& resourceObject)
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject, fromTheme);
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -610,15 +694,14 @@ void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef
     }
 }
 
-bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    bool fromTheme)
+bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorFromResource(vm, jsObj, result, resourceObject, fromTheme);
+    return ParseJsColorFromResource(vm, jsObj, result, resourceObject);
 }
 
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
+    RefPtr<ResourceObject>& resourceObject)
 {
     auto obj = jsObj ->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
@@ -628,7 +711,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 
     CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, jsObj);
-    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject, fromTheme);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
     }
@@ -727,17 +810,7 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {
-        if (!IsGetResourceByName(vm, jsObj)) {
-            return false;
-        }
-        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
-        if (!args->IsArray(vm)) {
-            return false;
-        }
-        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        result = resourceWrapper->GetDimensionByName(param->ToString(vm)->ToString(vm));
-        return true;
+        return ParseJsDimensionFromResourceByName(vm, obj, dimensionUnit, resourceObject, resourceWrapper, result);
     }
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (type->IsNull() || !type->IsNumber()) {
@@ -754,6 +827,35 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
         return true;
     }
     result = resourceWrapper->GetDimension(resId->Int32Value(vm));
+    return true;
+}
+
+bool ArkTSUtils::ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+    DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+    const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result)
+{
+    if (!IsGetResourceByName(vm, jsObj)) {
+        return false;
+    }
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    if (!args->IsArray(vm)) {
+        return false;
+    }
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+    auto resName = param->ToString(vm)->ToString(vm);
+
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetStringByName(resName);
+        result = StringUtils::StringToCalcDimension(value, false, dimensionUnit);
+        return true;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+        result = StringUtils::StringToDimensionWithUnit(value, dimensionUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimensionByName(resName);
     return true;
 }
 
@@ -782,17 +884,7 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {
-        if (!IsGetResourceByName(vm, jsObj)) {
-            return false;
-        }
-        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
-        if (!args->IsArray(vm)) {
-            return false;
-        }
-        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        result = resourceWrapper->GetDimensionByName(param->ToString(vm)->ToString(vm));
-        return true;
+        return ParseJsDimensionNGFromResourceByName(vm, obj, dimensionUnit, resourceObject, resourceWrapper, result);
     }
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (type->IsNull() || !type->IsNumber()) {
@@ -813,6 +905,34 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     }
 
     return false;
+}
+
+bool ArkTSUtils::ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+    DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+    const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result)
+{
+    if (!IsGetResourceByName(vm, jsObj)) {
+        return false;
+    }
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    if (!args->IsArray(vm)) {
+        return false;
+    }
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+    auto resName = param->ToString(vm)->ToString(vm);
+
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetStringByName(resName);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, dimensionUnit);
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+        StringUtils::StringToDimensionWithUnitNG(value, result, dimensionUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimensionByName(resName);
+    return true;
 }
 
 bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg,
@@ -1414,6 +1534,18 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
     return true;
 }
 
+bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
+{
+    if (!jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
+        return false;
+    }
+    Color color;
+    bool ret = ArkTSUtils::ParseJsColor(vm, jsValue, color, resourceObject, nodeInfo);
+    result = ret ? color.ToString() : "";
+    return ret;
+}
+
 bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     RefPtr<ResourceObject> resourceObject;
@@ -1532,6 +1664,8 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
     RefPtr<ResourceObject>& resourceObject)
 {
     auto obj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, obj);
+
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
@@ -1539,7 +1673,6 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         return false;
     }
 
-    CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, obj);
     auto resourceWrapper = CreateResourceWrapper(vm, obj, resourceObject);
     if (!resourceWrapper) {
@@ -2620,7 +2753,7 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
-        WrapMenuParams(vm, menuParams, menuItems, false);
+        WrapMenuParams(vm, menuParams, menuItems, true);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
@@ -2653,6 +2786,25 @@ void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
     onPrepareMenuCallback = jsCallback;
 }
 
+void ArkTSUtils::ParseMenuItemsSymbolId(
+    const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam)
+{
+    if (StringToMenuItemType(menuOptionsParam.id) == MenuItemType::UNKNOWN) {
+        uint32_t symbolId = 0;
+        RefPtr<ResourceObject> resourceObject;
+        if (jsStartIcon->IsNumber()) {
+            symbolId = jsStartIcon->ToNumber(vm)->Value();
+            menuOptionsParam.symbolId = symbolId;
+            return;
+        }
+        if (ParseJsSymbolId(vm, jsStartIcon, symbolId, resourceObject)) {
+            menuOptionsParam.symbolId = symbolId;
+        }
+    } else {
+        UpdateInfoById(menuOptionsParam, menuOptionsParam.id);
+    }
+}
+
 void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
     const Local<JSValueRef>& menuItems, bool enableLabelInfo)
 {
@@ -2673,6 +2825,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
         std::string icon;
         ParseJsMedia(vm, jsStartIcon, icon);
         menuOptionsParam.icon = icon;
+        ParseMenuItemsSymbolId(vm, jsStartIcon, menuOptionsParam);
         auto jsTextMenuId = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
         std::string id;
         if (jsTextMenuId->IsObject(vm)) {
@@ -2687,6 +2840,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
             ParseJsString(vm, jsLabelInfo, labelInfo);
             menuOptionsParam.labelInfo = labelInfo;
         }
+        UpdateInfoById(menuOptionsParam, menuOptionsParam.id);
         menuParams.emplace_back(menuOptionsParam);
     }
 }
@@ -2771,6 +2925,25 @@ bool ArkTSUtils::ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, 
     }
 
     return false;
+}
+
+bool ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges)
+{
+    if (!value->IsArray(vm)) {
+        return false;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        ArkUI_Int32 edge;
+        if (!ArkTSUtils::ParseJsInt32(vm, item, edge)) {
+            return false;
+        }
+        edges.push_back(edge);
+    }
+    return true;
 }
 
 void ArkTSUtils::ParseGradientCenter(

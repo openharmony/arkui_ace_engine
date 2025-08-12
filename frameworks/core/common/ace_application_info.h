@@ -215,6 +215,14 @@ public:
     {
         return isAccessibilityEnabled_;
     }
+    void SetAccessibilityScreenReadEnabled(bool isEnabled)
+    {
+        isAccessibilityScreenReadEnabled_ = isEnabled;
+    }
+    bool IsAccessibilityScreenReadEnabled() const
+    {
+        return isAccessibilityScreenReadEnabled_;
+    }
     void SetPid(int32_t pid)
     {
         pid_ = pid;
@@ -330,13 +338,14 @@ protected:
 
     int userId_ = 0;
     bool isAccessibilityEnabled_ = false;
+    bool isAccessibilityScreenReadEnabled_ = false;
 
     int32_t apiVersion_ = 0;
     std::string versionName_;
     uint32_t versionCode_ = 0;
     int32_t missionId_ = -1;
     mutable std::shared_mutex eventsPassMutex_;
-    TouchPassMode touchPassMode_ = TouchPassMode::ACCELERATE;
+    TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
     bool touchPadIdChanged_ = false;

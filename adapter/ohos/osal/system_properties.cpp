@@ -63,6 +63,9 @@ float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
+constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINT_NUMBER = 20;
+constexpr bool DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW = true;
+constexpr bool DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT = true;
 std::shared_mutex mutex_;
 const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
@@ -149,6 +152,11 @@ bool IsStateManagerEnable()
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
+}
+
+bool IsDynamicDetectionTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.dynamicdetection.enabled", "false") == "true");
 }
 
 bool IsSyncDebugTraceEnabled()
@@ -297,6 +305,23 @@ bool IsNavigationBlurEnabled()
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
+bool IsForceSplitIgnoreOrientationEnabled()
+{
+    return (system::GetParameter("persist.ace.navigation.ignoreorientation.enabled", "0") == "1");
+}
+
+std::optional<bool> IsArkUIHookEnabled()
+{
+    auto enabledValue = system::GetParameter("persist.ace.arkuihook.enabled", "NA");
+    if (enabledValue == "true") {
+        return true;
+    } else if (enabledValue == "false") {
+        return false;
+    } else {
+        return std::nullopt;
+    }
+}
+
 bool IsGridCacheEnabled()
 {
     return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
@@ -409,6 +434,23 @@ bool IsAceCommercialLogEnable()
 {
     return system::GetParameter("const.logsystem.versiontype", "commercial") == "commercial";
 }
+
+int32_t ReadVelocityTrackerPointNumber()
+{
+    return system::GetIntParameter("persist.sys.arkui.velocitytracker.pointnum", DEFAULT_VELOCITY_TRACKER_POINT_NUMBER);
+}
+
+bool ReadIsVelocityWithinTimeWindow()
+{
+    return system::GetBoolParameter(
+        "persist.sys.arkui.velocitytracker.withintimewindow", DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW);
+}
+
+bool ReadIsVelocityWithoutUpPoint()
+{
+    return system::GetBoolParameter(
+        "persist.sys.arkui.velocitytracker.withoutuppoint", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
+}
 } // namespace
 
 float ReadDragStartDampingRatio()
@@ -467,7 +509,7 @@ int32_t ReadDragDropFrameworkStatus()
 
 int32_t ReadTouchAccelarateMode()
 {
-    return system::GetIntParameter("debug.ace.touch.accelarate", 2);
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -611,6 +653,7 @@ bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
@@ -673,6 +716,8 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
+bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
+std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
@@ -700,6 +745,10 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 bool SystemProperties::whiteBlockEnabled_ = false;
+std::string SystemProperties::mapSearchPrefix_ = "";
+int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPointNumber();
+bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
+bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -835,6 +884,7 @@ void SystemProperties::InitDeviceInfo(
     traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+    dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
     safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
@@ -854,6 +904,8 @@ void SystemProperties::InitDeviceInfo(
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
+    forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
+    arkUIHookEnabled_ = IsArkUIHookEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -866,6 +918,7 @@ void SystemProperties::InitDeviceInfo(
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
     whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+    mapSearchPrefix_ = system::GetParameter("const.arkui.mapSearch", "");
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1048,6 +1101,16 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
+{
+    return forceSplitIgnoreOrientationEnabled_;
+}
+
+std::optional<bool> SystemProperties::GetArkUIHookEnabled()
+{
+    return arkUIHookEnabled_;
+}
+
 bool SystemProperties::GetCacheNavigationNodeEnable()
 {
     return cacheNavigationNodeEnable_;
@@ -1211,6 +1274,21 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
     return dragStartPanDisThreshold_;
 }
 
+int32_t SystemProperties::GetVelocityTrackerPointNumber()
+{
+    return velocityTrackerPointNumber_;
+}
+
+bool SystemProperties::IsVelocityWithinTimeWindow()
+{
+    return isVelocityWithinTimeWindow_;
+}
+
+bool SystemProperties::IsVelocityWithoutUpPoint()
+{
+    return isVelocityWithoutUpPoint_;
+}
+
 ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();
@@ -1349,5 +1427,10 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 {
     auto ret = OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0");
     return StringUtils::StringToInt(ret);
+}
+
+std::string SystemProperties::GetMapSearchPrefix()
+{
+    return mapSearchPrefix_;
 }
 } // namespace OHOS::Ace

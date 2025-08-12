@@ -1142,4 +1142,40 @@ HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
     EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyVGridLayout
+     */
+    RefPtr<FrameNode> lazyGrid;
+    auto column = CreateColumn([this, &lazyGrid](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        LazyVGridLayoutModel lazyGridModel;
+        lazyGridModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        lazyGrid = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect LazyVGridLayout's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = lazyGrid->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

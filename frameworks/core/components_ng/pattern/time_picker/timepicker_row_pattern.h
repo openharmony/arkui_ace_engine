@@ -51,6 +51,8 @@ public:
 
     ~TimePickerRowPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -423,13 +425,8 @@ public:
     bool GetWheelModeEnabled() const
     {
         auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
-        CHECK_NULL_RETURN(timePickerLayoutProperty, wheelModeEnabled_);
+        CHECK_NULL_RETURN(timePickerLayoutProperty, loop_);
         return timePickerLayoutProperty->GetLoopValue(true);
-    }
-
-    void SetWheelModeEnabled(bool value)
-    {
-        wheelModeEnabled_ = value;
     }
 
     RefPtr<FrameNode> GetColumn(int32_t tag) const
@@ -544,6 +541,18 @@ public:
         auto preAmPmTimeOrder = amPmTimeOrder_;
         amPmTimeOrder_ = DateTimeSequence::GetAmPmTimeOrder(language_).amPmTimeOrder;
         preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (language_ == "ar" && layoutProperty->GetLayoutDirection() != TextDirection::RTL) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+            isDirectionSetByAr = true;
+        } else if (isDirectionSetByAr) {
+            layoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
+            isDirectionSetByAr = false;
+        }
     }
 
     void HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -744,7 +753,7 @@ private:
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     void UpdateTextStyleCommon(
@@ -785,7 +794,7 @@ private:
     bool isNext_ = true;
     std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
-    bool wheelModeEnabled_ = true;
+    bool loop_ = true;
     std::vector<WeakPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
@@ -829,6 +838,7 @@ private:
     std::string selectedColumnId_;
     bool isUserSetSelectColor_ = false;
     bool isClearFocus_ = true;
+    bool isDirectionSetByAr = false;
 };
 } // namespace OHOS::Ace::NG
 

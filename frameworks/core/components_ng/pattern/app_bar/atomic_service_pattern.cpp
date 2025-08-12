@@ -20,10 +20,13 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/base/inspector.h"
-
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 namespace OHOS::Ace::NG {
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
 constexpr int32_t FIRST_OVERLAY_INDEX = 1;
+
+std::atomic<int32_t> g_nextListenerId = 1;
+
 std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)>
     AtomicServicePattern::beforeCreateLayoutBuilder_ = nullptr;
 
@@ -460,5 +463,66 @@ void AtomicServicePattern::UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<F
 
     icon->MarkModifyDone();
     icon->MarkDirtyNode();
+}
+
+bool AtomicServicePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto atom = GetHost();
+    CHECK_NULL_RETURN(atom, false);
+    auto pipeline = atom->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CallRectChange();
+    });
+    return false;
+}
+
+int32_t AtomicServicePattern::AddRectChangeListener(std::function<void(const RectF& rect)>&& listener)
+{
+    auto id = g_nextListenerId.fetch_add(1);
+    rectChangeListeners_.emplace(id, listener);
+    return id;
+}
+
+void AtomicServicePattern::RemoveRectChangeListener(int32_t id)
+{
+    auto it = rectChangeListeners_.find(id);
+    if (it != rectChangeListeners_.end()) {
+        rectChangeListeners_.erase(it);
+    }
+}
+
+void AtomicServicePattern::NotifyRectChange(const RectF& rect)
+{
+    for (auto& pair : rectChangeListeners_) {
+        if (pair.second) {
+            pair.second(rect);
+        }
+    }
+}
+
+void AtomicServicePattern::CallRectChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto appbar = container->GetAppBar();
+    CHECK_NULL_VOID(appbar);
+    auto rect = appbar->GetAppBarRect();
+    if (!rect.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of app bar failed, app bar is hidden");
+        return;
+    }
+    if (appBarRect_.has_value() && appBarRect_.value() == rect.value()) {
+        TAG_LOGD(AceLogTag::ACE_APPBAR, "App bar rect is not changed, no need to notify");
+        return;
+    }
+    NotifyRectChange(rect.value());
+    appBarRect_ = rect;
 }
 } // namespace OHOS::Ace::NG

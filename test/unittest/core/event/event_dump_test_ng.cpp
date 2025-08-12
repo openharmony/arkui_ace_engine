@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "core/common/event_dump.h"
+#include "test/unittest/core/event/event_manager_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,8 +25,9 @@ namespace {
 constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
+constexpr int32_t MAX_EVENT_TREE_AXIS_UPDATE_CNT = 20;
+constexpr int32_t MAX_EVENT_TREE_AXIS_CNT = 20;
 constexpr int32_t PARENT_NODEID = 0;
-constexpr int32_t NODEID = 1;
 constexpr int32_t DEFAULT_HITTEST_MODE = 0;
 constexpr int32_t DEFAULT_DEPTH = 1;
 constexpr int64_t DEFAULT_TIME_STAMP = 65536;
@@ -46,9 +48,12 @@ public:
 
     std::shared_ptr<FrameNodeSnapshot> CreateFrameNodeSnapshotWithInitValue();
     std::shared_ptr<TouchPointSnapshot> CreateTouchPointSnapshot(const TouchEvent& event);
+    std::shared_ptr<AxisSnapshot> CreateAxisSnapshot(const AxisEvent& event);
     std::shared_ptr<EventTreeRecord> CreateEventTreeRecord();
     void FillTouchDownEventToEventTree(std::shared_ptr<EventTreeRecord> eventTreeRecord, const TouchEvent& event,
         int32_t eventTreeRecordCount = 0, int32_t touchDownCount = 0, int32_t touchPointCount = 0);
+    void FillAxisUpdateEventToEventTree(std::shared_ptr<EventTreeRecord> eventTreeRecord, const AxisEvent& event,
+        int32_t eventTreeRecordCount = 0, int32_t axisUpdateCount = 0, int32_t AxisCount = 0);
 };
 
 void EventDumpTestNg::SetUp()
@@ -83,6 +88,11 @@ std::shared_ptr<TouchPointSnapshot> EventDumpTestNg::CreateTouchPointSnapshot(co
     return std::make_shared<TouchPointSnapshot>(event);
 }
 
+std::shared_ptr<AxisSnapshot> EventDumpTestNg::CreateAxisSnapshot(const AxisEvent& event)
+{
+    return std::make_shared<AxisSnapshot>(event);
+}
+
 std::shared_ptr<EventTreeRecord> EventDumpTestNg::CreateEventTreeRecord()
 {
     return std::make_shared<EventTreeRecord>();
@@ -105,6 +115,25 @@ void EventDumpTestNg::FillTouchDownEventToEventTree(std::shared_ptr<EventTreeRec
         eventTreeRecord->eventTreeList.back().touchDownCount = touchDownCount;
     }
 }
+
+void EventDumpTestNg::FillAxisUpdateEventToEventTree(std::shared_ptr<EventTreeRecord> eventTreeRecord,
+    const AxisEvent& event, const int32_t eventTreeRecordCount, int32_t axisUpdateCount, int32_t AxisCount)
+{
+    if (!eventTreeRecord || event.action != Ace::AxisAction::BEGIN) {
+        return;
+    }
+    eventTreeRecord->eventTreeList.clear();
+    for (int32_t i = 0; i < eventTreeRecordCount; ++i) {
+        eventTreeRecord->eventTreeList.emplace_back(EventTree());
+    }
+    if (!eventTreeRecord->eventTreeList.empty()) {
+        for (int32_t i = 0; i < AxisCount; ++i) {
+            eventTreeRecord->eventTreeList.back().axis.emplace_back(AxisSnapshot(event));
+        }
+        eventTreeRecord->eventTreeList.back().axisUpdateCount = axisUpdateCount;
+    }
+}
+
 
 /**
  * @tc.name: EventDumpTestNg001
@@ -151,6 +180,10 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg002, TestSize.Level1)
     EXPECT_TRUE(dumpList.empty());
     touchPointSnapshot->Dump(dumpList, DEFAULT_DEPTH);
     EXPECT_FALSE(dumpList.empty());
+
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    touchPointSnapshot->Dump(dumpJson);
+    EXPECT_TRUE(dumpJson->Contains("isInjected"));
 }
 
 /**
@@ -296,6 +329,11 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg007, TestSize.Level1)
     std::string state = "current";
     std::string disposal = "mainThread";
 
+    eventTreeRecord->AddGestureProcedure(finger + 1, procedure, "", state, disposal, DEFAULT_TIME_STAMP);
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    auto iter0 = eventTreeRecord->eventTreeList.back().gestureMap.find(finger + 1);
+    EXPECT_TRUE(iter0 == eventTreeRecord->eventTreeList.back().gestureMap.end());
+
     eventTreeRecord->AddGestureProcedure(finger, procedure, "", state, disposal, DEFAULT_TIME_STAMP);
     ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
     auto iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger);
@@ -341,7 +379,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg008, TestSize.Level2)
 }
 
 /**
- * @tc.name: EventDumpTestNg007
+ * @tc.name: EventDumpTestNg009
  * @tc.desc: EventTreeRecord AddGestureProcedure function test.
  * @tc.type: FUNC
  */
@@ -366,6 +404,11 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg009, TestSize.Level1)
     eventTreeRecord->AddGestureSnapshot(finger, std::move(gestureSnapshot));
     std::string state = "current";
     std::string disposal = "mainThread";
+
+    eventTreeRecord->AddGestureProcedure(finger + 1, event, "", state, disposal, DEFAULT_TIME_STAMP);
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    auto iter0 = eventTreeRecord->eventTreeList.back().gestureMap.find(finger + 1);
+    EXPECT_TRUE(iter0 == eventTreeRecord->eventTreeList.back().gestureMap.end());
 
     eventTreeRecord->AddGestureProcedure(finger, event, "", state, disposal, DEFAULT_TIME_STAMP);
     ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
@@ -409,6 +452,13 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg010, TestSize.Level1)
     EXPECT_TRUE(dumpList.empty());
     eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH);
     EXPECT_FALSE(dumpList.empty());
+
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    int32_t depth = 0;
+    int32_t startNumber = -1;
+    std::string header = "event tree_0";
+    eventTreeRecord->Dump(dumpJson, depth, startNumber);
+    EXPECT_FALSE(dumpJson->Contains(header));
 }
 
 /**
@@ -589,5 +639,240 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg016, TestSize.Level1)
     int32_t startNumber = 1;
     eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH, startNumber);
     EXPECT_FALSE(dumpList.empty());
+
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    int32_t depth = 0;
+    std::string header = "event tree_0";
+    eventTreeRecord->Dump(dumpJson, depth, startNumber);
+    EXPECT_TRUE(dumpJson->Contains(header));
+}
+
+/**
+ * @tc.name: EventDumpTestNg017
+ * @tc.desc: AxisSnapshot dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg017, TestSize.Level1)
+{
+    AxisEvent event;
+    const std::vector<Ace::AxisAction> axisActionArray = {Ace::AxisAction::BEGIN, Ace::AxisAction::UPDATE,
+        Ace::AxisAction::END, Ace::AxisAction::CANCEL};
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    EXPECT_TRUE(dumpList.empty());
+
+    for (int32_t i = 0; i < axisActionArray.size(); ++i) {
+        event.action = axisActionArray[i];
+        auto axisSnapshot = CreateAxisSnapshot(event);
+        ASSERT_NE(axisSnapshot, nullptr);
+        axisSnapshot->Dump(dumpList, DEFAULT_DEPTH + i);
+        axisSnapshot->Dump(dumpJson);
+    }
+    EXPECT_FALSE(dumpList.empty());
+    EXPECT_TRUE(dumpJson->Contains("isInjected"));
+}
+
+/**
+ * @tc.name: EventDumpTestNg018
+ * @tc.desc: TouchPointSnapshot dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TouchPointSnapshot instance and init value.
+     */
+    MockPipelineContext::SetUp();
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t fingerId = 1;
+    eventManager->downFingerIds_[fingerId] = 1;
+    TouchEvent event;
+    auto touchPointSnapshot = CreateTouchPointSnapshot(event);
+    ASSERT_NE(touchPointSnapshot, nullptr);
+    EXPECT_FALSE(touchPointSnapshot->downFingerIds.empty());
+
+    /**
+     * @tc.steps: step2. Invoke dump function.
+     * @tc.expected: dump list exist data, size is not empty.
+     */
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    EXPECT_TRUE(dumpList.empty());
+    touchPointSnapshot->Dump(dumpList, DEFAULT_DEPTH);
+    EXPECT_FALSE(dumpList.empty());
+
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    touchPointSnapshot->Dump(dumpJson);
+    EXPECT_TRUE(dumpJson->Contains("downFingerIds"));
+
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: EventDumpTestNg019
+ * @tc.desc: EventTreeRecord AddAxis function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+
+    /**
+     * @tc.steps: step2. mock Axis event BEGIN to END.
+     */
+    const std::vector<Ace::AxisAction> axisActionArray = {Ace::AxisAction::BEGIN, Ace::AxisAction::END,
+        Ace::AxisAction::BEGIN, Ace::AxisAction::CANCEL};
+    AxisEvent event;
+    int32_t eventTreeRecordCount = 1;
+    int32_t axisUpdateCount = 8;
+    for (int32_t i = 0; i < eventTreeRecordCount * axisUpdateCount; ++i) {
+        int32_t index = i % axisActionArray.size();
+        event.action = axisActionArray[index];
+        event.id = axisActionArray.size() > 0 ? i / axisActionArray.size() : i;
+        eventTreeRecord->AddAxis(event);
+    }
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    EXPECT_EQ(eventTreeRecord->eventTreeList.back().axisUpdateCount, (eventTreeRecordCount * axisUpdateCount) % 2);
+}
+
+/**
+ * @tc.name: EventDumpTestNg020
+ * @tc.desc: EventTreeRecord AddAxis function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+    AxisEvent event;
+    event.action = Ace::AxisAction::BEGIN;
+    event.id = 1;
+
+    /**
+     * @tc.steps: step2. fill touch event vale to eventTree.
+     * @tc.expected: list is not empty.
+     */
+    FillAxisUpdateEventToEventTree(eventTreeRecord, event, MAX_EVENT_TREE_RECORD_CNT + 1,
+        MAX_EVENT_TREE_AXIS_UPDATE_CNT, MAX_EVENT_TREE_AXIS_CNT + 1);
+    eventTreeRecord->AddAxis(event);
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    EXPECT_EQ(eventTreeRecord->eventTreeList.size(), MAX_EVENT_TREE_RECORD_CNT);
+}
+
+/**
+ * @tc.name: EventDumpTestNg021
+ * @tc.desc: EventTreeRecord AddAxis function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+
+    /**
+     * @tc.steps: step2. mock Axis event END.
+     */
+    AxisEvent event;
+    event.action = Ace::AxisAction::END;
+    eventTreeRecord->AddAxis(event);
+    EXPECT_TRUE(eventTreeRecord->eventTreeList.empty());
+}
+
+/**
+ * @tc.name: EventDumpTestNg022
+ * @tc.desc: EventTreeRecord AddTouchPoint function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+
+    /**
+     * @tc.steps: step2. mock touch event UP.
+     */
+    TouchEvent event;
+    event.type = Ace::TouchType::UP;
+    eventTreeRecord->AddTouchPoint(event);
+    EXPECT_TRUE(eventTreeRecord->eventTreeList.empty());
+}
+
+/**
+ * @tc.name: EventDumpTestNg023
+ * @tc.desc: EventTreeRecord AddGestureProcedure function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance and fill touch event vale to eventTree.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+    AxisEvent event;
+    event.action = Ace::AxisAction::BEGIN;
+    event.id = 1;
+    eventTreeRecord->AddAxis(event);
+    AxisEvent event2;
+    event2.action = Ace::AxisAction::UPDATE;
+    event2.id = 2;
+    eventTreeRecord->AddAxis(event2);
+    AxisEvent event3;
+    event3.action = Ace::AxisAction::UPDATE;
+    event3.id = 3;
+    eventTreeRecord->AddAxis(event3);
+
+    /**
+     * @tc.steps: step2. Invoke AddGestureProcedure function.
+     */
+    auto gestureSnapshot = AceType::MakeRefPtr<GestureSnapshot>();
+    int32_t finger = 0;
+    eventTreeRecord->AddGestureSnapshot(finger, std::move(gestureSnapshot));
+
+    std::string state = "current";
+    std::string disposal = "mainThread";
+    std::string state2 = "current2";
+    std::string disposal2 = "mainThread2";
+    eventTreeRecord->AddGestureProcedure(finger + 1, event, "", state, disposal, DEFAULT_TIME_STAMP);
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    auto iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger + 1);
+    EXPECT_TRUE(iter == eventTreeRecord->eventTreeList.back().gestureMap.end());
+
+    eventTreeRecord->AddGestureProcedure(finger, event, "", state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, event2, "", state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, event3, "", state2, disposal2, DEFAULT_TIME_STAMP);
+
+    ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
+    iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger);
+    ASSERT_TRUE(iter != eventTreeRecord->eventTreeList.back().gestureMap.end());
+    ASSERT_TRUE(iter->second != nullptr);
+    EXPECT_FALSE(iter->second->stateHistory.empty());
+
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    EXPECT_TRUE(dumpList.empty());
+    eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH);
+    EXPECT_FALSE(dumpList.empty());
+
+    std::unique_ptr<JsonValue> dumpJson = JsonUtil::Create(true);
+    int32_t depth = 0;
+    int32_t startNumber = -1;
+    std::string header = "event tree_0";
+    eventTreeRecord->Dump(dumpJson, depth, startNumber);
+    EXPECT_FALSE(dumpJson->Contains(header));
 }
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,7 @@ struct ModalStyle {
     bool prohibitedRemoveByRouter = false;
     bool isAllowAddChildBelowModalUec = true;
     bool prohibitedRemoveByNavigation = true;
+    bool isModalRequestFocus = true;
 
     bool operator==(const ModalStyle& modelStyle) const
     {
@@ -43,7 +44,8 @@ struct ModalStyle {
             isUIExtension != modelStyle.isUIExtension ||
             prohibitedRemoveByRouter != modelStyle.prohibitedRemoveByRouter ||
             isAllowAddChildBelowModalUec != modelStyle.isAllowAddChildBelowModalUec ||
-            prohibitedRemoveByNavigation != modelStyle.prohibitedRemoveByNavigation);
+            prohibitedRemoveByNavigation != modelStyle.prohibitedRemoveByNavigation ||
+            isModalRequestFocus != modelStyle.isModalRequestFocus);
     }
 
     void SetBackgroundColorResObj(RefPtr<ResourceObject>& obj)

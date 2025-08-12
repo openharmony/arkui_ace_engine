@@ -27,6 +27,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/hidumper/accessibility_hidumper.h"
 #include "core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
@@ -69,16 +70,6 @@ struct CommonProperty {
     float_t scaleY = 1.0f;
 };
 
-struct ActionTable {
-    AceAction aceAction;
-    ActionType action;
-};
-
-struct ActionStrTable {
-    ActionType action;
-    std::string actionStr;
-};
-
 struct FillEventInfoParam {
     int64_t elementId = 0;
     int64_t stackNodeId = 0;
@@ -108,33 +99,6 @@ struct AccessibilityFocusInfo {
 
     explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1)
         : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId) {}
-};
-
-enum class DumpMode {
-    TREE,
-    NODE,
-    HANDLE_EVENT,
-    HOVER_TEST,
-    EVENT_TEST,
-    INJECT_ACTION_TEST,
-    EMBED_SEARCH_TEST,
-    EMBED_HOVER_TEST,
-    SET_CHECKLIST_TEST,
-    GET_CHECKLIST_TEST,
-    SPECIFIC_SEARCH_TEST,
-};
-
-struct DumpInfoArgument {
-    bool useWindowId = false;
-    DumpMode mode = DumpMode::TREE;
-    bool isDumpSimplify = false;
-    bool verbose = false;
-    int64_t rootId = -1;
-    int32_t pointX = 0;
-    int32_t pointY = 0;
-    int64_t nodeId = -1;
-    int32_t action = 0;
-    int32_t eventId = -1;
 };
 
 struct GetInfoByNodeId {
@@ -297,8 +261,8 @@ public:
     void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
         const int64_t uiExtensionOffset = 0) override;
-    void FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
-        std::list<AccessibilityElementInfo> &treeInfos, std::list<AccessibilityElementInfo> &infos,
+    bool FindUIExtensionAccessibilityElement(const RefPtr<NG::FrameNode>& checkNode, const std::string &customId,
+        const CommonProperty& commonProperty, std::list<AccessibilityElementInfo> &infos,
         const RefPtr<PipelineBase>& context);
     bool SetAccessibilityCustomId(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
         CommonProperty &commonProperty, std::list<AccessibilityElementInfo> &infos,
@@ -349,7 +313,8 @@ public:
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action,
         const std::map<std::string, std::string>& actionArguments, const RefPtr<NG::WebPattern>& webPattern);
 
-    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
+    bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID,
+        const WeakPtr<NG::WebPattern>& webPattern) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
     void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
@@ -403,7 +368,7 @@ public:
         AccessibilityEvent& event, const std::vector<std::string>& params);
     bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument);
     bool DumpInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument);
-
+    bool HandleNodeModeParam(const std::string& param, DumpInfoArgument& argument);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
@@ -440,6 +405,7 @@ public:
         bool releaseAll = false) override;
 
     void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+    bool DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node) override;
     bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) override;
 
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;

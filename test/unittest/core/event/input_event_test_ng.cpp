@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
+constexpr int32_t DOUBLE = 2;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const std::string RESULT_SUCCESS_ONE = "sucess1";
 const std::string RESULT_SUCCESS_TWO = "sucess2";
@@ -645,5 +646,26 @@ HWTEST_F(InputEventTestNg, ProcessTipsMouseTestHit001, TestSize.Level1)
     TouchTestResult result;
     inputEventHub->ProcessTipsMouseTestHit(COORDINATE_OFFSET, result);
     EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveAllTipsEvents001
+ * @tc.desc: test RemoveAllTipsEvents
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, RemoveAllTipsEvents001, TestSize.Level1)
+{
+    auto actuator = AceType::MakeRefPtr<InputEventActuator>(nullptr);
+    auto hoverTask1 = [](bool isHover) {};
+    auto hoverTask2 = [](bool isHover) {};
+    auto hoverEvent1 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask1));
+    auto hoverEvent2 = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask2));
+    hoverEvent1->SetIstips(true);
+    hoverEvent2->SetIstips(true);
+    actuator->AddInputEvent(hoverEvent1);
+    actuator->AddInputEvent(hoverEvent2);
+    EXPECT_EQ(actuator->inputEvents_.size(), DOUBLE);
+    actuator->RemoveAllTipsEvents();
+    EXPECT_EQ(actuator->inputEvents_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

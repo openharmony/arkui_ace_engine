@@ -75,7 +75,9 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
     return -1;
 }
 
-int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
+    std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+    int32_t& version, int64_t& totalSize)
 {
     return -1;
 }

@@ -21,6 +21,7 @@ const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const MeasureText = requireNapi('measure');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const PUBLIC_MORE = {
     'id': -1,
     'type': 40000,
@@ -249,13 +250,13 @@ export class TabTitleBar extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             });
             Flex.margin({
-                right: {
+                end: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_max_padding_end'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__',
-                }
+                })
             });
             Flex.onAreaChange((r46, s46) => {
                 this.tabWidth = Number(s46.width) - this.menuSectionWidth;

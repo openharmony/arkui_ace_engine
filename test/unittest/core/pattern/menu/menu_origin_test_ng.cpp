@@ -2052,4 +2052,355 @@ HWTEST_F(MenuTestNg, MenuViewTestNg010, TestSize.Level1)
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_EQ(menuWrapperPattern->GetFilterColumnNode(), nullptr);
 }
+
+/**
+ * @tc.name: CreateWithFontFamilyResourceObj
+ * @tc.desc: Verify MenuModelNg::CreateWithFontFamilyResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CreateWithFontFamilyResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Menu frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create fontFamily resource object and verify resource manager.
+     * @tc.expected: step2. Resource is added to manager.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10001, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    model.CreateWithFontFamilyResourceObj(resObjWithParams, MenuFamilyType::FONT_FAMILY);
+    std::string key = "Menu" + model.FamilyTypeToString(MenuFamilyType::FONT_FAMILY);
+    pattern->OnColorModeChange(1);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    /**
+     * @tc.steps: step3. Create unknown fontFamily resource object with parameters.
+     * @tc.expected: step3. Resource is added to manager.
+     */
+    model.CreateWithFontFamilyResourceObj(resObjWithParams, static_cast<MenuFamilyType>(999));
+    key = "Menu" + model.FamilyTypeToString(static_cast<MenuFamilyType>(999));
+    pattern->OnColorModeChange(1);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: Verify MenuModelNg::ColorTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all MenuColorType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<MenuColorType, std::string>> types = {
+        { MenuColorType::FONT_COLOR, "FontColor" },
+        { MenuColorType::GROUP_DIVIDER_COLOR, "GroupDividerColor" },
+        { MenuColorType::DIVIDER_COLOR, "DividerColor" },
+        { static_cast<MenuColorType>(999), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = MenuModelNG::ColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: DimensionTypeToString
+ * @tc.desc: Verify MenuModelNG::DimensionTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, DimensionTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all MenuDimensionType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<MenuDimensionType, std::string>> types = {
+        { MenuDimensionType::WIDTH, "Width" },
+        { MenuDimensionType::FONT_SIZE, "FontSize" },
+        { MenuDimensionType::RADIUS_TOP_LEFT, "RadiusTopLeft" },
+        { MenuDimensionType::RADIUS_TOP_RIGHT, "RadiusTopRight" },
+        { MenuDimensionType::RADIUS_BOTTOM_LEFT, "RadiusBottomLeft" },
+        { MenuDimensionType::RADIUS_BOTTOM_RIGHT, "RadiusBottomRight" },
+        { MenuDimensionType::BORDER_RADIUS, "BorderRadius" },
+        { static_cast<MenuDimensionType>(999), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = MenuModelNG::DimensionTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: DimensionTypeToString
+ * @tc.desc: Verify MenuModelNG::DimensionTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, FamilyTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all MenuFamilyType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<MenuFamilyType, std::string>> types = {
+        { MenuFamilyType::FONT_FAMILY, "FontFamily" },
+        { static_cast<MenuFamilyType>(999), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = MenuModelNG::FamilyTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/**
+ * @tc.name: CreateWithDimensionResourceObj
+ * @tc.desc: Verify MenuModelNg::CreateWithDimensionResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CreateWithDimensionResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Menu frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create dimension resource object and verify resource manager.
+     * @tc.expected: step2. Resource is added to manager.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10001, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    model.CreateWithDimensionResourceObj(resObjWithParams, MenuDimensionType::FONT_SIZE);
+    std::string key = "Menu" + model.DimensionTypeToString(MenuDimensionType::FONT_SIZE);
+    pattern->OnColorModeChange(1);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    /**
+     * @tc.steps: step3. Add a second dimension resource of type BORDER_RADIUS.
+     * @tc.expected: step3. The resource is successfully recorded in the manager.
+     */
+    model.CreateWithDimensionResourceObj(resObjWithParams, MenuDimensionType::BORDER_RADIUS);
+    key = "Menu" + model.DimensionTypeToString(MenuDimensionType::BORDER_RADIUS);
+    pattern->OnColorModeChange(1);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    /**
+     * @tc.steps: step4. Re-add the same BORDER_RADIUS resource and manually cache a value.
+     * @tc.expected: step4. Resource count remains 1, cache entry is accepted.
+     */
+    model.CreateWithDimensionResourceObj(resObjWithParams, MenuDimensionType::BORDER_RADIUS);
+    key = "Menu" + model.DimensionTypeToString(MenuDimensionType::BORDER_RADIUS);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->AddResCache(key, "1.0");
+    pattern->OnColorModeChange(1);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SetMenuDimensionValue
+ * @tc.desc: Verify MenuModelNg::SetMenuDimensionValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, SetMenuDimensionValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Menu frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto layoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    CalcDimension defaultDim(10.0f, DimensionUnit::VP);
+    CalcDimension dimension(20.0f, DimensionUnit::VP);
+
+    /**
+     * @tc.steps: step2. Set WIDTH dimension and verify.
+     * @tc.expected: step2. The layout property returns the correct width value.
+     */
+    model.SetMenuDimensionValue(MenuDimensionType::WIDTH, menuNode, dimension);
+    EXPECT_EQ(layoutProperty->GetMenuWidthValue(defaultDim), dimension);
+
+    /**
+     * @tc.steps: step3. Set FONT_SIZE dimension and verify.
+     * @tc.expected: step3. The layout property returns the correct font-size value.
+     */
+    model.SetMenuDimensionValue(MenuDimensionType::FONT_SIZE, menuNode, dimension);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(defaultDim), dimension);
+
+    /**
+     * @tc.steps: step4. Attempt to set FONT_SIZE with PERCENT unit (invalid).
+     * @tc.expected: step4. Invalid unit causes the font-size to remain at default.
+     */
+    CalcDimension fontSizeDim(20.0f, DimensionUnit::PERCENT);
+    model.SetMenuDimensionValue(MenuDimensionType::FONT_SIZE, menuNode, fontSizeDim);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(defaultDim), defaultDim);
+
+    /**
+     * @tc.steps: step5. Set BORDER_RADIUS dimension and verify existence.
+     * @tc.expected: step5. BorderRadius property is present.
+     */
+    model.SetMenuDimensionValue(MenuDimensionType::BORDER_RADIUS, menuNode, dimension);
+    ASSERT_EQ(layoutProperty->GetBorderRadius().has_value(), true);
+
+    /**
+     * @tc.steps: step6. Attempt to set an unknown dimension type.
+     * @tc.expected: step6. No crash or change; function handles unknown gracefully.
+     */
+    model.SetMenuDimensionValue(static_cast<MenuDimensionType>(999), menuNode, dimension);
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Verify MenuModelNg::CreateWithColorResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Menu frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto pattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create color resource object and verify resource manager.
+     * @tc.expected: step2. Resource is added to manager.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(1, 10001, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+
+    model.CreateWithColorResourceObj(resObjWithParams, MenuColorType::FONT_COLOR);
+    std::string key = "Menu" + model.ColorTypeToString(MenuColorType::FONT_COLOR);
+    pattern->OnColorModeChange(1);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    /**
+     * @tc.steps: step3. Re-add the same FONT_COLOR resource and manually cache a value.
+     * @tc.expected: step3. Resource count remains 1; cache entry is accepted.
+     */
+    model.CreateWithColorResourceObj(resObjWithParams, MenuColorType::FONT_COLOR);
+    key = "Menu" + model.ColorTypeToString(MenuColorType::FONT_COLOR);
+    resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->AddResCache(key, "0xffff0000");
+    pattern->OnColorModeChange(1);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SetMenuColorValue
+ * @tc.desc: Verify MenuModelNg::SetMenuColorValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, SetMenuColorValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Menu frame node.
+     * @tc.expected: step1. Frame node is not null.
+     */
+    MenuModelNG model;
+    model.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto layoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Color defaultColor(Color::BLACK);
+    Color color(Color::RED);
+    layoutProperty->UpdateItemDivider(V2::ItemDivider {});
+    layoutProperty->UpdateItemGroupDivider(V2::ItemDivider {});
+
+    /**
+     * @tc.steps: step2. Set FONT_COLOR and verify.
+     * @tc.expected: step2. Font color in layout property matches the set value.
+     */
+    model.SetMenuColorValue(MenuColorType::FONT_COLOR, menuNode, color);
+    EXPECT_EQ(layoutProperty->GetFontColorValue(defaultColor), color);
+
+    /**
+     * @tc.steps: step3. Set DIVIDER_COLOR and verify.
+     * @tc.expected: step3. Item divider color is updated accordingly.
+     */
+    V2::ItemDivider itemDivider;
+    itemDivider.color = color;
+    model.SetMenuColorValue(MenuColorType::DIVIDER_COLOR, menuNode, color);
+    EXPECT_EQ(layoutProperty->GetItemDividerValue(V2::ItemDivider {}), itemDivider);
+
+    /**
+     * @tc.steps: step4. Set GROUP_DIVIDER_COLOR and verify.
+     * @tc.expected: step4. Item group divider color is updated accordingly.
+     */
+    V2::ItemDivider itemGroupDivider;
+    itemGroupDivider.color = color;
+    model.SetMenuColorValue(MenuColorType::GROUP_DIVIDER_COLOR, menuNode, color);
+    EXPECT_EQ(layoutProperty->GetItemGroupDividerValue(V2::ItemDivider {}), itemGroupDivider);
+
+    /**
+     * @tc.steps: step5. Attempt to set an unknown color type.
+     * @tc.expected: step5. No crash or change; function handles unknown gracefully.
+     */
+    model.SetMenuColorValue(static_cast<MenuColorType>(999), menuNode, color);
+}
 } // namespace OHOS::Ace::NG

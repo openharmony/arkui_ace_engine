@@ -364,6 +364,7 @@ public:
 
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
+    bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
 
     const PreviewTextInfo GetPreviewTextInfo() const;
 
@@ -544,6 +545,11 @@ public:
         TextPattern::OnAttachToMainTree();
     }
 
+    void OnDetachFromMainTree() override
+    {
+        TextPattern::OnDetachFromMainTree();
+    }
+    
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
@@ -628,7 +634,7 @@ public:
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
-    void DeleteBackward(int32_t length, TextChangeReason reason);
+    void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
     void AddPlaceholderSpan(const BuilderSpanOptions& options, bool restoreBuilderSpan, TextChangeReason reason);
@@ -653,10 +659,12 @@ public:
 #endif
     std::u16string DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length = 1) override;
-    void DeleteForward(int32_t length, TextChangeReason reason);
+    void DeleteForward(int32_t length, TextChangeReason reason, bool isByIME = false);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    RefPtr<FrameNode> CreateAIEntityMenu() override;
+    std::function<void(const RectF& firstHandle, const RectF& secondHandle)> GetAISelectTextFunc();
     void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
@@ -668,6 +676,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
+        lastCaretPos_.reset();
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
@@ -807,12 +816,13 @@ public:
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    bool IsShowHandle() override;
     void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest()) override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void CheckEditorTypeChange();
@@ -900,14 +910,14 @@ public:
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false) override;
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
-    void InitAiSelection(const Offset& globalOffset);
-    bool CheckAIPreviewMenuEnable();
+    void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
+    bool CheckAIPreviewMenuEnable() override;
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -966,7 +976,7 @@ public:
     }
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void RichEditorErrorReport(RichEditorInfo& info);
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
@@ -1533,6 +1543,7 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
+    std::pair<int32_t, int32_t> CalcSpansRange(const std::vector<RefPtr<SpanNode>>& spanNodes) const;
     void OnHover(bool isHover, HoverInfo& hoverInfo);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
@@ -1747,7 +1758,7 @@ private:
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
-    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif
@@ -1894,7 +1905,7 @@ private:
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
-    LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
+    LRUMap<uint64_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
     // Used to avoid show single handle by first click after window focus
@@ -1904,6 +1915,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
     std::optional<float> lastCaretPos_ = std::nullopt;
+    int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;

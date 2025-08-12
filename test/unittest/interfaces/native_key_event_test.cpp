@@ -16,6 +16,7 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "securec.h"
 #define private public
 #define protected public
 #include "native_key_event.h"
@@ -70,6 +71,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest001, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     EXPECT_EQ(nodeAPI->registerNodeEvent(nullptr, NODE_ON_KEY_EVENT, 0, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->registerNodeEvent(node, static_cast<ArkUI_NodeEventType>(-1), 0, nullptr),
@@ -88,6 +90,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest002, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     EXPECT_EQ(nodeAPI->registerNodeEvent(nullptr, NODE_ON_KEY_EVENT, 0, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->registerNodeEvent(node, static_cast<ArkUI_NodeEventType>(-1), 0, nullptr),
@@ -150,7 +153,10 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     event.keyEvent.unicode = ARKUI_UNICODE;
     event.keyEvent.deviceId = ARKUI_DEVICE_ID;
     event.keyEvent.timestamp = ARKUI_TIME;
-    event.keyEvent.keyText = ARKUI_KEY_TEXT;
+    std::size_t n = std::min(std::strlen(ARKUI_KEY_TEXT), sizeof(event.keyEvent.keyText) - 1);
+    errno_t ret = strncpy_s(event.keyEvent.keyText, sizeof(event.keyEvent.keyText), ARKUI_KEY_TEXT, n);
+    ASSERT_EQ(ret, 0);
+    event.keyEvent.keyText[n] = '\0';
     uiInputEvent.inputEvent = &event.keyEvent;
     uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -202,6 +208,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest005, TestSize.Level1)
      */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
 
     /**
@@ -213,62 +220,6 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest005, TestSize.Level1)
     nodeAPI->unregisterNodeEvent(nullptr, NODE_DISPATCH_KEY_EVENT);
     nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
     nodeAPI->disposeNode(node);
-}
-
-/**
- * @tc.name: NativeKeyEventTest006
- * @tc.desc: Test OH_ArkUI_KeyEvent_Dispatch function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeKeyEventTest, NativeKeyEventTest006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create node.
-     */
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
-
-    /**
-     * @tc.steps: step2. create ArkUI_NodeEvent, related function is called.
-     */
-    ArkUI_NodeEvent nodeEvent;
-    ArkUINodeEvent event;
-    ArkUI_UIInputEvent uiInputEvent;
-    event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
-    event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
-    event.keyEvent.type = static_cast<ArkUI_Int32>(OHOS::Ace::KeyAction::UP);
-    event.keyEvent.keyCode = static_cast<ArkUI_Int32>(OHOS::Ace::KeyCode::KEY_SPACE);
-    event.keyEvent.keySource = static_cast<ArkUI_Int32>(OHOS::Ace::SourceType::KEYBOARD);
-    event.keyEvent.intentionCode = static_cast<ArkUI_Int32>(OHOS::Ace::KeyIntention::INTENTION_UP);
-    event.keyEvent.unicode = ARKUI_UNICODE;
-    event.keyEvent.deviceId = ARKUI_DEVICE_ID;
-    event.keyEvent.timestamp = ARKUI_TIME;
-    event.keyEvent.keyText = ARKUI_KEY_TEXT;
-    uiInputEvent.inputEvent = &event.keyEvent;
-    nodeEvent.origin = &uiInputEvent;
-    nodeEvent.node = node;
-
-    /**
-     * @tc.steps: step3. call functions.
-     */
-    bool flag = false;
-    nodeAPI->registerNodeEvent(node, NODE_DISPATCH_KEY_EVENT, 0, &flag);
-    NodeModel::AddNodeEventReceiver(node, [](ArkUI_NodeEvent* event) {
-        auto userData = reinterpret_cast<bool*>(event->userData);
-        *userData = true;
-    });
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node->uiNodeHandle);
-    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
-    OH_ArkUI_KeyEvent_Dispatch(node, &uiInputEvent);
-    nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
-    NodeModel::DisposeNode(node);
-
-    /**
-     * @tc.expected: Return expected results.
-     */
-    EXPECT_EQ(flag, true);
-    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
 /**
@@ -522,6 +473,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0014, TestSize.Level1)
     */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
 
     /**
@@ -573,6 +525,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0015, TestSize.Level1)
      */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
 
@@ -627,6 +580,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0016, TestSize.Level1)
      */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
 
@@ -681,6 +635,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0017, TestSize.Level1)
      */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
     nodeAPI->registerNodeEvent(node, NODE_ON_KEY_EVENT, 0, nullptr);
 
@@ -743,6 +698,7 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0018, TestSize.Level1)
     auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
 
     /**

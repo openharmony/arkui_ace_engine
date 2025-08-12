@@ -61,7 +61,8 @@ class ShapeContainerPatternTestNg : public BaseShapePatternTestNg {
 public:
     RefPtr<FrameNode> CreadFrameNode() override
     {
-        return nullptr;
+        ShapeModelNG().Create();
+        return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     }
 
     void Draw(RefPtr<FrameNode> frameNode) override {}
@@ -335,5 +336,16 @@ HWTEST_F(ShapeContainerPatternTestNg, IsEnableChildrenMatchParentTest, TestSize.
      * @tc.expected: Function IsEnableChildrenMatchParent returns true.
      */
     EXPECT_TRUE(pattern->IsEnableChildrenMatchParent());
+}
+
+/**
+ * @tc.name: Paint001
+ * @tc.desc: set stroke and draw
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ShapeContainerPatternTestNg, SetStrokeTest, TestSize.Level1)
+{
+    CheckStroke(true);
 }
 } // namespace OHOS::Ace::NG

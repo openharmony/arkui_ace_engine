@@ -200,8 +200,8 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest004, TestSize.Level1)
     ASSERT_NE(ratingRenderProperty, nullptr);
 
     // Test ratingScore and stepSize default value.
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), DEFAULT_RATING_SCORE);
-    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.5), DEFAULT_STEP_SIZE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), DEFAULT_RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
 }
 
 /**
@@ -222,7 +222,7 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 
     // Test ratingScore and stepSize value.
     EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.0), RATING_STEP_SIZE);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), RATING_SCORE);
     ViewStackProcessor::GetInstance()->Finish();
 }
 
@@ -2552,5 +2552,31 @@ HWTEST_F(RatingTestNg, StringTypeToStr, TestSize.Level1)
         auto ret = RatingModelNG::StringTypeToStr(type);
         EXPECT_EQ(val, ret);
     }
+}
+
+/**
+ * @tc.name: OnColorModeChange
+ * @tc.desc: Test OnColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, OnColorModeChange, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->isNeedFocusStyle_ = true;
+    pattern->OnColorModeChange(colorMode);
+
+    EXPECT_TRUE(pattern->isForegroundImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isSecondaryImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isBackgroundImageInfoFromTheme_);
+
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

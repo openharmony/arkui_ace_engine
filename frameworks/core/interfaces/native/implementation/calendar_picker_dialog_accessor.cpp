@@ -63,7 +63,7 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
     dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(options.enableHoverMode);
+        Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode.value_or(false));
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
@@ -93,9 +93,9 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
 }
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
+#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_CalendarDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;
@@ -131,6 +131,7 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
     }
 
     CalendarDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+#endif
 }
 } // CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()

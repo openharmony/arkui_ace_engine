@@ -26,15 +26,15 @@ export struct SplitLayout {
   @BuilderParam container: () => void;
   @State sizeValue: string = '';
   @State areaWidth: number = 0;
-  @State imageBackgroundColor: string = "#19000000";
+  @State imageBackgroundColor: string = '#19000000';
   @State mainImage?: Resource = undefined;
-  @Prop primaryText: string = "";
-  secondaryText?: string = "";
-  tertiaryText?: string = "";
+  @Prop primaryText: string = '';
+  secondaryText?: string = '';
+  tertiaryText?: string = '';
 
   build() {
     Column() {
-      if (this.areaWidth < 600) {
+      if (this.areaWidth <= 600) {
         GridRow({
           columns: 4,
           breakpoints: {
@@ -86,7 +86,7 @@ export struct SplitLayout {
             }
           }
         }
-      } else if (600 < this.areaWidth && this.areaWidth < 840) {
+      } else if (600 < this.areaWidth && this.areaWidth <= 840) {
         GridRow({
           columns: 8,
           breakpoints: {

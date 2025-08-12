@@ -1760,19 +1760,19 @@ HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
     instance->ClearVisualState();
     EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
     auto frameNode = instance->GetMainFrameNode();
-    EXPECT_TRUE(frameNode);
+    ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
-    EXPECT_TRUE(pattern);
+    ASSERT_TRUE(pattern);
     pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
-    EXPECT_TRUE(pattern->resourceMgr_);
-    auto resMap = pattern->resourceMgr_->resMap_;
+    ASSERT_TRUE(pattern->resourceMgr_);
     ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") != pattern->resourceMgr_->resMap_.end());
     pattern->resourceMgr_->ReloadResources();
     MockPipelineContext::pipeline_ = nullptr;
     pattern->resourceMgr_->ReloadResources();
     MockPipelineContext::SetUp();
     ViewAbstract::SetCustomBackgroundColorWithResourceObj(BLUE, nullptr);
-    EXPECT_TRUE(resMap.find("customBackgroundColor") == resMap.end());
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("customBackgroundColor") == pattern->resourceMgr_->resMap_.end());
     ViewAbstract::SetCustomBackgroundColor(BLUE);
 
     /**

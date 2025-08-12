@@ -54,7 +54,8 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
-constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE = 300;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -1244,9 +1245,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (isRowStyle) {
-        PaddingProperty padding;
-        padding.right = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
-        textLayoutProperty->UpdatePadding(padding);
+        textLayoutProperty->UpdateLayoutWeight(1);
     }
     textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -1545,7 +1544,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
         },
-        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "DelayRemoveFormChildNode" + nodeIdStr);
+        STATIC_FORM_DELAY_TIME_FOR_DELETE_IMAGE_NODE, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)

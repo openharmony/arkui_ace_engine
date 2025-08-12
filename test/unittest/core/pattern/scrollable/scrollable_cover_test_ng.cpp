@@ -93,6 +93,9 @@ void ScrollableCoverTestNg::SetUpMockThemeManager()
     auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
     scrollBarTheme->normalWidth_ = Dimension(SCROLLBARTHEME_WIDTH_VALUE_PX, DimensionUnit::VP);
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
 }
 
 /**
@@ -350,6 +353,101 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto panRecognizerNG = scrollable->panRecognizerNG_;
     (*panRecognizerNG->onActionStart_)(gestureEvent);
     EXPECT_TRUE(scrollable->isDragging_);
+}
+
+/**
+ * @tc.name: InitializeTest002
+ * @tc.desc: Test Initialize method and covering actionUpdate, actionEnd, actionCancel
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
+{
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    auto propertyCallback = [](float offset) {};
+    scrollable->frictionOffsetProperty_ =
+        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    RefPtr<Container> conainer = Container::Current();
+    ASSERT_NE(conainer, nullptr);
+    conainer->SetUseNewPipeline();
+    scrollable->Initialize(scroll_);
+    ASSERT_NE(scrollable->panRecognizerNG_, nullptr);
+    auto panRecognizerNG = scrollable->panRecognizerNG_;
+    GestureEvent gestureEvent;
+    scrollable->isDragging_ = true;
+    bool isDragCancelCalled = false;
+    bool isActionEndCalled = false;
+    /**
+     * @tc.steps: step1. Trigger onActionUpdate event.
+     * @tc.expected: Verify that onActionUpdate executed.
+     */
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    (*panRecognizerNG->onActionUpdate_)(gestureEvent);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+    /**
+     * @tc.steps: step2. Trigger actionCancel and onActionEnd without dragCancelCallback_ and actionEnd_.
+     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
+     */
+    scrollable->panActionEndEvents_.clear();
+    scrollable->dragCancelCallback_ = nullptr;
+    (*panRecognizerNG->onActionEnd_)(gestureEvent);
+    (*panRecognizerNG->onActionCancel_)(gestureEvent);
+    EXPECT_FALSE(scrollable->isDragging_);
+
+    /**
+     * @tc.steps: step3. Trigger actionCancel and onActionEnd with dragCancelCallback_ and actionEnd_.
+     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
+     */
+    scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
+    scrollable->panActionEndEvents_.emplace_back(
+        [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; });
+    (*panRecognizerNG->onActionCancel_)(gestureEvent);
+    (*panRecognizerNG->onActionEnd_)(gestureEvent);
+    EXPECT_TRUE(isDragCancelCalled);
+    EXPECT_TRUE(isActionEndCalled);
+}
+
+/**
+ * @tc.name: InitializeTest003
+ * @tc.desc: Test Initialize method of Scrollable class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitializeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a Scrollable object and initialize it with a PipelineContext.
+     * @tc.expected: Verify that all event callbacks are set correctly.
+     */
+    double isCalled = false;
+    const std::function<bool(double, int32_t)> scrollCallback = [&isCalled](double offset, int32_t source) {
+        isCalled = true;
+        return true;
+    };
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->Initialize(scroll_);
+    EXPECT_DOUBLE_EQ(scrollable->defaultFriction_, FRICTION);
+
+    /**
+     * @tc.steps: step2. Change different api version.
+     * @tc.expected: defaultFriction_ changes with api version.
+     */
+    auto pipelineContext = scroll_->GetContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    scrollable->Initialize(scroll_);
+    EXPECT_DOUBLE_EQ(scrollable->defaultFriction_, API11_FRICTION);
+    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    scrollable->Initialize(scroll_);
+    EXPECT_DOUBLE_EQ(scrollable->defaultFriction_, API12_FRICTION);
+    auto scrollableTheme = pipelineContext->GetTheme<ScrollableTheme>();
+    EXPECT_NE(scrollableTheme, nullptr);
+    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    scrollable->Initialize(scroll_);
+    EXPECT_DOUBLE_EQ(scrollable->defaultFriction_, scrollableTheme->GetFriction());
 }
 
 /**
@@ -1172,60 +1270,6 @@ HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent002, TestSize
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetTag(), "notExistsTag");
     EXPECT_EQ(result->GetId(), nodeId);
-}
-
-/**
- * @tc.name: InitializeTest002
- * @tc.desc: Test Initialize method and covering actionUpdate, actionEnd, actionCancel
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
-{
-    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
-    ASSERT_NE(scrollable, nullptr);
-    auto propertyCallback = [](float offset) {};
-    scrollable->frictionOffsetProperty_ =
-        AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
-    scrollable->Initialize(scroll_);
-    ASSERT_NE(scrollable->panRecognizerNG_, nullptr);
-    auto panRecognizerNG = scrollable->panRecognizerNG_;
-    GestureEvent gestureEvent;
-    scrollable->isDragging_ = true;
-    bool isDragCancelCalled = false;
-    bool isActionEndCalled = false;
-    /**
-     * @tc.steps: step1. Trigger onActionUpdate event.
-     * @tc.expected: Verify that onActionUpdate executed.
-     */
-    scrollable->state_ = Scrollable::AnimationState::FRICTION;
-    (*panRecognizerNG->onActionUpdate_)(gestureEvent);
-    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
-    /**
-     * @tc.steps: step2. Trigger actionCancel and onActionEnd without dragCancelCallback_ and actionEnd_.
-     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
-     */
-    scrollable->panActionEndEvents_.clear();
-    scrollable->dragCancelCallback_ = nullptr;
-    (*panRecognizerNG->onActionEnd_)(gestureEvent);
-    (*panRecognizerNG->onActionCancel_)(gestureEvent);
-    EXPECT_FALSE(scrollable->isDragging_);
-
-    /**
-     * @tc.steps: step3. Trigger actionCancel and onActionEnd with dragCancelCallback_ and actionEnd_.
-     * @tc.expected: Verify that actionCancel and onActionEnd is executed.
-     */
-    scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
-    scrollable->panActionEndEvents_.emplace_back(
-        [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; });
-    (*panRecognizerNG->onActionCancel_)(gestureEvent);
-    (*panRecognizerNG->onActionEnd_)(gestureEvent);
-    EXPECT_TRUE(isDragCancelCalled);
-    EXPECT_TRUE(isActionEndCalled);
 }
 
 /**

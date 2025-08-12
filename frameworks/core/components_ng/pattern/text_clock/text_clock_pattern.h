@@ -144,9 +144,15 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void OnColorConfigurationUpdate() override;
     void InitTextClockController();
 

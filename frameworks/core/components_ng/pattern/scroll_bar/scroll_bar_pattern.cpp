@@ -436,6 +436,13 @@ void ScrollBarPattern::OnColorConfigurationUpdate()
     paintProperty->SetDefaultScrollBarColor(barColor);
 }
 
+void ScrollBarPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    OnColorConfigurationUpdate();
+}
+
 bool ScrollBarPattern::UpdateScrollBarDisplay()
 {
     auto host = GetHost();
@@ -449,7 +456,7 @@ bool ScrollBarPattern::UpdateScrollBarDisplay()
             return true;
         }
         SetOpacity(UINT8_MAX);
-        if (displayMode_ == DisplayMode::AUTO) {
+        if (displayMode_ == DisplayMode::AUTO && scrollBarProxy_ && !scrollBarProxy_->IsScrollableNodeScrolling()) {
             StartDisappearAnimator();
         }
         return true;

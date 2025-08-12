@@ -92,8 +92,7 @@ public:
 private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
-
-    float AdjustOffsetInFreeMode(float offset, float scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge);
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
 
     float crossOffset_;
     float currentOffset_ = 0.0f;

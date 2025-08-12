@@ -96,7 +96,7 @@ public:
     {
         return backgroundColor_;
     }
-        void SetForegroundColor(const Color& foregroundColor, const bool isRoundScroll = false)
+    void SetForegroundColor(const Color& foregroundColor, const bool isRoundScroll = false)
     {
         if (isRoundScroll) {
             arcForegroundColor_ = foregroundColor;

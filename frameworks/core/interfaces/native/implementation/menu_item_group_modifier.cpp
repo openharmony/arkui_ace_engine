@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -24,7 +24,10 @@ namespace MenuItemGroupModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuItemGroupModifier
 namespace MenuItemGroupInterfaceModifier {
@@ -38,22 +41,30 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
     Converter::VisitUnion(arkOptions.value().header,
         [frameNode, node](const Ark_ResourceStr& value) {
             auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupViewStatic::SetHeader(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupViewStatic::SetHeader(frameNode, std::move(builder));
+                }, node);
         },
         []() {}
     );
     Converter::VisitUnion(arkOptions.value().footer,
         [frameNode, node](const Ark_ResourceStr& value) {
             auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupViewStatic::SetFooter(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupViewStatic::SetFooter(frameNode, std::move(builder));
+                }, node);
         },
         []() {}
     );

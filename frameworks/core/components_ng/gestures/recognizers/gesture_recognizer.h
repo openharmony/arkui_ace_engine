@@ -193,6 +193,11 @@ public:
         onActionStart_ = std::make_unique<GestureEventFunc>(onActionStart);
     }
 
+    void SetOnActionExtUpdate(const GestureEventFunc& onActionExtUpdate)
+    {
+        onActionExtUpdate_ = std::make_unique<GestureEventFunc>(onActionExtUpdate);
+    }
+
     void SetOnActionUpdate(const GestureEventFunc& onActionUpdate)
     {
         onActionUpdate_ = std::make_unique<GestureEventFunc>(onActionUpdate);
@@ -346,6 +351,9 @@ public:
     }
 
     virtual void ForceCleanRecognizer() {};
+    virtual void ForceCleanRecognizerWithGroup() {
+        ForceCleanRecognizer();
+    };
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(const TouchEvent& event);
@@ -503,6 +511,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onAction_;
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
+    std::unique_ptr<GestureEventFunc> onActionExtUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected

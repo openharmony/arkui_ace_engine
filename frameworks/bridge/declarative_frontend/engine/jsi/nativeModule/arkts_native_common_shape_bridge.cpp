@@ -87,8 +87,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStroke(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resObj;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, ArkTSUtils::MakeNativeNodeInfo(nativeNode))) {
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     } else {
         GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
@@ -120,8 +119,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
     }
     Color color;
     RefPtr<ResourceObject> resObj;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, nodeInfo)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, ArkTSUtils::MakeNativeNodeInfo(nativeNode))) {
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetFill(nativeNode);
     } else {
         GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(
@@ -465,8 +463,8 @@ ArkUINativeModuleValue CommonShapeBridge::SetForegroundColor(ArkUIRuntimeCallInf
     }
     Color foregroundColor;
     RefPtr<ResourceObject> resObj;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, resObj, nodeInfo)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(
+        vm, colorArg, foregroundColor, resObj, ArkTSUtils::MakeNativeNodeInfo(nativeNode))) {
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeForegroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeForegroundColor(

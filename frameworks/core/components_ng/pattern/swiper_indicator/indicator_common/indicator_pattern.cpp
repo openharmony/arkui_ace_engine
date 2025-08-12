@@ -644,6 +644,7 @@ void IndicatorPattern::UpdateDefaultColor()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
@@ -665,8 +666,6 @@ void IndicatorPattern::OnColorModeChange(uint32_t colorMode)
 {
     UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
-    auto indicatorNode = GetHost();
-    CHECK_NULL_VOID(indicatorNode);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
         SaveDotIndicatorProperty();
     } else if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {

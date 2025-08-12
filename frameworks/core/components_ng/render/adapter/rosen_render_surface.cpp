@@ -615,7 +615,8 @@ void RosenRenderSurface::RegisterBufferCallback()
 #endif
 }
 
-void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
+#ifdef OHOS_PLATFORM
+void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId, sptr<SyncFence> fence)
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     auto iter = buffersToDraw_.begin();
@@ -629,6 +630,7 @@ void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
             ACE_SCOPED_TRACE(
                 "ReleaseXComponentBuffer[id:%u][sendTimes:%d][isLast:%d]", bufferId, surfaceNode->sendTimes_, isLast);
             if (--surfaceNode->sendTimes_ <= 0 && !isLast) {
+                surfaceNode->releaseFence_ = fence;
                 consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, surfaceNode->releaseFence_);
                 buffersToDraw_.erase(iter);
             }
@@ -638,6 +640,7 @@ void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
         }
     }
 }
+#endif
 
 void RosenRenderSurface::SetIsUniRender(bool isUniRender)
 {
@@ -745,16 +748,20 @@ void DrawBufferListener::OnBufferAvailable()
 #ifdef OHOS_PLATFORM
 void XComponentSurfaceBufferCallback::OnFinish(const Rosen::FinishCallbackRet& ret)
 {
-    ACE_SCOPED_TRACE(
-        "SurfaceBufferCallback::OnFinish[uid:%" PRIu64 "][size:%zu]", ret.uid, ret.surfaceBufferIds.size());
+    ACE_SCOPED_TRACE("SurfaceBufferCallback::OnFinish[uid:%" PRIu64 "][size:%zu] isUniRender:[%d]", ret.uid,
+        ret.surfaceBufferIds.size(), ret.isUniRender);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_VOID(renderSurface);
     if (ret.uid != renderSurface->GetUniqueIdNum()) {
         return;
     }
     if (ret.isUniRender) {
-        for (const auto& bufferId : ret.surfaceBufferIds) {
-            renderSurface->ReleaseSurfaceBufferById(bufferId);
+        auto surfaceBufferIds = ret.surfaceBufferIds;
+        auto releaseFences = ret.releaseFences;
+        auto idIter = surfaceBufferIds.begin();
+        auto fenceIter = releaseFences.begin();
+        for (; idIter != surfaceBufferIds.end() && fenceIter != releaseFences.end(); ++idIter, ++fenceIter) {
+            renderSurface->ReleaseSurfaceBufferById(*idIter, *fenceIter);
         }
     } else {
         renderSurface->ReleaseSurfaceBufferForRT(ret);

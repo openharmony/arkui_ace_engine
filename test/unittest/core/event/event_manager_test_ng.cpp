@@ -295,7 +295,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
      */
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
-
     /**
      * @tc.steps: step2. Create FrameNode and Call TouchTest
      * @tc.expected: touchTestResults_ has the touchPoint.id of instance
@@ -448,6 +447,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
     event.action = AxisAction::BEGIN;
     Container::SetCurrentUsePartialUpdate(true);
     AceForwardCompatibility::isNewPipeline_ = true;
+    eventManager->TouchTest(event, frameNode, touchRestrict);
     eventManager->DispatchTouchEvent(event);
     auto container = Container::Current();
     container->useNewPipeline_ = true;
@@ -876,6 +876,11 @@ HWTEST_F(EventManagerTestNg, EventManagerTest023, TestSize.Level1)
     event.type = TouchType::UP;
     ret = eventManager->DispatchTouchEvent(event);
     EXPECT_TRUE(ret);
+
+    event.id = 1;
+    eventManager->downFingerIds_[1] = 1;
+    ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_FALSE(ret);
 }
 
 /**

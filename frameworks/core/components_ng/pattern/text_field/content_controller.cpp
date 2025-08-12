@@ -400,9 +400,6 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
         auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         eventHub->FireOnInputFilterError(errorValue);
-        auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-        CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
-        textFieldAccessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(errorValue));
     }
     return !errorValue.empty();
 }

@@ -1680,4 +1680,58 @@ HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest005, TestSize.Level1)
     EXPECT_EQ(sizeInner, SizeF(150.0f, 200.0f));
     EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: LayoutPolicyTest006
+ * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest006, TestSize.Level1)
+{
+/**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    RefPtr<FrameNode> swiperOutter;
+    RefPtr<FrameNode> swiper;
+    swiperOutter = CreateSwiper([this, &swiper, &swiperInner](SwiperModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+            swiperInner = CreateSwiper([this](SwiperModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+            });
+        });
+    });
+    ASSERT_NE(swiperOutter, nullptr);
+    CreateLayoutTask(swiperOutter);
+
+    // Expect swiperOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = swiperOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect swiper's width is 150, height is 200 and offset is [25.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 300, height is 400 and offset is [-75.0, -100.0].
+    auto geometryNodeInner = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

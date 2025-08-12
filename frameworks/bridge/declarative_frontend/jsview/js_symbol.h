@@ -39,8 +39,8 @@ public:
     static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetSymbolShadow(const JSCallbackInfo& info);
     static void SetShaderStyle(const JSCallbackInfo& info);
-    static bool ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& shaderStyle);
-    static void ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow);
+    static bool ParseShaderStyle(const JSRef<JSObject>& shaderStyleObj, SymbolGradient& shaderStyle);
+    static void ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolShadow& symbolShadow);
     static void ParseCommonGradientOptions(const JSRef<JSObject>& optionsObj, SymbolGradient& gradient);
     static void ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gradient);
     static void ParseGradientCenter(const JSRef<JSArray>& centerArray, SymbolGradient& gradient);

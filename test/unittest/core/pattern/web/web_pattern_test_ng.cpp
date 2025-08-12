@@ -19,8 +19,10 @@
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #define private public
+#define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef protected
 #undef private
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -5099,6 +5101,57 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_003, TestSize.Level1)
     webPattern->HandleMouseEvent(info);
     mouseInfoQueue = webPattern->GetMouseInfoQueue();
     EXPECT_EQ(mouseInfoQueue.size(), 4);
+#endif
+}
+
+/**
+ * @tc.name: InitSurfaceDensityCallback_001
+ * @tc.desc: InitSurfaceDensityCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, InitSurfaceDensityCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->InitSurfaceDensityCallback(pipelineContext);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: UnInitSurfaceDensityCallback_001
+ * @tc.desc: UnInitSurfaceDensityCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UnInitSurfaceDensityCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->UnInitSurfaceDensityCallback(pipelineContext);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(webPattern->densityCallbackId_, 0);
 #endif
 }
 } // namespace OHOS::Ace::NG

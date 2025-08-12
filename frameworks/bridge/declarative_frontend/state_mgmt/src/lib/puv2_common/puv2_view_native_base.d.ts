@@ -40,6 +40,7 @@ declare class NativeViewPartialUpdate {
   setIsV2(isV2: boolean): void;
   allowReusableV2Descendant(): boolean;
   getInstanceId(): number;
+  getMainInstanceId(): number;
   markStatic(): void;
   elmtIdExists(elmtId: number): boolean;
   findChildByIdForPreview(viewId: number): object;

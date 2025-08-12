@@ -1290,6 +1290,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_REACH_START));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_REACH_END);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_REACH_END));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_WILL_STOP_DRAGGING);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_DID_ZOOM);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_DID_ZOOM));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_ZOOM_START);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_START));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_SCROLL_ZOOM_STOP);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_ZOOM_STOP));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_LIST_SCROLL);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_SCROLL_EVENT_ON_SCROLL));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_LIST_SCROLL_FRAME_BEGIN);
@@ -1755,6 +1763,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_RESIZABLE, &item);
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_DRAGGABLE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_IMAGE_SYNC_LOAD, &item);
 
     value[0].u32 = 0xFFFF0000;
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_FILL_COLOR, &item);
@@ -1773,6 +1782,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_ALT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_DRAGGABLE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_RENDER_MODE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FIT_ORIGINAL_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_FILL_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
@@ -1788,6 +1798,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest011, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_AUTO_RESIZE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_ALT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_DRAGGABLE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SYNC_LOAD), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RENDER_MODE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_FILL_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_RESIZABLE), nullptr);
@@ -6080,6 +6091,31 @@ HWTEST_F(NativeNodeTest, NativeNodeTest099, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListItemGroupTest001
+ * @tc.desc: Test ListItemGroup set header and adapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ListItemGroupTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto listItemGroup = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    auto header = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(listItemGroup, nullptr);
+    ArkUI_AttributeItem item0 = { nullptr, 0, nullptr, header };
+    auto ret = nodeAPI->setAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_SET_HEADER, &item0);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* nodeAdapter = fullImpl->getNodeAdapterAPI()->create();
+    auto adapter = reinterpret_cast<ArkUI_NodeAdapterHandle>(nodeAdapter);
+    item0.object = adapter;
+    ret = nodeAPI->setAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_NODE_ADAPTER, &item0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    fullImpl->getNodeAdapterAPI()->dispose(nodeAdapter);
+    nodeAPI->disposeNode(listItemGroup);
+}
+
+/**
  * @tc.name: NativeNodeTest097
  * @tc.desc: Test SetOnVisibleAreaApproximateChange function.
  * @tc.type: FUNC
@@ -7420,33 +7456,33 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_GetNodeHandleByUniqueId_003, TestSize.Le
 }
 
 /**
- * @tc.name: NativeNodeTest145
+ * @tc.name: NativeThreadSafeNodeTest001
  * @tc.desc: Test IsValidArkUINode
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeTest, NativeNodeTest145, TestSize.Level1)
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest001, TestSize.Level1)
 {
     EXPECT_EQ(NodeModel::IsValidArkUINode(nullptr), false);
 
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    EXPECT_EQ(NodeModel::IsValidArkUINode(notFreeNode), true);
-    nodeAPI->disposeNode(notFreeNode);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(notThreadSafeNode), true);
+    nodeAPI->disposeNode(notThreadSafeNode);
 
     auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
-    EXPECT_EQ(NodeModel::IsValidArkUINode(freeNode), true);
-    nodeAPI2->disposeNode(freeNode);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(threadSafeNode), true);
+    nodeAPI2->disposeNode(threadSafeNode);
 }
 
 /**
- * @tc.name: NativeNodeTest146
+ * @tc.name: NativeThreadSafeNodeTest002
  * @tc.desc: Test GetNativeNodeEventType
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeTest, NativeNodeTest146, TestSize.Level1)
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest002, TestSize.Level1)
 {
     ArkUINodeEvent event;
     event.extraParam = reinterpret_cast<ArkUI_Int64>(nullptr);
@@ -7454,19 +7490,143 @@ HWTEST_F(NativeNodeTest, NativeNodeTest146, TestSize.Level1)
 
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     ArkUINodeEvent event1;
-    event1.extraParam = reinterpret_cast<ArkUI_Int64>(notFreeNode);
+    event1.extraParam = reinterpret_cast<ArkUI_Int64>(notThreadSafeNode);
     EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event1), -1);
-    nodeAPI->disposeNode(notFreeNode);
+    nodeAPI->disposeNode(notThreadSafeNode);
 
     auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
     ArkUINodeEvent event2;
-    event2.extraParam = reinterpret_cast<ArkUI_Int64>(freeNode);
+    event2.extraParam = reinterpret_cast<ArkUI_Int64>(threadSafeNode);
     EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event2), -1);
-    nodeAPI2->disposeNode(freeNode);
+    nodeAPI2->disposeNode(threadSafeNode);
+}
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest003
+ * @tc.desc: Test clearChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));\
+    ASSERT_NE(nodeAPI, nullptr);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto notThreadSafeChildNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(notThreadSafeNode, nullptr);
+    ASSERT_NE(notThreadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step2. add not thread safe child
+     */
+    nodeAPI->addChild(notThreadSafeNode, notThreadSafeChildNode);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 1);
+    /**
+     * @tc.steps: step3. not thread safe native node remove all children
+     */
+    nodeAPI->removeAllChildren(notThreadSafeNode);
+    ASSERT_NE(notThreadSafeChildNode->uiNodeHandle, nullptr);
+    auto* childNode = reinterpret_cast<NG::UINode*>(notThreadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->isRemoving_, true);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 0);
+    nodeAPI->disposeNode(notThreadSafeNode);
+    nodeAPI->disposeNode(notThreadSafeChildNode);
+
+    /**
+     * @tc.steps: step4. create thread safe native node
+     */
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI2, nullptr);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    auto threadSafeChildNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(threadSafeNode, nullptr);
+    ASSERT_NE(threadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step5. add thread safe child
+     */
+    nodeAPI2->addChild(threadSafeNode, threadSafeChildNode);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 1);
+    /**
+     * @tc.steps: step6. thread safe native node remove all children
+     */
+    nodeAPI2->removeAllChildren(threadSafeNode);
+    ASSERT_NE(threadSafeChildNode->uiNodeHandle, nullptr);
+    auto* freeChildUINode = reinterpret_cast<NG::UINode*>(threadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(freeChildUINode, nullptr);
+    EXPECT_EQ(freeChildUINode->isRemoving_, false);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 0);
+    nodeAPI2->disposeNode(threadSafeNode);
+    nodeAPI2->disposeNode(threadSafeChildNode);
+}
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest004
+ * @tc.desc: Test removeChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));\
+    ASSERT_NE(nodeAPI, nullptr);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto notThreadSafeChildNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(notThreadSafeNode, nullptr);
+    ASSERT_NE(notThreadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step2. add not thread safe child
+     */
+    nodeAPI->addChild(notThreadSafeNode, notThreadSafeChildNode);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 1);
+    /**
+     * @tc.steps: step3. remove not thread safe child
+     */
+    nodeAPI->removeChild(notThreadSafeNode, notThreadSafeChildNode);
+    ASSERT_NE(notThreadSafeChildNode->uiNodeHandle, nullptr);
+    auto* childNode = reinterpret_cast<NG::UINode*>(notThreadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->isRemoving_, true);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 0);
+    nodeAPI->disposeNode(notThreadSafeNode);
+    nodeAPI->disposeNode(notThreadSafeChildNode);
+
+    /**
+     * @tc.steps: step4. create thread safe native node
+     */
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI2, nullptr);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    auto threadSafeChildNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(threadSafeNode, nullptr);
+    ASSERT_NE(threadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step5. add thread safe child
+     */
+    nodeAPI->addChild(threadSafeNode, threadSafeChildNode);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 1);
+    /**
+     * @tc.steps: step6. remove thread safe child
+     */
+    nodeAPI2->removeChild(threadSafeNode, threadSafeChildNode);
+    ASSERT_NE(threadSafeChildNode->uiNodeHandle, nullptr);
+    auto* freeChildUINode = reinterpret_cast<NG::UINode*>(threadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(freeChildUINode, nullptr);
+    EXPECT_EQ(freeChildUINode->isRemoving_, false);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 0);
+    nodeAPI2->disposeNode(threadSafeNode);
+    nodeAPI2->disposeNode(threadSafeChildNode);
 }
 
 /**
@@ -7484,6 +7644,42 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
     ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(nullptr, &offset);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest_OutlineColor001
+ * @tc.desc: Test customNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_OutlineColor001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    uint32_t color0 = 0xFFFF0000;
+    uint32_t color1 = 0xFFFF00FF;
+    uint32_t color2 = 0xFFFFFF00;
+    uint32_t color3 = 0xFF00FFFF;
+
+    ArkUI_NumberValue value[] = {{.u32 = color0}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    ArkUI_NumberValue value4[] = {{.u32 = color0}, {.u32 = color1}, {.u32 = color2}, {.u32 = color3}};
+    ArkUI_AttributeItem item4 = {value4, sizeof(value4) / sizeof(ArkUI_NumberValue)};
+
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &item);
+    auto outlineColorVal = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    EXPECT_EQ(outlineColorVal->value[0].u32, color0);
+
+    nodeAPI->setAttribute(rootNode, NODE_OUTLINE_COLOR, &item4);
+    auto outlineColorVal4 = nodeAPI->getAttribute(rootNode, NODE_OUTLINE_COLOR);
+    EXPECT_EQ(outlineColorVal4->value[0].u32, color0);
+    EXPECT_EQ(outlineColorVal4->value[1].u32, color1);
+    EXPECT_EQ(outlineColorVal4->value[2].u32, color2);
+    EXPECT_EQ(outlineColorVal4->value[3].u32, color3);
 }
 
 /**
@@ -7553,6 +7749,74 @@ HWTEST_F(NativeNodeTest, NativeNodeScrollZoomTest002, TestSize.Level1)
     ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP, 1, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_ZOOM_STOP);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest001
+ * @tc.desc: Test Scroll onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_SCROLL);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(scroll);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest002
+ * @tc.desc: Test Grid onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    auto ret = nodeAPI->registerNodeEvent(grid, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(grid, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(grid);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest003
+ * @tc.desc: Test List onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+
+    auto ret = nodeAPI->registerNodeEvent(list, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(list, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeScrollOnWillStopDraggingTest004
+ * @tc.desc: Test Waterflow onWillStopDragging event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeScrollOnWillStopDraggingTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto scroll = nodeAPI->createNode(ARKUI_NODE_WATER_FLOW);
+
+    auto ret = nodeAPI->registerNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(scroll, NODE_SCROLL_EVENT_ON_WILL_STOP_DRAGGING);
     nodeAPI->disposeNode(scroll);
 }
 } // namespace OHOS::Ace

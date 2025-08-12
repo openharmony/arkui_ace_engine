@@ -80,6 +80,8 @@ protected:
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow);
+    bool AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const RefPtr<NG::FrameNode>& host);
 
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
@@ -132,9 +134,12 @@ private:
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndAddStartingWindowAboveLocked();
     void HideStartingWindow();
+    void AddBackgroundColorDelayed();
     CancelableCallback<void()> interruptStartingTask_;
+    CancelableCallback<void()> addBackgroundColorTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    bool needAddBackgroundColor_ = true;
     friend class LifecycleListener;
     friend class WindowEventProcess;
 

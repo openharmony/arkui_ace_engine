@@ -61,6 +61,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SHEET_DETENTS_ZERO = 0;
+constexpr int32_t SHEET_DETENTS_ONE = 1;
+constexpr int32_t SHEET_DETENTS_TWO = 2;
+constexpr int32_t SHEET_DETENTS_THREE = 3;
 constexpr float SHEET_VISIABLE_ALPHA = 1.0f;
 constexpr float SHEET_INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t SHEET_ENTRY_ANIMATION_DURATION = 250;
@@ -144,7 +148,7 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto sheetTopSafeArea = safeAreaInsets.top_.Length();
     auto windowManager = pipelineContext->GetWindowManager();
-    auto sheetType = GetSheetType();
+    auto sheetType = sheetType_;
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
 
@@ -189,7 +193,7 @@ void SheetPresentationPattern::InitPageHeight()
     TAG_LOGD(AceLogTag::ACE_SHEET, "statusBarHeight of sheet by GetSafeAreaWithoutProcess : %{public}u",
         safeAreaInsets.top_.Length());
     sheetTopSafeArea_ =
-        GetSheetType() != SheetType::SHEET_BOTTOMLANDSPACE ? safeAreaInsets.top_.Length() : .0f;
+        sheetType_ != SheetType::SHEET_BOTTOMLANDSPACE ? safeAreaInsets.top_.Length() : .0f;
     auto showInPage =
         GetLayoutProperty<SheetPresentationProperty>()->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
     auto overlay = GetOverlayManager();
@@ -339,7 +343,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(sheetNode);
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        if (sheetPattern->GetSheetTypeNoProcess() == SheetType::SHEET_POPUP) {
             auto sheetWrapper = sheetNode->GetParent();
             CHECK_NULL_VOID(sheetWrapper);
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -388,7 +392,7 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto sheetType = pattern->GetSheetType();
+        auto sheetType = pattern->GetSheetTypeNoProcess();
         if (sheetType != SheetType::SHEET_CENTER) {
             return;
         }
@@ -887,7 +891,7 @@ void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
 
 void SheetPresentationPattern::AvoidKeyboard(bool forceAvoid)
 {
-    auto sheetType = GetSheetType();
+    auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover() ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         return;
@@ -1067,14 +1071,6 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
     return offset;
 }
 
-void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
-{
-    option.SetFillMode(FillMode::FORWARDS);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        option.SetDuration(SHEET_ANIMATION_DURATION);
-    }
-}
-
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
     if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
@@ -1088,7 +1084,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve = sheetObject_->GetSheetTransitionCurve(dragVelocity);
     option.SetCurve(curve);
-    SetSheetAnimationOption(option);
+    sheetObject_->SetSheetAnimationOption(option);
     auto offset = UpdateSheetTransitionOffset();
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();
@@ -1104,14 +1100,19 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 
 void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bool isFirstTransition)
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     // get sheet animation option and finishCallback
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
     // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
+    StopModifySheetTransition();
     AnimationUtils::Animate(
         option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent());
+    SetBottomStyleHotAreaInSubwindow();
 }
 
 void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
@@ -1149,7 +1150,7 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     if (!isTransitionIn) {
         OnWillDisappear();
     }
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         BubbleStyleSheetTransition(isTransitionIn);
     } else {
@@ -1168,7 +1169,7 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
     auto scrollHeight = height - GetTitleBuilderHeight() - resizeDecreasedHeight_;
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
@@ -1178,13 +1179,37 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+bool SheetPresentationPattern::IsSingleDetents(const NG::SheetStyle& sheetStyle)
+{
+    bool isSingle = true;
+    bool isFitContent = false;
+    for (const auto& detent : sheetStyle.detents) {
+        if (!detent.sheetMode.has_value()) {
+            continue;
+        }
+        if (detent.sheetMode.value() == SheetMode::AUTO) {
+            isFitContent = true;
+        }
+    }
+    if (unSortedSheetDentents_.size() == SHEET_DETENTS_TWO) {
+        isSingle = unSortedSheetDentents_[SHEET_DETENTS_ZERO] == unSortedSheetDentents_[SHEET_DETENTS_ONE];
+    } else if (unSortedSheetDentents_.size() == SHEET_DETENTS_THREE) {
+        isSingle = unSortedSheetDentents_[SHEET_DETENTS_ZERO] == unSortedSheetDentents_[SHEET_DETENTS_ONE] &&
+                   unSortedSheetDentents_[SHEET_DETENTS_ONE] == unSortedSheetDentents_[SHEET_DETENTS_TWO];
+    }
+    if (sheetStyle.detents.size() > SHEET_DETENTS_ONE && isFitContent) {
+        isSingle = false;
+    }
+    return isSingle;
+}
+
 void SheetPresentationPattern::UpdateDragBarStatus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
 
     auto sheetDragBar = GetDragBarNode();
@@ -1196,7 +1221,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
         sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
     }
-    if (IsSheetBottomStyle() && (sheetDetentHeight_.size() > 1)) {
+    if (IsSheetBottomStyle() && !IsSingleDetents(sheetStyle)) {
         if (sheetStyle.isTitleBuilder.has_value()) {
             dragBarLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
         } else {
@@ -1290,6 +1315,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
     auto mainTitleProp = mainTitleText->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(mainTitleProp);
     mainTitleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
+    mainTitleText->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -1302,6 +1328,7 @@ void SheetPresentationPattern::UpdateTitleTextColor()
         auto subTitleProp = subTitleText->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(subTitleProp);
         subTitleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
+        subTitleText->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -1452,7 +1479,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     }
 }
 
-void SheetPresentationPattern::OnColorConfigurationUpdate()
+void SheetPresentationPattern::UpdateSheetCloseIcon()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1460,8 +1487,6 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-
-    UpdateTitleTextColor();
     auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
@@ -1470,7 +1495,6 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto iconNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
     CHECK_NULL_VOID(iconNode);
-
     // when api >= 12, use symbol format image, else use image format.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
@@ -1483,6 +1507,33 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
         imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
     }
     iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::UpdateSheetBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.backgroundColor.has_value()) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SheetPresentationPattern::OnColorConfigurationUpdate()
+{
+    UpdateTitleTextColor();
+    UpdateSheetCloseIcon();
+    UpdateSheetBackgroundColor();
 }
 
 float SheetPresentationPattern::GetWrapperHeight()
@@ -1556,7 +1607,7 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
             sheetMaskColor_ = Color::TRANSPARENT;
         }
     } else {
-        if ((!sheetStyle.interactive.has_value() && GetSheetType() == SheetType::SHEET_POPUP) ||
+        if ((!sheetStyle.interactive.has_value() && GetSheetTypeNoProcess() == SheetType::SHEET_POPUP) ||
             sheetStyle.interactive.value_or(false)) {
             sheetMaskColor_ = Color::TRANSPARENT;
         }
@@ -1565,6 +1616,9 @@ void SheetPresentationPattern::UpdateMaskBackgroundColor()
 
 void SheetPresentationPattern::UpdateMaskBackgroundColorRender()
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     UpdateMaskBackgroundColor();
@@ -1678,7 +1732,7 @@ void SheetPresentationPattern::InitSheetDetents()
     auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeNoProcess();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
     auto mediumSize = sheetTheme->GetMediumPercent();
     float largeHeightOfTheme = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
@@ -1765,7 +1819,7 @@ void SheetPresentationPattern::HandleFitContontChange(float height)
 float SheetPresentationPattern::ComputeTransitionOffset(float sheetHeight)
 {
     float offset = 0.0f;
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET || IsCurSheetNeedHalfFoldHover()
         || IsNotBottomStyleInSubwindow()) {
@@ -1876,6 +1930,49 @@ void SheetPresentationPattern::SheetTransitionAction(float offset, bool isFirstT
     }
 }
 
+SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
+{
+    SheetType sheetType = SheetType::SHEET_BOTTOM;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, sheetType);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return SHEET_BOTTOM;
+    }
+#ifdef PREVIEW
+    sheetType = GetSheetType();
+#else
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, sheetType);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.instanceId.has_value()) {
+        return GetSheetType();
+    }
+    if (sheetStyle.showInSubWindow.value_or(false)) {
+        return ComputeSheetTypeInSubWindow();
+    }
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+            SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, sheetType);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, sheetType);
+    auto widthBreakpoints = windowManager->GetWidthBreakpointCallback();
+    auto heightBreakpoints = windowManager->GetHeightBreakpointCallback();
+    auto state =
+        SheetManager::GetInstance().CreateBreakPointState(widthBreakpoints, heightBreakpoints);
+    sheetType = state->HandleType(sheetStyle);
+    // When hasValidTargetNode is false, meaning the target node has not been provided,
+    // set popup style actually takes effect as the center style.
+    if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
+        sheetType = SheetType::SHEET_CENTER;
+    }
+#endif
+    return sheetType;
+}
+
 SheetType SheetPresentationPattern::GetSheetType() const
 {
     SheetType sheetType = SheetType::SHEET_BOTTOM;
@@ -1899,10 +1996,11 @@ SheetType SheetPresentationPattern::GetSheetType() const
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
         return SheetType::SHEET_CONTENT_COVER;
     }
+    DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
+        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
             SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
@@ -2664,7 +2762,7 @@ void SheetPresentationPattern::DumpAdvanceInfo()
         "TargetId: " + std::to_string(static_cast<int32_t>(targetId_)) + " , TargetTag : " + targetTag_);
     DumpLog::GetInstance().AddDesc("------------ SheetPage Pattern : ");
     DumpLog::GetInstance().AddDesc(
-        std::string("SheetType: ").append(std::to_string(static_cast<int32_t>(GetSheetType()))));
+        std::string("SheetType: ").append(std::to_string(static_cast<int32_t>(GetSheetTypeNoProcess()))));
     DumpLog::GetInstance().AddDesc(std::string("SheetPage Node Height: ").append(std::to_string(centerHeight_)));
     DumpLog::GetInstance().AddDesc(
         std::string("Sheet Height [start from the bottom, KeyboardHeight = 0]: ").append(std::to_string(height_)));
@@ -2935,7 +3033,7 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetType = GetSheetType();
+    auto sheetType = sheetType_;
     if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
         BorderWidthProperty borderWidth;
         BorderWidthProperty outBorderWidth;
@@ -2972,7 +3070,7 @@ void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TargetId", static_cast<int32_t>(targetId_));
     json->Put("TargetTag", targetTag_.c_str());
     std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
-    children->Put("SheetType", static_cast<int32_t>(GetSheetType()));
+    children->Put("SheetType", static_cast<int32_t>(GetSheetTypeNoProcess()));
     children->Put("SheetPage Node Height", centerHeight_);
     children->Put("Sheet Height [start from the bottom, KeyboardHeight = 0]", height_);
     children->Put("SheetMaxHeight [start from the bottom, pageHeight - sheetTopSafeArea]", sheetMaxHeight_);
@@ -3015,7 +3113,8 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus) {
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus ||
+        keyboardAvoidMode_ == SheetKeyboardAvoidMode::POPUP_SHEET) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
             "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
             keyboardAvoidMode_, isCurrentFocus);
@@ -3030,8 +3129,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     keyboardHeight_ = manager->GetKeyboardInset().Length();
 
     if (isDismissProcess_) {
-        TAG_LOGD(AceLogTag::ACE_SHEET,
-            "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will disappear, not need to handle canceling keyboard avoidance here.");
         return;
     }
     StopModifySheetTransition();
@@ -3161,7 +3259,7 @@ void SheetPresentationPattern::GetCurrentScrollHeight()
 
 void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
 {
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeFromSheetManager();
     if (sheetType_ != sheetType) {
         // It can only be MarkOuterBorder When the SheetType switches and the sheetType_ was SHEET_POPUP
         if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -3219,7 +3317,7 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
         TAG_LOGD(AceLogTag::ACE_SHEET, "sheet IsOuterBorderEnable is true.");
         isHoverMode = enableHoverMode ? IsWaterfallWindowMode() : false;
     }
-    return isHoverMode && GetSheetType() == SheetType::SHEET_CENTER;
+    return isHoverMode && GetSheetTypeNoProcess() == SheetType::SHEET_CENTER;
 }
 
 bool SheetPresentationPattern::IsShowInSubWindowTwoInOne()
@@ -3677,6 +3775,9 @@ bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
     if (it == sheetDetentHeight_.end()) {
         return false;
     }
+    if (IsAvoidingKeyboard()) {
+        return false;
+    }
     float lowestDetentHeight = *it;
     bool isNeedChangeScrollHeight =
         scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
@@ -3840,7 +3941,7 @@ void SheetPresentationPattern::SendMessagesAfterTransitionOut(FrameNode* sheetNo
 
 void SheetPresentationPattern::UpdateSheetType()
 {
-    auto sheetType = GetSheetType();
+    auto sheetType = GetSheetTypeFromSheetManager();
     if (sheetType_ != sheetType) {
         // It can only be MarkOuterBorder When the SheetType switches and the sheetType_ was SHEET_POPUP
         if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -3967,7 +4068,7 @@ void SheetPresentationPattern::RegisterBgColorRes(
     }
 }
 
-void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj)
+void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -3982,16 +4083,21 @@ void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetN
         NG::SheetStyle currSheetStyle = sheetStyle;
         NG::BorderRadiusProperty radius;
         radius.multiValued = false;
+        auto radiusResObj = sheetStyle.GetRadiusResObj();
+        // Return directly when the developer does not set the resource type.
+        if (!sheetStyle.radius->multiValued && !radiusResObj) {
+            return;
+        }
         if (sheetStyle.radius->multiValued) {
             // When multiValued is true, the value is set in multiple directions.
             // In this case, invoke ReloadResources to re-parse.
             radius = sheetStyle.radius.value();
             radius.ReloadResources();
-        } else if (resObj) {
+        } else if (radiusResObj) {
             // When multiValued is false and resource object is not empty, same value in all directions.
             // In this case, parse the sheet radius using the resource object.
             CalcDimension radiusSingle;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, radiusSingle);
+            ResourceParseUtils::ParseResDimensionVpNG(radiusResObj, radiusSingle);
             radius.SetRadius(radiusSingle);
         }
         currSheetStyle.radius = radius;
@@ -4002,29 +4108,31 @@ void SheetPresentationPattern::RegisterRadiusRes(const RefPtr<FrameNode>& sheetN
         pattern->ClipSheetNode();
         sheetNode->MarkModifyDone();
     };
-    resObj = resObj ? resObj : AceType::MakeRefPtr<ResourceObject>();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("sheetPage.radius", resObj, std::move(updateFunc));
 }
 
-void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObject>& resObj,
-    const WeakPtr<FrameNode>& sheetNodeWK)
+void SheetPresentationPattern::UpdateBorderWidth(const RefPtr<FrameNode>& sheetNode)
 {
-    auto sheetNode = sheetNodeWK.Upgrade();
-    CHECK_NULL_VOID(sheetNode);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     NG::BorderWidthProperty borderWidth;
+    auto widthResObj = sheetStyle.GetBorderWidthResObj();
+    // Return directly when the developer does not set the resource type.
+    if (!sheetStyle.borderWidth->multiValued && !widthResObj) {
+        return;
+    }
     if (sheetStyle.borderWidth->multiValued) {
         // When multiValued is true, the value is set in multiple directions.
         // In this case, invoke ReloadResources of border width to re-parse.
         borderWidth = sheetStyle.borderWidth.value();
         borderWidth.ReloadResources();
-    } else if (resObj) {
+    } else if (widthResObj) {
         // When multiValued is false and resource object is not empty, same value in all directions.
         // In this case, parse the sheet border width using the resource object.
         CalcDimension borderWidthSingle;
-        ResourceParseUtils::ParseResDimensionVpNG(resObj, borderWidthSingle);
+        ResourceParseUtils::ParseResDimensionVpNG(widthResObj, borderWidthSingle);
         borderWidth = NG::BorderWidthProperty({ borderWidthSingle, borderWidthSingle,
             borderWidthSingle, borderWidthSingle, std::nullopt, std::nullopt});
     }
@@ -4039,14 +4147,21 @@ void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObj
     auto renderContext = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBorderWidth(borderWidth);
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 
+void SheetPresentationPattern::UpdateBorderColor(const RefPtr<FrameNode>& sheetNode)
+{
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto colorResObj = sheetStyle.GetBorderColorResObj();
+    if (!sheetStyle.borderColor.has_value() || (!sheetStyle.borderColor->multiValued && !colorResObj)) {
+        return;
+    }
     // re-parse border color when needed
     NG::BorderColorProperty borderColor;
-    auto colorResObj = sheetStyle.GetBorderColorResObj();
-    if (!sheetStyle.borderColor.has_value()) {
-        sheetNode->MarkModifyDone();
-        return;
-    } else if (sheetStyle.borderColor->multiValued) {
+    if (sheetStyle.borderColor->multiValued) {
         // When multiValued is true, the value is set in multiple directions.
         // In this case, invoke ReloadResources of border Color to re-parse.
         borderColor = sheetStyle.borderColor.value();
@@ -4059,14 +4174,16 @@ void SheetPresentationPattern::UpdateBorderWidthOrColor(const RefPtr<ResourceObj
         borderColor.SetColor(borderColorSingle);
     }
     // Update sheet style and border color when border color changes.
+    NG::SheetStyle currSheetStyle = sheetStyle;
     currSheetStyle.borderColor = borderColor;
     layoutProperty->UpdateSheetStyle(currSheetStyle);
+    auto renderContext = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBorderColor(borderColor);
-    sheetNode->MarkModifyDone();
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode,
-    RefPtr<ResourceObject>& resObjWidth)
+void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameNode>& sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -4075,10 +4192,25 @@ void SheetPresentationPattern::RegisterBorderWidthOrColorRes(const RefPtr<FrameN
         (const RefPtr<ResourceObject>& resObjWidth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->UpdateBorderWidthOrColor(resObjWidth, sheetNodeWK);
+        auto sheetNode = sheetNodeWK.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        pattern->UpdateBorderWidth(sheetNode);
+        pattern->UpdateBorderColor(sheetNode);
+        sheetNode->MarkModifyDone();
     };
-    resObjWidth = resObjWidth ? resObjWidth : AceType::MakeRefPtr<ResourceObject>();
-    pattern->AddResObj("sheetPage.border", resObjWidth, std::move(updateFunc));
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->AddResObj("sheetPage.border", resObj, std::move(updateFunc));
+}
+
+void SheetPresentationPattern::HandleMultiDetentKeyboardAvoid()
+{
+    // This function is used to handle the scenario where the semi-modal multi-detent sheet switches to a higher detent
+    // when avoiding the keyboard.
+    // height_: Target height of the displacement
+    // preDetentsHeight_: Height of the previous detent
+    if (IsAvoidingKeyboard() && GreatNotEqual(height_, preDetentsHeight_)) {
+        isScrolling_ = true;
+    }
 }
 
 void SheetPresentationPattern::RegisterTitleRes(const RefPtr<FrameNode>& sheetNode,
@@ -4306,7 +4438,7 @@ void SheetPresentationPattern::RegisterWidthRes(const RefPtr<FrameNode>& sheetNo
                 auto sheetTheme = pipeline->GetTheme<SheetTheme>();
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                currSheetStyle.width = ((sheetTheme != nullptr) && pattern->GetSheetType() == SHEET_CENTER)
+                currSheetStyle.width = ((sheetTheme != nullptr) && pattern->GetSheetTypeNoProcess() == SHEET_CENTER)
                     ? sheetTheme->GetCenterDefaultWidth()
                     : width;
             }
@@ -4451,12 +4583,10 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
         RegisterBgColorRes(sheetNode, resObj);
     }
     if (sheetStyle.borderWidth.has_value()) {
-        auto resObjWidth = sheetStyle.GetBorderWidthResObj();
-        RegisterBorderWidthOrColorRes(sheetNode, resObjWidth);
+        RegisterBorderWidthOrColorRes(sheetNode);
     }
     if (sheetStyle.radius.has_value()) {
-        auto resObj = sheetStyle.GetRadiusResObj();
-        RegisterRadiusRes(sheetNode, resObj);
+        RegisterRadiusRes(sheetNode);
     }
     if (sheetStyle.shadow.has_value()) {
         RegisterShadowRes(sheetNode);
@@ -4488,17 +4618,5 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
-}
-
-bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto windowManager = pipelineContext->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, false);
-    TAG_LOGI(AceLogTag::ACE_SHEET, "FreeMultiWindowMode: %{public}d", windowManager->IsPcOrPadFreeMultiWindowMode());
-    return windowManager->IsPcOrPadFreeMultiWindowMode();
 }
 } // namespace OHOS::Ace::NG

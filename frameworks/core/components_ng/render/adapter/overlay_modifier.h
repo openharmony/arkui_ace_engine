@@ -21,11 +21,7 @@
 
 #include "modifier/rs_animatable_arithmetic.h"
 #include "render_service_client/core/modifier/rs_property.h"
-#if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/overlay/rs_overlay_style_modifier.h"
-#else
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
-#endif
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
@@ -60,13 +56,8 @@ private:
     OverlayOptions overlay_;
 };
 
-#if defined(MODIFIER_NG)
 using RSOverlayStyleModifier = Rosen::ModifierNG::RSOverlayStyleModifier;
 using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
-#else
-using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
-using RSDrawingContext = Rosen::RSDrawingContext;
-#endif
 
 class OverlayTextModifier : public RSOverlayStyleModifier {
 public:

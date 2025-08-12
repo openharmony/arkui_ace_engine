@@ -249,7 +249,7 @@ const Consumer = (aliasName?: string) => {
 const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
-    ObserveV2.addVariableDecoMeta(target, descriptor.value.name, '@Monitor');
+    ObserveV2.addMethodDecoMeta(target, descriptor.value.name, '@Monitor');
     stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
@@ -295,7 +295,7 @@ interface IMonitor {
    */
 const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor): void => {
   stateMgmtConsole.debug(`@Computed ${propertyKey}`);
-  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Computed');
+  ObserveV2.addMethodDecoMeta(target, propertyKey, '@Computed');
   let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
   const computeFunction = descriptor.get;
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction

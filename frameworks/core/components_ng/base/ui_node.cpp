@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +16,28 @@
 
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
+#include "base/utils/feature_param.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace::NG {
 
-thread_local int64_t currentAccessibilityId_ = 0;
+std::atomic<int64_t> currentAccessibilityId_ = 0;
 const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
-    if (MultiThreadBuildManager::IsFreeNodeScope()) {
-        isFreeNode_ = true;
-        isFreeState_ = true;
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        isThreadSafeNode_ = true;
+        isFree_ = true;
     }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -56,8 +59,11 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     instanceId_ = Container::CurrentId();
     nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
                                                                      : NodeStatus::NORMAL_NODE;
-    auto currentContainer = Container::GetContainer(instanceId_);
-    isDarkMode_ = currentContainer ? (currentContainer->GetColorMode() == ColorMode::DARK) : false;
+    if (SystemProperties::ConfigChangePerform()) {
+        auto currentContainer = Container::GetContainer(instanceId_);
+        isDarkMode_ = currentContainer ? (currentContainer->GetColorMode() == ColorMode::DARK) : false;
+    }
+    uiNodeGcEnable_ = FeatureParam::IsUINodeGcEnabled();
 }
 
 UINode::~UINode()
@@ -79,6 +85,9 @@ UINode::~UINode()
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
+    if (isThreadSafeNode_) {
+        ElementRegisterMultiThread::GetInstance()->RemoveThreadSafeNode(nodeId_);
+    }
     if (propInspectorId_.has_value()) {
         ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(propInspectorId_.value_or(""), nodeId_);
     }
@@ -96,7 +105,11 @@ UINode::~UINode()
 
 bool UINode::MaybeRelease()
 {
-    if (!isFreeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
+    if (!isThreadSafeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
+        if (uiNodeGcEnable_) {
+            UiNodeGc::OnReleaseFunc(this);
+            return false;
+        }
         return true;
     }
     auto pipeline = GetContext();
@@ -104,6 +117,17 @@ bool UINode::MaybeRelease()
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, true);
     return !executor->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyUINode");
+}
+
+void UINode::RegisterReleaseFunc(bool enableRegister)
+{
+    uiNodeGcEnable_ = enableRegister;
+}
+
+void UINode::OnDelete()
+{
+    disappearingChildren_.clear();
+    children_.clear();
 }
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)
@@ -801,8 +825,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
     isRemoving_ = false;
-    if (isFreeNode_) {
-        isFreeState_ = false;
+    if (isThreadSafeNode_) {
+        isFree_ = false;
         ElementRegister::GetInstance()->AddUINode(Claim(this));
         ExecuteAfterAttachMainTreeTasks();
     }
@@ -837,7 +861,21 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     }
 }
 
-void UINode::DetachFromMainTree(bool recursive, bool isRoot)
+bool UINode::CheckThreadSafeNodeTree(bool needCheck)
+{
+    bool needCheckChild = needCheck;
+    if (needCheck && !isThreadSafeNode_) {
+        // Remind developers that it is unsafe to operate node trees containing unsafe nodes on non UI threads.
+        TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
+            "CheckIsThreadSafeNodeTree failed. thread safe node tree contains unsafe node: %{public}d", GetId());
+        needCheckChild = false;
+    } else if (isThreadSafeNode_) {
+        needCheckChild = true;
+    }
+    return needCheckChild;
+}
+
+void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree)
 {
     if (!onMainTree_) {
         return;
@@ -863,17 +901,13 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
+    bool needCheckChild = CheckThreadSafeNodeTree(needCheckThreadSafeNodeTree);
     for (const auto& child : children) {
-        child->DetachFromMainTree(isRecursive, false);
+        child->DetachFromMainTree(isRecursive, needCheckChild);
     }
-    if (isFreeNode_) {
-        ElementRegister::GetInstance()->RemoveItemSilently(Claim(this));
-        isFreeState_ = true;
-        if (isRoot && !IsFreeNodeTree()) {
-            // Remind developers that it is unsafe to operate node trees containing not free nodes on non UI threads
-            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-                "CheckIsFreeNodeSubTree failed. free node: %{public}d contains not free node children", nodeId_);
-        }
+    if (isThreadSafeNode_) {
+        ElementRegister::GetInstance()->RemoveItemSilently(GetId());
+        isFree_ = true;
     }
     isTraversing_ = false;
 }
@@ -1138,6 +1172,28 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     }
 }
 
+bool UINode::DumpTreeByComponentName(const std::string& name)
+{
+    if (auto customNode = DynamicCast<CustomNode>(this)) {
+        const std::string& tag = customNode->GetCustomTag();
+        if (tag.size() >= name.size() && StringUtils::StartWith(tag, name)) {
+            DumpTree(0);
+            return true;
+        }
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->DumpTreeByComponentName(name)) {
+            return true;
+        }
+    }
+    for (const auto& [item, index, branch] : disappearingChildren_) {
+        if (item->DumpTreeByComponentName(name)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
 {
     auto currentNode = JsonUtil::Create(true);
@@ -1166,7 +1222,7 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
     json->PutRef(key.c_str(), std::move(currentNode));
 }
 
-void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)
 {
     current->Put("$type", tag_.c_str());
     current->Put("$ID", nodeId_);
@@ -1185,14 +1241,14 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
         auto array = JsonUtil::CreateArray();
         if (!nodeChildren.empty()) {
             for (const auto& item : nodeChildren) {
-                auto child = JsonUtil::Create();
+                auto child = JsonUtil::CreateSharedPtrJson();
                 item->DumpSimplifyTree(depth + 1, child);
                 array->PutRef(std::move(child));
             }
         }
         if (!disappearingChildren_.empty()) {
             for (const auto& [item, index, branch] : disappearingChildren_) {
-                auto child = JsonUtil::Create();
+                auto child = JsonUtil::CreateSharedPtrJson();
                 item->DumpSimplifyTree(depth + 1, child);
                 array->PutRef(std::move(child));
             }

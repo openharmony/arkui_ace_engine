@@ -438,12 +438,13 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
 
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
+    SubwindowKey searchKey = GetCurrentSubwindowKey(containerId, SubwindowType::TYPE_POPUP);
+    auto subwindow = GetSubwindowBySearchkey(containerId, searchKey);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-        manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
+        manager->AddSubwindowBySearchKey(searchKey, subwindow);
     }
     subwindow->ShowPopupNG(targetNode->GetId(), popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
@@ -506,12 +507,13 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     auto targetId = targetNode->GetId();
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
+    SubwindowKey searchKey = GetCurrentSubwindowKey(containerId, SubwindowType::TYPE_TIPS);
+    auto subwindow = GetSubwindowBySearchkey(containerId, searchKey);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-        manager->AddSubwindow(containerId, SubwindowType::TYPE_TIPS, subwindow);
+        manager->AddSubwindowBySearchKey(searchKey, subwindow);
     }
     auto overlayManager = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

@@ -428,6 +428,49 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Le
 }
 
 /**
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy003
+ * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE with calcLayoutConstraint is nullPtr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = nullptr;
+    auto contentSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    layoutWrapper->GetGeometryNode()->SetContentSize(contentSize);
+
+    auto frameSize = CONTAINER_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+
+    frameSize = CONTAINER_SIZE;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+}
+
+/**
  * @tc.name: UpdateConstraintByLayoutPolicy
  * @tc.desc: test UpdateConstraintByLayoutPolicy
  * @tc.type: FUNC
@@ -670,6 +713,56 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     richEditorPattern->isModifyingContent_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest001
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest001, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    std::list<RefPtr<SpanItem>> spanList1;
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList1.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash1 = layoutAlgorithm->Hash(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    spanList2.push_back(AceType::MakeRefPtr<SpanItem>());
+    uint64_t hash2 = layoutAlgorithm->Hash(spanList2);
+
+    EXPECT_NE(hash1, hash2);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithmTest002
+ * @tc.desc: test RichEditorLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithmTest002, TestSize.Level1)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    SizeF textSize;
+    ASSERT_EQ(textSize.Width(), 0.0f);
+    layoutAlgorithm->allSpans_.clear();
+    layoutAlgorithm->HandleTextSizeWhenEmpty(AceType::RawPtr(layoutWrapper), textSize);
+    EXPECT_NE(textSize.Width(), 0.0f);
 }
 
 } // namespace OHOS::Ace::NG

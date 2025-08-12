@@ -67,6 +67,7 @@ const uint32_t QR_CODE_VALUE_MAX_LENGTH = 256;
 const uint32_t QR_CODE_VALUE_MAX_LENGTH_NEW = 512;
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
+constexpr int32_t PLATFORM_VERSION_12 = 12;
 const Dimension DEFAULT_SIZE(240.0, DimensionUnit::VP);
 } // namespace
 
@@ -97,7 +98,7 @@ void QRCodeTestNg::TearDownTestSuite()
  * @tc.desc: Test qrcode paintProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -125,7 +126,7 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test qrcode paintProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -153,7 +154,7 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
  * @tc.desc:Test pattern of qrcode.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level0)
 {
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
@@ -190,7 +191,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest002, TestSize.Level1)
  * @tc.desc: Test layout of qrcode wrapper.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest003, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -310,7 +311,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest004, TestSize.Level1)
  * @tc.desc: Test qrcode  MeasureContent function.
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
@@ -358,7 +359,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest005, TestSize.Level1)
  * @tc.desc: Test qrcode OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create qrcode and get frameNode.
@@ -386,7 +387,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest006, TestSize.Level1)
  * @tc.desc: Test qrcode OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -425,7 +426,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternTest007, TestSize.Level1)
  * @tc.desc: test SetContentOpacity
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -464,7 +465,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
  * @tc.desc: test GetFocusPattern
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -494,7 +495,7 @@ HWTEST_F(QRCodeTestNg, QRCodePatternGetFocusPattern001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -549,7 +550,7 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -588,7 +589,7 @@ HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent002, TestSize.Level1)
  * @tc.desc: test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -628,6 +629,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
      */
     qrCodePaintMethod->UpdateContentModifier(paintWrapper);
     auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->SetQRCodeSize(100.0f);
     qrCodeModifier->onDraw(context);
     EXPECT_EQ(qrCodeModifier->color_->Get(), Color::BLUE);
 }
@@ -637,7 +639,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
  * @tc.desc: test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -683,7 +685,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw002, TestSize.Level1)
  * @tc.desc: test qrcodePaintMethod UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -733,7 +735,7 @@ HWTEST_F(QRCodeTestNg, UpdateContentModifier001, TestSize.Level1)
  * @tc.desc: test QRCodeModelNG static Method
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -751,7 +753,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModelNG001, TestSize.Level1)
  * @tc.desc: test modifier
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create LoadingProgressModifier pointer.
@@ -818,7 +820,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
  * @tc.desc: test MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent003, TestSize.Level1)
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent003, TestSize.Level0)
 {
     /**
      * @tc.steps: steps1. Create qrCodeModel
@@ -1126,5 +1128,54 @@ HWTEST_F(QRCodeTestNg, QRCodeCreateWithResourceObjTest001, TestSize.Level1)
     qrCodeModelNG.CreateWithResourceObj(jsResourceType, resObjWithId);
     pattern->OnColorModeChange(colorMode);
     EXPECT_EQ(paintProperty->GetOpacity(), opacity);
+}
+
+/**
+ * @tc.name: QRCodeModifierOnDraw003
+ * @tc.desc: test onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel and set api version 12
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_12);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateColor(Color::RED);
+    qrcodePaintProperty->UpdateValue(CREATE_VALUE);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->propForegroundColor_ = Color::RED;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).Times(1).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(1).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Scale(_, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawImage(_, _, _, _)).Times(1).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, Restore()).Times(1).WillOnce(Return());
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    qrCodePaintMethod->qrCodeSize_ = 100.0f;
+
+    /**
+     * @tc.steps: steps2. onDraw
+     * @tc.expected: steps2. Check the result of onDraw
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->onDraw(context);
+    EXPECT_EQ(qrCodeModifier->color_->Get(), Color::RED);
 }
 } // namespace OHOS::Ace::NG

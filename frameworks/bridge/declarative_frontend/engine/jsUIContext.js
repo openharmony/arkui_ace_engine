@@ -877,6 +877,13 @@ class UIContext {
         Context.setKeyboardAppearanceConfig(nodePtr, config);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    setCacheRange(frameNode, range) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = frameNode.getNodePtr();
+        getUINativeModule().list.setCacheRange(nodePtr, range);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {

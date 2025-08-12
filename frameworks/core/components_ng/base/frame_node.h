@@ -138,6 +138,8 @@ public:
 
     ~FrameNode() override;
 
+    void OnDelete() override;
+
     int32_t FrameCount() const override
     {
         return 1;
@@ -557,6 +559,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
+    // checkScreen takes effect only when checkBoundary is false.
     OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
@@ -603,13 +606,13 @@ public:
         AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
+        AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
+        AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -703,24 +706,23 @@ public:
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        if (isResetOptions) {
-            previewOption_ = previewOption;
-        } else {
-            auto options = previewOption_.options;
-            previewOption_ = previewOption;
-            previewOption_.options = options;
-        }
-        previewOption_.onApply = std::move(previewOption.onApply);
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetDragPreviewOption(previewOption, isResetOptions);
     }
 
     void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
     {
-        previewOption_.options = optionsAfterApplied;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_VOID(dragDropRelatedConfigurations);
+        dragDropRelatedConfigurations->SetOptionsAfterApplied(optionsAfterApplied);
     }
 
-    DragPreviewOption GetDragPreviewOption() const
+    DragPreviewOption GetDragPreviewOption()
     {
-        return previewOption_;
+        auto dragDropRelatedConfigurations = GetOrCreateDragDropRelatedConfigurations();
+        CHECK_NULL_RETURN(dragDropRelatedConfigurations, DragPreviewOption());
+        return dragDropRelatedConfigurations->GetOrCreateDragPreviewOption();
     }
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
@@ -829,9 +831,9 @@ public:
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
-    double GetPreviewScaleVal() const;
+    double GetPreviewScaleVal();
 
-    bool IsPreviewNeedScale() const;
+    bool IsPreviewNeedScale();
 
     void SetViewPort(RectF viewPort)
     {
@@ -856,6 +858,8 @@ public:
 
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    bool EnsureDelayedMeasureBeingOnlyOnce();
 
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
 
@@ -1265,15 +1269,6 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
-    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
-
-    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
-    void ArkoalaSynchronize(
-        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
-
-    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
-    /* ============================== Arkoala LazyForEach adapter section END ==============================*/
-
     void SetAICallerHelper(const std::shared_ptr<AICallerHelper>& aiCallerHelper);
     /**
      * @description: this callback triggered by ai assistant by ui_session proxy.
@@ -1284,8 +1279,16 @@ public:
      */
     uint32_t CallAIFunction(const std::string& functionName, const std::string& params);
 
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
 private:
-    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index, bool active);
     void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
 
     /* temporary adapter to provide LazyForEach feature in Arkoala */
@@ -1476,7 +1479,7 @@ protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void OnCollectRemoved() override;
 
 private:
@@ -1521,7 +1524,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json);
     void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
@@ -1575,7 +1578,8 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
+    void AddFrameNodeSnapshot(
+        bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1629,6 +1633,13 @@ private:
     const char* GetPaintPropertyTypeName() const;
     void AddNodeToRegisterTouchTest();
     void CleanupPipelineResources();
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void UpdateBackground();
+    void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1741,8 +1752,6 @@ private:
     RefPtr<FrameNode> accessibilityFocusPaintNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
-
-    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 

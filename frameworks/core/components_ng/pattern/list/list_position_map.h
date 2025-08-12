@@ -52,7 +52,7 @@ enum class ListPosMapUpdate {
 };
 
 class ListPositionMap : public virtual AceType {
-    DECLARE_ACE_TYPE(ListPositionMap, AceType)
+    DECLARE_ACE_TYPE(ListPositionMap, AceType);
 public:
     ListPositionMap() = default;
     ~ListPositionMap() override = default;
@@ -93,7 +93,7 @@ public:
 
     ListPosMapUpdate CheckPosMapUpdateRule();
 
-    void UpdatePosMapStart(float delta, float& listCurrentPos, float space,
+    void UpdatePosMapStart(float delta, double& listCurrentPos, float space,
         int32_t startIndex, float startPos, bool groupAtStart);
 
     void UpdatePosMapEnd(int32_t prevEndIndex, float space, bool groupAtEnd);

@@ -370,7 +370,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
     CHECK_NULL_VOID(previewNode);
     auto previewContext = previewNode->GetRenderContext();
     CHECK_NULL_VOID(previewContext);
-    
+
     imageContext->UpdateOpacity(1.0);
     previewContext->UpdateOpacity(0.0);
     AnimationUtils::Animate(
@@ -555,7 +555,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     auto scaleAfter = previewPattern->GetHoverImageScaleTo();
     auto scaleTo =
         LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
-    
+
     previewPattern->SetIsHoverImageScalePlaying(true);
     // when the scaling start and end sizes are the same, the end callback method should not be relied on
     AnimationOption scaleOption = AnimationOption();
@@ -1360,10 +1360,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
+    ReloadMenuParam(menuNode, menuParam);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ReloadMenuParam(menuNode, menuParam);
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
@@ -1382,11 +1382,16 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+            }
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1472,11 +1477,11 @@ void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, co
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdateOpacity(0.0);
     }
-    
+
     if (menuNode) {
         SetPreviewInfoToMenu(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    
+
     if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
         previewNode->MountToParent(menuParam.isShowHoverImage ? hoverImageStackNode : wrapperNode);
         previewNode->MarkModifyDone();
@@ -1539,6 +1544,10 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
     auto isCurDarkMode = colorMode == ColorMode::DARK;
     MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
     if (SystemProperties::ConfigChangePerform() && menuParam.isDarkMode != isCurDarkMode && !menuParam.isWithTheme) {
+        //Because the Menu is created outside the light/dark mode switching process,
+        //it is necessary to manually set the reloading state to trigger the color inversion process.
+        bool isReloading = ResourceParseUtils::IsReloading();
+        ResourceParseUtils::SetIsReloading(true);
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
@@ -1553,6 +1562,7 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
             menuParamValue.outlineWidth->ReloadResources();
         }
         menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
+        ResourceParseUtils::SetIsReloading(isReloading);
     }
 }
 
@@ -1586,11 +1596,16 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value());
+            }
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }

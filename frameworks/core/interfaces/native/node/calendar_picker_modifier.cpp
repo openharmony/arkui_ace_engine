@@ -199,6 +199,7 @@ void SetTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPickerTextSt
     }
     textStyle.fontWeight = StringUtils::StringToFontWeight(res[TEXT_STYLE_FONT_WEIGHT_INDEX], FontWeight::NORMAL);
     textStyle.textColor = Color(textStyleStruct->textColor);
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
 
     SetCalendarPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->textColorRawPtr);
     CalendarPickerModelNG::SetTextStyle(frameNode, textStyle);

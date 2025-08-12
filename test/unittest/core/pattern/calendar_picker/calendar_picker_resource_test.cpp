@@ -52,6 +52,10 @@ CalendarPickerModel* CalendarPickerModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double TEST_FONT_SIZE = 10.0;
+}
+
 class CalendarPickerResourceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -214,6 +218,44 @@ HWTEST_F(CalendarPickerResourceTest, CalendarPickerRemoveResObj001, TestSize.Lev
     EXPECT_FALSE(resMap.find("CalendarPicker.EdgeAlign") == resMap.end());
     CalendarPickerModelNG::GetInstance()->CalendarPickerRemoveResObj("CalendarPicker.EdgeAlign");
     EXPECT_EQ(pattern->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextStyle001
+ * @tc.desc: Test DatePickerPattern UpdateTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerResourceTest, UpdateTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     */
+    CalendarSettingData settingData;
+    CalendarPickerModelNG::GetInstance()->Create(settingData);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    CalendarPickerModelNG::GetInstance()->SetTextStyle(textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
 }
 
 } // namespace OHOS::Ace::NG

@@ -36,11 +36,15 @@ void TouchEventActuator::OnFlushTouchEventsEnd()
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    bool isNeedPropagation = false;
     // if current node is forbidden by monopolize, upper nodes should not response either
     if (!ShouldResponse()) {
+        SetNeedPropagation(isNeedPropagation);
         return false;
     }
-    return TriggerTouchCallBack(point);
+    isNeedPropagation = TriggerTouchCallBack(point);
+    SetNeedPropagation(isNeedPropagation);
+    return isNeedPropagation;
 }
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
@@ -192,7 +196,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
-    info.SetTouchType(type);
+    info.SetTouchType((pointItem.originalId == event.originalId) ? type : TouchType::MOVE);
     info.SetForce(pointItem.force);
     info.SetPressedTime(pointItem.downTime);
     info.SetWidth(pointItem.width);

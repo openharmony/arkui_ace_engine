@@ -31,7 +31,8 @@ public:
 
     static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
 
-    static RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<PipelineContext> GetMainPipelineContext(
+        const RefPtr<FrameNode>& frameNode, bool isTargetNodeInSubwindow = false);
 
     RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 

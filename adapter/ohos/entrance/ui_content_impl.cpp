@@ -50,6 +50,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -72,6 +73,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -176,8 +178,6 @@ enum class WindowChangeType {
     if (!*_##name->isValid_) {                          \
         ifInvalid;                                      \
     }
-#define PETALMAPS_SEARCH_URL(address) \
-    (std::string("https://www.petalmaps.com/search/?q=") + (address) + "&utm_source=fb")
 
 struct UIContentImplHelper {
     explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
@@ -1245,7 +1245,6 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     auto errorCode = InitializeInner(window, url, storageWrapper, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
-    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -1287,7 +1286,6 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     StorageWrapper storageWrapper { .napiStorage_ = storage };
     auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
-    RegisterLinkJumpCallback();
     UpdateWindowBlur();
     return errorCode;
 }
@@ -1551,7 +1549,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    ColorMode colorMode = ColorMode::LIGHT;
+    ColorMode colorMode = Container::CurrentColorMode();
     if (context) {
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
@@ -1709,7 +1707,8 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
+        instanceId_ = isDynamicRender_ ?
+            Container::GenerateId<DC_CONTAINER>() : Container::GenerateId<STAGE_CONTAINER>();
     } else {
         instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
@@ -2056,7 +2055,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
-    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -2211,6 +2209,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    // init xml config for performance feature
+    FeatureParamManager::GetInstance().Init(bundleName_);
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
     });
@@ -2380,6 +2380,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
+    if (appInfo->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
+    }
+
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
@@ -2407,7 +2415,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     container->SetPageProfile(pageProfile);
     container->Initialize();
-     // wjh create and init container end
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
@@ -2434,6 +2441,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     container->SetApiTargetVersion(apiTargetVersion);
+
+    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -2507,7 +2516,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
         CHECK_NULL_VOID(abilityContext);
         AAFwk::Want want;
-        auto url = PETALMAPS_SEARCH_URL(address);
+        auto url = SystemProperties::GetMapSearchPrefix() + address + "&utm_source=fb";
         want.SetUri(url);
         abilityContext->OpenLink(want, REQUEST_CODE);
     });
@@ -2530,7 +2539,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->InitFoldStatusFromListener();
-       // wjh set container rest info end
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     if (!container->IsSceneBoardEnabled()) {
@@ -2677,7 +2685,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) { // 1.1 SetLocalStorage
         auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
@@ -2689,10 +2697,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) { // 1.2 SetAniLocalStorage
         auto storage = storageWrapper.aniStorage_.value();
         if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+            container->SetAniLocalStorage(nullptr, context);
         } else {
             auto* env = reinterpret_cast<ani_env*>(runtime_);
             ani_ref ref;
@@ -2716,7 +2724,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     // setLogFunc of current app
     AddAlarmLogFunc(pipeline);
-    InitUISessionManagerCallbacks(pipeline);
+    if (pipeline) {
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (taskExecutor) {
+            InitUISessionManagerCallbacks(taskExecutor);
+        }
+    }
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
@@ -2771,12 +2784,14 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto& DMManager = Rosen::DisplayManager::GetInstance();
     auto window = container->GetUIWindow(instanceId_);
     uint64_t displayId = 0;
-    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
-        displayId = window->GetDisplayId();
-        listenedDisplayId_ = displayId;
-    } else if (window) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
-            window->GetWindowName().c_str());
+    if (window) {
+        if (window->GetDisplayId() != DISPLAY_ID_INVALID) {
+            displayId = window->GetDisplayId();
+            listenedDisplayId_ = displayId;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
+                window->GetWindowName().c_str());
+        }
     }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
     DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);
@@ -2809,7 +2824,9 @@ void UIContentImpl::Foreground()
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
         PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
-    ContainerScope::UpdateRecentForeground(instanceId_);
+    if (!isDynamicRender_) {
+        ContainerScope::UpdateRecentForeground(instanceId_);
+    }
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2860,7 +2877,9 @@ SerializedGesture UIContentImpl::GetFormSerializedGesture()
 void UIContentImpl::Focus()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window focus", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    ContainerScope::UpdateRecentActive(instanceId_);
+    if (!isDynamicRender_) {
+        ContainerScope::UpdateRecentActive(instanceId_);
+    }
     Platform::AceContainer::OnActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
@@ -3787,6 +3806,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto updateforceSplitTask = [context, width = config.Width()]() {
+        CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->UpdateIsInForceSplitMode(width);
+    };
     auto updateDensityTask = [container, modifyConfig]() {
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
@@ -3818,10 +3843,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateforceSplitTask();
         updateDensityTask(); // ensure density has been updated before load first page
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
+        taskExecutor->PostTask(
+            std::move(updateforceSplitTask), TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplit");
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
         taskExecutor->PostTask(
             std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
@@ -3878,8 +3906,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
-            pipelineContext->SetDisplayWindowRectInfo(
-                Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+            if (reason != OHOS::Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE) {
+                pipelineContext->SetDisplayWindowRectInfo(
+                    Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+            } else {
+                // when the reason is ROOT_SCENE_CHANGE, the offset of the window should be (0, 0).
+                pipelineContext->SetDisplayWindowRectInfo(
+                    Rect(Offset(0, 0), Size(config.Width(), config.Height())));
+            }
             pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
             TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayWindowRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
@@ -4337,6 +4371,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             container->SetApiTargetVersion(appInfo->apiTargetVersion);
         }
 
+        container->SetBundleName(context->GetBundleName());
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
@@ -5442,6 +5477,9 @@ void UIContentImpl::SetForceSplitEnable(
     auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, ignoreOrientation);
         if (isRouter) {
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
@@ -5458,6 +5496,29 @@ void UIContentImpl::SetForceSplitEnable(
     }
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
         isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
+}
+
+void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    NG::ForceSplitConfig config;
+    if (!NG::ForceSplitUtils::ParseForceSplitConfig(configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
+        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    navManager->SetForceSplitNavigationId(config.navigationId);
+    navManager->SetForceSplitNavigationDepth(config.navigationDepth);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()
@@ -5662,21 +5723,19 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
-void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
+void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandCallback = [weakContext = WeakPtr(pipeline)](int32_t value) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
+    auto sendCommandCallback = [weakTaskExecutor = taskExecutor](int32_t value) {
         KeyEvent keyEvent;
         keyEvent.action = KeyAction::DOWN;
         keyEvent.code = static_cast<KeyCode>(value);
         keyEvent.pressedCodes = { keyEvent.code };
 
-        auto taskExecutor = pipeline->GetTaskExecutor();
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), keyEvent]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [keyEvent]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->OnNonPointerEvent(keyEvent);
             },
@@ -5685,22 +5744,16 @@ void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
-void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     // set get inspector tree function for ui session manager
-    auto callback = [weakContext = WeakPtr(pipeline)](bool onlyNeedVisible) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (pipeline == nullptr) {
-            pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        }
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), onlyNeedVisible]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [onlyNeedVisible]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                ContainerScope scope(pipeline->GetInstanceId());
                 if (onlyNeedVisible) {
                     pipeline->GetInspectorTree(true);
                 } else {
@@ -5708,18 +5761,16 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
                     UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
                 }
             },
-            TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree",
+            TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
-    auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline), isRegister]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            [isRegister]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->NotifyAllWebPattern(isRegister);
             },
@@ -5727,24 +5778,22 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
-    SetupGetPixelMapCallback(pipeline);
-    RegisterGetCurrentPageName(pipeline);
-    InitSendCommandFunctionsCallbacks(pipeline);
-    sendCommandCallbackInner(pipeline);
+    SetupGetPixelMapCallback(taskExecutor);
+    RegisterGetCurrentPageName();
+    InitSendCommandFunctionsCallbacks(taskExecutor);
+    sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
-    RegisterExeAppAIFunction(pipeline);
+    RegisterExeAppAIFunction();
 }
 
-void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto getPixelMapCallback = [weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline)]() {
-                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->GetAllPixelMap();
             },
@@ -5766,25 +5815,20 @@ void UIContentImpl::SaveGetCurrentInstanceId()
     });
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterGetCurrentPageName()
 {
-    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+    auto getPageNameCallback = []() -> std::string {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, "");
         return pipeline->GetCurrentPageNameCallback();
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
-void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-    auto sendCommandAsync = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        if (!pipeline) {
-            LOGI("Pipeline context is null");
-            return 10;
-        }
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommandAsync = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         if (!taskExecutor) {
             LOGI("Task executor is null");
             return 11;
@@ -5804,10 +5848,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipel
         return result;
     };
     UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
-    auto sendCommand = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
+    auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [id, command]() {
@@ -6048,12 +6090,12 @@ UIContentErrorCode UIContentImpl::InitializeByNameWithAniStorage(
     return errorCode;
 }
 
-void UIContentImpl::RegisterExeAppAIFunction(const RefPtr<PipelineBase>& pipeline)
+void UIContentImpl::RegisterExeAppAIFunction()
 {
-    auto exeAppAIFunctionCallback = [weakContext = WeakPtr(pipeline)](
+    auto exeAppAIFunctionCallback = [](
         const std::string& funcName, const std::string& params) -> uint32_t {
         static constexpr uint32_t AI_CALL_ENV_INVALID = 4;
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, AI_CALL_ENV_INVALID);
         return pipeline->ExeAppAIFunctionCallback(funcName, params);
     };

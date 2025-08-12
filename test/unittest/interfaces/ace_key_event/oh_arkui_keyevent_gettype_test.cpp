@@ -71,4 +71,16 @@ HWTEST_F(KeyEventTest, KeyEvent_GetType003, TestSize.Level0)
     }
 }
 
+HWTEST_F(KeyEventTest, KeyEvent_GetType004, TestSize.Level0)
+{
+    ArkUI_UIInputEvent event = {
+        .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
+        .eventTypeId = AXIS_EVENT_ID,
+        .inputEvent = nullptr,
+        .isCloned = false,
+        .apiVersion = 0,
+    };
+    auto result = OH_ArkUI_KeyEvent_GetType(&event);
+    EXPECT_EQ(result, ArkUI_KeyEventType::ARKUI_KEY_EVENT_UNKNOWN);
+}
 } // namespace OHOS::Ace

@@ -1962,6 +1962,77 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCreateMenuOptionsParams003
+ * @tc.desc: test GetCreateMenuOptionsParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams003, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto info_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    info_->onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& params) {
+        std::vector<MenuOptionsParam> menuOptionItems;
+        MenuOptionsParam item;
+        item.id = std::to_string(1);
+        menuOptionItems.push_back(item);
+        return menuOptionItems;
+    };
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        }
+        auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+        textOverlayTheme->showShortcut_ = true;
+        textOverlayTheme->pasteLabel_ = "pasteLabel";
+        return textOverlayTheme;
+    });
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(info_);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
+    EXPECT_NE(menuWrapper, nullptr);
+}
+
+/**
+ * @tc.name: GetCreateMenuOptionsParams004
+ * @tc.desc: test GetCreateMenuOptionsParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams004, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto info_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    info_->onCreateCallback.onCreateMenuCallback = [](const std::vector<NG::MenuItemParam>& params) {
+        std::vector<MenuOptionsParam> menuOptionItems;
+        MenuOptionsParam item;
+        item.id = std::to_string(1);
+        item.icon = "icon";
+        menuOptionItems.push_back(item);
+        return menuOptionItems;
+    };
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        }
+        auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+        textOverlayTheme->showShortcut_ = true;
+        textOverlayTheme->pasteLabel_ = "pasteLabel";
+        return textOverlayTheme;
+    });
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(info_);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
+    EXPECT_NE(menuWrapper, nullptr);
+}
+
+/**
  * @tc.name: UpdateSingleHandleInfo
  * @tc.desc: test DraggingSingleHandle
  * @tc.type: FUNC

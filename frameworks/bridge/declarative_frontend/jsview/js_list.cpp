@@ -145,9 +145,13 @@ void JSList::SetScrollBar(const JSCallbackInfo& info)
 
 void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(info);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarColor = JSScrollable::ParseBarColor(info, resObj);
     if (!scrollBarColor.empty()) {
         ListModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
     }
 }
 
@@ -653,7 +657,7 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
     } else {
-        ListModel::GetInstance()->SetOnScrollIndex(nullptr);
+        ListModel::GetInstance()->SetOnScrollStop(nullptr);
     }
     args.ReturnSelf();
 }

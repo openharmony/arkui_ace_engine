@@ -34,6 +34,11 @@ enum class TestingCMSMatrixType {
     XYZ,
 };
 
+enum class TestingClamp {
+    NO_CLAMP,
+    YES_CLAMP,
+};
+
 class TestingColorSpace {
 public:
     TestingColorSpace() = default;

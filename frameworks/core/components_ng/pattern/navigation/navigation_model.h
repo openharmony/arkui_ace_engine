@@ -61,7 +61,7 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {}
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
-    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) {}
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetEnableModeChangeAnimation(bool isEnable) = 0;

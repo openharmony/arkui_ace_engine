@@ -160,6 +160,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void MultiThreadDelayedExecution();
 
     void OnWindowHide() override;
 
@@ -180,7 +181,7 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
@@ -233,12 +234,14 @@ public:
     }
 
     virtual void SetTextDetectEnable(bool enable);
+    void SetTextDetectEnableMultiThread(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
     }
     void SetTextDetectTypes(const std::string& types)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         dataDetectorAdapter_->SetTextDetectTypes(types);
         textDetectTypes_ = types; // url value is not recorded in dataDetectorAdapter_, need to record it here
     }
@@ -248,23 +251,26 @@ public:
     }
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
+        if (!dataDetectorAdapter_) {
+            dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+        }
         return dataDetectorAdapter_;
     }
     virtual const std::map<int32_t, AISpan>& GetAISpanMap()
     {
-        return dataDetectorAdapter_->aiSpanMap_;
+        return GetDataDetectorAdapter()->aiSpanMap_;
     }
     const std::u16string& GetTextForAI()
     {
-        return dataDetectorAdapter_->textForAI_;
+        return GetDataDetectorAdapter()->textForAI_;
     }
     void SetOnResult(std::function<void(const std::string&)>&& onResult)
     {
-        dataDetectorAdapter_->onResult_ = std::move(onResult);
+        GetDataDetectorAdapter()->onResult_ = std::move(onResult);
     }
     TextDataDetectResult GetTextDetectResult()
     {
-        return dataDetectorAdapter_->textDetectResult_;
+        return GetDataDetectorAdapter()->textDetectResult_;
     }
     virtual void MarkAISpanStyleChanged()
     {
@@ -274,6 +280,7 @@ public:
     }
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
         dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
         dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
@@ -281,14 +288,15 @@ public:
         dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
         dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
         auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
         dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
             MarkAISpanStyleChanged();
         }
-        dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)
     {
+        CHECK_NULL_VOID(GetDataDetectorAdapter());
         TextDetectConfig textDetectConfig;
         aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
         aiSpanStyle.SetTextDecoration(
@@ -344,6 +352,8 @@ public:
     }
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
+    void CloseSelectOverlayMultiThread(bool animation);
+    void CloseSelectOverlayMultiThreadAction(bool animation);
     void CreateHandles() override;
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
@@ -477,6 +487,8 @@ public:
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
+    void SetTextSelectionMultiThreadAction(int32_t selectionStart, int32_t selectionEnd);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -596,12 +608,13 @@ public:
         }
     }
     void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
+    void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
         bool includeEndHalf = false, bool getSubstrDirectly = false) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    virtual void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
     virtual bool IsSelectAll();
     void HandleOnCopy();
@@ -683,6 +696,7 @@ public:
     }
 
     void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
+    void SetExternalSpanItemMultiThread(const std::list<RefPtr<SpanItem>>& spans);
 
     void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
     {
@@ -849,13 +863,16 @@ public:
     virtual void UpdateAIMenuOptions();
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
     bool IsAiSelected();
-    RefPtr<FrameNode> CreateAIEntityMenu();
+    virtual RefPtr<FrameNode> CreateAIEntityMenu();
+    virtual bool CheckAIPreviewMenuEnable();
     void InitAiSelection(const Offset& globalOffset);
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
     void ResetAISelected(AIResetSelectionReason reason) override;
 
     void ShowAIEntityMenuForCancel() override;
+    bool IsPreviewMenuShow() override;
+    void DragNodeDetachFromParent();
     AISpan GetSelectedAIData();
     std::pair<bool, bool> GetCopyAndSelectable();
     std::pair<int32_t, int32_t> GetSelectedStartAndEnd();
@@ -892,6 +909,10 @@ public:
     {
         textSelector_.secondHandle = rect;
     }
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -899,7 +920,9 @@ protected:
         return clickedSpanPosition_;
     }
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     virtual void InitAISpanHoverEvent();
@@ -942,6 +965,7 @@ protected:
         const ShowSelectOverlayFunc& showSelectOverlayFunc);
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ShowSelectOverlay(const OverlayRequest& = OverlayRequest());
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
@@ -972,15 +996,10 @@ protected:
     virtual bool CanStartAITask() const;
 
     void MarkDirtySelf();
-    void OnAttachToMainTree() override
-    {
-        isDetachFromMainTree_ = false;
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        isDetachFromMainTree_ = true;
-    }
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
 
     void CreateMultipleClickRecognizer()
     {
@@ -1009,6 +1028,7 @@ protected:
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
     void HandleSpanStringTouchEvent(TouchEventInfo& info);
     void ShowAIEntityPreviewMenuTimer();
+    void PreviewDragNodeHideAnimation();
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
@@ -1026,6 +1046,9 @@ protected:
     bool isSpanStringMode_ = false;
     RefPtr<MutableSpanString> styledString_;
     bool keyEventInitialized_ = false;
+    bool isShowAIMenuOption_ = false;
+    bool isAskCeliaEnabled_ = false;
+    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -1055,7 +1078,7 @@ protected:
     friend class TextContentModifier;
     // properties for AI
     bool textDetectEnable_ = false;
-    RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+    RefPtr<DataDetectorAdapter> dataDetectorAdapter_;
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
@@ -1083,7 +1106,7 @@ private:
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void ActSetSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    virtual bool IsShowHandle();
     void InitUrlMouseEvent();
     void InitUrlTouchEvent();
     void HandleUrlMouseEvent(const MouseInfo& info);
@@ -1233,10 +1256,17 @@ private:
     // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
     MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     bool isTryEntityDragging_ = false;
-    bool isShowAIMenuOption_ = false;
-    std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool isRegisteredAreaCallback_ = false;
-    bool isAskCeliaEnabled_ = false;
+
+    // ----- multi thread state variables -----
+    bool setTextDetectEnableMultiThread_ = false;
+    bool setExternalSpanItemMultiThread_ = false;
+    bool closeSelectOverlayMultiThread_ = false;
+    bool closeSelectOverlayMultiThreadValue_ = false;
+    bool setTextSelectionMultiThread_ = true;
+    int32_t setTextSelectionMultiThreadValue0_;
+    int32_t setTextSelectionMultiThreadValue1_;
+    // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG
 

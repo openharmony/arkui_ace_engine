@@ -81,6 +81,20 @@ void CustomNodeExtPattern::OnWindowUnfocused()
     }
 }
 
+void CustomNodeExtPattern::OnWindowActivated()
+{
+    if (onWindowActivatedCallback_) {
+        onWindowActivatedCallback_();
+    }
+}
+
+void CustomNodeExtPattern::OnWindowDeactivated()
+{
+    if (onWindowDeactivatedCallback_) {
+        onWindowDeactivatedCallback_();
+    }
+}
+
 bool CustomNodeExtPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
@@ -148,6 +162,7 @@ void CustomNodeExtPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowFocusChangedCallback(id);
+    pipeline->AddWindowActivateChangedCallback(id);
 }
 
 void CustomNodeExtPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -157,6 +172,7 @@ void CustomNodeExtPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowFocusChangedCallback(id);
+    pipeline->RemoveWindowActivateChangedCallback(id);
 }
 
 void CustomNodeExtPattern::OnAttachToMainTree()

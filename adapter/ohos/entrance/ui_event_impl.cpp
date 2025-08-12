@@ -26,6 +26,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -49,10 +50,21 @@ std::string GetCurrentPageParam()
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, "");
     auto frontend = container->GetFrontend();
-    if (frontend) {
-        return frontend->GetTopNavDestinationInfo(false, true);
+    CHECK_NULL_RETURN(frontend, "");
+    auto result = frontend->GetTopNavDestinationInfo(false, true);
+    if (!result.empty() && result != "{}") {
+        return result;
     }
-    return "";
+
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    CHECK_NULL_RETURN(delegate, "");
+    auto paramJson = JsonUtil::Create();
+    result = delegate->GetParams();
+    if (result.empty() || result == "{}") {
+        result = delegate->GetInitParams();
+    }
+    paramJson->Put("params", result.c_str());
+    return paramJson->ToString();
 }
 } // namespace
 

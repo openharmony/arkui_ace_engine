@@ -137,7 +137,8 @@ bool DialogManager::IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) 
     return expandDisplay || isFreeMultiWindow;
 }
 
-RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(const RefPtr<FrameNode>& frameNode)
+RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(
+    const RefPtr<FrameNode>& frameNode, bool isTargetNodeInSubwindow)
 {
     // Get pipelineContext of main window or host window for UIExtension
     if (!frameNode) {
@@ -156,7 +157,7 @@ RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(const RefPtr<Frame
         return nullptr;
     }
     RefPtr<PipelineContext> context;
-    if (container->IsSubContainer()) {
+    if (container->IsSubContainer() && !isTargetNodeInSubwindow) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
         if (!parentContainer) {

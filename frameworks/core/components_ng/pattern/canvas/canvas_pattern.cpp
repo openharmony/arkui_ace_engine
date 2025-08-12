@@ -86,10 +86,11 @@ void CanvasPattern::FireOnContext2DDetach()
 
 void CanvasPattern::OnAttachToFrameNode()
 {
-    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", GetId());
-#ifndef ACE_UNITTEST
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    id_ = host->GetId();
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", id_);
+#ifndef ACE_UNITTEST
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
@@ -996,9 +997,7 @@ void CanvasPattern::SetDensity(double density)
 
 int32_t CanvasPattern::GetId()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1);
-    return host->GetId();
+    return id_;
 }
 
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1009,7 +1008,7 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 
-void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(paintMethod_);
     auto jsonMethod = JsonUtil::Create();

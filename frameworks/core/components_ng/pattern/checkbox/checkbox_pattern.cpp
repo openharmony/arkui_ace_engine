@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/log/dump_log.h"
@@ -126,6 +127,7 @@ void CheckBoxPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     RegisterVisibleAreaChange();
 }
@@ -528,7 +530,7 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -544,6 +546,19 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+
+void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void CheckBoxPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void CheckBoxPattern::CheckPageNode()
@@ -1138,10 +1153,8 @@ void CheckBoxPattern::SetPrePageIdToLastPageId()
     }
 }
 
-void CheckBoxPattern::OnAttachToMainTree()
+void CheckBoxPattern::UpdateNavIdAndState(const RefPtr<FrameNode>& host)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
@@ -1159,6 +1172,14 @@ void CheckBoxPattern::OnAttachToMainTree()
         groupManager->SetLastNavId(std::nullopt);
         UpdateState();
     }
+}
+
+void CheckBoxPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    UpdateNavIdAndState(host);
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()

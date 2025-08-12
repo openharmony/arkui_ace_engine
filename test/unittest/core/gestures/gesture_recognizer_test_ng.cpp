@@ -139,6 +139,39 @@ HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.L
 }
 
 /**
+ * @tc.name: TriggerGestureJudgeCallbackTest002
+ * @tc.desc: Test Recognizer function: TriggerGestureJudgeCallbackTest002
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.expected: step2. result equals CONTINUE.
+     */
+    rotationRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    rotationRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
+    rotationRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    auto result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+    rotationRecognizerPtr->targetComponent_ = targetComponent;
+    EXPECT_EQ(rotationRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::REJECT);
+    rotationRecognizerPtr->inputEventType_ = InputEventType::TOUCH_PAD;
+    result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
  * @tc.name: TransformTest001
  * @tc.desc: Test Transform in Default Condition
  */
@@ -1054,5 +1087,36 @@ HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest007, TestSize.Level1)
     };
     UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(endCallbackError);
     panRecognizerPtr->SendCallbackMsg(panRecognizerPtr->onActionEnd_, GestureCallbackType::UPDATE);
+}
+
+/**
+ * @tc.name: HandleGestureAcceptTest008
+ * @tc.desc: Test function: HandleGestureAccept for ClickRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest008, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(1, 1, false);
+    ASSERT_NE(clickRecognizerPtr, nullptr);
+    clickRecognizerPtr->AttachFrameNode(frameNode);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto action = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    clickRecognizerPtr->SetOnActionStart(start);
+    clickRecognizerPtr->SetOnAction(action);
+    clickRecognizerPtr->SetOnActionEnd(end);
+    clickRecognizerPtr->SetRecognizerType(GestureTypeName::CLICK);
+
+    auto startCallback = [](GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+                             const RefPtr<NGGestureRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+                             GestureActionPhase phase) {
+        EXPECT_EQ(phase, GestureActionPhase::UNKNOWN);
+        EXPECT_NE(gestureListenerType, GestureListenerType::TAP);
+    };
+    UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
+    clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionStart_, GestureCallbackType::START);
 }
 } // namespace OHOS::Ace::NG

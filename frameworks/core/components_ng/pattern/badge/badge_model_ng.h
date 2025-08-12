@@ -23,6 +23,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT BadgeModelNG : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
+    void CreateByFrameNode(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters) override;
+    RefPtr<FrameNode> CreateBadgeFrameNode() override;
     void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) override
     {
         isDefaultFontSize_ = isDefaultFontSize;

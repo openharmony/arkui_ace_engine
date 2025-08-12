@@ -34,7 +34,7 @@ template("framework_bridge") {
       "declarative_frontend:declarative_frontend_$platform",
 
       # bridge source
-      "arkts_frontend:arkts_frontend",
+      "arkts_frontend:arkts_frontend_$platform",
       "card_frontend:card_frontend_$platform",
       "codec:data_codec",
       "common:bridge_common_$platform",
@@ -44,7 +44,7 @@ template("framework_bridge") {
     ]
 
     if (build_ohos_sdk || is_arkui_x) {
-      deps -= [ "arkts_frontend:arkts_frontend" ]
+      deps -= [ "arkts_frontend:arkts_frontend_$platform" ]
     }
 
     if (defined(config.js_pa_support) && config.js_pa_support) {
@@ -73,14 +73,14 @@ template("framework_bridge_ng") {
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "arkts_frontend:arkts_frontend",
+      "arkts_frontend:arkts_frontend_$platform",
       "codec:data_codec",
       "common:bridge_common_ng_$platform",
       "common/accessibility:bridge_accessibility_$platform",
       "declarative_frontend:declarative_frontend_$platform",
     ]
     if (is_arkui_x) {
-      deps -= [ "arkts_frontend:arkts_frontend" ]
+      deps -= [ "arkts_frontend:arkts_frontend_$platform" ]
     }
     if (defined(config.js_pa_support) && config.js_pa_support) {
       deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]

@@ -1680,10 +1680,7 @@ void TabsModelNG::HandleBackgroundEffectInactiveColor(FrameNode* frameNode, cons
     CHECK_NULL_VOID(pattern);
     const std::string key = "tabsBackGroundEffectInactiveColor";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode),
-                                        weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                                        const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
         CHECK_NULL_VOID(tabsNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -1692,12 +1689,17 @@ void TabsModelNG::HandleBackgroundEffectInactiveColor(FrameNode* frameNode, cons
         CHECK_NULL_VOID(target);
         EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
         option.isWindowFocused = true; // set to default value
+        if (!resObj) {
+            TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
+            return;
+        }
         Color result = Color::TRANSPARENT;
         option.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
         option.inactiveColor = result;
         TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
     };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 
 void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
@@ -1708,10 +1710,7 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
     CHECK_NULL_VOID(pattern);
     const std::string key = "tabsBackGroundBlurStyle";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode),
-                                        weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                                        const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), resObj](const RefPtr<ResourceObject>& dummyResObj) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(weak.Upgrade());
         CHECK_NULL_VOID(tabsNode);
         auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -1720,11 +1719,16 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
         CHECK_NULL_VOID(target);
         BlurStyleOption styleOption = target->GetBackBlurStyle().value_or(BlurStyleOption{});
         styleOption.isWindowFocused = true; // set to default value
+        if (!resObj) {
+            TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
+            return;
+        }
         Color result = Color::TRANSPARENT;
         styleOption.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
         styleOption.inactiveColor = result;
         TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
     };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    RefPtr<ResourceObject> dummyResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj(key, dummyResObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

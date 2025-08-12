@@ -128,6 +128,7 @@ void SetSelectedTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPick
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -204,6 +205,7 @@ void SetDatePickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPi
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
@@ -280,6 +282,7 @@ void SetDisappearTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPic
         return;
     }
     NG::PickerTextStyle textStyle;
+    textStyle.textColorSetByUser = textStyleStruct->textColorSetByUser;
     InitDatePickerTextStyle(textStyleStruct->fontInfo, textStyleStruct->textColor, textStyleStruct->fontStyle,
         textStyle);
     SetDatePickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,

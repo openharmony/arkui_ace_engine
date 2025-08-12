@@ -68,11 +68,14 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParams(napi_env env, napi_value napiValue)
 {
     UDMF::DataLoadParams dataLoadParams;
-    UDMF::DataLoadParamsNapi::Convert2NativeValue(env, napiValue, dataLoadParams);
-    auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
-    CHECK_NULL_RETURN(udDataLoadParams, nullptr);
-    udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
-    return udDataLoadParams;
+    if (UDMF::DataLoadParamsNapi::Convert2NativeValue(env, napiValue, dataLoadParams)) {
+        auto udDataLoadParams = AceType::MakeRefPtr<DataLoadParamsImpl>();
+        CHECK_NULL_RETURN(udDataLoadParams, nullptr);
+        udDataLoadParams->SetDataLoadParams(std::make_shared<UDMF::DataLoadParams>(dataLoadParams));
+        return udDataLoadParams;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "convert udmf data load params failed.");
+    return nullptr;
 }
 
 napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData)
@@ -165,8 +168,6 @@ int32_t UdmfClientImpl::SetDelayInfo(RefPtr<DataLoadParams> dataLoadParams, std:
 {
     CHECK_NULL_RETURN(dataLoadParams, UDMF::E_ERROR);
     auto& client = UDMF::UdmfClient::GetInstance();
-    UDMF::CustomOption udCustomOption;
-    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
     auto udDataLoadParams = AceType::DynamicCast<DataLoadParamsImpl>(dataLoadParams);
     CHECK_NULL_RETURN(udDataLoadParams, UDMF::E_ERROR);
     CHECK_NULL_RETURN(udDataLoadParams->GetDataLoadParams(), UDMF::E_ERROR);
@@ -202,25 +203,21 @@ int32_t UdmfClientImpl::Cancel(const std::string& key)
     return static_cast<int32_t>(UDMF::UdmfAsyncClient::GetInstance().Cancel(key));
 }
 
-int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
-    std::map<std::string, int64_t>& detailedSummaryMap)
+int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo)
 {
     auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
-    UDMF::Summary detailedSummary;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
-    int32_t ret = client.GetSummary(queryOption, detailedSummary);
+    int32_t ret = client.GetSummary(queryOption, summary);
     if (ret != 0) {
         return ret;
     }
-    detailedSummaryMap = detailedSummary.summary;
-    ret = client.GetParentType(detailedSummary, summary);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF Convert summary failed, return value is %{public}d", ret);
-        return ret;
-    }
-    summaryMap = summary.summary;
+    dragSummaryInfo.summary = summary.summary;
+    dragSummaryInfo.detailedSummary = summary.specificSummary;
+    dragSummaryInfo.summaryFormat = summary.summaryFormat;
+    dragSummaryInfo.version = summary.version;
+    dragSummaryInfo.totalSize = summary.totalSize;
     return ret;
 }
 
@@ -676,20 +673,38 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData
     return GetSpanStringRecord(unifiedData);
 }
 
-bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& allowDropType)
+bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes)
 {
-    std::shared_ptr<UDMF::TypeDescriptor> typeDescriptor;
-    auto ret = UDMF::UtdClient::GetInstance().GetTypeDescriptor(summary, typeDescriptor);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF get typeDescriptor failed, return value is %{public}d", ret);
-        return false;
-    }
-    CHECK_NULL_RETURN(typeDescriptor, false);
-    bool result = false;
-    ret = typeDescriptor->BelongsTo(allowDropType, result);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF determine the belonging failed, return value is %{public}d", ret);
-    }
-    return result;
+    UDMF::Summary summary;
+    summary.summary = dragSummaryInfo.summary;
+    summary.specificSummary = dragSummaryInfo.detailedSummary;
+    summary.summaryFormat = dragSummaryInfo.summaryFormat;
+    summary.totalSize = dragSummaryInfo.totalSize;
+    auto& client = UDMF::UdmfClient::GetInstance();
+    std::vector<std::string> allowTypesArr(allowTypes.begin(), allowTypes.end());
+    return client.IsAppropriateType(summary, allowTypesArr);
 }
+
+#if defined(ACE_STATIC)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto unifiedDataPtr = reinterpret_cast<UDMF::UnifiedData*>(rawData);
+    std::shared_ptr<UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    udData->SetUnifiedData(unifiedData);
+    return udData;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{
+    auto udmfSummary = reinterpret_cast<UDMF::Summary*>(summaryPtr);
+    CHECK_NULL_VOID(udmfSummary);
+    udmfSummary->totalSize = 0;
+    for (auto element : summary) {
+        udmfSummary->totalSize += element.second;
+    }
+    udmfSummary->summary = std::move(summary);
+}
+#endif
 } // namespace OHOS::Ace

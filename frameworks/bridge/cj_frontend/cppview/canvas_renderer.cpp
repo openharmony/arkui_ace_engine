@@ -308,6 +308,9 @@ Metrics NativeCanvasRenderer::MeasureText(const std::string& text)
 
     double density = Positive(GetDensity()) ? GetDensity() : 1;
     TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    if (NearZero(density)) {
+        density = 1.0;
+    }
     double width = textMetrics.width / density;
     double height = textMetrics.height / density;
     double actualBoundingBoxLeft = textMetrics.actualBoundingBoxLeft / density;

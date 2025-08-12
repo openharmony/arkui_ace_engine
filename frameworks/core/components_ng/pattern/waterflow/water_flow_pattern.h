@@ -106,7 +106,7 @@ public:
 
     int32_t GetChildrenCount() const;
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -layoutInfo_->Offset();
     }
@@ -228,6 +228,8 @@ public:
     {
         layoutInfo_->InvalidatedOffset();
     }
+
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

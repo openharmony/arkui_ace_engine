@@ -126,6 +126,12 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
 
 void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetWrapper);
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -137,7 +143,7 @@ void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layo
     auto showInSubWindow = sheetStyle_.showInSubWindow.value_or(false);
     auto parentHeightConstraint = sheetMaxHeight_;
     auto parentWidthConstraint = sheetMaxWidth_;
-    if (showInSubWindow) {
+    if (showInSubWindow && !sheetWrapperPattern->ShowInUEC()) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -190,7 +196,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    sheetStyle_ = layoutProperty->GetSheetStyleValue();
+    sheetStyle_ = layoutProperty->GetSheetStyleValue(SheetStyle());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");
@@ -294,32 +300,8 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForUECSubwindow(
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_VOID(sheetWrapper);
-    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
-    CHECK_NULL_VOID(sheetWrapperPattern);
-    auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto sheetFrameSize = geometryNode->GetFrameSize();
-    // compute sheet offset when show in subwindow with UEC mainWindow
-    RectF containerModal;
-    RectF buttonsRect;
-    auto hostWindowId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
-    ContainerScope scope(hostWindowId);
-    auto container = AceEngine::Get().GetContainer(hostWindowId);
-    CHECK_NULL_VOID(container);
-    auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    sheetOffsetY_ = mainWindowRect.GetY() + mainWindowRect.Height() / DOUBLE_SIZE
-        - sheetFrameSize.Height() / DOUBLE_SIZE;
-    if (mainWindowContext && mainWindowContext->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
-        sheetOffsetY_ += buttonsRect.Height() / DOUBLE_SIZE;
-        if (LessOrEqual(sheetOffsetY_, mainWindowRect.GetY() + buttonsRect.Height())) {
-            sheetOffsetY_ = mainWindowRect.GetY() + buttonsRect.Height();
-        }
-    }
-    sheetOffsetX_ = mainWindowRect.GetX() + (mainWindowRect.Width()  - sheetFrameSize.Width()) / DOUBLE_SIZE;
-    MinusSubwindowDistance(sheetWrapper);
+    sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
+    sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_) / DOUBLE_SIZE;
 }
 
 void SheetPresentationLayoutAlgorithm::ComputeCenterOffsetForNotUECSubwindow(LayoutWrapper* layoutWrapper)

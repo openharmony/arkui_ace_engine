@@ -32,7 +32,10 @@ RefPtr<AceType> RecycleDummyNode::WrapRecycleDummyNode(const RefPtr<AceType>& cu
     return node;
 }
 
-RecycleDummyNode::RecycleDummyNode(int32_t nodeId) : UINode(V2::RECYCLE_VIEW_ETS_TAG, nodeId) {}
+RecycleDummyNode::RecycleDummyNode(int32_t nodeId) : UINode(V2::RECYCLE_VIEW_ETS_TAG, nodeId)
+{
+    RegisterReleaseFunc(false);
+}
 
 RecycleDummyNode::~RecycleDummyNode()
 {

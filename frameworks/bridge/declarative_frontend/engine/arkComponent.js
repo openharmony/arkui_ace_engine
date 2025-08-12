@@ -167,6 +167,26 @@ class ModifierWithKey {
     return true;
   }
 }
+class BackgroundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackground(node);
+    }
+    else {
+      getUINativeModule().common.setBackground(
+        node, this.value.content, this.value.align, this.value.ignoresLayoutSafeAreaEdges);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.content, this.value.content) ||
+      !isBaseOrResourceEqual(this.stageValue.align, this.value.align) ||
+      !deepCompareArrays(this.stageValue.ignoresLayoutSafeAreaEdges, this.value.ignoresLayoutSafeAreaEdges);
+  }
+}
+BackgroundModifier.identity = Symbol('background');
 class BackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2115,7 +2135,7 @@ class OnAreaChangeModifier extends ModifierWithKey {
     }
   }
 }
-OnSizeChangeModifier.identity = Symbol('onAreaChange');
+OnAreaChangeModifier.identity = Symbol('onAreaChange');
 class OnGestureJudgeBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3339,9 +3359,10 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().common.resetKeyBoardShortCut(node);
-    }
-    else {
+    } else if (this.value.action === undefined) {
       getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+    } else {
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys, this.value.action);
     }
   }
   checkObjectDiff() {
@@ -4144,8 +4165,19 @@ class ArkComponent {
     }
     return this;
   }
-  background(builder, options) {
-    throw new Error('Method not implemented.');
+  background(content, options) {
+    let arkBackground = new ArkBackground();
+    if (typeof content === 'function') {
+      throw new Error('Method not implemented.');
+    } else {
+      arkBackground.content = content;
+    }
+    if (typeof options === 'object') {
+      arkBackground.align = options.align;
+      arkBackground.ignoresLayoutSafeAreaEdges = options.ignoresLayoutSafeAreaEdges;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundModifier.identity, BackgroundModifier, arkBackground);
+    return this;
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
@@ -5109,6 +5141,7 @@ class ArkComponent {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
+    keyboardShortCut.action = action;
     modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }
@@ -5339,7 +5372,7 @@ class GestureHandler {
 class TapGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.TAP_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.count = options.count;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5362,7 +5395,7 @@ class TapGestureHandler extends GestureHandler {
 class LongPressGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.LONG_PRESS_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
@@ -5399,7 +5432,7 @@ class LongPressGestureHandler extends GestureHandler {
 class PanGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PAN_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
@@ -5447,7 +5480,7 @@ class PanGestureHandler extends GestureHandler {
 class SwipeGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.SWIPE_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
@@ -5474,7 +5507,7 @@ class SwipeGestureHandler extends GestureHandler {
 class PinchGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PINCH_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.distance = options.distance;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5515,7 +5548,7 @@ class PinchGestureHandler extends GestureHandler {
 class RotationGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.ROTATION_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.angle = options.angle;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5556,7 +5589,7 @@ class RotationGestureHandler extends GestureHandler {
 class GestureGroupHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.GESTURE_GROUP);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.mode = options.mode;
       this.gestures = options.gestures;
     }
@@ -10172,6 +10205,34 @@ class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey {
 }
 RichEditorEnableHapticFeedbackModifier.identity = Symbol('richEditorEnableHapticFeedback');
 
+class RichEditorEnableAutoSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableAutoSpacing(node);
+    } else {
+      getUINativeModule().richEditor.setEnableAutoSpacing(node, this.value);
+    }
+  }
+}
+RichEditorEnableAutoSpacingModifier.identity = Symbol('richEditorEnableAutoSpacing');
+
+class RichEditorUndoStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetUndoStyle(node);
+    } else {
+      getUINativeModule().richEditor.setUndoStyle(node, this.value);
+    }
+  }
+}
+RichEditorUndoStyleModifier.identity= Symbol('richEditorUndoStyle');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10324,6 +10385,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnableHapticFeedbackModifier.identity, RichEditorEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  enableAutoSpacing(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableAutoSpacingModifier.identity, RichEditorEnableAutoSpacingModifier, enable);
+    return this;
+  }
+  undoStyle(style) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
     return this;
   }
 }
@@ -14112,8 +14181,13 @@ class TextShaderStyleModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().text.resetShaderStyle(node, this.value);
     } else {
-      getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
-        this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      if (this.value.options) {
+        getUINativeModule().text.setShaderStyle(node, this.value.options.center, this.value.options.radius, this.value.options.angle,
+          this.value.options.direction, this.value.options.repeating, this.value.options.colors, this.value.options.color);
+      } else {
+        getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
+          this.value.direction, this.value.repeating, this.value.colors, this.value.color);
+      }
     }
   }
   checkObjectDiff() {
@@ -18997,6 +19071,20 @@ class ArkRegisterNativeEmbedRule {
     );
   }
 }
+class ArkBackground {
+  constructor() {
+    this.content = undefined;
+    this.align = undefined;
+    this.ignoresLayoutSafeAreaEdges = undefined;
+  }
+  isEqual(another) {
+    return (
+      this.content === another.content &&
+      this.align === another.align &&
+      deepCompareArrays(this.ignoresLayoutSafeAreaEdges, another.ignoresLayoutSafeAreaEdges)
+    );
+  }
+}
 class ArkBackgroundBlurStyle {
   constructor() {
     this.blurStyle = undefined;
@@ -19953,6 +20041,18 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another) {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkNavigationToolBarConfiguration {
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) && (this.options.backgroundColor === another.options.backgroundColor) &&
+      (this.options.backgroundBlurStyle === another.options.backgroundBlurStyle) &&
+      (this.options.barStyle === another.options.barStyle);
   }
 }
 
@@ -23508,125 +23608,91 @@ class TextpickerDefaultTextStyleModifier extends ModifierWithKey {
 TextpickerDefaultTextStyleModifier.identity = Symbol('textpickerDefaultTextStyle');
 class TextpickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
-    super(value);
+      super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().textpicker.resetTextStyle(node);
-    }
-    else {
-      getUINativeModule().textpicker.setTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e =
-      (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h =
-      (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+      if (reset) {
+          getUINativeModule().textpicker.resetTextStyle(node);
+      }
+      else {
+          getUINativeModule().textpicker.setTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.minFontSize) !== null && _r !== void 0 ? _r : undefined, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.maxFontSize) !== null && _t !== void 0 ? _t : undefined, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.overflow) !== null && _v !== void 0 ? _v : undefined);
+      }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
-      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
-      _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
-        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
-        _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
-        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
-        _t === void 0 ? void 0 : _t.family);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
+          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
+          return true;
+      }
+      else {
+          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
+              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
+              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
+              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
+              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
+      }
   }
 }
 TextpickerTextStyleModifier.identity = Symbol('textpickerTextStyle');
 class TextpickerSelectedTextStyleModifier extends ModifierWithKey {
   constructor(value) {
-    super(value);
+      super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().textpicker.resetSelectedTextStyle(node);
-    }
-    else {
-      getUINativeModule().textpicker.setSelectedTextStyle(node, (_b =
-        (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null &&
-        _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null ||
-        _c === void 0 ? void 0 : _c.font) === null ||
-        _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-        (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-        _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-        (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-        _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-        (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-        _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+      if (reset) {
+          getUINativeModule().textpicker.resetSelectedTextStyle(node);
+      }
+      else {
+          getUINativeModule().textpicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.minFontSize) !== null && _r !== void 0 ? _r : undefined, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.maxFontSize) !== null && _t !== void 0 ? _t : undefined, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.overflow) !== null && _v !== void 0 ? _v : undefined);
+      }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
-      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
-      _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
-        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
-        _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
-        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
-        _t === void 0 ? void 0 : _t.family);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
+          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
+          return true;
+      }
+      else {
+          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
+              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
+              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
+              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
+              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
+      }
   }
 }
 TextpickerSelectedTextStyleModifier.identity = Symbol('textpickerSelectedTextStyle');
 class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
   constructor(value) {
-    super(value);
+      super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().textpicker.resetDisappearTextStyle(node);
-    }
-    else {
-      getUINativeModule().textpicker.setDisappearTextStyle(node, (_b =
-        (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null &&
-        _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null ||
-        _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null &&
-        _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null ||
-        _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null &&
-        _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null ||
-        _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null &&
-        _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null ||
-        _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null &&
-        _p !== void 0 ? _p : undefined);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+      if (reset) {
+          getUINativeModule().textpicker.resetDisappearTextStyle(node);
+      }
+      else {
+          getUINativeModule().textpicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.minFontSize) !== null && _r !== void 0 ? _r : undefined, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.maxFontSize) !== null && _t !== void 0 ? _t : undefined, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.overflow) !== null && _v !== void 0 ? _v : undefined);
+      }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
-    }
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
+          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
+          return true;
+      }
+      else {
+          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
+              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
+              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
+              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
+              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
+      }
   }
 }
 TextpickerDisappearTextStyleModifier.identity = Symbol('textpickerDisappearTextStyle');
@@ -25017,9 +25083,14 @@ class ArkNavDestinationComponent extends ArkComponent {
     }
     return this;
   }
-  toolbarConfiguration(value) {
+  toolbarConfiguration(value, options) {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, NavDestinationToolBarConfigurationModifier.identity,
-      NavDestinationToolBarConfigurationModifier, value);
+      NavDestinationToolBarConfigurationModifier, configuration);
     return this;
   }
   hideBackButton(value) {
@@ -25190,10 +25261,10 @@ class NavDestinationToolBarConfigurationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navDestination.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navDestination.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff() {
@@ -26267,9 +26338,14 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, value);
     return this;
   }
-  toolbarConfiguration(value) {
+  toolbarConfiguration(value, options) {
+    let configuration = new ArkNavigationToolBarConfiguration();
+    configuration.value = value;
+    if (!isNull(options)) {
+      configuration.options = options;
+    }
     modifierWithKey(this._modifiersWithKeys, ToolBarConfigurationModifier.identity,
-      ToolBarConfigurationModifier, value);
+      ToolBarConfigurationModifier, configuration);
     return this;
   }
   hideToolBar(isHide, animated) {
@@ -26443,10 +26519,10 @@ class ToolBarConfigurationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       getUINativeModule().navigation.resetToolBarConfiguration(node);
     } else {
-      getUINativeModule().navigation.setToolBarConfiguration(node, this.value);
+      getUINativeModule().navigation.setToolBarConfiguration(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff() {
@@ -30765,7 +30841,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   javaScriptProxy(javaScriptProxy) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptProxyModifier.identity, WebJavaScriptProxyModifier, javaScriptProxy);
+    return this;
   }
   password(password) {
     throw new Error('Method not implemented.');
@@ -31911,7 +31988,7 @@ class WebMediaOptionsModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().web.resetMediaOptions(node);
     } else {
-      getUINativeModule().web.setMediaOptions(node, this.value);
+      getUINativeModule().web.setMediaOptions(node, this.value?.resumeInterval, this.value?.audioExclusive);
     }
   }
 }
@@ -32631,6 +32708,21 @@ class WebOnBeforeUnloadModifier extends ModifierWithKey {
   }
 }
 WebOnBeforeUnloadModifier.identity = Symbol('webOnBeforeUnloadModifier');
+
+class WebJavaScriptProxyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetJavaScriptProxy(node);
+    } else {
+      getUINativeModule().web.setJavaScriptProxy(node, this.value.object, this.value.name, this.value.methodList,
+        this.value.controller, this.value?.asyncMethodList, this.value?.permission);
+    }
+  }
+}
+WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

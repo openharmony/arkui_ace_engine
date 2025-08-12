@@ -39,7 +39,8 @@ namespace OHOS::Ace {
 enum class ToggleColorType {
     SELECTED_COLOR,
     SWITCH_POINT_COLOR,
-    UN_SELECTED_COLOR
+    UN_SELECTED_COLOR,
+    BACKGROUND_COLOR
 };
 enum class ToggleDimensionType {
     POINT_RADIUS,

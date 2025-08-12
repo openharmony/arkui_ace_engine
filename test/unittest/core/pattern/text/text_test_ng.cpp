@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -21,10 +22,12 @@
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -173,6 +176,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textModelNG.SetOnDetectResultUpdate(frameNode, std::move(textDetectConfig.onResult));
+    ASSERT_NE(textPattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
 
     FONT_FEATURES_LIST value;
@@ -280,6 +284,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig001, TestSize.Level1)
     textModelNG.SetTextDetectConfig(textDetectConfig);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, "");
     EXPECT_EQ(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, theme->GetTextColor());
@@ -298,6 +303,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig001, TestSize.Level1)
     textDetectConfig.entityDecorationColor = Color::BLACK;
     textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
     textModelNG.SetTextDetectConfig(textDetectConfig);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
     EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
@@ -335,6 +341,7 @@ HWTEST_F(TextTestNg, SetTextDetectConfig002, TestSize.Level1)
     textModelNG.SetTextDetectConfig(frameNode, textDetectConfig);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->textDetectTypes_, TEXT_DETECT_TYPES);
     EXPECT_NE(pattern->dataDetectorAdapter_->onResult_, nullptr);
     EXPECT_EQ(pattern->dataDetectorAdapter_->entityColor_, TEXT_COLOR_VALUE);
@@ -688,7 +695,7 @@ HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. update spanNode content and call TryLinkJump funciton.
-     * jump link: "www.baidu.com"
+     * jump link: "www.baidu.com".
      */
     spanNode->UpdateContent(NORMAL_URL);
     EXPECT_FALSE(textPattern->TryLinkJump(spanItem));
@@ -850,6 +857,22 @@ HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->pManager_->GetParagraphs().size(), 1);
+}
+
+/**
+ * @tc.name: OnModifyDone004
+ * @tc.desc: Test textEffect is not cleared by OnModifyDone .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnModifyDone004, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    ASSERT_NE(pattern->pManager_, nullptr);
+    pattern->textEffect_ = TextEffect::CreateTextEffect();
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->textEffect_, nullptr);
 }
 
 /**
@@ -1133,6 +1156,7 @@ HWTEST_F(TextTestNg, UpdateParagraphForAISpan001, TestSize.Level1)
     std::map<int32_t, AISpan> aiSpanMap;
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     std::u16string textForAI = u"";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
@@ -1210,6 +1234,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanEnd = 3;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -1271,6 +1296,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanEnd = 4;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -1332,6 +1358,7 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan003, TestSize.Level1)
     dragSpanPosition.spanEnd = 20;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
     EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
@@ -1393,6 +1420,7 @@ HWTEST_F(TextTestNg, BuildTextRaceParagraph001, TestSize.Level1)
     rowLayoutAlgorithm->BuildTextRaceParagraph(
         textStyle1, textLayoutProperty, contentConstraint1, AceType::RawPtr(frameNode));
     EXPECT_EQ(rowLayoutAlgorithm->textStyle_, textStyle1);
+    EXPECT_TRUE(textLayoutProperty->GetNeedReCreateParagraphValue(false));
 }
 
 /**
@@ -3207,6 +3235,26 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateTextStyleUsingTheme001
+ * @tc.desc: test CreateTextStyleUsingTheme().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateTextStyleUsingTheme001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto pipeline = textFrameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
+        textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>(), true);
+    EXPECT_EQ(textStyle.GetTextAlign(), TextAlign::CENTER);
+}
+
+/**
  * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
  * @tc.desc: Verify GetFirstHandleInfo
  * @tc.type: FUNC
@@ -3401,6 +3449,16 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
 
     RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
 
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
     ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
     ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
     textSelectOverlay->OnHandleMove(handleRect, true);
@@ -3409,6 +3467,8 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
     textSelectOverlay->OnHandleMove(handleRect, false);
     ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
     ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
+
+    manager->selectOverlayNode_ = nullptr;
 }
 
 /**
@@ -3989,6 +4049,7 @@ HWTEST_F(TextTestNg, TextPattern009, TestSize.Level1)
      * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
      */
     auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
     pattern->ProcessSpanString();
     EXPECT_EQ(pattern->textForDisplay_.length(), 0);

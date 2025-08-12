@@ -491,6 +491,7 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
             if (threshold->IsString() || threshold->IsNumber()) {
                 CalcDimension valueDimension;
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
+                breakpoint->userDefine = true;
                 if (GreatNotEqual(width, valueDimension.Value())) {
                     return breakpoint;
                 }

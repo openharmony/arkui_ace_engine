@@ -25,10 +25,10 @@ interface ListCategories {
 struct Index {
   @State message: string = ' Picker Safe Area Example ';
   private items: ListCategories[] = [
-    {title: 'CalendarPickerExample', url: 'pages/CalendarPicker_safe_area/CalendarPickerExample'},
-    {title: 'DatePickerExample', url: 'pages/DatePicker_safe_area/DatePickerExample'},
-    {title: 'TextPickerExample', url: 'pages/TextPicker_safe_area/TextPickerExample'},
-    {title: 'TimePickerExample', url: 'pages/TimePicker_safe_area/TimePickerExample'},
+    {title: 'DatePickerTest', url: 'pages/DatePickerTest'},
+    {title: 'TimePickerTest', url: 'pages/TimePickerTest'},
+    {title: 'TextPickerTest', url: 'pages/TextPickerTest'},
+    {title: 'CalendarPickerTest', url: 'pages/CalendarPickerTest'},
   ]
 
   build() {
@@ -36,7 +36,7 @@ struct Index {
       List({space: '10vp'}) {
         ForEach(this.items, (item: ListCategories) => {
           ListItem() {
-            Time(item.title).fontSize(16).fontWeight(FontWeight.Bold).onClick(() => {
+            Text(item.title).fontSize(16).fontWeight(FontWeight.Bold).onClick(() => {
               router.pushUrl({url: item.url})
             })
             .padding(12)

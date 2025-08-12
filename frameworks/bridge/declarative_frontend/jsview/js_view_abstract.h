@@ -524,9 +524,11 @@ public:
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void NewLinearGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
     static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void NewRadialGradient(const JSRef<JSObject>& jsObj, NG::Gradient& gradient);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsMotionBlur(const JSCallbackInfo& info);
@@ -872,11 +874,11 @@ public:
     static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
         NG::BorderRadiusProperty& dimension);
     static bool CheckLengthMetrics(const JSRef<JSObject>& object);
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        Color& color, bool state);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
-    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        Color& color, bool state);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,

@@ -2740,6 +2740,18 @@ typedef enum {
      */
     NODE_IMAGE_RESIZABLE,
     /**
+     * @brief Defines the synchronous image loading attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to load the image synchronously. \n
+     *
+     */
+    NODE_IMAGE_SYNC_LOAD = 4012,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -8282,7 +8294,6 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
  * @return 错误码。
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
  *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
- *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
 int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
@@ -8310,7 +8321,6 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index,
     * @param size 数组长度。
     * @return 错误码。
     *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
-    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
     * @since 12
     */
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);

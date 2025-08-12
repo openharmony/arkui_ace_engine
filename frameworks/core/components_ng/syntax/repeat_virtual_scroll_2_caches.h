@@ -274,6 +274,8 @@ private:
      * CacheItem has node, isL1=True
      */
     OptCacheItem CallOnGetRid4Index(IndexType index);
+    OptCacheItem GetNewRid4Index(IndexType index, RIDType rid, RefPtr<UINode>& node4Index);
+    OptCacheItem GetUpdatedRid4Index(IndexType index, RIDType rid);
 
     /**
      * return CacheItem for RID, if it exists

@@ -1757,6 +1757,39 @@ HWTEST_F(SwiperEventTestNg, onScrollStateChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: onScrollStateChanged002
+ * @tc.desc: Test onScrollStateChanged event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, onScrollStateChanged002, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onScrollStateChanged = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    info.SetMainDelta(0.0f);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    HandleDragEnd(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
+}
+
+/**
  * @tc.name: MarginIgnoreBlankDragTest001
  * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
  * @tc.type: FUNC
@@ -2078,5 +2111,58 @@ HWTEST_F(SwiperEventTestNg, FireSelectedEvent001, TestSize.Level1)
      */
     pattern_->FireSelectedEvent(3, 4);
     EXPECT_EQ(pattern_->selectedIndex_, 4);
+}
+
+/**
+ * @tc.name: FireSelectedEvent002
+ * @tc.desc: Test FireSelectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, FireSelectedEvent002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->selectedIndex_ = 2;
+    pattern_->jumpOnChange_ = true;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 2);
+
+    pattern_->jumpOnChange_ = false;
+    pattern_->FireSelectedEvent(3, 4);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 4);
+
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->FireSelectedEvent(3, 3);
+    EXPECT_EQ(pattern_->selectedIndex_, 3);
+}
+
+/**
+ * @tc.name: OnIndexChange002
+ * @tc.desc: Test OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnSelected(std::move(nullptr));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    pattern_->oldIndex_ = 3;
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(3);
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(true);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(true);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
 }
 } // namespace OHOS::Ace::NG

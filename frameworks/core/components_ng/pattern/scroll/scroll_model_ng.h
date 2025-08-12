@@ -61,6 +61,7 @@ public:
     void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjSnapPaginations(
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) override;
+    void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetMaxZoomScale(float scale) override;
     void SetMinZoomScale(float scale) override;
     void SetZoomScale(float scale) override;
@@ -72,6 +73,7 @@ public:
     void SetOnZoomStop(std::function<void()>&& event) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static void SetScrollController(
         FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
@@ -115,6 +117,7 @@ public:
     static void CreateWithResourceObjIntervalSize(FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
     static void CreateWithResourceObjSnapPaginations(FrameNode* frameNode,
         const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMaxZoomScale(FrameNode* frameNode, float scale);
     static float GetMaxZoomScale(FrameNode* frameNode);
     static void SetMinZoomScale(FrameNode* frameNode, float scale);

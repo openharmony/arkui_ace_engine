@@ -123,9 +123,9 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions optio
 }
 void ShowImpl(const Opt_TimePickerDialogOptions* options)
 {
+#ifndef ARKUI_WEARABLE
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_TimePickerDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_TimePickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TimePickerDialogOptions arkOptions = arkOptionsOpt.value();
@@ -171,6 +171,7 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
 #else
     MockTimePickerDialogView::SetData(dialogProps, settingData, buttonInfos, timePickerProp);
     MockTimePickerDialogView::SetCallbacks(dialogEvent, dialogCancelEvent);
+#endif
 #endif
 }
 } // TimePickerDialogAccessor

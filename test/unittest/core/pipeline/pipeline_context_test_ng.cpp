@@ -41,6 +41,8 @@ RefPtr<FrameNode> PipelineContextTestNg::frameNode_ = nullptr;
 RefPtr<CustomNode> PipelineContextTestNg::customNode_ = nullptr;
 RefPtr<PipelineContext> PipelineContextTestNg::context_ = nullptr;
 
+constexpr uint64_t LAST_VSYNC_TIME = 1000;
+
 void PipelineContextTestNg::ResetEventFlag(int32_t testFlag)
 {
     auto flag = context_->eventManager_->GetInstanceId();
@@ -1233,6 +1235,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->FlushTouchEvents();
     EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(context_->touchAccelarate_);
 }
 
 /**
@@ -2219,9 +2222,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg111, TestSize.Level1)
 {
     MouseEvent mouseEvent;
     context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    mouseEvent.targetDisplayId = 10;
     mouseEvent.mockFlushEvent = false;
     context_->UpdateLastMoveEvent(mouseEvent);
     EXPECT_EQ(context_->lastMouseEvent_->isMockWindowTransFlag, false);
+    EXPECT_EQ(context_->lastMouseEvent_->targetDisplayId, 10);
 }
 
 /**
@@ -2540,6 +2545,87 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg126, TestSize.Level1)
 
     // Verify no unexpected side effects
     EXPECT_TRUE(context_->scheduleTasks_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg127
+ * @tc.desc: Test the function UpdateDVSyncTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg127, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    context_->commandTimeUpdate_ = true;
+    context_->DVSyncChangeTime_ = true;
+    context_->lastVSyncTime_ = GetSysTimestamp();
+    std::string abilityName = "test";
+    context_->UpdateDVSyncTime(100, abilityName, 8333333);
+
+    EXPECT_FALSE(context_->commandTimeUpdate_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg128
+ * @tc.desc: Test function UpdateDVSyncTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg128, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    // Minimal state reset
+    uint64_t nanoTimestamp = 0;
+    const std::string& abilityName = "";
+    uint64_t vsyncPeriod = 0;
+    context_->lastVSyncTime_ = LAST_VSYNC_TIME;
+    context_->commandTimeUpdate_ = true;
+    context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    EXPECT_EQ(context_->commandTimeUpdate_, false);
+
+    // Verify no unexpected side effects
+    nanoTimestamp = LAST_VSYNC_TIME;
+    context_->commandTimeUpdate_ = true;
+    context_->lastVSyncTime_ = 0;
+    context_->DVSyncChangeTime_ = 0;
+    context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    EXPECT_EQ(context_->commandTimeUpdate_, false);
+
+    nanoTimestamp = LAST_VSYNC_TIME;
+    context_->commandTimeUpdate_ = true;
+    context_->lastVSyncTime_ = 0;
+    context_->DVSyncChangeTime_ = GetSysTimestamp() + 16666667;
+    context_->dvsyncTimeUseCount_ = 6;
+    context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    EXPECT_EQ(context_->commandTimeUpdate_, false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg129
+ * @tc.desc: Test function UpdateDVSyncTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg129, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+
+    uint64_t nanoTimestamp = LAST_VSYNC_TIME;
+    context_->commandTimeUpdate_ = true;
+    context_->lastVSyncTime_ = 0;
+    uint64_t vsyncPeriod = 8333333;
+    const std::string& abilityName = "";
+    context_->DVSyncChangeTime_ = GetSysTimestamp() + 16666667;
+    context_->dvsyncTimeUseCount_ = 0;
+    context_->dvsyncTimeUpdate_ = true;
+    context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    EXPECT_EQ(context_->commandTimeUpdate_, true);
+    EXPECT_EQ(context_->dvsyncTimeUpdate_, false);
+    context_->UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    EXPECT_EQ(context_->dvsyncTimeUpdate_, false);
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -177,7 +177,7 @@ EventTargetInfoWrapper* GetEventTargetInfoWrapper(
     return wrapper;
 }
 
-void PaesePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
+void ParsePanDirection(napi_env env, napi_value value, PanDirection& panDirection)
 {
     uint32_t typeValue;
     napi_get_value_uint32(env, value, &typeValue);
@@ -693,7 +693,7 @@ static napi_value SetDirection(napi_env env, napi_callback_info info)
     if (argc != PARAM_SIZE_ONE || !GestureObserverListener::MatchValueType(env, argv[PARAM_SIZE_ZERO], napi_number)) {
         panDirection.type = PanDirection::ALL;
     } else {
-        PaesePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
+        ParsePanDirection(env, argv[PARAM_SIZE_ZERO], panDirection);
     }
 
     wrapper->panGestureOption->SetDirection(panDirection);

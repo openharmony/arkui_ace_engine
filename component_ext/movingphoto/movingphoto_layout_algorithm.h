@@ -33,11 +33,11 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     void ChildMeasure(RefPtr<LayoutWrapper> layoutWrapper, SizeF contentSize,
-                     float xHeight, LayoutConstraintF layoutConstraint);
+                     LayoutConstraintF layoutConstraint);
 
 private:
-    void MeasureInRoundXmageMode(LayoutWrapper* layoutWrapper);
-    SizeF GetRoundXmageLayoutOffset(LayoutWrapper* layoutWrapper);
+    void MeasureInXmageMode(LayoutWrapper* layoutWrapper);
+    SizeF GetXmageLayoutOffset(LayoutWrapper* layoutWrapper);
     void ChildMeasureInXmage(RefPtr<LayoutWrapper> childLayoutWrapper, SizeF contentSize, SizeF imageSize,
         SizeF xmageRatio, LayoutConstraintF layoutConstraint);
 

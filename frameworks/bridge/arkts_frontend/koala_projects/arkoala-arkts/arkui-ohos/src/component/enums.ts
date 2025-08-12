@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export enum CheckBoxShape {
     CIRCLE = 0,
@@ -75,7 +75,8 @@ export enum ImageFit {
     END = 12,
     BOTTOM_START = 13,
     BOTTOM = 14,
-    BOTTOM_END = 15
+    BOTTOM_END = 15,
+    MATRIX = 16
 }
 export enum BorderStyle {
     DOTTED = 0,
@@ -103,29 +104,35 @@ export enum TouchType {
     CANCEL = 3,
     Cancel = 3
 }
+export enum InteractionHand {
+    NONE = 0,
+    LEFT = 1,
+    RIGHT = 2
+}
 export enum MouseButton {
-    LEFT = 0,
-    Left = 0,
-    RIGHT = 1,
-    Right = 1,
-    MIDDLE = 2,
-    Middle = 2,
-    BACK = 3,
-    Back = 3,
-    FORWARD = 4,
-    Forward = 4,
-    NONE = 5,
-    None = 5
+    LEFT = 1,
+    Left = 1,
+    RIGHT = 2,
+    Right = 2,
+    MIDDLE = 4,
+    Middle = 4,
+    BACK = 8,
+    Back = 8,
+    FORWARD = 16,
+    Forward = 16,
+    NONE = 0,
+    None = 0
 }
 export enum MouseAction {
-    PRESS = 0,
-    Press = 0,
-    RELEASE = 1,
-    Release = 1,
-    MOVE = 2,
-    Move = 2,
-    HOVER = 3,
-    Hover = 3
+    PRESS = 1,
+    Press = 1,
+    RELEASE = 2,
+    Release = 2,
+    MOVE = 3,
+    Move = 3,
+    HOVER = 4,
+    Hover = 4,
+    CANCEL = 13
 }
 export enum AnimationStatus {
     INITIAL = 0,
@@ -195,7 +202,8 @@ export enum KeySource {
     UNKNOWN = 0,
     Unknown = 0,
     KEYBOARD = 1,
-    Keyboard = 1
+    Keyboard = 1,
+    JOYSTICK = 2
 }
 export enum Edge {
     TOP = 0,
@@ -357,6 +365,10 @@ export enum PixelRoundCalcPolicy {
     NO_FORCE_ROUND = 0,
     FORCE_CEIL = 1,
     FORCE_FLOOR = 2
+}
+export enum PixelRoundMode {
+    PIXEL_ROUND_ON_LAYOUT_FINISH = 0,
+    PIXEL_ROUND_AFTER_MEASURE = 1
 }
 export enum FlexWrap {
     NO_WRAP = 0,
@@ -639,12 +651,21 @@ export enum DialogButtonStyle {
 export enum WordBreak {
     NORMAL = 0,
     BREAK_ALL = 1,
-    BREAK_WORD = 2
+    BREAK_WORD = 2,
+    HYPHENATION = 3
 }
 export enum LineBreakStrategy {
     GREEDY = 0,
     HIGH_QUALITY = 1,
     BALANCED = 2
+}
+export enum IlluminatedType {
+    NONE = 0,
+    BORDER = 1,
+    CONTENT = 2,
+    BORDER_CONTENT = 3,
+    BLOOM_BORDER = 4,
+    BLOOM_BORDER_CONTENT = 5
 }
 export enum EllipsisMode {
     START = 0,
@@ -655,14 +676,6 @@ export type Nullable<T> = T | undefined;
 export enum OptionWidthMode {
     FIT_CONTENT = "fit_content",
     FIT_TRIGGER = "fit_trigger"
-}
-export enum IlluminatedType {
-    NONE = 0,
-    BORDER = 1,
-    CONTENT = 2,
-    BORDER_CONTENT = 3,
-    BLOOM_BORDER = 4,
-    BLOOM_BORDER_CONTENT = 5
 }
 export enum FoldStatus {
     FOLD_STATUS_UNKNOWN = 0,
@@ -712,4 +725,43 @@ export enum HeightBreakpoint {
     HEIGHT_SM = 0,
     HEIGHT_MD = 1,
     HEIGHT_LG = 2
+}
+export enum AxisModel {
+    ABS_X = 0,
+    ABS_Y = 1,
+    ABS_Z = 2,
+    ABS_RZ = 3,
+    ABS_GAS = 4,
+    ABS_BRAKE = 5,
+    ABS_HAT0X = 6,
+    ABS_HAT0Y = 7
+}
+export enum PageFlipMode {
+    CONTINUOUS = 0,
+    SINGLE = 1
+}
+export enum CrownAction {
+    BEGIN = 0,
+    UPDATE = 1,
+    END = 2
+}
+export enum CrownSensitivity {
+    LOW = 0,
+    MEDIUM = 1,
+    HIGH = 2
+}
+export enum AxisAction {
+    NONE = 0,
+    BEGIN = 1,
+    UPDATE = 2,
+    END = 3,
+    CANCEL = 4
+}
+export enum FocusDrawLevel {
+    SELF = 0,
+    TOP = 1
+}
+export enum DividerMode {
+    FLOATING_ABOVE_MENU = 0,
+    EMBEDDED_IN_MENU = 1
 }

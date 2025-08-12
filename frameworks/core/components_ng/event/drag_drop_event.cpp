@@ -34,6 +34,28 @@ constexpr int32_t PREVIEW_LONG_PRESS_RECOGNIZER = 800;
 constexpr int32_t DEFAULT_DRAG_FINGERS = 1;
 constexpr Dimension DEFAULT_DRAG_DISTANCE = 10.0_vp;
 constexpr PanDirection DEFAULT_DRAG_DIRECTION = { PanDirection::ALL };
+
+GestureEvent PostNotifyPanOnActionStart(const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, info);
+    auto newInfo = info;
+    auto globalLocation = info.GetGlobalLocation();
+    auto postEventManager = pipeline->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, info);
+    auto node = postEventManager->GetPostTargetNode();
+    CHECK_NULL_RETURN(node, info);
+    auto offset = node->GetOffsetRelativeToWindow();
+    globalLocation.SetX(globalLocation.GetX() + offset.GetX());
+    globalLocation.SetY(globalLocation.GetY() + offset.GetY());
+    newInfo.SetGlobalLocation(globalLocation);
+    auto screenLocation = info.GetScreenLocation();
+    auto screenOffset = DragDropFuncWrapper::GetFrameNodeOffsetToScreen(node);
+    screenLocation.SetX(screenLocation.GetX() + screenOffset.GetX());
+    screenLocation.SetY(screenLocation.GetY() + screenOffset.GetY());
+    newInfo.SetScreenLocation(screenLocation);
+    return newInfo;
+}
 } // namespace
 
 DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
@@ -71,7 +93,12 @@ void DragDropEventActuator::InitPanAction()
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
             CHECK_NULL_VOID(handler);
-            handler->NotifyPanOnActionStart(info);
+            if (!info.GetPassThrough()) {
+                handler->NotifyPanOnActionStart(info);
+                return;
+            }
+            auto newInfo = PostNotifyPanOnActionStart(info);
+            handler->NotifyPanOnActionStart(newInfo);
         });
     panRecognizer_->SetOnActionUpdate(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {

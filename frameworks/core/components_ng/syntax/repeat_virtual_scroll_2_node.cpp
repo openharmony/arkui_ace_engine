@@ -153,27 +153,11 @@ bool RepeatVirtualScroll2Node::CheckNode4IndexInL1(int32_t index, int32_t nStart
  *
  * possible scenarios (only one repeat in scroll container):
  * - scenario 1: List/Swiper-no-Loop
- *   - 1.1 screen: [0 1 2] 3 4 5.., DoSetActiveChildRange params: (0,2,0,2), nStart&nEnd: (0,4)
- *   - 1.2 screen: ..1 2 [3 4 5] 6 7, DoSetActiveChildRange params: (3,5,2,2), nStart&nEnd: (1,7)
- *   - 1.3 screen: ..5 6 [7 8 9], DoSetActiveChildRange params: (7,9,2,0), nStart&nEnd: (5,9)
  * - scenario 2: Grid/WaterFlow
- *   - 2.1 screen: [0 1 2] 3 4 5.., DoSetActiveChildRange params: (0,2,2,2), nStart&nEnd: (0,4)
- *   - 2.2 screen: ..1 2 [3 4 5] 6 7, DoSetActiveChildRange params: (3,5,2,2), nStart&nEnd: (1,7)
- *   - 2.3 screen: ..5 6 [7 8 9], DoSetActiveChildRange params: (7,9,2,2), nStart&nEnd: (5,9)
  * - scenario 3: Swiper-Loop
- *   - 3.1 screen: ..8 9 [0 1 2] 3 4.., DoSetActiveChildRange params: (0,2,2,2), nStart&nEnd: (-2,4)
- *   - 3.2 screen: ..7 8 [9 0 1] 2 3.., DoSetActiveChildRange params: (9,1,2,2), nStart&nEnd: (7,3)
- *   - 3.3 screen: ..5 6 [7 8 9] 0 1.., DoSetActiveChildRange params: (8,2,2,2), nStart&nEnd: (5,11)
- *   - 3.4 screen(overlapped): 2 [3 0] 1, DoSetActiveChildRange params: (3,0,2,2), nStart&nEnd: (2,1)
  *
  * possible scenarios (multiple components in scroll container, X indicates a non-repeat child):
  * - scenario 4: List/Grid/WaterFlow/Swiper-no-Loop
- *   - 4.1 screen: ..[X X 0 1 2] 3 4.., DoSetActiveChildRange params: (-2,3,2,2), nStart&nEnd: (0,4)
- *   - 4.2 screen: ..[X X X] 0 1 2.., DoSetActiveChildRange params: (-5,-1,2,2), nStart&nEnd: (0,1)
- *   - 4.3 screen: ..[X X X] X X 0 1.., DoSetActiveChildRange params: (-5,-3,2,2), nStart&nEnd: (NaN)
- *   - 4.4 screen: ..0 1 [2 3 4 X X].., DoSetActiveChildRange params: (2,6,2,2), nStart&nEnd: (0,4)
- *   - 4.5 screen: ..0 1 [X X X].., DoSetActiveChildRange params: (2,5,2,2), nStart&nEnd: (0,1)
- *   - 4.6 screen: ..0 1 X X [X X X].., DoSetActiveChildRange params: (4,6,2,2), nStart&nEnd: (NaN)
  * - scenario 5: Swiper-Loop. Currently it isn't allowed to be used.
  */
 ActiveRangeType RepeatVirtualScroll2Node::CheckActiveRange(

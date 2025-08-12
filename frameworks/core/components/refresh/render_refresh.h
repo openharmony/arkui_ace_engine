@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 
 class RenderRefresh : public RenderNode {
-    DECLARE_ACE_TYPE(RenderRefresh, RenderNode)
+    DECLARE_ACE_TYPE(RenderRefresh, RenderNode);
 
 public:
     RenderRefresh();

@@ -53,6 +53,9 @@ class ObserveV2 {
   // meta data about decorated variable inside prototype
   public static readonly V2_DECO_META = Symbol('__v2_deco_meta__');
 
+  // meta data about decorated accessor and method: @Computed and @Monitor
+  public static readonly V2_DECO_METHOD_META = Symbol('__v2_deco_method_meta__');
+
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
   public static readonly MONITOR_REFS = Symbol('___monitor_refs_');
@@ -93,6 +96,7 @@ class ObserveV2 {
   // Queue of tasks to run in next idle period (used for optimization)
   public idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
     Object.assign(Array(1000).fill([]), { first: 0, end: 0 });
+  public static readonly idleTasksInitLength = 1000;
 
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
@@ -107,7 +111,6 @@ class ObserveV2 {
   // @Monitor id
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
-
   // used for Monitor API
   // only store the MonitorV2 id, not the path id
   // to make sure the callback function will be executed only once
@@ -217,6 +220,9 @@ class ObserveV2 {
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
     if (this.idleTasks_) {
+      if (this.idleTasks_.end - this.idleTasks_.first > ObserveV2.idleTasksInitLength) {
+        ObserveV2.getObserve().runIdleTasks();
+      }
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {
       this.clearBindingInternal(id);
@@ -280,13 +286,14 @@ class ObserveV2 {
       delete this.idleTasks_[this.idleTasks_.first];
       this.idleTasks_.first++;
       // ensure that there is no accumulation in idleTask leading to oom
-      if (this.idleTasks_.end - this.idleTasks_.first < 1000 && this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
+      if (this.idleTasks_.end - this.idleTasks_.first < ObserveV2.idleTasksInitLength &&
+        this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
         return;
       }
     }
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
-    this.idleTasks_.length = 1000;
+    this.idleTasks_.length = ObserveV2.idleTasksInitLength;
   }
 
   /**
@@ -746,6 +753,46 @@ class ObserveV2 {
    * three nested loops, means:
    * process @Computed until no more @Computed need update
    * process @Monitor until no more @Computed and @Monitor
+   * process UINode update until no more @Computed and @Monitor and UINode rerender
+   *
+   * @param updateUISynchronously should be set to true if called during VSYNC only
+   *
+   */
+
+  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
+    aceDebugTrace.begin('updateDirty2');
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
+    // obtain and unregister the removed elmtIds
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+
+    // priority order of processing:
+    // 1- update computed properties until no more need computed props update
+    // 2- update monitors until no more monitors and no more computed props
+    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+    // FIXME prevent infinite loops
+    do {
+      this.updateComputedAndMonitors();
+
+      if (this.elmtIdsChanged_.size) {
+        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
+        this.elmtIdsChanged_ = new Set<number>();
+        updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
+      }
+    } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+
+    aceDebugTrace.end();
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
+  }
+
+  /**
+   * execute /update in this order
+   * - @Computed variables
+   * - @Monitor functions
+   * - UINode re-render
+   * three nested loops, means:
+   * process @Computed until no more @Computed need update
+   * process @Monitor until no more @Computed and @Monitor
   */
   private updateComputedAndMonitors(): void {
     do {
@@ -786,46 +833,6 @@ class ObserveV2 {
       }
     } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size +
     this.computedPropIdsChanged_.size + this.monitorIdsChangedForAddMonitor_.size + this.monitorFuncsToRun_.size > 0);
-  }
-
-  /**
-   * execute /update in this order
-   * - @Computed variables
-   * - @Monitor functions
-   * - UINode re-render
-   * three nested loops, means:
-   * process @Computed until no more @Computed need update
-   * process @Monitor until no more @Computed and @Monitor
-   * process UINode update until no more @Computed and @Monitor and UINode rerender
-   *
-   * @param updateUISynchronously should be set to true if called during VSYNC only
-   *
-   */
-
-  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
-    aceDebugTrace.begin('updateDirty2');
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
-    // obtain and unregister the removed elmtIds
-    UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-
-    // priority order of processing:
-    // 1- update computed properties until no more need computed props update
-    // 2- update monitors until no more monitors and no more computed props
-    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
-    // FIXME prevent infinite loops
-    do {
-      this.updateComputedAndMonitors();
-
-      if (this.elmtIdsChanged_.size) {
-        const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
-        this.elmtIdsChanged_ = new Set<number>();
-        updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
-      }
-    } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
-
-    aceDebugTrace.end();
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
@@ -1104,6 +1111,13 @@ class ObserveV2 {
         // store a reference inside owningObject
         // thereby ComputedV2 will share lifespan as owning @ComponentV2 or @ObservedV2
         // remember: id2cmp only has a WeakRef to ComputedV2 obj
+        const existingComputed = refs[computedPropertyName];
+        if (existingComputed && existingComputed instanceof ComputedV2) {
+          // current computed will be override, and will be GC soon
+          // to avoid the Computed be triggered anymore, invalidate it
+          this.clearBinding(existingComputed.getComputedId());
+          stateMgmtConsole.warn(`Check compatibility, ${owningObjectName} has @Computed ${computedPropertyName} and create ${owningObject?.constructor?.name} instance`);
+        }
         refs[computedPropertyName] = computed;
       });
     }
@@ -1178,9 +1192,10 @@ class ObserveV2 {
 
   /**
    * Helper function to add meta data about decorator to ViewPU or ViewV2
-   * @param proto prototype object of application class derived from  ViewPU or ViewV2
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2 or `@ObservedV2` class
    * @param varName decorated variable
-   * @param deco '@Local', '@Event', etc 
+   * @param deco '@Local', '@Event', etc
+   *              Excludes `@Computed` and `@Monitor`
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
@@ -1195,8 +1210,25 @@ class ObserveV2 {
     Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
-    }
-    );
+    });
+  }
+
+    /**
+   * Helper function to add meta data about for `@Computed` and `@Monitor`
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2 or `@ObservedV2` class
+   * @param varName decorated variable
+   * @param deco `@Computed` and `@Monitor`
+   */
+  public static addMethodDecoMeta(proto: Object, varName: string, deco: string): void {
+    // add decorator meta data
+    const meta = proto[ObserveV2.V2_DECO_METHOD_META] ??= {};
+    meta[varName] = {};
+    meta[varName].deco = deco;
+
+    Reflect.defineProperty(proto, 'isViewV2', {
+      get() { return true; },
+      enumerable: false
+    });
   }
 
 
@@ -1245,11 +1277,16 @@ class ObserveV2 {
    */
   public getDecoratorInfo(target: object, attrName: string): string {
     const meta = target[ObserveV2.V2_DECO_META];
-    if (!meta) {
+    const metaMethod = target[ObserveV2.V2_DECO_METHOD_META];
+    const decorator = meta?.[attrName] ?? metaMethod?.[attrName];
+    return this.parseDecorator(decorator);
+  }
+
+  public parseDecorator(decorator: any): string {
+    if (!decorator) {
       return '';
     }
-    const decorator = meta[attrName];
-    if (!decorator) {
+    if (typeof decorator !== 'object') {
       return '';
     }
     let decoratorInfo: string = '';
@@ -1315,6 +1352,6 @@ const trackInternal = (
 }; // trackInternal
 
 // used to manually mark dirty v2 before animateTo
-function __UpdateDirty2ForAnimateTo__V2_Change_Observation(): void {
+function __updateDirty2Immediately_V2_Change_Observation(): void {
   ObserveV2.getObserve().updateDirty2();
 }

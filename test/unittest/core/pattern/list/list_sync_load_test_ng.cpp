@@ -78,7 +78,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad001, TestSize.Level1)
      * @tc.steps: step1. Flush next frame
      * @tc.expected: List load 2 item in 2th frame
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
     FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->itemPosition_.size(), 4);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);
@@ -109,7 +109,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad002, TestSize.Level1)
      * @tc.steps: step1. Flush next frame
      * @tc.expected: List load 2 item in 2th frame
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
     FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->itemPosition_.size(), 4);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);

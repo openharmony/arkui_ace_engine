@@ -43,9 +43,13 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     }
     // capture active props in animation
     std::vector<RefPtr<MockImplicitAnimation>> res;
-    for (const auto& prop : activeProps_) {
+    auto props = std::move(activeProps_);
+    for (const auto& prop : props) {
         auto anim = propToAnimation_[prop].Upgrade();
         if (anim) {
+            if (runningVersion_ > Version::V0 && !anim->Finished()) {
+                anim->End(); // call previous animation's end callback
+            }
             // update existing animation instead
             anim->Update(params_.callbacks, ticks_);
             continue;
@@ -54,7 +58,6 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
         propToAnimation_[prop] = res.back();
         animations_.emplace_back(res.back());
     }
-    activeProps_.clear();
     return res;
 }
 

@@ -1035,6 +1035,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan001, TestSize
     ASSERT_NE(pattern, nullptr);
     AISpan span1 = { 10, 20, "example content1", TextDataDetectType::EMAIL };
     AISpan span2 = { 101, 20, "example content2", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -1061,6 +1062,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan002, TestSize
     ASSERT_NE(pattern, nullptr);
     AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
     AISpan span2 = { 10, 20, "example content2", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -1084,6 +1086,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan003, TestSize
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
     EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
@@ -1106,6 +1109,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan004, TestSize
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     AISpan span1 = { 40, 60, "example content1", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -1129,6 +1133,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan005, TestSize
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     AISpan span1 = { 50, 54, "example content", TextDataDetectType::EMAIL };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -1391,6 +1396,12 @@ HWTEST_F(TextTestEightNg, GetLayoutCalPolicy, TestSize.Level1)
     EXPECT_EQ(len, 1080.0f);
     len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, false);
     EXPECT_EQ(len, 2048.0f);
+    constraint.maxSize = SizeF(1024.0f, 2048.0f);
+    constraint.parentIdealSize.Reset();
+    len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, true);
+    EXPECT_EQ(len, 1024.0f);
+    len = TextBase::GetConstraintMaxLength(AceType::RawPtr(layoutWrapper), constraint, false);
+    EXPECT_EQ(len, 2048.0f);
 }
 /**
  * @tc.name: InitAiSelection001
@@ -1409,6 +1420,7 @@ HWTEST_F(TextTestEightNg, InitAiSelection001, TestSize.Level1)
     AISpan span1 = { 0, 20, "example content1", TextDataDetectType::EMAIL };           // 第一个 span
     AISpan span2 = { 101, 120, "example content2", TextDataDetectType::PHONE_NUMBER }; // 第二个 span
     AISpan span3 = { 120, 125, "example content3", TextDataDetectType::EMAIL };        // 第三个 span
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(101, span2));
 
@@ -1460,6 +1472,7 @@ HWTEST_F(TextTestEightNg, InitAiSelection002, TestSize.Level1)
 
     // 3. 初始化AI检测数据
     AISpan testSpan = { 30, 50, "test content", TextDataDetectType::PHONE_NUMBER };
+    ASSERT_NE(pattern->GetDataDetectorAdapter(), nullptr);
     pattern->dataDetectorAdapter_->aiSpanMap_.emplace(30, testSpan);
     pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
     pattern->textDetectEnable_ = true;

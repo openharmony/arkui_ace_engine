@@ -19,7 +19,6 @@ import { WatchFunc, WatchFuncType } from './decoratorWatch';
 import { BackingValue } from '../base/backingValue';
 import { propDeepCopy } from '@koalaui/common';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
-import { requestFrame } from "../tools/requestFrame";
 
 /** 
 * implementation of V1 @Prop
@@ -95,7 +94,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.__backing.value = newValue;
             this.meta_.fireChange();
             this.execWatchFuncs();
-            requestFrame();
         }
     }
 

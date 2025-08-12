@@ -67,6 +67,9 @@ private:
         const SnapshotParam& param);
     static void BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
         const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param);
+    static void SetRSUIContext(
+        const RefPtr<FrameNode>& frameNode, const std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
+    static std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<PipelineContext>& pipeline);
 
     WeakPtr<FrameNode> node_;
 };

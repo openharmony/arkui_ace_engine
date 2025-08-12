@@ -32,6 +32,7 @@ build_component_ng("web_pattern_ng") {
       "touch_event_listener.cpp",
       "transitional_node_info.cpp",
       "web_accessibility_child_tree_callback.cpp",
+      "web_accessibility_event_report.cpp",
       "web_accessibility_property.cpp",
       "web_accessibility_session_adapter.cpp",
       "web_content_modifier.cpp",
@@ -42,6 +43,11 @@ build_component_ng("web_pattern_ng") {
       "web_paint_method.cpp",
       "web_pattern.cpp",
       "web_select_overlay.cpp",
+    ]
+    sources += [
+      "ani/richtext_model_static.cpp",
+      "ani/web_model_static.cpp",
+      "ani/web_pattern_static.cpp",
     ]
 
     external_deps = [

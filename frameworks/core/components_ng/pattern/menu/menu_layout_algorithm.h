@@ -113,6 +113,7 @@ protected:
     float GetMenuBottomPositionY(const RefPtr<FrameNode>& menu);
     bool isContainerModal(const RefPtr<FrameNode>& node);
     float GetContainerModalOffsetY(const RefPtr<FrameNode>& node);
+    float CalcVerticalPosition(const SizeF& size);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.
@@ -372,6 +373,8 @@ private:
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
+
+    std::optional<OffsetF> anchorPosition_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

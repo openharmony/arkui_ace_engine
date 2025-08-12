@@ -52,8 +52,8 @@ public:
 
     double GetDouble(uint32_t resId) override
     {
-        double data = 0.0f;
-        return GetMockResourceData(resId, data) ? data : 0;
+        double data = 0.0;
+        return GetMockResourceData(resId, data) ? data : 0.0;
     }
 
     int32_t GetInt(uint32_t resId) override

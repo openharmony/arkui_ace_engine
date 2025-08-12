@@ -221,6 +221,7 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest003, TestSize.Level1)
      * @tc.expected: step3. Call BuilderNodeFunc with "__deleteBuilderNode__".
      */
     std::list<RefPtr<NG::UINode>> nodes;
+    BuilderUtils::ClearChildInBuilderContainer(UNIQUED_ID_OF_TEST_NODE, nodes);
     BuilderUtils::GetBuilderNodes(firstNode, nodes);
     EXPECT_EQ(nodes.size(), 2);
     EXPECT_CALL(*frontend, BuilderNodeFunc("__deleteBuilderNode__", _)).Times(1);
@@ -248,6 +249,61 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest003, TestSize.Level1)
      * @tc.steps: step5. Call AddBuilderToParent or RemoveBuilderFromParent with C Node.
      */
     secondedNode->setIsCNode(true);
+    EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNode__", _)).Times(0);
+    EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNodeToBuilder__", _)).Times(0);
+    BuilderUtils::AddBuilderToParent(secondedNode, thirdNode);
+    BuilderUtils::AddBuilderToParent(nullptr, thirdNode);
+    BuilderUtils::AddBuilderToParent(nullptr, nullptr);
+    BuilderUtils::AddBuilderToParent(secondedNode, nullptr);
+
+    EXPECT_CALL(*frontend, BuilderNodeFunc("__deleteBuilderNodeFromBuilder__", _)).Times(0);
+    EXPECT_CALL(*frontend, BuilderNodeFunc("__deleteBuilderNode__", _)).Times(0);
+    BuilderUtils::RemoveBuilderFromParent(secondedNode, thirdNode);
+    BuilderUtils::RemoveBuilderFromParent(nullptr, thirdNode);
+    BuilderUtils::RemoveBuilderFromParent(nullptr, nullptr);
+    BuilderUtils::RemoveBuilderFromParent(secondedNode, nullptr);
+}
+
+/**
+ * @tc.name: BuilderUtilsTest004
+ * @tc.desc: Test when the Tree does not contains valid parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BuilderUtilsTest, BuilderUtilsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some UINode. And Set Second Node as BuilderRootNode;
+     * @tc.expected: step1. The return value is not null.
+     */
+    auto firstNode = NG::FrameNode::GetOrCreateFrameNode(
+        TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    EXPECT_NE(firstNode, nullptr);
+    auto secondedNode = NG::FrameNode::GetOrCreateFrameNode(
+        TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    EXPECT_NE(secondedNode, nullptr);
+    auto thirdNode = NG::FrameNode::GetOrCreateFrameNode(
+        TEST_NODE_TAG, UNIQUED_ID_OF_TEST_NODE++, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
+    /**
+     * @tc.steps: step2. Make a tree by the previous Node.
+     *├─ firstNode
+     *│ ├─ secondedNode
+     *│ │  └─ thirdNode (true)
+     */
+    firstNode->AddChild(secondedNode);
+    secondedNode->AddChild(thirdNode);
+    thirdNode->SetJsBuilderNodeId(secondedNode->GetId());
+
+    auto context = AceType::MakeRefPtr<NG::MockPipelineContext>();
+    EXPECT_NE(context, nullptr);
+    firstNode->context_ = AceType::RawPtr(context);
+    secondedNode->context_ = AceType::RawPtr(context);
+    thirdNode->context_ = AceType::RawPtr(context);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context->weakFrontend_ = AceType::WeakClaim(AceType::RawPtr(frontend));
+
+    /**
+     * @tc.steps: step3. Call AddBuilderToParent or RemoveBuilderFromParent without valid parent.
+     */
     EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNode__", _)).Times(0);
     EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNodeToBuilder__", _)).Times(0);
     BuilderUtils::AddBuilderToParent(secondedNode, thirdNode);

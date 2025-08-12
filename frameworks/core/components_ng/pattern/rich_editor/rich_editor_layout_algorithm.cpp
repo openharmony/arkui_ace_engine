@@ -29,7 +29,7 @@ constexpr int32_t CHILDREN_SIZE = 1;
 namespace OHOS::Ace::NG {
 
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans,
-    RichEditorParagraphManager* paragraphs, LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
+    RichEditorParagraphManager* paragraphs, LRUMap<uint64_t, RefPtr<Paragraph>>* paraMapPtr,
     std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder, const AISpanLayoutInfo& aiSpanLayoutInfo)
     : allSpans_(spans), pManager_(paragraphs), paraMapPtr_(paraMapPtr), styleManager_(styleManager),
     needShowPlaceholder_(needShowPlaceholder)
@@ -138,15 +138,22 @@ void RichEditorLayoutAlgorithm::HandleAISpan(
     }
 }
 
+inline uint64_t RichEditorLayoutAlgorithm::Hash(uint64_t hash, const RefPtr<SpanItem>& span)
+{
+    constexpr uint64_t MAGIC_NUMBER = 0x9e3779b9;
+    constexpr int32_t LEFT_SHIFT = 6;
+    constexpr int32_t RIGHT_SHIFT = 2;
+    return hash ^ (static_cast<uint64_t>(span->nodeId_) + MAGIC_NUMBER + (hash << LEFT_SHIFT) + (hash >> RIGHT_SHIFT));
+}
+
 void RichEditorLayoutAlgorithm::HandleParagraphCache()
 {
     CHECK_NULL_VOID(paraMapPtr_);
     for (const auto& group : spans_) {
-        std::uintptr_t hash = 0;
+        uint64_t hash = 0;
         bool needReLayout = false;
         for (const auto& child : group) {
-            std::uintptr_t intValue = reinterpret_cast<std::uintptr_t>(RawPtr(child));
-            hash ^= intValue;
+            hash = Hash(hash, child);
             needReLayout |= child->needReLayout;
         }
         if (needReLayout) {
@@ -155,11 +162,11 @@ void RichEditorLayoutAlgorithm::HandleParagraphCache()
     }
 }
 
-std::uintptr_t RichEditorLayoutAlgorithm::Hash(const std::list<RefPtr<SpanItem>>& spanGroup)
+uint64_t RichEditorLayoutAlgorithm::Hash(const std::list<RefPtr<SpanItem>>& spanGroup)
 {
-    std::uintptr_t hash = 0;
+    uint64_t hash = 0;
     for (const auto& child : spanGroup) {
-        hash ^= reinterpret_cast<std::uintptr_t>(RawPtr(child));
+        hash = Hash(hash, child);
     }
     return hash;
 }
@@ -171,7 +178,8 @@ RefPtr<Paragraph> RichEditorLayoutAlgorithm::GetOrCreateParagraph(const std::lis
         useParagraphCache_ = false;
         return Paragraph::CreateRichEditorParagraph(paraStyle, FontCollection::Current());
     }
-    auto hash = Hash(group);
+    uint64_t hash = Hash(group);
+    paragraphKeySet_.insert(hash);
     auto it = paraMapPtr_->Get(hash);
     bool findCache = it != paraMapPtr_->End() && it->second != nullptr;
     bool directionChanged = findCache && it->second->GetParagraphStyle().direction != paraStyle.direction;
@@ -294,6 +302,15 @@ void RichEditorLayoutAlgorithm::UpdateConstraintByLayoutPolicy(
     IF_TRUE(finalSize.Height().has_value(), constraint.maxSize.SetHeight(finalSize.Height().value()));
 }
 
+void RichEditorLayoutAlgorithm::HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize)
+{
+    CHECK_NULL_VOID(layoutWrapper && allSpans_.empty());
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_VOID(pattern);
+    float minWidth = std::ceil(pattern->GetCaretWidth());
+    textSize.SetWidth(std::max(textSize.Width(), minWidth));
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -303,6 +320,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     auto optionalTextSize = MeasureContentSize(contentConstraint, layoutWrapper);
     CHECK_NULL_RETURN(optionalTextSize.has_value(), {});
     auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
+    HandleTextSizeWhenEmpty(layoutWrapper, optionalTextSize.value());
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
     CHECK_NULL_RETURN(res.IsNonNegative(), {});
@@ -319,10 +337,15 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     UpdateMaxSizeByLayoutPolicy(contentConstraint, layoutWrapper, maxSize);
     cacheHitCount_ = 0;
+    paragraphKeySet_.clear();
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
     }
     CHECK_NULL_RETURN(paragraphManager_, false);
+    if (paragraphKeySet_.size() != spans_.size()) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "paragraph hash collision, %{public}zu, %{public}zu",
+            paragraphKeySet_.size(), spans_.size());
+    }
     AceScopedTrace scopedTrace("LayoutParagraph[cacheHit=%d][hitRate=%.4f]",
         cacheHitCount_, (float) cacheHitCount_ / spans_.size());
     auto& paragraphInfo = paragraphManager_->GetParagraphs();
@@ -514,8 +537,6 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
-    CHECK_NULL_VOID(calcLayoutConstraint);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint.has_value());
     const auto& percentReference = layoutConstraint->percentReference;
@@ -526,8 +547,8 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
     auto contentSize = content->GetRect().GetSize();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentSize);
-    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize), calcLayoutConstraint,
-        percentReference);
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize),
+        layoutProperty->GetCalcLayoutConstraint(), percentReference);
     bool widthAdaptive = layoutPolicy->IsWidthAdaptive() && fixIdealSize.Width().has_value();
     bool heightAdaptive = layoutPolicy->IsHeightAdaptive() && fixIdealSize.Height().has_value();
     IF_TRUE(widthAdaptive, frameSize.SetWidth(fixIdealSize.Width().value()));

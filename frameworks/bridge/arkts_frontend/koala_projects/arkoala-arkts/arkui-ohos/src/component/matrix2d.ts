@@ -16,14 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { LengthMetricsUnit } from "../Graphics"
+import { LengthMetricsUnit } from "./../Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 export class Matrix2DInternal {
     public static fromPtr(ptr: KPointer): Matrix2D {
         const obj : Matrix2D = new Matrix2D()
@@ -126,7 +126,7 @@ export class Matrix2D implements MaterializedBase {
         const sy_casted = sy as (number | undefined)
         return this.scale_serialize(sx_casted, sy_casted)
     }
-    private getScaleX(): number {
+    private getScaleX(): number | undefined {
         return this.getScaleX_serialize()
     }
     private setScaleX(scaleX: number): void {
@@ -134,7 +134,7 @@ export class Matrix2D implements MaterializedBase {
         this.setScaleX_serialize(scaleX_casted)
         return
     }
-    private getRotateY(): number {
+    private getRotateY(): number | undefined {
         return this.getRotateY_serialize()
     }
     private setRotateY(rotateY: number): void {
@@ -142,7 +142,7 @@ export class Matrix2D implements MaterializedBase {
         this.setRotateY_serialize(rotateY_casted)
         return
     }
-    private getRotateX(): number {
+    private getRotateX(): number | undefined {
         return this.getRotateX_serialize()
     }
     private setRotateX(rotateX: number): void {
@@ -150,7 +150,7 @@ export class Matrix2D implements MaterializedBase {
         this.setRotateX_serialize(rotateX_casted)
         return
     }
-    private getScaleY(): number {
+    private getScaleY(): number | undefined {
         return this.getScaleY_serialize()
     }
     private setScaleY(scaleY: number): void {
@@ -158,7 +158,7 @@ export class Matrix2D implements MaterializedBase {
         this.setScaleY_serialize(scaleY_casted)
         return
     }
-    private getTranslateX(): number {
+    private getTranslateX(): number | undefined {
         return this.getTranslateX_serialize()
     }
     private setTranslateX(translateX: number): void {
@@ -166,7 +166,7 @@ export class Matrix2D implements MaterializedBase {
         this.setTranslateX_serialize(translateX_casted)
         return
     }
-    private getTranslateY(): number {
+    private getTranslateY(): number | undefined {
         return this.getTranslateY_serialize()
     }
     private setTranslateY(translateY: number): void {
@@ -282,44 +282,44 @@ export class Matrix2D implements MaterializedBase {
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    private getScaleX_serialize(): number {
+    private getScaleX_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getScaleX(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setScaleX_serialize(scaleX: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setScaleX(this.peer!.ptr, scaleX)
     }
-    private getRotateY_serialize(): number {
+    private getRotateY_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getRotateY(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setRotateY_serialize(rotateY: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setRotateY(this.peer!.ptr, rotateY)
     }
-    private getRotateX_serialize(): number {
+    private getRotateX_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getRotateX(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setRotateX_serialize(rotateX: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setRotateX(this.peer!.ptr, rotateX)
     }
-    private getScaleY_serialize(): number {
+    private getScaleY_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getScaleY(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setScaleY_serialize(scaleY: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setScaleY(this.peer!.ptr, scaleY)
     }
-    private getTranslateX_serialize(): number {
+    private getTranslateX_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getTranslateX(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setTranslateX_serialize(translateX: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setTranslateX(this.peer!.ptr, translateX)
     }
-    private getTranslateY_serialize(): number {
+    private getTranslateY_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getTranslateY(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setTranslateY_serialize(translateY: number): void {
         ArkUIGeneratedNativeModule._Matrix2D_setTranslateY(this.peer!.ptr, translateY)

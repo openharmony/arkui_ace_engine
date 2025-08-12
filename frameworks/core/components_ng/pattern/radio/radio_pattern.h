@@ -192,10 +192,6 @@ public:
         return true;
     }
 
-    bool isEqualWidthAndHeight() override
-    {
-        return true;
-    }
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
     void SetUncheckedBorderColorByJSRadioTheme(bool flag)
@@ -217,18 +213,19 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
     void OnClick();
-    CalcSize GetChildContentSize();
-    void InitializeParam(
-        Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding);
+    CalcSize GetChildContentSize(const RefPtr<RadioTheme>& radioTheme);
     void LoadBuilder();
     void SetBuilderState();
-    void UpdateIndicatorType();
+    void UpdateIndicatorType(bool checkValue);
     void UpdateState();
     void UpdateGroupCheckStatus(
         const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check);
@@ -247,6 +244,7 @@ private:
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
     bool OnKeyEvent(const KeyEvent& event);
+    void UpdateGroupStatus(FrameNode* frameNode);
 
     void ImageNodeCreate();
     void startEnterAnimation();
@@ -257,7 +255,7 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
-    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
+    ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator, const RefPtr<RadioTheme>& radioTheme);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
     void InitDefaultMargin();

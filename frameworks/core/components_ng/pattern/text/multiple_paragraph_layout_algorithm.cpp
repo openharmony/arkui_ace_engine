@@ -85,6 +85,12 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    if (textLayoutProperty->HasFontForegroudGradiantColor()) {
+        textStyle.SetFontForegroudGradiantColor(textLayoutProperty->GetFontForegroudGradiantColor());
+    } else {
+        textStyle.SetFontForegroudGradiantColor(textTheme->GetTextStyle().GetFontForegroudGradiantColor());
+    }
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -99,6 +105,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         fontFamilies = textLayoutProperty->GetFontFamilyValue(defaultFontFamily);
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
@@ -174,7 +181,7 @@ std::optional<OHOS::Ace::Gradient> MultipleParagraphLayoutAlgorithm::ToGradient(
             retGradient.GetRadialGradient().radialVerticalSize = ToAnimatableDimension(radialVerticalSize.value());
         }
         auto radialHorizontalSize = gradient.GetRadialGradient()->radialHorizontalSize;
-        if (radialVerticalSize.has_value()) {
+        if (radialHorizontalSize.has_value()) {
             retGradient.GetRadialGradient().radialHorizontalSize = ToAnimatableDimension(radialHorizontalSize.value());
         }
     }
@@ -219,12 +226,20 @@ void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& tex
     }
 }
 
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
+{
+    if (!isSymbol) {
+        return;
+    }
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
+}
+
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-    MeasureWithFixAtIdealSize(layoutWrapper);
-    MeasureWithMatchParent(layoutWrapper);
+    MeasureWidthLayoutCalPolicy(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -952,68 +967,5 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
-}
-
-void MultipleParagraphLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
-    if (widthPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE && heightPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
-        return;
-    }
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto& content = geometryNode->GetContent();
-    CHECK_NULL_VOID(content);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto contentSize = content->GetRect().GetSize();
-    AddPaddingToSize(padding, contentSize);
-    OptionalSizeF frameSize;
-    frameSize.UpdateIllegalSizeWithCheck(contentSize);
-    frameSize = UpdateOptionSizeByCalcLayoutConstraint(
-        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutProperty->GetLayoutConstraint()->percentReference);
-    auto fixSize = frameSize.ConvertToSizeT();
-    auto measureSize = geometryNode->GetFrameSize();
-    if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
-        measureSize.SetWidth(fixSize.Width());
-    }
-    if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
-        measureSize.SetHeight(fixSize.Height());
-    }
-    geometryNode->SetFrameSize(measureSize);
-}
-
-void MultipleParagraphLayoutAlgorithm::MeasureWithMatchParent(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
-    CHECK_NULL_VOID(layoutPolicyProperty);
-    auto widthLayoutPolicy = layoutPolicyProperty.value().widthLayoutPolicy_;
-    auto heightLayoutPolicy = layoutPolicyProperty.value().heightLayoutPolicy_;
-    if (widthLayoutPolicy != LayoutCalPolicy::MATCH_PARENT && heightLayoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
-        return;
-    }
-    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
-    auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
-        widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
-        Axis::HORIZONTAL);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    OptionalSizeF frameSize(geometryNode->GetFrameSize());
-    frameSize.UpdateSizeWithCheck(layoutPolicySize.ConvertToSizeT());
-    auto constraintSize = UpdateOptionSizeByCalcLayoutConstraint(
-        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutConstraint->percentReference);
-    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        layoutWrapper->GetGeometryNode()->SetFrameWidth(constraintSize.ConvertToSizeT().Width());
-    }
-    if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        layoutWrapper->GetGeometryNode()->SetFrameHeight(constraintSize.ConvertToSizeT().Height());
-    }
 }
 } // namespace OHOS::Ace::NG

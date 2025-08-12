@@ -597,19 +597,13 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
-    uint32_t caretColor;
+    uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!caretColorArg->IsUndefined()) {
         if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
             caretColor = color.GetValue();
-        } else {
-            caretColor = textFieldTheme->GetCursorColor().GetValue();
         }
-    } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaret(
-            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), AceType::RawPtr(widthObject));
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor,
@@ -711,10 +705,19 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputAutoCapitalizationMode(ArkUI
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    if (secondArg->IsNumber()) {
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAutoCapitalizationMode(nativeNode, value);
     } else {
@@ -739,6 +742,15 @@ ArkUINativeModuleValue TextInputBridge::ResetTextInputAutoCapitalizationMode(Ark
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);

@@ -381,6 +381,7 @@ void BubblePattern::PopBubble(bool tips)
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
+    auto instanceId = pipelineNg->GetInstanceId();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
     if (!popupInfo.isCurrentOnShow || (tips && !popupInfo.isTips)) {
@@ -394,9 +395,9 @@ void BubblePattern::PopBubble(bool tips)
     auto isTips = layoutProp->GetIsTips().value_or(false);
     if (showInSubWindow) {
         if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
+            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0, instanceId);
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_, instanceId);
         }
     } else {
         if (isTips) {
@@ -713,34 +714,25 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
-    switch (type) {
-        case WindowSizeChangeReason::UNDEFINED:
-        case WindowSizeChangeReason::MOVE:
-        case WindowSizeChangeReason::RESIZE:
-        case WindowSizeChangeReason::DRAG_START:
-        case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END:
-        case WindowSizeChangeReason::OCCUPIED_AREA_CHANGE: {
-            break;
-        }
-        default: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto pipelineNg = host->GetContextRefPtr();
-            CHECK_NULL_VOID(pipelineNg);
-            auto overlayManager = pipelineNg->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->HideAllPopups();
-            auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
-                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
-                CHECK_NULL_VOID(subwindow);
-                subwindow->HidePopupNG(targetNodeId_);
-            }
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %{public}d", type);
+    if (type == WindowSizeChangeReason::MAXIMIZE || type == WindowSizeChangeReason::RECOVER ||
+        type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::HIDE ||
+        type == WindowSizeChangeReason::TRANSFORM || type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineNg = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineNg);
+        auto overlayManager = pipelineNg->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->HideAllPopups();
+        auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+        CHECK_NULL_VOID(layoutProp);
+        auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        if (showInSubWindow) {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
+            CHECK_NULL_VOID(subwindow);
+            subwindow->HidePopupNG(targetNodeId_);
         }
     }
 }
@@ -829,8 +821,39 @@ void BubblePattern::UpdateBubbleText()
     host->MarkDirtyNode();
 }
 
+void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_VOID(popupTheme);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+    auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = blurStyle;
+    styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (needUpdateShadow) {
+        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        renderContext->UpdateBackShadow(shadow);
+    }
+}
+
 void BubblePattern::OnColorConfigurationUpdate()
 {
+    // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
+    if (isTips_) {
+        UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
+    } else if (SystemProperties::ConfigChangePerform()) {
+        UpdateStyleOption(popupParam_->GetBlurStyle(), false);
+    }
     if (isCustomPopup_) {
         return;
     }
@@ -838,24 +861,6 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
     UpdateBubbleText();
-    if (isTips_) {
-        auto host = GetHost();
-        auto popupTheme = GetPopupTheme();
-        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
-        auto renderContext = childNode->GetRenderContext();
-        CHECK_NULL_VOID(popupTheme);
-        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
-        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
-        renderContext->UpdateBackBlurStyle(styleOption);
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
-        renderContext->UpdateBackShadow(shadow);
-    }
 }
 
 void BubblePattern::UpdateAgingTextSize()
@@ -885,6 +890,8 @@ void BubblePattern::UpdateBubbleBackGroundColor(const Color& value)
     auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
     popupPaintProp->UpdateBackgroundColor(value);
+    CHECK_NULL_VOID(popupParam_);
+    UpdateStyleOption(popupParam_->GetBlurStyle(), false);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

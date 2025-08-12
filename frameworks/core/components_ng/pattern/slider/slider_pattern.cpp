@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -55,7 +56,7 @@ constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
 constexpr Dimension PAN_MOVE_DISTANCE = 5.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
-constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
+constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 100;
 constexpr int32_t NONE_POINT_OFFSET = 2;
 constexpr int32_t STEP_POINT_OFFSET = 1;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
@@ -758,9 +759,9 @@ int32_t SliderPattern::GetOffsetStepIndex(uint32_t index)
     if (NearZero(step)) {
         return 0;
     }
-    auto stepIndex = static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+    auto stepIndex = static_cast<int32_t>(std::ceil((currentValue - min) / step));
     auto diffValue = stepIndex * step + min - currentValue;
-    int32_t offsetStepIndex = index - stepIndex;
+    int32_t offsetStepIndex = static_cast<int32_t>(index) - stepIndex;
     if (NearZero(diffValue) || offsetStepIndex <= 0) {
         return offsetStepIndex;
     } else {
@@ -2172,31 +2173,45 @@ void SliderPattern::LayoutImageNode()
 void SliderPattern::UpdateImagePositionX(float centerX)
 {
     CHECK_NULL_VOID(imageFrameNode_);
-    auto renderContext = imageFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = imageFrameNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto offset = geometryNode->GetMarginFrameOffset();
-    offset.SetX(centerX - blockSize_.Width() * HALF);
-    geometryNode->SetMarginFrameOffset(offset);
-    renderContext->SavePaintRect();
-    renderContext->SyncGeometryProperties(nullptr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerX, blocksize = blockSize_]() {
+        auto imageNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        const auto& renderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto& geometryNode = imageNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto offset = geometryNode->GetMarginFrameOffset();
+        offset.SetX(centerX - blocksize.Width() * HALF);
+        geometryNode->SetMarginFrameOffset(offset);
+        renderContext->SavePaintRect();
+        renderContext->SyncGeometryProperties(nullptr);
+    });
 }
 
 void SliderPattern::UpdateImagePositionY(float centerY)
 {
     CHECK_NULL_VOID(imageFrameNode_);
-    auto renderContext = imageFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = imageFrameNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto offset = geometryNode->GetMarginFrameOffset();
-    offset.SetY(centerY - blockSize_.Height() * HALF);
-    geometryNode->SetMarginFrameOffset(offset);
-    renderContext->SavePaintRect();
-    renderContext->SyncGeometryProperties(nullptr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerY, blocksize = blockSize_]() {
+        auto imageNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        const auto& renderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto& geometryNode = imageNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto offset = geometryNode->GetMarginFrameOffset();
+        offset.SetY(centerY - blocksize.Height() * HALF);
+        geometryNode->SetMarginFrameOffset(offset);
+        renderContext->SavePaintRect();
+        renderContext->SyncGeometryProperties(nullptr);
+    });
 }
 
 void SliderPattern::OpenTranslateAnimation(SliderStatus status)
@@ -2498,13 +2513,23 @@ void SliderPattern::UpdateValue(float value)
         CHECK_NULL_VOID(sliderPaintProperty);
         sliderPaintProperty->UpdateValue(value);
     }
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, UpdateValue, host);
     CalcSliderValue();
     FireBuilder();
 }
 
 void SliderPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     RegisterVisibleAreaChange();
+}
+
+void SliderPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void SliderPattern::StartAnimation()
@@ -2686,9 +2711,10 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     return (makeFunc_.value())(sliderConfiguration);
 }
 
-void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
 {
     RemoveTipFromRoot();
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2700,7 +2726,19 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
 
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach OK");
+}
+
+void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    RemoveCallbackOnDetach(frameNode);
+}
+
+void SliderPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void SliderPattern::InitOrRefreshSlipFactor()

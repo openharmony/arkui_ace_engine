@@ -279,13 +279,13 @@ void FolderStackPattern::UpdateChildAlignment()
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
+    if (controlPartsStackNode && controlPartsStackNode->GetLayoutProperty()) {
         auto controlPartsLayoutProperty =
             AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
         controlPartsLayoutProperty->UpdateAlignment(align);
     }
     auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
+    if (hoverStackNode && hoverStackNode->GetLayoutProperty()) {
         auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
         hoverLayoutProperty->UpdateAlignment(align);
     }
@@ -298,7 +298,7 @@ void FolderStackPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("rotation", static_cast<int32_t>(rotation));
 }
 
-void FolderStackPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+void FolderStackPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(displayInfo_);
     auto rotation = displayInfo_->GetRotation();

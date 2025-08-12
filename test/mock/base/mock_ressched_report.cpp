@@ -32,7 +32,8 @@ ResSchedReport::ResSchedReport()
 {}
 
 void ResSchedReport::ResSchedDataReport(
-    const char* name , const std::unordered_map<std::string, std::string>& param)
+    const char* name, const std::unordered_map<std::string, std::string>& param,
+    int64_t tid)
 {
     reportDataFunc_ = nullptr;
     if (std::strcmp(ABILITY_OR_PAGE_SWITCH_START, name) == 0 || std::strcmp(ABILITY_OR_PAGE_SWITCH_END, name) == 0) {
@@ -45,6 +46,8 @@ void ResSchedReport::ResSchedDataReport(
 {}
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config) {}
+
+void ResSchedReport::OnKeyEvent(const KeyEvent& event) {}
 
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     const std::string& toPage, const std::string& mode)

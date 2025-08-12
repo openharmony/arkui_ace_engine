@@ -330,19 +330,24 @@ void RawInputInjector::DoInject(const std::vector<std::vector<ConsumeActionInfo>
         std::this_thread::sleep_for(std::chrono::milliseconds(intervalTimeMs));
 
         // update current global status
-        UpdateGlobalStatus(actionList, activedInjectingInfos);
+        UpdateGlobalStatus(actionList, activedInjectingInfos, allOtherInjectingInfos);
         currentTime += intervalTimeMs;
         round++;
     }
 }
 
-void RawInputInjector::UpdateGlobalStatus(
-    const std::vector<ConsumeActionInfo>& actionList, const std::vector<InjectingInfo>& activedInjectingInfos)
+void RawInputInjector::UpdateGlobalStatus(const std::vector<ConsumeActionInfo>& actionList,
+    const std::vector<InjectingInfo>& activedInjectingInfos, const std::vector<InjectingInfo>& otherInjectingInfos)
 {
-    if (activedInjectingInfos.empty()) {
+    std::vector<InjectingInfo> allEvents;
+    allEvents.insert(allEvents.end(), activedInjectingInfos.begin(), activedInjectingInfos.end());
+    allEvents.insert(allEvents.end(), otherInjectingInfos.begin(), otherInjectingInfos.end());
+
+    if (allEvents.empty()) {
         return;
     }
-    for (auto& info : activedInjectingInfos) {
+
+    for (auto& info : allEvents) {
         bool isStartUpdateNeeded = false;
         for (auto& action : actionList) {
             if (action.finger == info.finger) {

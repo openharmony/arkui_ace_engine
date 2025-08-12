@@ -339,7 +339,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Trigger HandleOnItemDragStart,
-     * @tc.expected: Do nothing
+     * @tc.expected: The item with index 0 is being dragged.
      */
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
@@ -349,7 +349,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Trigger drag animation
-     * @tc.expected: Nothing
+     * @tc.expected: Expect every gridItem's position is correct.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(itemWidth * 1.5);
@@ -400,7 +400,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation002, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Trigger HandleOnItemDragStart,
-     * @tc.expected: Do nothing
+     * @tc.expected: The item with index 0 is being dragged.
      */
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
@@ -471,7 +471,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation003, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Trigger HandleOnItemDragStart,
-     * @tc.expected: Do nothing
+     * @tc.expected: The item with index 0 is being dragged.
      */
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
@@ -481,7 +481,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Trigger drag animation
-     * @tc.expected: Nothing
+     * @tc.expected: Expect every gridItem's position is correct.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(itemWidth * 1.5);
@@ -534,7 +534,7 @@ HWTEST_F(GridEventTestNg, OnItemDragWithAnimation004, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Trigger HandleOnItemDragStart
-     * @tc.expected: Do nothing
+     * @tc.expected: The item with index 0 is being dragged.
      */
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);

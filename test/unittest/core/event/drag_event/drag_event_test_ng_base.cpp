@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+#define private public
+#define protected public
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "test/unittest/core/event/drag_event/drag_event_common_test_ng.h"
 
 #include "test/unittest/core/event/drag_event/drag_event_test_ng_base_utils.h"
@@ -475,5 +479,166 @@ HWTEST_F(DragEventTestNgBase, DragEventTestNGBase004, TestSize.Level1)
     ASSERT_NE(mock, nullptr);
     bool actualState = mock->gDragData_.extraInfo == dragStartInfo.extraInfo;
     EXPECT_EQ(actualState, testCase.expectResult);
+}
+
+/**
+ * @tc.name: ActionStartCallbackTest001
+ * @tc.desc: Test drag dragDropManager Dragging UpdateDragStartResult DragStartResult::REPEAT_DRAG_FAIL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgBase, ActionStartCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create image frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. init frameNode drag status.
+     */
+    DragStartInfo dragStartInfo;
+    dragStartInfo.extraInfo = "pixelMap is null.";
+    dragStartInfo.hasPixelMap = false;
+    DragStartTestCase testCase(true, true, true, false, false);
+    InitTestFrameNodeStatus(frameNode, testCase, dragStartInfo);
+    /**
+     * @tc.steps: step3. get frameNode dragEventActuator.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    auto gestureEvent = CreateGestureEventInfo(testCase);
+    bool isCallbackTriggered = false;
+    dragEventActuator->isNewFwk_ = false;
+    /**
+     * @tc.steps: step4. actionstart_ callback.
+     */
+    dragEventActuator->actionStart_ = [dragDropManager, &isCallbackTriggered](GestureEvent& info) {
+        isCallbackTriggered = true;
+        if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::REPEAT_DRAG_FAIL);
+        }
+    };
+    ResetDragging();
+    MockTouchDown(dragEventActuator);
+    ASSERT_NE(dragEventActuator->actionStart_, nullptr);
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    MockDragPanSuccess(dragEventActuator, gestureEvent);
+    EXPECT_TRUE(isCallbackTriggered);
+    EXPECT_EQ(DragDropBehaviorReporter::GetInstance().startResult_, DragStartResult::REPEAT_DRAG_FAIL);
+}
+
+/**
+ * @tc.name: ActionStartCallbackTest002
+ * @tc.desc: Test drag preDragStatus_ expect PREVIEW_LANDING_FINISHED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgBase, ActionStartCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create image frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. init frameNode drag status.
+     */
+    DragStartInfo dragStartInfo;
+    dragStartInfo.extraInfo = "pixelMap is null.";
+    dragStartInfo.hasPixelMap = false;
+    DragStartTestCase testCase(true, true, true, false, false);
+    InitTestFrameNodeStatus(frameNode, testCase, dragStartInfo);
+    /**
+     * @tc.steps: step3. get frameNode dragEventActuator.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    auto gestureEvent = CreateGestureEventInfo(testCase);
+    bool isCallbackTriggered = false;
+    dragEventActuator->isNewFwk_ = false;
+    /**
+     * @tc.steps: step4. actionstart_ callback.
+     */
+    dragEventActuator->actionStart_ = [dragDropManager, &isCallbackTriggered](GestureEvent& info) {
+        if (DragDropGlobalController::GetInstance().GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED) {
+            isCallbackTriggered = true;
+        }
+    };
+    ResetDragging();
+    MockTouchDown(dragEventActuator);
+    ASSERT_NE(dragEventActuator->actionStart_, nullptr);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_FINISHED);
+    MockDragPanSuccess(dragEventActuator, gestureEvent);
+    EXPECT_TRUE(isCallbackTriggered);
+}
+
+/**
+ * @tc.name: ActionStartCallbackTest003
+ * @tc.desc: Test drag dragDropManager isDragNodeNeedClean_ expect true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgBase, ActionStartCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create image frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. init frameNode drag status.
+     */
+    DragStartInfo dragStartInfo;
+    dragStartInfo.extraInfo = "pixelMap is null.";
+    dragStartInfo.hasPixelMap = false;
+    DragStartTestCase testCase(true, true, true, false, false);
+    InitTestFrameNodeStatus(frameNode, testCase, dragStartInfo);
+    /**
+     * @tc.steps: step3. get frameNode dragEventActuator.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    auto gestureEvent = CreateGestureEventInfo(testCase);
+    bool isCallbackTriggered = false;
+    dragEventActuator->isNewFwk_ = false;
+    /**
+     * @tc.steps: step4. actionstart_ callback.
+     */
+    dragEventActuator->actionStart_ = [dragDropManager, &isCallbackTriggered](GestureEvent& info) {
+        if (dragDropManager->IsDragNodeNeedClean()) {
+            isCallbackTriggered = true;
+        }
+    };
+    ResetDragging();
+    MockTouchDown(dragEventActuator);
+    ASSERT_NE(dragEventActuator->actionStart_, nullptr);
+    dragDropManager->isDragNodeNeedClean_ = true;
+    MockDragPanSuccess(dragEventActuator, gestureEvent);
+    EXPECT_TRUE(isCallbackTriggered);
 }
 } // namespace OHOS::Ace::NG

@@ -70,6 +70,22 @@ public:
         return imageSrc_;
     }
 
+    void SetFrameSize(float width, float height)
+    {
+        frameSizeWidth_ = width;
+        frameSizeHeight_ = height;
+    }
+
+    float GetFrameSizeWidth() const
+    {
+        return frameSizeWidth_;
+    }
+
+    float GetFrameSizeHeight() const
+    {
+        return frameSizeHeight_;
+    }
+
 private:
     ImageNodeId nodeInfo_ = ImageNodeId();
     int32_t srcType_ = -1;
@@ -77,6 +93,8 @@ private:
     bool isTrimMemRecycle_ = false;
     std::string withoutSrcInfo_ = "";
     std::string withSrcInfo_ = "";
+    float frameSizeWidth_ = 0.0f;
+    float frameSizeHeight_ = 0.0f;
 
     void InitToStringWithoutSrc()
     {

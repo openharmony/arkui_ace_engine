@@ -103,6 +103,7 @@ protected:
     }
     void UpdatePointInfoForFinger(const TouchEvent& touchEvent);
     void OnActionEnd(const GestureEvent& info);
+    void OnActionCancel(const GestureEvent& info);
     bool IsAllowedDrag();
     void UpdateDragPreviewOptionFromModifier();
     void ResetBorderRadiusAnimation();

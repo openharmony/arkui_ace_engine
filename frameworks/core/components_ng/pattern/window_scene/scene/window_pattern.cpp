@@ -27,12 +27,10 @@
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
-#include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t ADD_BACKGROUND_COLOR_MS = 50;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 
@@ -245,6 +243,7 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
+    CHECK_EQUAL_VOID(AddPersistentImage(surfaceNode, host), true);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
@@ -252,6 +251,21 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
     attachToFrameNodeFlag_ = true;
+}
+
+bool WindowPattern::AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const RefPtr<NG::FrameNode>& host)
+{
+    int32_t imageFit = 0;
+    if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit) == false) {
+        return false;
+    }
+    CreateSnapshotWindow();
+    AddChild(host, snapshotWindow_, snapshotWindowName_);
+    surfaceNode->SetIsNotifyUIBufferAvailable(false);
+    surfaceNode->SetBufferAvailableCallback(callback_);
+    return true;
 }
 
 void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
@@ -412,14 +426,9 @@ void WindowPattern::CreateASStartingWindow()
     std::string circleIcon = "";
 
 #ifdef ACE_ENGINE_PLUGIN_PATH
-    std::vector<std::string> atomicServiceIconInfo = AtomicServiceBasicEnginePlugin::GetInstance().
-        getParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
-    if (atomicServiceIconInfo.size() >= ASENGINE_ATTRIBUTIONS_COUNT) {
-        appNameInfo = atomicServiceIconInfo[0];
-        circleIcon = atomicServiceIconInfo[CIRCLE_ICON_INDEX];
-        eyelashRingIcon = atomicServiceIconInfo[EYELASHRING_ICON_INDEX];
-    }
-    AtomicServiceBasicEnginePlugin::GetInstance().releaseData();
+    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo;
+    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon;
+    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon;
 #endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -544,7 +553,6 @@ void WindowPattern::CreateStartingWindow()
     auto sourceInfo = ImageSourceInfo(
         startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
     auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
-    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
     if (preLoadPixelMap != nullptr) {
         auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
@@ -552,6 +560,7 @@ void WindowPattern::CreateStartingWindow()
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
     }
+    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
@@ -647,12 +656,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
-            auto context = GetContext();
-            CHECK_NULL_VOID(context);
-            auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-            auto snapshotContext = snapshotWindow_->GetRenderContext();
-            CHECK_NULL_VOID(snapshotContext);
-            snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+            needAddBackgroundColor_ = true;
+            AddBackgroundColorDelayed();
         }
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
@@ -668,7 +673,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = static_cast<uint32_t>(session_->GetWindowOrientation());
-        if (matchSnapshot) {
+        if (matchSnapshot && (!freeMultiWindow)) {
             auto orientation = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
             pattern->SetOrientation(orientation);
         }
@@ -723,10 +728,39 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             auto context = self->snapshotWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
             context->UpdateBackgroundColor(Color::TRANSPARENT);
+            self->needAddBackgroundColor_ = false;
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
     UpdateSnapshotWindowProperty();
+}
+
+void WindowPattern::AddBackgroundColorDelayed()
+{
+    if (session_->IsExitSplitOnBackground()) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    addBackgroundColorTask_.Cancel();
+    addBackgroundColorTask_.Reset([weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_EQUAL_VOID(self->needAddBackgroundColor_, false);
+        ACE_SCOPED_TRACE("WindowScene::AddBackgroundColorTask");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "add background color: %{public}d", self->session_->GetPersistentId());
+        auto context = self->GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        CHECK_NULL_VOID(self->snapshotWindow_);
+        auto snapshotContext = self->snapshotWindow_->GetRenderContext();
+        CHECK_NULL_VOID(snapshotContext);
+        snapshotContext->UpdateBackgroundColor(Color(backgroundColor));
+    });
+    taskExecutor->PostDelayedTask(
+        addBackgroundColorTask_, TaskExecutor::TaskType::UI, ADD_BACKGROUND_COLOR_MS, __func__);
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)

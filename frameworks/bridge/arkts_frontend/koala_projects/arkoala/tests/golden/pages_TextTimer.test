@@ -1,0 +1,75 @@
+{
+  "rootElement": {
+    "nodeId": 1242,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1243,
+        "kind": "TextTimer",
+        "children": [],
+        "format_value": "hh:mm:ss",
+        "fontColor_value": "#ff0000ff",
+        "fontSize_value": 30,
+        "fontFamily_value": "Arial",
+        "fontStyle_value": 0,
+        "fontWeight_value": 0,
+        "textShadow_value": {
+          "radius": 24,
+          "type": 0,
+          "color": "#ff000000",
+          "offsetX": 15,
+          "offsetY": 25
+        }
+      },
+      {
+        "nodeId": 1244,
+        "kind": "TextTimer",
+        "children": [],
+        "setTextTimerOptions_options": {
+          "isCountDown": true,
+          "count": 900
+        },
+        "format_value": "yyyy/mm/dd",
+        "fontColor_value": 333,
+        "fontSize_value": "20vp",
+        "fontStyle_value": 1,
+        "fontWeight_value": "Bolder",
+        "textShadow_value": {
+          "radius": 48,
+          "type": 1,
+          "color": 333,
+          "offsetX": 25,
+          "offsetY": 15
+        }
+      },
+      {
+        "nodeId": 1245,
+        "kind": "TextTimer",
+        "children": [],
+        "setTextTimerOptions_options": {
+          "isCountDown": false
+        },
+        "fontColor_value": "#404040",
+        "fontSize_value": "40px",
+        "fontWeight_value": 400
+      },
+      {
+        "nodeId": 1246,
+        "kind": "TextTimer",
+        "children": [],
+        "setTextTimerOptions_options": {
+          "count": 1000
+        },
+        "fontSize_value": "25lpx",
+        "fontWeight_value": 900
+      },
+      {
+        "nodeId": 1247,
+        "kind": "TextTimer",
+        "children": [],
+        "fontSize_value": "5%",
+        "fontWeight_value": 10
+      }
+    ]
+  }
+}

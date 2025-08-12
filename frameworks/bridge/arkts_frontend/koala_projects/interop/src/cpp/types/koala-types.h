@@ -106,9 +106,9 @@ struct KStringPtrImpl {
         return result;
     }
   private:
-    char* _value;
-    int _length;
-    bool _owned;
+    char* _value = nullptr;
+    int _length = 0;
+    bool _owned = false;
 };
 
 struct KInteropNumber {

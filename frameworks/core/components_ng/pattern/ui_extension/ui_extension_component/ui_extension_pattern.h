@@ -115,7 +115,8 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void OnVisibleChangeInner(bool visible);
+    void OnRealVisibleChangeInner(bool visible);
+    void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -154,6 +155,10 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    /* only for 1.2 begin */
+    bool GetIsTransferringCaller();
+    void SetIsTransferringCaller(bool isTransferringCaller);
+    /* only for 1.2 end */
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
@@ -267,6 +272,29 @@ public:
         avoidInfo_ = info;
     }
     bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetModalRequestFocus(bool requestFocus)
+    {
+        isModalRequestFocus_ = requestFocus;
+    }
+    bool IsWindowSceneVisible() const
+    {
+        return windowSceneVisible_;
+    }
+
+    bool GetVisiblityProperty() const
+    {
+        return visiblityProperty_;
+    }
+
+    void SetRealVisible(bool isVisible)
+    {
+        isVisible_ = isVisible;
+    }
+
+    void SetCurVisible(bool curVisible)
+    {
+        curVisible_ = curVisible;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -409,7 +437,7 @@ private:
     ErrorMsg lastError_;
     AbilityState state_ = AbilityState::NONE;
     bool isTransferringCaller_ = false;
-    bool isVisible_ = true;
+    bool isVisible_ = true;  // actual visibility
     bool isModal_ = false;
     bool hasInitialize_ = false;
     bool isAsyncModalBinding_ = false;
@@ -434,7 +462,9 @@ private:
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
-    bool curVisible_ = false;
+    bool curVisible_ = false; // HandleVisibleArea visible
+    bool windowSceneVisible_ = false;
+    bool visiblityProperty_ = true;  // visibility property
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
@@ -448,6 +478,10 @@ private:
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     bool isWindowModeFollowHost_ = false;
+    bool isModalRequestFocus_ = true;
+    /* only for 1.2 begin */
+    bool hasAttachContext_ = false;
+    /* only for 1.2 end */
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;

@@ -1,0 +1,12 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "module": "CommonJS",
+        "rootDir": "./../",
+        "outDir": "../../build/test/"
+    },
+    "include": [
+        "./sync-specification.ts",
+        "./../utils.ts"
+    ]
+}

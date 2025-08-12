@@ -99,6 +99,9 @@ public:
     UINode(const std::string& tag, int32_t nodeId, bool isRoot = false);
     ~UINode() override;
 
+    void RegisterReleaseFunc(bool enableRegister);
+    virtual void OnDelete();
+
     // atomic node is like button, image, custom node and so on.
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
@@ -141,7 +144,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
+    void DetachFromMainTree(bool recursive = false, bool needCheckThreadSafeNodeTree = false);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
     void UpdateConfigurationUpdate();
@@ -250,10 +253,11 @@ public:
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
+    void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
+    bool DumpTreeByComponentName(const std::string& name);
 
     const std::string& GetTag() const
     {
@@ -1067,27 +1071,14 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
-    bool IsFreeNode() const
+    bool IsThreadSafeNode() const
     {
-        return isFreeNode_;
+        return isThreadSafeNode_;
     }
 
-    bool IsFreeState() const
+    bool IsFree() const
     {
-        return isFreeState_;
-    }
-
-    bool IsFreeNodeTree()
-    {
-        if (!IsFreeNode()) {
-            return false;
-        }
-        for (const auto& child : GetChildren()) {
-            if (!child->IsFreeNodeTree()) {
-                return false;
-            }
-        }
-        return true;
+        return isFree_;
     }
 
     void PostAfterAttachMainTreeTask(std::function<void()>&& task)
@@ -1130,7 +1121,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
-    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
@@ -1184,7 +1175,6 @@ protected:
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
     const static std::set<std::string> layoutTags_;
-
     std::string tag_ = "UINode";
     int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
@@ -1221,6 +1211,7 @@ private:
         }
         afterAttachMainTreeTasks_.clear();
     }
+    bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
@@ -1231,8 +1222,8 @@ private:
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool isFreeNode_ = false;
-    bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
+    bool isThreadSafeNode_ = false;
+    bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
@@ -1290,6 +1281,8 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+
+    bool uiNodeGcEnable_ = false;
 };
 
 } // namespace OHOS::Ace::NG

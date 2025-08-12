@@ -57,6 +57,10 @@ public:
     void UpdateTargetNodesBarMargin(bool reset = false);
     void ExpandStackNodeLayout(bool reset = false);
     void ResetExpandStackNode();
+    bool GetIsUpdateTargetNode() const
+    {
+        return isUpdateTargetNode_;
+    }
 
 protected:
     void UpdateTitleAfterRemove();

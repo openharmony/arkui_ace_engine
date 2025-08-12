@@ -556,6 +556,7 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     Color color;
     if (ParseJsColor(fontColor, color, textStyle.textColorResObj)) {
         textStyle.textColor = color;
+        textStyle.textColorSetByUser = true;
     }
 
     if (!fontStyle->IsObject()) {
@@ -925,6 +926,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+
+    properties.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
     JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
     JSViewAbstract::SetDialogEffectOption(paramObj, properties);

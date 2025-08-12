@@ -20,9 +20,14 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-bool InRange(float number, float boundaryStart, float boundaryEnd)
+bool InRangeStart(float number, float boundaryStart, float boundaryEnd)
 {
-    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
+    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd + 1.0f);
+}
+
+bool InRangeEnd(float number, float boundaryStart, float boundaryEnd)
+{
+    return GreatOrEqual(number, boundaryStart - 1.0f) && LessOrEqual(number, boundaryEnd);
 }
 
 bool CheckPaddingBorderGap(ExpandEdges& incomingExpand, const PaddingPropertyF& innerSpace)
@@ -87,7 +92,9 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 
 void LayoutWrapper::OffsetNodeToSafeArea()
 {
-    auto&& insets = GetLayoutProperty()->GetSafeAreaInsets();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& insets = layoutProperty->GetSafeAreaInsets();
     CHECK_NULL_VOID(insets);
     auto geometryNode = GetGeometryNode();
     auto offset = geometryNode->GetMarginFrameOffset();
@@ -113,7 +120,9 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 RectF LayoutWrapper::GetBackGroundAccumulatedSafeAreaExpand()
 {
-    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, {});
+    auto ignoreLayoutSafeAreaEdges = layoutProperty->GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges();
     IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = ignoreLayoutSafeAreaEdges };
     auto expandEdges = GetAccumulatedSafeAreaExpand(false, opts);
     auto geometryNode = GetGeometryNode();
@@ -150,7 +159,9 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             "pageCurrentOffset: %f, keyboardOffset: %f", isFocusOnPage, isFocusOnOverlay,
             pageCurrentOffset, keyboardOffset);
         if (!(isFocusOnPage || (isFocusOnOverlay && isOverlay) || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
-            renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
+            const auto& layoutProperty = GetLayoutProperty();
+            CHECK_NULL_RETURN(layoutProperty, false);
+            renderContext->SavePaintRect(true, layoutProperty->GetPixelRound());
             return false;
         }
         auto geometryNode = GetGeometryNode();
@@ -159,12 +170,14 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             auto usingRect = RectF(OffsetF(x, keyboardOffset), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+            pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
             renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect = RectF(OffsetF(x, safeArea.top_.Length() + keyboardOffset), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+        pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
         renderContext->SyncPartialRsProperties();
         return true;
     }
@@ -180,7 +193,9 @@ bool LayoutWrapper::CheckValidSafeArea()
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
     SafeAreaInsets safeArea;
-    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     // if self does not have opts, check parent's
     if (!opts) {
         auto parent = host->GetAncestorNodeOfFrame(false);
@@ -269,6 +284,7 @@ void LayoutWrapper::AdjustNotExpandNode()
         adjustedRect += geometryNode->GetParentAdjust();
     }
     geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
+    pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
     renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
     if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
         ACE_SAFE_AREA_SCOPED_TRACE("AdjustNotExpandNode[%s][self:%d][parent:%d][key:%s][paintRectRect:%s]",
@@ -291,6 +307,8 @@ void LayoutWrapper::ExpandSafeArea()
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive) {
@@ -332,6 +350,7 @@ void LayoutWrapper::ExpandSafeArea()
     }
     auto selfAdjust = frame - geometryNode->GetFrameRect();
     geometryNode->SetSelfAdjust(selfAdjust);
+    pipeline->SetAreaChangeNodeMinDepth(host->GetDepth());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
@@ -342,49 +361,6 @@ void LayoutWrapper::ExpandSafeArea()
             host->GetAncestorNodeOfFrame(false) ? host->GetAncestorNodeOfFrame(false)->GetId() : 0,
             host->GetInspectorIdValue("").c_str(), opts->ToString().c_str(),
             renderContext->GetPaintRectWithoutTransform().ToString().c_str(), selfAdjust.ToString().c_str());
-    }
-}
-
-void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
-{
-    CHECK_NULL_VOID(opts);
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
-    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
-        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
-        frame.SetLeft(safeArea.left_.start);
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
-        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
-        frame.SetTop(safeArea.top_.start);
-    }
-
-    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
-        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
-        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
-    }
-}
-
-void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
-{
-    // reset if User has fixed size
-    auto layoutProperty = GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (layoutProperty->HasFixedWidth()) {
-        frame.SetWidth(geometryNode->GetFrameRect().Width());
-    }
-    if (layoutProperty->HasFixedHeight()) {
-        frame.SetHeight(geometryNode->GetFrameRect().Height());
-    }
-    if (layoutProperty->HasAspectRatio()) {
-        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
 }
 
@@ -427,9 +403,10 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
     StartPoint startPoint = StartPoint::NORMAL;
     if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
-    } else if (strategy == IgnoreStrategy::SCROLLABLE_AXIS) {
+    } else if (strategy == IgnoreStrategy::AXIS_INSENSITIVE) {
         isScrollableAxis_ = true;
-        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(startPoint, options.type), options.edges);
+        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(
+            includingSelf ? StartPoint::INCLUDING_SELF : startPoint, options.type), options.edges);
         isScrollableAxis_ = false;
         return sae;
     } else if (includingSelf) {
@@ -459,7 +436,7 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpandForAllEdges(StartPoint st
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();
-    if (hostMargin.AllSidesFilled(true)) {
+    if (startPoint != StartPoint::FROM_MARGIN && hostMargin.AllSidesFilled(true)) {
         return totalExpand;
     }
     // total expanding distance of four sides used to calculate cache
@@ -483,7 +460,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
     if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
         auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
         // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
+        if (InRangeStart(adjustingRect.Left(), innerSpaceLeftLength,
             innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
             rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
         }
@@ -491,7 +468,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
     if (!NearZero(parentSafeAreaPadding.top.value_or(0.0f))) {
         auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
         // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Top(), innerSpaceTopLength,
+        if (InRangeStart(adjustingRect.Top(), innerSpaceTopLength,
             innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
             rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
         }
@@ -501,7 +478,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         auto innerSpaceRightLength = parentInnerSpace.right.value_or(0.0f);
         // right side safeArea padding range is
         // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
-        if (InRange(adjustingRect.Right(),
+        if (InRangeEnd(adjustingRect.Right(),
             parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
             parentWidth - innerSpaceRightLength)) {
             rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
@@ -513,7 +490,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         // [parentHeight - (bottom border + padding) - bottom safeAreaPadding,
         // parentHeight - (bottom border + padding)]
         auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
-        if (InRange(adjustingRect.Bottom(),
+        if (InRangeEnd(adjustingRect.Bottom(),
             parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
             parentHeight - innerSpaceBottomLength)) {
             rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
@@ -550,7 +527,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
     auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
 
     auto pattern = recursiveHost->GetPattern();
-    if (isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
+    if (!isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
         innerSpace.Plus(pattern->CustomizeSafeAreaPadding(safeAreaPadding, true), true);
         safeAreaPadding = pattern->CustomizeSafeAreaPadding(safeAreaPadding, false);
     }
@@ -612,6 +589,49 @@ bool LayoutWrapper::PredictMeasureResult(
         return true;
     }
     return false;
+}
+
+void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
+{
+    CHECK_NULL_VOID(opts);
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
+    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
+        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
+        frame.SetLeft(safeArea.left_.start);
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
+        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
+        frame.SetTop(safeArea.top_.start);
+    }
+
+    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
+        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
+        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
+    }
+}
+
+void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
+{
+    // reset if User has fixed size
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (layoutProperty->HasFixedWidth()) {
+        frame.SetWidth(geometryNode->GetFrameRect().Width());
+    }
+    if (layoutProperty->HasFixedHeight()) {
+        frame.SetHeight(geometryNode->GetFrameRect().Height());
+    }
+    if (layoutProperty->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
+    }
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
@@ -683,7 +703,9 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
             // keep child expand into keyboard
             break;
         }
-        auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        const auto& parentLayoutProperty = parent->GetLayoutProperty();
+        CHECK_NULL_RETURN(parentLayoutProperty, OffsetF());
+        auto&& opts = parentLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
             return OffsetF();
         }
@@ -733,14 +755,18 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     GetGeometryNode()->SetParentLayoutConstraint(constraint);
 
     auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty.HasAspectRatio()) {
         std::optional<CalcSize> idealSize = std::nullopt;
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
+        auto host = GetHostNode();
+        auto greaterThanApiTen = host ? host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)
+                                      : Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize,
+            layoutProperty->GetLayoutPolicyProperty(), greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();
@@ -763,6 +789,7 @@ void LayoutWrapper::CreateRootConstraint()
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
     auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty.HasAspectRatio()) {
         auto aspectRatio = magicItemProperty.GetAspectRatioValue();

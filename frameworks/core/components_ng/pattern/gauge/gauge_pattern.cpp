@@ -408,6 +408,52 @@ void GaugePattern::OnColorModeChange(uint32_t colorMode)
     }
 }
 
+bool GaugePattern::CheckDarkResource(uint32_t resId)
+{
+    auto colorMode = Container::CurrentColorMode();
+    if (colorMode != ColorMode::DARK) {
+        return true;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    bool hasDarkRes = false;
+    hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    return hasDarkRes;
+}
+
+bool GaugePattern::ProcessSingleColorStop(Color& color, std::function<uint32_t(uint32_t)>& invertFunc)
+{
+    uint32_t resId = color.GetResourceId();
+    if (resId != 0) {
+        if (CheckDarkResource(resId)) {
+            color.UpdateColorByResourceId();
+            return true;
+        } else if (invertFunc) {
+            color = Color(invertFunc(color.GetValue()));
+            return true;
+        }
+    } else if (invertFunc) {
+        color = Color(invertFunc(color.GetValue()));
+        return true;
+    }
+    return false;
+}
+
+bool GaugePattern::ProcessGradientColors(std::vector<std::vector<std::pair<Color, Dimension>>>& gradientColors,
+    std::function<uint32_t(uint32_t)>& invertFunc)
+{
+    bool isGradientColorsResEmpty = true;
+    for (auto& colorStopArray : gradientColors) {
+        for (auto& colorStop : colorStopArray) {
+            Color& color = colorStop.first;
+            if (ProcessSingleColorStop(color, invertFunc)) {
+                isGradientColorsResEmpty = false;
+            }
+        }
+    }
+    return isGradientColorsResEmpty;
+}
+
 void GaugePattern::OnColorConfigurationUpdate()
 {
     if (!SystemProperties::ConfigChangePerform()) {
@@ -419,21 +465,25 @@ void GaugePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool isGradientColorsResEmpty = true;
     if (paintProperty->GetUseJsLinearGradientValue(false) || !paintProperty->HasGradientColors()) {
         return;
     }
+    bool isGradientColorsResEmpty = true;
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = host->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    auto colorMode = Container::CurrentColorMode();
     auto gradientColors = paintProperty->GetGradientColorsValue();
-    for (auto& colorStopArray : gradientColors) {
-        for (auto& colorStop : colorStopArray) {
-            Color& color = colorStop.first;
-            if (color.GetResourceId() != 0) {
-                color.UpdateColorByResourceId();
-                isGradientColorsResEmpty = false;
-            }
-        }
+    bool needInitRevert = false;
+    auto colorModeInit = paintProperty->GetColorModeInitValue();
+    if (colorModeInit == static_cast<int>(colorMode)) {
+        needInitRevert = true;
+    } else {
+        isGradientColorsResEmpty = ProcessGradientColors(gradientColors, invertFunc);
     }
-    if (!isGradientColorsResEmpty) {
+    if (needInitRevert) {
+        paintProperty->UpdateGradientColors(paintProperty->GetGradientColorsInitValue());
+    } else if (!isGradientColorsResEmpty) {
         paintProperty->UpdateGradientColors(gradientColors);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

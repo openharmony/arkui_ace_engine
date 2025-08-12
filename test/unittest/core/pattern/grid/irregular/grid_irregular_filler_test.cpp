@@ -682,4 +682,33 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixByLine002, TestSize.Level1)
     EXPECT_EQ(idx, 10);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_5);
 }
+
+/**
+ * @tc.name: GridIrregularFiller::FillToTarget
+ * @tc.desc: Test GridIrregularFiller::FillToTarget with illegal startLine
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillToTarget001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo5());
+    CreateFixedItems(11);
+    CreateDone();
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 120.0f, 120.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 11;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.FillToTarget(params, 5, -1);
+    auto iter = info.gridMatrix_.begin();
+    EXPECT_NE(iter, info.gridMatrix_.end());
+    EXPECT_EQ(iter->first, 0);
+}
 } // namespace OHOS::Ace::NG

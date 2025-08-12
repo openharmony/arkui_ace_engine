@@ -156,8 +156,8 @@ void SetOptionBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* optionB
     SetOptionBgColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        SelectModelNG::SetOptionBgColorByUser(frameNode, false);
         CHECK_NULL_VOID(frameNode);
+        SelectModelNG::SetOptionBgColorByUser(frameNode);
         if (optionBgColorRawPtr) {
             auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
             auto bgColorResObj = AceType::Claim(bgColor);
@@ -677,7 +677,7 @@ void SetMenuBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* menuBgCol
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, false);
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode);
         if (menuBgColorRawPtr) {
             auto* menuBgColor = reinterpret_cast<ResourceObject*>(menuBgColorRawPtr);
             auto menuBgColorResObj = AceType::Claim(menuBgColor);
@@ -955,19 +955,12 @@ const ArkUISelectModifier* GetSelectModifier()
     static const ArkUISelectModifier modifier = {
         .setSpace = SetSpace,
         .setValue = SetValue,
-        .setValuePtr = SetValuePtr,
         .setSelected = SetSelected,
-        .setSelectedPtr = SetSelectedPtr,
         .setSelectFontColor = SetSelectFontColor,
-        .setSelectFontColorPtr = SetSelectFontColorPtr,
         .setSelectedOptionBgColor = SetSelectedOptionBgColor,
-        .setSelectedOptionBgColorPtr = SetSelectedOptionBgColorPtr,
         .setOptionBgColor = SetOptionBgColor,
-        .setOptionBgColorPtr = SetOptionBgColorPtr,
         .setOptionFontColor = SetOptionFontColor,
-        .setOptionFontColorPtr = SetOptionFontColorPtr,
         .setSelectedOptionFontColor = SetSelectedOptionFontColor,
-        .setSelectedOptionFontColorPtr = SetSelectedOptionFontColorPtr,
         .setArrowPosition = SetArrowPosition,
         .setMenuAlign = SetMenuAlign,
         .setFont = SetFont,
@@ -1002,7 +995,6 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectValue = SetSelectValue,
         .resetSelectValue = ResetSelectValue,
         .setMenuBgColor = SetMenuBgColor,
-        .setMenuBgColorPtr = SetMenuBgColorPtr,
         .resetMenuBgColor = ResetMenuBgColor,
         .setMenuBgBlurStyle = SetMenuBgBlurStyle,
         .resetMenuBgBlurStyle = ResetMenuBgBlurStyle,
@@ -1019,6 +1011,14 @@ const ArkUISelectModifier* GetSelectModifier()
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
         .setSelectSymbolValue = SetSelectSymbolValue,
+        .setValuePtr = SetValuePtr,
+        .setSelectedPtr = SetSelectedPtr,
+        .setSelectFontColorPtr = SetSelectFontColorPtr,
+        .setSelectedOptionBgColorPtr = SetSelectedOptionBgColorPtr,
+        .setOptionBgColorPtr = SetOptionBgColorPtr,
+        .setOptionFontColorPtr = SetOptionFontColorPtr,
+        .setSelectedOptionFontColorPtr = SetSelectedOptionFontColorPtr,
+        .setMenuBgColorPtr = SetMenuBgColorPtr,
         .setArrowColor = SetArrowColor,
         .setShowDefaultSelectedIcon = SetShowDefaultSelectedIcon,
     };

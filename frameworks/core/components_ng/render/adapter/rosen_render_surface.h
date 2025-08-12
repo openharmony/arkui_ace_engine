@@ -164,8 +164,9 @@ public:
     void Disconnect() const override;
 
     void DumpInfo() override;
-
-    void ReleaseSurfaceBufferById(uint32_t bufferId);
+#ifdef OHOS_PLATFORM
+    void ReleaseSurfaceBufferById(uint32_t bufferId, sptr<SyncFence> fence);
+#endif
 
 #ifdef OHOS_PLATFORM
     void ReleaseSurfaceBufferForRT(const Rosen::FinishCallbackRet& ret);

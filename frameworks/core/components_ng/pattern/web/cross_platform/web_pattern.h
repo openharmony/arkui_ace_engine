@@ -89,6 +89,7 @@ public:
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -488,6 +489,16 @@ public:
         return onOpenAppLinkCallback_;
     }
 
+    void SetFaviconFunction(OnOpenAppLinkCallback&& callback)
+    {
+        setFaviconCallback_ = std::move(callback);
+    }
+
+    SetFaviconCallback GetSetFaviconFunction() const
+    {
+        return setFaviconCallback_;
+    }
+
     bool IsPreviewImageNodeExist() const
     {
         // cross platform is not support now;
@@ -665,6 +676,7 @@ private:
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    SetFaviconCallback setFaviconCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

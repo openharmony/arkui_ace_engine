@@ -79,6 +79,7 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
+    static void ProcessDefaultStyleAndBehaviorsMultiThread(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
     void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
@@ -306,6 +307,7 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Dimension GetLineHeight(FrameNode* frameNode);
+    static bool GetHalfLeading(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
     static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);

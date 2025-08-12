@@ -1048,14 +1048,16 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest023, TestSize.Level1)
 
 /**
  * @tc.name: ButtonPropertyTest024
- * @tc.desc: Test SetLabel and GetLabel 
+ * @tc.desc: Test SetLabel and GetLabel
  * @tc.type: FUNC
  */
 HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest024, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create button and add text into it.
+     */
     ButtonModelNG buttonModelNG;
-    auto textNode =
-        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
     auto frameNode = FrameNode(V2::BUTTON_ETS_TAG, NODE_ID, AceType::MakeRefPtr<ButtonPattern>());
     auto accessibilityProperty = AceType::MakeRefPtr<AccessibilityProperty>();
@@ -1065,21 +1067,27 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest024, TestSize.Level1)
     frameNode.children_.push_back(textNode);
     frameNode.accessibilityProperty_ = accessibilityProperty;
     frameNode.layoutProperty_ = buttonLayoutProperty;
-    const char * label = "button";
+    /**
+     * @tc.steps: step2. try call SetLabel.
+     * @tc.expected: step2. the label is as expected.
+     */
+    const char* label = "button";
     buttonModelNG.SetLabel(&frameNode, label);
     EXPECT_EQ(buttonModelNG.GetLabel(&frameNode), "button");
 }
 
 /**
  * @tc.name: ButtonPropertyTest025
- * @tc.desc: Test SetFontSize and GetFontSize 
+ * @tc.desc: Test SetFontSize and GetFontSize
  * @tc.type: FUNC
  */
 HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest025, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create button and add text into it.
+     */
     ButtonModelNG buttonModelNG;
-    auto textNode =
-        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, NODE_ID, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -1092,7 +1100,11 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest025, TestSize.Level1)
     frameNode.children_.push_back(textNode);
     frameNode.accessibilityProperty_ = accessibilityProperty;
     frameNode.layoutProperty_ = buttonLayoutProperty;
+    /**
+     * @tc.steps: step2. try call SetFontSize.
+     * @tc.expected: step2. the font size is as expected.
+     */
     buttonModelNG.SetFontSize(&frameNode, FONT_SIZE);
     EXPECT_EQ(buttonModelNG.GetFontSize(&frameNode), FONT_SIZE);
 }
-}
+} // namespace OHOS::Ace::NG

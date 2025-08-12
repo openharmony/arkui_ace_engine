@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiClockBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(JsiClockBridge, AceType)
+    DECLARE_ACE_TYPE(JsiClockBridge, AceType);
 
 public:
     void ParseClockConfig(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& valObject);

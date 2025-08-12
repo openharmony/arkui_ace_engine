@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/i18n/localization.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -844,6 +846,38 @@ void PageRouterManager::GetPageNameAndPath(const std::string& url, std::string& 
     }
 }
 
+std::string PageRouterManager::GetInitParams() const
+{
+    CHECK_RUN_ON(JS);
+    RefPtr<FrameNode> pageNode = nullptr;
+    if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BELLOW_TOP) {
+        constexpr size_t STACK_SIZE = 2;
+        if (pageRouterStack_.size() < STACK_SIZE) {
+            return "";
+        }
+        auto it = pageRouterStack_.rbegin();
+        ++it;
+        pageNode = it->Upgrade();
+    } else if (insertPageProcessingType_ == InsertPageProcessingType::INSERT_BOTTOM) {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = pageRouterStack_.front().Upgrade();
+    } else {
+        if (pageRouterStack_.empty()) {
+            return "";
+        }
+        pageNode = GetCurrentPageNode();
+    }
+
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, "");
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_RETURN(pageInfo, "");
+    return pageInfo->GetPageInitParams();
+}
+
 std::string PageRouterManager::GetParams() const
 {
     CHECK_RUN_ON(JS);
@@ -1484,9 +1518,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
         return;
     }
-    AccessibilityEventType type = AccessibilityEventType::CHANGE;
-    pageNode->OnAccessibilityEvent(type);
     TAG_LOGI(AceLogTag::ACE_ROUTER, "LoadPage Success");
+    auto pipeline = pageNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_LOAD_PAGE,
+        pageNode->GetAccessibilityId());
 }
 
 RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPageInfo& target)
@@ -2074,6 +2110,7 @@ void PageRouterManager::CleanPageOverlay()
 
 void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
 {
+    UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
         return;

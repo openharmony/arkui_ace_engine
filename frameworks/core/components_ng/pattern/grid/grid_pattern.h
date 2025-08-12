@@ -174,7 +174,7 @@ public:
 
     bool UpdateStartIndex(int32_t index, ScrollAlign align);
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return EstimateHeight();
     }
@@ -268,6 +268,7 @@ public:
 
     void HandleOnItemFocus(int32_t index);
 
+    void OnColorModeChange(uint32_t colorMode) override;
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

@@ -22,6 +22,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -58,6 +59,7 @@ constexpr int32_t BUILD_PARAM_INDEX_THIS_OBJ = 5;
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
+    ACE_REUSE_DETECTION_SCOPED_TRACE("JSBaseNode:BuildNode");
     auto builder = info[0];
     CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
@@ -247,7 +249,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         return;
     }
     TouchEvent touchEvent;
-    if (InitTouchEvent(info, touchEvent, true)) {
+    if (!InitTouchEvent(info, touchEvent, true)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
@@ -375,6 +377,8 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
         touchEvent.y = itemObj->GetPropertyValue<float>("y", 0.0f);
         touchEvent.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+        touchEvent.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+        touchEvent.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
         touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
     return true;
@@ -413,6 +417,8 @@ bool JSBaseNode::GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touch
     touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     touchEvent.width = itemObj->GetPropertyValue<float>("width", 0);
     touchEvent.height = itemObj->GetPropertyValue<float>("height", 0);
+    touchEvent.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+    touchEvent.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
     auto pressedTimeJsVal = itemObj->GetProperty("pressedTime");
     if (pressedTimeJsVal->IsNumber()) {
         std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeJsVal->ToNumber<double>()));
@@ -455,6 +461,8 @@ bool JSBaseNode::GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEv
         point.width = itemObj->GetPropertyValue<float>("width", 0);
         point.height = itemObj->GetPropertyValue<float>("height", 0);
         point.operatingHand = itemObj->GetPropertyValue<int32_t>("hand", 0);
+        point.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+        point.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
         auto pressedTimeJsVal = itemObj->GetProperty("pressedTime");
         if (pressedTimeJsVal->IsNumber()) {
             std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeJsVal->ToNumber<double>()));
@@ -589,6 +597,14 @@ bool JSBaseNode::InitMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEve
     if (yJsVal->IsNumber()) {
         mouseEvent.y = yJsVal->ToNumber<float>();
     }
+    auto globalDisplayXJsVal = obj->GetProperty("globalDisplayX");
+    if (globalDisplayXJsVal->IsNumber()) {
+        mouseEvent.globalDisplayX = globalDisplayXJsVal->ToNumber<double>();
+    }
+    auto globalDisplayYJsVal = obj->GetProperty("globalDisplayY");
+    if (globalDisplayYJsVal->IsNumber()) {
+        mouseEvent.globalDisplayY = globalDisplayYJsVal->ToNumber<double>();
+    }
     auto buttonJsVal = obj->GetProperty("button");
     if (buttonJsVal->IsNumber()) {
         mouseEvent.button = static_cast<MouseButton>(buttonJsVal->ToNumber<int32_t>());
@@ -701,6 +717,14 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     auto screenYJsVal = obj->GetProperty("displayY");
     if (screenYJsVal->IsNumber()) {
         axisEvent.screenY = screenYJsVal->ToNumber<float>();
+    }
+    auto globalDisplayXJsVal = obj->GetProperty("globalDisplayX");
+    if (globalDisplayXJsVal->IsNumber()) {
+        axisEvent.globalDisplayX = globalDisplayXJsVal->ToNumber<double>();
+    }
+    auto globalDisplayYJsVal = obj->GetProperty("globalDisplayY");
+    if (globalDisplayYJsVal->IsNumber()) {
+        axisEvent.globalDisplayY = globalDisplayYJsVal->ToNumber<double>();
     }
 
     AxisInfo* axisInfo = obj->Unwrap<AxisInfo>();

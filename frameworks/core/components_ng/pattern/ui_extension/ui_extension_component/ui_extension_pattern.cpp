@@ -151,6 +151,18 @@ void UIExtensionPattern::Initialize()
     hasInitialize_ = true;
 }
 
+/* only for 1.2 begin */
+bool UIExtensionPattern::GetIsTransferringCaller()
+{
+    return isTransferringCaller_;
+}
+
+void UIExtensionPattern::SetIsTransferringCaller(bool isTransferringCaller)
+{
+    isTransferringCaller_ = isTransferringCaller;
+}
+/* only for 1.2 end */
+
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 {
     return MakeRefPtr<UIExtensionLayoutAlgorithm>();
@@ -189,6 +201,16 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
         instanceId_ = newInstanceId;
         UpdateSessionInstanceId(newInstanceId);
     }
+    /* only for 1.2 begin */
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        auto wantWrap = GetWantWrap();
+        CHECK_NULL_VOID(wantWrap);
+        UIEXT_LOGI("OnAttachContext UpdateWant, newInstanceId: %{public}d", instanceId_);
+        UpdateWant(wantWrap);
+        SetWantWrap(nullptr);
+        hasAttachContext_ = true;
+    }
+    /* only for 1.2 end */
 }
 
 void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
@@ -242,6 +264,7 @@ void UIExtensionPattern::RegisterUIExtensionManagerEvent(int32_t instanceId)
 
 void UIExtensionPattern::OnDetachContext(PipelineContext *context)
 {
+    hasAttachContext_ = false;
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
     if (instanceId != instanceId_) {
@@ -539,7 +562,7 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
-    if ((usage_ == UIExtensionUsage::MODAL) && focusHub) {
+    if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
@@ -617,8 +640,21 @@ void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t node
 void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
 {
     UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    windowSceneVisible_ = visible;
     if (!visible) {
-        OnWindowHide();
+        auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (!pattern->IsWindowSceneVisible()) {
+                    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "window hide by window scene change invisible.");
+                    pattern->OnWindowHide();
+                }
+            }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnWindowSceneInVisible");
     }
 }
 
@@ -759,6 +795,8 @@ void UIExtensionPattern::OnWindowHide()
     } else if (state_ == AbilityState::FOREGROUND) {
         NotifyBackground(false);
     }
+    curVisible_ = false;
+    isVisible_ = false;
 }
 
 void UIExtensionPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
@@ -1495,6 +1533,11 @@ void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<Wan
     }
     state_ = AbilityState::DESTRUCTION;
     SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
+    // Release the session if current UEC is use for EMBEDDED.
+    if ((sessionType_ == SessionType::UI_EXTENSION_ABILITY) && (usage_ != UIExtensionUsage::MODAL)
+        && sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
 }
 
 void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback)
@@ -1567,9 +1610,33 @@ bool UIExtensionPattern::GetDensityDpi()
     return densityDpi_;
 }
 
-void UIExtensionPattern::OnVisibleChangeInner(bool visible)
+void UIExtensionPattern::OnVisibleChange(bool visible)
 {
-    UIEXT_LOGI("The component is changing from '%{public}s' to '%{public}s'.", isVisible_ ? "visible" : "invisible",
+    UIEXT_LOGI("The component visiblity property changing from '%{public}s' to '%{public}s'.",
+        visiblityProperty_ ? "visible" : "invisible", visible ? "visible" : "invisible");
+    visiblityProperty_ = visible;
+    if (!visible) {
+        auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (!pattern->GetVisiblityProperty()) {
+                    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "NotifyBackground by change invisible.");
+                    pattern->NotifyBackground();
+                    pattern->SetRealVisible(false);
+                    pattern->SetCurVisible(false);
+                }
+            }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnVisibleChange");
+    }
+}
+
+void UIExtensionPattern::OnRealVisibleChangeInner(bool visible)
+{
+    UIEXT_LOGI("visible change inner from '%{public}s' to '%{public}s'.", isVisible_ ? "visible" : "invisible",
         visible ? "visible" : "invisible");
     isVisible_ = visible;
     if (visible) {
@@ -1739,7 +1806,7 @@ void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
     bool curVisible = !NearEqual(ratio, SHOW_START);
     if (curVisible_ != curVisible) {
         curVisible_ = curVisible;
-        OnVisibleChangeInner(curVisible_);
+        OnRealVisibleChangeInner(curVisible_);
     }
 
     if (needCheckDisplayArea) {
@@ -1798,7 +1865,11 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 
 void UIExtensionPattern::SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    curWant_ = wantWrap;
+    if (hasAttachContext_) {
+        UpdateWant(wantWrap);
+    } else {
+        curWant_ = wantWrap;
+    }
 }
 
 RefPtr<OHOS::Ace::WantWrap> UIExtensionPattern::GetWantWrap()

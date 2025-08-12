@@ -90,7 +90,7 @@ public:
     void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation = false);
     void SwitchToHandleMode(HandleLevelMode mode, bool forceChange = true);
     float GetHandleDiameter();
-    void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
+    void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point, bool passThrough = false);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
@@ -105,6 +105,7 @@ public:
     bool IsSelectOverlaySubWindowMenu();
     void FocusFirstFocusableChildInMenu();
     void NotifyAccessibilityOwner();
+    void UpdateIsSingleHandle(bool isSingleHandle);
     static bool IsPasteOption(const RefPtr<UINode>& node);
 
 private:

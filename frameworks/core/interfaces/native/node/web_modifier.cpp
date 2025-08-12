@@ -37,7 +37,7 @@ constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
 constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
-constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_OVERVIEW_MODE_ACCESS = false;
 constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
@@ -480,7 +480,7 @@ void ResetOverviewModeAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEWMODE_ACCESS_ENABLED);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEW_MODE_ACCESS);
 }
 
 void SetForceDarkAccess(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1062,7 +1062,10 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1076,9 +1079,9 @@ void SetJavaScriptOnDocumentStart(ArkUINodeHandle node, ArkUI_ScriptItemArray* v
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentStart(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentStart(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentStart(ArkUINodeHandle node)
@@ -1092,7 +1095,10 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScriptItems SecriptInfos;
+    if (size <= 0) {
+        return;
+    }
+    ScriptItems scriptInfos;
     for (int32_t i = 0; i < size; ++i) {
         std::string script;
         ScriptItemsByOrder scriptRules;
@@ -1106,9 +1112,9 @@ void SetJavaScriptOnDocumentEnd(ArkUINodeHandle node, ArkUI_ScriptItemArray* val
             tmp.push_back(sc);
         }
         scriptRules = tmp;
-        SecriptInfos.insert(std::make_pair(script, scriptRules));
+        scriptInfos.insert(std::make_pair(script, scriptRules));
     }
-    WebModelNG::JavaScriptOnDocumentEnd(frameNode, SecriptInfos);
+    WebModelNG::JavaScriptOnDocumentEnd(frameNode, scriptInfos);
 }
 
 void ResetJavaScriptOnDocumentEnd(ArkUINodeHandle node)
@@ -2129,6 +2135,25 @@ void ResetOnBeforeUnload(ArkUINodeHandle node)
     WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
 }
 
+void SetJavaScriptProxy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* jsProxyCallback = reinterpret_cast<std::function<void()>*>(extraParam);
+        WebModelNG::SetJavaScriptProxy(frameNode, std::move(*jsProxyCallback));
+    } else {
+        WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+    }
+}
+
+void ResetJavaScriptProxy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2332,6 +2357,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnFaviconReceived = ResetOnFaviconReceived,
         .setOnBeforeUnload = SetOnBeforeUnload,
         .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2539,6 +2566,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnFaviconReceived = ResetOnFaviconReceived,
         .setOnBeforeUnload = SetOnBeforeUnload,
         .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

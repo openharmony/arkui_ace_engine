@@ -245,6 +245,11 @@ public:
         return sheetType_;
     }
 
+    const std::string& GetSheetBottomType() const
+    {
+        return sheetBottom_;
+    }
+
     const int& GetSheetBackgroundBlurStyle() const
     {
         return sheetBackgroundBlurStyle_;

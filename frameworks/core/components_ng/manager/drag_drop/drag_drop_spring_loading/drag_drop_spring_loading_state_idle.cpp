@@ -35,6 +35,6 @@ void DragDropSpringLoadingStateIdle::OnEnter(std::string_view extraInfo)
             stateMachine->SetWaitingForIdleFinish(false);
             stateMachine->RequestStatusTransition(DragDropSpringLoadingState::BEGIN, extraInfoStr);
         },
-        config->stillTimeLimit, DRAG_GROP_SPRING_LOADING_TASK_NAME);
+        config->stillTimeLimit, DRAG_DROP_SPRING_LOADING_TASK_NAME);
 }
 } // namespace OHOS::Ace::NG

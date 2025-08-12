@@ -1255,6 +1255,11 @@ void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::s
     ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    if (parentAceContainer->IsUIExtensionWindow()) {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    }
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),
@@ -1679,8 +1684,8 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    SetIsToastWindow(toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
-                     toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST || parentContainer->IsSceneBoardWindow());
+    SetIsToastWindow(
+        toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId : %{public}d", childContainerId_);

@@ -288,7 +288,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           // send viewPropertyHasChanged right away
           this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
         } else {
-          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies(), true);
         }
         // send changed observed property to profiler
         // only will be true when enable profiler
@@ -323,7 +323,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
         } else {
           this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_,
-            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'), false);
         }
         
         // send changed observed property to profiler
@@ -370,6 +370,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
+    // FIXME enable the check when V1-V2 interoperability is forbidden
+    // && !ObserveV2.IsProxiedObservedV2(value)
     let res = ((typeof value === 'object' && typeof value !== 'function' &&
       !ObserveV2.IsObservedObjectV2(value) &&
       !ObserveV2.IsMakeObserved(value)) ||

@@ -19,5 +19,8 @@
 
 struct PinchGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::PinchGestureEvent> {
+protected:
+    PinchGestureEventPeer() = default;
     ~PinchGestureEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

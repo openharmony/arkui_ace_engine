@@ -508,6 +508,8 @@ public:
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
         bool isRouter = true, bool ignoreOrientation = false) {}
 
+    virtual void SetForceSplitConfig(const std::string& configJsonStr) {}
+
     virtual void EnableContainerModalGesture(bool isEnable) {};
 
     virtual bool GetContainerFloatingTitleVisible()

@@ -86,7 +86,4 @@ const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanv
     return &OffscreenCanvasRenderingContext2DAccessorImpl;
 }
 
-struct OffscreenCanvasRenderingContext2DPeer {
-    virtual ~OffscreenCanvasRenderingContext2DPeer() = default;
-};
 }

@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ScrollPattern;
+class AxisAnimator;
 enum class ScrollEdge;
 
 /**
@@ -37,12 +38,12 @@ public:
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
+        freePanGesture_->SetEnabled(enableScroll_); // workaround gesture's internal reset
         return freePanGesture_;
     }
 
     /**
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
-     * @attention doesn't allow over-scroll
      */
     void SetOffset(OffsetF newPos, bool allowOverScroll = false);
     inline void UpdateOffset(const OffsetF& delta)
@@ -53,6 +54,10 @@ public:
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
+    const OffsetF& GetLayoutOffset() const
+    {
+        return actualOffset_;
+    }
 
     /**
      * @brief Start a scroll animation to the final position.
@@ -72,22 +77,27 @@ private:
     void HandleTouchUpOrCancel();
 
     /**
+     * @brief update callback of AnimatableProperty @c offset_.
+     */
+    void HandleOffsetUpdate(const OffsetF& currentValue);
+
+    /**
      * @brief Start the scroll animation if possible with the given velocity and offset_.
      */
     void Fling(const OffsetF& velocity);
     void StopScrollAnimation();
-    void HandleAnimationUpdate(const OffsetF& currentValue);
     void HandleAnimationEnd();
 
     /**
      * @brief clamp position to be within the scrollable area.
      */
-    void ClampPosition(OffsetF& finalPos) const;
+    OffsetF ClampPosition(const OffsetF& finalPos) const;
 
     /**
      * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.
+     * @return true if any edge is reached, false otherwise.
      */
-    void CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
+    bool CheckCrashEdge(const OffsetF& newOffset, const SizeF& scrollableArea) const;
 
     /**
      * @brief triggers onWillScroll user callback
@@ -99,13 +109,29 @@ private:
     void FireOnScrollEnd() const;
     void FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const;
 
+    void AnimateOnMouseScroll(const OffsetF& delta);
+    void HandleAxisAnimationFrame(float newOffset);
+
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
-    OffsetF prevOffset_;
+    OffsetF actualOffset_; // actual displayed offset, adjusted by LayoutAlgorithm
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
-    ScrollState state_ = ScrollState::IDLE;
+    RefPtr<AxisAnimator> axisAnimator_; // to smooth out mouse wheel scrolls
+
+public:
+    enum class State {
+        IDLE,
+        DRAG,
+        FLING,
+        EXTERNAL_FLING, // used for external animations like scroller animation
+        BOUNCE,         // used for bounce animation transitioned from FLING when reaching edge
+    };
+
+private:
+    State state_ = State::IDLE;
     bool enableScroll_ = true;
+    bool mouseWheelScrollIsVertical_ = true;
 };
 
 } // namespace OHOS::Ace::NG

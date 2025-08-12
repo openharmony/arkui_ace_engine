@@ -57,6 +57,8 @@ public:
     {}
     ~ListItemPattern() override = default;
 
+    void OnRecycle() override;
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -281,6 +283,9 @@ private:
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();

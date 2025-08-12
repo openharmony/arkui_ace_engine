@@ -276,12 +276,12 @@ void SetTextForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t c
     CHECK_NULL_VOID(frameNode);
     if (isColor) {
         TextModelNG::SetTextColor(frameNode, Color(color));
+        NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), colorRawPtr);
     } else {
         TextModelNG::SetTextColor(frameNode, Color::FOREGROUND);
         auto strategy = static_cast<ForegroundColorStrategy>(color);
         ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
     }
-    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), colorRawPtr);
 }
 
 void ResetTextForegroundColor(ArkUINodeHandle node)
@@ -515,7 +515,7 @@ void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
     NodeModifier::ProcessResourceObj<CalcDimension>(
-        frameNode, "AdapttMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
+        frameNode, "AdaptMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
 }
 
 void ResetTextMaxFontSize(ArkUINodeHandle node)
@@ -526,7 +526,7 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("AdapttMaxFontSize");
+        pattern->UnRegisterResource("AdaptMaxFontSize");
     }
 }
 
@@ -629,20 +629,22 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
     std::vector<RefPtr<ResourceObject>> colorResArr;
     std::vector<RefPtr<ResourceObject>> offsetXResArr;
     std::vector<RefPtr<ResourceObject>> offsetYResArr;
-    if (radiusResArrs != nullptr) {
-        radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
-    }
-    if (colorResArrs != nullptr) {
-        colorResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
-    }
-    if (offsetXResArrs != nullptr) {
-        offsetXResArr =
-            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
-    }
-    if (offsetYResArrs != nullptr) {
-        offsetYResArr =
-        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+    if (SystemProperties::ConfigChangePerform()) {
+            if (radiusResArrs != nullptr) {
+            radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
+        }
+        if (colorResArrs != nullptr) {
+            colorResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
+        }
+        if (offsetXResArrs != nullptr) {
+            offsetXResArr =
+                *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
+        }
+        if (offsetYResArrs != nullptr) {
+            offsetYResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+        }
     }
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
@@ -653,11 +655,13 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
-        RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
-        RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
-        RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
-        Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        if (SystemProperties::ConfigChangePerform()) {
+            RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
+            RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
+            RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
+            Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
+        }
         shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
@@ -1267,7 +1271,6 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
     textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
-    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
     if (SystemProperties::ConfigChangePerform()) {
         if (entityColorRawPtr) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityColorRawPtr));
@@ -1278,6 +1281,7 @@ void SetTextDataDetectorConfigWithEvent(
             TextDetectConfig::RegisterDecoColorResource(textDetectConfig, resObj);
         }
     }
+    TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
 void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
@@ -1702,6 +1706,9 @@ ArkUI_Int32 GetTextLinearGradient(
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stop)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -1755,14 +1762,16 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     CHECK_NULL_RETURN(radialGradient, ERROR_INT_CODE);
     (*values)[NUM_0] = radialGradient->radialCenterX->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_1] = radialGradient->radialCenterY->GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] =
-        gradient.GetRadialGradient()->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = radialGradient->radialHorizontalSize->GetNativeValue(static_cast<DimensionUnit>(unit));
     (*values)[NUM_3] = gradient.GetRepeat();
 
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     //0 start index
     int index = 0;
     for (auto& gradientColor : gradientColors) {
+        if (index >= NUM_10) {
+            break;
+        }
         (*colors)[index] = gradientColor.GetColor().GetValue();
         (*stops)[index] = gradientColor.GetDimension().Value();
         index++;
@@ -2127,10 +2136,11 @@ void ResetOnDetectResultUpdate(ArkUINodeHandle node)
 template<typename T>
 void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         pattern->RegisterResource<T>(key, resObj, value);
     } else {

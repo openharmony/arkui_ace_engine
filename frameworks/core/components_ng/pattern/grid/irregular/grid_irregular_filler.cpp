@@ -65,6 +65,9 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
 {
+    if (startingLine < 0) {
+        startingLine = 0;
+    }
     if (targetIdx >= info_->GetChildrenCount()) {
         targetIdx = info_->GetChildrenCount() - 1;
     }
@@ -219,7 +222,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-
+    
+    if (isCache) {
+        child->SetActive();
+    }
     child->Measure(constraint);
     SetItemInfo(child, itemIdx, row, col, itemSize);
 

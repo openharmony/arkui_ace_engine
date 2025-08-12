@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 struct ImageBitmapPeer : public OHOS::Ace::Referenced {
 public:
@@ -33,7 +34,7 @@ public:
     void SetWidth(double width);
     double GetHeight();
     void SetHeight(double height);
-    std::string GetSrc();
+    virtual std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
 
     virtual OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> GetPixelMap() const
@@ -48,7 +49,7 @@ public:
     {
         imageData_ = imageData;
     }
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> GetSvgDom()
+    virtual OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> GetSvgDom()
     {
         return svgDom_;
     }
@@ -60,11 +61,11 @@ public:
     {
         return instanceId_;
     }
-    bool IsSvg()
+    virtual bool IsSvg()
     {
         return sourceInfo_.IsSvg();
     }
-    OHOS::Ace::ImageFit GetImageFit()
+    virtual OHOS::Ace::ImageFit GetImageFit()
     {
         return imageFit_;
     }
@@ -82,7 +83,8 @@ public:
     }
     double GetDensity()
     {
-        return 0;
+        double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
     size_t GetBindingSize() const
     {

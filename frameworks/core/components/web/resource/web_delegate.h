@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
@@ -31,6 +32,7 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -39,6 +41,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "frameworks/core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
@@ -466,19 +469,28 @@ public:
         size_t height,
         OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType)
-        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)
+        {
+            SetPixelMap();
+        }
     const void* GetData() override;
     size_t GetWidth() override;
     size_t GetHeight() override;
     int GetColorType() override;
     int GetAlphaType() override;
+    Media::PixelFormat GetMediaPixelFormat() override;
+    Media::AlphaType GetMediaAlphaType() override;
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
 
 private:
+    void SetPixelMap() override;
+
     const void* data_ = nullptr;
     size_t width_ = 0;
     size_t height_ = 0;
     OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
     OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+    std::shared_ptr<Media::PixelMap> pixelMap_;
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
@@ -971,6 +983,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -1173,6 +1186,7 @@ public:
     void Backward();
     bool AccessBackward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+    bool OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
@@ -1182,6 +1196,10 @@ public:
 
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
+
+    std::string GetAllTextInfo() const;
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
@@ -1215,6 +1233,8 @@ public:
     void SetSurfaceId(const std::string& surfaceId);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+
+    void OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
 
     void OnCursorUpdate(double x, double y, double width, double height);
 
@@ -1322,9 +1342,7 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
-    void TextBlurReportByBlurEvent(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
 
@@ -1546,7 +1564,9 @@ private:
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
+    double density_ = 0.0;
 
+    bool isVisible_ = false;
 #endif
 };
 

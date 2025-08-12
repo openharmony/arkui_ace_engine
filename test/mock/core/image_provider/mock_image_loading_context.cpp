@@ -20,9 +20,10 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(
-    const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
-    : src_(src), notifiers_(loadNotifier), syncLoad_(syncLoad), imageDfxConfig_(imageDfxConfig)
+ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
+    bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
+    : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad), isSceneBoardWindow_(isSceneBoardWindow),
+      imageDfxConfig_(imageDfxConfig)
 {}
 
 ImageLoadingContext::~ImageLoadingContext() = default;

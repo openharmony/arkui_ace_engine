@@ -22,7 +22,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-    // SUB_WINDOW_MANAGER = 
+    const int32_t CONATINERID = 100000;
 } // namespace
 
 class SubwindowManagerTest : public testing::Test {
@@ -85,7 +85,7 @@ HWTEST_F(SubwindowManagerTest, CloseDialog001, TestSize.Level1)
      */
     auto manager = SubwindowManager::GetInstance();
     ASSERT_NE(manager, nullptr);
-    manager->CloseDialog(100000);
+    manager->CloseDialog(CONATINERID);
 }
 
 /**

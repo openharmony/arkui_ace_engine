@@ -86,12 +86,12 @@ public:
         return color_;
     }
 
-    void SetColor(const Color color)
+    void SetColor(const Color& color)
     {
         color_ = color;
     }
 
-    void SetNodeTag(const std::string nodeTag)
+    void SetNodeTag(const std::string& nodeTag)
     {
         nodeTag_ = nodeTag;
     }

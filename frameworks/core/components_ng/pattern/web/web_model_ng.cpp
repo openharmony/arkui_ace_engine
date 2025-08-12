@@ -1291,6 +1291,14 @@ void WebModelNG::SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback)
     webPattern->SetSetWebDetachCallback(std::move(jsCallback));
 }
 
+void WebModelNG::SetFaviconFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetFaviconFunction(std::move(jsCallback));
+}
+
 void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -2446,5 +2454,12 @@ void WebModelNG::SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPdfLoadEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& jsProxyCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
 }
 } // namespace OHOS::Ace::NG

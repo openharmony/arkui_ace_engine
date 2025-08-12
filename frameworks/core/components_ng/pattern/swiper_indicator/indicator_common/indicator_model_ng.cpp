@@ -231,7 +231,7 @@ void IndicatorModelNG::ProcessDotSizeWithResourceObj(FrameNode* frameNode, const
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionVpNG(theObj, result);
             if (!(parseOk && result > 0.0_vp)) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
@@ -270,7 +270,7 @@ void IndicatorModelNG::ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNod
             CalcDimension result;
             bool parseOk = ResourceParseUtils::ParseResDimensionFpNG(theObj, result);
             if (!parseOk || LessOrEqual(result.Value(), 0.0) || result.Unit() == DimensionUnit::PERCENT) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
@@ -305,7 +305,7 @@ void IndicatorModelNG::ProcessDotColorWithResourceObj(FrameNode* frameNode, cons
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             if (!parseOk) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);
@@ -336,7 +336,7 @@ void IndicatorModelNG::ProcessDigitalColorWithResourceObj(FrameNode* frameNode, 
             Color result;
             bool parseOk = ResourceParseUtils::ParseResColor(theObj, result);
             if (!parseOk) {
-                auto pipelineContext = PipelineBase::GetCurrentContext();
+                auto pipelineContext = node->GetContext();
                 CHECK_NULL_VOID(pipelineContext);
                 auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
                 CHECK_NULL_VOID(theme);

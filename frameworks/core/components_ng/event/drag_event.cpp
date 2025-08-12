@@ -648,7 +648,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             }
         }
         actuator->isDragPrepareFinish_ = true;
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -681,7 +681,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdate = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                 GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 800ms.");
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
 
         auto manager = pipeline->GetOverlayManager();
@@ -765,7 +765,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         option.SetOnFinishEvent(
             [id = Container::CurrentId(), pointerId = info.GetPointerId(), hasContextMenuUsingGesture]() {
                 ContainerScope scope(id);
-                auto pipeline = PipelineContext::GetCurrentContext();
+                auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
                 auto dragDropManager = pipeline->GetDragDropManager();
                 CHECK_NULL_VOID(dragDropManager);
@@ -1582,11 +1582,13 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         }
         // 长按ai菜单预览回落时，执行弹出ai菜单操作
         pattern->ShowAIEntityMenuForCancel();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
+        if (!pattern->IsPreviewMenuShow()) {
+            auto manager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(manager);
+            manager->RemovePixelMap();
+        }
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -1633,6 +1635,15 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         },
         option.GetOnFinishEvent());
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set hide text animation success.");
+}
+
+void DragEventActuator::RemovePixelMap()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
 }
 
 bool DragEventActuator::GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator)

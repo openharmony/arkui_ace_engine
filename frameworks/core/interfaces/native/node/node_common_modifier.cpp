@@ -52,7 +52,9 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
+#include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "securec.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -89,6 +91,7 @@ constexpr int32_t DEFAULT_GRIDSPAN = 1;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
+constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
@@ -952,6 +955,66 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
+LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
+    const ArkUI_Int32* ignoreEdges, ArkUI_Uint32 size, LayoutSafeAreaEdge defaultVal)
+{
+    if (ignoreEdges == nullptr || size == 0) {
+        return NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    }
+    static std::vector<uint32_t> layoutEdgeEnum {
+        NG::LAYOUT_SAFE_AREA_EDGE_TOP,
+        NG::LAYOUT_SAFE_AREA_EDGE_BOTTOM,
+        NG::LAYOUT_SAFE_AREA_EDGE_START,
+        NG::LAYOUT_SAFE_AREA_EDGE_END,
+        NG::LAYOUT_SAFE_AREA_EDGE_VERTICAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_HORIZONTAL,
+        NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    for (uint32_t i = 0; i < size; ++i) {
+        if (ignoreEdges[i] < 0 || ignoreEdges[i] > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+            return defaultVal;
+        }
+        edges |= layoutEdgeEnum[ignoreEdges[i]];
+    }
+    return edges;
+}
+
+void SetBackground(ArkUINodeHandle node, const ArkUIBackgroundContent* content, const ArkUIBackgroundOptions* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    CHECK_NULL_VOID(options);
+
+    ViewAbstract::SetIsTransitionBackground(frameNode, true);
+    ViewAbstract::SetIsBuilderBackground(frameNode, false);
+    Alignment alignment = ParseAlignment(options->align);
+    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+    LayoutSafeAreaEdge edges = ParseIgnoresLayoutSafeAreaEdges(
+        options->ignoresLayoutSafeAreaEdges, options->ignoresLayoutSafeAreaEdgesSize,
+        LAYOUT_SAFE_AREA_EDGE_ALL);
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, edges);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* resObj = reinterpret_cast<ResourceObject*>(content->bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(resObj);
+        ViewAbstract::SetCustomBackgroundColorWithResourceObj(frameNode, Color(content->color), backgroundColorResObj);
+    } else {
+        ViewAbstract::SetCustomBackgroundColor(frameNode, Color(content->color));
+    }
+}
+
+void ResetBackground(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetIsTransitionBackground(frameNode, true);
+    ViewAbstract::SetIsBuilderBackground(frameNode, false);
+    ViewAbstract::SetBackgroundAlign(frameNode, Alignment::CENTER);
+    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, LAYOUT_SAFE_AREA_EDGE_ALL);
+    ViewAbstract::SetCustomBackgroundColor(frameNode, Color::TRANSPARENT);
+}
+
 void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1536,7 +1599,7 @@ void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIS
         if (vaild) {
             if (SystemProperties::ConfigChangePerform() && rawPtr) {
                 auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-                ViewAbstract::SetPosition(frameNode, x.value(), y.value(), objs[0], objs[1]);
+                ViewAbstract::SetPosition(frameNode, offset, objs[0], objs[1]);
             } else {
                 ViewAbstract::SetPosition(frameNode, offset);
             }
@@ -3314,6 +3377,7 @@ void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGe
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetGeometryTransition, node, id, options);
     std::string idStr(id);
     ViewAbstract::SetGeometryTransition(frameNode, idStr,
         static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
@@ -3335,6 +3399,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, ResetGeometryTransition, node);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
@@ -6347,10 +6412,10 @@ void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t value
     ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderColor");
     int32_t colorOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
-    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
         if (objs.size() > NUM_3) {
@@ -8752,6 +8817,8 @@ const ArkUICommonModifier* GetCommonModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
         .setOnTouchTestDoneCallback = SetOnTouchTestDoneCallback,
+        .setBackground = SetBackground,
+        .resetBackground = ResetBackground,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -9895,7 +9962,14 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9937,7 +10011,14 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ON_KEY_PREIME;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -9977,7 +10058,14 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
         event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
         event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
-        event.keyEvent.keyText = info.GetKeyText().c_str();
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
         event.keyEvent.unicode = info.GetUnicode();
@@ -10366,7 +10454,7 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     event.hoverEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
     // tiltX tiltY
     event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
-    event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    event.hoverEvent.tiltY = info.GetTiltY().value_or(0.0f);
     // rollAngle
     event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     // stoppropagation
@@ -10417,6 +10505,34 @@ void SetOnTextSpanLongPress(ArkUINodeHandle node, void* extraParam)
     }
 }
 
+void SetOnHoverMoveEvent(ArkUINodeEvent& event, const HoverInfo& info, const bool usePx)
+{
+    event.touchEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    event.touchEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    event.touchEvent.timeStamp = info.GetTimeStamp().time_since_epoch().count();
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.touchEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.touchEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.touchEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.touchEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.touchEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.touchEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // modifierkeystates
+    event.touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // pressure
+    event.touchEvent.actionTouchPoint.pressure = 0.0f;
+}
+
 void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10441,6 +10557,8 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         event.touchEvent.deviceId = info.GetDeviceId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node *>(extraParam));
+        SetOnHoverMoveEvent(event, info, usePx);
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHoverMove(frameNode, onEvent);

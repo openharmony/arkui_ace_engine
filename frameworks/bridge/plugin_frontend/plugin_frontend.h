@@ -163,14 +163,14 @@ public:
         }
     }
 
-    void SetPluginBundleName(const std::string& pluginBundleName)
+    virtual void SetPluginBundleName(const std::string& pluginBundleName)
     {
         if (jsEngine_) {
             jsEngine_->SetPluginBundleName(pluginBundleName);
         }
     }
 
-    void SetPluginModuleName(const std::string& pluginModuleName)
+    virtual void SetPluginModuleName(const std::string& pluginModuleName)
     {
         if (jsEngine_) {
             jsEngine_->SetPluginModuleName(pluginModuleName);

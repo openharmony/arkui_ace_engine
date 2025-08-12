@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -26,6 +27,7 @@ static std::string g_setReturnStatus = "";
 const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
+std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -613,6 +615,14 @@ public:
         delegate->HandleAutoFillEvent(result);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWeb::NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(value);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };
@@ -807,9 +817,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
 void WebDelegate::OnAccessibilityEvent(
     int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
 {}
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {}
@@ -994,8 +1002,20 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
+
 void WebDelegate::HandleAccessibilityHoverEvent(
-    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time) {}
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
+{
+    std::string surfaceId = "";
+    if (point.GetX() >= 0 && point.GetY() >= 0) {
+        surfaceId = "existSurfaceId";
+    }
+    if (GetWebAccessibilityIdBySurfaceId(surfaceId) == -1) {
+        surfaceToWebAccessibilityMap.erase("hoverSurfaceId");
+    } else {
+        surfaceToWebAccessibilityMap["hoverSurfaceId"] = 1;
+    }
+}
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
@@ -1016,6 +1036,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     auto it = surfaceToWebAccessibilityMap.find(surfaceId);
     if (it != surfaceToWebAccessibilityMap.end()) {
         return it->second;
@@ -1160,6 +1183,9 @@ void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1168,6 +1194,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAc
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1176,6 +1205,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    if (g_setReturnStatus == STATUS_TRUE && g_customAccessibilityNode) {
+        return g_customAccessibilityNode;
+    }
     if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
@@ -1186,6 +1218,10 @@ OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() cons
     return OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
 }
 bool WebDelegate::OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    return false;
+}
+bool WebDelegate::OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param)
 {
     return false;
 }
@@ -1219,6 +1255,18 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 std::string WebDelegate::GetSelectInfo() const
 {
     return "";
+}
+std::string WebDelegate::GetAllTextInfo() const
+{
+    return "";
+}
+int WebDelegate::GetSelectStartIndex() const
+{
+    return 0;
+}
+int WebDelegate::GetSelectEndIndex() const
+{
+    return 0;
 }
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
@@ -1268,6 +1316,10 @@ bool WebDelegate::CloseImageOverlaySelection()
 void SetReturnStatus(const std::string& status)
 {
     g_setReturnStatus = status;
+}
+void SetReturnNode(std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node)
+{
+    g_customAccessibilityNode = node;
 }
 void SetComponentType(const std::string& type)
 {
@@ -1322,7 +1374,10 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
 void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
-void WebDelegate::SetVisibility(bool isVisible) {}
+void WebDelegate::SetVisibility(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}

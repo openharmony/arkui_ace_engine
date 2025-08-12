@@ -127,6 +127,8 @@ public:
     void DoSetActiveChildRange(
         int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
+    void FireRecycleRenderFunc() override;
+
     const WeakPtr<UINode>& GetNavigationNode() const
     {
         return navigationNode_;
@@ -147,6 +149,8 @@ private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
     void DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo);
+
+    RefPtr<CustomNode> FindParentCustomNode() const;
 
     std::string viewKey_;
     RenderFunction renderFunction_;

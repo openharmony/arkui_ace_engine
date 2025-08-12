@@ -634,7 +634,7 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
             CHECK_NULL_VOID(uiContent);
             auto subInstanceId = uiContent->GetInstanceId();
             ContainerScope scope(subInstanceId);
-            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent);
+            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent, keyEvent.isPreIme);
             TAG_LOGI(aceLogTag, "send key event: %{public}s, result = %{public}d",
                 keyEvent.ToString().c_str(), result);
         },
@@ -788,10 +788,22 @@ void DynamicComponentRendererImpl::DestroyContent()
     AfterDestroyContent();
 }
 
+void DynamicComponentRendererImpl::UnRegisterContainerHandler()
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    aceContainer->RegisterContainerHandler(nullptr);
+    TAG_LOGI(aceLogTag_, "UnRegisterContainerHandler");
+}
+
 void DynamicComponentRendererImpl::OnDestroyContent()
 {
     CHECK_NULL_VOID(uiContent_);
     UnRegisterConfigChangedCallback();
+    UnRegisterContainerHandler();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(

@@ -74,6 +74,8 @@ struct NavdestinationRecoveryInfo {
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
 
+const std::pair<bool, int32_t> DEFAULT_EXIST_FORCESPLIT_NAV_VALUE = {false, -1};
+
 class NavigationManager : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationManager, AceType);
 public:
@@ -94,7 +96,7 @@ public:
         pipeline_ = pipeline;
     }
 
-    void AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback);
+    void AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback);
     void RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth);
 
     void OnDumpInfo();
@@ -239,16 +241,48 @@ public:
     {
         return homePageName_;
     }
-    bool GetIgnoreOrientation() const
-    {
-        return ignoreOrientation_;
-    }
+    bool GetIgnoreOrientation() const;
+
     void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitListener(int32_t nodeId);
     bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);
 
     std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart);
+
+    //-------force split begin-------
+    void IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode);
+    void SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode);
+    void RemoveForceSplitNavStateIfNeed(int32_t nodeId);
+    void SetExistForceSplitNav(bool isTargetForceSplitNav, int32_t id)
+    {
+        existForceSplitNav_ = {isTargetForceSplitNav, id};
+    }
+    std::pair<bool, int32_t> GetExistForceSplitNav() const
+    {
+        return existForceSplitNav_;
+    }
+    bool TargetIdOrDepthExists() const
+    {
+        return forceSplitNavigationId_.has_value() || forceSplitNavigationDepth_.has_value();
+    }
+    void SetForceSplitNavigationId(std::optional<std::string> forceSplitNavigationId)
+    {
+        forceSplitNavigationId_ = forceSplitNavigationId;
+    }
+    void SetForceSplitNavigationDepth(std::optional<int32_t> forceSplitNavigationDepth)
+    {
+        forceSplitNavigationDepth_ = forceSplitNavigationDepth;
+    }
+    std::optional<std::string> GetTargetNavigationId() const
+    {
+        return forceSplitNavigationId_;
+    }
+    std::optional<int32_t> GetTargetNavigationDepth() const
+    {
+        return forceSplitNavigationDepth_;
+    }
+    //-------force split end-------
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -302,6 +336,13 @@ private:
     std::string homePageName_;
     std::unordered_map<int32_t, std::function<void()>> forceSplitListeners_;
     bool ignoreOrientation_ = false;
+
+    //-------force split begin-------
+    int32_t currNestedDepth_ = 0;
+    std::pair<bool, int32_t> existForceSplitNav_ = DEFAULT_EXIST_FORCESPLIT_NAV_VALUE;
+    std::optional<std::string> forceSplitNavigationId_;
+    std::optional<int32_t> forceSplitNavigationDepth_;
+    //-------force split end-------
 };
 } // namespace OHOS::Ace::NG
 

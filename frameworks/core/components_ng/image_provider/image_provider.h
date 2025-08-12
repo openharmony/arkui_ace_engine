@@ -86,7 +86,8 @@ public:
      *    @param ctxWp                ImageLoadingContext that initiates the task, to be stored in the map
      *    @param sync                 if true, run task synchronously
      */
-    static void CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
+    static void CreateImageObject(
+        const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync, bool isSceneBoardWindow);
 
     /** Decode image data and make CanvasImage from ImageObject.
      *
@@ -138,7 +139,7 @@ private:
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 
     // helper function to create image object from ImageSourceInfo
-    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
+    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false, bool isSceneBoardWindow = false);
 
     static void DownLoadSuccessCallback(
         const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync = false, int32_t containerId = 0);

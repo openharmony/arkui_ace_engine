@@ -29,7 +29,7 @@ struct NavContentInfo {
 };
 
 template<>
-inline void* Convert(const Ark_CustomObject& src)
+inline void* Convert(const Ark_Object& src)
 {
     return new NavigationTransitionProxyPeer();
 }
@@ -51,8 +51,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_NavigationTransitionProxy peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NavigationTransitionProxy CtorImpl()
@@ -105,10 +103,11 @@ void SetToImpl(Ark_NavigationTransitionProxy peer,
     Converter::Convert<Converter::NavContentInfo>(*to);
     LOGE("NavigationTransitionProxyAccessor::SetToImpl, modifying from attribute isn't supported");
 }
-Ark_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
+Opt_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->GetInteractive());
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer && peer->handler, invalid);
+    return Converter::ArkValue<Opt_Boolean>(peer->handler->GetInteractive());
 }
 void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
                           Ark_Boolean isInteractive)
@@ -136,7 +135,4 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
     return &NavigationTransitionProxyAccessorImpl;
 }
 
-struct NavigationTransitionProxyPeer {
-    virtual ~NavigationTransitionProxyPeer() = default;
-};
 }

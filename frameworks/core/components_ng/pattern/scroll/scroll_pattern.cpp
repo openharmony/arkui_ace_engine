@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ void ScrollPattern::OnModifyDone()
         // need to init after scrollableEvent
         if (axis == Axis::FREE) {
             freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            SetScrollEnabled(true); // always enable scrollEvent
             scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
             SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
             auto* ctx = GetRenderContext();
@@ -130,17 +131,17 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    if (!SetScrollProperties(dirty)) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!SetScrollProperties(dirty, host)) {
         return false;
     }
     UpdateScrollBarOffset();
-    if (config.frameSizeChange) {
+    if (config.frameSizeChange && isInitialized_) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
@@ -171,18 +172,21 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
     }
     ChangeCanStayOverScroll();
-    return paintProperty->GetFadingEdge().value_or(false);
+    return paintProperty->GetFadingEdge().value_or(false) ||
+            ((config.frameSizeChange || config.contentSizeChange) && paintProperty->GetContentClip().has_value());
 }
 
-bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
+bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host)
 {
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    if (freeScroll_) {
+    if (freeScroll_ && scrollBar2d_) {
         freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
+        scrollBar2d_->SyncLayout(
+            layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -207,7 +211,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         SetIntervalSize(Dimension(static_cast<double>(viewPortLength_)));
     }
     if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
-        CaleSnapOffsets();
+        CaleSnapOffsets(host);
         scrollSnapUpdate_ = false;
     }
     ProcessZoomScale();
@@ -230,6 +234,9 @@ bool ScrollPattern::ScrollSnapTrigger()
 
 void ScrollPattern::CheckScrollable()
 {
+    if (freeScroll_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
@@ -438,7 +445,8 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
     auto onJsFrameNodeScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
-    CHECK_NULL_RETURN(onScroll || onJsFrameNodeScroll, scroll);
+    auto observer = positionController_ ? positionController_->GetObserverManager() : nullptr;
+    CHECK_NULL_RETURN(onScroll || onJsFrameNodeScroll || observer, scroll);
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
@@ -455,6 +463,10 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
     if (onJsFrameNodeScroll) {
         scrollRes = onJsFrameNodeScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
+            ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    }
+    if (observer) {
+        scrollRes = FireObserverTwoDimensionOnWillScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
             ScrollablePattern::ConvertScrollSource(GetScrollSource()));
     }
     auto context = GetContext();
@@ -512,6 +524,9 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
+    if (freeScroll_) {
+        return; // not supported in FreeScroll mode
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachStart(!isInitialized_)) {
@@ -530,6 +545,9 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnR
 
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
+    if (freeScroll_) {
+        return; // not supported in FreeScroll mode
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachEnd(false)) {
@@ -809,9 +827,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
-    if (scrollBar2d_ && freeScroll_) {
-        // update 2d scroll bar
-        scrollBar2d_->SyncLayout(freeScroll_->GetOffset(), GetViewSize(), GetViewPortExtent());
+    if (freeScroll_) {
         return;
     }
     CheckScrollBarOff();
@@ -1034,26 +1050,28 @@ std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapD
     return predictSnapOffset;
 }
 
-void ScrollPattern::CaleSnapOffsets()
+void ScrollPattern::CaleSnapOffsets(const RefPtr<FrameNode>& host)
 {
-    auto scrollSnapAlign = GetScrollSnapAlign();
+    auto scrollSnapAlign = GetScrollSnapAlign(host);
     std::vector<float>().swap(snapOffsets_);
     if (scrollSnapAlign == ScrollSnapAlign::NONE) {
         CHECK_NULL_VOID(enablePagingStatus_ == ScrollPagingStatus::VALID);
         scrollSnapAlign = ScrollSnapAlign::START;
     }
     if (IsSnapToInterval()) {
-        CaleSnapOffsetsByInterval(scrollSnapAlign);
+        CaleSnapOffsetsByInterval(scrollSnapAlign, host);
     } else {
         CaleSnapOffsetsByPaginations(scrollSnapAlign);
     }
 }
 
-void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
+void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, const RefPtr<FrameNode>& host)
 {
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
-    auto intervalSize =
-        intervalSize_.Unit() == DimensionUnit::PERCENT ? intervalSize_.Value() * mainSize : intervalSize_.ConvertToPx();
+    auto pipeline = host->GetContext();
+    auto intervalSize = intervalSize_.Unit() == DimensionUnit::PERCENT
+                            ? intervalSize_.Value() * mainSize
+                            : (pipeline ? pipeline->NormalizeToPx(intervalSize_) : intervalSize_.ConvertToPx());
     CHECK_NULL_VOID(GreatOrEqual(intervalSize, SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
@@ -1173,6 +1191,14 @@ bool ScrollPattern::NeedScrollSnapToSide(float delta)
     return false;
 }
 
+ScrollSnapAlign ScrollPattern::GetScrollSnapAlign(const RefPtr<FrameNode>& host) const
+{
+    CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
+    auto scrollLayoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
+    return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
+}
+
 std::string ScrollPattern::ProvideRestoreInfo()
 {
     Dimension dimension(currentOffset_);
@@ -1196,8 +1222,19 @@ Rect ScrollPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(item, Rect());
     auto itemGeometry = item->GetGeometryNode();
     CHECK_NULL_RETURN(itemGeometry, Rect());
-    return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
-        itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    float scale = GetZoomScale();
+    if (scale == 1.0f) {
+        return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
+            itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+    } else {
+        auto rect = itemGeometry->GetFrameRect();
+        auto cx = rect.Left() + rect.Width() / 2;
+        auto cy = rect.Top() + rect.Height() / 2;
+        auto left = cx - (cx - rect.Left()) * scale;
+        auto top = cy - (cy - rect.Top()) * scale;
+        auto size = itemGeometry->GetFrameSize() * scale;
+        return Rect(left, top, size.Width(), size.Height());
+    }
 }
 
 float ScrollPattern::GetSelectScrollWidth()
@@ -1415,6 +1452,10 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     scrollSnapOptions->Put("enableSnapToStart", enableSnapToSide_.first);
     scrollSnapOptions->Put("enableSnapToEnd", enableSnapToSide_.second);
     json->PutExtAttr("scrollSnap", scrollSnapOptions, filter);
+    json->PutExtAttr("maxZoomScale", maxZoomScale_, filter);
+    json->PutExtAttr("minZoomScale", minZoomScale_, filter);
+    json->PutExtAttr("zoomScale", zoomScale_.value_or(1.0f), filter);
+    json->PutExtAttr("enableBouncesZoom", enableBouncesZoom_, filter);
 }
 
 std::string ScrollPattern::GetScrollSnapPagination() const
@@ -1442,9 +1483,10 @@ void ScrollPattern::OnColorModeChange(uint32_t colorMode)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (scrollSnapUpdate_) {
-        CaleSnapOffsets();
+        CaleSnapOffsets(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
@@ -1690,6 +1732,8 @@ SizeF ScrollPattern::GetChildrenExpandedSize()
         return SizeF(viewPort_.Width(), viewPortExtent_.Height());
     } else if (axis == Axis::HORIZONTAL) {
         return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    } else if (axis == Axis::FREE) {
+        return SizeF(viewPortExtent_.Width(), viewPortExtent_.Height());
     }
     return SizeF();
 }
@@ -1705,7 +1749,7 @@ void ScrollPattern::TriggerScrollBarDisplay()
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
-        auto res = freeScroll_->GetOffset();
+        auto&& res = freeScroll_->GetLayoutOffset();
         return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};
@@ -1748,7 +1792,7 @@ bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
     }
     return true;
 }
-bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
     auto pos = freeScroll_->GetOffset();
@@ -1769,6 +1813,10 @@ bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std
             break;
     }
     if (smooth) {
+        if (velocity) {
+            constexpr float VELOCITY_TO_SPRING_RATIO = 100.0f;
+            *velocity /= VELOCITY_TO_SPRING_RATIO; // Adjust velocity for smooth scrolling
+        }
         freeScroll_->ScrollTo(pos, velocity);
     } else {
         freeScroll_->SetOffset(pos);
@@ -1788,5 +1836,20 @@ void ScrollPattern::FreeScrollTo(const ScrollControllerBase::ScrollToParam& para
     } else {
         freeScroll_->SetOffset(pos, param.canOverScroll);
     }
+}
+
+TwoDimensionScrollResult ScrollPattern::FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
+    ScrollState state, ScrollSource source)
+{
+    TwoDimensionScrollResult result = { .xOffset = xOffset, .yOffset = yOffset };
+    CHECK_NULL_RETURN(positionController_, result);
+    auto obsMgr = positionController_->GetObserverManager();
+    CHECK_NULL_RETURN(obsMgr, result);
+    ScrollFrameResult xResult = { .offset = xOffset };
+    ScrollFrameResult yResult = { .offset = yOffset };
+    obsMgr->HandleTwoDimensionOnWillScrollEvent(xResult, yResult, state, source);
+    result.xOffset = xResult.offset;
+    result.yOffset = yResult.offset;
+    return result;
 }
 } // namespace OHOS::Ace::NG

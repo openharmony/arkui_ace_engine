@@ -208,6 +208,11 @@ private:
     void OnImageLoadFail();
 
     Color GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const;
+    bool CheckDarkResource(uint32_t resId);
+    bool ProcessGradientColors(std::vector<std::vector<std::pair<Color, Dimension>>>& gradientColors,
+        std::function<uint32_t(uint32_t)>& invertFunc);
+    bool ProcessSingleColorStop(Color& color, std::function<uint32_t(uint32_t)>& invertFunc);
+
     std::optional<int32_t> descriptionNodeId_;
     std::optional<int32_t> minValueTextId_;
     std::optional<int32_t> maxValueTextId_;

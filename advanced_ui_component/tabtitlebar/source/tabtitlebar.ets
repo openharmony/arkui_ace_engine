@@ -19,7 +19,7 @@ import window from '@ohos.window'
 import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
-import { SymbolGlyphModifier } from '@kit.ArkUI'
+import { SymbolGlyphModifier, LengthMetrics } from '@kit.ArkUI'
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
@@ -209,7 +209,7 @@ export struct TabTitleBar {
         }
       }
       .backgroundColor($r('sys.color.ohos_id_color_background'))
-      .margin({ right: $r('sys.float.ohos_id_max_padding_end') })
+      .margin({ end: LengthMetrics.resource($r('sys.float.ohos_id_max_padding_end')) })
       .onAreaChange((_oldValue, newValue) => {
         this.tabWidth = Number(newValue.width) - this.menuSectionWidth
       })
@@ -714,7 +714,7 @@ struct ImageMenuItem {
   static readonly buttonBorderRadius = 8;
   static readonly focusBorderWidth = 2;
   static readonly disabledImageOpacity = 0.4;
-  static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
+  static readonly focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
 
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;

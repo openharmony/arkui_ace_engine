@@ -11,43 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("key_event_manager_test") {
-  module_out_path = "$basic_test_output_path"
-
-  include_dirs = [ "$ace_root/frameworks/core/components_ng/pattern" ]
-  cflags = [
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
-
-  sources = [
-    "$ace_root/adapter/ohos/osal/input_manager.cpp",
-    "$ace_root/frameworks/core/common/key_event_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
-    "key_event_manager_test.cpp",
-  ]
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/test/unittest:ace_unittest_log",
-  ]
-  external_deps = [
-    "cJSON:cjson",
-    "c_utils:utils",
-    "googletest:gmock",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-  ]
-  if (is_ohos_standard_system) {
-    external_deps += [
-      "form_fwk:fmskit_native",
-      "graphic_2d:librender_service_base",
-      "graphic_2d:librender_service_client",
-    ]
-  }
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+ace_unittest("key_event_manager_test") {
+  type = "new"
+  module_output = "events"
+  sources = [ "key_event_manager_test.cpp" ]
 }

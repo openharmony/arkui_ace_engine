@@ -62,6 +62,8 @@ struct PickerTextStyle {
     std::optional<Dimension> maxFontSize;
     std::optional<Ace::TextOverflow> textOverflow;
 
+    bool textColorSetByUser = false;
+
     RefPtr<ResourceObject> textColorResObj;
     RefPtr<ResourceObject> fontSizeResObj;
     RefPtr<ResourceObject> fontFamilyResObj;
@@ -79,6 +81,9 @@ struct PickerTextProperties {
 struct PickerBackgroundStyle {
     std::optional<Color> color;
     std::optional<NG::BorderRadiusProperty> borderRadius;
+    bool textColorSetByUser = false;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> borderRadiusResObj;
 };
 
 // textpicker column kind
@@ -141,6 +146,7 @@ struct TextPickerSettingData {
     NG::TextCascadePickerOptionsAttr attr;
     bool isDisableTextStyleAnimation = false;
     bool isEnableHapticFeedback = true;
+    std::vector<Dimension> columnWidths;
 };
 
 struct TimePickerSettingData {

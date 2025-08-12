@@ -44,7 +44,6 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-
 #include "core/image/image_source_info.h"
 
 #include "component_ext/movingphoto/movingphoto_styles.h"
@@ -1241,5 +1240,81 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest025, TestSize.Level1)
         .WillRepeatedly(Return(false));
     pattern->SetWaterMask(true);
     EXPECT_EQ(pattern->GetWaterMask(), true);
+}
+/**
+ * @tc.name: MovingPhotoPatternTest026
+ * @tc.desc: Test NotifyTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. NotifyTransition
+     * @tc.expected: step2. notifyTransitionFlag_ != 0
+     */
+    pattern->NotifyTransition();
+    EXPECT_EQ(pattern->notifyTransitionFlag_, true);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest027
+ * @tc.desc: Test DetachImageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. DetachFirstImageFromFrameNode
+     * @tc.expected: step2. delete first imageNode
+     */
+    pattern->NotifyTransition();
+    int32_t childCount = frameNode->GetTotalChildCount();
+    EXPECT_EQ(childCount, 3);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest028
+ * @tc.desc: Test DetachImageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. DetachFirstImageFromFrameNode
+     * @tc.expected: step2. delete first imageNode
+     */
+    pattern->DetachFirstImageFromFrameNode();
+    int32_t childCount = frameNode->GetTotalChildCount();
+    EXPECT_EQ(childCount, 1);
 }
 } //namespace OHOS::Ace::NG

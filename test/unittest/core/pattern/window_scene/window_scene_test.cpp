@@ -122,7 +122,7 @@ RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest(Rose
  * @tc.desc: Create WindowNode with invalid persistentId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, WindowSceneTest01, TestSize.Level1)
+HWTEST_F(WindowSceneTest, WindowSceneTest01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create WindowNode.
@@ -142,7 +142,7 @@ HWTEST_F(WindowSceneTest, WindowSceneTest01, TestSize.Level1)
  * @tc.desc: Create WindowScene with valid persistentId
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, WindowSceneTest02, TestSize.Level1)
+HWTEST_F(WindowSceneTest, WindowSceneTest02, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Request scene session.
@@ -172,7 +172,7 @@ HWTEST_F(WindowSceneTest, WindowSceneTest02, TestSize.Level1)
  * @tc.desc: Buffer aviliable callback when enable app remove starting window and app not ready
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, BufferAvailableCallback01, TestSize.Level1)
+HWTEST_F(WindowSceneTest, BufferAvailableCallback01, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create windowScene.
@@ -289,6 +289,73 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
     windowScene->BufferAvailableCallback();
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->startingWindow_, nullptr);
+}
+
+/**
+ * @tc.name: AddPersistentImage
+ * @tc.desc: add persistent image
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, AddPersistentImage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
+    /**
+     * @tc.steps: step2. Test add persistent image return false.
+     */
+    auto result = windowScene->AddPersistentImage(windowScene->session_->surfaceNode_, windowScene->GetHost());
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AddBackgroundColorDelayed
+ * @tc.desc: add background color delayed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, AddBackgroundColorDelayed, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
+    /**
+     * @tc.steps: step2. Test add snapshot background color delayed.
+     */
+    windowScene->session_->SetExitSplitOnBackground(false);
+    windowScene->AddBackgroundColorDelayed();
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
+
+    windowScene->session_->SetExitSplitOnBackground(true);
+    windowScene->AddBackgroundColorDelayed();
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
 }
 
 /**
@@ -505,7 +572,7 @@ HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
  * @tc.desc: check main session recent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level1)
+HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level0)
 {
     Rosen::SessionInfo sessionInfo = {
         .abilityName_ = "ABILITY_NAME",
@@ -594,7 +661,7 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefalut, TestSize.Level1)
  * @tc.desc: set sub session visible
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
+HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create windowScene.
@@ -635,7 +702,7 @@ HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
  * @tc.desc: OnLayoutFinished Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, OnLayoutFinished, TestSize.Level1)
+HWTEST_F(WindowSceneTest, OnLayoutFinished, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create windowScene.
@@ -662,7 +729,7 @@ HWTEST_F(WindowSceneTest, OnLayoutFinished, TestSize.Level1)
  * @tc.desc: CreateSnapshotWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level1)
+HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level0)
 {
     Rosen::SessionInfo sessionInfo = {
         .abilityName_ = "ABILITY_NAME",
@@ -695,7 +762,7 @@ HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level1)
  * @tc.desc: OnAttachToFrameNode Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level1)
+HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level0)
 {
     Rosen::SessionInfo sessionInfo = {
         .abilityName_ = "ABILITY_NAME",
@@ -725,7 +792,7 @@ HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level1)
  * @tc.desc: OnBoundsChanged Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level1)
+HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
 {
     Rosen::SessionInfo sessionInfo = {
         .abilityName_ = "ABILITY_NAME",

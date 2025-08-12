@@ -158,8 +158,8 @@ public:
     static void SetArrowColor(FrameNode* frameNode, const Color& color);
     static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
     static void SetColorStatus(FrameNode* frameNode, const SelectColorType& type);
-    void SetMenuBackgroundColorByUser(bool isFromModifier = true) override;
-    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isFromModifier = true);
+    void SetMenuBackgroundColorByUser(bool isValidValue = true) override;
+    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isValidValue = true);
     void SetOptionFontColorByUser(bool isValidValue = true) override;
     static void SetOptionFontColorByUser(FrameNode* frameNode, bool isValidValue = true);
     void SetFontColorByUser(bool isValidValue = true) override;

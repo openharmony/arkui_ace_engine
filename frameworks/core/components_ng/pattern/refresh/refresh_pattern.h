@@ -132,19 +132,9 @@ public:
         return true;
     }
 
-    bool NeedCustomizeSafeAreaPadding() override
-    {
-        return true;
-    }
-
-    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
-
-    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
-        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
-
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<FrameNode>& host);
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
@@ -153,10 +143,13 @@ private:
     float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     float GetFollowRatio();
     void HandleCustomBuilderDragUpdateStage();
-    void SetAccessibilityAction();
-    void InitOnKeyEvent();
+    void SetAccessibilityAction(const RefPtr<FrameNode>& host);
+    void InitOnKeyEvent(const RefPtr<FrameNode>& host);
     bool OnKeyEvent(const KeyEvent& event);
     void QuickEndFresh();
     void QuickStartFresh();
@@ -169,19 +162,16 @@ private:
     void SpeedTriggerAnimation(float speed);
     void SpeedAnimationFinish();
     void SwitchToFinish();
-    void InitChildNode();
-    void InitProgressNode();
+    void InitChildNode(const RefPtr<FrameNode>& host);
+    void InitProgressNode(const RefPtr<FrameNode>& host);
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
     float GetLoadingVisibleHeight();
-    void UpdateScrollTransition(float scrollOffset);
+    void UpdateScrollTransition(const RefPtr<FrameNode>& host, float scrollOffset);
     RefreshAnimationState GetLoadingProgressStatus();
-    void RefreshStatusChangeEffect();
+    void RefreshStatusChangeEffect(bool refreshingProp);
     float GetTargetOffset();
     void ResetAnimation();
-    void FireStateChange(int32_t value);
-    void FireRefreshing();
-    void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
     void FireOnStepOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
@@ -194,7 +184,7 @@ private:
     Color GetLoadingProgressColor();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_ = 0.0f;

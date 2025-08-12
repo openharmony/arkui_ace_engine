@@ -274,7 +274,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     ASSERT_NE(endNode, nullptr);
     endNode->UpdateRecycleElmtId(NUMTWO);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);

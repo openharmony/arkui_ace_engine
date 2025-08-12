@@ -165,12 +165,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutPolicy = swiperLayoutProperty->GetLayoutPolicyProperty();
     auto isMainMatchParent = false;
     auto isCrossMatchParent = false;
+    auto isCrossWrap = false;
     if (layoutPolicy.has_value()) {
         bool isHorizontal = axis_ == Axis::HORIZONTAL;
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         isMainMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
         isCrossMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
+        isCrossWrap = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
 
         // when the main/cross axis is set matchParent, Update contentIdealSize
         if (isMainMatchParent || isCrossMatchParent) {
@@ -233,6 +235,19 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } else {
         contentCrossSize_ = crossSize.value();
+    }
+
+    if (isCrossWrap) {
+        auto parentCrossSize = CreateIdealSizeByPercentRef(
+            contentConstraint, axis_, MeasureType::MATCH_PARENT_CROSS_AXIS).CrossSize(axis_);
+        contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
+        if (!parentCrossSize.has_value()) {
+            contentIdealSize.SetCrossSize(contentCrossSize_, axis_);
+        } else {
+            contentIdealSize.SetCrossSize(std::min(contentCrossSize_, parentCrossSize.value()), axis_);
+            contentCrossSize_ = std::min(contentCrossSize_, parentCrossSize.value());
+        }
+        crossMatchChild_ = true;
     }
 
     if (!mainSizeIsDefined_ && isSingleCase) {

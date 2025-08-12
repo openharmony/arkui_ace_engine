@@ -179,7 +179,8 @@ class FrameNode extends Disposable {
   dispose(): void {
     super.dispose();
     if (this.nodePtr_) {
-      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
+          'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -228,6 +229,12 @@ class FrameNode extends Disposable {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
       __JSScopeUtil__.restoreInstanceId();
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      if (frameNode) {
+        return frameNode;
+      }
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -333,6 +340,7 @@ class FrameNode extends Disposable {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
+
   moveTo(targetParent: FrameNode, index?: number): void {
     if (targetParent === undefined || targetParent === null) {
       return;
@@ -352,15 +360,12 @@ class FrameNode extends Disposable {
     }
     targetParent._childList.set(this._nodeId, this);
   }
+
   getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
     const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
-    }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
@@ -379,10 +384,6 @@ class FrameNode extends Disposable {
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
-    }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
@@ -391,10 +392,6 @@ class FrameNode extends Disposable {
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
-    }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
@@ -405,10 +402,6 @@ class FrameNode extends Disposable {
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
-    }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
@@ -418,10 +411,6 @@ class FrameNode extends Disposable {
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
-    }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
@@ -430,10 +419,6 @@ class FrameNode extends Disposable {
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
-    }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
@@ -446,10 +431,6 @@ class FrameNode extends Disposable {
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
-    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-      return frameNode === undefined ? null : frameNode;
-    }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
@@ -459,6 +440,7 @@ class FrameNode extends Disposable {
     __JSScopeUtil__.restoreInstanceId();
     return childrenCount;
   }
+
   getPositionToParent(): Position {
     const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
     return { x: position[0], y: position[1] };
@@ -853,6 +835,18 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T, options?: object) {
     super(uiContext, type, options);
     this.attrCreator_ = attrCreator;
+  }
+
+  dispose() {
+    this.isDisposed_ = true;
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+    }
+    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
+    this._nodeId = -1;
+    this._nativeRef?.dispose();
+    this._nativeRef = null;
+    this.nodePtr_ = null;
   }
 
   initialize(...args: Object[]): T {

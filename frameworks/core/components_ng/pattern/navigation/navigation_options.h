@@ -195,8 +195,6 @@ struct NavigationToolbarOptions {
         } else {
             json->PutExtAttr("backgroundEffect", JsonUtil::Create(true), filter);
         }
-        // add moreButtonOptions
-        mbOptions.ToJsonValue(json, filter);
     }
 };
 
@@ -216,6 +214,11 @@ struct NavigationMenuOptions {
     bool operator!= (const NavigationMenuOptions& other) const
     {
         return !(*this == other);
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
+    {
+        mbOptions.ToJsonValue(json, filter);
     }
 };
 

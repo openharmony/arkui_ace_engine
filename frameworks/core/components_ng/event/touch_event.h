@@ -154,6 +154,14 @@ public:
         commonTouchEventCallback_ = touchEventActuator->commonTouchEventCallback_;
     }
 
+    void SetNeedPropagation(bool isNeedPropagation) {
+        isNeedPropagation_ = isNeedPropagation;
+    }
+
+    bool IsNeedPropagation() const {
+        return isNeedPropagation_;
+    }
+
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
@@ -172,6 +180,7 @@ private:
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;
     std::map<int32_t, TimeStamp> firstInputTimeWithId_;
+    bool isNeedPropagation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -181,6 +181,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+        pinchCenter_ = ComputePinchCenter();
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
@@ -243,13 +244,13 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
+            if (CheckLimitFinger()) {
+                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
+                return;
+            }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            if (CheckLimitFinger()) {
-                extraInfo_ += " isLFC: " + std::to_string(isLimitFingerCount_);
                 return;
             }
             if (!isLastPinchFinished_) {
@@ -260,6 +261,7 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
+        pinchCenter_ = ComputePinchCenter();
         if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
             return;
         }
@@ -449,10 +451,12 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         info.SetInputEventType(inputEventType_);
@@ -515,6 +519,13 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEventType(inputEventType_);
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
+        info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

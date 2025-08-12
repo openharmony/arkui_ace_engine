@@ -390,7 +390,7 @@ public:
     void PlaySpringAnimation(
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
-    virtual float GetTotalOffset() const
+    virtual double GetTotalOffset() const
     {
         return 0.0f;
     }
@@ -408,7 +408,7 @@ public:
     {
         return false;
     }
-    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
     {
         return false;
     }
@@ -709,6 +709,8 @@ public:
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPageMultiThread(
+        bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
@@ -900,14 +902,18 @@ public:
 
     PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
 
-    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    bool ChildTentativelyLayouted() override
     {
-        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
         return true;
     }
 
     bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
+    void SetNeedFullSafeArea(bool needFullSafeArea)
+    {
+        needFullSafeArea_ = needFullSafeArea;
+    }
 
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -916,6 +922,9 @@ public:
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
@@ -1039,6 +1048,8 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
@@ -1068,6 +1079,7 @@ private:
     /******************************************************************************
      * NestableScrollContainer implementations
      */
+    void HandleExtScroll(float velocity = 0.f);
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
@@ -1107,6 +1119,7 @@ private:
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
     void SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
     void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
@@ -1141,10 +1154,12 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
+    void SetUiDVSyncCommandTime(uint64_t time);
     void SetNestedScrolling(bool nestedScrolling);
     void InitRatio();
     void SetOnHiddenChangeForParent();
     void ReportOnItemStopEvent();
+    virtual void ResetForExtScroll() {};
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -1231,6 +1246,7 @@ private:
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    float GetDVSyncOffset();
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
@@ -1238,7 +1254,7 @@ private:
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
-    bool prevHasFadingEdge_ = false;
+    bool preHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 
     bool isRoundScroll_ = false;
@@ -1250,6 +1266,10 @@ private:
     bool backToTop_ = false;
     bool useDefaultBackToTop_ = true;
     bool isHitTestBlock_ = false;
+    std::queue<std::pair<uint64_t, float>> offsets_;
+    bool isExtScroll_ = false;
+    bool isNeedCollectOffset_ = false;
+    bool needFullSafeArea_ = false;
 };
 } // namespace OHOS::Ace::NG
 

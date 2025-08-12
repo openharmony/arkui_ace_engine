@@ -255,12 +255,15 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     deviceWidth_ = options.deviceWidth;
     deviceHeight_ = options.deviceHeight;
     isRound_ = options.isRound;
+    isComponentMode_ = options.isComponentMode;
     onRouterChange_ = options.onRouterChange;
     deviceConfig_.orientation = static_cast<DeviceOrientation>(options.deviceConfig.orientation);
     deviceConfig_.deviceType = static_cast<DeviceType>(options.deviceConfig.deviceType);
     deviceConfig_.colorMode = static_cast<ColorMode>(options.deviceConfig.colorMode);
     deviceConfig_.density = options.deviceConfig.density;
     deviceConfig_.fontRatio = options.deviceConfig.fontRatio;
+    runArgs_.deviceConfig.orientation = deviceConfig_.orientation;
+    runArgs_.deviceConfig.density = deviceConfig_.density;
 
     bundleName_ = options.bundleName;
     compatibleVersion_ = options.compatibleVersion;
@@ -390,6 +393,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     }
     container->SetInstallationFree(installationFree_);
     container->SetLabelId(labelId_);
+    AceContainer::SetComponentModeFlag(isComponentMode_);
     auto config = container->GetResourceConfiguration();
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());
@@ -599,6 +603,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     container->UpdateDeviceConfig(deviceConfig_);
     viewPtr->NotifyDensityChanged(config.Density());
     viewPtr->NotifySurfaceChanged(config.Width(), config.Height());
+    if (deviceConfig_.orientation != runArgs_.deviceConfig.orientation ||
+        deviceConfig_.density != runArgs_.deviceConfig.density) {
+        container->NotifyConfigurationChange(false, ConfigurationChange({ false, false, true }));
+        runArgs_.deviceConfig.orientation = deviceConfig_.orientation;
+        runArgs_.deviceConfig.density = deviceConfig_.density;
+    }
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
@@ -708,6 +718,7 @@ void UIContentImpl::LoadDocument(const std::string& url, const std::string& comp
     LOGI("Component Preview start:%{public}s, ", componentName.c_str());
     AceApplicationInfo::GetInstance().ChangeLocale(systemParams.language, systemParams.region);
     runArgs_.isRound = systemParams.isRound;
+    runArgs_.deviceConfig.deviceType = systemParams.deviceType;
     SurfaceChanged(systemParams.orientation, systemParams.density, systemParams.deviceWidth, systemParams.deviceHeight);
     DeviceConfig deviceConfig = {
         .orientation = systemParams.orientation,

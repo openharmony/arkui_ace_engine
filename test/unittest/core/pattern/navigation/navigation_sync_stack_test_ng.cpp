@@ -291,7 +291,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg004, TestSize.Level
     for (int32_t index = 0; index < testNumber; ++ index) {
         auto info = AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index));
         info->isEntry_ = true;
-        info->mode = LaunchMode::NEW_INSTANCE;
+        info->mode = static_cast<int32_t>(LaunchMode::NEW_INSTANCE);
         info->needBuildNewInstance = true;
         mockNavPathStack->MockPushPath(info);
     }

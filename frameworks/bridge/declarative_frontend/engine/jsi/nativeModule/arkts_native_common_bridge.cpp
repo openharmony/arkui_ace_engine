@@ -49,6 +49,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr uint32_t ALIGNMENT_TOP_LEFT = 0;
+constexpr uint32_t ALIGNMENT_CENTER = 4;
+constexpr int32_t DEFAULT_LAYOUT_SAFE_AREA_EDGE_FOR_COLOR_BACKGROUND = 6;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -995,6 +997,30 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     PushOuterBorderColorVector(bottomColor, values);
 }
 
+void ParseOutLineColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    ParseOuterBorderEdgeColor(vm, leftArg, leftColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, rightArg, rightColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, topArg, topColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, bottomArg, bottomColor, resObjs, nodeInfo);
+    
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+    PushOuterBorderColorVector(leftColor, values);
+}
+
 bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
@@ -1579,6 +1605,50 @@ const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySam
     AccessibilitySamePageMode::FULL_SILENT };
 const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
 } // namespace
+
+ArkUINativeModuleValue CommonBridge::SetBackground(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+    // Parse color background
+    Color color;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj, nodeInfo)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUIBackgroundContent content;
+    content.color = color.GetValue();
+    content.bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+
+    ArkUIBackgroundOptions options;
+    options.align = ALIGNMENT_CENTER;
+    // Parse ignoresLayoutSafeAreaEdges
+    std::vector<ArkUI_Int32> edges;
+    if (!ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(vm, fourthArg, edges)) {
+        edges.emplace_back(DEFAULT_LAYOUT_SAFE_AREA_EDGE_FOR_COLOR_BACKGROUND);
+    }
+    options.ignoresLayoutSafeAreaEdges = edges.data();
+    options.ignoresLayoutSafeAreaEdgesSize = edges.size();
+    
+    GetArkUINodeModifiers()->getCommonModifier()->setBackground(nativeNode, &content, &options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackground(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackground(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -2208,7 +2278,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runti
     std::vector<uint32_t> colorOptions;
     std::vector<RefPtr<ResourceObject>> vectorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
+    ParseOutLineColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
     auto rawPtr = static_cast<void*>(&vectorResObj);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineColor(
         nativeNode, colorOptions.data(), colorOptions.size(), rawPtr);
@@ -6459,6 +6529,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     std::string stringValue;
     std::string extraInfoValue;
     RefPtr<PixelMap> pixmap = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMapSharedPtr = nullptr;
     if (valueObj->IsObject(vm)) {
         auto obj = valueObj->ToObject(vm);
         auto inspectorId = obj->Get(vm, "inspetorId");
@@ -6481,7 +6552,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
             pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, pixelMap);
 #endif
             if (pixmap) {
-                auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+                pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
                 dragPreview.pixelMap = static_cast<void*>(&pixelMapSharedPtr);
             }
         }
@@ -7228,14 +7299,33 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
     if (arrLength > NUM_10) {
         arrLength = NUM_10;
     }
-    int32_t* keysIntArray = new int32_t[arrLength];
-    for (size_t i = 0; i < arrLength; i++) {
+    std::vector<OHOS::Ace::ModifierKey> keysVector(arrLength);
+    for (uint32_t i = 0; i < arrLength; i++) {
         Local<JSValueRef> objValue = keysArray->GetValueAt(vm, keysArg, i);
-        keysIntArray[i] = objValue->Int32Value(vm);
+        keysVector.emplace_back(static_cast<OHOS::Ace::ModifierKey>(objValue->Int32Value(vm)));
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setKeyBoardShortCut(
-        nativeNode, stringValue.c_str(), keysIntArray, arrLength);
-    delete[] keysIntArray;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (runtimeCallInfo->GetArgsNumber() == NUM_4) {
+        Local<JSValueRef> actionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+        auto obj = actionArg->ToObject(vm);
+        auto containerId = Container::CurrentId();
+        panda::Local<panda::FunctionRef> func = obj;
+        auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+        auto onActionFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                node = AceType::WeakClaim(frameNode), containerId]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+            function->Call(vm, function.ToLocal(), nullptr, 0);
+        };
+        ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, std::move(onActionFunc));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -7507,28 +7597,7 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
 {
     auto obj = SetUniqueAttributes(vm, typeName, info);
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "timestamp"),
-        panda::NumberRef::New(vm, static_cast<double>(info->GetTimeStamp().time_since_epoch().count())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "source"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceDevice())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, info->GetForce()));
-    if (info->GetTiltX().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"), panda::NumberRef::New(vm, info->GetTiltX().value()));
-    }
-    if (info->GetTiltY().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"), panda::NumberRef::New(vm, info->GetTiltY().value()));
-    }
-    if (info->GetRollAngle().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-            panda::NumberRef::New(vm, info->GetRollAngle().value()));
-    }
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
-
+    SetCommonAttributes(obj, vm, info);
     auto fingerArr = panda::ArrayRef::New(vm);
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
     std::list<FingerInfo> notTouchFingerList;
@@ -7552,7 +7621,40 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
     CreateFingerInfosInfo(vm, info, obj);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(info.get()));
     return obj;
+}
+
+void CommonBridge::SetCommonAttributes(
+    Local<panda::ObjectRef>& obj, EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)
+{
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "timestamp"),
+        panda::NumberRef::New(vm, static_cast<double>(info->GetTimeStamp().time_since_epoch().count())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "source"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceDevice())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, info->GetForce()));
+    if (info->GetTiltX().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"), panda::NumberRef::New(vm, info->GetTiltX().value()));
+    }
+    if (info->GetTiltY().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"), panda::NumberRef::New(vm, info->GetTiltY().value()));
+    }
+    if (info->GetRollAngle().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+            panda::NumberRef::New(vm, info->GetRollAngle().value()));
+    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, info->GetVerticalAxis()));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, info->GetHorizontalAxis()));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)
@@ -8485,7 +8587,7 @@ ArkUINativeModuleValue CommonBridge::SetOnDragSpringLoading(ArkUIRuntimeCallInfo
         if (!JSViewAbstract::CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
             return panda::JSValueRef::Undefined(vm);
         }
-        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        NG::OnDragDropSpringLoadingFunc onDragSpringLoading = nullptr;
         if (jsVal->IsFunction()) {
             RefPtr<JsDragFunction> jsOnDragSpringLoadingFunc =
                 AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
@@ -9143,7 +9245,8 @@ ArkUINativeModuleValue CommonBridge::ResetOnBlur(ArkUIRuntimeCallInfo* runtimeCa
 Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInfo& hoverInfo)
 {
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
-        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY" };
+        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY",
+        "sourceTool" };
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = hoverInfo.GetGlobalLocation();
     const Offset& localOffset = hoverInfo.GetLocalLocation();
@@ -9162,7 +9265,8 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInf
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetX() / density : 0),
-        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceTool())) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -9239,8 +9343,15 @@ ArkUINativeModuleValue CommonBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* runtim
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto obj = CreateHoverInfo(vm, hoverInfo);
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltX().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltY().value_or(0.0f))));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { obj };
@@ -10535,7 +10646,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
     const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "target", "timestamp", "source", "pressure",
         "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState", "axisVertical", "axisHorizontal",
-        "globalDisplayX", "globalDisplayY" };
+        "globalDisplayX", "globalDisplayY", "targetDisplayId" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -10558,7 +10669,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
         panda::NumberRef::New(vm, info.GetVerticalAxis()),
         panda::NumberRef::New(vm, info.GetHorizontalAxis()),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -10828,25 +10940,23 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    JsiRef<JsiValue> secondArg =
+        JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_1));
+    CHECK_NULL_RETURN(secondArg->IsArray(), panda::JSValueRef::Undefined(vm));
+    auto ratioArray = JSRef<JSArray>::Cast(secondArg);
+    size_t size = ratioArray->Length();
     std::vector<double> ratioList;
-    if (secondeArg->IsArray(vm)) {
-        auto arrayObj = secondeArg->ToObject(vm);
-        uint32_t length = 0;
-        bool isArrayOrSharedArray = false;
-        bool isPendingException = false;
-        arrayObj->TryGetArrayLength(vm, &isPendingException, &isArrayOrSharedArray, &length);
-        for (uint32_t i = 0; i < length; ++i) {
-            auto element = arrayObj->Get(vm, i);
-            double ratio = 0.0;
-            bool isNumber = true;
-            element->GetValueDouble(isNumber);
-            if (isNumber) {
-                ratio = element->ToNumber(vm)->Value();
-                ratio = std::max(std::min(ratio, VISIBLE_RATIO_MAX), VISIBLE_RATIO_MIN);
-                ratioList.push_back(ratio);
-            }
+    for (size_t i = 0; i < size; i++) {
+        double ratio = 0.0;
+        JSViewAbstract::ParseJsDouble(ratioArray->GetValueAt(i), ratio);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
         }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioList.push_back(ratio);
     }
     CHECK_NULL_RETURN(thirdArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto event = thirdArg->ToObject(vm);

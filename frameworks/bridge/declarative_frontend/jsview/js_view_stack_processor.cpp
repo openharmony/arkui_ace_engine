@@ -87,11 +87,15 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("moveDeletedElmtIds", &JSViewStackProcessor::JsMoveDeletedElmtIds);
     JSClass<JSViewStackProcessor>::StaticMethod(
         "scheduleUpdateOnNextVSync", &JSViewStackProcessor::JSScheduleUpdateOnNextVSync);
-    JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
     JSClass<JSViewStackProcessor>::StaticMethod("PushPrebuildCompCmd",
         &JSViewStackProcessor::JsPushPrebuildCompCmd, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("CheckIsPrebuildTimeout",
         &JSViewStackProcessor::JsCheckIsPrebuildTimeout, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
+#ifdef ACE_STATIC
+    JSClass<JSViewStackProcessor>::StaticMethod("push", &JSViewStackProcessor::JsPush, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("pop", &JSViewStackProcessor::JsPop, opt);
+#endif
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -270,4 +274,23 @@ bool JSViewStackProcessor::JsCheckIsPrebuildTimeout()
 {
     return ViewStackModel::GetInstance()->CheckIsPrebuildTimeout();
 }
+
+#ifdef ACE_STATIC
+void JSViewStackProcessor::JsPush(const JSCallbackInfo &info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+
+    return ViewStackModel::GetInstance()->PushPtr(info[0]->ToNumber<int64_t>());
+}
+
+void JSViewStackProcessor::JsPop()
+{
+    return ViewStackModel::GetInstance()->Pop();
+}
+#endif
 } // namespace OHOS::Ace::Framework

@@ -46,7 +46,7 @@ constexpr float DEFAULT_SIZE = -1.0f;
 }
 
 class ListChildrenMainSize : public virtual AceType {
-    DECLARE_ACE_TYPE(ListChildrenMainSize, AceType)
+    DECLARE_ACE_TYPE(ListChildrenMainSize, AceType);
 public:
     ListChildrenMainSize() = default;
     ListChildrenMainSize(const std::vector<float>& mainSize, float defaulatMainSize)
@@ -80,7 +80,8 @@ public:
             auto deleteStartPos = childrenSize_.begin() + start + cursor;
             auto deleteEndPos = deleteStartPos;
             int32_t needDeleteSpan = deleteCount - newChildrenSizeSize;
-            while (deleteEndPos != childrenSize_.end() && needDeleteSpan--) {
+            while (deleteEndPos != childrenSize_.end() && needDeleteSpan > 0) {
+                needDeleteSpan--;
                 deleteEndPos++;
             }
             childrenSize_.erase(deleteStartPos, deleteEndPos);

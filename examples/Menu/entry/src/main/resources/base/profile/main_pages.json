@@ -16,8 +16,6 @@
     "pages/Examples/MenuTestLevel0_1",
     "pages/Examples/MenuTestLevel0_2",
     "pages/Examples/MenuTestLevel0_3",
-    "pages/Examples/stackMenuAvoid",
-    "pages/Examples/MultiLevelSubMenu",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
@@ -148,6 +146,35 @@
     "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuStyle/iconMenu",
     "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuStyle/normalMenu",
     "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuStyle/startIconMenu",
-    "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuStyle/titleIconMenu"
+    "pages/BindContextMenu/bindContextMenus/UIConsistency/MenuStyle/titleIconMenu",
+
+    "pages/PreviewAnimation/Index",
+    "pages/PreviewAnimation/InterfaceTest_001",
+    "pages/PreviewAnimation/InterfaceTest_002",
+    "pages/PreviewAnimation/InterfaceTest_003",
+    "pages/PreviewAnimation/InterfaceTest_004",
+    "pages/PreviewAnimation/ScenariosTest_001",
+    "pages/PreviewAnimation/ScenariosTest_002",
+    "pages/PreviewAnimation/ScenariosTest_003",
+    "pages/PreviewAnimation/ScenariosTest_004",
+    "pages/PreviewAnimation/ScenariosTest_005",
+
+    "pages/Dock/Index",
+    "pages/Dock/bindMenu",
+    "pages/Dock/bindMenuBuilder",
+    "pages/Dock/bindMenuBuiNoMenu",
+    "pages/Dock/bindContextMenu",
+    "pages/Dock/bindMenuSub",
+    "pages/Dock/bindContextMenuSub",
+    "pages/Dock/bindMenuOut",
+    "pages/Dock/bindMenuBuilderOut",
+    "pages/Dock/bindContextMenuOut",
+    "pages/Dock/bindMenuHeight",
+    "pages/Dock/bindMenuBuilderHei",
+    "pages/Dock/bindContextMenuHei",
+    "pages/Dock/bindMenu1",
+    "pages/Dock/bindMenuBuilder1",
+    "pages/Dock/bindContextMenu1",
+    "pages/Dock/menuList"
   ]
 }

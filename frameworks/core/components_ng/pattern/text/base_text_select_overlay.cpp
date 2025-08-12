@@ -307,7 +307,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         overlay->OnResetTextSelection();
     };
     selectionInfo.checkTouchInArea = [weak = WeakClaim(this), manager = WeakClaim(AceType::RawPtr(overlayManager))](
-                                         const PointF& point) {
+                                         const PointF& point, bool passThrough) {
         auto baseOverlay = weak.Upgrade();
         CHECK_NULL_RETURN(baseOverlay, false);
         auto overlayManager = manager.Upgrade();
@@ -315,7 +315,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         auto host = baseOverlay->GetOwner();
         CHECK_NULL_RETURN(host, false);
         auto localPoint = point;
-        overlayManager->ConvertPointRelativeToNode(host, localPoint);
+        overlayManager->ConvertPointRelativeToNode(host, localPoint, passThrough);
         return baseOverlay->CheckTouchInHostNode(localPoint);
     };
     selectionInfo.eventFilter = [weak = WeakClaim(this)](SourceType sourceType, TouchType touchType) {
@@ -1644,5 +1644,13 @@ bool BaseTextSelectOverlay::GetDragViewHandleRects(RectF& firstRect, RectF& seco
     firstRect = overlayInfo->firstHandle.localPaintRect + dragParentOffset;
     secondRect = overlayInfo->secondHandle.localPaintRect + dragParentOffset;
     return true;
+}
+
+void BaseTextSelectOverlay::UpdateIsSingleHandle(bool isSingleHandle)
+{
+    SetIsSingleHandle(isSingleHandle);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateIsSingleHandle(isSingleHandle);
 }
 } // namespace OHOS::Ace::NG

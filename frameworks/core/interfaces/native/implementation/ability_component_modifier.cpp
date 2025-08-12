@@ -27,7 +27,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // AbilityComponentModifier
 namespace AbilityComponentInterfaceModifier {
 void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
-                                    const Ark_Literal_Want_want* value)
+                                    const Ark_Literal__want* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -36,18 +36,16 @@ void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
 void OnConnectImpl(Ark_NativePointer node,
-                   const Callback_Void* value)
+                   const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
-                      const Callback_Void* value)
+                      const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 } // AbilityComponentAttributeModifier
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()

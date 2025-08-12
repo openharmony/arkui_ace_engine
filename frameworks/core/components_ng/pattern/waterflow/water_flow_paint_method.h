@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPaintMethod : public ScrollablePaintMethod {
-    DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod)
+    DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod);
 public:
     WaterFlowPaintMethod() = default;
     WaterFlowPaintMethod(bool vertical, bool isReverse, bool isVerticalReverse)

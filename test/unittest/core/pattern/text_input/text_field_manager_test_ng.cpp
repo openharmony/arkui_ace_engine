@@ -305,6 +305,7 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPositio
     refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
     SelectOverlayHolder selectOverlayHolder;
     auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    EXPECT_NE(frameNode, nullptr);
     auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
     WeakPtr<UINode> parent = mockUINode;
     frameNode->parent_ = parent;

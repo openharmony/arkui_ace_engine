@@ -741,6 +741,40 @@ HWTEST_F(TextTestNg, SpanStringGetSubSpanList002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpSimplifyInfo001
+ * @tc.desc: test DumpSimplifyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init textLayoutProp.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("host", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. make !textvalue.empty() true
+     */
+    textLayoutProp->UpdateContent(CREATE_VALUE_W);
+
+    auto json = JsonUtil::CreateSharedPtrJson();
+    pattern->DumpSimplifyInfo(json);
+
+    /**
+     * @tc.steps: step3. verify result
+     * @expect json is not ""
+     */
+    EXPECT_TRUE(json->Contains("content"));
+    std::string  result = json->ToString();
+    EXPECT_EQ(result, "{\"content\":\"Hello World\"}");
+}
+
+/**
  * @tc.name: SpanStringGetSpan001
  * @tc.desc: test GetSpan
  * @tc.type: FUNC
@@ -905,6 +939,83 @@ HWTEST_F(TextTestNg, SpanStringGetSpecialTypesVector002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSymbolShadowInJson001
+ * @tc.desc: test GetSymbolShadowInJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSymbolShadowInJson001, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE_W);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    auto nullJsonString = json->ToString();
+    
+    SymbolShadow symbolShadow;
+    symbolShadow.radius = 10.0f;
+    std::string symbolShadowText = GetSymbolShadowInJson(symbolShadow)->ToString();
+    EXPECT_NE(symbolShadowText.length(), nullJsonString.length());
+
+    symbolShadowText = GetSymbolShadowInJson(std::nullopt)->ToString();
+    EXPECT_EQ(symbolShadowText.length(), nullJsonString.length());
+}
+
+/**
+ * @tc.name: GetShaderStyleInJson001
+ * @tc.desc: test GetShaderStyleInJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetShaderStyleInJson001, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE_W);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto array = JsonUtil::CreateArray(true);
+    auto nullArrayString = array->ToString();
+    
+    std::vector<SymbolGradient> gradients;
+    SymbolGradient colorShaderCase;
+    colorShaderCase.type = SymbolGradientType::COLOR_SHADER;
+    colorShaderCase.symbolColor = { Color::RED };
+    colorShaderCase.symbolOpacities = { 1.0f };
+    colorShaderCase.repeating = false;
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+    linearGradientCase.radius = std::nullopt;
+    linearGradientCase.radialCenterX = std::nullopt;
+    linearGradientCase.radialCenterY = std::nullopt;
+    SymbolGradient radialGradientCase;
+    radialGradientCase.type = SymbolGradientType::RADIAL_GRADIENT;
+    radialGradientCase.angle = std::nullopt;
+    radialGradientCase.radius = Dimension(100.0, DimensionUnit::VP);
+    radialGradientCase.radialCenterX = Dimension(100.0, DimensionUnit::VP);
+    radialGradientCase.radialCenterY = Dimension(100.0, DimensionUnit::VP);
+    SymbolGradient nullGradientCase;
+    nullGradientCase.type = (SymbolGradientType)-1;
+    gradients.emplace_back(std::move(colorShaderCase));
+    gradients.emplace_back(std::move(linearGradientCase));
+    gradients.emplace_back(std::move(radialGradientCase));
+    gradients.emplace_back(std::move(nullGradientCase));
+
+    std::string shaderStyleText = GetShaderStyleInJson(gradients)->ToString();
+    EXPECT_NE(shaderStyleText.length(), nullArrayString.length());
+
+    shaderStyleText = GetShaderStyleInJson(std::nullopt)->ToString();
+    EXPECT_EQ(shaderStyleText.length(), nullArrayString.length());
+}
+
+/**
  * @tc.name: UrlSpanApplyToSpanItem001
  * @tc.desc: test ApplyToSpanItem
  * @tc.type: FUNC
@@ -917,4 +1028,63 @@ HWTEST_F(TextTestNg, UrlSpanApplyToSpanItem001, TestSize.Level1)
     urlSpan.ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     EXPECT_EQ(spanItem->urlOnRelease, nullptr);
 }
+
+/**
+ * @tc.name: GetSpanItemAttributeUseForHtml
+ * @tc.desc: Test GetSpanItemAttributeUseForHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSpanItemAttributeUseForHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set GetSpanItemAttributeUseForHtml func param.
+     */
+    std::optional<TextStyle> textStyle = std::optional<TextStyle>(TextStyle());
+    textStyle->SetFontSize(Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    textStyle->SetFontWeight(FontWeight::MEDIUM);
+    textStyle->SetLineHeight(Dimension(2.2));
+    NG::FontStyle fontStyle;
+    NG::TextLineStyle textLineStyle;
+    /**
+     * @tc.steps: step3. Excute function for GetSpanItemAttributeUseForHtml.
+     */
+    pattern->GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle);
+    EXPECT_EQ(fontStyle.GetFontSize(), Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    EXPECT_EQ(fontStyle.GetFontWeight(), FontWeight::MEDIUM);
+    EXPECT_EQ(textLineStyle.GetLineHeight(), Dimension(2.2));
+}
+
+/**
+ * @tc.name: AsyncHandleOnCopySpanStringHtml
+ * @tc.desc: Test AsyncHandleOnCopySpanStringHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AsyncHandleOnCopySpanStringHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set AsyncHandleOnCopySpanStringHtml func param.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    /**
+     * @tc.steps: step3. Excute function for AsyncHandleOnCopySpanStringHtml.
+     */
+    pattern->AsyncHandleOnCopySpanStringHtml(spanString);
+    EXPECT_EQ(spanString->GetString(), "0123456789");
+    EXPECT_EQ(spanString->GetLength(), 10);
+}
+
 } // namespace OHOS::Ace::NG

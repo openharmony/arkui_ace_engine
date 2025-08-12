@@ -29,6 +29,13 @@ template("ace_capability_ohos_source_set") {
       "clipboard/clipboard_impl.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
+
+      # xml parser
+      "feature_config/feature_param_manager.cpp",
+      "feature_config/config_xml_parser_base.cpp",
+      "feature_config/features/ui_node_gc_params_parser.cpp",
+      "feature_config/features/sync_load_parser.cpp",
+
       "html/html_to_span.cpp",
       "html/span_to_html.cpp",
       "package/package_event_proxy_ohos.cpp",
@@ -51,6 +58,7 @@ template("ace_capability_ohos_source_set") {
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
       external_deps += [ "pasteboard:pasteboard_client" ]
+      external_deps += [ "pasteboard:pasteboard_data" ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
     }
 

@@ -20,7 +20,6 @@ export type UserViewBuilder =
 () => void
 
 export class UserView {
-    constructor() {}
     getBuilder(): UserViewBuilder {
         throw new Error("User must override this method");
     }
@@ -37,14 +36,14 @@ export class UserView {
     static getNativeLog(group: int32): string {
         let ptr = InteropNativeModule._GetGroupedLog(group)
         let length = InteropNativeModule._StringLength(ptr)
-        let data = int8Array(length);
+        let data = new byte[length];
         // @ts-ignore
         InteropNativeModule._StringData(ptr, data, length)
         InteropNativeModule._InvokeFinalizer(ptr, InteropNativeModule._GetStringFinalizer())
 
         let result = new StringBuilder("")
         for (let i = 0; i < length; i++) {
-            result.append(String.fromCharCode(data[i])) // Attention. This code causes native crash in arm64.
+            result.append(String.fromCharCode(data[i] as number)) // Attention. This code causes native crash in arm64.
         }
         return result.toString()
     }

@@ -172,7 +172,7 @@ void ResourceAdapterImpl::SetAppHasDarkRes(bool hasDarkRes)
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName, bool fromTheme)
+    const std::string& bundleName, const std::string& moduleName)
 {
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, nullptr);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -239,7 +240,9 @@ void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 int32_t ListModelNG::GetSticky(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetStickyStyleValue());
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    return static_cast<int32_t>(layoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE));
 }
 
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
@@ -595,6 +598,17 @@ bool ListModelNG::GetShowCached(FrameNode* frameNode)
     return show;
 }
 
+void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
+{
+    CacheRange range { min, max };
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, range, frameNode);
+}
+
+void ListModelNG::ResetCacheRange(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
+}
+
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
@@ -615,7 +629,9 @@ void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool a
 int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListDirection().value());
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    return static_cast<int32_t>(layoutProperty->GetListDirectionValue(Axis::VERTICAL));
 }
 
 void ListModelNG::SetListDirection(FrameNode* frameNode, int32_t axis)
@@ -718,6 +734,14 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(
         };
         pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
     }
+}
+
+void ListModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 
 void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled)
@@ -885,7 +909,9 @@ void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listI
 float ListModelNG::GetListSpace(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSpaceValue();
+    const auto& layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto value = layoutProperty->GetSpace().value_or(Dimension(0.0_vp));
     return value.ConvertToVp();
 }
 
@@ -1030,6 +1056,8 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
 void ListModelNG::SetScrollToIndex(
     FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment, extraOffset);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1138,7 +1166,8 @@ void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase>
     pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
-void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+void ListModelNG::SetOnScrollVisibleContentChange(
+    FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
@@ -1231,6 +1260,8 @@ void ListModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
 void ListModelNG::ScrollToItemInGroup(
     FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
+    // call ScrollToItemInGroupMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, ScrollToItemInGroup, frameNode, index, indexInGroup, smooth, align);
     CHECK_NULL_VOID(frameNode);
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
@@ -1487,5 +1518,10 @@ void ListModelNG::CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
         };
         pattern->AddResObj("ListMaxLength", resObjMaxLengthValue, std::move(maxLengthupdateFunc));
     }
+}
+
+void ListModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

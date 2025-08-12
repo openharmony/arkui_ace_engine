@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
@@ -24,11 +25,10 @@ namespace CounterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = CounterModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = CounterModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // CounterModifier
 namespace CounterInterfaceModifier {
@@ -39,40 +39,58 @@ void SetCounterOptionsImpl(Ark_NativePointer node)
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
-               const VoidCallback* value)
+               const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    CounterModelNG::SetOnInc(frameNode, onEvent);
+    CounterModelStatic::SetOnInc(frameNode, onEvent);
 }
 void OnDecImpl(Ark_NativePointer node,
-               const VoidCallback* value)
+               const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    CounterModelNG::SetOnDec(frameNode, onEvent);
+    CounterModelStatic::SetOnDec(frameNode, onEvent);
 }
 void EnableDecImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+                   const Opt_Boolean* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CounterModelNG::SetEnableDec(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    CounterModelNG::SetEnableDec(frameNode, *convValue);
 }
 void EnableIncImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+                   const Opt_Boolean* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CounterModelNG::SetEnableInc(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    CounterModelNG::SetEnableInc(frameNode, *convValue);
 }
 } // CounterAttributeModifier
 const GENERATED_ArkUICounterModifier* GetCounterModifier()

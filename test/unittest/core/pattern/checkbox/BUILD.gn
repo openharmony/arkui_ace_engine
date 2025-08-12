@@ -19,6 +19,7 @@ ace_unittest("checkbox_test_ng") {
     "checkbox_content_modifier_test_ng.cpp",
     "checkbox_pattern_sub_test_ng.cpp",
     "checkbox_pattern_test_ng.cpp",
+    "checkbox_patternScd_test_ng.cpp",
     "checkbox_test_ng.cpp",
   ]
 }

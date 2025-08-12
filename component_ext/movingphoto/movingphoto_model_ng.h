@@ -48,7 +48,6 @@ public:
     void SetMovingPhotoFormat(MovingPhotoFormat format);
     void SetDynamicRangeMode(DynamicRangeMode rangeMode);
     void SetWaterMask(bool enabled);
-    void GetXmageHeight();
     void SetXmagePosition();
 
 private:

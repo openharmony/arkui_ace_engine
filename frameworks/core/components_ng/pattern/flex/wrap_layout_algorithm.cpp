@@ -206,7 +206,9 @@ void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, co
     if (crossAlignment_ != WrapAlignment::STRETCH) {
         return;
     }
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     for (const auto& item : content.itemList) {
         auto itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
         // if content cross axis size is larger than item cross axis size,

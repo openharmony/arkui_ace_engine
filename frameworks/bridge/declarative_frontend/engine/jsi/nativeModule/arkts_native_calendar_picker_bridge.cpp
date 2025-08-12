@@ -92,9 +92,13 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color textColor = calendarTheme->GetEntryFontColor();
     RefPtr<ResourceObject> textColorResObj;
+    ArkUIPickerTextStyleStruct textStyleStruct;
+    textStyleStruct.textColorSetByUser = false;
     if (!colorArg->IsUndefined()) {
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo);
+        if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
+            textStyleStruct.textColorSetByUser = true;
+        }
     }
     CalcDimension fontSizeData(DEFAULT_TEXTSTYLE_FONTSIZE);
     std::string fontSize = fontSizeData.ToString();
@@ -108,7 +112,6 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
         fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
     }
 
-    ArkUIPickerTextStyleStruct textStyleStruct;
     std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str());
     textStyleStruct.fontInfo = fontInfo.c_str();
     textStyleStruct.textColor = textColor.GetValue();

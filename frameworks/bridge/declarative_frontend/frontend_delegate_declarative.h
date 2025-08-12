@@ -181,6 +181,7 @@ public:
     void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
     bool IsUnrestoreByIndex(int32_t index);
     void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
+    std::string GetInitParams() override;
     std::string GetParams() override;
     int32_t GetIndexByUrl(const std::string& url) override;
 

@@ -2551,4 +2551,27 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest039, TestSize.Level1)
     EXPECT_EQ(changeValueInfo.previewText.offset, 11);
     EXPECT_EQ(changeValueInfo.previewText.value, u"ah");
 }
+
+/**
+ * @tc.name: GetAccessibilityText001
+ * @tc.desc: test CounterDecorator GetAccessibilityText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. call AddCounterNode
+     */
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->AddCounterNode();
+    auto counter = pattern_->GetCounterDecorator();
+    ASSERT_NE(counter, nullptr);
+    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(10, 20);
+    EXPECT_EQ(result, "");
+}
 } // namespace OHOS::Ace::NG

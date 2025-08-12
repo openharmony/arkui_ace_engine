@@ -299,10 +299,10 @@ private:
     void RecordMaxSpace(const float maxAreaSpace, const OffsetF& position, const float maxWidth, const float maxHeight,
         const OffsetF& arrowPosition);
     void BottomAndTopPosition(OffsetF& bottomPosition, OffsetF& topPosition, const SizeF& childSize);
-    Rect GetBottomRect();
-    Rect GetTopRect();
-    Rect GetRightRect();
-    Rect GetLeftRect();
+    Rect GetBottomRect(const Dimension& targetSpace);
+    Rect GetTopRect(const Dimension& targetSpace);
+    Rect GetRightRect(const Dimension& targetSpace);
+    Rect GetLeftRect(const Dimension& targetSpace);
     OffsetF AvoidToTopOrBottomByWidth(const SizeF& childSize, OffsetF& arrowPosition, SizeF& resultSize);
     OffsetF AdjustAvoidPosition(const OffsetF& position, float width, float height, OffsetF& arrowPosition);
 

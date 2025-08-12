@@ -298,10 +298,11 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
 template<typename T>
 void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         pattern->RegisterResource<T>(key, resObj, value);
     } else {

@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -173,26 +173,26 @@ void ImageLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(
     // Calculate the frameWidth size based on the layout policy
     if (layoutPolicy->IsWidthWrap()) {
         auto parentIdealSize = layoutConstraint->parentIdealSize;
-        imageFrameSize.SetWidth(std::min(
-            parentIdealSize.Width().value_or(rawImageSize->Width()), rawImageSize->Width()
-        ));
+        imageFrameSize.SetWidth(
+            std::min(parentIdealSize.Width().value_or(rawImageSize->Width()), rawImageSize->Width()));
     } else if (layoutPolicy->IsWidthFix()) {
         // If width is fixed, use the raw image size
         imageFrameSize.SetWidth(rawImageSize->Width());
     } else if (!layoutPolicy->IsWidthMatch()) {
-        imageFrameSize.SetWidth(layoutConstraint->selfIdealSize.Width().value_or(rawImageSize->Width()));
+        imageFrameSize.SetWidth(layoutConstraint->selfIdealSize.Width().value_or(
+            layoutConstraint->parentIdealSize.Width().value_or(rawImageSize->Width())));
     }
     // Calculate the frameHeight size based on the layout policy
     if (layoutPolicy->IsHeightWrap()) {
         auto parentIdealSize = layoutConstraint->parentIdealSize;
-        imageFrameSize.SetHeight(std::min(
-            parentIdealSize.Height().value_or(rawImageSize->Height()), rawImageSize->Height()
-        ));
+        imageFrameSize.SetHeight(
+            std::min(parentIdealSize.Height().value_or(rawImageSize->Height()), rawImageSize->Height()));
     } else if (layoutPolicy->IsHeightFix()) {
         // If height is fixed, use the raw image size
         imageFrameSize.SetHeight(rawImageSize->Height());
     } else if (!layoutPolicy->IsHeightMatch()) {
-        imageFrameSize.SetHeight(layoutConstraint->selfIdealSize.Height().value_or(rawImageSize->Height()));
+        imageFrameSize.SetHeight(layoutConstraint->selfIdealSize.Height().value_or(
+            layoutConstraint->parentIdealSize.Height().value_or(rawImageSize->Height())));
     }
 }
 

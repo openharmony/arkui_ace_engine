@@ -262,7 +262,7 @@ struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
 public:
-    SpanItem() = default;
+    SpanItem() : nodeId_(ElementRegister::GetInstance()->MakeUniqueId()) {}
     virtual ~SpanItem()
     {
         children.clear();
@@ -829,7 +829,7 @@ public:
 protected:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
@@ -879,19 +879,6 @@ public:
 
 private:
     RefPtr<UINode> customNode_;
-};
-
-class PlaceholderSpanPattern : public Pattern {
-    DECLARE_ACE_TYPE(PlaceholderSpanPattern, Pattern);
-
-public:
-    PlaceholderSpanPattern() = default;
-    ~PlaceholderSpanPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 };
 
 class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
@@ -958,6 +945,31 @@ private:
     RefPtr<PlaceholderSpanItem> placeholderSpanItem_ = MakeRefPtr<PlaceholderSpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanNode);
+};
+
+class PlaceholderSpanPattern : public Pattern {
+    DECLARE_ACE_TYPE(PlaceholderSpanPattern, Pattern);
+
+public:
+    PlaceholderSpanPattern() = default;
+    ~PlaceholderSpanPattern() override = default;
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        Pattern::OnDirtyLayoutWrapperSwap(dirty, config);
+        CHECK_NULL_RETURN(config.frameSizeChange, true);
+        auto spanNode = DynamicCast<PlaceholderSpanNode>(GetHost());
+        CHECK_NULL_RETURN(spanNode, true);
+        const auto& spanItem = spanNode->GetSpanItem();
+        CHECK_NULL_RETURN(spanItem, true);
+        spanItem->MarkDirty();
+        return true;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
 };
 
 struct CustomSpanItem : public PlaceholderSpanItem {

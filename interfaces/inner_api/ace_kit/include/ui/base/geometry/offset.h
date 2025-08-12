@@ -18,10 +18,9 @@
 
 #include <cmath>
 
+#include "ui/animation/animation_option.h"
 #include "ui/base/geometry/size.h"
 #include "ui/base/utils/utils.h"
-
-#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 class Offset {

@@ -1,0 +1,114 @@
+{
+    "compilerOptions": {
+        "package": "arkui",
+        "outDir": "build",
+        "baseUrl": "./arkui-preprocessed",
+        "paths": {
+            "#components": [
+                "./arkui/component/arkts"
+            ],
+            "#external": [
+                "./arkui/external/arkts"
+            ],
+            "arkui.ani": [
+                "./arkui/ani/arkts"
+            ],
+            "arkui": [
+                "./arkui/"
+            ],
+            "arkui/*": [
+                "./arkui/*"
+            ],
+            "@koalaui/interop": [
+                "../../interop/src/arkts"
+            ],
+            "@koalaui/common": [
+                "../../incremental/common/src"
+            ],
+            "@koalaui/compat": [
+                "../../incremental/compat/src/arkts"
+            ],
+            "@koalaui/runtime": [
+                "../../incremental/runtime/ets-processed"
+            ],
+            "@ohos.arkui.stateManagement": [
+                "./arkui/stateManagement/index.ets"
+            ],
+            "arkui.stateManagement.runtime": [
+                "./arkui/stateManagement/runtime"
+            ],
+            "@koalaui/runtime/annotations": [
+                "../../incremental/runtime/annotations"
+            ],
+            "@ohos/animator": [
+                "@ohos.animator.ets"
+            ],
+            "@ohos/arkui/UIContext": [
+                "@ohos.arkui.UIContext.ets"
+            ],
+            "@ohos.arkui.UIContext": [
+                "@ohos.arkui.UIContext.ets"
+            ],
+            "@ohos.arkui.node": [
+                "./arkui/ohos.arkui.node.ets"
+            ],
+            "@ohos/measure": [
+                "@ohos.measure.ets"
+            ],
+            "@ohos/font": [
+                "@ohos.font.ets"
+            ],
+            "@ohos/router": [
+                "@ohos.router.ets"
+            ],
+            "@ohos/arkui/observer": [
+                "@ohos.arkui.observer.ets"
+            ],
+            "@ohos/graphics/common2D": [
+                "@ohos.graphics.common2D.ets"
+            ],
+            "@ohos/graphics/drawing": [
+                "@ohos.graphics.drawing.ets"
+            ],
+            "@ohos/arkui/graphics": [
+                "@ohos.arkui.graphics.ets"
+            ],
+            "@ohos/promptAction": [
+                "@ohos.promptAction.ets"
+            ],
+            "@ohos/arkui/inspector": [
+                "@ohos.arkui.inspector.ets"
+            ],
+            "@ohos/arkui/componentUtils": [
+                "@ohos.arkui.componentUtils.ets"
+            ],
+            "@ohos/arkui/focusController": [
+                "@ohos.arkui.focusController.ets"
+            ],
+            "@ohos/arkui/componentSnapshot": [
+                "@ohos.arkui.componentSnapshot.ets"
+            ],
+            "@ohos/mediaquery": [
+                "@ohos.mediaquery.ets"
+            ],
+            "@ohos.multimodalInput.intentionCode": [
+                "@ohos.multimodalInput.intentionCode.ets"
+            ],
+            "@ohos/arkui/dragController": [
+                "@ohos.arkui.dragController.ets"
+            ],
+            "#stateMgmtTool": [
+                "./arkui/stateManagement/tools/arkts"
+            ]
+        }
+    },
+    "include": [
+        "./arkui-preprocessed/arkui/**/*.ets",
+        "./arkui-preprocessed/@ohos.*.ets",
+        "./arkui-processed/global/**/*.ets"
+    ],
+    "exclude": [
+        "./arkui-preprocessed/arkui/component/main.ets",
+        "./arkui-preprocessed/arkui/index-test.d.ets"
+    ]
+}

@@ -54,45 +54,41 @@ void ScrollBar2D::InitGestures(ScrollBar& bar, Axis axis)
 
 ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
 {
-    // Enables use of WeakPtr captures in lambdas.
-    // No need for DecRefCount in destructor since data is not dynamically allocated.
-    vertical_.IncRefCount();
-    horizontal_.IncRefCount();
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    vertical_->SetAxis(Axis::VERTICAL);
+    horizontal_->SetAxis(Axis::HORIZONTAL);
+    horizontal_->SetPositionMode(PositionMode::BOTTOM);
+    vertical_->SetPositionMode(PositionMode::RIGHT);
 
-    vertical_.SetAxis(Axis::VERTICAL);
-    horizontal_.SetAxis(Axis::HORIZONTAL);
-    horizontal_.SetPositionMode(PositionMode::BOTTOM);
-    vertical_.SetPositionMode(PositionMode::RIGHT);
-
-    InitGestures(vertical_, Axis::VERTICAL);
-    InitGestures(horizontal_, Axis::HORIZONTAL);
+    InitGestures(*vertical_, Axis::VERTICAL);
+    InitGestures(*horizontal_, Axis::HORIZONTAL);
 
     auto scrollableEvent = pattern_.GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
     scrollableEvent->SetInBarRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
         auto self = weak.Upgrade();
-        CHECK_NULL_RETURN(self, false);
+        CHECK_NULL_RETURN(self && self->vertical_ && self->horizontal_, false);
         const Point pointDouble { point.GetX(), point.GetY() };
         if (source == SourceType::MOUSE) {
-            return self->vertical_.InBarHoverRegion(pointDouble) || self->horizontal_.InBarHoverRegion(pointDouble);
+            return self->vertical_->InBarHoverRegion(pointDouble) || self->horizontal_->InBarHoverRegion(pointDouble);
         }
-        return self->vertical_.InBarTouchRegion(pointDouble) || self->horizontal_.InBarTouchRegion(pointDouble);
+        return self->vertical_->InBarTouchRegion(pointDouble) || self->horizontal_->InBarTouchRegion(pointDouble);
     });
     scrollableEvent->SetInBarRectRegionCallback([weak = WeakClaim(this)](const PointF& point, SourceType source) {
         auto self = weak.Upgrade();
-        CHECK_NULL_RETURN(self, false);
+        CHECK_NULL_RETURN(self && self->vertical_ && self->horizontal_, false);
         const Point pointDouble { point.GetX(), point.GetY() };
-        return self->vertical_.InBarRectRegion(pointDouble) || self->horizontal_.InBarRectRegion(pointDouble);
+        return self->vertical_->InBarRectRegion(pointDouble) || self->horizontal_->InBarRectRegion(pointDouble);
     });
     scrollableEvent->SetBarCollectTouchTargetCallback(
         [weak = WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
             TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
-            CHECK_NULL_VOID(self);
-            self->vertical_.OnCollectTouchTarget(
+            CHECK_NULL_VOID(self && self->vertical_ && self->horizontal_);
+            self->vertical_->OnCollectTouchTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-            self->horizontal_.OnCollectTouchTarget(
+            self->horizontal_->OnCollectTouchTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent->SetBarCollectClickAndLongPressTargetCallback(
@@ -100,10 +96,10 @@ ScrollBar2D::ScrollBar2D(ScrollPattern& pattern) : pattern_(pattern)
             TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
             ResponseLinkResult& responseLinkResult) {
             auto self = weak.Upgrade();
-            CHECK_NULL_VOID(self);
-            self->vertical_.OnCollectLongPressTarget(
+            CHECK_NULL_VOID(self && self->vertical_ && self->horizontal_);
+            self->vertical_->OnCollectLongPressTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-            self->horizontal_.OnCollectLongPressTarget(
+            self->horizontal_->OnCollectLongPressTarget(
                 coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
 }
@@ -121,8 +117,9 @@ void ScrollBar2D::RemoveGestures(ScrollBar& bar)
 
 ScrollBar2D::~ScrollBar2D()
 {
-    RemoveGestures(vertical_);
-    RemoveGestures(horizontal_);
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    RemoveGestures(*vertical_);
+    RemoveGestures(*horizontal_);
 
     auto* ctx = pattern_.GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -179,50 +176,64 @@ inline float GetOverScroll(float offset, float scrollableDistance)
 
 void ScrollBar2D::Update(const std::unique_ptr<ScrollBarProperty>& props)
 {
-    ConfigureScrollBar(props, vertical_);
-    ConfigureScrollBar(props, horizontal_);
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    ConfigureScrollBar(props, *vertical_);
+    ConfigureScrollBar(props, *horizontal_);
 
     const PositionMode verticalMode = pattern_.IsRTL() ? PositionMode::LEFT : PositionMode::RIGHT;
-    vertical_.SetPositionMode(verticalMode);
+    vertical_->SetPositionMode(verticalMode);
 
     const auto* renderContext = pattern_.GetRenderContext();
-    UpdateBorderRadius(vertical_, renderContext);
-    UpdateBorderRadius(horizontal_, renderContext);
+    UpdateBorderRadius(*vertical_, renderContext);
+    UpdateBorderRadius(*horizontal_, renderContext);
 }
+
+namespace {
+struct LayoutData {
+    SizeF viewSize;
+    Axis axis;
+    OffsetF offset;
+    float contentLength = 0.0f;
+};
+void SyncScrollBarLayout(ScrollBar& bar, const LayoutData& data)
+{
+    const float scrollableArea = data.contentLength - data.viewSize.MainSize(data.axis);
+    bar.SetScrollable(Positive(scrollableArea));
+    bar.ScheduleDisappearDelayTask();
+    bar.SetOutBoundary(GetOverScroll(data.offset.GetMainOffset(data.axis), scrollableArea));
+
+    bar.UpdateScrollBarRegion({}, { data.viewSize.Width(), data.viewSize.Height() },
+        { -data.offset.GetX(), -data.offset.GetY() }, data.contentLength, 0);
+    bar.MarkNeedRender();
+}
+} // namespace
 
 void ScrollBar2D::SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content)
 {
-    const auto scrollableArea = content - viewSize;
-    vertical_.SetScrollable(Positive(scrollableArea.Height()));
-    horizontal_.SetScrollable(Positive(scrollableArea.Width()));
-    vertical_.ScheduleDisappearDelayTask();
-    horizontal_.ScheduleDisappearDelayTask();
-    vertical_.SetOutBoundary(GetOverScroll(offset.GetY(), content.Height() - viewSize.Height()));
-    horizontal_.SetOutBoundary(GetOverScroll(offset.GetX(), content.Width() - viewSize.Width()));
-
-    const Size sizeDouble { viewSize.Width(), viewSize.Height() };
-    vertical_.UpdateScrollBarRegion({}, sizeDouble, { 0.0, -offset.GetY() }, content.Height(), 0);
-    horizontal_.UpdateScrollBarRegion({}, sizeDouble, { -offset.GetX(), 0.0 }, content.Width(), 0);
-    vertical_.MarkNeedRender();
-    horizontal_.MarkNeedRender();
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    SyncScrollBarLayout(*vertical_, { viewSize, Axis::VERTICAL, offset, content.Height() });
+    SyncScrollBarLayout(*horizontal_, { viewSize, Axis::HORIZONTAL, offset, content.Width() });
 }
 
 void ScrollBar2D::ResetAnimationSignals()
 {
-    vertical_.SetHoverAnimationType(HoverAnimationType::NONE);
-    vertical_.SetOpacityAnimationType(OpacityAnimationType::NONE);
-    horizontal_.SetHoverAnimationType(HoverAnimationType::NONE);
-    horizontal_.SetOpacityAnimationType(OpacityAnimationType::NONE);
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    vertical_->SetHoverAnimationType(HoverAnimationType::NONE);
+    vertical_->SetOpacityAnimationType(OpacityAnimationType::NONE);
+    horizontal_->SetHoverAnimationType(HoverAnimationType::NONE);
+    horizontal_->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 
 void ScrollBar2D::OnScrollStart()
 {
-    vertical_.PlayScrollBarAppearAnimation();
-    horizontal_.PlayScrollBarAppearAnimation();
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    vertical_->PlayScrollBarAppearAnimation();
+    horizontal_->PlayScrollBarAppearAnimation();
 }
 void ScrollBar2D::OnScrollEnd()
 {
-    vertical_.ScheduleDisappearDelayTask();
-    horizontal_.ScheduleDisappearDelayTask();
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    vertical_->ScheduleDisappearDelayTask();
+    horizontal_->ScheduleDisappearDelayTask();
 }
 } // namespace OHOS::Ace::NG

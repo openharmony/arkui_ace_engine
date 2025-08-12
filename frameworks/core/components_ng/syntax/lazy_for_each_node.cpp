@@ -40,6 +40,26 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     return node;
 }
 
+void LazyForEachNode::OnDelete()
+{
+    if (builder_ && isRegisterListener_) {
+        builder_->UnregisterDataChangeListener(this);
+        isRegisterListener_ = false;
+    }
+
+    UINode::OnDelete();
+}
+
+LazyForEachNode::~LazyForEachNode()
+{
+    CHECK_NULL_VOID(builder_);
+    if (isRegisterListener_) {
+        builder_->UnregisterDataChangeListener(this);
+        isRegisterListener_ = false;
+    }
+    builder_->ClearAllOffscreenNode();
+}
+
 RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
 {
@@ -670,6 +690,13 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
                 }
                 break;
         }
+    }
+}
+
+void LazyForEachNode::EnablePreBuild(bool enable)
+{
+    if (builder_) {
+        builder_->EnablePreBuild(enable);
     }
 }
 } // namespace OHOS::Ace::NG

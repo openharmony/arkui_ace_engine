@@ -69,6 +69,7 @@ public:
         AttachProperty(indicatorChange_);
         AttachProperty(gaugeTypeValue_);
         AttachProperty(isShowIndicator_);
+        AttachProperty(gaugeUpdate_);
 
         AttachProperty(shadowRadiusFloat_);
         AttachProperty(shadowOffsetXFloat_);
@@ -156,6 +157,7 @@ private:
     RefPtr<PropertyBool> isShowIndicator_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> indicatorChange_;
+    RefPtr<PropertyBool> gaugeUpdate_;
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);
 };
 } // namespace OHOS::Ace::NG

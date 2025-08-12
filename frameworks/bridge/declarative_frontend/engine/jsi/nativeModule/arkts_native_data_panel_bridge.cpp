@@ -230,37 +230,6 @@ void ParseTrackShadowProperties(EcmaVM* vm, const Local<panda::ObjectRef>& obj, 
     }
 }
 
-void ParseTrackShadowColors(EcmaVM* vm, const Local<panda::ObjectRef>& obj,
-    std::vector<OHOS::Ace::NG::Gradient>& shadowColors, ArkUIDatePanelTrackShadow& trackShadow)
-{
-    auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
-    std::vector<RefPtr<ResourceObject>> colorVectorResObj;
-    ConvertThemeColor(shadowColors);
-    if (!colors.IsEmpty() && colors->IsArray(vm)) {
-        shadowColors.clear();
-        auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
-        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
-            return;
-        }
-        for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
-            auto item = colorsArray->GetValueAt(vm, colors, i);
-            OHOS::Ace::NG::Gradient gradient;
-            NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj, nodeInfo)) {
-                shadowColors.clear();
-                ConvertThemeColor(shadowColors);
-                break;
-            }
-            shadowColors.emplace_back(gradient);
-        }
-        if (colorVectorResObj.empty()) {
-            trackShadow.colorRawPtr = nullptr;
-        } else {
-            trackShadow.colorRawPtr = static_cast<void*>(&colorVectorResObj);
-        }
-    }
-}
-
 ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

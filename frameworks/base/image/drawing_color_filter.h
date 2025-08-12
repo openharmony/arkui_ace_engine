@@ -36,6 +36,9 @@ class ACE_EXPORT DrawingColorFilter : public AceType {
     DECLARE_ACE_TYPE(DrawingColorFilter, AceType)
 
 public:
+#if defined(ACE_STATIC)
+    static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromAni(void* sptrAddr);
+#endif
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(void* sptrAddr);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(const std::vector<float>& matrix);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);

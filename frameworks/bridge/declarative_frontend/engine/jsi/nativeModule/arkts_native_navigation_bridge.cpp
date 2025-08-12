@@ -381,8 +381,8 @@ ArkUINativeModuleValue NavigationBridge::SetToolBarConfiguration(ArkUIRuntimeCal
         }
     }
     NG::NavigationToolbarOptions options;
-    JSNavigationUtils::ParseToolbarOptions(info, options);
     NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAV_BAR, "navigation.navigationToolbarOptions");
+    JSNavigationUtils::ParseToolbarOptions(info, options, NUM_2);
     NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }

@@ -780,6 +780,15 @@ public:
         return resourceBorderWidthObj_;
     }
 
+    void SetIsWithTheme(bool isWithTheme)
+    {
+        isWithTheme_ = isWithTheme;
+    }
+
+    bool GetIsWithTheme()
+    {
+        return isWithTheme_;
+    }
 
 private:
     bool isShow_ = true;
@@ -800,6 +809,7 @@ private:
     std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
+    bool isWithTheme_ = false;
     TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;

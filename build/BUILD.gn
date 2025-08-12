@@ -155,6 +155,7 @@ ohos_shared_library("libace_compatible") {
       debug = ace_sanitize_debug
     }
     deps += [ "$ace_root/build:libace_static_ohos" ]
+    deps += [ "$ace_root/adapter/ohos/services/etc:ace_engine_param" ]
     version_script = "libace.map"
     innerapi_tags = [ "platformsdk" ]
     configs = [ "$ace_root:ace_coverage_config" ]

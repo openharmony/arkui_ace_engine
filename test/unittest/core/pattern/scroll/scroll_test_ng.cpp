@@ -16,14 +16,14 @@
 #include "scroll_test_ng.h"
 
 #include "mock_task_executor.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
-#include "test/mock/base/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 void ScrollTestNg::SetUpTestSuite()
@@ -48,6 +48,7 @@ void ScrollTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockAnimationManager::Enable(true);
+    MockAnimationManager::SetVersion(MockAnimationManager::Version::V1);
 }
 
 void ScrollTestNg::TearDownTestSuite()
@@ -55,6 +56,7 @@ void ScrollTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
     ResetMockResourceData();
     g_isConfigChangePerform = false;
+    MockAnimationManager::SetVersion(MockAnimationManager::Version::V0);
 }
 
 void ScrollTestNg::SetUp() {}

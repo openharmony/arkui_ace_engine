@@ -101,30 +101,20 @@ void DividerModelNG::LineCap(const Ace::LineCap& value)
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value);
 }
 
-void DividerModelNG::StrokeWidth(FrameNode* frameNode, std::optional<Dimension> valueOpt)
+void DividerModelNG::StrokeWidth(FrameNode* frameNode, const Dimension& value)
 {
-    if (valueOpt) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, valueOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, value, frameNode);
 }
 
-void DividerModelNG::LineCap(FrameNode* frameNode, const std::optional<enum LineCap> valueOpt)
+void DividerModelNG::LineCap(FrameNode* frameNode, const Ace::LineCap& value)
 {
-    if (valueOpt) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, LineCap, valueOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DividerRenderProperty, LineCap, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value, frameNode);
 }
 
 void DividerModelNG::SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt, bool isSetByTheme)
 {
     if (colorOpt) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, colorOpt.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, frameNode);
     }
     if (SystemProperties::ConfigChangePerform()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColorSetByUser, isSetByTheme, frameNode);

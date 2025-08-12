@@ -60,6 +60,8 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
     CHECK_NULL_RETURN(frameNode, false);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
     touchEvent.passThrough = true;
     passThroughResult_ = false;
     if (touchEvent.type != TouchType::MOVE) {
@@ -68,7 +70,18 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
         }
         postInputEventAction_.push_back({ uiNode, touchEvent });
     }
-    pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+    // Check if there's a pending drag cancel operation
+    if (!eventManager->IsDragCancelPending()) {
+        // Normal touch event processing: dispatch the touch event through the pipeline context
+        // for standard event handling and gesture recognition
+        targetNode_ = frameNode;
+        pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
+        targetNode_.Reset();
+    } else {
+        // Abnormal state handling: when drag cancel is pending, use specialized event validation
+        // to check and clean up invalid touch events (e.g., UP/CANCEL without corresponding DOWN)
+        eventManager->CheckUpEvent(touchEvent);
+    }
     touchEvent.passThrough = false;
     if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         ClearPostInputActions(uiNode, touchEvent.id);
@@ -83,12 +96,14 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     mouseEvent.postEventNodeId = uiNode->GetId();
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_RETURN(frameNode, false);
+    targetNode_ = frameNode;
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     mouseEvent.passThrough = true;
     passThroughResult_ = false;
     pipelineContext->OnMouseEvent(mouseEvent, frameNode);
     mouseEvent.passThrough = false;
+    targetNode_.Reset();
     return passThroughResult_;
 }
 
@@ -303,5 +318,10 @@ bool PostEventManager::CheckPointValidity(const TouchEvent& touchEvent)
 void PostEventManager::SetPassThroughResult(bool passThroughResult)
 {
     passThroughResult_ = passThroughResult;
+}
+
+RefPtr<FrameNode> PostEventManager::GetPostTargetNode()
+{
+    return targetNode_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

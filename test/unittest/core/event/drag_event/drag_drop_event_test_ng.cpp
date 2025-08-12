@@ -17,6 +17,7 @@
 
 #define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_handler.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #undef private
 #include "core/gestures/drag_event.h"
 
@@ -634,5 +635,363 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNGIssue021, TestSize.Level1)
             CheckDragDropInitiatingStatus(caseNum, handler->GetDragDropInitiatingStatus(), testCase.expectStatus));
         caseNum++;
     }
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue022
+ * @tc.desc: Test onActionStart_ function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue022, TestSize.Level1)
+{
+    auto testCase = DragDropStartTestCase(GlobalDraggingInfo(false, false), DragInfo(false, false, false, false),
+        MultiDragInfo(false, false, false), InputEventType::TOUCH_SCREEN, DragDropInitiatingStatus::READY);
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    /**
+     * @tc.steps: step2. call onActionStart_ function.
+     * @tc.expected: step2. onActionStart_ exit.
+     */
+    dragDropEventActuator->InitPanAction();
+    GestureEvent gestureEvent;
+    gestureEvent.SetPassThrough(false);
+    auto callback = *(dragDropEventActuator->panRecognizer_->onActionStart_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    gestureEvent.SetPassThrough(true);
+    callback = *(dragDropEventActuator->panRecognizer_->onActionStart_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: DragDropProxyTest001
+ * @tc.desc: Test onDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    GestureEvent gestureEvent;
+
+    /**
+     * @tc.steps: step2. call onDragEnd
+     * @tc.expected: step2. drag extraInfo equals.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetDragDropManager();
+    manager->dragDropState_ = DragDropMgrState::DRAGGING;
+    auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
+    dragDropProxy->id_ = manager->currentId_;
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_EQ(manager->dragDropState_, DragDropMgrState::IDLE);
+}
+
+/**
+ * @tc.name: DragDropProxyTest002
+ * @tc.desc: Test onDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropProxyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. call onDragStart
+     * @tc.expected: step2. drag extraInfo equals.
+     */
+    GestureEvent gestureEvent;
+    auto pipeline = MockPipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetDragDropManager();
+    auto dragDropProxy = dragDropManager->CreateFrameworkDragDropProxy();
+    dragDropProxy->id_ = manager->currentId_;
+    MockContainer::Current()->SetIsUIExtensionWindow(true);
+    dragDropProxy->OnDragStart(gestureEvent, "dragDropProxyTest", frameNode);
+    EXPECT_EQ(manager->extraInfo_, "dragDropProxyTest");
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue023
+ * @tc.desc: Test NotifyDragStart function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue023, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->NotifyDragStart();
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue024
+ * @tc.desc: Test ResetPreScaledPixelMapForDragThroughTouch function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue024, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto& params = dragDropEventActuator->dragDropInitiatingHandler_->initiatingFlow_->GetDragDropInitiatingParams();
+    params.preScaleValue = 2.0f;
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->ResetPreScaledPixelMapForDragThroughTouch();
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNGIssue025
+ * @tc.desc: Test NotifyTransDragWindowToFwk function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue025, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->NotifyTransDragWindowToFwk();
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue026
+ * @tc.desc: Test NotifyMenuShow function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue026, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    bool isMenuShow = false;
+    dragDropEventActuator->NotifyMenuShow(isMenuShow);
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue027
+ * @tc.desc: Test SetThumbnailCallback function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue027, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    Offset offset(10.0, 20.0);
+    auto callBack = [](Offset offset) {};
+    dragDropEventActuator->SetThumbnailCallback(std::move(callBack));
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue028
+ * @tc.desc: Test HandleTouchEvent function when touches is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue028, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+
+    TouchEventInfo info("onTouch");
+    dragDropEventActuator->HandleTouchEvent(info, false);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::CANCEL);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    dragDropEventActuator->HandleTouchEvent(info, false);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->HandleTouchEvent(info, false);
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue029
+ * @tc.desc: Test NotifyDragEnd  function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue029, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->NotifyDragEnd();
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue030
+ * @tc.desc: Test NotifyPreDragStatus function when dragDropInitiatingHandler_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue030, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+
+    dragDropEventActuator->NotifyPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue031
+ * @tc.desc: Test NotifyPreDragStatus function when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue031, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    dragDropEventActuator->NotifyPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue032
+ * @tc.desc: Test RestartDragTask when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue032, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    GestureEvent gestureEvent;
+    dragDropEventActuator->RestartDragTask(gestureEvent);
+    ASSERT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
 }
 } // namespace OHOS::Ace::NG

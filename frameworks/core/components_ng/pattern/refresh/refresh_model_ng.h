@@ -65,6 +65,7 @@ public:
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
     static bool GetRefreshing(FrameNode* frameNode);
     static void SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder);
+    static void SetCustomBuilderMultiThread(FrameNode* frameNode, FrameNode* customBuilder);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
     static void SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset);
     static void ResetOnOffsetChange(FrameNode* frameNode);

@@ -369,9 +369,9 @@ public:
 
     std::unordered_map<int32_t, TouchDelegates> touchDelegatesMap_;
 
-    TouchDelegateHdl AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+    TouchDelegateHdl AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
 
-    TouchDelegateHdl ReplaceTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater);
+    TouchDelegateHdl UpdateTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater);
 
     void UnregisterTouchDelegate(TouchDelegateHdl handler);
 
@@ -385,6 +385,11 @@ public:
     {
         CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
         return mouseStyleManager_->GetCurrentMouseStyle();
+    }
+
+    bool IsDragCancelPending() const
+    {
+        return isDragCancelPending_;
     }
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
@@ -490,6 +495,7 @@ private:
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
+    bool isDragCancelPending_ = false;
 };
 
 } // namespace OHOS::Ace

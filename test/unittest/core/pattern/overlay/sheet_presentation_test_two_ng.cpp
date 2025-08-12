@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -30,10 +31,10 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -778,6 +779,14 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode002, TestSize.Level
     EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
     EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
     sheetPattern->AvoidKeyboardBySheetMode();
+    safeAreaManager->keyboardInset_ = SafeAreaInsets::Inset();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::POPUP_SHEET;
+    host->GetFocusHub()->currentFocus_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1606,14 +1615,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset002, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme.
      */
     SetOnBindSheet();
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1740,12 +1742,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     auto sheetType = sheetPattern->GetSheetType();
     EXPECT_NE(sheetType, SheetType::SHEET_BOTTOM_OFFSET);
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
     sheetPattern->InitSheetObject();
@@ -1832,12 +1829,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     sheetPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    auto manager = pipelineContext->GetWindowManager();
-    ASSERT_NE(manager, nullptr);
-    auto isPcOrPadFreeMultiWindow = []() {
-        return true;
-    };
-    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
+    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     auto sheetType = sheetPattern->GetSheetType();
 
     /**
@@ -2335,7 +2327,7 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE and pageHeight_ is 1000 and frameSize height is 500.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_CENTER);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetPattern->pageHeight_ = 1000.0f;
     auto sheetSize = SizeF({ 500, 500 });
     sheetNode->GetGeometryNode()->SetFrameSize(sheetSize);
@@ -2352,9 +2344,8 @@ HWTEST_F(SheetPresentationTestTwoNg, ComputeSheetOffset001, TestSize.Level1)
      * @tc.expected: SheetType is SHEET_BOTTOMLANDSPACE.
      */
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     sheetPattern->pageHeight_ = 1200.0f;
-
     /**
      * @tc.steps: step11. excute ComputeSheetOffset function.
      * @tc.expected: sheetHeight_ is pageHeight_.
@@ -2543,7 +2534,10 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     style.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
-    
+    auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    sheetNode->MountToParent(sheetWrapperNode);
     /**
      * @tc.steps: step2. create sheet property and style.
      * @tc.expected: layoutProperty and LayoutAlgorithm are not nullptr.
@@ -2559,7 +2553,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->sheetMaxHeight_ = 2420;
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     layoutProperty->propSheetStyle_ = style;
 
     /**
@@ -2567,7 +2560,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
      */
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     manager->keyboardInset_ = KEYBOARD_INSET;
     pipeline->isHalfFoldHoverStatus_ = true;
@@ -2582,8 +2574,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus004, TestSize.Level1)
     sheetLayoutAlgorithm->InitParameter(Referenced::RawPtr(layoutWrapper));
     EXPECT_TRUE(sheetLayoutAlgorithm->isHoverMode_);
     std::vector<Rect> rects;
-    Rect rect;
-    rect.SetRect(0, 1064, 2294, 171);
+    Rect rect(0, 1064, 2294, 171);
     rects.insert(rects.end(), rect);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -2700,8 +2691,8 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus006, TestSize.Level1)
     Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step3. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2775,7 +2766,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     MockPipelineContext::SetCurrentWindowRect(windowRect);
     sheetPattern->sheetKey_.hasValidTargetNode = true;
     sheetTheme->sheetType_ = "popup";
-
     /**
      * @tc.steps: step4. Set sheet type and run IsCurSheetNeedHalfFoldHover.
      * @tc.expected: sheet is in half fold status.
@@ -2785,6 +2775,7 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus007, TestSize.Level1)
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     SheetPresentationTestTwoNg::SetSheetTheme(sheetTheme);
     EXPECT_TRUE(sheetPattern->IsCurSheetNeedHalfFoldHover());
 

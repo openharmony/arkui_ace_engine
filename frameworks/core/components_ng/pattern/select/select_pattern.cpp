@@ -1936,18 +1936,22 @@ void SelectPattern::OnColorConfigurationUpdate()
 void SelectPattern::SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props)
 {
     CHECK_NULL_VOID(props);
-    Color menuBackgroundColor = props->GetMenuBackgroundColorSetByUserValue(false) && menuBackgroundColor_.has_value()
-                                    ? menuBackgroundColor_.value()
-                                    : color;
-    SetMenuBackgroundColor(menuBackgroundColor);
+    if (props->GetMenuBackgroundColorSetByUserValue(false)) {
+        return;
+    }
+    SetMenuBackgroundColor(color);
 }
 
 void SelectPattern::SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props)
 {
     CHECK_NULL_VOID(props);
-    Color optionBgColor =
-        props->GetOptionBgColorSetByUserValue(false) && optionBgColor_.has_value() ? optionBgColor_.value() : color;
-    optionBgColor_ = optionBgColor;
+    if (props->GetOptionBgColorSetByUserValue(false)) {
+        return;
+    }
+    optionBgColor_ = color;
+    if (!optionBgColor_.has_value()) {
+        return;
+    }
     for (const auto& option : options_) {
         auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
@@ -1966,9 +1970,9 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     CHECK_NULL_VOID(theme);
     auto props = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto themeBgColor = theme->GetBackgroundColor();
-    SetMenuBackgroundColorByUser(themeBgColor, props);
-    SetOptionBgColorByUser(themeBgColor, props);
+    auto themeBgcolor = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
+    SetMenuBackgroundColorByUser(themeBgcolor, props);
+    SetOptionBgColorByUser(Color::TRANSPARENT, props);
     auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     SetSelectedOptionBgColorByUser(theme, props, layoutProps);

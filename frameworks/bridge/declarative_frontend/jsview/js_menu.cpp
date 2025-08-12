@@ -96,6 +96,9 @@ void JSMenu::Font(const JSCallbackInfo& info)
 void JSMenu::HandleFontObject(
     const JSCallbackInfo& info, CalcDimension& fontSize, std::string& weight, RefPtr<ResourceObject>& fontSizeResObj)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
     if (!size->IsNull()) {
@@ -165,6 +168,7 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
         if (layoutPolicy->IsString()) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
             return;

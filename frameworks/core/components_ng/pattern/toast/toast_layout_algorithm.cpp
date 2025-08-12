@@ -126,7 +126,10 @@ void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    LayoutConstraintF layoutConstraint;
+    auto toastLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(toastLayoutProperty, layoutConstraint);
+    layoutConstraint = toastLayoutProperty->CreateChildConstraint();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, layoutConstraint);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();

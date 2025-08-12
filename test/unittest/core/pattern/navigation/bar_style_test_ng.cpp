@@ -1316,25 +1316,4 @@ HWTEST_F(BarStyleTestNg, toolBarStyleTest012, TestSize.Level1)
      */
     ASSERT_NE(safeAreaPadding, nullptr);
 }
-
-/*
- * @tc.name: ToJsonValue001
- * @tc.desc: Branch: if MoreButtonOptions not empty
- * @tc.type: FUNC
- */
-HWTEST_F(BarStyleTestNg, ToJsonValue001, TestSize.Level1)
-{
-    NavigationBackgroundOptions navigationBgOpt;
-    navigationBgOpt.blurStyleOption = BlurStyleOption();
-    navigationBgOpt.effectOption = EffectOption();
-    MoreButtonOptions moreButtonOpt;
-    moreButtonOpt.bgOptions = navigationBgOpt;
-
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
-    InspectorFilter filter;
-    moreButtonOpt.ToJsonValue(json, filter);
-    ASSERT_NE(json->GetValue("backgroundEffect"), nullptr);
-    ASSERT_NE(json->GetValue("backgroundBlurStyle"), nullptr);
-    ASSERT_NE(json->GetString("backgroundBlurStyleValue"), "");
-}
 } // namespace OHOS::Ace::NG

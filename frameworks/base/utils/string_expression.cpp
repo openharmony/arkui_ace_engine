@@ -187,28 +187,28 @@ bool FilterCalcSpecialString(const std::string& formula)
     return (isSingleCalc && isNotIncludeEmptyBracket);
 }
 
-std::vector<std::string> ConvertDal2Rpn(std::string formula)
+void ConvertDal2Rpn(std::string formula, std::vector<std::string> &result)
 {
-    std::vector<std::string> result;
+    result.clear();
     std::vector<std::string> opStack;
     std::string curNum;
     std::regex calc("calc");
     std::regex space(" ");
     bool isValid = CheckCalcIsValid(formula);
     if (!isValid) {
-        return result;
+        return;
     }
     ReplaceSignNumberWithUnit(formula);
     ReplaceSignNumber(formula);
     formula = regex_replace(formula, space, "");
     isValid = FilterCalcSpecialString(formula);
     if (!isValid) {
-        return result;
+        return;
     }
     formula = regex_replace(formula, calc, "");
     bool ret = PushOpStack(formula, curNum, result, opStack);
     if (!ret) {
-        return result;
+        return;
     }
     if (!curNum.empty()) {
         result.emplace_back(curNum);
@@ -218,7 +218,6 @@ std::vector<std::string> ConvertDal2Rpn(std::string formula)
         result.emplace_back(opStack.back());
         opStack.pop_back();
     }
-    return result;
 }
 
 bool CalculateFourOperationsExp(const std::string& exp, const Dimension& num1, const Dimension& num2,
@@ -294,7 +293,7 @@ double CalculateExp(const std::string& expression, const std::function<double(co
     if (!lengthString.empty()) {
         rpnexp = lengthString;
     } else {
-        rpnexp = ConvertDal2Rpn(expression);
+        ConvertDal2Rpn(expression, rpnexp);
     }
     std::vector<Dimension> result;
     double opRes = 0.0;

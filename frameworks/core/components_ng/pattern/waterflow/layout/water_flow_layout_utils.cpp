@@ -73,8 +73,18 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
 
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
-    itemConstraint.parentIdealSize = OptionalSizeF(itemIdealSize);
     itemConstraint.percentReference = itemIdealSize;
+
+    if (child) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy.has_value() && ((params.axis == Axis::VERTICAL && layoutPolicy->IsWidthMatch()) ||
+                                                (params.axis == Axis::HORIZONTAL && layoutPolicy->IsHeightMatch()))) {
+                itemConstraint.parentIdealSize = OptionalSizeF(itemIdealSize);
+            }
+        }
+    }
 
     CHECK_NULL_RETURN(props->HasItemLayoutConstraint() && !params.haveUserDefSize, itemConstraint);
 
@@ -170,7 +180,9 @@ float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
     footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     footer->Measure(footerConstraint);
     auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
-    return GetMainAxisSize(itemSize, axis);
+    auto footerSize = GetMainAxisSize(itemSize, axis);
+
+    return std::max(footerSize, 0.0f);
 }
 
 float WaterFlowLayoutUtils::GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx)

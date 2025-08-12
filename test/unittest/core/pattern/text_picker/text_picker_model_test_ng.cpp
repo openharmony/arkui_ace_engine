@@ -1154,4 +1154,77 @@ HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle001, TestSize.Level1)
     EXPECT_EQ(pickerBgStyle.color, result2.color);
     EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
 }
+
+/**
+ * @tc.name: SelectedBackgroundStyle002
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    PickerBackgroundStyle pickerBgStyle;
+    PickerBackgroundStyle result1;
+    PickerBackgroundStyle result2;
+    pickerBgStyle.color = Color(0x00000000);
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle003
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    PickerBackgroundStyle pickerBgStyle;
+    PickerBackgroundStyle result1;
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+    result1.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result1.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(theme->GetSelectedBackgroundColor(), result1.color);
+    EXPECT_EQ(theme->GetSelectedBorderRadius(), result1.borderRadius);
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle004
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SelectedBackgroundStyle004, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    PickerBackgroundStyle pickerBgStyle;
+    PickerBackgroundStyle result1;
+    TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
+    result1.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result1.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(theme->GetSelectedBackgroundColor(), result1.color);
+    EXPECT_EQ(theme->GetSelectedBorderRadius(), result1.borderRadius);
+}
 } // namespace OHOS::Ace::NG

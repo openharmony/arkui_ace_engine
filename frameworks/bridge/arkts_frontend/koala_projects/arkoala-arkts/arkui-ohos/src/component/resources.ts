@@ -1,42 +1,64 @@
-import { Resource } from "global/resource";
+import { Resource } from "global.resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
-import { Serializer } from "../generated/peers/Serializer";
+import { Serializer } from "./peers/Serializer";
 import { asArray } from "@koalaui/common";
-import { RuntimeType, runtimeType } from "@koalaui/interop";
+import { InteropNativeModule } from "@koalaui/interop";
+
+enum ResourceType {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000,
+    SYMBOL = 40000
+}
 
 class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
-    params?: Array<Object> | undefined;
+    params?: Array<Object | undefined> | undefined;
     type?: number | undefined;
     _id: number = -1;
-    constructor(resourceName: string, bundleName: string, moduleName: string, ...params: Object[]) {
+
+    castParams(params: Object[]): Array<Object | undefined> {
+        let result: Array<Object | undefined> = new Array<Object | undefined>();
+        for (let param of params) {
+            result.push(param);
+        }
+        return result;
+    }
+
+    constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
-        let param1 = new Array<Object>();
-        if (resourceName != null) {
+        if (resourceName !== null) {
+            let param1 = new Array<Object | undefined>();
             param1.push(resourceName);
-            param1 = param1.concat(asArray(params));
+            this.params = param1.concat(this.castParams(params));
+        } else {
+            this.params = this.castParams(params);
         }
-        this.params = param1;
         this._id = -1;
-        const param: string = resourceName.split(".")[1];
-        this.type = 20000;
-        switch (param) {
-            case 'media':
-                this.type = 20000;
-                break;
-            case 'color':
-                this.type = 10001;
-                break;
-            case 'string':
-                this.type = 10003;
-                break;
-            case 'float':
-                this.type = 10002;
-                break;
+        if (this.params!.length > 0) {
+            const name: string = this.params![0] as string;
+            this.type = this.parseResourceType(name);
+        } else {
+            InteropNativeModule._NativeLog("UI-Plugin do not send resourceName when id is -1");
         }
+    }
+    constructor(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]) {
+        this._id = id;
+        this.type = type;
+        this.params = this.castParams(params);
+        this.bundleName = bundleName;
+        this.moduleName = moduleName;
     }
     set id(value: number) {
         this._id = value;
@@ -56,16 +78,7 @@ class ArkResource implements Resource {
             }
             thisSerializer.writeInt32(param.length as int32);
             for (let i = 0; i < param.length; i++) {
-                const params_type = runtimeType(param[i]);
-                if (params_type == RuntimeType.STRING) {
-                    const params_element: string = param[i] as string;
-                    thisSerializer.writeString(params_element);
-                } else if (params_type == RuntimeType.NUMBER) {
-                    const params_element: number = param[i] as number;
-                    thisSerializer.writeString(String(params_element));
-                } else {
-                    throw new Error("Unsupported params type, expect string or number.")
-                }
+                thisSerializer.writeString(String(param[i]));
             }
             const retval = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleNamea, moduleNamea, thisSerializer.asBuffer(), thisSerializer.length());
             thisSerializer.release();
@@ -76,16 +89,40 @@ class ArkResource implements Resource {
         }
         return this._id;
     }
+    parseResourceType(resourceName: string): ResourceType {
+        const typeName: string = resourceName.split(".")[1];
+        switch (typeName) {
+            case 'color':
+                return ResourceType.COLOR;
+            case 'float':
+                return ResourceType.FLOAT;
+            case 'string':
+                return ResourceType.STRING;
+            case 'plural':
+                return ResourceType.PLURAL;
+            case 'boolean':
+                return ResourceType.BOOLEAN;
+            case 'intarray':
+                return ResourceType.INTARRAY
+            case 'integer':
+                return ResourceType.INTEGER;
+            case 'pattern':
+                return ResourceType.PATTERN;
+            case 'strarray':
+                return ResourceType.STRARRAY
+            case 'media':
+                return ResourceType.MEDIA;
+            case 'RAWFILE':
+                return ResourceType.RAWFILE;
+            case 'symbol':
+                return ResourceType.SYMBOL;
+        }
+        return ResourceType.STRING;
+    }
 }
 export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {
     return new ArkResource(name, bundleName, moduleName, ...params)
 }
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
-    return {
-        "id": 0,
-        "type": 30000,
-        "params": new Array<Object>(name),
-        "bundleName": bundleName,
-        "moduleName": moduleName
-    } as Resource
+    return new ArkResource(0, 30000, bundleName, moduleName, name);
 }

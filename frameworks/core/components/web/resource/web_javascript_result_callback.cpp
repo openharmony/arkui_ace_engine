@@ -149,6 +149,34 @@ std::shared_ptr<NWebValue> GetWebViewValue(const std::shared_ptr<WebJSValue>& we
     return webViewValue;
 }
 
+std::shared_ptr<WebJSValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
+    const std::vector<std::shared_ptr<WebJSValue>>& args, const std::string& method, const std::string& object_name)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return nullptr;
+    }
+
+    ContainerScope scope(delegate->GetInstanceId());
+    std::shared_ptr<WebJSValue> result;
+
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return nullptr;
+    }
+
+    task->PostSyncTask(
+        [webJSCallBack = this, object_name, method, args, &result] {
+            if (webJSCallBack->javaScriptCallBackImpl_) {
+                result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, args);
+            }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebGetJavaScriptResult");
+
+    return result;
+}
+
 std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     std::vector<std::shared_ptr<NWebValue>> args, const std::string& method, const std::string& object_name,
     int32_t routing_id, int32_t object_id)
@@ -157,26 +185,8 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
     // not used
     (void)object_id;
     (void)routing_id;
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_RETURN(delegate, std::make_shared<NWebValue>(NWebValue::Type::NONE));
-    ContainerScope scope(delegate->GetInstanceId());
-    std::shared_ptr<WebJSValue> result;
-    auto jsArgs = GetWebJSValue(args);
 
-    auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
-        LOGW("can't get task executor");
-        return std::make_shared<NWebValue>(NWebValue::Type::NONE);
-    }
-
-    task->PostSyncTask(
-        [webJSCallBack = this, object_name, method, jsArgs, &result] {
-            if (webJSCallBack->javaScriptCallBackImpl_) {
-                result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, jsArgs);
-            }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebGetJavaScriptResult");
-
+    std::shared_ptr<WebJSValue> result = GetJavaScriptResult(GetWebJSValue(args), method, object_name);
     return GetWebViewValue(result);
 }
 
@@ -218,4 +228,172 @@ void WebJavaScriptResultCallBack::RemoveTransientJavaScriptObject()
 {
     // webcontroller not support object, so nothing to do
 }
+
+std::shared_ptr<WebJSValue> GetWebJSValueHelperV2(std::shared_ptr<NWebHapValue> argument)
+{
+    if (!argument) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetWebJSValueHelper: argument is null");
+        return std::make_shared<WebJSValue>();
+    }
+
+    switch (argument->GetType()) {
+        case NWebHapValue::Type::INTEGER:
+            return std::make_shared<WebJSValue>(argument->GetInt());
+        case NWebHapValue::Type::BOOLEAN:
+            return std::make_shared<WebJSValue>(argument->GetBool());
+        case NWebHapValue::Type::DOUBLE:
+            return std::make_shared<WebJSValue>(argument->GetDouble());
+        case NWebHapValue::Type::STRING:
+            return std::make_shared<WebJSValue>(argument->GetString());
+        case NWebHapValue::Type::BINARY: {
+            int length = 0;
+            auto buff = argument->GetBinary(length);
+            return std::make_shared<WebJSValue>(buff, length);
+        }
+        case NWebHapValue::Type::LIST: {
+            std::vector<WebJSValue> vec;
+            auto list = argument->GetListValue();
+            for (auto& item : list) {
+                vec.push_back(*GetWebJSValueHelperV2(item));
+            }
+            return std::make_shared<WebJSValue>(vec);
+        }
+        case NWebHapValue::Type::DICTIONARY: {
+            std::map<std::string, WebJSValue> map;
+            auto dict = argument->GetDictValue();
+            for (auto& item : dict) {
+                map[item.first] = *GetWebJSValueHelperV2(item.second);
+            }
+            return std::make_shared<WebJSValue>(map);
+        }
+        case NWebHapValue::Type::NONE:
+            return std::make_shared<WebJSValue>();
+        default:
+            LOGI("GetWebJSValueHelper: jsvalue type not support!");
+            break;
+    }
+    return std::make_shared<WebJSValue>();
+}
+
+std::vector<std::shared_ptr<WebJSValue>> GetWebJSValueV2(const std::vector<std::shared_ptr<NWebHapValue>>& args)
+{
+    std::vector<std::shared_ptr<WebJSValue>> webJSValues;
+    for (auto value : args) {
+        if (value == nullptr) {
+            continue;
+        }
+        webJSValues.push_back(GetWebJSValueHelperV2(value));
+    }
+    return webJSValues;
+}
+
+bool GetBasicTypeWebViewValueV2(
+    const std::shared_ptr<WebJSValue>& webJSValue, std::shared_ptr<NWebHapValue>& webHapValue)
+{
+    WebJSValue::Type type = webJSValue->GetType();
+    switch (type) {
+        case WebJSValue::Type::NONE:
+            webHapValue->SetType(NWebHapValue::Type::NONE);
+            break;
+        case WebJSValue::Type::INTEGER:
+            webHapValue->SetType(NWebHapValue::Type::INTEGER);
+            webHapValue->SetInt(webJSValue->GetInt());
+            break;
+        case WebJSValue::Type::DOUBLE:
+            webHapValue->SetType(NWebHapValue::Type::DOUBLE);
+            webHapValue->SetDouble(webJSValue->GetDouble());
+            break;
+        case WebJSValue::Type::BOOLEAN:
+            webHapValue->SetType(NWebHapValue::Type::BOOLEAN);
+            webHapValue->SetBool(webJSValue->GetBoolean());
+            break;
+        case WebJSValue::Type::STRING:
+            webHapValue->SetType(NWebHapValue::Type::STRING);
+            webHapValue->SetString(webJSValue->GetString());
+            break;
+        case WebJSValue::Type::BINARY:
+            webHapValue->SetType(NWebHapValue::Type::BINARY);
+            webHapValue->SetBinary(webJSValue->GetBinaryValueSize(), webJSValue->GetBinaryValue());
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
+void GetWebViewValueV2(const std::shared_ptr<WebJSValue>& webJSValue, std::shared_ptr<NWebHapValue> webHapValue)
+{
+    if (!webJSValue) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetWebViewValue: webJSValue is null");
+        return;
+    }
+
+    if (!webHapValue) {
+        return;
+    }
+
+    if (GetBasicTypeWebViewValueV2(webJSValue, webHapValue)) {
+        return;
+    }
+
+    WebJSValue::Type type = webJSValue->GetType();
+    switch (type) {
+        case WebJSValue::Type::LIST: {
+            webHapValue->SetType(NWebHapValue::Type::LIST);
+            size_t length = webJSValue->GetListValueSize();
+            for (size_t i = 0; i < length; ++i) {
+                GetWebViewValueV2(
+                    std::make_shared<WebJSValue>(webJSValue->GetListValue(i)), webHapValue->NewChildValue());
+                webHapValue->SaveListChildValue();
+            }
+            return;
+        }
+        case WebJSValue::Type::DICTIONARY: {
+            webHapValue->SetType(NWebHapValue::Type::DICTIONARY);
+            auto dict = webJSValue->GetDictionaryValue();
+            for (auto& item : dict) {
+                GetWebViewValueV2(std::make_shared<WebJSValue>(item.second), webHapValue->NewChildValue());
+                webHapValue->SaveDictChildValue(item.first);
+            }
+            return;
+        }
+        default:
+            LOGI("GetWebViewValue: jsvalue type not support!");
+            break;
+    }
+}
+
+void WebJavaScriptResultCallBack::GetJavaScriptResultV2(const std::vector<std::shared_ptr<NWebHapValue>>& args,
+    const std::string& method, const std::string& objectName, int32_t routingId, int32_t objectId,
+    std::shared_ptr<NWebHapValue> result)
+{
+    // webcontroller not support object, so the object_id and routing_id param is
+    // not used
+    (void)objectId;
+    (void)routingId;
+
+    GetWebViewValueV2(GetJavaScriptResult(GetWebJSValueV2(args), method, objectName), result);
+}
+
+void WebJavaScriptResultCallBack::GetJavaScriptResultFlowbufV2(const std::vector<std::shared_ptr<NWebHapValue>>& args,
+    const std::string& method, const std::string& objectName, int fd, int32_t routingId, int32_t objectId,
+    std::shared_ptr<NWebHapValue> result)
+{
+    (void)fd;
+    (void)args;
+    (void)method;
+    (void)result;
+    (void)objectId;
+    (void)routingId;
+    (void)objectName;
+    // webcontroller not support object, so nothing to do
+}
+
+void WebJavaScriptResultCallBack::GetJavaScriptObjectMethodsV2(int32_t objectId, std::shared_ptr<NWebHapValue> result)
+{
+    (void)result;
+    (void)objectId;
+    // webcontroller not support object, so nothing to do
+}
+
 } // namespace OHOS::Ace

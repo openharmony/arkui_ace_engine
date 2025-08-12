@@ -135,7 +135,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnDrapDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
+using OnDragDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
@@ -245,6 +245,8 @@ public:
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void AddPanEvent(
         const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent,
+        PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     void SetLongPressEventType(GestureTypeName typeName);
@@ -367,8 +369,8 @@ public:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
         DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
     void HideMenu();
-    GestureEvent GetGestureEventInfo();
-    ClickInfo GetClickInfo();
+    const GestureEvent GetGestureEventInfo();
+    const ClickInfo GetClickInfo();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
@@ -399,6 +401,7 @@ public:
     bool IsDragNewFwk() const;
     bool TriggerTouchEvent(const TouchEvent& point);
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus = RecognizerDelayStatus::NONE);
+    void DragNodeDetachFromParent();
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,

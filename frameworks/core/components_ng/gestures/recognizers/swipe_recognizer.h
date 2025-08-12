@@ -91,6 +91,7 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
+    void UpdateGestureEventInfo(std::shared_ptr<SwipeGestureEvent>& info);
 
     bool CheckAngle(double angle);
 

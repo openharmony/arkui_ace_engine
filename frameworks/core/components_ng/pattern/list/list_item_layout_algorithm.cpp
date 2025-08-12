@@ -22,7 +22,9 @@ namespace OHOS::Ace::NG {
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const
 {
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
     if (layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL) {
         return true;
     } else {
@@ -66,8 +68,10 @@ void ListItemLayoutAlgorithm::CheckAndUpdateCurOffset(LayoutWrapper* layoutWrapp
 
 void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
 {
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     std::list<RefPtr<LayoutWrapper>> childList;
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
     if (child) {
         child->Measure(layoutConstraint);
@@ -127,12 +131,14 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto paddingOffset = padding.Offset();
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
 
     SetSwipeActionNode(layoutWrapper, size, paddingOffset);

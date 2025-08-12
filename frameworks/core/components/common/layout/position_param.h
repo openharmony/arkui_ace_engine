@@ -79,7 +79,7 @@ struct EdgesParam {
     bool operator==(const EdgesParam& rhs) const
     {
         return ((this->top == rhs.top) && (this->left == rhs.left) && (this->bottom == rhs.bottom) &&
-                (this->right == rhs.right));
+                (this->right == rhs.right) && (this->start == rhs.start) && (this->end == rhs.end));
     }
 
     std::string ToString() const
@@ -216,6 +216,16 @@ struct BarrierInfo {
                 (this->referencedId == right.referencedId));
     }
 };
+
+#ifdef ACE_STATIC
+struct LocalizedBarrierInfo : public BarrierInfo {
+    LocalizedBarrierInfo()
+    {
+        direction = BarrierDirection::START;
+    }
+};
+#endif
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_POSITION_PARAM_H

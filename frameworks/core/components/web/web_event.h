@@ -18,8 +18,16 @@
 
 #include <map>
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+
+namespace OHOS {
+namespace Media {
+enum class PixelFormat;
+enum class AlphaType;
+}
+}
 
 namespace OHOS::Ace {
 
@@ -641,9 +649,9 @@ public:
 private:
     RefPtr<AllSslErrorResult> result_;
     int32_t error_;
-    const std::string& url_;
-    const std::string& originalUrl_;
-    const std::string& referrer_;
+    const std::string url_;
+    const std::string originalUrl_;
+    const std::string referrer_;
     bool isFatalError_;
     bool isMainFrame_;
     std::vector<std::string> certChainData_;
@@ -1676,6 +1684,10 @@ public:
     virtual size_t GetHeight() = 0;
     virtual int GetColorType() = 0;
     virtual int GetAlphaType() = 0;
+    virtual Media::PixelFormat GetMediaPixelFormat() = 0;
+    virtual Media::AlphaType GetMediaAlphaType() = 0;
+    virtual void SetPixelMap() = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetPixelMap() = 0;
 };
 
 class ACE_EXPORT FaviconReceivedEvent : public BaseEventInfo {

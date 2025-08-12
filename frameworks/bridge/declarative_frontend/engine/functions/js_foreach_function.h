@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsForEachFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsForEachFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsForEachFunction, JsFunction);
 
 private:
     JSWeak<JSFunc> jsIdentityMapperFunc_;

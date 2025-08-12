@@ -764,66 +764,6 @@ HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
 }
 
 /**
-* @tc.name: FormRenderTest026
-* @tc.desc: test CheckWhetherNeedResizeFormAgain
-* @tc.type: FUNC
-*/
-HWTEST_F(FormRenderTest, FormRenderTest026, TestSize.Level1)
-{
-    auto formRenderer = GetInstance("formRenderTest026");
-    ASSERT_TRUE(formRenderer);
-    float borderWidth = 1.0f;
-    float width = 1.0f;
-    float height = 1.0f;
-    formRenderer->CheckWhetherNeedResizeFormAgain(borderWidth, width, height);
-}
-
-/**
-* @tc.name: FormRenderTest027
-* @tc.desc: test ResizeFormAgain
-* @tc.type: FUNC
-*/
-HWTEST_F(FormRenderTest, FormRenderTest027, TestSize.Level1)
-{
-    auto formRenderer = GetInstance("formRenderTest027");
-    ASSERT_TRUE(formRenderer);
-    float borderWidth = 1.0f;
-    float width = 1.0f;
-    float height = 1.0f;
-    formRenderer->ResizeFormAgain(borderWidth, width, height);
-    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
-    EXPECT_TRUE(formRenderer->uiContent_);
-    formRenderer->ResizeFormAgain(borderWidth, width, height);
-}
-
-/**
-* @tc.name: FormRenderTest028
-* @tc.desc: test GetRunFormPageInnerTimeStamp
-* @tc.type: FUNC
-*/
-HWTEST_F(FormRenderTest, FormRenderTest028, TestSize.Level1)
-{
-    auto formRenderer = GetInstance("formRenderTest028");
-    ASSERT_TRUE(formRenderer);
-    int64_t res = formRenderer->GetRunFormPageInnerTimeStamp();
-    EXPECT_EQ(res, -1);
-}
-
-/**
-* @tc.name: FormRenderTest029
-* @tc.desc: test SetRunFormPageInnerTimeStamp
-* @tc.type: FUNC
-*/
-HWTEST_F(FormRenderTest, FormRenderTest029, TestSize.Level1)
-{
-    auto formRenderer = GetInstance("formRenderTest029");
-    ASSERT_TRUE(formRenderer);
-    formRenderer->SetRunFormPageInnerTimeStamp(0);
-    int64_t res = formRenderer->GetRunFormPageInnerTimeStamp();
-    EXPECT_EQ(res, 0);
-}
-
-/**
 * @tc.name: FormRenderTest030
 * @tc.desc: test IsManagerDelegateValid
 * @tc.type: FUNC

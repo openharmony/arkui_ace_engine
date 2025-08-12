@@ -25,10 +25,6 @@ StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
-    if (host && !host->GetIgnoreLayoutProcess() && GetNeedPostponeForIgnore()) {
-        return;
-    }
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
@@ -40,8 +36,10 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    const auto& stackLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    const auto& padding = stackLayoutProperty->CreatePaddingAndBorder();
+    auto layoutDirection = stackLayoutProperty->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }

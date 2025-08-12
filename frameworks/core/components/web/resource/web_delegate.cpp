@@ -54,6 +54,7 @@
 #include "system_ability_definition.h"
 #include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
+#include "webview_value.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -63,6 +64,7 @@
 #endif
 
 #include "core/common/container.h"
+#include "base/include/ark_web_errno.h"
 
 namespace OHOS::Ace {
 
@@ -132,6 +134,36 @@ static bool IsDeviceTabletOr2in1()
 static bool GetWebOptimizationValue()
 {
     return OHOS::system::GetBoolParameter("web.optimization", true);
+}
+
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
+{
+    switch (colorType) {
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
+            return Media::PixelFormat::UNKNOWN;
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
+            return Media::PixelFormat::RGBA_8888;
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
+            return Media::PixelFormat::BGRA_8888;
+        default:
+            return Media::PixelFormat::UNKNOWN;
+    }
+}
+
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
+{
+    switch (alphaType) {
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+        default:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    }
 }
 } // namespace
 
@@ -709,6 +741,39 @@ int FaviconReceivedOhos::GetColorType()
 int FaviconReceivedOhos::GetAlphaType()
 {
     return static_cast<int>(alphaType_);
+}
+
+Media::PixelFormat FaviconReceivedOhos::GetMediaPixelFormat()
+{
+    return GetPixelFormat(NG::TransImageColorType(colorType_));
+}
+
+Media::AlphaType FaviconReceivedOhos::GetMediaAlphaType()
+{
+    return ::OHOS::Ace::GetAlphaType(NG::TransImageAlphaType(alphaType_));
+}
+
+void FaviconReceivedOhos::SetPixelMap()
+{
+    Media::InitializationOptions opt;
+    opt.size.width = static_cast<int32_t>(width_);
+    opt.size.height = static_cast<int32_t>(height_);
+    opt.pixelFormat = GetMediaPixelFormat();
+    opt.alphaType = GetMediaAlphaType();
+    opt.editable = true;
+    pixelMap_ = Media::PixelMap::Create(opt);
+    if (!pixelMap_) {
+        return;
+    }
+
+    uint32_t stride = width_ << 2;
+    uint64_t bufferSize = stride * height_;
+    pixelMap_->WritePixels(static_cast<const uint8_t*>(data_), bufferSize);
+}
+
+std::shared_ptr<Media::PixelMap> FaviconReceivedOhos::GetPixelMap()
+{
+    return pixelMap_;
 }
 
 NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context) : context_(context) {}
@@ -1539,10 +1604,16 @@ void WebDelegate::ClosePort(std::string& port)
 void WebDelegate::PostPortMessage(std::string& port, std::string& data)
 {
     if (nweb_) {
-        auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-        webMsg->SetType(NWebValue::Type::STRING);
-        webMsg->SetString(data);
-        nweb_->PostPortMessage(port, webMsg);
+        auto romMsg = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+        romMsg->SetType(NWebRomValue::Type::STRING);
+        romMsg->SetString(data);
+        nweb_->PostPortMessageV2(port, romMsg);
+        if (ArkWebGetErrno() != RESULT_OK) {
+            auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMsg->SetType(NWebValue::Type::STRING);
+            webMsg->SetString(data);
+            nweb_->PostPortMessage(port, webMsg);
+        }
     }
 }
 
@@ -3216,6 +3287,16 @@ public:
         result->SetBoolean(ret);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        bool ret = delegate->HandleAutoFillEvent(value);
+        value->SetType(NWebHapValue::Type::BOOLEAN);
+        value->SetBool(ret);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };
@@ -3345,6 +3426,7 @@ void WebDelegate::InitWebViewWithSurface()
             if (sptr<Rosen::Window> window = OHOS::Rosen::Window::GetWindowWithId(window_id)) {
                 delegate->nweb_->SetPrivacyStatus(window->IsPrivacyMode());
             }
+            delegate->nweb_->SetVisibility(delegate->isVisible_);
             delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
@@ -3442,6 +3524,10 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
 
 void WebDelegate::SetSurfaceDensity(const double& density)
 {
+    if (density_ == density || density == 0.0) {
+        return;
+    }
+    density_ = density;
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -5463,14 +5549,15 @@ void WebDelegate::OnAccessibilityEvent(
                 webPattern->UpdateFocusedAccessibilityId();
             }
         }
-        if (eventType == AccessibilityEventType::FOCUS) {
-            TextBlurReportByFocusEvent(accessibilityId);
-        }
         if (eventType == AccessibilityEventType::CLICK) {
             WebComponentClickReport(accessibilityId);
         }
-        if (eventType == AccessibilityEventType::BLUR) {
-            TextBlurReportByBlurEvent(accessibilityId);
+        if (eventType == AccessibilityEventType::FOCUS ||
+            eventType == AccessibilityEventType::BLUR ||
+            eventType == AccessibilityEventType::TEXT_CHANGE) {
+            auto report = webPattern->GetAccessibilityEventReport();
+            CHECK_NULL_VOID(report);
+            report->ReportEvent(eventType, accessibilityId);
         }
         event.nodeId = accessibilityId;
         event.type = eventType;
@@ -5484,35 +5571,6 @@ void WebDelegate::OnAccessibilityEvent(
     }
 }
 
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
-{
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    auto textBlurCallback = webPattern->GetTextBlurCallback();
-    CHECK_NULL_VOID(textBlurCallback);
-    auto lastFocusNode = webPattern->GetAccessibilityNodeById(lastFocusInputId_);
-    if (lastFocusNode && lastFocusNode->GetIsEditable() && lastFocusInputId_ != accessibilityId) {
-        if (lastFocusNode->GetIsPassword()) {
-            TAG_LOGW(AceLogTag::ACE_WEB, "the input type is password, do not report");
-        } else {
-            std::string blurText = lastFocusNode->GetContent();
-            if (!blurText.empty()) {
-                TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
-                    static_cast<int32_t>(blurText.length()));
-                textBlurCallback(lastFocusInputId_, blurText);
-                lastFocusReportId_ = lastFocusInputId_;
-            }
-        }
-    }
-    if (accessibilityId != 0) {
-        auto focusNode = webPattern->GetAccessibilityNodeById(accessibilityId);
-        if (focusNode) {
-            // record last editable focus id
-            lastFocusInputId_ = accessibilityId;
-        }
-    }
-}
-
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
 {
     auto webPattern = webPattern_.Upgrade();
@@ -5522,23 +5580,6 @@ void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
     auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
     CHECK_NULL_VOID(webComponentClickCallback);
     webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
-}
-
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId)
-{
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    auto textBlurCallback = webPattern->GetTextBlurCallback();
-    CHECK_NULL_VOID(textBlurCallback);
-    auto blurNode = webPattern->GetAccessibilityNodeById(accessibilityId);
-    if (blurNode && blurNode->GetIsEditable() && lastFocusReportId_ != accessibilityId) {
-        std::string blurText = blurNode->GetContent();
-        if (!blurNode->GetIsPassword() && !blurText.empty()) {
-            TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
-                static_cast<int32_t>(blurText.length()));
-            textBlurCallback(accessibilityId, blurText);
-        }
-    }
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5559,8 +5600,9 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
-    
-    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED) {
+
+    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED ||
+        error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_NAME_NOT_RESOLVED) {
         AccessibilityReleasePageEvent();
     }
 }
@@ -5586,10 +5628,11 @@ void WebDelegate::AccessibilitySendPageChange()
             }
             if (webNode->IsOnMainTree()) {
                 if (!webPattern->CheckVisible()) {
+                    bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
                     TAG_LOGI(AceLogTag::ACE_WEB,
                         "WebDelegate::AccessibilitySendPageChange CheckVisible accessibilityId = "
-                        "%{public}" PRId64,
-                        webNode->GetAccessibilityId());
+                        "%{public}" PRId64 ", deleteResult = %{public}d",
+                        webNode->GetAccessibilityId(), deleteResult);
                     return;
                 }
                 if (accessibilityManager->CheckPageEventCached(webNode, false)) {
@@ -6060,7 +6103,7 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::RemoveSnapshotFrameNode");
+    TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
@@ -6097,6 +6140,7 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath)
 
 void WebDelegate::SetVisibility(bool isVisible)
 {
+    isVisible_ = isVisible;
     CHECK_NULL_VOID(nweb_);
     nweb_->SetVisibility(isVisible);
 }
@@ -6133,7 +6177,7 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (request->IsAboutMainFrame()) {
+            if (request->IsAboutMainFrame() && !request->IsRequestRedirect()) {
                 bool ret = delegate->nweb_->TriggerBlanklessForUrl(request->Url());
                 TAG_LOGD(AceLogTag::ACE_WEB, "TriggerBlanklessForUrl ret %{public}d", ret);
             }
@@ -6210,6 +6254,10 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     if (!webPattern) {
         return false;
     }
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     return webPattern->NotifyStartDragTask();
 }
 
@@ -6227,6 +6275,10 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     dragData_ = dragData;
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
 
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
@@ -6457,6 +6509,8 @@ void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t heigh
     auto param = std::make_shared<FaviconReceivedEvent>(
         AceType::MakeRefPtr<FaviconReceivedOhos>(data, width, height, colorType, alphaType));
     if (Container::IsCurrentUseNewPipeline()) {
+        OnSetFaviconCallback(param);
+
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         auto webEventHub = webPattern->GetWebEventHub();
@@ -6489,9 +6543,16 @@ void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
     if (hotZone) {
-        hotZone->SetWidth(touchHandleSize);
-        hotZone->SetHeight(touchHandleSize);
+        if (webPattern->IsShowHandle()) {
+            hotZone->SetWidth(touchHandleSize);
+            hotZone->SetHeight(touchHandleSize);
+        } else {
+            hotZone->SetWidth(theme->GetHandleLineWidth().ConvertToPx());
+            hotZone->SetHeight(0);
+        }
     }
 }
 
@@ -6829,6 +6890,12 @@ void WebDelegate::HandleAccessibilityHoverEvent(
         int embedWidth = embedInfo->GetWidth();
         int embedHeight = embedInfo->GetHeight();
         if (x >= embedX && y >= embedY && x <= embedX + embedWidth && y <= embedY + embedHeight) {
+            std::string surfaceId = dataInfo->GetSurfaceId();
+            int64_t webNodeId = GetWebAccessibilityIdBySurfaceId(surfaceId);
+            if (webNodeId == -1) {
+                TAG_LOGW(AceLogTag::ACE_WEB, "WebDelegate::HandleAccessibilityHoverEvent cannot find the bind webNode");
+                continue;
+            }
             NG::PointF mutablePoint = point;
             mutablePoint.SetX(x - embedX);
             mutablePoint.SetY(y - embedY);
@@ -6856,10 +6923,16 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-            webMessage->SetType(NWebValue::Type::STRING);
-            webMessage->SetString(jsonStr);
-            delegate->nweb_->FillAutofillData(webMessage);
+            auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+            romMessage->SetType(NWebRomValue::Type::STRING);
+            romMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillDataV2(romMessage);
+            if (ArkWebGetErrno() != RESULT_OK) {
+                auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+                webMessage->SetType(NWebValue::Type::STRING);
+                webMessage->SetString(jsonStr);
+                delegate->nweb_->FillAutofillData(webMessage);
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
@@ -6879,6 +6952,13 @@ void WebDelegate::AutofillCancel(const std::string& fillContent)
 }
 
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
+}
+
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -7523,6 +7603,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
     CHECK_NULL_RETURN(nweb_, -1);
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;
@@ -8009,6 +8092,29 @@ bool WebDelegate::OnOpenAppLink(
     return true;
 }
 
+bool WebDelegate::OnSetFaviconCallback(std::shared_ptr<FaviconReceivedEvent> param)
+{
+    if (!param) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Set Favicon callback is nullptr");
+        return false;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), param, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto setFaviconCallback = webPattern->GetSetFaviconFunction();
+        CHECK_NULL_VOID(setFaviconCallback);
+        setFaviconCallback(param);
+        result = true;
+        }, "SetFavicon");
+    return result;
+}
+
 std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const
 {
     const char* standards[3] = { "HTML", "MIME", "IANA" };
@@ -8207,6 +8313,24 @@ std::string WebDelegate::GetSelectInfo() const
     return nweb_->GetSelectInfo();
 }
 
+std::string WebDelegate::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(nweb_, std::string());
+    return nweb_->GetAllTextInfo();
+}
+
+int WebDelegate::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectStartIndex();
+}
+
+int WebDelegate::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectEndIndex();
+}
+
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
@@ -8352,6 +8476,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     webPattern->KeyboardReDispatch(event, isUsed);
 }
 
+void WebDelegate::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTakeFocus(event);
+}
+
 void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)
 {
     auto webPattern = webPattern_.Upgrade();
@@ -8427,8 +8558,14 @@ void WebDelegate::CreateOverlay(void* data, size_t len, int width, int height, i
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->CreateOverlay(PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height),
-        offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+
+    RefPtr<OHOS::Ace::PixelMap> pixelMap =
+        PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    uint32_t res = pixelMap->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap->GetPixelMapSharedPtr(), "AI"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
+
+    webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
 }
 
 void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)

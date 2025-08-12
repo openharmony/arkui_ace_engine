@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
+#include "core/components_ng/pattern/web/web_accessibility_event_report.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -59,6 +60,10 @@
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
+#include "core/components_ng/pattern/text_field/text_select_controller.h"
+#include "core/common/ai/ai_write_adapter.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -77,6 +82,7 @@ namespace OHOS::NWeb {
     class NWebDateTimeChooserCallback;
     class NWebAccessibilityNodeInfo;
     class NWebMessage;
+    class NWebHapValue;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
     class NWebUpdateScrollUpdateData;
@@ -134,6 +140,7 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using SetFaviconCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
@@ -337,6 +344,16 @@ public:
     OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
     {
         return onOpenAppLinkCallback_;
+    }
+
+    void SetFaviconFunction(SetFaviconCallback&& callback)
+    {
+        setFaviconCallback_ = std::move(callback);
+    }
+
+    SetFaviconCallback GetSetFaviconFunction() const
+    {
+        return setFaviconCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode);
@@ -556,6 +573,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    std::string GetPixelMapName(std::shared_ptr<Media::PixelMap> pixelMap, std::string featureName);
     void UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
@@ -591,11 +609,13 @@ public:
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
     void ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
         const std::shared_ptr<ViewDataCommon>& viewDataCommon);
-    void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+    void ParseNWebViewDataJson(const std::string& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon);
     AceAutoFillType GetFocusedType();
     HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
+    bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
     bool RequestAutoSave();
@@ -701,6 +721,7 @@ public:
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
     void EnableSecurityLayer(bool isNeedSecurityLayer);
+    void OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
     void OnCursorUpdate(double x, double y, double width, double height)
     {
         cursorInfo_ = RectF(x, y, width, height);
@@ -729,12 +750,6 @@ public:
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
     int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
-    void RegisterTextBlurCallback(TextBlurCallback&& callback);
-    void UnRegisterTextBlurCallback();
-    TextBlurCallback GetTextBlurCallback() const
-    {
-        return textBlurCallback_;
-    }
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
@@ -816,8 +831,9 @@ public:
 
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
-    void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
+    void InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
+    void UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
@@ -831,6 +847,10 @@ public:
     {
         return mouseInfo_;
     }
+
+    // WebAccessibilityEventReport funcs
+    RefPtr<WebAccessibilityEventReport> GetAccessibilityEventReport();
+    void SetTextEventAccessibilityEnable(bool enable);
 
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
@@ -858,6 +878,23 @@ public:
     void OnShowMagnifier();
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
+    bool IsShowHandle();
+
+    bool IsShowAIWrite();
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
+    std::string GetAllTextInfo() const;
+    void GetHandleInfo(SelectOverlayInfo& infoHandle);
+    void HandleOnAIWrite();
+
+protected:
+    void ModifyWebSrc(const std::string& webSrc)
+    {
+        webSrc_ = webSrc;
+    }
+
+    void OnWebSrcUpdate();
+
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -907,7 +944,6 @@ private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
-    void OnWebSrcUpdate();
     void OnWebDataUpdate();
     void OnJsEnabledUpdate(bool value);
     void OnMediaPlayGestureAccessUpdate(bool value);
@@ -1161,6 +1197,12 @@ private:
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
 
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    void FormatIndex(int32_t& startIndex, int32_t& endIndex);
+    std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
+    RefPtr<TextFieldTheme> GetTheme() const;
+    void GetAIWriteInfo(AIWriteInfo& info);
+
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
@@ -1171,6 +1213,7 @@ private:
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    SetFaviconCallback setFaviconCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
@@ -1289,6 +1332,7 @@ private:
     std::queue<MouseInfo> mouseInfoQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     std::list<KeyEvent> webKeyEvent_ {};
+    KeyEvent tabKeyEvent_;
     double startPinchScale_ = -1.0;
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
@@ -1310,7 +1354,6 @@ private:
     bool inspectorAccessibilityEnable_ = false;
     std::optional<std::string> sharedRenderProcessToken_;
     bool textBlurAccessibilityEnable_ = false;
-    TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
     std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
@@ -1354,6 +1397,9 @@ private:
 
     MouseInfo mouseInfo_;
 
+    // properties for WebAccessibilityEventReport
+    RefPtr<WebAccessibilityEventReport> webAccessibilityEventReport_ = nullptr;
+
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
@@ -1366,6 +1412,11 @@ private:
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool needSetDefaultBackgroundColor_ = false;
     GestureFocusMode gestureFocusMode_ = GestureFocusMode::DEFAULT;
+
+    RectF firstInfoHandle_;
+    RectF secondInfoHandle_;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::u16string content_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

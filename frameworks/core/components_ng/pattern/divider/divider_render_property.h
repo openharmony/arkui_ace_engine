@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
 class DividerRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(DividerRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(DividerRenderProperty, PaintProperty);
 public:
     DividerRenderProperty() = default;
     ~DividerRenderProperty() override = default;

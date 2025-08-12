@@ -28,6 +28,14 @@ constexpr int32_t ADD_BUTTON = 2;
 constexpr int32_t SUB_TEXT = 0;
 constexpr int32_t ADD_TEXT = 0;
 } // namespace
+static bool checkLayoutPolicy(const std::optional<NG::LayoutPolicyProperty> layoutPolicy)
+{
+    if (layoutPolicy.has_value()) {
+        return layoutPolicy->widthLayoutPolicy_ != LayoutCalPolicy::NO_MATCH ||
+               layoutPolicy->heightLayoutPolicy_ != LayoutCalPolicy::NO_MATCH;
+    }
+    return false;
+}
 
 void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -61,7 +69,7 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF selfContentSize(frameSize.Width(), frameSize.Height());
     const auto& padding = layoutProperty->CreatePaddingWithoutBorder();
     MinusPaddingToSize(padding, selfContentSize);
-    if (checkSizeFlag || !layoutPolicy.has_value()) {
+    if (checkSizeFlag || !checkLayoutPolicy(layoutPolicy)) {
         geometryNode->SetFrameSize(frameSize);
         geometryNode->SetContentSize(selfContentSize);
     }
@@ -83,7 +91,7 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentLayoutProperty = contentWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty);
     CalcSize contentSize;
-    if (layoutPolicy.has_value()) {
+    if (checkLayoutPolicy(layoutPolicy)) {
         if (layoutPolicy->IsWidthFix()) {
             layoutConstraint.maxSize.SetWidth(std::numeric_limits<float>::max());
             contentLayoutProperty->ClearUserDefinedIdealSize(true, false);

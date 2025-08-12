@@ -1377,7 +1377,7 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
-    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 4);
+    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 5);
 
     // repeat add should not work
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), false);
@@ -1388,24 +1388,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
-}
-
-/**
- * @tc.name: GetKeyboardWebInset
- * @tc.desc: Use GetKeyboardWebInset and test.
- * @tc.type: FUNC
- */
-HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
-{
-    SafeAreaInsets::Inset inset;
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
-    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, inset.start);
-    EXPECT_EQ(keyboardInset.end, inset.end);
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
-    keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
-    EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
 }
 
 /**
@@ -1434,5 +1416,42 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
         EXPECT_EQ(safeAreaManager_->IsModeOffset(), expectedRes[i].first);
         EXPECT_EQ(safeAreaManager_->IsModeResize(), expectedRes[i].second);
     }
+}
+
+/**
+ * @tc.name: GetKeyboardWebInset
+ * @tc.desc: Use GetKeyboardWebInset and test.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
+ {
+     SafeAreaInsets::Inset inset;
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, inset.start);
+     EXPECT_EQ(keyboardInset.end, inset.end);
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+     keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
+     EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
+ }
+ 
+/**
+ * @tc.name: SetAndGetKeyboardInsetImplTest
+ * @tc.desc: test Set And GetKeyboardInsetImplTest interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, SetAndGetKeyboardInsetImplTest, TestSize.Level1)
+{
+    safeAreaManager_->SetKeyboardInsetImpl([](SafeAreaManager* manager) { return manager->GetKeyboardWebInset(); });
+    EXPECT_NE(safeAreaManager_->getKeyboardInset, nullptr);
+    auto ret = safeAreaManager_->GetKeyboardInsetImpl();
+    auto compare = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(ret, compare);
+    safeAreaManager_->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager*)>());
+    EXPECT_EQ(safeAreaManager_->getKeyboardInset, nullptr);
+    ret = safeAreaManager_->GetKeyboardInsetImpl();
+    compare = safeAreaManager_->GetKeyboardInset();
+    EXPECT_EQ(ret, compare);
 }
 } // namespace OHOS::Ace::NG

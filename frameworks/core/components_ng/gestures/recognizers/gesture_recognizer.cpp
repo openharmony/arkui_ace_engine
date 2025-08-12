@@ -703,8 +703,7 @@ std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEv
 void NGGestureRecognizer::HandleGestureAccept(
     const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType)
 {
-    auto gestureInfo = GetGestureInfo();
-    CHECK_NULL_VOID(gestureInfo);
+    CHECK_EQUAL_VOID(GetRecognizerType(), GestureTypeName::CLICK);
     auto node = GetAttachedNode().Upgrade();
     CHECK_NULL_VOID(node);
     if (listenerType == GestureListenerType::UNKNOWN) {

@@ -52,7 +52,7 @@ void DragDropSpringLoadingStateUpdate::OnEnter(std::string_view extraInfo)
                     stateMachine->RequestStatusTransition(DragDropSpringLoadingState::CANCEL, extraInfoStr);
                 }
             },
-            userConfig->updateToFinishInterval, DRAG_GROP_SPRING_LOADING_TASK_NAME);
+            userConfig->updateToFinishInterval, DRAG_DROP_SPRING_LOADING_TASK_NAME);
         return;
     }
     stateMachine->PostDelayedTask(
@@ -63,6 +63,6 @@ void DragDropSpringLoadingStateUpdate::OnEnter(std::string_view extraInfo)
                 stateMachine->RequestStatusTransition(DragDropSpringLoadingState::CANCEL, extraInfoStr);
             }
         },
-        userConfig->updateInterval, DRAG_GROP_SPRING_LOADING_TASK_NAME);
+        userConfig->updateInterval, DRAG_DROP_SPRING_LOADING_TASK_NAME);
 }
 } // namespace OHOS::Ace::NG

@@ -80,6 +80,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage001, TestSi
     hitFrameNodes.push_back(frameNodeNull);
     hitFrameNodes.push_back(childNodeNull);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
     auto manager = pipeline->GetOverlayManager();
     auto parentNode = pipeline->GetRootElement();
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
@@ -446,6 +447,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage012, TestSi
     std::map<int32_t, WeakPtr<FrameNode>> frameNodes = dragDropManager->gridDragFrameNodes_;
     PointF point(100.0, 100.0);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
     auto manager = pipeline->GetOverlayManager();
     auto parentNode = pipeline->GetRootElement();
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);

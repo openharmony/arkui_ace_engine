@@ -568,6 +568,26 @@ class ArkRegisterNativeEmbedRule {
   }
 }
 
+class ArkBackground {
+  content: ResourceColor | undefined;
+  align?: Alignment | undefined;
+  ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge> | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.align = undefined;
+    this.ignoresLayoutSafeAreaEdges = undefined;
+  }
+
+  isEqual(another: ArkBackground): boolean {
+    return (
+      this.content === another.content &&
+      this.align === another.align &&
+      deepCompareArrays(this.ignoresLayoutSafeAreaEdges, another.ignoresLayoutSafeAreaEdges)
+    );
+  }
+}
+
 class ArkBackgroundBlurStyle {
   blurStyle: number | undefined;
   colorMode: number | undefined;
@@ -1922,6 +1942,20 @@ class ArkNavigationTitle {
   }
 }
 
+class ArkNavigationToolBarConfiguration {
+  value: Array<ToolbarItem> | undefined;
+  options?: NavigationToolbarOptions | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkNavigationToolBarConfiguration): boolean {
+    return (this.value === another.value) && (this.options.backgroundColor === another.options.backgroundColor) &&
+      (this.options.backgroundBlurStyle === another.options.backgroundBlurStyle) &&
+      (this.options.barStyle === another.options.barStyle);
+  }
+}
 class ArkNavHideTitleBarOrToolBar {
   isHide: boolean;
   animated: boolean;

@@ -719,14 +719,39 @@ void ListPattern::SetLayoutAlgorithmParams(
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom(true));
+    listLayoutAlgorithm->SetCanOverScrollStart(JudgeCanOverScrollStart());
+    listLayoutAlgorithm->SetCanOverScrollEnd(JudgeCanOverScrollEnd());
     if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+}
+
+bool ListPattern::JudgeCanOverScrollStart()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollStart(source)) {
+        return false;
+    }
+    if (IsAtTop()) {
+        return true;
+    }
+    
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
+}
+
+bool ListPattern::JudgeCanOverScrollEnd()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollEnd(source)) {
+        return false;
+    }
+    if (IsAtBottom(true)) {
+        return true;
+    }
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -856,7 +881,7 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
+    if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
     auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
@@ -881,7 +906,7 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
 
 float ListPattern::GetOffsetWithLimit(float offset) const
 {
-    auto currentOffset = GetTotalOffset() + contentStartOffset_;
+    float currentOffset = GetTotalOffset() + contentStartOffset_;
     if (Positive(offset)) {
         return std::min(currentOffset, offset);
     } else if (Negative(offset)) {
@@ -1743,14 +1768,20 @@ void ListPattern::ScrollTo(float position)
     isScrollEnd_ = true;
 }
 
+void ListPattern::ResetScrollToIndexParams()
+{
+    targetIndex_.reset();
+    targetIndexInGroup_.reset();
+    scrollAlign_ = ScrollAlign::START;
+}
+
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     // When snap align scrolling with the mouse wheel, do not interrupt the animation.
     if (!smooth && !lastSnapTargetIndex_.has_value()) {
+        ResetScrollToIndexParams();
         StopAnimate();
-        targetIndex_.reset();
-        targetIndexInGroup_.reset();
     }
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
@@ -2013,6 +2044,9 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         if (!indexInGroup.has_value()) {
             scrollTarget_ = { index, extraOffset, align, targetPos + currentOffset_ };
         }
+    } else {
+        ResetScrollToIndexParams();
+        StopAnimate();
     }
     return true;
 }
@@ -2272,7 +2306,7 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         return 0;
     }
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
-    float prevOffset = currentOffset_;
+    double prevOffset = currentOffset_;
     if (childrenSize_) {
         listTotalHeight_ = posMap_->GetTotalHeight();
         currentOffset_ = itemPosition_.empty() ? 0.0f :
@@ -2376,7 +2410,8 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         float height = pos.endPos - pos.startPos;
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
-            if (groupAtStart) {
+            bool groupAtEnd = pos.groupInfo.value().atEnd;
+            if (groupAtStart && groupAtEnd) {
                 posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             } else {
                 posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
@@ -3082,15 +3117,15 @@ void ListPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: true")
-                                 : DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: false");
+    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollChange: true")
+                                 : DumpLog::GetInstance().AddDesc("hasOnScrollChange: false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
     onJSFrameNodeScrollVisibleContentChange
-        ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: true")
-        : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: false");
+        ? DumpLog::GetInstance().AddDesc("nodeOnScrollChange: true")
+        : DumpLog::GetInstance().AddDesc("nodeOnScrollChange: false");
 }
 
 void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -3103,12 +3138,11 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
-
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    json->Put("hasOnScrollVisibleContentChange", onScrollVisibleContentChange ? "true" : "false");
+    json->Put("hasOnScrollChange", onScrollVisibleContentChange ? "true" : "false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
-    json->Put("hasFrameNodeOnScrollVisibleContentChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
+    json->Put("nodeOnScrollChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
 }
 
 DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const
@@ -3923,6 +3957,11 @@ void ListPattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     UpdateDefaultColor();
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetScrollBarProperty()) {
+        SetScrollBar(paintProperty->GetScrollBarProperty());
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
 }
 
@@ -4104,6 +4143,26 @@ void ListPattern::ProcessFocusEvent(bool indexChanged)
     }
 }
 
+void ListPattern::HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(childFocusHub);
+    auto child = childFocusHub->GetFrameNode();
+    CHECK_NULL_VOID(child);
+    auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto parentNode = childNode->GetParent();
+    while (parentNode && !AceType::InstanceOf<FrameNode>(parentNode)) {
+        if (AceType::InstanceOf<LazyForEachNode>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScroll2Node>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScrollNode>(parentNode)) {
+            focusHub->LostChildFocusToSelf();
+            return;
+        }
+        parentNode = parentNode->GetParent();
+    }
+}
+
 void ListPattern::FireFocus()
 {
     CHECK_NULL_VOID(focusIndex_);
@@ -4150,7 +4209,7 @@ void ListPattern::FireFocus()
         auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
         CHECK_NULL_VOID(childFocusHub);
         if (childFocusHub->IsCurrentFocus()) {
-            focusHub->LostChildFocusToSelf();
+            HandleFocusParentCheck(childFocusHub, focusHub);
         }
     }
 }
@@ -4331,5 +4390,10 @@ void ListPattern::UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, i
             focusGroupIndex_ = 0;
         }
     }
+}
+
+void ListPattern::ResetForExtScroll()
+{
+    currentDelta_ = 0;
 }
 } // namespace OHOS::Ace::NG

@@ -1369,6 +1369,11 @@ let PlaybackSpeed;
   PlaybackSpeed.Speed_Forward_1_25_X = '1.25';
   PlaybackSpeed.Speed_Forward_1_75_X = '1.75';
   PlaybackSpeed.Speed_Forward_2_00_X = '2.00';
+  PlaybackSpeed.Speed_Forward_0_50_X = '0.50';
+  PlaybackSpeed.Speed_Forward_1_50_X = '1.50';
+  PlaybackSpeed.Speed_Forward_3_00_X = '3.00';
+  PlaybackSpeed.Speed_Forward_0_25_X = '0.25';
+  PlaybackSpeed.Speed_Forward_0_125_X = '0.125';
 })(PlaybackSpeed || (PlaybackSpeed = {}));
 
 let MixedMode;
@@ -2541,7 +2546,7 @@ class NavPathStack {
   initNavPathIndex(pathName) {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
-      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+      if (pathName[i] === this.pathArray[i].name) {
         this.pathArray[i].index = i;
       }
     }
@@ -3082,7 +3087,17 @@ class NavPathStack {
       return '';
     }
     try {
-      return JSON.stringify(this.pathArray[index].param);
+      let serializeCount = 0;
+      const MAX_COUNT = 1000;
+      const serializeFilter = (key, value) => {
+        serializeCount++;
+        if (serializeCount > MAX_COUNT) {
+          console.warn('AceNavigation', 'too many iterations during serialize navigation param!');
+          throw new Error('too many iterations');
+        }
+        return value;
+      }
+      return JSON.stringify(this.pathArray[index].param, serializeFilter);
     } catch (error) {
       return '';
     }

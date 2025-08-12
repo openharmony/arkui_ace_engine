@@ -17,6 +17,7 @@
 
 #include <string>
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -716,6 +717,8 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
 
 void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
 {
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -812,5 +815,18 @@ void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& f
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseResObjScrollBarColor(frameNode, resObj);
+}
+
+void WaterFlowModelNG::ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 } // namespace OHOS::Ace::NG

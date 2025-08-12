@@ -199,7 +199,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             LOGE("get pointer item failed.");
             continue;
         }
-        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType(), false);
+        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType(), true);
         touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
@@ -472,6 +472,7 @@ void ConvertMouseEvent(
         }
     }
     events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
+    events.pressedTime = TimeStamp(std::chrono::microseconds(item.GetDownTime()));
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     UpdateMouseEventForPen(item, events);
@@ -706,6 +707,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
     event.scrollLock = keyEvent->GetFunctionKey(MMI::KeyEvent::SCROLL_LOCK_FUNCTION_KEY);
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
+    event.targetDisplayId = keyEvent->GetTargetDisplayId();
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
     } else if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_DOWN) {

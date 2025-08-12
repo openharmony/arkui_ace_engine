@@ -20,17 +20,13 @@
 namespace OHOS::Ace::NG {
 ScrollBar2DPainter::ScrollBar2DPainter()
 {
-    // Enables use of WeakPtr captures in lambdas.
-    // No need for DecRefCount in destructor since data is not dynamically allocated.
-    horizontal_.IncRefCount();
-    vertical_.IncRefCount();
-
-    horizontal_.SetPositionMode(PositionMode::BOTTOM);
-    vertical_.SetPositionMode(PositionMode::RIGHT);
-    for (auto&& prop : horizontal_.GetAttachedProperties()) {
+    CHECK_NULL_VOID(horizontal_ && vertical_);
+    horizontal_->SetPositionMode(PositionMode::BOTTOM);
+    vertical_->SetPositionMode(PositionMode::RIGHT);
+    for (auto&& prop : horizontal_->GetAttachedProperties()) {
         AttachProperty(prop);
     }
-    for (auto&& prop : vertical_.GetAttachedProperties()) {
+    for (auto&& prop : vertical_->GetAttachedProperties()) {
         AttachProperty(prop);
     }
 }
@@ -38,10 +34,13 @@ ScrollBar2DPainter::ScrollBar2DPainter()
 namespace {
 void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
 {
+    if (!bar.NeedPaint()) {
+        painter.SetOpacity(0);
+        return;
+    }
     painter.SetBarColor(bar.GetForegroundColor());
     painter.StartBarAnimation(
         bar.GetHoverAnimationType(), bar.GetOpacityAnimationType(), bar.GetNeedAdaptAnimation(), bar.GetActiveRect());
-    painter.SetRect(bar.GetActiveRect());
     painter.SetScrollable(bar.IsScrollable());
 
     switch (bar.GetDisplayMode()) {
@@ -61,14 +60,16 @@ void Update(ScrollBarOverlayModifier& painter, const ScrollBar& bar)
 
 void ScrollBar2DPainter::UpdateFrom(const ScrollBar2D& bar)
 {
-    Update(vertical_, bar.GetVerticalBar());
-    vertical_.SetPositionMode(bar.GetVerticalBar().GetPositionMode());
-    Update(horizontal_, bar.GetHorizontalBar());
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    Update(*vertical_, bar.GetVerticalBar());
+    vertical_->SetPositionMode(bar.GetVerticalBar().GetPositionMode());
+    Update(*horizontal_, bar.GetHorizontalBar());
 }
 
 void ScrollBar2DPainter::onDraw(DrawingContext& drawingContext)
 {
-    vertical_.onDraw(drawingContext);
-    horizontal_.onDraw(drawingContext);
+    CHECK_NULL_VOID(vertical_ && horizontal_);
+    vertical_->onDraw(drawingContext);
+    horizontal_->onDraw(drawingContext);
 }
 } // namespace OHOS::Ace::NG

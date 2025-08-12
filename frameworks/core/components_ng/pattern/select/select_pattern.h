@@ -53,6 +53,11 @@ public:
         return true;
     }
 
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;

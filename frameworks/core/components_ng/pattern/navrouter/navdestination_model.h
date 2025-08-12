@@ -68,7 +68,7 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
-    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) = 0;
+    virtual void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) {}
     virtual void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;

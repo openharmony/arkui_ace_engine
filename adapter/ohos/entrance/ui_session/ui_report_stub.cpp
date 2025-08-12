@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 
+#include "pixel_map.h"
+
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {

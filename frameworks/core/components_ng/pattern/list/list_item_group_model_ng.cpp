@@ -55,8 +55,6 @@ void ListItemGroupModelNG::SetSpace(const Dimension& space)
 
 void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider);
 }
 

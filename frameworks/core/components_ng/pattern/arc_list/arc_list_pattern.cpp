@@ -98,6 +98,11 @@ void ArcListPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    auto fadingEdge = GetFadingEdge(paintProperty);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && fadingEdge) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -300,6 +305,9 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(listLayoutProperty, false);
+    if (!listLayoutProperty->GetContentLayoutConstraint().has_value()) {
+        return false;
+    }
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     float stopOnScreen = GetMainAxisSize(contentConstraint.maxSize, Axis::VERTICAL) / FLOAT_TWO;
     float predictStop = stopOnScreen + deltaPos;

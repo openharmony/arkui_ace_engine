@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
@@ -94,6 +95,8 @@ void XComponentPatternV2::OnAttachToMainTree()
         XComponentPattern::OnAttachToMainTree();
         return;
     }
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
@@ -211,6 +214,8 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
     isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
@@ -225,11 +230,13 @@ void XComponentPatternV2::OnDetachFromMainTree()
 
 void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::OnDetachFromFrameNode(frameNode);
         return;
     }
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -254,12 +261,14 @@ void XComponentPatternV2::InitSurface()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, InitSurface, host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         renderSurface_->SetRenderContext(renderContextForSurface_);
@@ -289,16 +298,14 @@ void XComponentPatternV2::InitSurface()
     }
     surfaceId_ = renderSurface_->GetUniqueId();
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            surfaceId_, WeakPtr(renderContextForSurface_));
+        XComponentInnerSurfaceController::RegisterNode(surfaceId_, WeakPtr(host));
     }
 }
 
 void XComponentPatternV2::DisposeSurface()
 {
     if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(
-            surfaceId_);
+        XComponentInnerSurfaceController::UnregisterNode(surfaceId_);
         surfaceId_ = "";
     }
     if (renderSurface_) {

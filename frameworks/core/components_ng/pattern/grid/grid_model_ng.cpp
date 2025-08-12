@@ -800,6 +800,13 @@ void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& re
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
 }
 
+void GridModelNG::CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjScrollBarColor(frameNode, resObj);
+}
+
 void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
@@ -863,6 +870,11 @@ void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefP
         pattern->SetFriction(friction);
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+}
+
+void GridModelNG::CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    ScrollableModelNG::CreateWithResourceObjScrollBarColor(frameNode, resObj);
 }
 
 void GridModelNG::SetSyncLoad(bool syncLoad)

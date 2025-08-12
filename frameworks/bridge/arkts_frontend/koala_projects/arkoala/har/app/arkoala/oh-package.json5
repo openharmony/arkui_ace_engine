@@ -1,0 +1,10 @@
+{
+  "name": "@koalaui/arkoala-arkui",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "index_full.ets",
+  "types": "arkoala.d.ts",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

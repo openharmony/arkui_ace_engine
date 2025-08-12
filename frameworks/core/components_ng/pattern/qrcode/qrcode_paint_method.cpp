@@ -50,7 +50,9 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     auto paintOffset = paintWrapper->GetContentOffset();
     qrCodeModifier_->SetQRCodeOpacity(opacity);
-    qrCodeModifier_->SetQRCodeSize(qrCodeSize_);
+    auto contentSize = paintWrapper->GetContentSize();
+    auto qrCodeSize = std::min(contentSize.Width(), contentSize.Height());
+    qrCodeModifier_->SetQRCodeSize(qrCodeSize);
     qrCodeModifier_->SetQRCodeValue(value);
     qrCodeModifier_->SetPaintOffset(paintOffset);
     qrCodeModifier_->SetQRCodeColor(color);

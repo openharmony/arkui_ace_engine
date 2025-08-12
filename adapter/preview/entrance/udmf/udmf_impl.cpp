@@ -84,8 +84,7 @@ int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const st
     return -1;
 }
 
-int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
-    std::map<std::string, int64_t>& detailedSummaryMap)
+int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo)
 {
     return -1;
 }
@@ -205,8 +204,18 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData
     return {};
 }
 
-bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& allowDropType)
+bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes)
 {
     return false;
 }
+
+#if defined(ACE_STATIC)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    return nullptr;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{}
+#endif
 } // namespace OHOS::Ace

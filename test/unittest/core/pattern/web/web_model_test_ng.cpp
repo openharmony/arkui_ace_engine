@@ -1657,6 +1657,25 @@ HWTEST_F(WebModelTestNg, JavaScriptOnHeadReady032, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOpenAppLinkFunction026
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFaviconFunction001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto SetFaviconFunction = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    webModelNG.SetFaviconFunction(std::move(SetFaviconFunction));
+    webPattern->setFaviconCallback_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetFirstMeaningfulPaintId001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -4384,6 +4403,24 @@ HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnHttpAuthRequest003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnHttpAuthRequest(nullptr, [&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+        return true;
+    });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: SetGestureFocusMode001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -4891,6 +4928,70 @@ HWTEST_F(WebModelTestNg, SetOnPdfLoadEvent001, TestSize.Level1)
     auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
     webEventHub->FireOnPdfLoadEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetJavaScriptProxy001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetJavaScriptProxy001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetJavaScriptProxy(
+        AccessibilityManager::RawPtr(frameNode), [&callbackCalled]() { callbackCalled = true; });
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->CallJsProxyCallback();
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetJavaScriptProxy002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetJavaScriptProxy002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetJavaScriptProxy(nullptr, [&callbackCalled]() { callbackCalled = true; });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetJavaScriptProxy003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetJavaScriptProxy003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->ClearStack();
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetJavaScriptProxy(
+        AccessibilityManager::RawPtr(frameNode), [&callbackCalled]() { callbackCalled = true; });
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_EQ(webPattern, nullptr);
+    EXPECT_FALSE(callbackCalled);
 #endif
 }
 } // namespace OHOS::Ace::NG

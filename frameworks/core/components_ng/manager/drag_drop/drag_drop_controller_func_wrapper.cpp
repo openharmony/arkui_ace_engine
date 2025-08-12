@@ -79,17 +79,6 @@ void DragControllerFuncWrapper::CreatePreviewNode(RefPtr<FrameNode>& imageNode, 
 
     UpdatePreviewPositionAndScale(imageNode, frameOffset, 1.0f);
     UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
-    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    imageNode->MarkModifyDone();
-    imageNode->SetLayoutDirtyMarked(true);
-    imageNode->SetActive(true);
-    auto context = imageNode->GetContext();
-    if (context) {
-        context->FlushUITaskWithSingleDirtyNode(imageNode);
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushSyncGeometryNodeTasks();
 }
 
 OffsetF DragControllerFuncWrapper::GetOriginNodeOffset(
@@ -297,6 +286,7 @@ bool DragControllerFuncWrapper::TryDoDragStartAnimation(const RefPtr<Subwindow>&
     }
     pipelineContext->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
+    dragDropManager->SetIsShowBadgeAnimation(true);
     DragAnimationHelper::ShowBadgeAnimation(textNode);
 
     DoDragStartAnimation(subWindowOverlayManager, data, asyncCtxData);
@@ -439,6 +429,13 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto width = data.pixelMap->GetWidth();
     auto height = data.pixelMap->GetHeight();
 
+    auto container = AceEngine::Get().GetContainer(asyncCtxData.containerId);
+    CHECK_NULL_VOID(container);
+    auto windowScale = container->GetWindowScale();
+    if (NearZero(windowScale)) {
+        windowScale = 1.0f;
+    }
+
     auto originNodeOffset = GetOriginNodeOffset(data, asyncCtxData);
     originNodeOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(textNode->GetContextRefPtr());
     RefPtr<FrameNode> parentNode = textNode->GetAncestorNodeOfFrame(true);
@@ -448,9 +445,10 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto offset = previewOffset.NonOffset() ? originNodeOffset : previewOffset;
     
     auto badgeLength = std::to_string(data.badgeNumber).size();
-    double textOffsetX = offset.GetX() + width * (data.previewScale + 1) / 2 -
-        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY = offset.GetY() - height * (data.previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    double textOffsetX = offset.GetX() + width * (data.previewScale / windowScale + 1) / 2 -
+                         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY =
+        offset.GetY() - height * (data.previewScale / windowScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
@@ -543,6 +541,11 @@ void DragControllerFuncWrapper::DoDragStartAnimation(
     dragDropManager->SetDragFwkShow(false);
     dragDropManager->ResetPullMoveReceivedForCurrentDrag();
 
+    auto dragAnimationPointerEvent =
+        DragPointerEvent(asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY,
+            asyncCtxData.dragPointerEvent.displayX, asyncCtxData.dragPointerEvent.displayY,
+            asyncCtxData.dragPointerEvent.globalDisplayX, asyncCtxData.dragPointerEvent.globalDisplayY);
+    dragDropManager->SetDragAnimationPointerEvent(dragAnimationPointerEvent, nullptr);
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(dragDropManager->GetDragPreviewInfo().imageNode);
 
     Point point = { asyncCtxData.dragPointerEvent.windowX, asyncCtxData.dragPointerEvent.windowY };
@@ -570,7 +573,7 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     DragDropManager::DragPreviewInfo dragPreviewInfo;
     auto imageNode = overlayManager->GetDragPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
-    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
+    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
@@ -605,6 +608,7 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     dragPreviewInfo.imageNode = imageNode;
     dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
     dragPreviewInfo.originScale = imageNode->GetTransformScale();
+    dragPreviewInfo.isDragController = true;
     dragDropManager->SetDragPreviewInfo(dragPreviewInfo);
     return true;
 }

@@ -426,6 +426,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         }
     }
 
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (targetNode) {
+        bool isWithTheme = targetNode->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED;
+        popupParam->SetIsWithTheme(isWithTheme);
+    }
+
     auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
     if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;
@@ -1493,17 +1499,16 @@ void JSViewPopups::ParseMenuParam(
         JSRef<JSVal> yVal = anchorPositionObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
         CalcDimension dx;
         CalcDimension dy;
-        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
-            menuParam.anchorPosition.SetX(dx.ConvertToPx());
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx) && JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            menuParam.anchorPosition = { dx.ConvertToPx(), dy.ConvertToPx() };
         }
-        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
-            menuParam.anchorPosition.SetY(dy.ConvertToPx());
-        }
-        menuParam.isAnchorPosition = true;
-        if (LessNotEqual(menuParam.anchorPosition.GetX(), 0.0f) &&
-            LessNotEqual(menuParam.anchorPosition.GetY(), 0.0f)) {
-            menuParam.isAnchorPosition = false;
-            menuParam.placement = Placement::BOTTOM_LEFT;
+
+        if (menuParam.anchorPosition.has_value()) {
+            if (LessNotEqual(menuParam.anchorPosition->GetX(), 0.0f) &&
+                LessNotEqual(menuParam.anchorPosition->GetY(), 0.0f)) {
+                menuParam.placement = Placement::BOTTOM_LEFT;
+                menuParam.anchorPosition.reset();
+            }
         }
     }
 }
@@ -2202,10 +2207,10 @@ void JSViewAbstract::ParseSheetStyle(
     }
 
     bool isInteractive = false;
-    if (ParseJsBool(interactive, isInteractive)) {
-        sheetStyle.interactive = isInteractive;
-    } else if (!isPartialUpdate && NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
+    if (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
         sheetStyle.interactive = true;
+    } else if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
     }
 
     bool showClose = true;
@@ -2481,7 +2486,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
- 
+
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args,
     std::vector<NG::SheetHeight>& sheetDetents, NG::SheetStyle& sheetStyle)
 {
@@ -3037,6 +3042,9 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
 void JSViewPopups::ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam,
     NG::BorderWidthProperty& outlineWidth)
 {
+    if (!outlineWidthValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineWidthValue);
     CalcDimension left;
     RefPtr<ResourceObject> leftResObj;
@@ -3161,30 +3169,48 @@ void JSViewPopups::ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, 
 void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
     NG::BorderColorProperty& outlineColor)
 {
+    if (!outlineColorValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
     Color left;
     RefPtr<ResourceObject> leftColorResObj;
+    outlineColor.SetColor(Color::TRANSPARENT);
+    bool isSettingOutlineColor = false;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left, leftColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.leftColor = left;
     }
     Color right;
     RefPtr<ResourceObject> rightColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right, rightColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.rightColor = right;
     }
     Color top;
     RefPtr<ResourceObject> topColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top, topColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.topColor = top;
     }
     Color bottom;
     RefPtr<ResourceObject> bottomColorResObj;
     if (JSViewAbstract::ParseJsColor(
         object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom, bottomColorResObj)) {
+        isSettingOutlineColor = true;
         outlineColor.bottomColor = bottom;
+    }
+    if (!isSettingOutlineColor) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(theme);
+        outlineColor.SetColor(theme->GetMenuOutlineColor());
     }
     ParseMenuOutlineColorWithResourceObj(
         leftColorResObj, rightColorResObj, topColorResObj, bottomColorResObj, outlineColor);

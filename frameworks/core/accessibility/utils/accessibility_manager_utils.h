@@ -47,6 +47,24 @@ public:
         }
     }
 
+    bool Delete(const RefPtr<FrameNode>& frameNode)
+    {
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto containerId = pipeline->GetInstanceId();
+        auto it = controller_.find(containerId);
+        if (it != controller_.end()) {
+            auto& controllerMap = it->second;
+            auto mapIt = controllerMap.find(WeakPtr(frameNode));
+            if (mapIt != controllerMap.end()) {
+                controllerMap.erase(mapIt);
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool CheckNode(const RefPtr<FrameNode>& frameNode, bool deleteController)
     {
         CHECK_NULL_RETURN(frameNode, false);

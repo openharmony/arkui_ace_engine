@@ -71,9 +71,9 @@ typedef enum {
                         S_NODE_DISPATCH_KEY_EVENT, // 0x00000058 3 scenarios give c key event
 } ArkUIEventScenario;
 
-ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInputEvent* event);
+ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIInputEvent* event);
 
-inline void CheckSupportedScenarioAndResetEventStatus(int32_t scenarioExpr, const ArkUI_UIInputEvent* event)
+inline void CheckSupportedScenarioAndResetEventStatus(uint32_t scenarioExpr, const ArkUI_UIInputEvent* event)
 {
     g_scenarioSupportCheckResult = CheckIsSupportedScenario(scenarioExpr, event);
     g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;

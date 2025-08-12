@@ -82,6 +82,16 @@ public:
         onWindowUnfocusedCallback_ = std::move(onWindowUnfocusedCallback);
     }
     
+    void SetOnWindowActivatedCallback(std::function<void()>&& onWindowActivatedCallback)
+    {
+        onWindowActivatedCallback_ = std::move(onWindowActivatedCallback);
+    }
+    
+    void SetOnWindowDeactivatedCallback(std::function<void()>&& onWindowDeactivatedCallback)
+    {
+        onWindowDeactivatedCallback_ = std::move(onWindowDeactivatedCallback);
+    }
+
     void SetOnAttachToMainTreeCallback(std::function<void()>&& onAttachToMainTreeCallback)
     {
         onAttachToMainTreeCallback_ = std::move(onAttachToMainTreeCallback);
@@ -114,6 +124,8 @@ public:
     void OnModifyDone() override;
     void OnWindowFocused() override;
     void OnWindowUnfocused() override;
+    void OnWindowActivated() override;
+    void OnWindowDeactivated() override;
     void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
     void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
     void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
@@ -145,6 +157,8 @@ private:
     std::function<void(const DirtySwapConfig& config)> onDirtySwap_;
     std::function<void()> onWindowFocusedCallback_;
     std::function<void()> onWindowUnfocusedCallback_;
+    std::function<void()> onWindowActivatedCallback_;
+    std::function<void()> onWindowDeactivatedCallback_;
     std::function<void()> onAttachToMainTreeCallback_;
     std::function<void()> onDetachFromMainTreeCallback_;
     std::function<void()> onAvoidInfoChangeCallback_;

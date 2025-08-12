@@ -367,7 +367,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
     preTopNavDestinationNode->SetDestroying(false);
 
     navigationNode->RemoveJsChildImmediately(preTopNavDestinationNode, false, 1);
-    EXPECT_TRUE(preTopNavDestinationNode->isInDestroying_);
+    EXPECT_FALSE(preTopNavDestinationNode->isInDestroying_);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 
@@ -904,8 +904,8 @@ HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode002, TestSize.
     navigationModel.SetNavigationStack(mockNavPathStack);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigation, nullptr);
-    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     ASSERT_NE(node, nullptr);
     navigation->navBarNode_ = node;
 
@@ -950,6 +950,50 @@ HWTEST_F(NavigationGroupNodeTestNg, OnAttachToMainTree001, TestSize.Level1)
     EXPECT_EQ(navPattern->GetParentCustomNode().Upgrade(), parentNode);
     auto homeDest = navigation->GetHomeDestinationNode();
     EXPECT_EQ(homeDest, destNode);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: UpdateNavdestinationVisiblity001
+ * @tc.desc: Branch: if (index == static_cast<int32_t>(destinationSize) - 1) false
+ *                   if (navigationPattern->IsPrimaryNode(navDestination)) false
+ *                   if (index < lastStandardIndex_) false
+ *                   if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, UpdateNavdestinationVisiblity001, TestSize.Level1)
+{
+    /*
+     *@tc.steps create navNode
+     */
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create(true);
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->isOnAnimation_ = true;
+    navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    auto navPattern = navDestination->GetPattern<NavDestinationPattern>();
+    navPattern->SetCustomNode(navDestination);
+    /*
+     *@tc.steps test updateNavDestinationVisiblity
+     */
+    navigationNode->lastStandardIndex_ = -1;
+    navigationNode->UpdateNavDestinationVisibility(navDestination, nullptr, 1, 10, nullptr);
+    EXPECT_EQ(navDestination->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+
+    /*
+     *@tc.steps test if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) false
+     */
+    navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    navigationNode->UpdateNavDestinationVisibility(navDestination, navDestination, 1, 10, nullptr);
+    EXPECT_EQ(navDestination->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

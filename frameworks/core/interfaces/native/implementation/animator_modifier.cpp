@@ -33,135 +33,92 @@ void SetAnimatorOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::Convert<std::string>(*value);
-    //AnimatorModelNG::SetSetAnimatorOptions(frameNode, convValue);
 }
 } // AnimatorInterfaceModifier
 namespace AnimatorAttributeModifier {
 void StateImpl(Ark_NativePointer node,
-               Ark_AnimationStatus value)
+               const Opt_AnimationStatus* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AnimatorModelNG::SetState(frameNode, convValue);
 }
 void DurationImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetDuration(frameNode, convValue);
 }
 void CurveImpl(Ark_NativePointer node,
-               Ark_Curve value)
+               const Opt_Curve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AnimatorModelNG::SetCurve(frameNode, convValue);
 }
 void DelayImpl(Ark_NativePointer node,
-               const Ark_Number* value)
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetDelay(frameNode, convValue);
 }
 void FillModeImpl(Ark_NativePointer node,
-                  Ark_FillMode value)
+                  const Opt_FillMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AnimatorModelNG::SetFillMode(frameNode, convValue);
 }
 void IterationsImpl(Ark_NativePointer node,
-                    const Ark_Number* value)
+                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetIterations(frameNode, convValue);
 }
 void PlayModeImpl(Ark_NativePointer node,
-                  Ark_PlayMode value)
+                  const Opt_PlayMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AnimatorModelNG::SetPlayMode(frameNode, convValue);
 }
 void MotionImpl(Ark_NativePointer node,
-                Ark_SpringMotion value)
+                const Opt_SpringMotion* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AnimatorModelNG::SetMotion(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnStart(frameNode, convValue);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnPause(frameNode, convValue);
 }
 void OnRepeatImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnRepeat(frameNode, convValue);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnCancel(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnFrameImpl(Ark_NativePointer node,
-                 const Callback_Number_Void* value)
+                 const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AnimatorModelNG::SetOnFrame(frameNode, convValue);
 }
 } // AnimatorAttributeModifier
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier()

@@ -26,6 +26,8 @@ state_mgmt_release_files_to_watch = [
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/lazy_foreach.d.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/ifelse_native.d.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/ark_component.d.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_configure.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_module.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/i_environment_backend.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/i_storage.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/i_animatable_arithmetic.ts",
@@ -101,5 +103,7 @@ state_mgmt_release_files_to_watch = [
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/business_error.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/gesture_span.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/gesture_span_native.d.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop.ts",
+  "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/v2_builder.ts",
   "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/src/index.ts",
 ]

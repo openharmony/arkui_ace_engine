@@ -219,6 +219,7 @@ void ParseDivider(JSRef<JSObject>& obj, NG::ItemDivider& divider)
     if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
         divider.color = color;
         divider.colorResObj = colorResObj;
+        divider.isDefaultColor = false;
     }
 
     Dimension startMargin = defaultMargin;
@@ -1075,6 +1076,7 @@ void JSTextPickerParser::ParseTextStyle(
     Color textColor;
     if (ParseJsColor(fontColor, textColor, textStyle.textColorResObj)) {
         textStyle.textColor = textColor;
+        textStyle.textColorSetByUser = true;
     }
 
     ParseDefaultTextStyle(paramObj, textStyle);
@@ -1123,16 +1125,19 @@ void JSTextPickerParser::ParsePickerBackgroundStyle(const JSRef<JSObject>& param
     auto borderRadius = paramObj->GetProperty("borderRadius");
     if (!color->IsUndefined() && !color->IsNull()) {
         Color buttonBgColor;
-        if (ParseJsColor(color, buttonBgColor)) {
+        if (ParseJsColor(color, buttonBgColor, bgStyle.colorResObj)) {
             bgStyle.color = buttonBgColor;
+            bgStyle.textColorSetByUser = true;
         }
     }
     if (!borderRadius->IsUndefined() && !borderRadius->IsNull()) {
         CalcDimension calcDimension;
         NG::BorderRadiusProperty borderRadiusProperty;
-        if (ParseLengthMetricsToDimension(borderRadius, calcDimension)) {
+        if (ParseLengthMetricsToDimension(borderRadius, calcDimension, bgStyle.borderRadiusResObj)) {
             if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
                 bgStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
+            } else {
+                bgStyle.borderRadiusResObj = nullptr;
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
             SetBorderRadiusWithCheck(bgStyle.borderRadius, borderRadiusProperty);
@@ -1412,7 +1417,6 @@ void JSTextPicker::SetDivider(const JSCallbackInfo& info)
         ParseDivider(obj, divider);
     } else if (info.Length() >= 1 && info[0]->IsNull()) {
         divider.strokeWidth = 0.0_vp;
-        divider.isNull = true;
     }
 
     TextPickerModel::GetInstance()->SetDivider(divider);
@@ -1802,6 +1806,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    textPickerDialog.hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
     if (hoverModeAreaValue->IsNumber()) {
         auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
         if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
@@ -1908,6 +1913,8 @@ bool JSTextPickerDialog::ParseShowDataOptions(
             JSRef<JSArray> getRange = paramObject->GetProperty("range");
             JSTextPickerParser::GenerateCascadeOptions(getRange, param.options);
             attr.isCascade = true;
+
+            JSTextPickerParser::ParseColumnWidths(paramObject, param);
         }
     }
     if (optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
@@ -2029,6 +2036,10 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
     settingData.isEnableHapticFeedback = isEnableHapticFeedback;
+
+    for (auto& item : param.columnWidths) {
+        settingData.columnWidths.emplace_back(item);
+    }
     return true;
 }
 

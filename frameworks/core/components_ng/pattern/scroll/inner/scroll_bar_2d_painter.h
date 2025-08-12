@@ -34,8 +34,8 @@ public:
     void UpdateFrom(const ScrollBar2D& bar);
 
 private:
-    ScrollBarOverlayModifier vertical_;
-    ScrollBarOverlayModifier horizontal_;
+    RefPtr<ScrollBarOverlayModifier> vertical_ = MakeRefPtr<ScrollBarOverlayModifier>();
+    RefPtr<ScrollBarOverlayModifier> horizontal_ = MakeRefPtr<ScrollBarOverlayModifier>();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_2D_PAINTER_H

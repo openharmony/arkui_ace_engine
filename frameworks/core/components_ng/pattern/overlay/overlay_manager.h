@@ -600,7 +600,7 @@ public:
     void UpdateModalUIExtensionConfig(
         int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
     static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
-        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation, bool isModalRequestFocus);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -984,6 +984,7 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
+    RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;

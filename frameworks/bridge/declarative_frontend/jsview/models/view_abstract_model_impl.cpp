@@ -1227,7 +1227,7 @@ void ViewAbstractModelImpl::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
     box->SetOnDragEndId(onDragEnd);
 }
 
-void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDrapDropSpringLoadingFunc&& onDragSpringLoading) {}
+void ViewAbstractModelImpl::SetOnDragSpringLoading(NG::OnDragDropSpringLoadingFunc&& onDragSpringLoading) {}
 
 void ViewAbstractModelImpl::SetOnDragSpringLoadingConfiguration(
     const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
@@ -1252,7 +1252,7 @@ void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 }
 
 void ViewAbstractModelImpl::SetOnVisibleChange(
-    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios)
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios, bool isOutOfBoundsAllowed)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);

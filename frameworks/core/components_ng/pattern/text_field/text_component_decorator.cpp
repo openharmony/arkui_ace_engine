@@ -127,6 +127,11 @@ void CounterDecorator::UpdateTextFieldMargin()
             textFieldLayoutProperty->UpdateMargin(*currentMargin);
         }
     }
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_VOID(textNode);
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel("yes");
 }
 
 float CounterDecorator::MeasureTextNodeHeight()
@@ -172,9 +177,14 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     CHECK_NULL_VOID(context);
     auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     std::string counterText;
     if (isVisible) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
+        accessibilityProperty->SetAccessibilityText(GetAccessibilityText(textLength, maxLength));
+    } else {
+        accessibilityProperty->SetAccessibilityText("");
     }
     TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) ?
                                 theme->GetOverCountTextStyle() :
@@ -195,6 +205,43 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     counterNodeLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment());
     counterNodeLayoutProperty->UpdateMaxLines(theme->GetCounterTextMaxline());
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
+}
+
+std::string CounterDecorator::GetAccessibilityText(uint32_t textLength, uint32_t maxLength)
+{
+    std::string result = "";
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_RETURN(textNode, result);
+    auto pipelineContext = textNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, result);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, result);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, result);
+
+    std::string textLengthStr = std::to_string(textLength);
+    std::string maxLengthStr = std::to_string(maxLength);
+    std::string toFindStr = "%d";
+
+    auto firstStr = themeConstants->GetPluralStringByName("sys.plurals.textfield_counter_content_part_one", textLength);
+    if (firstStr.empty()) {
+        return result;
+    }
+    size_t posFirst = firstStr.find(toFindStr);
+    if (posFirst != std::string::npos) {
+        firstStr.replace(posFirst, toFindStr.length(), textLengthStr);
+    }
+
+    auto secondStr = themeConstants->GetPluralStringByName("sys.plurals.textfield_counter_content_part_two", maxLength);
+    if (secondStr.empty()) {
+        return result;
+    }
+    size_t posSecond = secondStr.find(toFindStr);
+    if (posSecond != std::string::npos) {
+        secondStr.replace(posSecond, toFindStr.length(), maxLengthStr);
+    }
+    result = firstStr + secondStr;
+    return result;
 }
 
 TextAlign CounterDecorator::GetCounterNodeAlignment()

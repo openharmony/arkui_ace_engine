@@ -28,6 +28,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -205,7 +206,7 @@ enum class CloseReason {
 };
 
 struct HoldSelectionInfo {
-    std::function<bool(const PointF&)> checkTouchInArea;
+    std::function<bool(const PointF&, bool)> checkTouchInArea;
     std::function<void()> resetSelectionCallback;
     std::function<bool(SourceType, TouchType)> eventFilter;
 
@@ -425,6 +426,10 @@ struct SelectOverlayInfo {
     const RectF& GetSecondHandlePaintRect();
     bool enableSubWindowMenu = false;
     OffsetF containerModalOffset;
+
+    // menu avoid keyboard adjust ark_ui and web
+    std::function<bool(LayoutWrapper *, OffsetF &, const RectF, OffsetF &, std::shared_ptr<SelectOverlayInfo> &)>
+        computeMenuOffset = nullptr;
 };
 
 enum class TextMenuShowMode {

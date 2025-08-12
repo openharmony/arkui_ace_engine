@@ -58,7 +58,9 @@ public:
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);
     static void RegistAppBarNodeBuilder(
         std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder);
-
+    static int32_t AddRectChangeListener(
+        const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
+    static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -71,6 +73,7 @@ private:
     void CreateServicePanel(bool firstTry);
     void DestroyServicePanel();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
+    static void InitAccessibility(RefPtr<UINode> uiNode);
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;

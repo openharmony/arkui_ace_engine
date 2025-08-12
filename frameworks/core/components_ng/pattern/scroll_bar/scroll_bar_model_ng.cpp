@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
@@ -161,5 +162,39 @@ void ScrollBarModelNG::ResetScrollBarColor()
 void ScrollBarModelNG::ResetScrollBarColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void ScrollBarModelNG::CreateWithResourceObj(ScrollBarJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    switch (jsResourceType) {
+        case ScrollBarJsResType::SCROLLBAR_COLOR:
+            HandleSetScrollBarColor(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void ScrollBarModelNG::HandleSetScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("ScrollBar.SetScrollBarColor");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            ScrollBarModelNG::SetScrollBarColor(AceType::RawPtr(frameNode), result);
+        } else {
+            ScrollBarModelNG::ResetScrollBarColor(AceType::RawPtr(frameNode));
+        }
+    };
+    pattern->AddResObj("ScrollBar.SetScrollBarColor", resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

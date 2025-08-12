@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class ScrollPaintMethod : public ScrollablePaintMethod {
-    DECLARE_ACE_TYPE(ScrollPaintMethod, ScrollablePaintMethod)
+    DECLARE_ACE_TYPE(ScrollPaintMethod, ScrollablePaintMethod);
 
 public:
     ScrollPaintMethod() = default;

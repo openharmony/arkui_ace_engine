@@ -237,7 +237,7 @@ void GestureScope::ForceCleanGestureScope()
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
-            recognizer->ForceCleanRecognizer();
+            recognizer->ForceCleanRecognizerWithGroup();
         }
     }
     recognizers_.clear();
