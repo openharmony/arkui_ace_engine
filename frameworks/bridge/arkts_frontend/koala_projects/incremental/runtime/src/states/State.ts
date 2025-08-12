@@ -56,6 +56,7 @@ export interface StateManager extends StateContext {
     contextData: object | undefined
     isDebugMode: boolean
     setThreadChecker(callback: () => boolean): void;
+    _isNeedCreate: boolean
 }
 
 /**
@@ -567,6 +568,7 @@ export class StateManagerImpl implements StateManager {
     private threadCheckerCallback?: () => boolean
     private childManager: Array<StateManagerImpl> = new Array<StateManagerImpl>()
     private parentManager: StateManagerImpl | undefined = undefined
+    _isNeedCreate: boolean
 
     constructor() {
     }
