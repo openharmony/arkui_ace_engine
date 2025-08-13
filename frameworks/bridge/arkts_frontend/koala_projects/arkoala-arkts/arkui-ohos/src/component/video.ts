@@ -67,17 +67,18 @@ export class VideoController implements MaterializedBase {
     public stop(): void {
         return this.stop_serialize()
     }
-    public setCurrentTime(value: number): void {
+    public setCurrentTimeDefault(value: number): void {
         const value_casted = value as (number)
         this.setCurrentTime0_serialize(value_casted)
         return
     }
-    public setCurrentTime(value: number, seekMode: SeekMode): void {
+    public setCurrentTimeWithMode(value: number, seekMode: SeekMode): void {
         const value_casted = value as (number)
         const seekMode_casted = seekMode as (SeekMode)
         this.setCurrentTime1_serialize(value_casted, seekMode_casted)
         return
     }
+    overload setCurrentTime { setCurrentTimeDefault, setCurrentTimeWithMode };
     public requestFullscreen(value: boolean): void {
         const value_casted = value as (boolean)
         return this.requestFullscreen_serialize(value_casted)
