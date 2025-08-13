@@ -37,6 +37,12 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
 ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity);
+ani_long GetNodePtrWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_int GetNodeIdWithNodePtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_int GetNodeIdWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_long CreateRenderNodePeerWithNodePtr(ani_env* env, ani_object obj, ani_long ptr);
+ani_long ToColorLong(ani_env* env, ani_object obj, ani_int color);
+ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color);
 ani_int CheckIsUIThread(ani_env* env, ani_object obj, ani_int id);
 ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);

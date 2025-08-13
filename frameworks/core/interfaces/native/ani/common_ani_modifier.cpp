@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "common_ani_modifier.h"
 #include "ani_utils.h"
 #include "base/log/log.h"
@@ -171,6 +173,40 @@ ArkUI_Int32 RequireArkoalaNodeId(ArkUI_Int32 capacity)
 {
     auto cursor = ElementRegister::GetInstance()->RequireArkoalaNodeId(capacity);
     return cursor;
+}
+
+ani_long GetNodePtrWithPeerPtr(ani_long peerPtr)
+{
+    RenderNodePeer* peer = reinterpret_cast<RenderNodePeer*>(peerPtr);
+    CHECK_NULL_RETURN(peer, -1);
+    RefPtr<FrameNode> node = peer->GetFrameNode();
+    ani_long ret = reinterpret_cast<ani_long>(node.GetRawPtr());
+    return ret;
+}
+
+ani_int GetNodeIdWithNodePtr(ani_long nodePtr)
+{
+    FrameNode* node = reinterpret_cast<FrameNode*>(nodePtr);
+    CHECK_NULL_RETURN(node, -1);
+    int32_t id = node->GetId();
+    return id;
+}
+
+ani_int GetNodeIdWithPeerPtr(ani_long ptr)
+{
+    RenderNodePeer* peer = reinterpret_cast<RenderNodePeer*>(ptr);
+    CHECK_NULL_RETURN(peer, -1);
+    RefPtr<FrameNode> node = peer->GetFrameNode();
+    int32_t id = node->GetId();
+    return id;
+}
+ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
+{
+    FrameNode* node = reinterpret_cast<FrameNode*>(ptr);
+    auto nodePtr = AceType::Claim(node);
+    auto peerPtr = RenderNodePeer::Create(nodePtr);
+    ani_long ret = reinterpret_cast<ani_long>(peerPtr);
+    return ret;
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -592,6 +628,10 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
         .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId,
+        .getNodePtrWithPeerPtr = OHOS::Ace::NG::GetNodePtrWithPeerPtr,
+        .getNodeIdWithNodePtr = OHOS::Ace::NG::GetNodeIdWithNodePtr,
+        .getNodeIdWithPeerPtr = OHOS::Ace::NG::GetNodeIdWithPeerPtr,
+        .createRenderNodePeerWithNodePtr = OHOS::Ace::NG::CreateRenderNodePeerWithNodePtr,
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,

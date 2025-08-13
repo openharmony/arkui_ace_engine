@@ -305,6 +305,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/wrapBuilder.ets",
   "arkui-preprocessed/arkui/component/xcomponent.ets",
   "arkui-preprocessed/arkui/external/arkts/index.ets",
+  "arkui-preprocessed/arkui/handwritten/transfer/TransferUtil.ets",
+  "arkui-preprocessed/arkui/handwritten/transfer/RenderNodeTransfer.ets",
   "arkui-preprocessed/arkui/handwritten/AlphabetIndexerOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/ArkAnimation.ets",
   "arkui-preprocessed/arkui/handwritten/ArkBackgroundImageImpl.ets",
