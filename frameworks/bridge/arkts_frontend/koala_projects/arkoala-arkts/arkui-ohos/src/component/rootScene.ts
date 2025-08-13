@@ -49,14 +49,8 @@ export interface RootSceneSession {
 }
 export type RootSceneInterface = (session: RootSceneSession) => RootSceneAttribute;
 export interface RootSceneAttribute extends CommonMethod {
-    setRootSceneOptions(session: RootSceneSession): this {
-        return this
-    }
 }
 export class ArkRootSceneStyle extends ArkCommonMethodStyle implements RootSceneAttribute {
-    public setRootSceneOptions(session: RootSceneSession): this {
-        return this
-    }
 }
 export class ArkRootSceneComponent extends ArkCommonMethodComponent implements RootSceneAttribute {
     getPeer(): ArkRootScenePeer {
@@ -77,9 +71,10 @@ export class ArkRootSceneComponent extends ArkCommonMethodComponent implements R
     }
 }
 /** @memo */
-export function RootSceneImpl(
+export function RootScene(
     /** @memo */
     style: ((attributes: RootSceneAttribute) => void) | undefined,
+    session: RootSceneSession,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -87,7 +82,9 @@ export function RootSceneImpl(
         return new ArkRootSceneComponent()
     })
     NodeAttach<ArkRootScenePeer>((): ArkRootScenePeer => ArkRootScenePeer.create(receiver), (_: ArkRootScenePeer) => {
+        receiver.setRootSceneOptions(session)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

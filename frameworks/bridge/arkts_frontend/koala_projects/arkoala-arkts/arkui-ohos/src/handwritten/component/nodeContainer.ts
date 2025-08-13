@@ -105,14 +105,8 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
 }
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
-    setNodeContainerOptions(controller: NodeController): this {
-        return this
-    }
 }
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
-    public setNodeContainerOptions(controller: NodeController): this {
-        return this
-    }
 }
 export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements NodeContainerAttribute {
     private controller: NodeController | null = null;
@@ -175,9 +169,10 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function NodeContainerImpl(
+export function NodeContainer(
     /** @memo */
     style: ((attributes: NodeContainerAttribute) => void) | undefined,
+    controller: NodeController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -188,7 +183,9 @@ export function NodeContainerImpl(
         return new ArkNodeContainerComponent(uiContext!)
     })
     NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer) => {
+        receiver.setNodeContainerOptions(controller)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

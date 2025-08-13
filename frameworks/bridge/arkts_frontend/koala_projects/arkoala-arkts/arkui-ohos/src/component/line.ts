@@ -94,9 +94,6 @@ export interface LineOptions {
 }
 export type LineInterface = (options?: LineOptions) => LineAttribute;
 export interface LineAttribute extends CommonShapeMethod {
-    setLineOptions(options?: LineOptions): this {
-        return this
-    }
     startPoint(value: ShapePoint | undefined): this
     endPoint(value: ShapePoint | undefined): this
     attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
@@ -104,9 +101,6 @@ export interface LineAttribute extends CommonShapeMethod {
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
     startPoint_value?: ShapePoint | undefined
     endPoint_value?: ShapePoint | undefined
-    public setLineOptions(options?: LineOptions): this {
-        return this
-    }
     public startPoint(value: ShapePoint | undefined): this {
         return this
     }
@@ -154,9 +148,10 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
     }
 }
 /** @memo */
-export function LineImpl(
+export function Line(
     /** @memo */
     style: ((attributes: LineAttribute) => void) | undefined,
+    options?: LineOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -164,7 +159,9 @@ export function LineImpl(
         return new ArkLineComponent()
     })
     NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (_: ArkLinePeer) => {
+        receiver.setLineOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

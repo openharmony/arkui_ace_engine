@@ -326,9 +326,6 @@ export interface ViewportRect {
     height?: number | string;
 }
 export interface ShapeAttribute extends CommonMethod {
-    setShapeOptions(value?: PixelMap): this {
-        return this
-    }
     viewPort(value: ViewportRect | undefined): this
     stroke(value: ResourceColor | undefined): this
     fill(value: ResourceColor | undefined): this
@@ -357,9 +354,6 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     fillOpacity_value?: number | string | Resource | undefined
     strokeWidth_value?: number | string | undefined
     antiAlias_value?: boolean | undefined
-    public setShapeOptions(value?: PixelMap): this {
-        return this
-    }
     public viewPort(value: ViewportRect | undefined): this {
         return this
     }
@@ -531,9 +525,10 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     }
 }
 /** @memo */
-export function ShapeImpl(
+export function Shape(
     /** @memo */
     style: ((attributes: ShapeAttribute) => void) | undefined,
+    value?: PixelMap,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -541,7 +536,9 @@ export function ShapeImpl(
         return new ArkShapeComponent()
     })
     NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (_: ArkShapePeer) => {
+        receiver.setShapeOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

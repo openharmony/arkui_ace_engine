@@ -66,9 +66,6 @@ export interface DisturbanceFieldOptions {
 }
 
 export interface ParticleAttribute extends CommonMethod {
-    setParticleOptions(particles: Particles): this {
-        return this
-    }
     disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this
     emitter(value: Array<EmitterProperty> | undefined): this
     /** @memo */
@@ -300,9 +297,6 @@ export class ArkParticleStyle extends ArkCommonMethodStyle implements ParticleAt
     disturbanceFields_value?: Array<DisturbanceFieldOptions> | undefined
     emitter_value?: Array<EmitterProperty> | undefined
     attributeModifier_value?: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined
-    public setParticleOptions(particles: Particles): this {
-        return this
-    }
     public disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this {
         return this
     }
@@ -356,9 +350,10 @@ export class ArkParticleComponent extends ArkCommonMethodComponent implements Pa
     }
 }
 /** @memo */
-export function ParticleImpl(
+export function Particle(
     /** @memo */
     style: ((attributes: ParticleAttribute) => void) | undefined,
+    particles: Particles,
     /** @memo */
     content_?: (() => void) | undefined,
 ) {
@@ -366,7 +361,9 @@ export function ParticleImpl(
         return new ArkParticleComponent()
     })
     NodeAttach<ArkParticlePeer>((): ArkParticlePeer => ArkParticlePeer.create(receiver), (_: ArkParticlePeer) => {
+        receiver.setParticleOptions(particles)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

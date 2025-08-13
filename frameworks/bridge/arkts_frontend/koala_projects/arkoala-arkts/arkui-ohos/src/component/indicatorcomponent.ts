@@ -195,9 +195,6 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
 }
 export type IndicatorComponentInterface = (controller?: IndicatorComponentController) => IndicatorComponentAttribute;
 export interface IndicatorComponentAttribute extends CommonMethod {
-    setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
-        return this
-    }
     initialIndex(value: number | undefined): this
     count(value: number | undefined): this
     style(value: DotIndicator | DigitIndicator | undefined): this
@@ -212,9 +209,6 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     loop_value?: boolean | undefined
     vertical_value?: boolean | undefined
     onChange_value?: ((index: number) => void) | undefined
-    public setIndicatorComponentOptions(controller?: IndicatorComponentController): this {
-        return this
-    }
     public initialIndex(value: number | undefined): this {
         return this
     }
@@ -301,9 +295,10 @@ export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent imp
     }
 }
 /** @memo */
-export function IndicatorComponentImpl(
+export function IndicatorComponent(
     /** @memo */
     style: ((attributes: IndicatorComponentAttribute) => void) | undefined,
+    controller?: IndicatorComponentController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -311,7 +306,9 @@ export function IndicatorComponentImpl(
         return new ArkIndicatorComponentComponent()
     })
     NodeAttach<ArkIndicatorComponentPeer>((): ArkIndicatorComponentPeer => ArkIndicatorComponentPeer.create(receiver), (_: ArkIndicatorComponentPeer) => {
+        receiver.setIndicatorComponentOptions(controller)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

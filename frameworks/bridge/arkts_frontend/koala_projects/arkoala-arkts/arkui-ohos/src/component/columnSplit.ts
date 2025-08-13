@@ -77,9 +77,6 @@ export interface ColumnSplitDividerStyle {
     endMargin?: Dimension;
 }
 export interface ColumnSplitAttribute extends CommonMethod {
-    setColumnSplitOptions(): this {
-        return this
-    }
     resizeable(value: boolean | undefined): this {return this;}
     divider(value: ColumnSplitDividerStyle | null | undefined): this {return this;}
     attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
@@ -87,9 +84,6 @@ export interface ColumnSplitAttribute extends CommonMethod {
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
     divider_value?: ColumnSplitDividerStyle | null | undefined
-    public setColumnSplitOptions(): this {
-        return this
-    }
     public resizeable(value: boolean | undefined): this {
         return this
     }
@@ -137,9 +131,10 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function ColumnSplitImpl(
+export function ColumnSplit(
     /** @memo */
     style: ((attributes: ColumnSplitAttribute) => void) | undefined,
+    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -147,7 +142,9 @@ export function ColumnSplitImpl(
         return new ArkColumnSplitComponent()
     })
     NodeAttach<ArkColumnSplitPeer>((): ArkColumnSplitPeer => ArkColumnSplitPeer.create(receiver), (_: ArkColumnSplitPeer) => {
+        receiver.setColumnSplitOptions()
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

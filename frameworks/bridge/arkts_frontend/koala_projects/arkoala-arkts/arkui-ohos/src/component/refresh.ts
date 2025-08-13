@@ -153,9 +153,6 @@ export interface RefreshOptions {
 export type RefreshInterface = (value: RefreshOptions) => RefreshAttribute;
 export type Callback_RefreshStatus_Void = (state: RefreshStatus) => void;
 export interface RefreshAttribute extends CommonMethod {
-    setRefreshOptions(value: RefreshOptions): this {
-        return this
-    }
     onStateChange(value: ((state: RefreshStatus) => void) | undefined): this { return this; }
     onRefreshing(value: (() => void) | undefined): this { return this; }
     refreshOffset(value: number | undefined): this { return this; }
@@ -172,9 +169,6 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     pullToRefresh_value?: boolean | undefined
     onOffsetChange_value?: ((index: number) => void) | undefined
     pullDownRatio_value?: number | undefined
-    public setRefreshOptions(value: RefreshOptions): this {
-        return this
-    }
     public onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
         return this
     }
@@ -289,9 +283,10 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     }
 }
 /** @memo */
-export function RefreshImpl(
+export function Refresh(
     /** @memo */
     style: ((attributes: RefreshAttribute) => void) | undefined,
+    value: RefreshOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -299,7 +294,9 @@ export function RefreshImpl(
         return new ArkRefreshComponent()
     })
     NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (_: ArkRefreshPeer) => {
+        receiver.setRefreshOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

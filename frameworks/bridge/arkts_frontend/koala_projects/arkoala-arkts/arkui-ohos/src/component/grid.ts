@@ -597,9 +597,6 @@ export interface Literal_Number_offsetRemain {
 }
 export type Callback_Number_ScrollState_Literal_Number_offsetRemain = (offset: number, state: ScrollState) => Literal_Number_offsetRemain;
 export interface GridAttribute extends ScrollableCommonMethod {
-    setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
-        return this
-    }
     columnsTemplate(value: string | undefined): this { return this; }
     rowsTemplate(value: string | undefined): this { return this; }
     columnsGap(value: Length | undefined): this { return this; }
@@ -661,9 +658,6 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
-    public setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
-        return this
-    }
     public columnsTemplate(value: string | undefined): this {
         return this
     }
@@ -1097,9 +1091,10 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     }
 }
 /** @memo */
-export function GridImpl(
+export function Grid(
     /** @memo */
     style: ((attributes: GridAttribute) => void) | undefined,
+    scroller?: Scroller, layoutOptions?: GridLayoutOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1107,7 +1102,9 @@ export function GridImpl(
         return new ArkGridComponent()
     })
     NodeAttach<ArkGridPeer>((): ArkGridPeer => ArkGridPeer.create(receiver), (_: ArkGridPeer) => {
+        receiver.setGridOptions(scroller,layoutOptions)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

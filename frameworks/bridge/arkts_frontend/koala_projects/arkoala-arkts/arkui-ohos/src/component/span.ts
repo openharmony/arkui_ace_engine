@@ -339,9 +339,6 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
 }
 export type SpanInterface = (value: string | Resource) => SpanAttribute;
 export interface SpanAttribute extends BaseSpan {
-    setSpanOptions(value: string | Resource): this {
-        return this
-    }
     font(value: Font | undefined): this
     fontColor(value: ResourceColor | undefined): this
     fontSize(value: number | string | Resource | undefined): this
@@ -366,9 +363,6 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
-    public setSpanOptions(value: string | Resource): this {
-        return this
-    }
     public font(value: Font | undefined): this {
         return this
     }
@@ -536,9 +530,10 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
     }
 }
 /** @memo */
-export function SpanImpl(
+export function Span(
     /** @memo */
     style: ((attributes: SpanAttribute) => void) | undefined,
+    value: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -546,7 +541,9 @@ export function SpanImpl(
         return new ArkSpanComponent()
     })
     NodeAttach<ArkSpanPeer>((): ArkSpanPeer => ArkSpanPeer.create(receiver), (_: ArkSpanPeer) => {
+        receiver.setSpanOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

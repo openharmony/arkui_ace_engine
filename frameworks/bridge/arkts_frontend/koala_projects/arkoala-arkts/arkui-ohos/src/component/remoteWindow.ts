@@ -60,14 +60,9 @@ export interface WindowAnimationTarget {
 }
 export type RemoteWindowInterface = (target: WindowAnimationTarget) => RemoteWindowAttribute;
 export interface RemoteWindowAttribute extends CommonMethod {
-    setRemoteWindowOptions(target: WindowAnimationTarget): this {
-        return this
-    }
 }
 export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements RemoteWindowAttribute {
-    public setRemoteWindowOptions(target: WindowAnimationTarget): this {
-        return this
-    }
+    
 }
 export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implements RemoteWindowAttribute {
     getPeer(): ArkRemoteWindowPeer {
@@ -88,9 +83,10 @@ export class ArkRemoteWindowComponent extends ArkCommonMethodComponent implement
     }
 }
 /** @memo */
-export function RemoteWindowImpl(
+export function RemoteWindow(
     /** @memo */
     style: ((attributes: RemoteWindowAttribute) => void) | undefined,
+    target: WindowAnimationTarget,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -98,7 +94,9 @@ export function RemoteWindowImpl(
         return new ArkRemoteWindowComponent()
     })
     NodeAttach<ArkRemoteWindowPeer>((): ArkRemoteWindowPeer => ArkRemoteWindowPeer.create(receiver), (_: ArkRemoteWindowPeer) => {
+        receiver.setRemoteWindowOptions(target)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

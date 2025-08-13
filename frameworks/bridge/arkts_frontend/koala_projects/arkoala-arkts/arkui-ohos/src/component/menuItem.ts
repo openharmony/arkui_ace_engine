@@ -239,9 +239,6 @@ export interface MenuItemOptions {
 }
 export type MenuItemInterface = (value?: MenuItemOptions | CustomBuilder) => MenuItemAttribute;
 export interface MenuItemAttribute extends CommonMethod {
-    setMenuItemOptions(value?: MenuItemOptions | CustomBuilder): this {
-        return this
-    }
     selected(value: boolean | Bindable<boolean> | undefined): this
     selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined): this
@@ -259,9 +256,6 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
     contentFontColor_value?: ResourceColor | undefined
     labelFont_value?: Font | undefined
     labelFontColor_value?: ResourceColor | undefined
-    public setMenuItemOptions(value?: MenuItemOptions | CustomBuilder): this {
-        return this
-    }
     public selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -371,9 +365,10 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
     }
 }
 /** @memo */
-export function MenuItemImpl(
+export function MenuItem(
     /** @memo */
     style: ((attributes: MenuItemAttribute) => void) | undefined,
+    value?: MenuItemOptions | CustomBuilder,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -381,7 +376,9 @@ export function MenuItemImpl(
         return new ArkMenuItemComponent()
     })
     NodeAttach<ArkMenuItemPeer>((): ArkMenuItemPeer => ArkMenuItemPeer.create(receiver), (_: ArkMenuItemPeer) => {
+        receiver.setMenuItemOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
