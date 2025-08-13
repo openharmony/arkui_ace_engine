@@ -53,7 +53,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Float32* quality)
+                         const Opt_Number* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(type, {});

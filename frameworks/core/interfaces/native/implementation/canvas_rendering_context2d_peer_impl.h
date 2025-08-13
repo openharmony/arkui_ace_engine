@@ -43,6 +43,7 @@ public:
     double GetWidth();
     void On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
     void Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    int32_t GetCanvasId();
 
 private:
     CanvasCallbackList::const_iterator FindCallbackInList(const CanvasCallbackList& callbackFuncPairList,
