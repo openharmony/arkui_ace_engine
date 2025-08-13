@@ -1513,6 +1513,30 @@ void WebModelNG::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWind
     webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }
 
+void WebModelNG::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadStartedEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadFinishedEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetOnScroll(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

@@ -91,6 +91,19 @@ HWTEST_F(WebModelTestNg, WebFrameNodeCreator001, TestSize.Level1)
     });
     webEventHub->FireOnPageFinishedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    webModelNG.SetOnLoadStarted([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+    });
+    webEventHub->FireOnLoadStartedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+    callbackCalled = false;
+    webModelNG.SetOnLoadFinished([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+    });
+    webEventHub->FireOnLoadFinishedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
     auto onProgressChangeImpl = [](const BaseEventInfo* info) {};
     webModelNG.SetOnProgressChange(onProgressChangeImpl);
     auto titleReceiveEventId = [](const BaseEventInfo* info) {};

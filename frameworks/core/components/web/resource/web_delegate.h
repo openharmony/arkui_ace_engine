@@ -1303,6 +1303,8 @@ public:
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
     void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
+    void OnLoadStarted(const std::string& param);
+    void OnLoadFinished(const std::string& param);
     void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
     bool IsFileSelectorShow() { return isFileSelectorShow_; }
 
@@ -1432,6 +1434,8 @@ private:
     EventCallback onPageFinished_;
     EventCallback onPageError_;
     EventCallback onMessage_;
+    EventCallback onLoadStarted_;
+    EventCallback onLoadFinished_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
@@ -1487,6 +1491,8 @@ private:
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    EventCallbackV2 onLoadStartedV2_;
+    EventCallbackV2 onLoadFinishedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
