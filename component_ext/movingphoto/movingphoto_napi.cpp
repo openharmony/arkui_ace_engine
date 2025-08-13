@@ -312,6 +312,7 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("repeatPlay", JsRepeatPlay),
         DECLARE_NAPI_FUNCTION("enableAnalyzer", JsEnableAnalyzer),
         DECLARE_NAPI_FUNCTION("hdrBrightness", JsHdrBrightness),
+        DECLARE_NAPI_FUNCTION("setPlaybackStrategy", JsSetPlaybackStrategy),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -587,6 +588,26 @@ napi_value JsHdrBrightness(napi_env env, napi_callback_info info)
     }
     NG::MovingPhotoModelNG::GetInstance()->SetHdrBrightness(hdrBrightness);
  
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsSetPlaybackStrategy(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+ 
+    if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_object)) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    napi_value jsEnabled = nullptr;
+    if (napi_get_named_property(env, argv[0], "enableCameraPostprocessing", &jsEnabled) != napi_ok) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    bool isEnabled = ExtNapiUtils::GetBool(env, jsEnabled);
+    NG::MovingPhotoModelNG::GetInstance()->SetEnableCameraPostprocessing(isEnabled);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "napi SetEnableCameraPostprocessing = %{public}d.", isEnabled);
     return ExtNapiUtils::CreateNull(env);
 }
 

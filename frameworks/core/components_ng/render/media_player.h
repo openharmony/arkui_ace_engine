@@ -161,6 +161,14 @@ public:
     {
         return -1;
     }
+    virtual int32_t EnableCameraPostprocessing()
+    {
+        return -1;
+    }
+    virtual int32_t SetCameraPostprocessing(bool isOpen)
+    {
+        return -1;
+    }
 
 protected:
 

@@ -384,6 +384,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
+    isGestureTriggeredLongPress_ = true;
     Start();
 }
 
@@ -1427,6 +1428,9 @@ void MovingPhotoPattern::OnMediaPlayerInitialized()
     }
     isAutoChangePlayMode_ = false;
     PrepareSurface();
+    if (cameraPostprocessingEnabled_) {
+        mediaPlayer_->EnableCameraPostprocessing();
+    }
     if (mediaPlayer_->PrepareAsync() != PREPARE_RETURN) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
     }
@@ -1838,8 +1842,11 @@ void MovingPhotoPattern::NotifyTransition()
     notifyTransitionFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhoto);
+    auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
+    CHECK_NULL_VOID(image);
+    AddTempNode(image, host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
@@ -2134,6 +2141,10 @@ void MovingPhotoPattern::Start()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (cameraPostprocessingEnabled_) {
+        mediaPlayer_->SetCameraPostprocessing(isGestureTriggeredLongPress_);
+        isGestureTriggeredLongPress_ = false;
+    }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(

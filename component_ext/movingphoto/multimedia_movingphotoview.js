@@ -43,6 +43,10 @@ class MovingPhotoView extends JSViewAbstract {
         __MovingPhotoView__.hdrBrightness(value);
     }
 
+    static setPlaybackStrategy(value) {
+        __MovingPhotoView__.setPlaybackStrategy(value);
+    }
+
     static objectFit(value) {
         __MovingPhotoView__.objectFit(value);
     }

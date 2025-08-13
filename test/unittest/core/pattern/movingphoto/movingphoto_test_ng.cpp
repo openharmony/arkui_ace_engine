@@ -45,7 +45,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/image/image_source_info.h"
-
 #include "component_ext/movingphoto/movingphoto_styles.h"
 #include "component_ext/movingphoto/movingphoto_pattern.h"
 #include "component_ext/movingphoto/movingphoto_node.h"
@@ -1285,7 +1284,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest027, TestSize.Level1)
 
     /**
      * @tc.steps: step2. DetachFirstImageFromFrameNode
-     * @tc.expected: step2. delete first imageNode
+     * @tc.expected: step2. NotifyTransition add temp node
      */
     pattern->NotifyTransition();
     int32_t childCount = frameNode->GetTotalChildCount();

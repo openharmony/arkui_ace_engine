@@ -563,6 +563,20 @@ int32_t RosenMediaPlayer::SetPlayRangeUsWithMode(int64_t startTime, int64_t endT
     return mediaPlayer_->SetPlayRangeUsWithMode(startTime, endTime, ConvertToMediaSeekMode(mode));
 }
 
+int32_t RosenMediaPlayer::EnableCameraPostprocessing()
+{
+    LOGI("Media player start to EnableCameraPostprocessing.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->EnableCameraPostprocessing();
+}
+ 
+int32_t RosenMediaPlayer::SetCameraPostprocessing(bool isOpen)
+{
+    LOGI("Media player start to SetCameraPostprocessing %{public}d.", isOpen);
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetCameraPostprocessing(isOpen);
+}
+
 int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
 {
     LOGI("Media player start to SetParameter.");

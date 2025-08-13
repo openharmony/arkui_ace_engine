@@ -85,6 +85,11 @@ public:
         return hdrBrightness_;
     }
  
+    bool GetCameraPostprocessingEnabled()
+    {
+        return cameraPostprocessingEnabled_;
+    }
+
     void SetHdrBrightness(float hdrBrightness);
 
     void OnVisibleChange(bool isVisible) override;
@@ -125,6 +130,11 @@ public:
     bool GetWaterMask()
     {
         return isPlayWithMask_;
+    }
+
+    void SetEnableCameraPostprocessing(bool isEnabled)
+    {
+        cameraPostprocessingEnabled_ = isEnabled;
     }
 
     int64_t GetCurrentDateModified()
@@ -330,6 +340,8 @@ private:
     bool isEnableTransition_ = true;
     bool isStopAnimation_ = false;
     bool notifyTransitionFlag_ = false;
+    bool cameraPostprocessingEnabled_ = false;
+    bool isGestureTriggeredLongPress_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
