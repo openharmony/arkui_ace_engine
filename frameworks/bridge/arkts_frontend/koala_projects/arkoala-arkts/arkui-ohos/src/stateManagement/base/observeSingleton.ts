@@ -24,6 +24,14 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
 import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
 
+type TaskType<T> = () => T;
+
+enum NotifyMutableStateMode {
+    normal = 0,
+    delayMutation = 1,
+    noMutation = 2
+}
+
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
@@ -34,9 +42,11 @@ export class ObserveSingleton implements IObserve {
     public static readonly RenderingComputed: number = 4;
 
     public _renderingComponent: number = ObserveSingleton.RenderingComponent;
+    private mutateMutableStateMode_: NotifyMutableStateMode = NotifyMutableStateMode.normal;
     public renderingComponentRef?: ITrackedDecoratorRef;
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private queuedMutableStateChanges_ = new Set<WeakRef<IBindingSource>>();
     private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
         this.finalizeComputedAndMonitorPath
     );
@@ -169,5 +179,94 @@ export class ObserveSingleton implements IObserve {
             }
         });
         return monitors;
+    }
+
+    /* Execute given task
+     * apply state changes to incremental engine immediately that occur while executing the task
+     * this is the regular operation mode, therefore the function is rather redundant and given 
+     * just for the case where normal mode needs to be nested inside delayed mode
+     * @param task 
+     * @returns 
+     */
+    public applyTaskImmediateMutableStateChange<T>(task: TaskType<T>): T {
+        const temp = this.mutateMutableStateMode_;
+        this.mutateMutableStateMode_ = NotifyMutableStateMode.normal;
+        const result: T = task();
+        this.mutateMutableStateMode_ = temp;
+        return result;
+    }
+
+    /**
+     * Execute given task
+     * while executing do not notify any state changes to incremental engine
+     * state changes still trigger dependent @Computed to update and @Monitor 
+     * function to execute
+     * 
+     * @param task 
+     * @returns 
+     */
+    public applyTaskNoMutableStateChange<T>(task: TaskType<T>): T {
+        const temp = this.mutateMutableStateMode_;
+        this.mutateMutableStateMode_ = NotifyMutableStateMode.noMutation;
+        const result: T = task();
+        this.mutateMutableStateMode_ = temp;
+        return result;
+    }
+
+    /**
+     * Execute given task
+     * queue any state changes to incremental engine that occur while executing the task
+     * state changes still trigger normally dependent @Computed to update and @Monitor 
+     * function to execute
+     * queued state changes get notified to incremental engine when instructed to do so
+     * by calling @see delayedNotify
+     * 
+     * @param task 
+     * @returns 
+     */
+    public applyTaskDelayMutableStateChange<T>(task: TaskType<T>): T {
+        const temp = this.mutateMutableStateMode_;
+        this.mutateMutableStateMode_ = NotifyMutableStateMode.delayMutation;
+        const result: T = task();
+        this.mutateMutableStateMode_ = temp;
+        return result;
+    }
+
+    /**
+     * Notify any state changes to incremental engine that have been queued up by 
+     * executing tasks with @see applyDelayNotify
+     * The function mutates each MutableState just once even if executing tasks
+     * added it to the queue several times. 
+     * The order of mutation is non deterministic.
+     * @returns number of distinct MutableState objects that have been touched
+     */
+    public makeDelayedMutableStateChanges(): number {
+        const count = this.queuedMutableStateChanges_.size;
+        if (count > 0) {
+            this.queuedMutableStateChanges_.forEach(mutableStateMetaWeak => {
+                const mutableStateMeta = mutableStateMetaWeak.deref();
+                if (mutableStateMeta) {
+                    mutableStateMeta!.changeMutableState();
+                }
+            })
+            this.queuedMutableStateChanges_.clear();
+        }
+        return count;
+    }
+
+    public changeMutableState(mutableStateMeta: IBindingSource): void {
+        switch (this.mutateMutableStateMode_) {
+            case NotifyMutableStateMode.normal:
+                mutableStateMeta.changeMutableState();
+                break;
+            case NotifyMutableStateMode.delayMutation:
+                this.queuedMutableStateChanges_.add(mutableStateMeta.weakThis);
+                break;
+            case NotifyMutableStateMode.noMutation:
+                // do nothing
+                break;
+            default:
+                break;
+        }
     }
 }
