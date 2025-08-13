@@ -15,7 +15,7 @@
 
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { XComponentAttribute, ArkXComponentPeer, XComponentParameters, XComponentOptions, NativeXComponentParameters, OnNativeLoadCallback, setXComponentParametersANI, setXComponentOptionsANI, SurfaceRect } from '../../component/xcomponent';
+import { XComponentAttribute, ArkXComponentPeer, XComponentParameters, XComponentOptions, NativeXComponentParameters, setXComponentParametersANI, setXComponentOptionsANI, SurfaceRect } from '../../component/xcomponent';
 import { VoidCallback } from '../../component/units';
 import { ArkUIAniModule } from "arkui.ani";
 
@@ -43,7 +43,7 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
         return this;
     }
     overload initialize { initializeXComponentParameter, initializeXComponentOptions, initializeNativeXComponentParameters }
-    onLoad(value: OnNativeLoadCallback | undefined): this {
+    onLoad(value: VoidCallback | undefined): this {
         this.getPeer()?.onLoadAttribute(value);
         return this;
     }
