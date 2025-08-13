@@ -577,18 +577,12 @@ export interface TextMetrics {
     height: number;
 }
 export interface CanvasAttribute extends CommonMethod {
-    setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
-        return this
-    }
     onReady(value: VoidCallback | undefined): this
     enableAnalyzer(value: boolean | undefined): this
 }
 export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
     onReady_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
-    public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
-        return this
-    }
     public onReady(value: VoidCallback | undefined): this {
         return this
     }
@@ -641,9 +635,10 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
     }
 }
 /** @memo */
-export function CanvasImpl(
+export function Canvas(
     /** @memo */
     style: ((attributes: CanvasAttribute) => void) | undefined,
+    context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -651,8 +646,10 @@ export function CanvasImpl(
         return new ArkCanvasComponent()
     })
     NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer) => {
+        receiver.setCanvasOptions(context,imageAIOptions)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
 export class Path2DInternal {

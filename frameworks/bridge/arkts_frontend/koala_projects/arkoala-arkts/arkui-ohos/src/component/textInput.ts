@@ -1376,9 +1376,6 @@ export type OnTextSelectionChangeCallback = (selectionStart: number, selectionEn
 export type OnContentScrollCallback = (totalOffsetX: number, totalOffsetY: number) => void;
 export type OnPasteCallback = (content: string, event: PasteEvent) => void;
 export interface TextInputAttribute extends CommonMethod {
-    setTextInputOptions(value?: TextInputOptions): this {
-        return this
-    }
     type(value: InputType | undefined): this
     contentType(value: ContentType | undefined): this
     placeholderColor(value: ResourceColor | undefined): this
@@ -1523,9 +1520,6 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     stopBackPress_value?: boolean | undefined
     onWillChange_value?: ((parameter: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
-    public setTextInputOptions(value?: TextInputOptions): this {
-        return this
-    }
     public type(value: InputType | undefined): this {
         return this
     }
@@ -2441,9 +2435,10 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
     }
 }
 /** @memo */
-export function TextInputImpl(
+export function TextInput(
     /** @memo */
     style: ((attributes: TextInputAttribute) => void) | undefined,
+    value?: TextInputOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -2451,8 +2446,10 @@ export function TextInputImpl(
         return new ArkTextInputComponent()
     })
     NodeAttach<ArkTextInputPeer>((): ArkTextInputPeer => ArkTextInputPeer.create(receiver), (_: ArkTextInputPeer) => {
+        receiver.setTextInputOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
 export class TextInputControllerInternal {

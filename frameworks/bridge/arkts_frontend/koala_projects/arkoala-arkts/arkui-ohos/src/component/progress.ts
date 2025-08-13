@@ -238,9 +238,6 @@ export interface ProgressStyleMap {
 }
 export type ProgressInterface = (options: ProgressOptions) => ProgressAttribute;
 export interface ProgressAttribute extends CommonMethod {
-    setProgressOptions(options: ProgressOptions): this {
-        return this
-    }
     value(value: number | undefined): this
     color(value: ResourceColor | LinearGradient | undefined): this
     style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this
@@ -253,9 +250,6 @@ export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAt
     style_value?: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier | undefined
-    public setProgressOptions(options: ProgressOptions): this {
-        return this
-    }
     public value(value: number | undefined): this {
         return this
     }
@@ -335,9 +329,10 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
     }
 }
 /** @memo */
-export function ProgressImpl(
+export function Progress(
     /** @memo */
     style: ((attributes: ProgressAttribute) => void) | undefined,
+    options: ProgressOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -345,7 +340,9 @@ export function ProgressImpl(
         return new ArkProgressComponent()
     })
     NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (_: ArkProgressPeer) => {
+        receiver.setProgressOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

@@ -168,9 +168,6 @@ export enum SubMenuExpandingMode {
     STACK_EXPAND = 2
 }
 export interface MenuAttribute extends CommonMethod {
-    setMenuOptions(): this {
-        return this
-    }
     fontSize(value: Length | undefined): this
     font(value: Font | undefined): this
     fontColor(value: ResourceColor | undefined): this
@@ -187,9 +184,6 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     menuItemDivider_value?: DividerStyleOptions | undefined
     menuItemGroupDivider_value?: DividerStyleOptions | undefined
     subMenuExpandingMode_value?: SubMenuExpandingMode | undefined
-    public setMenuOptions(): this {
-        return this
-    }
     public fontSize(value: Length | undefined): this {
         return this
     }
@@ -286,9 +280,10 @@ export class ArkMenuComponent extends ArkCommonMethodComponent implements MenuAt
     }
 }
 /** @memo */
-export function MenuImpl(
+export function Menu(
     /** @memo */
     style: ((attributes: MenuAttribute) => void) | undefined,
+    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -296,7 +291,9 @@ export function MenuImpl(
         return new ArkMenuComponent()
     })
     NodeAttach<ArkMenuPeer>((): ArkMenuPeer => ArkMenuPeer.create(receiver), (_: ArkMenuPeer) => {
+        receiver.setMenuOptions()
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

@@ -103,17 +103,11 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
     }
 }
 export interface BlankAttribute extends CommonMethod {
-    setBlankOptions(min?: number | string): this {
-        return this
-    }
     color(value: ResourceColor | undefined): this {return this;}
     attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
     color_value?: ResourceColor | undefined
-    public setBlankOptions(min?: number | string): this {
-        return this
-    }
     public color(value: ResourceColor | undefined): this {
         return this
     }
@@ -153,9 +147,10 @@ export class ArkBlankComponent extends ArkCommonMethodComponent implements Blank
     }
 }
 /** @memo */
-export function BlankImpl(
+export function Blank(
     /** @memo */
     style: ((attributes: BlankAttribute) => void) | undefined,
+    min?: number | string,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -163,7 +158,9 @@ export function BlankImpl(
         return new ArkBlankComponent()
     })
     NodeAttach<ArkBlankPeer>((): ArkBlankPeer => ArkBlankPeer.create(receiver), (_: ArkBlankPeer) => {
+        receiver.setBlankOptions(min)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

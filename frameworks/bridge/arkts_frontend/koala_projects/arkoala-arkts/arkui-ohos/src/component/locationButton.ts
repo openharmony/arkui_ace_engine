@@ -91,16 +91,10 @@ export enum LocationButtonOnClickResult {
 }
 export type LocationButtonCallback = (event: ClickEvent, result: LocationButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface LocationButtonAttribute extends SecurityComponentMethod {
-    setLocationButtonOptions(options?: LocationButtonOptions): this {
-        return this
-    }
     onClick(value: LocationButtonCallback | undefined): this
 }
 export class ArkLocationButtonStyle extends ArkSecurityComponentMethodStyle implements LocationButtonAttribute {
     onClick_value?: LocationButtonCallback | undefined
-    public setLocationButtonOptions(options?: LocationButtonOptions): this {
-        return this
-    }
     public onClick(value: LocationButtonCallback | undefined): this {
         return this
         }
@@ -132,9 +126,10 @@ export class ArkLocationButtonComponent extends ArkSecurityComponentMethodCompon
     }
 }
 /** @memo */
-export function LocationButtonImpl(
+export function LocationButton(
     /** @memo */
     style: ((attributes: LocationButtonAttribute) => void) | undefined,
+    options?: LocationButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -142,7 +137,9 @@ export function LocationButtonImpl(
         return new ArkLocationButtonComponent()
     })
     NodeAttach<ArkLocationButtonPeer>((): ArkLocationButtonPeer => ArkLocationButtonPeer.create(receiver), (_: ArkLocationButtonPeer) => {
+        receiver.setLocationButtonOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

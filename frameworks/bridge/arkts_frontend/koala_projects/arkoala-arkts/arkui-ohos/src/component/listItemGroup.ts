@@ -94,9 +94,6 @@ export interface ListItemGroupOptions {
 }
 export type ListItemGroupInterface = (options?: ListItemGroupOptions) => ListItemGroupAttribute;
 export interface ListItemGroupAttribute extends CommonMethod {
-    setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
     divider(value: ListDividerOptions | null | undefined): this { return this; }
     childrenMainSize(value: ChildrenMainSize | undefined): this { return this; }
     attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
@@ -104,9 +101,6 @@ export interface ListItemGroupAttribute extends CommonMethod {
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | null | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
-    public setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
     public divider(value: ListDividerOptions | null | undefined): this {
         return this
     }
@@ -151,9 +145,10 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function ListItemGroupImpl(
+export function ListItemGroup(
     /** @memo */
     style: ((attributes: ListItemGroupAttribute) => void) | undefined,
+    options?: ListItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -161,7 +156,9 @@ export function ListItemGroupImpl(
         return new ArkListItemGroupComponent()
     })
     NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer) => {
+        receiver.setListItemGroupOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

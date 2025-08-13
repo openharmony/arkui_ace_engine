@@ -947,9 +947,6 @@ export interface TextOverflowOptions {
 export type TextInterface = (content?: string | Resource, value?: TextOptions) => TextAttribute;
 export type Callback_MarqueeState_Void = (parameter: MarqueeState) => void;
 export interface TextAttribute extends CommonMethod {
-    setTextOptions(content?: string | Resource, value?: TextOptions): this {
-        return this
-    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this { return this;}
     fontColor(value: ResourceColor | undefined): this { return this;}
     fontSize(value: number | string | Resource | undefined): this { return this;}
@@ -1037,9 +1034,6 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     editMenuOptions_value?: EditMenuOptions | undefined
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
-    public setTextOptions(content?: string | Resource, value?: TextOptions): this {
-        return this
-    }
     public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
@@ -1584,9 +1578,10 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
 
 }
 /** @memo */
-export function TextImpl(
+export function Text(
     /** @memo */
     style: ((attributes: TextAttribute) => void) | undefined,
+    content?: string | Resource, value?: TextOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1596,10 +1591,10 @@ export function TextImpl(
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
         ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
         ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)
-
+        receiver.setTextOptions(content,value)
         style?.(receiver)
         content_?.()
-    
+        receiver.applyAttributesFinish()
         ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
     })
 }

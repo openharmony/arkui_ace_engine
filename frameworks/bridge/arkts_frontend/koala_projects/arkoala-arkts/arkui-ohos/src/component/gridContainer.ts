@@ -68,14 +68,8 @@ export interface GridContainerOptions {
 }
 export type GridContainerInterface = (value?: GridContainerOptions) => GridContainerAttribute;
 export interface GridContainerAttribute extends ColumnAttribute {
-    setGridContainerOptions(value?: GridContainerOptions): this {
-        return this
-    }
 }
 export class ArkGridContainerStyle extends ArkColumnStyle implements GridContainerAttribute {
-    public setGridContainerOptions(value?: GridContainerOptions): this {
-        return this
-    }
 }
 export class ArkGridContainerComponent extends ArkColumnComponent implements GridContainerAttribute {
     getPeer(): ArkGridContainerPeer {
@@ -96,9 +90,10 @@ export class ArkGridContainerComponent extends ArkColumnComponent implements Gri
     }
 }
 /** @memo */
-export function GridContainerImpl(
+export function GridContainer(
     /** @memo */
     style: ((attributes: GridContainerAttribute) => void) | undefined,
+    value?: GridContainerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -106,7 +101,9 @@ export function GridContainerImpl(
         return new ArkGridContainerComponent()
     })
     NodeAttach<ArkGridContainerPeer>((): ArkGridContainerPeer => ArkGridContainerPeer.create(receiver), (_: ArkGridContainerPeer) => {
+        receiver.setGridContainerOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

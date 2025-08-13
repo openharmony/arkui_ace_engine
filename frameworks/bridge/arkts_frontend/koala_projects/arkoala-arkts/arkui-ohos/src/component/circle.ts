@@ -58,15 +58,9 @@ export interface CircleOptions {
 }
 export type CircleInterface = (value?: CircleOptions) => CircleAttribute;
 export interface CircleAttribute extends CommonShapeMethod {
-    setCircleOptions(value?: CircleOptions): this {
-        return this
-    }
     attributeModifier(modifier: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
-    public setCircleOptions(value?: CircleOptions): this {
-        return this
-    }
 }
 export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements CircleAttribute {
     getPeer(): ArkCirclePeer {
@@ -90,9 +84,10 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
     }
 }
 /** @memo */
-export function CircleImpl(
+export function Circle(
     /** @memo */
     style: ((attributes: CircleAttribute) => void) | undefined,
+    value?: CircleOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -100,7 +95,9 @@ export function CircleImpl(
         return new ArkCircleComponent()
     })
     NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (_: ArkCirclePeer) => {
+        receiver.setCircleOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

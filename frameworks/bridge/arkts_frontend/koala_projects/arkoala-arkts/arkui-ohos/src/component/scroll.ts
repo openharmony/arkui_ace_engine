@@ -601,9 +601,6 @@ export interface OnScrollFrameBeginHandlerResult {
 }
 export type OnScrollFrameBeginCallback = (offset: number, state: ScrollState) => OnScrollFrameBeginHandlerResult;
 export interface ScrollAttribute extends ScrollableCommonMethod {
-    setScrollOptions(scroller?: Scroller): this {
-        return this
-    }
     scrollable(value: ScrollDirection | undefined): this { return this; }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this { return this; }
     onDidScroll(value: ScrollOnScrollCallback | undefined): this { return this; }
@@ -643,9 +640,6 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
     scrollSnap_value?: ScrollSnapOptions | undefined
     enablePaging_value?: boolean | undefined
     initialOffset_value?: OffsetOptions | undefined
-    public setScrollOptions(scroller?: Scroller): this {
-        return this
-    }
     public scrollable(value: ScrollDirection | undefined): this {
         return this
     }
@@ -882,9 +876,10 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
     }
 }
 /** @memo */
-export function ScrollImpl(
+export function Scroll(
     /** @memo */
     style: ((attributes: ScrollAttribute) => void) | undefined,
+    scroller?: Scroller,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -892,7 +887,9 @@ export function ScrollImpl(
         return new ArkScrollComponent()
     })
     NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (_: ArkScrollPeer) => {
+        receiver.setScrollOptions(scroller)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

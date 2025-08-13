@@ -174,9 +174,6 @@ export interface LinearIndicatorStyle {
 }
 export type LinearIndicatorInterface = (count?: number, controller?: LinearIndicatorController) => LinearIndicatorAttribute;
 export interface LinearIndicatorAttribute extends CommonMethod {
-    setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this {
-        return this
-    }
     indicatorStyle(value: LinearIndicatorStyle | undefined): this
     indicatorLoop(value: boolean | undefined): this
     onChange(value: OnLinearIndicatorChangeCallback | undefined): this
@@ -185,9 +182,6 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
     indicatorStyle_value?: LinearIndicatorStyle | undefined
     indicatorLoop_value?: boolean | undefined
     onChange_value?: OnLinearIndicatorChangeCallback | undefined
-    public setLinearIndicatorOptions(count?: number, controller?: LinearIndicatorController): this {
-        return this
-    }
     public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
         return this
     }
@@ -243,9 +237,10 @@ export class ArkLinearIndicatorComponent extends ArkCommonMethodComponent implem
     }
 }
 /** @memo */
-export function LinearIndicatorImpl(
+export function LinearIndicator(
     /** @memo */
     style: ((attributes: LinearIndicatorAttribute) => void) | undefined,
+    count?: number, controller?: LinearIndicatorController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -253,7 +248,9 @@ export function LinearIndicatorImpl(
         return new ArkLinearIndicatorComponent()
     })
     NodeAttach<ArkLinearIndicatorPeer>((): ArkLinearIndicatorPeer => ArkLinearIndicatorPeer.create(receiver), (_: ArkLinearIndicatorPeer) => {
+        receiver.setLinearIndicatorOptions(count,controller)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

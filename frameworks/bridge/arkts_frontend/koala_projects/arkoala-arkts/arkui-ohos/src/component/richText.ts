@@ -68,16 +68,10 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
 }
 export type RichTextInterface = (content: string) => RichTextAttribute;
 export interface RichTextAttribute extends CommonMethod {
-    setRichTextOptions(content: string): this {
-        return this
-    }
     onStart(value: (() => void) | undefined): this
     onComplete(value: (() => void) | undefined): this
 }
 export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
-    public setRichTextOptions(content: string): this {
-        return this
-    }
     onStart_value?: (() => void) | undefined
     onComplete_value?: (() => void) | undefined
     public onStart(value: (() => void) | undefined): this {
@@ -122,9 +116,10 @@ export class ArkRichTextComponent extends ArkCommonMethodComponent implements Ri
     }
 }
 /** @memo */
-export function RichTextImpl(
+export function RichText(
     /** @memo */
     style: ((attributes: RichTextAttribute) => void) | undefined,
+    content: string,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -132,7 +127,9 @@ export function RichTextImpl(
         return new ArkRichTextComponent()
     })
     NodeAttach<ArkRichTextPeer>((): ArkRichTextPeer => ArkRichTextPeer.create(receiver), (_: ArkRichTextPeer) => {
+        receiver.setRichTextOptions(content)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

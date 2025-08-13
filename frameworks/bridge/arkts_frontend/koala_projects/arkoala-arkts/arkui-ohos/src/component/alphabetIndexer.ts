@@ -604,9 +604,6 @@ export type OnAlphabetIndexerRequestPopupDataCallback = (index: number) => Array
 export type Callback_Number_Void = (index: number) => void;
 export type Callback_Opt_Number_Void = (selected: number | undefined) => void;
 export interface AlphabetIndexerAttribute extends CommonMethod {
-    setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
-        return this
-    }
     onSelected(value: ((index: number) => void) | undefined): this
     color(value: ResourceColor | undefined): this
     selectedColor(value: ResourceColor | undefined): this
@@ -663,9 +660,6 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     popupBackgroundBlurStyle_value?: BlurStyle | undefined
     popupTitleBackground_value?: ResourceColor | undefined
     enableHapticFeedback_value?: boolean | undefined
-    public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
-        return this
-    }
     public onSelected(value: ((index: number) => void) | undefined): this {
         return this
     }
@@ -1011,9 +1005,10 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
     }
 }
 /** @memo */
-export function AlphabetIndexerImpl(
+export function AlphabetIndexer(
     /** @memo */
     style: ((attributes: AlphabetIndexerAttribute) => void) | undefined,
+    options: AlphabetIndexerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1021,7 +1016,9 @@ export function AlphabetIndexerImpl(
         return new ArkAlphabetIndexerComponent()
     })
     NodeAttach<ArkAlphabetIndexerPeer>((): ArkAlphabetIndexerPeer => ArkAlphabetIndexerPeer.create(receiver), (_: ArkAlphabetIndexerPeer) => {
+        receiver.setAlphabetIndexerOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

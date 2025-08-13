@@ -85,18 +85,12 @@ export interface PluginErrorData {
 export type PluginErrorCallback = (info: PluginErrorData) => void;
 export type PluginComponentInterface = (options: PluginComponentOptions) => PluginComponentAttribute;
 export interface PluginComponentAttribute extends CommonMethod {
-    setPluginComponentOptions(options: PluginComponentOptions): this {
-        return this
-    }
     onComplete(value: VoidCallback | undefined): this
     onError(value: PluginErrorCallback | undefined): this
 }
 export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
     onComplete_value?: VoidCallback | undefined
     onError_value?: PluginErrorCallback | undefined
-    public setPluginComponentOptions(options: PluginComponentOptions): this {
-        return this
-    }
     public onComplete(value: VoidCallback | undefined): this {
         return this
     }
@@ -139,9 +133,10 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
     }
 }
 /** @memo */
-export function PluginComponentImpl(
+export function PluginComponent(
     /** @memo */
     style: ((attributes: PluginComponentAttribute) => void) | undefined,
+    options: PluginComponentOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -149,7 +144,9 @@ export function PluginComponentImpl(
         return new ArkPluginComponentComponent()
     })
     NodeAttach<ArkPluginComponentPeer>((): ArkPluginComponentPeer => ArkPluginComponentPeer.create(receiver), (_: ArkPluginComponentPeer) => {
+        receiver.setPluginComponentOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

@@ -80,16 +80,10 @@ export enum PasteButtonOnClickResult {
 }
 export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
-    setPasteButtonOptions(options?: PasteButtonOptions): this {
-        return this
-    }
     onClick(value: PasteButtonCallback | undefined): this
 }
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined
-    public setPasteButtonOptions(options?: PasteButtonOptions): this {
-        return this
-    }
     public onClick(value: PasteButtonCallback | undefined): this {
         return this
         }
@@ -122,9 +116,10 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
     }
 }
 /** @memo */
-export function PasteButtonImpl(
+export function PasteButton(
     /** @memo */
     style: ((attributes: PasteButtonAttribute) => void) | undefined,
+    options?: PasteButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -132,7 +127,9 @@ export function PasteButtonImpl(
         return new ArkPasteButtonComponent()
     })
     NodeAttach<ArkPasteButtonPeer>((): ArkPasteButtonPeer => ArkPasteButtonPeer.create(receiver), (_: ArkPasteButtonPeer) => {
+        receiver.setPasteButtonOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

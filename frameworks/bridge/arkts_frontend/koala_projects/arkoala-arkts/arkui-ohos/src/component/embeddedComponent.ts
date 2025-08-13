@@ -79,18 +79,12 @@ export interface TerminationInfo {
     want?: Want;
 }
 export interface EmbeddedComponentAttribute extends CommonMethod {
-    setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
-        return this
-    }
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onError(value: ErrorCallback | undefined): this
 }
 export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
     onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
     onError_value?: ErrorCallback | undefined
-    public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
-        return this
-    }
     public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
         return this
     }
@@ -135,9 +129,10 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
     }
 }
 /** @memo */
-export function EmbeddedComponentImpl(
+export function EmbeddedComponent(
     /** @memo */
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
+    loader: Want, type: EmbeddedType,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -145,7 +140,9 @@ export function EmbeddedComponentImpl(
         return new ArkEmbeddedComponentComponent()
     })
     NodeAttach<ArkEmbeddedComponentPeer>((): ArkEmbeddedComponentPeer => ArkEmbeddedComponentPeer.create(receiver), (_: ArkEmbeddedComponentPeer) => {
+        receiver.setEmbeddedComponentOptions(loader,type)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
