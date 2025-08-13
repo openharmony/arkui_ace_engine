@@ -460,8 +460,15 @@ export class RenderNode implements MaterializedBase {
         return
     }
     dispose() {
-        this.frameNode_?.deref()?.dispose()
-        this.peer?.release()
+        this.frameNode_?.deref()?.resetNodePtr()
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
+    }
+    resetNodePtr() {
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
     }
     private getBackgroundColor(): number {
         return this.getBackgroundColor_serialize()
