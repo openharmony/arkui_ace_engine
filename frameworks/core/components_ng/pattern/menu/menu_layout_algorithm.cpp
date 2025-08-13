@@ -804,9 +804,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
-    auto containerId = Container::CurrentId();
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu
-        || (containerId >= MIN_SUBCONTAINER_ID);
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
     InitCanExpandCurrentWindow(isShowInSubWindow, layoutWrapper);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
