@@ -67,14 +67,13 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             newValue = getObservedObject(newValue, this);
         }
         const value = uiUtils.makeObserved(newValue);
-        if (this.backing_.set(value)) {
-            if (this.setProxyValue) {
-                this.setProxyValue!(newValue);
-            }
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(value);
-            this.execWatchFuncs();
+        this.backing_.setNoCheck(value);
+        if (this.setProxyValue) {
+            this.setProxyValue!(newValue);
         }
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.execWatchFuncs();
     }
 
     private proxy?: ESValue;

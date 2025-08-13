@@ -61,6 +61,10 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
             this.value_ = newValue;
         }
     }
+    public setNoCheck(newValue: T): void {
+        this.value_ = newValue;
+        this.fireChange();
+    }
     // create dependency if currently rendering anything
     // FIXME: make protected once compiler allows
     // super.addRef on protected
