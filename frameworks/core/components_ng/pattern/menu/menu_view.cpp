@@ -714,30 +714,6 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
         previewPattern->GetHoverImageAfterScaleHeight()) / HALF_DIVIDE));
 }
 
-void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
-{
-    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(targetProps);
-    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
-        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
-        if (!focus) {
-            auto targetNode = targetWK.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            auto context = targetNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto pixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(pixelMap);
-            auto imageNode = imageWK.Upgrade();
-            CHECK_NULL_VOID(imageNode);
-            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(props);
-            props->UpdateAutoResize(false);
-            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-            imageNode->MarkModifyDone();
-        }
-    });
-}
-
 BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_RETURN(previewNode, {});
@@ -788,7 +764,6 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
-    SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
