@@ -4351,6 +4351,10 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_getUserConfigMargin(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNode_getUserConfigSize(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNode_createByRawPtr(ptr: KPointer): KPointer
+    @ani.unsafe.Quick
+    native static _FrameNode_unWrapRawPtr(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _LengthMetrics_ctor(): KPointer
     @ani.unsafe.Direct

@@ -135,7 +135,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public opacity(value: number | Resource | undefined): this {
-        return this
+         if (value != null) {
+            this.getPeer().opacity0Attribute(value);
+        }
+        return this;
     }
     public border(value: BorderOptions | undefined): this {
         return this
@@ -144,7 +147,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
-        return this
+        if (value != null) {
+            this.getPeer().borderWidthAttribute(value);
+        }
+        return this;
     }
     public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         return this
@@ -668,14 +674,13 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
-
-    width(value: Length | undefined | Length | LayoutPolicy | undefined | undefined): this {
+    width(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().width0Attribute(value as Length);
         }
         return this;
     }
-    height(value: Length | undefined | Length | LayoutPolicy | undefined | undefined): this {
+    height(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().height0Attribute(value as Length);
         }
