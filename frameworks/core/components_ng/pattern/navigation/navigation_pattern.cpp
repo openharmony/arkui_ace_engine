@@ -352,7 +352,7 @@ void NavigationPattern::DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>&
         navBarLayoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, hostNode->GetContextRefPtr());
 }
 
 void NavigationPattern::InitDragBarEvent()

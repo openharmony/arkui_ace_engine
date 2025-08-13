@@ -313,7 +313,10 @@ void NavDestinationPatternBase::StartAnimation(
     if (needRunToolBarAnimation) {
         OnToolBarAnimationStart();
     }
-    auto animation = AnimationUtils::StartAnimation(option, propertyCallback, finishCallback);
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto animation = AnimationUtils::StartAnimation(
+        option, propertyCallback, finishCallback, nullptr /* repeatCallback */, hostNode->GetContextRefPtr());
     barAnimations_.emplace(nextBarAnimationId_, animation);
     nextBarAnimationId_++;
 }

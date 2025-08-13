@@ -384,7 +384,7 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();
         hostNode->SetDoingModeSwitchAnimationFlag(false);
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, hostNode->GetContextRefPtr());
 }
 
 } // namespace
