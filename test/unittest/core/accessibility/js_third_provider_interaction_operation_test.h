@@ -25,6 +25,7 @@ constexpr int32_t TEST_PARAMETER_OFFSET2 = 2;
 constexpr int32_t TEST_PARAMETER_OFFSET3 = 3;
 constexpr int32_t SPECIAL_CURSOR_POSTION = 100;
 constexpr int32_t INVALID_PARENT_ID = -2100000;
+constexpr int32_t INJECT_EMPTY_INFOS = -32678;
 
 class ProviderMockResult {
     public:
@@ -114,6 +115,9 @@ public:
 
         if (startElementId >= MAX_TEST_ELEMENT_COUNT) {
             return -1;
+        }
+        if (providerMockResult_.injectResult_ == INJECT_EMPTY_INFOS) {
+            return 0;
         }
 
         if (mode == static_cast<uint32_t>(Accessibility::PREFETCH_RECURSIVE_CHILDREN)) {

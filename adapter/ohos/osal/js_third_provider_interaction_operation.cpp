@@ -84,27 +84,6 @@ void LogAccessibilityEventInfo(
     printStr.append("]");
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "%{public}s", printStr.c_str());
 }
-void FillNodeConfig(
-    const NodeConfig& config, Accessibility::AccessibilityElementInfo& info)
-{
-    OHOS::Accessibility::Rect oldRect = info.GetRectInScreen();
-    OHOS::Accessibility::Rect newRect = OHOS::Accessibility::Rect(
-        oldRect.GetLeftTopXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
-        oldRect.GetLeftTopYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()),
-        oldRect.GetRightBottomXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
-        oldRect.GetRightBottomYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()));
-    info.SetRectInScreen(newRect);
-    info.SetPageId(config.pageId);
-    info.SetWindowId(config.windowId);
-    info.SetBelongTreeId(config.belongTreeId);
-    info.SetChildTreeIdAndWinId(config.childTreeId, config.childWindowId);
-    info.SetParentWindowId(config.parentWindowId);
-    info.SetBundleName(config.bundleName);
-    info.SetInspectorKey(config.inspectorKey);
-    int64_t splitElementId = info.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(config.belongTreeId, splitElementId);
-    info.SetAccessibilityId(splitElementId);
-}
 
 void CopyNativeInfoToAccessibilityElementInfo(
     const ArkUI_AccessibilityElementInfo& elementInfo,
@@ -112,7 +91,7 @@ void CopyNativeInfoToAccessibilityElementInfo(
     Accessibility::AccessibilityElementInfo& info)
 {
     TransformAccessbilityElementInfo(elementInfo, info);
-    FillNodeConfig(config, info);
+    JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
 }
 
 void CopyNativeInfosToAccessibilityElementInfos(
@@ -123,7 +102,7 @@ void CopyNativeInfosToAccessibilityElementInfos(
     for (const auto& nativeInfo : nativeInfos) {
         Accessibility::AccessibilityElementInfo info;
         TransformAccessbilityElementInfo(nativeInfo, info);
-        FillNodeConfig(config, info);
+        JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
         infos.push_back(info);
     }
 }
@@ -181,6 +160,28 @@ void JsThirdProviderInteractionOperation::Initialize()
     CHECK_NULL_VOID(provider);
 }
 
+void JsThirdProviderInteractionOperation::FillNodeConfig(
+    const NodeConfig& config, Accessibility::AccessibilityElementInfo& info)
+{
+    OHOS::Accessibility::Rect oldRect = info.GetRectInScreen();
+    OHOS::Accessibility::Rect newRect = OHOS::Accessibility::Rect(
+        oldRect.GetLeftTopXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
+        oldRect.GetLeftTopYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()),
+        oldRect.GetRightBottomXScreenPostion() * config.scaleX + static_cast<int32_t>(config.offset.GetX()),
+        oldRect.GetRightBottomYScreenPostion() * config.scaleY + static_cast<int32_t>(config.offset.GetY()));
+    info.SetRectInScreen(newRect);
+    info.SetPageId(config.pageId);
+    info.SetWindowId(config.windowId);
+    info.SetBelongTreeId(config.belongTreeId);
+    info.SetChildTreeIdAndWinId(config.childTreeId, config.childWindowId);
+    info.SetParentWindowId(config.parentWindowId);
+    info.SetBundleName(config.bundleName);
+    info.SetInspectorKey(config.inspectorKey);
+    int64_t splitElementId = info.GetAccessibilityId();
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(config.belongTreeId, splitElementId);
+    info.SetAccessibilityId(splitElementId);
+}
+
 RetError JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     const int64_t elementId, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode)
@@ -209,6 +210,29 @@ RetError JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId
     // 3. Return result
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
     return RET_OK;
+}
+
+bool JsThirdProviderInteractionOperation::FindNativeInfoById(
+    const WeakPtr<AccessibilityProvider>& accessibilityProvider,
+    int64_t splitElementId,
+    std::shared_ptr<ArkUI_AccessibilityElementInfo>& nativeInfo)
+{
+    CHECK_NULL_RETURN(nativeInfo, false);
+    auto provider = accessibilityProvider.Upgrade();
+    CHECK_NULL_RETURN(provider, false);
+    std::vector<ArkUI_AccessibilityElementInfo> nativeInfos;
+    int32_t code = provider->FindAccessibilityNodeInfosById(
+        splitElementId, 0, 0, nativeInfos);
+    if (code != 0) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "FindNativeInfoById failed: %{public}d", code);
+        return false;
+    }
+    if (nativeInfos.empty()) {
+        return false;
+    }
+    *nativeInfo = nativeInfos.front();
+    return true;
 }
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProvider(
@@ -788,7 +812,7 @@ void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEve
 
     // 1.1. Fill elementInfo config
     auto elementInfo = accessibilityEventInfo.GetElementInfo();
-    FillNodeConfig(config, elementInfo);
+    JsThirdProviderInteractionOperation::FillNodeConfig(config, elementInfo);
     int64_t elementId = elementInfo.GetAccessibilityId();
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(belongTreeId_, elementId);
     elementInfo.SetAccessibilityId(elementId);

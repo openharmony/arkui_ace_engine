@@ -807,4 +807,46 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
         operatorCallback, mode, 2);
     EXPECT_EQ(operatorCallback.mockRequestId, requestId);
 }
+
+
+/**
+ * @tc.name: FindNativeInfoById001
+ * @tc.desc: ClearFocusFromProvider
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, FindNativeInfoById001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider
+        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto jsInteractionOperation = std::make_shared<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    bool ret;
+
+    int64_t elementId = 0;
+    auto nativeInfo = std::make_shared<ArkUI_AccessibilityElementInfo>();
+
+    // 1 FindAccessibilityNodeInfosById get error result
+    ohAccessibilityProvider->SetInjectResult(-1);
+    ret = jsInteractionOperation->FindNativeInfoById(ohAccessibilityProvider, elementId, nativeInfo);
+    EXPECT_EQ(ret, false);
+ 
+    // 2 FindAccessibilityNodeInfosById get empty infos
+    ohAccessibilityProvider->SetInjectResult(INJECT_EMPTY_INFOS);
+    ret = jsInteractionOperation->FindNativeInfoById(ohAccessibilityProvider, elementId, nativeInfo);
+    EXPECT_EQ(ret, false);
+
+    // 3 FindAccessibilityNodeInfosByIdFromProvider ok, info equals to mock element info
+    ohAccessibilityProvider->providerMockResult_.Reset();
+    ret = jsInteractionOperation->FindNativeInfoById(ohAccessibilityProvider, elementId, nativeInfo);
+    EXPECT_EQ(ret, true);
+}
+
 } // namespace OHOS::Ace::NG

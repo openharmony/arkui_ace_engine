@@ -32,8 +32,10 @@ template("ace_core_accessibility_ng_source_set") {
 
     # add common source file needed by all product platform here
     sources = [
-      # dfx
+      # hidumper
       "hidumper/accessibility_hidumper.cpp",
+      # for frameNode property handle
+      "node_utils/accessibility_frame_node_utils.cpp",
     ]
 
     configs = [ "$ace_root:ace_config" ]
