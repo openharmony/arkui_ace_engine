@@ -932,12 +932,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLescompat/Uint8ClampedArray;DDIIDDDD:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetStringColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
         },
-        ani_native_function {            
+        ani_native_function {
             "_GetNumberColorValue",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
