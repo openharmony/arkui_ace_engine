@@ -63,7 +63,7 @@ export class ArkThemeNativeHelper {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
         const thisSerializer : Serializer = Serializer.hold();
-        const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
         SerializeUtils.writeColorArray(thisSerializer, colorArray);
         ArkUIAniModule._CreateAndBindTheme(themeScopeId, themeId,
             thisSerializer.asBuffer(), thisSerializer.length(), colorMode, onThemeScopeDestroy);
