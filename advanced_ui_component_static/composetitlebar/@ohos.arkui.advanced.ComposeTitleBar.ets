@@ -448,7 +448,7 @@ struct ImageMenuItem {
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly focusablePrefix: string = 'Id-ComposeTitleBar-ImageMenuItem-';
-  item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
+  item: ComposeTitleBarMenuItem = {value: 'undefined'} as ComposeTitleBarMenuItem;
   index: number = 0;
   itemIndex?: number = 0;
   minFontSize: number = 1.75;
@@ -799,7 +799,7 @@ struct ImageMenuItem {
  */
 @CustomDialog
 struct ComposeTitleBarDialog {
-  itemComposeTitleDialog: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
+  itemComposeTitleDialog: ComposeTitleBarMenuItem = {value: 'undefined'} as ComposeTitleBarMenuItem;
   callbackId: number | undefined = undefined;
   composeTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;

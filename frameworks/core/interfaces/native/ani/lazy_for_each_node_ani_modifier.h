@@ -24,11 +24,9 @@ namespace OHOS::Ace::NG {
 ani_long ConstructLazyForEachNode(ani_int id)
 {
     auto node = AceType::MakeRefPtr<ArkoalaLazyNode>(id);
+    CHECK_NULL_RETURN(node, 0);
     node->IncRefCount();
-    if (node) {
-        return reinterpret_cast<ani_long>(AceType::RawPtr(node));
-    }
-    return 0;
+    return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
 const ArkUIAniLazyForEachNodeModifier* GetLazyForEachNodeAniModifier()

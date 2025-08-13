@@ -111,16 +111,10 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
 }
 export type HyperlinkInterface = (address: string | Resource, content?: string | Resource) => HyperlinkAttribute;
 export interface HyperlinkAttribute extends CommonMethod {
-    setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
-        return this
-    }
     color(value: Color | number | string | Resource | undefined): this
 }
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined
-    public setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
-        return this
-    }
     public color(value: Color | number | string | Resource | undefined): this {
         return this
         }
@@ -153,9 +147,10 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
     }
 }
 /** @memo */
-export function HyperlinkImpl(
+export function Hyperlink(
     /** @memo */
     style: ((attributes: HyperlinkAttribute) => void) | undefined,
+    address: string | Resource, content?: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -163,7 +158,9 @@ export function HyperlinkImpl(
         return new ArkHyperlinkComponent()
     })
     NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer) => {
+        receiver.setHyperlinkOptions(address,content)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

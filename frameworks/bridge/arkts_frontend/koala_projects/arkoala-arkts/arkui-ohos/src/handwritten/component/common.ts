@@ -823,7 +823,11 @@ export class TouchEventTransfer {
                 // pressedTime: changedTouch.getProperty("pressedTime").toNumber(),
                 pressure: changedTouch.getProperty("pressure").toNumber(),
                 width: changedTouch.getProperty("width").toNumber(),
-                height: changedTouch.getProperty("height").toNumber()
+                height: changedTouch.getProperty("height").toNumber(),
+                // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+                // despite some property types having default values
+                screenX: 0,
+                screenY: 0
             };
             index++;
             changedTouchArray.push(staticChangedTouch)
@@ -846,7 +850,11 @@ export class TouchEventTransfer {
                 pressedTime: touchEvent.touches[index].pressedTime,
                 pressure: touch.getProperty("pressure").toNumber(),
                 width: touch.getProperty("width").toNumber(),
-                height: touch.getProperty("height").toNumber()
+                height: touch.getProperty("height").toNumber(),
+                // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal,
+                // despite some property types having default values
+                screenX: 0,
+                screenY: 0
             };
             index++;
             touchesArray.push(staticTouch)

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Callback_Boolean_Void } from "./navigation"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -31,8 +31,10 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceStr } from "./units"
 import { ComponentContent } from "./arkui-custom"
 import { RefreshOpsHandWritten } from "./../handwritten"
-
+import { hookRefreshAttributeModifier } from '../handwritten'
+import { RefreshModifier } from '../RefreshModifier'
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
+    _attributeSet?: RefreshModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -151,16 +153,14 @@ export interface RefreshOptions {
 export type RefreshInterface = (value: RefreshOptions) => RefreshAttribute;
 export type Callback_RefreshStatus_Void = (state: RefreshStatus) => void;
 export interface RefreshAttribute extends CommonMethod {
-    setRefreshOptions(value: RefreshOptions): this {
-        return this
-    }
-    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this
-    onRefreshing(value: (() => void) | undefined): this
-    refreshOffset(value: number | undefined): this
-    pullToRefresh(value: boolean | undefined): this
-    onOffsetChange(value: ((index: number) => void) | undefined): this
-    pullDownRatio(value: number | undefined): this
-    _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void
+    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this { return this; }
+    onRefreshing(value: (() => void) | undefined): this { return this; }
+    refreshOffset(value: number | undefined): this { return this; }
+    pullToRefresh(value: boolean | undefined): this { return this; }
+    onOffsetChange(value: ((index: number) => void) | undefined): this { return this; }
+    pullDownRatio(value: number | undefined): this { return this; }
+    _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void {}
+    attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttribute {
     onStateChange_value?: ((state: RefreshStatus) => void) | undefined
@@ -169,9 +169,6 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     pullToRefresh_value?: boolean | undefined
     onOffsetChange_value?: ((index: number) => void) | undefined
     pullDownRatio_value?: number | undefined
-    public setRefreshOptions(value: RefreshOptions): this {
-        return this
-    }
     public onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
         return this
     }
@@ -275,6 +272,10 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
         }
         return
     }
+    public attributeModifier(modifier: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookRefreshAttributeModifier(this, modifier)
+        return this
+    }      
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -282,9 +283,10 @@ export class ArkRefreshComponent extends ArkCommonMethodComponent implements Ref
     }
 }
 /** @memo */
-export function RefreshImpl(
+export function Refresh(
     /** @memo */
     style: ((attributes: RefreshAttribute) => void) | undefined,
+    value: RefreshOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -292,7 +294,9 @@ export function RefreshImpl(
         return new ArkRefreshComponent()
     })
     NodeAttach<ArkRefreshPeer>((): ArkRefreshPeer => ArkRefreshPeer.create(receiver), (_: ArkRefreshPeer) => {
+        receiver.setRefreshOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

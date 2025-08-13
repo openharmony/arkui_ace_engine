@@ -185,9 +185,6 @@ export interface CalendarOptions {
 export type CalendarPickerInterface = (options?: CalendarOptions) => CalendarPickerAttribute;
 export type Callback_Date_Void = (parameter: Date) => void;
 export interface CalendarPickerAttribute extends CommonMethod {
-    setCalendarPickerOptions(options?: CalendarOptions): this {
-        return this
-    }
     textStyle(value: PickerTextStyle | undefined): this
     onChange(value: ((parameter: Date) => void) | undefined): this
     markToday(value: boolean | undefined): this
@@ -197,9 +194,6 @@ export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements Cale
     textStyle_value?: PickerTextStyle | undefined
     onChange_value?: ((parameter: Date) => void) | undefined
     markToday_value?: boolean | undefined
-    public setCalendarPickerOptions(options?: CalendarOptions): this {
-        return this
-    }
     public textStyle(value: PickerTextStyle | undefined): this {
         return this
     }
@@ -301,9 +295,10 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
     }
 }
 /** @memo */
-export function CalendarPickerImpl(
+export function CalendarPicker(
     /** @memo */
     style: ((attributes: CalendarPickerAttribute) => void) | undefined,
+    options?: CalendarOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -311,7 +306,9 @@ export function CalendarPickerImpl(
         return new ArkCalendarPickerComponent()
     })
     NodeAttach<ArkCalendarPickerPeer>((): ArkCalendarPickerPeer => ArkCalendarPickerPeer.create(receiver), (_: ArkCalendarPickerPeer) => {
+        receiver.setCalendarPickerOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

@@ -61,13 +61,13 @@ ani_error GetErrorObject(ani_env *env, const std::string &errMsg, int32_t code)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_class errClass;
-    ani_status status = env->FindClass("@ohos.base.BusinessError", &errClass);
+    ani_status status = env->FindClass("L@ohos/base/BusinessError;", &errClass);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "find class failed. status: %{public}d", status);
         return nullptr;
     }
     ani_method ctor;
-    status = env->Class_FindMethod(errClass, "<ctor>", ":", &ctor);
+    status = env->Class_FindMethod(errClass, "<ctor>", ":V", &ctor);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "cannot find constructor for class. status: %{public}d", status);
         return nullptr;

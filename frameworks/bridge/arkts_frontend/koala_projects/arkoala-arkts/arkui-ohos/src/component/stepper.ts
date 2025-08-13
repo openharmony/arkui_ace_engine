@@ -137,9 +137,6 @@ export interface StepperOptions {
 }
 export type StepperInterface = (value?: StepperOptions) => StepperAttribute;
 export interface StepperAttribute extends CommonMethod {
-    setStepperOptions(value?: StepperOptions): this {
-        return this
-    }
     onFinish(value: (() => void) | undefined): this
     onSkip(value: (() => void) | undefined): this
     onChange(value: ((first: number,last: number) => void) | undefined): this
@@ -153,9 +150,6 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     onChange_value?: ((first: number,last: number) => void) | undefined
     onNext_value?: ((first: number,last: number) => void) | undefined
     onPrevious_value?: ((first: number,last: number) => void) | undefined
-    public setStepperOptions(value?: StepperOptions): this {
-        return this
-    }
     public onFinish(value: (() => void) | undefined): this {
         return this
     }
@@ -242,9 +236,10 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
     }
 }
 /** @memo */
-export function StepperImpl(
+export function Stepper(
     /** @memo */
     style: ((attributes: StepperAttribute) => void) | undefined,
+    value?: StepperOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -252,7 +247,9 @@ export function StepperImpl(
         return new ArkStepperComponent()
     })
     NodeAttach<ArkStepperPeer>((): ArkStepperPeer => ArkStepperPeer.create(receiver), (_: ArkStepperPeer) => {
+        receiver.setStepperOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

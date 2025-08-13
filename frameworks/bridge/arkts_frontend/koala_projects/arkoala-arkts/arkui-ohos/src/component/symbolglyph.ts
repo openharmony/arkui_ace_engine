@@ -446,9 +446,6 @@ export enum EffectFillStyle {
     ITERATIVE = 1
 }
 export interface SymbolGlyphAttribute extends CommonMethod {
-    setSymbolGlyphOptions(value?: Resource): this {
-        return this
-    }
     fontSize(value: number | string | Resource | undefined): this { return this; }
     fontColor(value: Array<ResourceColor> | undefined): this { return this; }
     fontWeight(value: number | FontWeight | string | undefined): this { return this; }
@@ -467,9 +464,6 @@ export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolG
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
-    public setSymbolGlyphOptions(value?: Resource): this {
-        return this
-    }
     public fontSize(value: number | string | Resource | undefined): this {
         return this
     }
@@ -595,9 +589,10 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function SymbolGlyphImpl(
+export function SymbolGlyph(
     /** @memo */
     style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
+    value?: Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -605,8 +600,10 @@ export function SymbolGlyphImpl(
         return new ArkSymbolGlyphComponent()
     })
     NodeAttach<ArkSymbolGlyphPeer>((): ArkSymbolGlyphPeer => ArkSymbolGlyphPeer.create(receiver), (_: ArkSymbolGlyphPeer) => {
+        receiver.setSymbolGlyphOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
 export class HierarchicalSymbolEffectInternal {

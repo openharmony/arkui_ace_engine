@@ -3670,9 +3670,6 @@ export type Callback_OnOverScrollEvent_Void = (parameter: OnOverScrollEvent) => 
 export type Callback_NativeEmbedDataInfo_Void = (event: NativeEmbedDataInfo) => void;
 export type Callback_NativeEmbedTouchInfo_Void = (event: NativeEmbedTouchInfo) => void;
 export interface WebAttribute extends CommonMethod {
-    setWebOptions(value: WebOptions): this {
-        return this
-    }
     javaScriptAccess(value: boolean | undefined): this
     fileAccess(value: boolean | undefined): this
     onlineImageAccess(value: boolean | undefined): this
@@ -3927,9 +3924,6 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions
-    public setWebOptions(value: WebOptions): this {
-        return this
-    }
     public javaScriptAccess(value: boolean | undefined): this {
         return this
     }
@@ -5378,9 +5372,10 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     }
 }
 /** @memo */
-export function WebImpl(
+export function Web(
     /** @memo */
     style: ((attributes: WebAttribute) => void) | undefined,
+    value: WebOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -5388,7 +5383,9 @@ export function WebImpl(
         return new ArkWebComponent()
     })
     NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (_: ArkWebPeer) => {
+        receiver.setWebOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

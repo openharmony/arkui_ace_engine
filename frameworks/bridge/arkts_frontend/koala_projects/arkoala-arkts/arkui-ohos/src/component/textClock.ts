@@ -304,9 +304,6 @@ export interface TextClockOptions {
 }
 export type TextClockInterface = (options?: TextClockOptions) => TextClockAttribute;
 export interface TextClockAttribute extends CommonMethod {
-    setTextClockOptions(options?: TextClockOptions): this {
-        return this
-    }
     format(value: string | undefined): this
     onDateChange(value: ((index: number) => void) | undefined): this
     fontColor(value: ResourceColor | undefined): this
@@ -331,9 +328,6 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     fontFeature_value?: string | undefined
     contentModifier_value?: ContentModifier | undefined
     dateTimeOptions_value?: DateTimeOptions | undefined
-    public setTextClockOptions(options?: TextClockOptions): this {
-        return this
-    }
     public format(value: string | undefined): this {
         return this
     }
@@ -475,9 +469,10 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
     }
 }
 /** @memo */
-export function TextClockImpl(
+export function TextClock(
     /** @memo */
     style: ((attributes: TextClockAttribute) => void) | undefined,
+    options?: TextClockOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -485,7 +480,9 @@ export function TextClockImpl(
         return new ArkTextClockComponent()
     })
     NodeAttach<ArkTextClockPeer>((): ArkTextClockPeer => ArkTextClockPeer.create(receiver), (_: ArkTextClockPeer) => {
+        receiver.setTextClockOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

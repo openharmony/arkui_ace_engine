@@ -22,15 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ChildrenMainSize, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { ListDividerOptions } from "./list"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
-import { hookListItemGroupChildrenMainSizeImpl } from "./../handwritten"
+import { hookListItemGroupChildrenMainSizeImpl, hookListItemGroupAttributeModifier } from "./../handwritten"
+import { ListItemGroupModifier } from '../ListItemGroupModifier'
 
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ListItemGroupModifier
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -92,18 +94,13 @@ export interface ListItemGroupOptions {
 }
 export type ListItemGroupInterface = (options?: ListItemGroupOptions) => ListItemGroupAttribute;
 export interface ListItemGroupAttribute extends CommonMethod {
-    setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
-    divider(value: ListDividerOptions | null | undefined): this
-    childrenMainSize(value: ChildrenMainSize | undefined): this
+    divider(value: ListDividerOptions | null | undefined): this { return this; }
+    childrenMainSize(value: ChildrenMainSize | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | null | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
-    public setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
     public divider(value: ListDividerOptions | null | undefined): this {
         return this
     }
@@ -138,16 +135,20 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookListItemGroupAttributeModifier(this, modifier)
+        return this
+    }        
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function ListItemGroupImpl(
+export function ListItemGroup(
     /** @memo */
     style: ((attributes: ListItemGroupAttribute) => void) | undefined,
+    options?: ListItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -155,7 +156,9 @@ export function ListItemGroupImpl(
         return new ArkListItemGroupComponent()
     })
     NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer) => {
+        receiver.setListItemGroupOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

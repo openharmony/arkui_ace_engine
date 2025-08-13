@@ -217,9 +217,6 @@ export interface Literal_Number_errcode_String_msg {
 export type Callback_Literal_Number_errcode_String_msg_Void = (info: Literal_Number_errcode_String_msg) => void;
 export type Callback_Any_Void = (info: object) => void;
 export interface FormComponentAttribute extends CommonMethod {
-    setFormComponentOptions(value: FormInfo): this {
-        return this
-    }
     size(value: SizeOptions | undefined): this
     moduleName(value: string | undefined): this
     dimension(value: FormDimension | undefined): this
@@ -242,9 +239,6 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     onRouter_value?: ((info: object) => void) | undefined
     onUninstall_value?: ((parameter: FormCallbackInfo) => void) | undefined
     onLoad_value?: (() => void) | undefined
-    public setFormComponentOptions(value: FormInfo): this {
-        return this
-    }
     public size(value: SizeOptions | undefined): this {
         return this
     }
@@ -375,9 +369,10 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function FormComponentImpl(
+export function FormComponent(
     /** @memo */
     style: ((attributes: FormComponentAttribute) => void) | undefined,
+    value: FormInfo,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -385,7 +380,9 @@ export function FormComponentImpl(
         return new ArkFormComponentComponent()
     })
     NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (_: ArkFormComponentPeer) => {
+        receiver.setFormComponentOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

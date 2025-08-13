@@ -229,9 +229,6 @@ export interface MarqueeOptions {
 }
 export type MarqueeInterface = (options: MarqueeOptions) => MarqueeAttribute;
 export interface MarqueeAttribute extends CommonMethod {
-    setMarqueeOptions(options: MarqueeOptions): this {
-        return this
-    }
     fontColor(value: ResourceColor | undefined): this
     fontSize(value: Length | undefined): this
     allowScale(value: boolean | undefined): this
@@ -252,9 +249,6 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     onStart_value?: (() => void) | undefined
     onBounce_value?: (() => void) | undefined
     onFinish_value?: (() => void) | undefined
-    public setMarqueeOptions(options: MarqueeOptions): this {
-        return this
-    }
     public fontColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -374,9 +368,10 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
     }
 }
 /** @memo */
-export function MarqueeImpl(
+export function Marquee(
     /** @memo */
     style: ((attributes: MarqueeAttribute) => void) | undefined,
+    options: MarqueeOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -384,7 +379,9 @@ export function MarqueeImpl(
         return new ArkMarqueeComponent()
     })
     NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (_: ArkMarqueePeer) => {
+        receiver.setMarqueeOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

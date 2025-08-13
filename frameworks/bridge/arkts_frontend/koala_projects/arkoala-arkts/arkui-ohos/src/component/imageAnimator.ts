@@ -227,9 +227,6 @@ export interface ImageFrameInfo {
     duration?: number;
 }
 export interface ImageAnimatorAttribute extends CommonMethod {
-    setImageAnimatorOptions(): this {
-        return this
-    }
     images(value: Array<ImageFrameInfo> | undefined): this
     state(value: AnimationStatus | undefined): this
     duration(value: number | undefined): this
@@ -260,9 +257,6 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     onRepeat_value?: (() => void) | undefined
     onCancel_value?: (() => void) | undefined
     onFinish_value?: (() => void) | undefined
-    public setImageAnimatorOptions(): this {
-        return this
-    }
     public images(value: Array<ImageFrameInfo> | undefined): this {
         return this
     }
@@ -436,9 +430,10 @@ export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function ImageAnimatorImpl(
+export function ImageAnimator(
     /** @memo */
     style: ((attributes: ImageAnimatorAttribute) => void) | undefined,
+    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -446,7 +441,9 @@ export function ImageAnimatorImpl(
         return new ArkImageAnimatorComponent()
     })
     NodeAttach<ArkImageAnimatorPeer>((): ArkImageAnimatorPeer => ArkImageAnimatorPeer.create(receiver), (_: ArkImageAnimatorPeer) => {
+        receiver.setImageAnimatorOptions()
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

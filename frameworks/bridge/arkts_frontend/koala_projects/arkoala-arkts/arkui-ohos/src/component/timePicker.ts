@@ -330,9 +330,6 @@ export type TimePickerInterface = (options?: TimePickerOptions) => TimePickerAtt
 export type OnTimePickerChangeCallback = (result: TimePickerResult) => void;
 export type Callback_TimePickerResult_Void = (value: TimePickerResult) => void;
 export interface TimePickerAttribute extends CommonMethod {
-    setTimePickerOptions(options?: TimePickerOptions): this {
-        return this
-    }
     useMilitaryTime(value: boolean | undefined): this
     loop(value: boolean | undefined): this
     disappearTextStyle(value: PickerTextStyle | undefined): this
@@ -358,9 +355,6 @@ export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePick
     enableHapticFeedback_value?: boolean | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableCascade_value?: boolean | undefined
-    public setTimePickerOptions(options?: TimePickerOptions): this {
-        return this
-    }
     public useMilitaryTime(value: boolean | undefined): this {
         return this
     }
@@ -628,9 +622,10 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function TimePickerImpl(
+export function TimePicker(
     /** @memo */
     style: ((attributes: TimePickerAttribute) => void) | undefined,
+    options?: TimePickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -638,7 +633,9 @@ export function TimePickerImpl(
         return new ArkTimePickerComponent()
     })
     NodeAttach<ArkTimePickerPeer>((): ArkTimePickerPeer => ArkTimePickerPeer.create(receiver), (_: ArkTimePickerPeer) => {
+        receiver.setTimePickerOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

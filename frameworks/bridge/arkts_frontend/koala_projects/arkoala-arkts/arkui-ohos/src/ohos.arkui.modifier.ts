@@ -70,3 +70,5 @@ export { StepperItemModifier } from './StepperItemModifier';
 export { NavDestinationModifier } from './NavDestinationModifier';
 
 export { NavigationModifier } from './NavigationModifier';
+
+export { SwiperModifier } from './SwiperModifier';

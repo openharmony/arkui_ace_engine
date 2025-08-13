@@ -1382,8 +1382,8 @@ export namespace typeNode {
     overload createNode {
         createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
         createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
-        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode,
-        createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode, createBadgeNode,
+        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
+        createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,createImageNode
     }
 
@@ -1662,7 +1662,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNode(context: UIContext, type: string): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext, type: string): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1688,7 +1688,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));

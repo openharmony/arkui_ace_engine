@@ -55,14 +55,8 @@ export interface FormLinkOptions {
 }
 export type FormLinkInterface = (options: FormLinkOptions) => FormLinkAttribute;
 export interface FormLinkAttribute extends CommonMethod {
-    setFormLinkOptions(options: FormLinkOptions): this {
-        return this
-    }
 }
 export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAttribute {
-    public setFormLinkOptions(options: FormLinkOptions): this {
-        return this
-    }
 }
 export class ArkFormLinkComponent extends ArkCommonMethodComponent implements FormLinkAttribute {
     getPeer(): ArkFormLinkPeer {
@@ -83,9 +77,10 @@ export class ArkFormLinkComponent extends ArkCommonMethodComponent implements Fo
     }
 }
 /** @memo */
-export function FormLinkImpl(
+export function FormLink(
     /** @memo */
     style: ((attributes: FormLinkAttribute) => void) | undefined,
+    options: FormLinkOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -93,7 +88,9 @@ export function FormLinkImpl(
         return new ArkFormLinkComponent()
     })
     NodeAttach<ArkFormLinkPeer>((): ArkFormLinkPeer => ArkFormLinkPeer.create(receiver), (_: ArkFormLinkPeer) => {
+        receiver.setFormLinkOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

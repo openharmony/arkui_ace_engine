@@ -73,16 +73,10 @@ export interface PathOptions {
 export type PathInterface = (options?: PathOptions) => PathAttribute;
 export interface PathAttribute extends CommonShapeMethod {
     commands(value: string | undefined): this
-    setPathOptions(options?: PathOptions): this {
-        return this
-    }
     attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
     commands_value?: string | undefined
-    public setPathOptions(options?: PathOptions): this {
-        return this
-    }
     public commands(value: string | undefined): this {
         return this
         }
@@ -119,9 +113,10 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
     }
 }
 /** @memo */
-export function PathImpl(
+export function Path(
     /** @memo */
     style: ((attributes: PathAttribute) => void) | undefined,
+    options?: PathOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -129,7 +124,9 @@ export function PathImpl(
         return new ArkPathComponent()
     })
     NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (_: ArkPathPeer) => {
+        receiver.setPathOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

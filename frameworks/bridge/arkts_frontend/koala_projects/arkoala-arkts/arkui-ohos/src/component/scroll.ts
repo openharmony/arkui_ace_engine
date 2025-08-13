@@ -18,7 +18,7 @@
 
 import { Edge, Axis, ScrollSource, BarState, Color, EdgeEffect, Curve } from "./enums"
 import { Length, VoidCallback, Dimension } from "./units"
-import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { RectResult, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, AttributeModifier, ArkCommonMethodStyle, CommonMethod } from "./common"
 import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
@@ -33,6 +33,8 @@ import { Callback_Number_Number_Void } from "./grid"
 import { ScrollState, ScrollSnapAlign } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "../Graphics"
+import { hookScrollAttributeModifier }  from '../handwritten'
+import { ScrollModifier } from "../ScrollModifier"
 
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
@@ -241,6 +243,7 @@ export class Scroller implements MaterializedBase {
     }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
+    _attributeSet?: ScrollModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -598,28 +601,25 @@ export interface OnScrollFrameBeginHandlerResult {
 }
 export type OnScrollFrameBeginCallback = (offset: number, state: ScrollState) => OnScrollFrameBeginHandlerResult;
 export interface ScrollAttribute extends ScrollableCommonMethod {
-    setScrollOptions(scroller?: Scroller): this {
-        return this
-    }
-    scrollable(value: ScrollDirection | undefined): this
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this
-    onDidScroll(value: ScrollOnScrollCallback | undefined): this
-    onScrollEdge(value: OnScrollEdgeCallback | undefined): this
-    onScrollStart(value: VoidCallback | undefined): this
-    onScrollEnd(value: (() => void) | undefined): this
-    onScrollStop(value: VoidCallback | undefined): this
-    scrollBar(value: BarState | undefined): this
-    scrollBarColor(value: Color | number | string | undefined): this
-    scrollBarWidth(value: number | string | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    scrollSnap(value: ScrollSnapOptions | undefined): this
-    enablePaging(value: boolean | undefined): this
-    initialOffset(value: OffsetOptions | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
+    scrollable(value: ScrollDirection | undefined): this { return this; }
+    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this { return this; }
+    onDidScroll(value: ScrollOnScrollCallback | undefined): this { return this; }
+    onScrollEdge(value: OnScrollEdgeCallback | undefined): this { return this; }
+    onScrollStart(value: VoidCallback | undefined): this { return this; }
+    onScrollEnd(value: (() => void) | undefined): this { return this; }
+    onScrollStop(value: VoidCallback | undefined): this { return this; }
+    scrollBar(value: BarState | undefined): this { return this; }
+    scrollBarColor(value: Color | number | string | undefined): this { return this; }
+    scrollBarWidth(value: number | string | undefined): this { return this; }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
+    scrollSnap(value: ScrollSnapOptions | undefined): this { return this; }
+    enablePaging(value: boolean | undefined): this { return this; }
+    initialOffset(value: OffsetOptions | undefined): this { return this; }
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
     scrollable_value?: ScrollDirection | undefined
@@ -640,9 +640,6 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
     scrollSnap_value?: ScrollSnapOptions | undefined
     enablePaging_value?: boolean | undefined
     initialOffset_value?: OffsetOptions | undefined
-    public setScrollOptions(scroller?: Scroller): this {
-        return this
-    }
     public scrollable(value: ScrollDirection | undefined): this {
         return this
     }
@@ -868,6 +865,10 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
+    public attributeModifier(modifier: AttributeModifier<ScrollAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookScrollAttributeModifier(this, modifier)
+        return this
+    }   
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -875,9 +876,10 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
     }
 }
 /** @memo */
-export function ScrollImpl(
+export function Scroll(
     /** @memo */
     style: ((attributes: ScrollAttribute) => void) | undefined,
+    scroller?: Scroller,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -885,7 +887,9 @@ export function ScrollImpl(
         return new ArkScrollComponent()
     })
     NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (_: ArkScrollPeer) => {
+        receiver.setScrollOptions(scroller)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

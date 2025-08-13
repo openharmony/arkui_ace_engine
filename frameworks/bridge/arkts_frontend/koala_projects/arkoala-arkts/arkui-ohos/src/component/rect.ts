@@ -157,9 +157,6 @@ export interface RoundedRectOptions {
 }
 export type RectInterface = (options?: RectOptions | RoundedRectOptions) => RectAttribute;
 export interface RectAttribute extends CommonShapeMethod {
-    setRectOptions(options?: RectOptions | RoundedRectOptions): this {
-        return this
-    }
     radiusWidth(value: number | string | undefined): this
     radiusHeight(value: number | string | undefined): this
     radius(value: Length | Array<RadiusItem> | undefined): this
@@ -169,9 +166,6 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
     radiusWidth_value?: number | string | undefined
     radiusHeight_value?: number | string | undefined
     radius_value?: Length | Array<RadiusItem> | undefined
-    public setRectOptions(options?: RectOptions | RoundedRectOptions): this {
-        return this
-    }
     public radiusWidth(value: number | string | undefined): this {
         return this
     }
@@ -230,9 +224,10 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
     }
 }
 /** @memo */
-export function RectImpl(
+export function Rect(
     /** @memo */
     style: ((attributes: RectAttribute) => void) | undefined,
+    options?: RectOptions | RoundedRectOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -240,7 +235,9 @@ export function RectImpl(
         return new ArkRectComponent()
     })
     NodeAttach<ArkRectPeer>((): ArkRectPeer => ArkRectPeer.create(receiver), (_: ArkRectPeer) => {
+        receiver.setRectOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

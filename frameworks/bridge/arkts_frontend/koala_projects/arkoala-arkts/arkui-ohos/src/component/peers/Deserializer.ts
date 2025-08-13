@@ -7332,7 +7332,7 @@ export class Deserializer extends DeserializerBase {
     }
     readCommonConfiguration(): CommonConfiguration {
         let valueDeserializer : Deserializer = this
-        let value : CommonConfiguration = {};
+        let value : CommonConfiguration = {enabled: false, contentModifier: {}};
         return value
     }
     readCommonModifier(): CommonModifier {
@@ -8952,12 +8952,14 @@ export class Deserializer extends DeserializerBase {
         let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
         return value
     }
-    readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
+    readLeadingMarginPlaceholder(map?: PixelMap): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({size: size_result} as LeadingMarginPlaceholder)
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // despite some property types having default values
+        let value : LeadingMarginPlaceholder = ({size: size_result, pixelMap: map!} as LeadingMarginPlaceholder)
         return value
     }
     readLengthMetrics(): LengthMetrics {
@@ -10411,7 +10413,9 @@ export class Deserializer extends DeserializerBase {
         return value
     }
     readPolyToPolyOptions(): PolyToPolyOptions {
-        let value : PolyToPolyOptions = ({} as PolyToPolyOptions)
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // despite some property types having default values
+        let value : PolyToPolyOptions = ({dst: [], src: []} as PolyToPolyOptions)
         return value
     }
     readPopInfo(): PopInfo {
@@ -11794,7 +11798,7 @@ export class Deserializer extends DeserializerBase {
         let value : SurfaceRotationOptions = ({lock: lock_result} as SurfaceRotationOptions)
         return value
     }
-    readRadioConfiguration(): RadioConfiguration {
+    readRadioConfiguration(cttModifier?: ContentModifier<RadioConfiguration>): RadioConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result : boolean = valueDeserializer.readBoolean()
         const value_result : string = (valueDeserializer.readString() as string)
@@ -11812,10 +11816,10 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result} as RadioConfiguration)
+        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result, contentModifier: cttModifier!} as RadioConfiguration)
         return value
     }
-    readButtonConfiguration(): ButtonConfiguration {
+    readButtonConfiguration(cttModifier?: ContentModifier<ButtonConfiguration>): ButtonConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const label_result: string = (valueDeserializer.readString() as string)
@@ -11834,10 +11838,10 @@ export class Deserializer extends DeserializerBase {
             triggerClick_buf_argsSerializer.release();
             return;
         }
-        let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result } as ButtonConfiguration)
+        let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result, contentModifier: cttModifier! } as ButtonConfiguration)
         return value
     }
-    readCheckBoxConfiguration(): CheckBoxConfiguration {
+    readCheckBoxConfiguration(cttModifier?: ContentModifier<CheckBoxConfiguration>): CheckBoxConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const name_result: string = (valueDeserializer.readString() as string)
@@ -11855,11 +11859,11 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: CheckBoxConfiguration = ({ enabled: enabled_result, name: name_result, selected: selected_result, triggerChange: triggerChange_result } as CheckBoxConfiguration)
+        let value: CheckBoxConfiguration = ({ enabled: enabled_result, name: name_result, selected: selected_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as CheckBoxConfiguration)
         return value
     }
 
-    readToggleConfiguration(): ToggleConfiguration {
+    readToggleConfiguration(cttModifier?: ContentModifier<ToggleConfiguration>): ToggleConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const isOn_result: boolean = valueDeserializer.readBoolean()
@@ -11876,10 +11880,10 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result } as ToggleConfiguration)
+        let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as ToggleConfiguration)
         return value
     }
-    readRatingConfiguration(): RatingConfiguration {
+    readRatingConfiguration(cttModifier?: ContentModifier<RatingConfiguration>): RatingConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const rating_result: number = (valueDeserializer.readNumber() as number)
@@ -11899,11 +11903,11 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: RatingConfiguration = ({ enabled: enabled_result, rating: rating_result, indicator: indicator_result, stars: stars_result, stepSize: stepSize_result, triggerChange: triggerChange_result } as RatingConfiguration)
+        let value: RatingConfiguration = ({ enabled: enabled_result, rating: rating_result, indicator: indicator_result, stars: stars_result, stepSize: stepSize_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as RatingConfiguration)
         return value
     }
 
-    readSliderConfiguration(): SliderConfiguration {
+    readSliderConfiguration(cttModifier?: ContentModifier<SliderConfiguration>): SliderConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const value_result: number = (valueDeserializer.readNumber() as number)
@@ -11924,7 +11928,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: SliderConfiguration = ({ enabled: enabled_result, value: value_result, min: min_result, max: max_result, step: step_result, triggerChange: triggerChange_result } as SliderConfiguration)
+        let value: SliderConfiguration = ({ enabled: enabled_result, value: value_result, min: min_result, max: max_result, step: step_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as SliderConfiguration)
         return value
     }
     readSweepGradientOptions(): SweepGradientOptions {
@@ -12533,7 +12537,7 @@ export class Deserializer extends DeserializerBase {
             height_buf = (valueDeserializer.readNumber() as number)
         }
         const height_result : number | undefined = height_buf
-        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result} as TouchObject)
+        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result, screenX: 0, screenY: 0} as TouchObject)
         return value
     }
     readTouchResult(): TouchResult {
