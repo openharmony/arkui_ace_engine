@@ -1604,14 +1604,34 @@ class BounceSymbolEffect extends SymbolEffect {
 }
 
 class ReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
+  constructor(scope, replaceType) {
     super();
     this.type = 'ReplaceSymbolEffect';
     this.scope = scope;
+    this.replaceType_ = replaceType;
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
   }
   scope(value) {
     this.scope = value;
     return this;
+  }
+
+  set replaceType(value) {
+    this.replaceType_ = value;
+    this.type = 'ReplaceSymbolEffect';
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
+  }
+
+  get replaceType() {
+    return this.replaceType_;
   }
 }
 
@@ -1619,30 +1639,6 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = 'PulseSymbolEffect';
-  }
-}
-
-class DisableSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'DisableSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
-  }
-}
-
-class QuickReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'QuickReplaceSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
   }
 }
 
@@ -4287,3 +4283,10 @@ let PdfLoadResult;
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
 })(PdfLoadResult || (PdfLoadResult = {}));
+
+let ReplaceEffectType;
+(function (ReplaceEffectType) {
+  ReplaceEffectType[ReplaceEffectType.SEQUENTIAL = 0] = 'SEQUENTIAL';
+  ReplaceEffectType[ReplaceEffectType.CROSS_FADE = 1] = 'CROSS_FADE';
+  ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
+})(ReplaceEffectType || (ReplaceEffectType = {}));
