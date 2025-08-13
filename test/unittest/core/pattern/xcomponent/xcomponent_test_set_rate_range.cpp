@@ -178,4 +178,38 @@ HWTEST_F(XComponentTestSetRateRange, SetExpectedRateRangeTest, TestSize.Level1)
     code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, invalidRate);
 #endif
 }
+
+/**
+ * @tc.name: HandleOnFrameEventTest
+ * @tc.desc: Test HandleOnFrameEvent successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestSetRateRange, HandleOnFrameEventTest, TestSize.Level0)
+{
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+    auto code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
+    ASSERT_EQ(code, CODE_NO_ERROR);
+
+    pattern->nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
+    EXPECT_NE(pattern->nativeXComponentImpl_, nullptr);
+    pattern->nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(pattern->nativeXComponentImpl_));
+    EXPECT_NE(pattern->nativeXComponent_, nullptr);
+    EXPECT_NE(pattern->displaySync_, nullptr);
+    OH_NativeXComponent_ExpectedRateRange* rateRange =
+        (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
+    rateRange->min = 10;
+    rateRange->max = 60;
+    rateRange->expected = 30;
+    pattern->nativeXComponentImpl_->SetRateRange(rateRange);
+    EXPECT_NE(pattern->nativeXComponentImpl_->GetRateRange(), nullptr);
+    pattern->HandleOnFrameEvent();
+    EXPECT_TRUE(pattern->GetHost());
+    pattern->frameNode_.Reset();
+    pattern->HandleOnFrameEvent();
+    EXPECT_FALSE(pattern->GetHost());
+}
 } // namespace OHOS::Ace::NG

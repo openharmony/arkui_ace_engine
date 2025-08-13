@@ -291,7 +291,8 @@ void XComponentPattern::OnAttachToMainTree()
             needRecoverDisplaySync_ = false;
         }
     }
-    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
+    WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+    displaySync_->AddToPipeline(pipelineContext);
 }
 
 void XComponentPattern::OnDetachFromMainTree()
@@ -1477,7 +1478,13 @@ void XComponentPattern::HandleOnFrameEvent()
     });
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
         displaySync_->GetId());
-    displaySync_->AddToPipelineOnContainer();
+    auto host = GetHost();
+    if (host) {
+        WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+        displaySync_->AddToPipeline(pipelineContext);
+    } else {
+        displaySync_->AddToPipelineOnContainer();
+    }
 }
 
 void XComponentPattern::HandleUnregisterOnFrameEvent()
