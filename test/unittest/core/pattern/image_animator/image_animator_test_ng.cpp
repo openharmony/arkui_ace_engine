@@ -2868,4 +2868,38 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest003, TestSize.Level1)
     auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
     EXPECT_TRUE(pattern->images_.empty());
 }
+
+/**
+ * @tc.name: ImageAnimatorSetImagesTest004
+ * @tc.desc: SetImages into ImageAnimatorPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelNG.
+     */
+    ImageAnimatorModelNG imageAnimatorModelNG;
+    imageAnimatorModelNG.Create();
+    std::vector<ImageProperties> images1 = {};
+    ImageProperties imageProperties1;
+    imageProperties1.src = IMAGE_SRC_URL;
+    imageProperties1.width = IMAGE_WIDTH;
+    imageProperties1.height = IMAGE_HEIGHT;
+    imageProperties1.top = IMAGE_TOP;
+    imageProperties1.left = IMAGE_LEFT;
+    imageProperties1.duration = -IMAGE_DURATION;
+    std::vector<ImageProperties> images2 = { imageProperties1 };
+    imageAnimatorModelNG.SetImages(std::move(images2));
+    /**
+     * @tc.step2: step5. Verify that the image list has been set successfully (size should be 1).
+     */
+    auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
+    EXPECT_EQ(pattern->images_.size(), 1);
+    /**
+     * @tc.step3: step6. Switch to an empty image list dynamically and verify that the image list is cleared.
+     */
+    imageAnimatorModelNG.SetImages(std::move(images1));
+    EXPECT_TRUE(pattern->images_.empty());
+}
 } // namespace OHOS::Ace::NG
