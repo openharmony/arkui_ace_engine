@@ -28,6 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -3308,5 +3309,15 @@ void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src)
             dst = std::make_optional(peer->levelOrder->GetOrder());
         }
     }
+}
+
+template<>
+void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
+{
+    if (src) {
+        dst = Color(src->colorValue.value);
+        return;
+    }
+    dst = std::nullopt;
 }
 } // namespace OHOS::Ace::NG::Converter

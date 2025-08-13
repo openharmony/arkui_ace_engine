@@ -15,15 +15,17 @@
 
 #include "core/components_ng/pattern/indexer/indexer_model_static.h"
 
+#include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> IndexerModelStatic::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> IndexerModelStatic::CreateFrameNode(int32_t nodeId, bool isArc)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
-    return FrameNode::GetOrCreateFrameNode(
-        V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
+    return isArc ? FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<ArcIndexerPattern>())
+                 : FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<IndexerPattern>());
 }
 
 void IndexerModelStatic::SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue)
@@ -227,13 +229,9 @@ void IndexerModelStatic::SetPopupPositionY(FrameNode* frameNode, const std::opti
     }
 }
 
-void IndexerModelStatic::SetAutoCollapse(FrameNode* frameNode, const std::optional<bool>& autoCollapse)
+void IndexerModelStatic::SetAutoCollapse(FrameNode* frameNode, bool autoCollapse)
 {
-    if (autoCollapse.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse, frameNode);
 }
 
 void IndexerModelStatic::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state)
@@ -342,7 +340,7 @@ void IndexerModelStatic::SetChangeEvent(FrameNode* frameNode, std::function<void
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
-void IndexerModelStatic::SetCreatChangeEvent(
+void IndexerModelStatic::SetCreateChangeEvent(
     FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);

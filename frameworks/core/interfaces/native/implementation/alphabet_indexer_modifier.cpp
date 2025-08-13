@@ -61,7 +61,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = IndexerModelStatic::CreateFrameNode(id);
+    auto frameNode = IndexerModelStatic::CreateFrameNode(id, false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -158,8 +158,8 @@ void SelectedFontImpl(Ark_NativePointer node, const Opt_Font* value)
     auto fontOpt = Converter::OptConvert<Font>(*value);
     // TODO: Reset value
     if (fontOpt.has_value()) {
-        IndexerModelStatic::SetSelectedFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-            fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
+        IndexerModelStatic::SetSelectedFont(
+            frameNode, fontOpt->fontSize, fontOpt->fontWeight, fontOpt->fontFamilies, fontOpt->fontStyle);
     } else {
         IndexerModelStatic::SetSelectedFont(frameNode, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
@@ -171,8 +171,8 @@ void PopupFontImpl(Ark_NativePointer node, const Opt_Font* value)
     auto fontOpt = Converter::OptConvert<Font>(*value);
     // TODO: Reset value
     if (fontOpt.has_value()) {
-        IndexerModelStatic::SetPopupFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-            fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
+        IndexerModelStatic::SetPopupFont(
+            frameNode, fontOpt->fontSize, fontOpt->fontWeight, fontOpt->fontFamilies, fontOpt->fontStyle);
     } else {
         IndexerModelStatic::SetPopupFont(frameNode, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
@@ -208,8 +208,8 @@ void FontImpl(Ark_NativePointer node, const Opt_Font* value)
     auto fontOpt = Converter::OptConvert<Font>(*value);
     // TODO: Reset value
     if (fontOpt.has_value()) {
-        IndexerModelStatic::SetFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
-            fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
+        IndexerModelStatic::SetFont(
+            frameNode, fontOpt->fontSize, fontOpt->fontWeight, fontOpt->fontFamilies, fontOpt->fontStyle);
     } else {
         IndexerModelStatic::SetFont(frameNode, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
@@ -288,7 +288,7 @@ void AutoCollapseImpl(Ark_NativePointer node, const Opt_Boolean* value)
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
-    IndexerModelStatic::SetAutoCollapse(frameNode, *convValue);
+    IndexerModelStatic::SetAutoCollapse(frameNode, convValue.value_or(true));
 }
 void PopupItemBorderRadiusImpl(Ark_NativePointer node, const Opt_Number* value)
 {
@@ -359,7 +359,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node, const Callback_Opt_Numb
     auto onEvent = [arkCallback = CallbackHelper(*callback)](
                        const int32_t selected) { arkCallback.Invoke(Converter::ArkValue<Opt_Number>(selected)); };
 
-    IndexerModelStatic::SetCreatChangeEvent(frameNode, std::move(onEvent));
+    IndexerModelStatic::SetCreateChangeEvent(frameNode, std::move(onEvent));
 }
 } // namespace AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()

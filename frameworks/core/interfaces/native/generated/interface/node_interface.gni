@@ -28,6 +28,7 @@ generated_sources = [
   "implementation/animation_extender_accessor.cpp",
   "implementation/animator_modifier.cpp",
   "implementation/appear_symbol_effect_accessor.cpp",
+  "implementation/arc_alphabet_indexer_extender_accessor.cpp",
   "implementation/axis_event_accessor.cpp",
   "implementation/background_color_style_accessor.cpp",
   "implementation/badge_modifier.cpp",
