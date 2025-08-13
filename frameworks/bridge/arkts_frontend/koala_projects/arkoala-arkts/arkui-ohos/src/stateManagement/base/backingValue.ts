@@ -17,7 +17,6 @@
   skeleton of a class to support
   versioning of backing store values
 */
-
 import { IMutableStateMeta } from '../decorator';
 import { IBackingValue } from './iBackingValue';
 import { TypeChecker } from '#components';
@@ -25,6 +24,7 @@ import { StateMgmtTool } from '#stateMgmtTool';
 import { STATE_MGMT_FACTORY } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+
 export class DecoratorBackingValue<T> implements IBackingValue<T> {
     protected readonly propertyName_: string;
     private value_: T;
