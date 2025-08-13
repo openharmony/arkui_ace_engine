@@ -950,6 +950,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
+    NavigationTitleUtil::SetTitleAnimationElapsedTime(option, curNode);
     pattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern]() {

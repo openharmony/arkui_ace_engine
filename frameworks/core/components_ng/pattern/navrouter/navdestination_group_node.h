@@ -266,6 +266,26 @@ public:
         return primaryNode_.Upgrade();
     }
 
+    void SetTitleAnimationElapsedTime(int32_t elapsedTime)
+    {
+        titleAnimationElapsedTime_ = elapsedTime;
+    }
+
+    int32_t GetTitleAnimationElapsedTime() const
+    {
+        return titleAnimationElapsedTime_;
+    }
+
+    bool IsTitleConsumedElapsedTime() const
+    {
+        return isTitleConsumedElapsedTime_;
+    }
+
+    void MarkTitleConsumedElapsedTime()
+    {
+        isTitleConsumedElapsedTime_ = true;
+    }
+
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -306,6 +326,8 @@ private:
     float userSetOpacity_ = 1.0f;
 
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
+    bool isTitleConsumedElapsedTime_ = false;
+    int32_t titleAnimationElapsedTime_ = 0;
 
     bool isShowInPrimaryPartition_ = false;
     RefPtr<NavDestinationGroupNode> proxyNode_;

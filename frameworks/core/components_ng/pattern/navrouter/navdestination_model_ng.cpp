@@ -1944,4 +1944,11 @@ void NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
 }
+
+void NavDestinationModelNG::SetTitleAnimationElapsedTime(FrameNode* frameNode, int32_t elapsedTime)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetTitleAnimationElapsedTime(elapsedTime);
+}
 } // namespace OHOS::Ace::NG

@@ -4466,6 +4466,7 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnReady)(ArkUINodeHandle node);
     void (*setNavDestinationBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
+    void (*setTitleAnimationElapsedTime)(ArkUINodeHandle node, ArkUI_Int32 elapsedTime);
 };
 
 struct ArkUITextAreaModifier {

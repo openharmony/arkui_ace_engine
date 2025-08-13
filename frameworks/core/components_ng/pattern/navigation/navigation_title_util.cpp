@@ -46,6 +46,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
 constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
 
@@ -908,5 +909,25 @@ void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<
 bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
+}
+
+bool NavigationTitleUtil::SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode)
+{
+    auto pushEnterNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(pushEnterNode);
+    CHECK_NULL_RETURN(pushEnterNavDestination, false);
+    if (pushEnterNavDestination->IsTitleConsumedElapsedTime() ||
+        pushEnterNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::TITLE) {
+        return false;
+    }
+    auto elapsedTime = pushEnterNavDestination->GetTitleAnimationElapsedTime();
+    if (elapsedTime <= 0 || elapsedTime > DEFAULT_ANIMATION_DURATION) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "will skip %{public}d ms animation for enter push NavDestination node", elapsedTime);
+    // elapsed time is the TIME to skip
+    option.SetDelay(option.GetDelay() - elapsedTime);
+    pushEnterNavDestination->MarkTitleConsumedElapsedTime();
+    return true;
 }
 } // namespace OHOS::Ace::NG
