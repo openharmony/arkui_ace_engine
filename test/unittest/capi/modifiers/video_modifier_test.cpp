@@ -635,7 +635,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onStart = [](const Ark_Int32 resourceId)
+    auto onStart = [](Ark_VMContext context, const Ark_Int32 resourceId)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -667,7 +667,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onPause = [](const Ark_Int32 resourceId)
+    auto onPause = [](Ark_VMContext context, const Ark_Int32 resourceId)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -699,7 +699,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onFinish = [](const Ark_Int32 resourceId)
+    auto onFinish = [](Ark_VMContext context, const Ark_Int32 resourceId)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -731,7 +731,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
         bool fullscreen;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onFullscreenChange = [](const Ark_Int32 resourceId, const Ark_FullscreenInfo parameter)
+    auto onFullscreenChange = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_FullscreenInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -771,7 +771,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
         float duration;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onPrepared = [](const Ark_Int32 resourceId, const Ark_PreparedInfo parameter)
+    auto onPrepared = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PreparedInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -811,8 +811,9 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onSeeking = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
+    auto onSeeking = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
+        printf("CHECK ");
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
             .time = Converter::Convert<float>(parameter.time),
@@ -852,7 +853,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onSeeked = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
+    auto onSeeked = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -893,7 +894,7 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onUpdate = [](const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
+    auto onUpdate = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_PlaybackInfo parameter)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -933,7 +934,7 @@ HWTEST_F(VideoModifierTest, setOnErrorTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onError = [](const Ark_Int32 resourceId)
+    auto onError = [](Ark_VMContext context, const Ark_Int32 resourceId)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
@@ -965,7 +966,7 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
         int32_t nodeId;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onStop = [](const Ark_Int32 resourceId)
+    auto onStop = [](Ark_VMContext context, const Ark_Int32 resourceId)
     {
         checkEvent = CheckEvent{
             .nodeId = Converter::Convert<int32_t>(resourceId),
