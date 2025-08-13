@@ -56,6 +56,7 @@ ace_unittest("capi_all_modifiers_test") {
     "common_shape_method_modifier_resources_test.cpp",
     "common_shape_method_modifier_test.cpp",
     "counter_modifier_test.cpp",
+    "custom_layout_root_modifier_test.cpp",
     "data_panel_modifier_test.cpp",
     "date_picker_modifier_test.cpp",
     "divider_modifier_test.cpp",
