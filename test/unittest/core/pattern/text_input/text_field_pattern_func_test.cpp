@@ -2715,4 +2715,44 @@ HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay017, TestSize.Level1)
     EXPECT_NE(paintProperty, nullptr);
 }
 
+/**
+ * @tc.name: UpdateMagnifier
+ * @tc.desc: test text_field_select_overlay.cpp UpdateMagnifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifier, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateMagnifier and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
+    pattern->selectOverlay_->SetIsSingleHandle(true);
+    pattern->selectController_->floatingCaretInfo_.rect = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    pattern->floatCaretState_.lastFloatingCursorY = 50.0f;
+    pattern->contentScroller_.isScrolling = true;
+    pattern->selectOverlay_->UpdateMagnifier(OffsetF(), false);
+
+    EXPECT_EQ(pattern->magnifierController_->localOffset_, OffsetF());
+    pattern->selectOverlay_->UpdateMagnifier(OffsetF(), true);
+    EXPECT_EQ(pattern->magnifierController_->localOffset_, OffsetF(50.0f, 50.0f));
+}
 } // namespace OHOS::Ace

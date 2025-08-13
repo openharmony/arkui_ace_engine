@@ -235,7 +235,6 @@ struct ContentScroller {
     float stepOffset = 0.0f;
     Offset localOffset;
     std::optional<Offset> hotAreaOffset;
-    float updateMagniferEpsilon = 0.5f;
 
     void OnBeforeScrollingCallback(const Offset& localOffset)
     {
@@ -1725,6 +1724,10 @@ public:
     void ProcessDefaultStyleAndBehaviorsMultiThread();
 
     void ProcessResponseArea();
+    void AddContentScrollingCallback(std::function<void(const Offset&)>&& callback)
+    {
+        contentScroller_.scrollingCallback = std::move(callback);
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2046,6 +2049,7 @@ private:
     void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
+    void UpdateMagnifierWithFloatingCaretPos();
 
     RectF frameRect_;
     RectF textRect_;

@@ -707,7 +707,7 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
     auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + 0.f);
+    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() - 1.0f);
 
     /**
      * @tc.steps: step2. localOffset is in the normal area.
@@ -716,7 +716,7 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
     controller->SetLocalOffset(localOffset);
     magnifierOffset = geometryNode->GetFrameOffset();
     EXPECT_EQ(magnifierOffset.GetX(),
-        paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2 - 1.0f);
+        paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
 
     /**
      * @tc.steps: step3. localOffset is on the far right.
