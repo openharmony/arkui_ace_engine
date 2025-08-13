@@ -309,6 +309,7 @@ private:
 
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
 
+    void InitEvent();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
