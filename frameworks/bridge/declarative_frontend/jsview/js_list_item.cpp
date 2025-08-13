@@ -348,8 +348,8 @@ void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDele
         RefPtr<NG::FrameNode> builderNode;
         ParseBuilderComponentContent(builderComponentObject, builderNode);
         ListItemModel::GetInstance()->SetDeleteAreaWithFrameNode(builderNode, std::move(onDelete),
-            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange), length, isStartArea,
-            node);
+            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange),
+            length, isStartArea, node);
     } else {
         std::function<void()> builderAction;
         auto builderObject = obj->GetProperty("builder");
@@ -357,9 +357,9 @@ void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDele
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject));
             builderAction = [builderFunc]() { builderFunc->Execute(); };
         }
-        ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onDelete),
-            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange), length, isStartArea,
-            node);
+    ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onDelete),
+        std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange),
+        length, isStartArea, node);
     }
 }
 

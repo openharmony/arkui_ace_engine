@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
+
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -225,27 +226,6 @@ void GetFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[1].f32 = ScrollableModelNG::GetFadingEdgeLength(frameNode);
 }
 
-void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
-}
-
-void ResetFlingSpeedLimit(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
-}
-
-float GetFlingSpeedLimit(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, -1.0f);
-    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
-}
-
 void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -295,6 +275,27 @@ void GetScrollBarMargin(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[1].f32 = scrollBarMargin.end_.ConvertToVp();
 }
 
+void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
+void ResetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
+}
+
+float GetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1.0f);
+    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
+}
+
 void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -333,6 +334,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnReachStartCallBack = ResetOnReachStartCallBack,
         .setOnReachEndCallBack = SetOnReachEndCallBack,
         .resetOnReachEndCallBack = ResetOnReachEndCallBack,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
+        .getBackToTop = GetBackToTop,
+        .setScrollBarMargin = SetScrollBarMargin,
+        .resetScrollBarMargin = ResetScrollBarMargin,
+        .getScrollBarMargin = GetScrollBarMargin,
         .setOnWillScrollCallBack = SetOnWillScrollCallBack,
         .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
         .setOnDidScrollCallBack = SetOnDidScrollCallBack,
@@ -343,15 +353,6 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnScrollStartCallBack = ResetOnScrollStartCallBack,
         .setOnScrollStopCallBack = SetOnScrollStopCallBack,
         .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
-        .getFlingSpeedLimit = GetFlingSpeedLimit,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
-        .setBackToTop = SetBackToTop,
-        .resetBackToTop = ResetBackToTop,
-        .getBackToTop = GetBackToTop,
-        .setScrollBarMargin = SetScrollBarMargin,
-        .resetScrollBarMargin = ResetScrollBarMargin,
-        .getScrollBarMargin = GetScrollBarMargin,
         .setOnWillStopDragging = SetOnWillStopDragging,
         .resetOnWillStopDragging = ResetOnWillStopDragging,
     };

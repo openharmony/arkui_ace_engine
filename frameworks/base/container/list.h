@@ -25,8 +25,7 @@
 
 #include "base/log/log_wrapper.h"
 
-#define list_entry(ptr, type, member) \
-    reinterpret_cast<type*>(reinterpret_cast<char*>(ptr) - offsetof(type, member))
+#define list_entry(ptr, type, member) reinterpret_cast<type*>(reinterpret_cast<char*>(ptr) - offsetof(type, member))
 
 namespace OHOS::Ace {
 
@@ -64,16 +63,17 @@ public:
             head->next = this;
         }
     };
-    
+
 private:
     struct TrackedElement {
         T value;
         mutable list_head iterator_head;
 
-        TrackedElement(const T& val={}) : value(val) {}
+        TrackedElement(const T& val = {}) : value(val) {}
         TrackedElement(T&& val) : value(std::forward<T>(val)) {}
-        TrackedElement(const TrackedElement& rhs): value(rhs.value) {}
-        TrackedElement& operator=(const TrackedElement& rhs) {
+        TrackedElement(const TrackedElement& rhs) : value(rhs.value) {}
+        TrackedElement& operator=(const TrackedElement& rhs)
+        {
             if (&rhs != this) {
                 this->value = rhs.value;
             }
@@ -148,9 +148,9 @@ public:
     class iterator {
     private:
         using ListIter = typename std::list<TrackedElement>::iterator;
+        list_head node;
         SafeList* container_ = nullptr;
         ListIter inner_iter;
-        list_head node;
         friend SafeList;
         ListIter get_end() const
         {
@@ -158,9 +158,9 @@ public:
         }
 
         explicit iterator(SafeList* container, ListIter it = ListIter {})
-            : container_(container), inner_iter(it),
-              node(container_ ? (inner_iter != get_end() ? &inner_iter->iterator_head : &container_->end_iterator_head)
-                              : nullptr)
+            : node(container ? (it != container->elements.end() ? &it->iterator_head : &container->end_iterator_head)
+                             : nullptr),
+              container_(container), inner_iter(it)
         {}
 
     public:
@@ -169,7 +169,7 @@ public:
         using value_type = T;
         using pointer = T*;
         using reference = T&;
-        explicit iterator() : container_(nullptr), inner_iter(), node() {}
+        explicit iterator() : node(), container_(nullptr), inner_iter() {}
 
         iterator(const iterator& other) : container_(other.container_), inner_iter(other.inner_iter)
         {
@@ -181,7 +181,7 @@ public:
                 }
             }
         }
-        
+
         T& operator*() const
         {
             if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectUseInvalidIterator() &&
@@ -276,9 +276,9 @@ public:
     class const_iterator {
     private:
         using ListIter = typename std::list<TrackedElement>::const_iterator;
+        list_head node;
         const SafeList* container_ = nullptr;
         ListIter inner_iter;
-        list_head node;
         friend SafeList;
         ListIter get_cend() const
         {
@@ -286,13 +286,13 @@ public:
         }
 
         explicit const_iterator(const SafeList* container, ListIter it = ListIter {})
-            : container_(container), inner_iter(it),
-              node(container_ ? (inner_iter != get_cend() ? &inner_iter->iterator_head : &container_->end_iterator_head)
-                              : nullptr)
+            : node(container ? (it != container->elements.cend() ? &it->iterator_head : &container->end_iterator_head)
+                             : nullptr),
+              container_(container), inner_iter(it)
         {}
 
     public:
-        explicit const_iterator() : container_(nullptr), inner_iter(), node() {}
+        explicit const_iterator() : node(), container_(nullptr), inner_iter() {}
 
         const_iterator(const iterator& other) : container_(other.container_), inner_iter(other.inner_iter)
         {
@@ -374,7 +374,7 @@ public:
         const_iterator& operator--()
         {
             if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectUseInvalidIterator() && !container_)) {
-                LOGF_ABORT("Dereferencing invalid iterator");
+                LOGF_ABORT("Decrementing invalid const_iterator");
             }
             --inner_iter;
             if (inner_iter != get_cend()) {
@@ -409,9 +409,9 @@ public:
     class reverse_iterator {
     private:
         using ListIter = typename std::list<TrackedElement>::reverse_iterator;
+        list_head node;
         SafeList* container_ = nullptr;
         ListIter inner_iter;
-        list_head node;
         friend SafeList;
 
         ListIter get_rend() const
@@ -420,13 +420,13 @@ public:
         }
 
         explicit reverse_iterator(SafeList* container, ListIter it = ListIter {})
-            : container_(container), inner_iter(it),
-              node(container_ ? (inner_iter != get_rend() ? &inner_iter->iterator_head : &container_->end_iterator_head)
-                              : nullptr)
+            : node(container ? (it != container->elements.rend() ? &it->iterator_head : &container->end_iterator_head)
+                             : nullptr),
+              container_(container), inner_iter(it)
         {}
 
     public:
-        explicit reverse_iterator() : container_(nullptr), inner_iter(), node() {}
+        explicit reverse_iterator() : node(), container_(nullptr), inner_iter() {}
 
         reverse_iterator(const reverse_iterator& other) : container_(other.container_), inner_iter(other.inner_iter)
         {
@@ -497,7 +497,7 @@ public:
         reverse_iterator& operator--()
         {
             if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectUseInvalidIterator() && !container_)) {
-                LOGF_ABORT("Decrementing invalid iterator");
+                LOGF_ABORT("Decrementing invalid reverse iterator");
             }
             --inner_iter;
             if (inner_iter != get_rend()) {
@@ -532,9 +532,9 @@ public:
     class const_reverse_iterator {
     private:
         using ListIter = typename std::list<TrackedElement>::const_reverse_iterator;
+        list_head node;
         const SafeList* container_ = nullptr;
         ListIter inner_iter;
-        list_head node;
         friend SafeList;
 
         ListIter get_crend() const
@@ -543,13 +543,13 @@ public:
         }
 
         explicit const_reverse_iterator(const SafeList* container, ListIter it = ListIter {})
-            : container_(container), inner_iter(it),
-              node(container_ ? (inner_iter != get_crend() ? &inner_iter->iterator_head : &container_->end_iterator_head)
-                              : nullptr)
+            : node(container ? (it != container->elements.crend() ? &it->iterator_head : &container->end_iterator_head)
+                             : nullptr),
+              container_(container), inner_iter(it)
         {}
 
     public:
-        explicit const_reverse_iterator() : container_(nullptr), inner_iter(), node() {}
+        explicit const_reverse_iterator() : node(), container_(nullptr), inner_iter() {}
 
         const_reverse_iterator(const reverse_iterator& other)
             : container_(other.container_), inner_iter(other.inner_iter)
@@ -672,7 +672,7 @@ public:
             push_back(val);
         }
     }
-    SafeList(const SafeList& other):elements(other.elements){}
+    SafeList(const SafeList& other) : elements(other.elements) {}
     SafeList(SafeList&& other) : elements(std::forward<std::list<TrackedElement>>(other.elements)) {}
 
     ~SafeList()
@@ -750,14 +750,14 @@ public:
         }
         return iterator(this, elements.insert(pos.inner_iter, value));
     }
-    iterator insert( const_iterator pos, T&& value )
+    iterator insert(const_iterator pos, T&& value)
     {
         if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectUseInvalidIterator() && !pos.container_)) {
             LOGF_ABORT("Inserting with invalid iterator");
         }
         return iterator(this, elements.insert(pos.inner_iter, std::forward<T>(value)));
     }
-    iterator insert(const_iterator pos, size_t count, const T& value) 
+    iterator insert(const_iterator pos, size_t count, const T& value)
     {
         if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectUseInvalidIterator() && !pos.container_)) {
             LOGF_ABORT("Inserting with invalid iterator");
@@ -793,7 +793,8 @@ public:
         return insert_impl(pos, first, last);
     }
 
-    decltype(auto) get_allocator() const noexcept {
+    decltype(auto) get_allocator() const noexcept
+    {
         return elements.get_allocator();
     }
 
@@ -811,8 +812,7 @@ public:
     }
 
     template<typename InputIt>
-    auto assign(InputIt first, InputIt last)
-        -> typename std::enable_if<!std::is_integral<InputIt>::value>::type 
+    auto assign(InputIt first, InputIt last) -> typename std::enable_if<!std::is_integral<InputIt>::value>::type
     {
         clear();
         for (; first != last; ++first) {
@@ -823,7 +823,7 @@ public:
     template<typename... Args>
     iterator emplace(const_iterator pos, Args&&... args)
     {
-        auto iter = elements.emplace(pos.inner_iter,T(std::forward<Args>(args)...));
+        auto iter = elements.emplace(pos.inner_iter, T(std::forward<Args>(args)...));
         return iterator(this, iter);
     }
 
@@ -891,25 +891,22 @@ public:
         return elements.max_size();
     }
 
-    void sort() {
+    void sort()
+    {
         elements.sort();
     }
 
     template<typename Compare>
     void sort(Compare comp)
     {
-        auto adapted_comp = [comp](const TrackedElement& a, const TrackedElement& b) {
-            return comp(a.value, b.value);
-        };
+        auto adapted_comp = [comp](const TrackedElement& a, const TrackedElement& b) { return comp(a.value, b.value); };
         elements.sort(adapted_comp);
     }
 
     template<typename BinaryPredicate>
     void unique(BinaryPredicate pred)
     {
-        auto adapted_pred = [pred](const TrackedElement& a, const TrackedElement& b) {
-            return pred(a.value, b.value);
-        };
+        auto adapted_pred = [pred](const TrackedElement& a, const TrackedElement& b) { return pred(a.value, b.value); };
         elements.unique(adapted_pred);
     }
 
@@ -918,7 +915,8 @@ public:
         elements.unique();
     }
 
-    void reverse() noexcept {
+    void reverse() noexcept
+    {
         elements.reverse();
     }
 
@@ -937,7 +935,7 @@ public:
     {
         if (other.empty()) {
             return;
-        } 
+        }
         elements.splice(pos.inner_iter, other.elements);
     }
 
@@ -959,13 +957,12 @@ public:
     template<typename Compare>
     void merge(SafeList& other, Compare comp)
     {
-        auto adapted_comp = [comp](const TrackedElement& a, const TrackedElement& b) {
-            return comp(a.value, b.value);
-        };
+        auto adapted_comp = [comp](const TrackedElement& a, const TrackedElement& b) { return comp(a.value, b.value); };
         elements.merge(other.elements, adapted_comp);
     }
 
-    void swap(SafeList& other) noexcept {
+    void swap(SafeList& other) noexcept
+    {
         elements.swap(other.elements);
     }
 
@@ -976,7 +973,7 @@ public:
 
     void resize(size_t count, const T& value)
     {
-        elements.resize(count,value);
+        elements.resize(count, value);
     }
 
     iterator begin()
@@ -1012,16 +1009,20 @@ public:
     {
         return reverse_iterator(this, elements.rend());
     }
-    const_reverse_iterator rbegin() const { 
+    const_reverse_iterator rbegin() const
+    {
         return crbegin();
     }
-    const_reverse_iterator rend() const { 
+    const_reverse_iterator rend() const
+    {
         return crend();
     }
-    const_reverse_iterator crbegin() const { 
+    const_reverse_iterator crbegin() const
+    {
         return const_reverse_iterator(this, elements.crbegin());
     }
-    const_reverse_iterator crend() const { 
+    const_reverse_iterator crend() const
+    {
         return const_reverse_iterator(this, elements.crend());
     }
 };
