@@ -850,7 +850,7 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     CalcDimension value;
     value.SetValue(static_cast<double>(radius));
@@ -1176,7 +1176,7 @@ void RosenRenderContext::UpdateBackgroundEffect(
         rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     float radiusPx = context->NormalizeToPx(effectOption->radius);
     float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
