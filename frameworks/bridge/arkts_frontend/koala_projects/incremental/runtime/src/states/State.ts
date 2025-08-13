@@ -369,7 +369,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     }
 
     checkSetProhibited() {
-        if (this.dependencies?.empty != false) {
+        if (this.dependencies?.empty) {
             return // no dependencies
         }
         this.manager?.checkThread();

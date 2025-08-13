@@ -144,8 +144,6 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             const handler = StateMgmtTool.tryGetHandler(value as Object);
             if (handler && StateMgmtTool.isIWatchSubscriberRegister(handler)) {
                 this.onObservedObjectChangeExecWatchFuncs_.registerMeTo(handler as IWatchSubscriberRegister);
-            } else {
-                StateMgmtConsole.log('error: watch function register failed');
             }
         }
     }
