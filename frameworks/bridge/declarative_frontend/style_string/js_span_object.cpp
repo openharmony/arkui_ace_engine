@@ -455,12 +455,12 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackI
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    float lineThicknessScale = 1.0f;
+    std::optional<float> lineThicknessScale;
     JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
     if (thicknessScaleValue->IsNumber()) {
         lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+        lineThicknessScale = LessNotEqual(lineThicknessScale.value_or(-1.0f), 0) ? 1.0f : lineThicknessScale;
     }
-    lineThicknessScale = LessNotEqual(lineThicknessScale, 0) ? 1.0f : lineThicknessScale;
     std::optional<TextDecorationOptions> options;
     if (args.Length() > 1 && args[1]->IsObject()) {
         options = JSDecorationSpan::ParseJsDecorationOptions(JSRef<JSObject>::Cast(args[1]));

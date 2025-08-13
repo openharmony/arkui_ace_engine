@@ -2621,7 +2621,7 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
 
     auto decorationSpan2 = AceType::MakeRefPtr<DecorationSpan>(
         std::vector<TextDecoration>({TextDecoration::OVERLINE}),
-        Color::RED, TextDecorationStyle::DASHED, 5.0f, std::optional<TextDecorationOptions>(), 0, 1);
+        Color::RED, TextDecorationStyle::DASHED, 6.0f, std::optional<TextDecorationOptions>(), 0, 1);
     EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan2));
     decorationSpan2->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     buffer.clear();
