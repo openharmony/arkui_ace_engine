@@ -452,26 +452,6 @@ export class ArkThemeScopeManager {
      * @param isColorModeChanged notifies about specific case
      */
     private notifyScopeThemeChanged(item: ArkThemeScopeItem, themeWillApply: Theme, isColorModeChanged: boolean) {
-        if (item.owner) {
-            const listener = item.owner;
-            if (isColorModeChanged) {
-                // we need to redraw all nodes if developer set new local colorMode
-                // listener.forceRerenderNode(item.elmtId);
-            } else {
-                // take whitelist info from cache item
-                let isInWhiteList = item.isInWhiteList;
-                if (isInWhiteList === undefined) {
-                    // if whitelist info is undefined we have check whitelist directly
-                    isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name);
-                    // keep result in cache item for the next checks
-                    item.isInWhiteList = isInWhiteList;
-                }
-                if (isInWhiteList === true) {
-                    // redraw node only if component within whitelist
-                    // listener.forceRerenderNode(item.elmtId);
-                }
-            }
-        }
         if (item.listener) {
             const listener = item.listener as ArkCustomComponent;
             listener.onWillApplyTheme(themeWillApply);
