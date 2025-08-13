@@ -75,18 +75,17 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
             newValue = getObservedObject(newValue, this);
         }
         const value = uiUtils.makeObserved(newValue);
-        if (this.backing_.set(value)) {
-            if (this.setProxyValue) {
-                this.setProxyValue!(newValue);
-            }
-            // @Watch
-            // if new value is object, register so that property changes trigger
-            // Watch function exec
-            // unregister if old value is an object
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(value);
-            this.execWatchFuncs();
+        this.backing_.setNoCheck(value);
+        if (this.setProxyValue) {
+            this.setProxyValue!(newValue);
         }
+        // @Watch
+        // if new value is object, register so that property changes trigger
+        // Watch function exec
+        // unregister if old value is an object
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.execWatchFuncs();
     }
 
     /**
