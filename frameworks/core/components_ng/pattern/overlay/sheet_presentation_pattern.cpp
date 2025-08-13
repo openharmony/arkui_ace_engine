@@ -567,7 +567,6 @@ void SheetPresentationPattern::HandleFocusEvent()
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
-    keyboardHeight_ = 0;
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
     SetShadowStyle(false);
 }
@@ -3047,16 +3046,13 @@ void SheetPresentationPattern::StopModifySheetTransition()
 
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus ||
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE ||
         keyboardAvoidMode_ == SheetKeyboardAvoidMode::POPUP_SHEET) {
-        TAG_LOGD(AceLogTag::ACE_SHEET,
-            "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
-            keyboardAvoidMode_, isCurrentFocus);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will not avoid keyboard.");
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
@@ -3079,7 +3075,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     CHECK_NULL_VOID(host->GetFocusHub());
     // When bindSheet lift height exceed the max height, hightUp = the remaining height that needs to scroll,
     // otherwise, hightUp = the height to be lifted up
-    auto heightUp = isCurrentFocus ? GetSheetHeightChange() : 0.0f;
+    auto heightUp = host->GetFocusHub()->IsCurrentFocus() ? GetSheetHeightChange() : 0.0f;
     sheetHeightUp_ = heightUp;
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet needs to deal with %{public}f height.", heightUp);
     auto offset = pageHeight_ - height_ - heightUp;
@@ -3092,10 +3088,13 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
             // scroll needs to reset first when keyboard is down.
             renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
         } else {
-            sheetHeightUp_ = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_) - height_;
-            // sheet is raised to the top first
-            renderContext->UpdateTransformTranslate(
-                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_, 0.0f });
+            auto sheetHeightUp = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_) - height_;
+            sheetHeightUp_ = LessNotEqual(sheetHeightUp, 0.0f) ? 0.0f : sheetHeightUp;
+            if (GreatNotEqual(sheetHeightUp_, 0.0f)) {
+                // sheet is raised to the top first
+                renderContext->UpdateTransformTranslate(
+                    { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_, 0.0f });
+            }
         }
     } else {
         // offset: translate endpoint, calculated from top
