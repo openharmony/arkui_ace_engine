@@ -25,7 +25,7 @@ class Car {
     });
   }
 
-  callFileIo(filePath:string) {
+  callFileIo(filePath:string): boolean {
     // Load native module failed, so is @ohos:file.fs
     setTimeout('');
     console.log('callFileIo plugin. hms = ' + globalThis.hms);
