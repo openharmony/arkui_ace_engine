@@ -60,15 +60,11 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // measure self size.
     auto [childTotalSize, childMaxSize] = MeasureChildren(layoutWrapper);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     if (splitType_ == SplitType::ROW_SPLIT) {
         if (!layoutConstraint->selfIdealSize.Width()) {
             float width = std::max(minSize.Width(), childTotalSize.Width());
             if (maxSize.Width() > 0) {
                 width = std::min(maxSize.Width(), width);
-            }
-            if (!childrenDragPos_.empty()) {
-                width = childrenDragPos_.back() - childrenDragPos_.front() + padding.Width();
             }
             realSize.SetWidth(width);
         }
@@ -79,9 +75,6 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else if (splitType_ == SplitType::COLUMN_SPLIT) {
         if (!layoutConstraint->selfIdealSize.Height()) {
             float height = std::min(maxSize.Height(), childTotalSize.Height());
-            if (!childrenDragPos_.empty()) {
-                height = childrenDragPos_.back() - childrenDragPos_.front() + padding.Height();
-            }
             realSize.SetHeight(height);
         }
         if (!layoutConstraint->selfIdealSize.Width()) {
@@ -307,7 +300,8 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset)
+void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, const OffsetF& originOffset)
 {
     auto childNode = childLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
@@ -321,7 +315,7 @@ void LinearSplitLayoutAlgorithm::UpdateChildPositionWidthIgnoreLayoutSafeArea(co
     auto sae = childNode->GetAccumulatedSafeAreaExpand(false, opts, IgnoreStrategy::FROM_MARGIN);
     auto offsetX = sae.left.value_or(0.0f);
     auto offsetY = sae.top.value_or(0.0f);
-    OffsetF saeTrans = OffsetF(offsetX , offsetY);
+    OffsetF saeTrans = OffsetF(offsetX, offsetY);
     saeCorrect -= saeTrans;
     childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(saeCorrect);
 }

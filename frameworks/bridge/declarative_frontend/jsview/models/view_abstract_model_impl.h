@@ -355,7 +355,8 @@ public:
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
@@ -419,8 +420,8 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
-    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj,
-        const PopupType& type) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override {};
     void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
     void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,

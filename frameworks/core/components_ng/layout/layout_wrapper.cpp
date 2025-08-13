@@ -381,7 +381,7 @@ bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const Pad
     CHECK_NULL_RETURN(geometryNode, false);
     auto& selfAccumulateExpand = geometryNode->GetAccumulatedSafeAreaExpand();
     CHECK_NULL_RETURN(selfAccumulateExpand, false);
-    // if parent has expand cache that covers child's, for expample child expands toward left, top
+    // if parent has expand cache that covers child's, for example child expands toward left, top
     // and parent already has cache toward left, top, bottom, then this is a cache hit
     // and we can concatenate left and top cache to result
     // otherwise meaning child is expanding toward a direction that parent does not have cache
