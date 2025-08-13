@@ -19,6 +19,7 @@ group("advanced_ui_component_static") {
   if (!ace_engine_feature_wearable) {
     deps += [
       "selecttitlebar:selectTitleBar",
+      "fullscreenlaunchcomponent:fullScreenLaunch",
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
       "swiperefresher:swipeRefresher",
