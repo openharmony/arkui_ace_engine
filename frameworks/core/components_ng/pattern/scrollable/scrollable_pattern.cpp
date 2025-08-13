@@ -1218,6 +1218,10 @@ void ScrollablePattern::UpdateBorderRadius()
         if (!(borderRadius == scrollBar_->GetHostBorderRadius())) {
             scrollBar_->SetHostBorderRadius(borderRadius);
             scrollBar_->CalcReservedHeight();
+            auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
+            if (paintProperty) {
+                paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+            }
         }
     }
 }

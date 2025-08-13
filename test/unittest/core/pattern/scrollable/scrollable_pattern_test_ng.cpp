@@ -2139,4 +2139,26 @@ HWTEST_F(ScrollablePatternTestNg, GetDVSyncOffset, TestSize.Level1)
     float dvsyncOffset = scrollablePattern->GetDVSyncOffset();
     EXPECT_EQ(dvsyncOffset, 0);
 }
+
+/**
+ * @tc.name: UpdateBorderRadius
+ * @tc.desc: Test UpdateBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, UpdateBorderRadius, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    frameNode->SetLayoutProperty(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_FALSE(renderContext->HasBorderRadius());
+
+    BorderWidthProperty borderWidth = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    renderContext->UpdateBorderWidth(borderWidth);
+    scrollablePattern->UpdateBorderRadius();
+    EXPECT_FALSE(renderContext->HasBorderRadius());
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG
