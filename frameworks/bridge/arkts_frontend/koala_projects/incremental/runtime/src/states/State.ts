@@ -325,7 +325,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     }
 
     checkSetProhibited() {
-        if (this.dependencies?.empty != false) return // no dependencies
+        if (this.dependencies?.empty) return // no dependencies
         this.manager?.checkThread();
         const scope = this.manager?.current
         if (scope === undefined) return // outside the incremental update
