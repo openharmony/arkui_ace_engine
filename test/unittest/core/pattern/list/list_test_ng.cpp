@@ -335,20 +335,6 @@ void ListTestNg::CreateItemsInLazyForEach(
     lazyForEachModelNG.OnMove(std::move(onMove));
 }
 
-RefPtr<ListItemMockLazy> ListTestNg::CreateItemsInLazyForEachWithHandle(
-    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
-{
-    RefPtr<ListItemMockLazy> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
-    RefPtr<LazyForEachActuator> mockActuator = mockLazy;
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(mockActuator);
-    lazyForEachModelNG.OnMove(std::move(onMove));
-    ViewStackProcessor::GetInstance()->Pop();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    return mockLazy;
-}
-
 LazyForEachModelNG ListTestNg::CreateItemsInForLazyEachForItemDragEvent(int32_t itemNumber, float itemMainSize)
 {
     RefPtr<LazyForEachActuator> mockForEach = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
@@ -383,6 +369,20 @@ ForEachModelNG ListTestNg::CreateForEachListForItemDragEvent(int32_t itemNumber,
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
     }
     return forEachModelNG;
+}
+
+RefPtr<ListItemMockLazy> ListTestNg::CreateItemsInLazyForEachWithHandle(
+    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
+{
+    RefPtr<ListItemMockLazy> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
+    RefPtr<LazyForEachActuator> mockActuator = mockLazy;
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockActuator);
+    lazyForEachModelNG.OnMove(std::move(onMove));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    return mockLazy;
 }
 
 void ListTestNg::CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove)

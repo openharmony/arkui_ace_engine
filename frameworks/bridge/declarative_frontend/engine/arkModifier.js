@@ -1089,17 +1089,6 @@ class ContainerSpanModifier extends ArkContainerSpanComponent {
   }
 }
 
-class LinearIndicatorModifier extends ArkLinearIndicatorComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-    this._modifiersWithKeys = new ModifierMap();
-  }
-  applyNormalAttribute(instance) {
-    ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier(instance, this);
-  }
-}
-
 class IndicatorComponentModifier extends ArkIndicatorComponentComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -1133,8 +1122,7 @@ class StepperModifier extends ArkStepperComponent {
     }
   }
 
-export default {
-  CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
+export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,
   ListModifier, ListItemModifier, ListItemGroupModifier, LoadingProgressModifier, MarqueeModifier, MenuModifier, MenuItemModifier, NavDestinationModifier,
@@ -1143,6 +1131,6 @@ export default {
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, LinearIndicatorModifier,
-  IndicatorComponentModifier, LazyVGridLayoutModifier, ModifierMap, StepperModifier, EmbeddedComponentModifier
+  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, ModifierMap,
+  IndicatorComponentModifier, LazyVGridLayoutModifier, StepperModifier, EmbeddedComponentModifier
 };

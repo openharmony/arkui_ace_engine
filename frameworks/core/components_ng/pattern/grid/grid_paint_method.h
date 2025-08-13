@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridPaintMethod : public ScrollablePaintMethod {
-    DECLARE_ACE_TYPE(GridPaintMethod, ScrollablePaintMethod)
+    DECLARE_ACE_TYPE(GridPaintMethod, ScrollablePaintMethod);
 public:
     explicit GridPaintMethod(const RefPtr<ScrollBar>& scrollBar) : scrollBar_(scrollBar) {}
     explicit GridPaintMethod(bool vertical, bool isReverse, const RefPtr<ScrollBar>& scrollBar)

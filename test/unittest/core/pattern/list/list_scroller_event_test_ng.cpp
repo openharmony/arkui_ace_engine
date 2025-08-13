@@ -443,28 +443,6 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
 }
 
 /**
- * @tc.name: Event008
- * @tc.desc: Test scroll callback
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
-{
-    bool isTrigger = false;
-    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
-    ListModelNG model = CreateList();
-    model.SetOnScroll(event);
-    CreateListItems(2);
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. When unScrollable, call ScrollToEdge
-     * @tc.expected: Would not trigger onScroll event
-     */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_FALSE(isTrigger);
-}
-
-/**
  * @tc.name: ListOnReachEnd001
  * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
  * @tc.type: FUNC

@@ -564,6 +564,9 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    if (!sections_) {
+        return;
+    }
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
         layoutInfo_->InitSegmentsForKeepPositionMode(
             sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);

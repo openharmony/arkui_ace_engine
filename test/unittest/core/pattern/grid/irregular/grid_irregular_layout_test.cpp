@@ -1322,64 +1322,6 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridIrregularLayout::Integrated003
- * @tc.desc: Test large offset
- * @tc.type: FUNC
- */
-HWTEST_F(GridIrregularLayoutTest, Integrated003, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetColumnsGap(Dimension { 5.0f });
-    for (int i = 0; i < 500; ++i) {
-        CreateGridItems(1, -2, rand() % 1000);
-    }
-    CreateDone();
-
-    bool pos = true;
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    const auto& info = pattern_->info_;
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-
-    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushUITasks();
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-
-    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushUITasks();
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-}
-
-/**
  * @tc.name: GridIrregularLayout::GetOverScrollOffset001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC

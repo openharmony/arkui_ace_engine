@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -24,7 +25,6 @@
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {

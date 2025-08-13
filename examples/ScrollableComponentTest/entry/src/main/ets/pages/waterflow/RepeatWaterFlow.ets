@@ -28,7 +28,7 @@ export struct V2ChildComponent {
 export class Data1396 {
   @Trace public message: string = '';
   @Trace public img: Resource = $r('app.media.icon')
-  @Trace public bgColor:Color=Color.Blue
+  @Trace public bgColor:Color = Color.Blue
 
   constructor(message: string, img: Resource, bgColor:Color) {
     this.message = message
@@ -86,7 +86,7 @@ export struct ListPage {
   build() {
     Scroll() {
       Column({ space: 10 }) {
-        ListRepeatChildComponent({simpleList: this.simpleList, img:this. img, bgcolor:this.bgcolor})
+        ListRepeatChildComponent({simpleList: this.simpleList, img:this.img, bgcolor:this.bgcolor})
             .visibility(this.isHidden ? Visibility.Hidden : Visibility.Visible)
       }
     }

@@ -544,7 +544,7 @@ globalThis.WaterFlow.attributeModifier = function (modifier: ArkComponent): void
   });
 };
 
-globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) => void) {
+globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) => void): void {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
 };

@@ -246,7 +246,7 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
     res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
-    
+
     return res;
 }
 

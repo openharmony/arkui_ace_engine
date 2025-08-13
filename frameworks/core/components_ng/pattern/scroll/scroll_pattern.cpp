@@ -641,11 +641,16 @@ void ScrollPattern::StartVibrateFeedback()
     if (crownEventNum_ < CROWN_EVENT_NUN_THRESH_MIN) {
         crownEventNum_++;
     }
+    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback crownEventNum_:%{public}d [reachBoundary_:%{public}s]",
+        crownEventNum_, (reachBoundary_ ? "true" : "false"));
     auto currentTime = GetSysTimestamp();
     if (!reachBoundary_ &&
-        (crownEventNum_ >= CROWN_EVENT_NUN_THRESH_MIN && currentTime - lastTime_ > CROWN_VIBRATOR_INTERVAL_TIME)) {
+        (crownEventNum_ > CROWN_EVENT_NUN_THRESH_MIN && currentTime - lastTime_ > CROWN_VIBRATOR_INTERVAL_TIME)) {
         VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         lastTime_ = GetSysTimestamp();
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StartVibrateFeedback StartVibrateFeedback %{public}s",
+            CROWN_VIBRATOR_WEAK);
     }
 }
 #endif
