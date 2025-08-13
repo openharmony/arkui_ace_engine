@@ -120,6 +120,7 @@ group("core_pattern_unittest") {
     "window_scene:window_scene_test",
     "withtheme:withtheme_test_ng",
     "xcomponent:xcomponent_test_ng",
+    "xcomponent:xcomponent_test_set_rate_range",
   ]
 
   if (defined(global_parts_info) && defined(global_parts_info.web_webview)) {
