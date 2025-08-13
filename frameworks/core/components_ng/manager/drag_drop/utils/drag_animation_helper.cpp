@@ -331,6 +331,11 @@ OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menu
     CHECK_NULL_RETURN(imageNode, OffsetF());
     CHECK_NULL_RETURN(menuPattern, OffsetF());
     auto offset = imageNode->GetPaintRectOffset();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        double textOffsetX = offset.GetX() - BADGE_RELATIVE_OFFSET.ConvertToPx();
+        double textOffsetY = offset.GetY() - BADGE_RELATIVE_OFFSET.ConvertToPx();
+        return OffsetF(textOffsetX, textOffsetY);
+    }
     auto width = imageNode->GetGeometryNode()->GetFrameSize().Width();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     auto menuTheme = context->GetTheme<NG::MenuTheme>();
@@ -848,9 +853,16 @@ void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& f
                       ? DragDropFuncWrapper::GetFrameNodeOffsetToWindow(textNode, frameNode, width, height)
                       : previewOffset;
     auto badgeLength = std::to_string(childSize).size();
-    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx() -
-                         (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    double textOffsetX = 0.0f;
+    double textOffsetY = 0.0f;
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        textOffsetX = offset.GetX() - BADGE_RELATIVE_OFFSET.ConvertToPx() - width * (previewScale - 1) / HALF_DIVIDE;
+        textOffsetY = offset.GetY() - BADGE_RELATIVE_OFFSET.ConvertToPx() - height * (previewScale - 1) / HALF_DIVIDE;
+    } else {
+        textOffsetX = offset.GetX() + width * (previewScale + 1) / HALF_DIVIDE - BADGE_RELATIVE_OFFSET.ConvertToPx() -
+            (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+        textOffsetY = offset.GetY() - height * (previewScale - 1) / HALF_DIVIDE - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    }
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
