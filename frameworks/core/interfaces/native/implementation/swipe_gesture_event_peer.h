@@ -17,8 +17,7 @@
 
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct SwipeGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::SwipeGestureEvent> {
+struct SwipeGestureEventPeer : public OHOS::Ace::NG::GeneratedModifier::BaseGestureEventPeerImpl {
 protected:
     SwipeGestureEventPeer() = default;
     ~SwipeGestureEventPeer() override = default;

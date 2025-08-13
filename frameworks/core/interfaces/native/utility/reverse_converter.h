@@ -187,6 +187,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_TapGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_LongPressGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_PanGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_PinchGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_RotationGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
+    void AssignArkValue(Ark_SwipeGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);

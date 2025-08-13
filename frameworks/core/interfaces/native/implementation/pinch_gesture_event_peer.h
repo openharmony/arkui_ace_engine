@@ -17,8 +17,7 @@
 
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct PinchGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::PinchGestureEvent> {
+struct PinchGestureEventPeer : public OHOS::Ace::NG::GeneratedModifier::BaseGestureEventPeerImpl {
 protected:
     PinchGestureEventPeer() = default;
     ~PinchGestureEventPeer() override = default;

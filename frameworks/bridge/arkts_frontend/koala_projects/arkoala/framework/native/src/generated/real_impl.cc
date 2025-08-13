@@ -17474,6 +17474,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Array_FingerInfo* fingerList)
     {
     }
+    Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
+    {
+        return {};
+    }
     } // BaseGestureEventAccessor
     namespace TapGestureEventAccessor {
     void DestroyPeerImpl(Ark_TapGestureEvent peer)
@@ -23607,6 +23611,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseGestureEventAccessor::GetFinalizerImpl,
             BaseGestureEventAccessor::GetFingerListImpl,
             BaseGestureEventAccessor::SetFingerListImpl,
+            BaseGestureEventAccessor::GetTypeImpl
         };
         return &BaseGestureEventAccessorImpl;
     }

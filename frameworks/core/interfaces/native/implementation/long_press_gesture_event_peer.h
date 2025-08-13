@@ -17,8 +17,7 @@
 
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct LongPressGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::LongPressGestureEvent> {
+struct LongPressGestureEventPeer : public OHOS::Ace::NG::GeneratedModifier::BaseGestureEventPeerImpl {
 protected:
     LongPressGestureEventPeer() = default;
     ~LongPressGestureEventPeer() override = default;

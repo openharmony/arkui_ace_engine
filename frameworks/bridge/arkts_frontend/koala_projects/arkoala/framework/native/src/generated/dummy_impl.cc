@@ -35532,6 +35532,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getType(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // BaseGestureEventAccessor
     namespace TapGestureEventAccessor {
     void DestroyPeerImpl(Ark_TapGestureEvent peer)
@@ -46233,6 +46243,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseGestureEventAccessor::GetFinalizerImpl,
             BaseGestureEventAccessor::GetFingerListImpl,
             BaseGestureEventAccessor::SetFingerListImpl,
+            BaseGestureEventAccessor::GetTypeImpl
         };
         return &BaseGestureEventAccessorImpl;
     }

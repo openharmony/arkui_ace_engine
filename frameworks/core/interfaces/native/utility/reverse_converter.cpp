@@ -15,26 +15,34 @@
 
 #include "reverse_converter.h"
 
+#include "arkoala_api_generated.h"
+#include "converter.h"
+#include "validators.h"
+
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
-#include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/peer_utils.h"
-#include "converter.h"
-#include "validators.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -113,6 +121,54 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
         GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
     peer->SetEventInfo(src);
     dst = peer;
+}
+
+void AssignArkValue(Ark_TapGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<TapGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
+}
+
+void AssignArkValue(Ark_LongPressGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<LongPressGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
+}
+
+void AssignArkValue(Ark_PanGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<PanGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
+}
+
+void AssignArkValue(Ark_PinchGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<PinchGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
+}
+
+void AssignArkValue(Ark_RotationGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<RotationGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
+}
+
+void AssignArkValue(Ark_SwipeGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
+{
+    dst = PeerUtils::CreatePeer<SwipeGestureEventPeer>();
+    if (dst) {
+        dst->SetEventInfo(src);
+    }
 }
 
 void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
