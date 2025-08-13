@@ -62,6 +62,18 @@ char* realpath(const char* path, char* resolved_path)
     return resolved_path;
 }
 #endif
+
+#ifndef PREVIEW
+struct DataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void DataWrapperReleaseProc(const void*, void* context)
+{
+    DataWrapper* wrapper = reinterpret_cast<DataWrapper*>(context);
+    delete wrapper;
+}
+#endif
 } // namespace
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
@@ -207,6 +219,26 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
                       std::move(downloadCallback), src, Container::CurrentId());
 }
 
+std::shared_ptr<RSData> FileImageLoader::BuildImageData(const std::shared_ptr<RSData>& result)
+{
+    CHECK_NULL_RETURN(result, nullptr);
+    auto rsData = std::make_shared<RSData>();
+    CHECK_NULL_RETURN(rsData, nullptr);
+#ifdef PREVIEW
+    // on Windows previewer, RSData::MakeFromFileName keeps the file open during Drawing::Data's lifetime
+    // return a copy to release the file handle
+    return rsData->BuildWithCopy(result->GetData(), result->GetSize()) ? rsData : nullptr;
+#else
+    DataWrapper* wrapper = new DataWrapper { std::move(result) };
+    CHECK_NULL_RETURN(wrapper, nullptr);
+    auto data = wrapper->data;
+    CHECK_NULL_RETURN(data, nullptr);
+    return rsData->BuildWithProc(data->GetData(), data->GetSize(), DataWrapperReleaseProc, wrapper)
+               ? rsData
+               : nullptr;
+#endif
+}
+
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
     NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
 {
@@ -259,7 +291,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Read data %{private}s - %{public}s : %{public}d", realPath,
             imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->GetSize()));
     }
-    return result;
+    return BuildImageData(result);
 }
 
 std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
