@@ -2170,4 +2170,31 @@ HWTEST_F(WaterFlowSegmentTest, InvalidSectionWithDefaultSize, TestSize.Level1)
     EXPECT_EQ(geometryNode->GetFrameSize().Width(), 400.0f);
     EXPECT_EQ(geometryNode->GetFrameSize().Height(), 800.0f);
 }
+
+/**
+ * @tc.name: EmptySectionWithDefaultSize
+ * @tc.desc: Verify WaterFlow maintains default size when section data is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, EmptySectionWithDefaultSize, TestSize.Level1)
+{
+    // Initialize WaterFlow with default size
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+
+    // Create items and set empty section
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, {});  // Empty section data
+
+    // Complete initialization
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    // Verify WaterFlow maintains default size
+    auto geometryNode = frameNode_->GetGeometryNode();
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 400.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 600.0f);
+}
 } // namespace OHOS::Ace::NG
