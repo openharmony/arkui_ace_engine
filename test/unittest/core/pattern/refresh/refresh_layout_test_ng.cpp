@@ -525,6 +525,69 @@ HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMaxPullDownDistance001
+ * @tc.desc: Test does not set SetMaxPullDownDistance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is Infinity
+     * @tc.expected: The GetMaxPullDownDistance method returns infinity
+     */
+    float value = std::numeric_limits<float>::infinity();
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), value);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance002
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from GetMaxPullDownDistance method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 100.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(100.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is 100.0f
+     * @tc.expected: The GetMaxPullDownDistance method returns 100.0f
+     */
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), 100.0f);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance003
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from layoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 200.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(200.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test layoutProperty maxpulldowndistance is 200.0f
+     * @tc.expected: The layoutProperty maxpulldowndistance property returns 200.0f
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxPullDownDistance().value(), 200.0f);
+}
+
+/**
  * @tc.name: BeginAndEndTrailingTrace001
  * @tc.desc: Test BeginTrailingTrace and EndTrailingTrace function
  * @tc.type: FUNC
