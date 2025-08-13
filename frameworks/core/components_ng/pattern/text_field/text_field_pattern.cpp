@@ -8747,6 +8747,9 @@ void TextFieldPattern::ProcessResponseArea()
             return;
         }
         // responseArea_ may not be a password area.
+        if (responseArea_) {
+            responseArea_->ClearArea();
+        }
         responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(WeakClaim(this), GetTextObscured());
         if (IsShowPasswordIcon()) {
             responseArea_->InitResponseArea();
@@ -8758,6 +8761,9 @@ void TextFieldPattern::ProcessResponseArea()
     }
 
     if (IsUnderlineMode()) {
+        if (responseArea_) {
+            responseArea_->ClearArea();
+        }
         responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
         responseArea_->InitResponseArea();
         auto host = GetHost();
