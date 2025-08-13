@@ -255,7 +255,7 @@ struct CJClickInfo {
 };
 
 struct CJKeyEvent {
-    char keyText[128];
+    const char* keyText;
     int32_t type;
     int32_t keyCode;
     int32_t keySource;
