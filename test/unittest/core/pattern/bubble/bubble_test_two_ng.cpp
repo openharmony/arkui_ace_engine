@@ -410,6 +410,7 @@ HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level1)
     bool showInSubwindow = false;
     layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
     showInSubwindow = true;
+    layoutAlgorithm->followCursor_ = false;
     layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
@@ -2063,4 +2064,67 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleTextTest001, TestSize.Level1)
     auto textColorValue = textProperLayout->GetTextColorValue(Color::RED);
     EXPECT_EQ(textColorValue, Color::BLACK);
 }
+
+
+/**
+ * @tc.name: OnWindowSizeChangedTest001
+ * @tc.desc: Test OnWindowSizeChanged func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, OnWindowSizeChangedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get bubblePattern.
+     */
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnWindowSizeChanged.
+     * @tc.expected: step2. Check the property is correct.
+     */
+
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    PopupInfo popupInfo;
+    popupInfo.popupNode = frameNode;
+    popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::RECOVER);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::HIDE);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::TRANSFORM);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, false);
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).isCurrentOnShow, true);
+}
+
 } // namespace OHOS::Ace::NG
