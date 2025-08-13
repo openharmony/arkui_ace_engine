@@ -220,6 +220,50 @@ ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity)
     return cursor;
 }
 
+ani_long GetNodePtrWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto ret = modifier->getCommonAniModifier()->getNodePtrWithPeerPtr(ptr);
+    return ret;
+}
+ani_int GetNodeIdWithNodePtr(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto ret = modifier->getCommonAniModifier()->getNodeIdWithNodePtr(ptr);
+    return ret;
+}
+
+ani_int GetNodeIdWithPeerPtr(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto ret = modifier->getCommonAniModifier()->getNodeIdWithPeerPtr(ptr);
+    return ret;
+}
+
+ani_long CreateRenderNodePeerWithNodePtr(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto peerPtr = modifier->getCommonAniModifier()->createRenderNodePeerWithNodePtr(ptr);
+    return peerPtr;
+}
+
+ani_long ToColorLong(ani_env* env, ani_object obj, ani_int color)
+{
+    unsigned int uClr = static_cast<unsigned int>(color);
+    int64_t clr = static_cast<int64_t>(uClr);
+    return clr;
+}
+ani_int ToColorInt(ani_env* env, ani_object obj, ani_long color)
+{
+    unsigned int uClr = static_cast<unsigned int>(color);
+    int32_t clr = static_cast<int32_t>(uClr);
+    return clr;
+}
+
 ani_int CheckIsUIThread([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
 {
     const auto* modifier = GetNodeAniModifier();

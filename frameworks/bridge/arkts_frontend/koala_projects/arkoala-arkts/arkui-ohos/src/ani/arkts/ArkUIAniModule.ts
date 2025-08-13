@@ -49,6 +49,12 @@ export class ArkUIAniModule {
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
+    native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
+    native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
+    native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt
+    native static _CreateRenderNodePeerWithNodePtr(ptr: KPointer): KPointer
+    native static _ToColorLong(color: KInt): KLong
+    native static _ToColorInt(color: KLong): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
