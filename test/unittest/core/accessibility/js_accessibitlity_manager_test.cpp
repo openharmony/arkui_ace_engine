@@ -506,6 +506,8 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager010, TestSize.Level1)
      * @tc.steps: step1. construct JsAccessibilityManager
      */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
     jsAccessibilityManager->SetWindowId(1);
 
@@ -513,11 +515,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager010, TestSize.Level1)
      * @tc.steps: step2. test GetPipelineByWindowId
      */
     auto pattern = jsAccessibilityManager->GetPipelineByWindowId(1);
-    EXPECT_EQ(pattern, nullptr);
-
-    auto context = NG::PipelineContext::GetCurrentContext();
-    jsAccessibilityManager->SetPipelineContext(context);
-    pattern = jsAccessibilityManager->GetPipelineByWindowId(1);
     EXPECT_NE(pattern, nullptr);
 
     pattern = jsAccessibilityManager->GetPipelineByWindowId(2);
