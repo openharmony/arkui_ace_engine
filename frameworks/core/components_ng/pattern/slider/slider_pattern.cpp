@@ -150,12 +150,6 @@ void SliderPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto inputEventHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputEventHub);
     auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -170,6 +164,33 @@ void SliderPattern::OnModifyDone()
     }
     InitSliderEnds();
     UpdateBlock();
+    InitializeBubble();
+    SetAccessibilityAction();
+    InitAccessibilityHoverEvent();
+    AccessibilityVirtualNodeRenderTask();
+    InitSliderAccessibilityEnabledRegister();
+    InitOrRefreshSlipFactor();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitEvent();
+    };
+    context->AddBuildFinishCallBack(callback);
+}
+
+void SliderPattern::InitEvent()
+{
+    RegisterVisibleAreaChange();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputEventHub = hub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
@@ -177,16 +198,10 @@ void SliderPattern::OnModifyDone()
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    InitializeBubble();
-    SetAccessibilityAction();
 #ifdef SUPPORT_DIGITAL_CROWN
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
     InitDigitalCrownEvent(focusHub);
 #endif
-    InitAccessibilityHoverEvent();
-    AccessibilityVirtualNodeRenderTask();
-    InitSliderAccessibilityEnabledRegister();
-    InitOrRefreshSlipFactor();
 }
 
 void SliderPattern::InitSliderEnds()
@@ -2523,7 +2538,6 @@ void SliderPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    RegisterVisibleAreaChange();
 }
 
 void SliderPattern::OnAttachToMainTree()
