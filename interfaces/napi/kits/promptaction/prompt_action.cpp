@@ -1227,6 +1227,7 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
+            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetX = resourceWrapper->GetDimension(recv.resId);
             double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
             shadow.SetOffsetX(xValue);
@@ -1239,6 +1240,7 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
+            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetY = resourceWrapper->GetDimension(recv.resId);
             shadow.SetOffsetY(offsetY.Value());
         } else {
