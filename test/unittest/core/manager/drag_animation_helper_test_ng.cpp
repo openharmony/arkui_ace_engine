@@ -30,6 +30,8 @@ constexpr float ITEM_WIDTH = 120.0f;
 constexpr float ITEM_HEIGHT = 200.0f;
 constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t DEFAULT_BADGE_NUM = 2;
+constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
+const float EPSILON = 0.1f;
 } // namespace
 
 void DragAnimationHelperTestNg::SetUpTestSuite()
@@ -787,5 +789,42 @@ HWTEST_F(DragAnimationHelperTestNg, MountPixelMap001, TestSize.Level1)
     data.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
     DragAnimationHelper::MountPixelMap(overlayManager, gestureEventHub, data, true);
     EXPECT_EQ(overlayManager->hasDragPixelMap_, true);
+}
+
+/**
+ * @tc.name: CalcBadgeTextOffset001
+ * @tc.desc: CalcBadgeTextOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextOffset001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create node.
+    */
+    auto imageNodeId = GetElmtId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+
+    /**
+    * @tc.steps: step2. Execute CalcBadgeTextOffset
+    */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    const int32_t badgeLength = 2;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto offset = DragAnimationHelper::CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    float expectX = -BADGE_RELATIVE_OFFSET.ConvertToPx();
+    float expectY = -BADGE_RELATIVE_OFFSET.ConvertToPx();
+    EXPECT_NEAR(offset.GetX(), expectX, EPSILON);
+    EXPECT_NEAR(offset.GetY(), expectY, EPSILON);
 }
 } // namespace OHOS::Ace::NG
