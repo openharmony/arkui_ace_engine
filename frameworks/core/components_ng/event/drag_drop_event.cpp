@@ -109,7 +109,11 @@ void DragDropEventActuator::InitPanAction()
     panRecognizer_->SetOnActionEnd(
         [weakHandler = WeakPtr<DragDropInitiatingHandler>(dragDropInitiatingHandler_)](GestureEvent& info) {
             auto handler = weakHandler.Upgrade();
-            CHECK_NULL_VOID(handler);
+            if (!handler) {
+                TAG_LOGW(AceLogTag::ACE_DRAG, "on action end, frameNode has been destroyed, resetting");
+                DragEventActuator::ResetDragStatus();
+                return;
+            }
             handler->NotifyPanOnActionEnd(info);
         });
     panRecognizer_->SetOnActionCancel(
