@@ -1,0 +1,136 @@
+{
+  "string": [
+    {
+      "name": "liaoning",
+      "value": "深辽宁省"
+    },
+    {
+      "name": "shenyang",
+      "value": "深沈阳市"
+    },
+    {
+      "name": "shenhe",
+      "value": "深沈河区"
+    },
+    {
+      "name": "heping",
+      "value": "深和平区"
+    },
+    {
+      "name": "hunnan",
+      "value": "深浑南区"
+    },
+    {
+      "name": "dalian",
+      "value": "深大连市"
+    },
+    {
+      "name": "zhongshan",
+      "value": "深中山区"
+    },
+    {
+      "name": "jinzhou",
+      "value": "深金州区"
+    },
+    {
+      "name": "changhai",
+      "value": "深长海县"
+    },
+    {
+      "name": "jilin",
+      "value": "深吉林省"
+    },
+    {
+      "name": "changchun",
+      "value": "深长春市"
+    },
+    {
+      "name": "nanguan",
+      "value": "深南关区"
+    },
+    {
+      "name": "kuancheng",
+      "value": "深宽城区"
+    },
+    {
+      "name": "chaoyang",
+      "value": "深朝阳区"
+    },
+    {
+      "name": "siping",
+      "value": "深四平市"
+    },
+    {
+      "name": "tiexi",
+      "value": "深铁西区"
+    },
+    {
+      "name": "tiedong",
+      "value": "深铁东区"
+    },
+    {
+      "name": "lishu",
+      "value": "深梨树县"
+    },
+    {
+      "name": "heilongjiang",
+      "value": "深黑龙江省"
+    },
+    {
+      "name": "haerbing",
+      "value": "深哈尔滨市"
+    },
+    {
+      "name": "daoli",
+      "value": "深道里区"
+    },
+    {
+      "name": "daowai",
+      "value": "深道外区"
+    },
+    {
+      "name": "nangang",
+      "value": "深南岗区"
+    },
+    {
+      "name": "mudan",
+      "value": "深牡丹江市"
+    },
+    {
+      "name": "dongan",
+      "value": "深东安区"
+    },
+    {
+      "name": "xian",
+      "value": "深西安区"
+    },
+    {
+      "name": "aimin",
+      "value": "深爱民区"
+    },
+    {
+      "name": "100vpDark200",
+      "value": "200vp"
+    },
+    {
+      "name": "100vpDark120",
+      "value": "120vp"
+    },
+    {
+      "name": "200vpDark220",
+      "value": "220vp"
+    },
+    {
+      "name": "20PercentDark25",
+      "value": "25%"
+    },
+    {
+      "name": "40PercentDark45",
+      "value": "45%"
+    },
+    {
+      "name": "99999vp",
+      "value": "99999vp"
+    }
+  ]
+}

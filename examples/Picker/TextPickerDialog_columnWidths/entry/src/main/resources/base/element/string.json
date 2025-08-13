@@ -1,0 +1,148 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "liaoning",
+      "value": "浅辽宁省"
+    },
+    {
+      "name": "shenyang",
+      "value": "浅沈阳市"
+    },
+    {
+      "name": "shenhe",
+      "value": "浅沈河区"
+    },
+    {
+      "name": "heping",
+      "value": "浅和平区"
+    },
+    {
+      "name": "hunnan",
+      "value": "浅浑南区"
+    },
+    {
+      "name": "dalian",
+      "value": "浅大连市"
+    },
+    {
+      "name": "zhongshan",
+      "value": "浅中山区"
+    },
+    {
+      "name": "jinzhou",
+      "value": "浅金州区"
+    },
+    {
+      "name": "changhai",
+      "value": "浅长海县"
+    },
+    {
+      "name": "jilin",
+      "value": "浅吉林省"
+    },
+    {
+      "name": "changchun",
+      "value": "浅长春市"
+    },
+    {
+      "name": "nanguan",
+      "value": "浅南关区"
+    },
+    {
+      "name": "kuancheng",
+      "value": "浅宽城区"
+    },
+    {
+      "name": "chaoyang",
+      "value": "浅朝阳区"
+    },
+    {
+      "name": "siping",
+      "value": "浅四平市"
+    },
+    {
+      "name": "tiexi",
+      "value": "浅铁西区"
+    },
+    {
+      "name": "tiedong",
+      "value": "浅铁东区"
+    },
+    {
+      "name": "lishu",
+      "value": "浅梨树县"
+    },
+    {
+      "name": "heilongjiang",
+      "value": "浅黑龙江省"
+    },
+    {
+      "name": "haerbing",
+      "value": "浅哈尔滨市"
+    },
+    {
+      "name": "daoli",
+      "value": "浅道里区"
+    },
+    {
+      "name": "daowai",
+      "value": "浅道外区"
+    },
+    {
+      "name": "nangang",
+      "value": "浅南岗区"
+    },
+    {
+      "name": "mudan",
+      "value": "浅牡丹江市"
+    },
+    {
+      "name": "dongan",
+      "value": "浅东安区"
+    },
+    {
+      "name": "xian",
+      "value": "浅西安区"
+    },
+    {
+      "name": "aimin",
+      "value": "浅爱民区"
+    },
+    {
+      "name": "100vpDark200",
+      "value": "100vp"
+    },
+    {
+      "name": "100vpDark120",
+      "value": "100vp"
+    },
+    {
+      "name": "200vpDark220",
+      "value": "200vp"
+    },
+    {
+      "name": "20PercentDark25",
+      "value": "20%"
+    },
+    {
+      "name": "40PercentDark45",
+      "value": "40%"
+    },
+    {
+      "name": "99999vp",
+      "value": "99999vp"
+    }
+  ]
+}

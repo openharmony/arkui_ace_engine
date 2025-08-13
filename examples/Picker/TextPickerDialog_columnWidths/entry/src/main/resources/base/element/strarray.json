@@ -1,0 +1,22 @@
+{
+  "strarray": [
+    {
+      "name": "example_name_1",
+      "value": [
+        {
+          "value": "string_value_1"
+        },
+        {
+          "value": "string_value_2"
+        },
+        {
+          "value": "string_value_3"
+        },
+        {
+          "value": "string_value_4"
+        }
+      ],
+      "comment": "This is a comment for the first object"
+    }
+  ]
+}
