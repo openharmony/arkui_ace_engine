@@ -22,7 +22,7 @@ enum ResourceType {
 
 const re = new RegExp("^\\[\\S+?]");
 
-class ArkResource implements Resource {
+export class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
     params?: Array<Object | undefined> | undefined;
@@ -59,6 +59,12 @@ class ArkResource implements Resource {
         this._id = id;
         this.type = type;
         this.params = this.castParams(params);
+        this.bundleName = bundleName;
+        this.moduleName = moduleName;
+    }
+    constructor(id: long, type: int32 | undefined, bundleName: string, moduleName: string) {
+        this._id = id;
+        this.type = type;
         this.bundleName = bundleName;
         this.moduleName = moduleName;
     }
