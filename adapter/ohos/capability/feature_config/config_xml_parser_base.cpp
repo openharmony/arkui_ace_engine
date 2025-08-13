@@ -93,10 +93,22 @@ ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const 
 
 ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName)
 {
-    xmlNode* currNode = &node;
-    auto ret = ParseXmlNodeNameWithIndex(*currNode, PARSE_XML_PERFORMANCE_OPT_CONFIG);
-    if (ret != PARSE_EXEC_SUCCESS) {
-        return ret;
+    // skip root node
+    xmlNode* currNode = node.children;
+    if (currNode == nullptr) {
+        return PARSE_GET_CHILD_FAIL;
+    }
+
+    // find first PerformanceOptConfig node
+    auto ret = PARSE_EXEC_SUCCESS;
+    for (; currNode; currNode = currNode->next) {
+        ret = ParseXmlNodeNameWithIndex(*currNode, PARSE_XML_PERFORMANCE_OPT_CONFIG);
+        if (ret == PARSE_EXEC_SUCCESS) {
+            break;
+        }
+    }
+    if (currNode == nullptr) {
+        return PARSE_XML_NAME_ERROR;
     }
 
     currNode = currNode->children;
@@ -104,13 +116,14 @@ ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, con
         return PARSE_GET_CHILD_FAIL;
     }
 
+    // find parse feature nodes
     for (; currNode; currNode = currNode->next) {
         if (ParseXmlNodeNameWithIndex(*currNode, PARSE_XML_BUNDLE_NAME) != PARSE_EXEC_SUCCESS) {
             continue;
         }
 
         std::string xmlBundleName = ExtractPropertyValue("name", *currNode);
-        if (xmlBundleName == bundleName) {
+        if (xmlBundleName == bundleName && currNode->children) {
             ParseFeatures(*(currNode->children));
             break;
         }

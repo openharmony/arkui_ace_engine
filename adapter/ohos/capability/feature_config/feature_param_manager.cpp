@@ -22,14 +22,14 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
-#define ADD_PARSER_MODLE(cls)         \
+#define ADD_PARSER_MODEL(cls)         \
     {                                 \
         #cls, std::make_shared<cls>() \
     }
 
 const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
-    ADD_PARSER_MODLE(UINodeGcParamParser),
-    ADD_PARSER_MODLE(SyncloadParser),
+    ADD_PARSER_MODEL(UINodeGcParamParser),
+    ADD_PARSER_MODEL(SyncLoadParser),
 };
 
 FeatureParamManager::FeatureParamManager() = default;

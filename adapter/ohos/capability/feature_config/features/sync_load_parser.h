@@ -19,10 +19,10 @@
 #include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
 namespace OHOS::Ace {
-class SyncloadParser : public ConfigXMLParserBase {
+class SyncLoadParser : public ConfigXMLParserBase {
 public:
-    SyncloadParser() = default;
-    ~SyncloadParser() = default;
+    SyncLoadParser() = default;
+    ~SyncLoadParser() = default;
 
     ParseErrCode ParseFeatureParam(xmlNode& node) override;
 private:
