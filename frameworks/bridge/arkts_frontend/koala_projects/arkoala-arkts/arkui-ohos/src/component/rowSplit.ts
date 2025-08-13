@@ -64,7 +64,7 @@ export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAt
     resizeable_value?: boolean | undefined
     public resizeable(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
     getPeer(): ArkRowSplitPeer {

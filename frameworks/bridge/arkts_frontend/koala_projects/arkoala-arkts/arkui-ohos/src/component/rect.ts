@@ -174,7 +174,7 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
     }
     public radius(value: Length | Array<RadiusItem> | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRectComponent extends ArkCommonShapeMethodComponent implements RectAttribute {
     getPeer(): ArkRectPeer {

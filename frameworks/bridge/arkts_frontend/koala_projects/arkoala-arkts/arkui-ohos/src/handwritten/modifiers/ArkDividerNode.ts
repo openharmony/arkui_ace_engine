@@ -20,7 +20,10 @@ import { DividerAttribute, ArkDividerPeer, LineCapStyle, ResourceColor } from '.
 export class ArkDividerNode extends ArkBaseNode implements DividerAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('column constructParam enter');
+        if (param.length > 0) {
+            throw new Error('more than 0 parameters');
+        }
+        this.getPeer()?.setDividerOptionsAttribute();
         return this;
     }
 
@@ -29,18 +32,31 @@ export class ArkDividerNode extends ArkBaseNode implements DividerAttribute {
     }
 
     vertical(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.verticalAttribute(value_casted);
+        return this;
+    }
+
+    initialize(): this {
+        this.getPeer()?.setDividerOptionsAttribute();
         return this;
     }
 
     color(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined);
+        this.getPeer()?.colorAttribute(value_casted);
         return this;
     }
 
     strokeWidth(value: string | number | undefined): this {
+        const value_casted = value as (number | string | undefined);
+        this.getPeer()?.strokeWidthAttribute(value_casted);
         return this;
     }
 
     lineCap(value: LineCapStyle | undefined): this {
+        const value_casted = value as (LineCapStyle | undefined);
+        this.getPeer()?.lineCapAttribute(value_casted);
         return this;
     }
 }

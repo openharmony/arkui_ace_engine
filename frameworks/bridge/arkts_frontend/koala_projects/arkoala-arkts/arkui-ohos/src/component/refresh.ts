@@ -186,7 +186,7 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     }
     public _onChangeEvent_refreshing(callback: ((isVisible: boolean) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkRefreshComponent extends ArkCommonMethodComponent implements RefreshAttribute {
     getPeer(): ArkRefreshPeer {

@@ -210,7 +210,7 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkGridItemComponent extends ArkCommonMethodComponent implements GridItemAttribute {
     getPeer(): ArkGridItemPeer {

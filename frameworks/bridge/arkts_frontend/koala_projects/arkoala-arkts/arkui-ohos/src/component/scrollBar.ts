@@ -78,7 +78,7 @@ export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBar
     enableNestedScroll_value?: boolean | undefined
     public enableNestedScroll(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkScrollBarComponent extends ArkCommonMethodComponent implements ScrollBarAttribute {
     getPeer(): ArkScrollBarPeer {

@@ -94,7 +94,7 @@ export class ArkNavRouterStyle extends ArkCommonMethodStyle implements NavRouter
     }
     public mode(value: NavRouteMode | undefined): this {
         return this
-        }
+    }
 }
 export class ArkNavRouterComponent extends ArkCommonMethodComponent implements NavRouterAttribute {
     getPeer(): ArkNavRouterPeer {

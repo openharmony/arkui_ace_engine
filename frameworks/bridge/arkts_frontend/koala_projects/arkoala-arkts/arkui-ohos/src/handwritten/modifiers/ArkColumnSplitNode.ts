@@ -20,7 +20,10 @@ import { ArkBaseNode } from './ArkBaseNode';
 export class ArkColumnSplitNode extends ArkBaseNode implements ColumnSplitAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('columnsplit constructParam enter');
+        if (param.length > 0) {
+            throw new Error('more than 0 parameters');
+        }
+        this.getPeer()?.setColumnSplitOptionsAttribute();
         return this;
     }
 
@@ -29,10 +32,14 @@ export class ArkColumnSplitNode extends ArkBaseNode implements ColumnSplitAttrib
     }
 
     resizeable(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.resizeableAttribute(value_casted);
         return this;
     }
 
     divider(value: ColumnSplitDividerStyle | undefined): this {
+        const value_casted = value as (ColumnSplitDividerStyle | undefined);
+        this.getPeer()?.dividerAttribute(value_casted);
         return this;
     }
-}
+}

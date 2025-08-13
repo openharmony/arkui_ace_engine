@@ -13,15 +13,33 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from '@koalaui/interop';
+import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { RowAttribute, ArkRowPeer, VerticalAlign, FlexAlign, PointLightStyle } from '../../component';
+import { RowAttribute, ArkRowPeer, VerticalAlign, FlexAlign, PointLightStyle, RowOptions,
+    RowOptionsV2 } from '../../component';
 
 export class ArkRowNode extends ArkBaseNode implements RowAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('row constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let options_casted: RowOptions | RowOptionsV2 | undefined = undefined;
+        if (param.length === 1) {
+            options_casted = param[0] as (RowOptions | RowOptionsV2 | undefined);
+        }
+        this.getPeer()?.setRowOptions1Attribute(options_casted);
         return this;
+    }
+    
+    initialize(options?: RowOptions | RowOptionsV2): this {
+        const options_type = runtimeType(options);
+        if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            const options_casted = options as (RowOptions | RowOptionsV2 | undefined);
+            this.getPeer()?.setRowOptions1Attribute(options_casted);
+            return this;
+        }
+        throw new Error("Can not select appropriate overload");
     }
 
     getPeer(): ArkRowPeer {
@@ -29,18 +47,26 @@ export class ArkRowNode extends ArkBaseNode implements RowAttribute {
     }
 
     alignItems(value: VerticalAlign | undefined): this {
+        const value_casted = value as (VerticalAlign | undefined);
+        this.getPeer()?.alignItemsAttribute(value_casted);
         return this;
     }
 
     justifyContent(value: FlexAlign | undefined): this {
+        const value_casted = value as (FlexAlign | undefined);
+        this.getPeer()?.justifyContentAttribute(value_casted);
         return this;
     }
 
     pointLight(value: PointLightStyle | undefined): this {
+        const value_casted = value as (PointLightStyle | undefined);
+        this.getPeer()?.pointLightAttribute(value_casted);
         return this;
     }
 
     reverse(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.reverseAttribute(value_casted);
         return this;
     }
-}
+}

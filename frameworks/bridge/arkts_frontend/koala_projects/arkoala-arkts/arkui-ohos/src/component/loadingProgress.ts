@@ -129,7 +129,7 @@ export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements Loa
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-        }
+    }
 }
 export interface LoadingProgressConfiguration extends CommonConfiguration {
     enableLoading: boolean;

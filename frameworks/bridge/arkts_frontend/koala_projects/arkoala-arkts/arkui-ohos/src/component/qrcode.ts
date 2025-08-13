@@ -152,7 +152,7 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     }
     public contentOpacity(value: number | Resource | undefined): this {
         return this
-        }
+    }
 }
 export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCodeAttribute {
     getPeer(): ArkQRCodePeer {

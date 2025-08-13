@@ -79,7 +79,7 @@ export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttri
     commands_value?: string | undefined
     public commands(value: string | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPathComponent extends ArkCommonShapeMethodComponent implements PathAttribute {
     getPeer(): ArkPathPeer {

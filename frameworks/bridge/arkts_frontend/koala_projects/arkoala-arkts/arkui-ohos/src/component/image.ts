@@ -739,7 +739,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     }
     public orientation(value: ImageRotateOrientation | undefined): this {
         return this
-        }
+    }
 }
 export type ImageErrorCallback = (error: ImageError) => void;
 export interface ImageError {

@@ -244,7 +244,7 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkListItemComponent extends ArkCommonMethodComponent implements ListItemAttribute {
     getPeer(): ArkListItemPeer {

@@ -1381,7 +1381,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     }
     public _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {

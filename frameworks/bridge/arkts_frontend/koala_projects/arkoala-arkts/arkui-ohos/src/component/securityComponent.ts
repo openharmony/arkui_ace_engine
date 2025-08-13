@@ -890,7 +890,7 @@ export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod 
     }
     public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {

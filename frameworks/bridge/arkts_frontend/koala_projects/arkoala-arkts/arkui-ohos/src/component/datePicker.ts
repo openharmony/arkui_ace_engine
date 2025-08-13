@@ -303,7 +303,7 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     }
     public _onChangeEvent_selected(callback: ((parameter: Date) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export interface LunarSwitchStyle {
     selectedColor?: ResourceColor;

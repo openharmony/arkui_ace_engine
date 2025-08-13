@@ -88,7 +88,7 @@ export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements Polyl
     points_value?: Array<ShapePoint> | undefined
     public points(value: Array<ShapePoint> | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements PolylineAttribute {
     getPeer(): ArkPolylinePeer {

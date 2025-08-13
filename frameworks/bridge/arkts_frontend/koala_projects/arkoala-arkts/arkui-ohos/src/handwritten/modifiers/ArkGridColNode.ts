@@ -15,12 +15,25 @@
 
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { GridColAttribute, ArkGridColPeer, GridColColumnOption } from '../../component';
+import { GridColAttribute, ArkGridColPeer, GridColColumnOption, GridColOptions } from '../../component';
 
 export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('gridcol constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let option_casted: GridColOptions | undefined = undefined;
+        if (param.length === 1) {
+            option_casted = param[0] as (GridColOptions | undefined);
+        }
+        this.getPeer()?.setGridColOptionsAttribute(option_casted);
+        return this;
+    }
+
+    initialize(option?: GridColOptions): this {
+        const option_casted = option as (GridColOptions | undefined);
+        this.getPeer()?.setGridColOptionsAttribute(option_casted);
         return this;
     }
 
@@ -29,14 +42,20 @@ export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
     }
 
     span(value: number | GridColColumnOption | undefined): this {
+        const value_casted = value as (number | GridColColumnOption | undefined);
+        this.getPeer()?.spanAttribute(value_casted);
         return this;
     }
 
     gridColOffset(value: number | GridColColumnOption | undefined): this {
+        const value_casted = value as (number | GridColColumnOption | undefined);
+        this.getPeer()?.gridColOffsetAttribute(value_casted);
         return this;
     }
 
     order(value: number | GridColColumnOption | undefined): this {
+        const value_casted = value as (number | GridColColumnOption | undefined);
+        this.getPeer()?.orderAttribute(value_casted);
         return this;
     }
-}
+}

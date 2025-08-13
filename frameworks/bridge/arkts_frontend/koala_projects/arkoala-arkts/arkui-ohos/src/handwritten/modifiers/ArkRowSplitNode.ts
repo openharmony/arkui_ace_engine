@@ -20,7 +20,10 @@ import { RowSplitAttribute, ArkRowSplitPeer } from '../../component';
 export class ArkRowSplitNode extends ArkBaseNode implements RowSplitAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('rowsplit contructParam enter');
+        if (param.length > 0) {
+            throw new Error('more than 0 parameters');
+        }
+        this.getPeer()?.setRowSplitOptionsAttribute();
         return this;
     }
 
@@ -29,6 +32,8 @@ export class ArkRowSplitNode extends ArkBaseNode implements RowSplitAttribute {
     }
 
     resizeable(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.resizeableAttribute(value_casted);
         return this;
     }
-}
+}

@@ -226,7 +226,7 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     }
     public onChange(value: ((index: number) => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkIndicatorComponentComponent extends ArkCommonMethodComponent implements IndicatorComponentAttribute {
     getPeer(): ArkIndicatorComponentPeer {

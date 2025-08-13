@@ -350,7 +350,7 @@ export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribut
     }
     public _onChangeEvent_mode(callback: ((mode: PanelMode | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkPanelComponent extends ArkCommonMethodComponent implements PanelAttribute {
     getPeer(): ArkPanelPeer {

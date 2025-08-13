@@ -392,7 +392,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     }
     public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
         return this
-        }
+    }
 }
 export class ArkShapeComponent extends ArkCommonMethodComponent implements ShapeAttribute {
     getPeer(): ArkShapePeer {

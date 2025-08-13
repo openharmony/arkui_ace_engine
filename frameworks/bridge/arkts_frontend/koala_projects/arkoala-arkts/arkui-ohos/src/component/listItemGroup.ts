@@ -103,7 +103,7 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
     }
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         return this
-        }
+    }
 }
 export class ArkListItemGroupComponent extends ArkCommonMethodComponent implements ListItemGroupAttribute {
     getPeer(): ArkListItemGroupPeer {

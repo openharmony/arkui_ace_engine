@@ -275,7 +275,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     }
     public onFinish(value: (() => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkMarqueeComponent extends ArkCommonMethodComponent implements MarqueeAttribute {
     getPeer(): ArkMarqueePeer {

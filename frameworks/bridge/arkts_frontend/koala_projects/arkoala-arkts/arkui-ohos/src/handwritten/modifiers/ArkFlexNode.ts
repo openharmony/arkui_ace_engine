@@ -15,13 +15,26 @@
 
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { FlexAttribute, ArkFlexPeer, PointLightStyle } from '../../component';
+import { FlexAttribute, ArkFlexPeer, PointLightStyle, FlexOptions } from '../../component';
 
 /** @memo:stable */
 export class ArkFlexNode extends ArkBaseNode implements FlexAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('flex constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let value_casted: FlexOptions | undefined = undefined;
+        if (param.length === 1) {
+            value_casted = param[0] as (FlexOptions | undefined);
+        }
+        this.getPeer()?.setFlexOptionsAttribute(value_casted);
+        return this;
+    }
+
+    initialize(value?: FlexOptions): this {
+        const value_casted = value as (FlexOptions | undefined);
+        this.getPeer()?.setFlexOptionsAttribute(value_casted);
         return this;
     }
 
@@ -30,6 +43,8 @@ export class ArkFlexNode extends ArkBaseNode implements FlexAttribute {
     }
 
     pointLight(value: PointLightStyle | undefined): this {
+        const value_casted = value as (PointLightStyle | undefined);
+        this.getPeer()?.pointLightAttribute(value_casted);
         return this;
     }
 }

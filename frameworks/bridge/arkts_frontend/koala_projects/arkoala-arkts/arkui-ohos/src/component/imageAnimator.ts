@@ -298,7 +298,7 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     }
     public onFinish(value: (() => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkImageAnimatorComponent extends ArkCommonMethodComponent implements ImageAnimatorAttribute {
     getPeer(): ArkImageAnimatorPeer {

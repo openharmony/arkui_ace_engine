@@ -186,7 +186,7 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     }
     public alt(value: PixelMap | undefined): this {
         return this
-        }
+    }
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
 export interface ImageLoadResult {

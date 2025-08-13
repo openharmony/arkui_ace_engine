@@ -264,7 +264,7 @@ export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAt
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-        }
+    }
 }
 export interface ProgressConfiguration extends CommonConfiguration {
     value: number;
