@@ -1465,11 +1465,13 @@ RefPtr<FrameNode> GetMenuWrapper(std::vector<OptionParam>& params, const RefPtr<
     CHECK_NULL_RETURN(textOverlayTheme, nullptr);
     RefPtr<FrameNode> menuWrapper = nullptr;
     auto showShortcut = textOverlayTheme->GetShowShortcut();
+    auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     if (showShortcut) {
         auto* stack = ViewStackProcessor::GetInstance();
         CHECK_NULL_RETURN(stack, nullptr);
-        auto innerMenuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, stack->ClaimNodeId(),
-            []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+        auto innerMenuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, stack->ClaimNodeId(), [targetNodeId]() {
+            return AceType::MakeRefPtr<InnerMenuPattern>(targetNodeId, V2::MENU_ETS_TAG, MenuType::MULTI_MENU);
+        });
         CHECK_NULL_RETURN(innerMenuNode, nullptr);
 #ifdef OHOS_PLATFORM
         RefPtr<FrameNode> menuItem = nullptr;
@@ -1483,15 +1485,15 @@ RefPtr<FrameNode> GetMenuWrapper(std::vector<OptionParam>& params, const RefPtr<
                 continue;
             }
         }
-        menuWrapper = MenuView::Create(innerMenuNode, -1, "SelectOverlayMenuByRightClick",
+        menuWrapper = MenuView::Create(innerMenuNode, targetNodeId, "SelectOverlayMenuByRightClick",
             { .isShowInSubWindow = false, .type = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU });
         menuWrapper->UpdateInspectorId("select_overlay_right_click_menuWrapper");
 #else
-        menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
+        menuWrapper = MenuView::Create(std::move(params), targetNodeId, "SelectOverlayMenuByRightClick",
             MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
 #endif
     } else {
-        menuWrapper = MenuView::Create(std::move(params), -1, "SelectOverlayMenuByRightClick",
+        menuWrapper = MenuView::Create(std::move(params), targetNodeId, "SelectOverlayMenuByRightClick",
             MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU, { .isShowInSubWindow = false });
     }
     return menuWrapper;
@@ -1738,9 +1740,10 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(
 
 void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    selectMenu_ = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), [id = GetId()]() {
-            return AceType::MakeRefPtr<MenuPattern>(id, V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
+    selectMenu_ =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<MenuPattern>(
+                ElementRegister::GetInstance()->MakeUniqueId(), V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
         });
     selectMenu_->MountToParent(Claim(this));
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateCustomSelectOverlay by menu:%{public}d", selectMenu_->GetId());
