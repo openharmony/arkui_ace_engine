@@ -1849,18 +1849,21 @@ HWTEST_F(SheetShowInSubwindowTestNg, TestBreakpoint001, TestSize.Level1)
     EXPECT_EQ(type2, SheetType::SHEET_CENTER);
     sheetTheme->sheetBottom_ = "popup";
     auto type3 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type3, SheetType::SHEET_CENTER);
-    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    EXPECT_EQ(type3, SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetTheme->sheetType_ = "popup";
     auto type4 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type4, SheetType::SHEET_POPUP);
-    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    EXPECT_EQ(type4, SheetType::SHEET_CENTER);
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
     auto type5 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type5, SheetType::SHEET_CONTENT_COVER);
-    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    EXPECT_EQ(type5, SheetType::SHEET_POPUP);
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
     auto type6 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type6, SheetType::SHEET_BOTTOM);
-    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    EXPECT_EQ(type6, SheetType::SHEET_CONTENT_COVER);
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     auto type7 = state.HandleType(sheetStyle);
-    EXPECT_EQ(type7, SheetType::SHEET_SIDE);
+    EXPECT_EQ(type7, SheetType::SHEET_BOTTOM);
+    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    auto type8 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type8, SheetType::SHEET_SIDE);
 }
 } // namespace OHOS::Ace::NG
