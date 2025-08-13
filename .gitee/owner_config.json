@@ -47,7 +47,8 @@
             "https://gitee.com/luoying_ace_admin",
             "https://gitee.com/xiaoxiaohuang9",
             "https://gitee.com/crazyracing0726",
-            "https://gitee.com/xuqinfeng1996"
+            "https://gitee.com/xuqinfeng1996",
+            "https://gitee.com/huaweimaxuchu"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -257,6 +258,10 @@
         },
         "https://gitee.com/xuqinfeng1996": {
             "info": "[信息展示类组件 xuqingfeng]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/huaweimaxuchu": {
+            "info": "[Image能力 maxuchu]",
             "group": "https://gitee.com/arkui_image"
         },
         "https://gitee.com/liyujie43": {
