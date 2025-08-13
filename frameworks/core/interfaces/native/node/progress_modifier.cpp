@@ -317,6 +317,8 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     } else {
         ProgressModelNG::SetText(node, std::string(value->content));
     }
+    ProgressModelNG::SetCapsuleStyle(node, true);
+    ProgressModelNG::SetCapsuleStyleFontColor(node, value->fontColorSetByUser);
     CreateWithResourceObjIfNeeded(node, JsProgressResourceType::Text, styleRes.contentRawPtr, false);
     ProgressModelNG::SetFontColor(node, Color(value->fontColor));
     CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontColor, styleRes.fontColorRawPtr);
@@ -403,6 +405,8 @@ void SetCapsuleStyleOptions(FrameNode* node)
     auto textTheme = themeManager->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     std::optional<std::string> textOpt = std::nullopt;
+    ProgressModelNG::SetCapsuleStyle(node, false);
+    ProgressModelNG::SetCapsuleStyleFontColor(node, false);
     ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
     ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
     ProgressModelNG::SetSweepingEffect(node, false);
