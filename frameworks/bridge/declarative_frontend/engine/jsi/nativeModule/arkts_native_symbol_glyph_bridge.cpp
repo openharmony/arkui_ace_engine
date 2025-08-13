@@ -369,15 +369,25 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetShaderStyle(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    if (info.Length() < NUM_2 || !info[1]->IsArray()) {
+    if (info.Length() < NUM_2 || !info[1]->IsObject()) {
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    auto jsArray = Framework::JSRef<Framework::JSArray>::Cast(info[1]);
+
     std::vector<SymbolGradient> gradients;
+    if (!info[1]->IsArray()) {
+        auto jsGradientObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+        SymbolGradient gradient;
+        gradient.isDefined = true;
+        Framework::JSSymbol::ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
+        SymbolModelNG::SetShaderStyle(frameNode, gradients);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto jsArray = Framework::JSRef<Framework::JSArray>::Cast(info[1]);
     gradients.reserve(jsArray->Length());
     for (size_t i = 0; i < jsArray->Length(); ++i) {
         auto jsGradientObj = Framework::JSRef<Framework::JSObject>::Cast(jsArray->GetValueAt(i));
