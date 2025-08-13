@@ -99,6 +99,7 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    void CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWrapperNode, RefPtr<FrameNode>& targetNode);
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -201,6 +202,20 @@ RefPtr<FrameNode> MenuPatternTestNg::GetPreviewMenuWrapper(
     auto menuWrapperNode =
         MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
     return menuWrapperNode;
+}
+
+void MenuPatternTestNg::CreateWrapperAndTargetNode(RefPtr<FrameNode>& menuWrapperNode, RefPtr<FrameNode>& targetNode)
+{
+    targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuWrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
 }
 
 /**
@@ -1896,5 +1911,76 @@ HWTEST_F(MenuPatternTestNg, UpdateSelectOptionIconByIndex, TestSize.Level1)
     parentPattern->UpdateSelectOptionIconByIndex(0, icon);
     ret = childPattern->GetIcon();
     EXPECT_EQ(icon, ret);
+}
+
+/**
+ * @tc.name: NeedHoldTargetOffsetTest
+ * @tc.desc: Test NeedHoldTargetOffsetTest function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, NeedHoldTargetOffsetTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create parent and child frame nodes.
+     * @tc.expected: step1. wrapper and menu nodes are not null.
+     */
+    RefPtr<FrameNode> menuWrapperNode;
+    RefPtr<FrameNode> targetNode;
+    CreateWrapperAndTargetNode(menuWrapperNode, targetNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_NE(targetNode, nullptr);
+    auto wrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. Test NeedHoldTargetOffset when not have history.
+     * @tc.expected: step2. NeedHoldTargetOffset will return false.
+     */
+    EXPECT_FALSE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+    /**
+     * @tc.steps: step3. Test NeedHoldTargetOffset when menu hide.
+     * @tc.expected: step3. NeedHoldTargetOffset will return true.
+     */
+    wrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuPattern->SetTargetSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+    /**
+     * @tc.steps: step4. Test NeedHoldTargetOffset when target is null.
+     * @tc.expected: step4. NeedHoldTargetOffset will return true.
+     */
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(nullptr, menuPattern));
+    /**
+     * @tc.steps: step5. Test NeedHoldTargetOffset when opacity zero.
+     * @tc.expected: step5. NeedHoldTargetOffset will return true.
+     */
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    targetRenderContext->UpdateOpacity(0.0);
+    EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+    /**
+     * @tc.steps: step6. Test NeedHoldTargetOffset when INVISIBLE.
+     * @tc.expected: step6. NeedHoldTargetOffset will return true.
+     */
+    targetRenderContext->UpdateOpacity(1.0);
+    auto layoutProperty = targetNode->GetLayoutProperty();
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+    /**
+     * @tc.steps: step7. Test NeedHoldTargetOffset when size zero.
+     * @tc.expected: step7. NeedHoldTargetOffset will return true.
+     */
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_TRUE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
+    /**
+     * @tc.steps: step8. Test NeedHoldTargetOffset when normal.
+     * @tc.expected: step8. NeedHoldTargetOffset will return false.
+     */
+    targetRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    EXPECT_FALSE(layoutAlgorithm->NeedHoldTargetOffset(targetNode, menuPattern));
 }
 } // namespace OHOS::Ace::NG
