@@ -52,6 +52,31 @@ bool ParagraphManager::DidExceedMaxLines() const
     }
     return res;
 }
+
+bool ParagraphManager::DidExceedMaxLinesInner() const
+{
+    bool res = false;
+    for (auto&& info : paragraphs_) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, false);
+        res |= paragraph->DidExceedMaxLinesInner();
+    }
+    return res;
+}
+
+std::string ParagraphManager::GetDumpInfo() const
+{
+    std::string dumpInfo = "";
+    for (auto&& info : paragraphs_) {
+        dumpInfo += "[";
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, dumpInfo);
+        dumpInfo += paragraph->GetDumpInfo();
+        dumpInfo += "]";
+    }
+    return dumpInfo;
+}
+
 float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;

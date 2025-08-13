@@ -5178,13 +5178,15 @@ void TextPattern::DumpTextEngineInfo()
     dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
     dumpLog.AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
     if (pManager_) {
-        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :"));
+        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :").append(pManager_->GetDumpInfo()));
         auto paragraphs = pManager_->GetParagraphs();
         if (paragraphs.empty()) {
             dumpLog.AddDesc(std::string("paragraphs is empty!"));
             return;
         }
-        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
+        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines()))
+                        .append(" DidExceedMaxLinesInner:")
+                        .append(std::to_string(pManager_->DidExceedMaxLinesInner())));
         dumpLog.AddDesc(std::string("GetTextWidth:")
                             .append(std::to_string(pManager_->GetTextWidth()))
                             .append(" GetHeight:")

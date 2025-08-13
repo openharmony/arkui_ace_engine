@@ -651,4 +651,45 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level1)
     EXPECT_NE(textBoxes.size(), 0);
 }
 
+/**
+ * @tc.name: DidExceedMaxLinesInner001
+ * @tc.desc: test DidExceedMaxLinesInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, DidExceedMaxLinesInner001, TestSize.Level1)
+{
+    RefPtr<ParagraphManager> pManager_ = AceType::MakeRefPtr<ParagraphManager>();;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, DidExceedMaxLinesInner).WillOnce(Return(true));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    pManager_->AddParagraph(std::move(paragraphInfo));
+    EXPECT_TRUE(pManager_->DidExceedMaxLinesInner());
+}
+
+/**
+ * @tc.name: GetDumpInfo001
+ * @tc.desc: test GetDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetDumpInfo001, TestSize.Level1)
+{
+    RefPtr<ParagraphManager> pManager_ = AceType::MakeRefPtr<ParagraphManager>();;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetDumpInfo).WillRepeatedly(Return("test"));
+
+    ParagraphManager::ParagraphInfo paragraphInfo2;
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo2.paragraph = mockParagraph;
+    paragraphInfo2.start = 10;
+    paragraphInfo2.end = 20;
+    pManager_->AddParagraph(std::move(paragraphInfo));
+    pManager_->AddParagraph(std::move(paragraphInfo2));
+    EXPECT_EQ(pManager_->GetDumpInfo(), "[test][test]");
+}
 } // namespace OHOS::Ace::NG
