@@ -3687,7 +3687,9 @@ void ViewAbstract::BindPopup(
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    if (popupInfo.popupNode) {
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    // Do not need change showInSubWindow to false when targetNode is in subwindow.
+    if (popupInfo.popupNode && container && !container->IsSubContainer()) {
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
@@ -3707,6 +3709,7 @@ void ViewAbstract::BindPopup(
             }
         }
     }
+    param->SetShowInSubWindow(showInSubWindow);
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);
