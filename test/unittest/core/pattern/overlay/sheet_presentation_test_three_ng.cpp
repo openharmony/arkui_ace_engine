@@ -2279,6 +2279,58 @@ HWTEST_F(SheetPresentationTestThreeNg, SheetHeightNeedChanged001, TestSize.Level
 }
 
 /**
+ * @tc.name: AvoidKeyboardBySheetModeTest001
+ * @tc.desc: Branch: if (isScrolling_) && if (GreatOrEqual(sheetHeightUp_, 0.0f))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, AvoidKeyboardBySheetModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. init value.
+     */
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    sheetPattern->keyboardHeight_ = safeAreaManager->GetKeyboardInset().Length() + 10.0f;
+    sheetPattern->isDismissProcess_ = false;
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    safeAreaManager->keyboardInset_.end = 498.0f;
+    pipelineContext->rootHeight_ = 2240.0f;
+    sheetPattern->isScrolling_ = true;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    /**
+     * @tc.steps: step3. test AvoidKeyboardBySheetMode.
+     */
+    EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_EQ(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    EXPECT_NE(sheetPattern->GetSheetHeightChange(), 0.0f);
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: SheetWidthNeedChanged001
  * @tc.desc: Branch: if (!NearEqual(sheetGeometryNode->GetFrameSize().Width(), sheetWidth_) ||
  *       !NearEqual(GetWrapperWidth(), wrapperWidth_))
