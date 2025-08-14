@@ -911,6 +911,7 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
         ++nextIt;
         while (nextIt != itemPosition_.end() &&
             LessNotEqual(it->second.endPos + GetChainOffset(it->first), startMainPos_)) {
+            recycledItemPosition_.emplace(it->first, it->second);
             it = nextIt;
             ++nextIt;
         }
@@ -928,6 +929,7 @@ void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGr
         ++nextIt;
         while (nextIt != itemPosition_.rend() &&
             GreatNotEqual(it->second.startPos + GetChainOffset(it->first), endMainPos_)) {
+            recycledItemPosition_.emplace(it->first, it->second);
             it = nextIt;
             ++nextIt;
         }
@@ -1782,21 +1784,31 @@ void ListLayoutAlgorithm::ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, Pos
         if (!wrapper) {
             ReportGetChildError("ResetLayoutItem", pos.first);
         }
-        pos.second.startPos -= currentOffset_;
-        pos.second.endPos -= currentOffset_;
-        if (pos.second.isGroup) {
-            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
-            if (wrapper && wrapper->GetHostNode() && wrapper->GetHostNode()->GetPattern<ListItemGroupPattern>()) {
-                auto groupPattern = wrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
+        ResetUnLayoutedItem(wrapper, pos.second);
+    }
+}
+
+void ListLayoutAlgorithm::ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info)
+{
+    info.startPos -= currentOffset_;
+    info.endPos -= currentOffset_;
+    if (info.isGroup) {
+        if (layoutWrapper && layoutWrapper->GetHostNode()) {
+            auto host = layoutWrapper->GetHostNode();
+            if (host->HasLayoutAlgorithm()) {
+                info.groupInfo = GetListItemGroupLayoutInfo(layoutWrapper);
+            }
+            if (host->GetPattern<ListItemGroupPattern>()) {
+                auto groupPattern = host->GetPattern<ListItemGroupPattern>();
                 groupPattern->ClearItemPosition();
             }
-        } else {
-            pos.second.groupInfo.reset();
         }
-        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
-        if (wrapperFrameNode) {
-            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
-        }
+    } else {
+        info.groupInfo.reset();
+    }
+    auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
+    if (wrapperFrameNode) {
+        wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
     }
 }
 
