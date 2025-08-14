@@ -621,6 +621,7 @@ private:
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
     bool hasSetPixelMapMemoryName_ = false;
+    bool previousVisibility_ = false;
 };
 
 } // namespace OHOS::Ace::NG
