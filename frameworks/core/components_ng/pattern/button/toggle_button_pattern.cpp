@@ -299,12 +299,12 @@ void ToggleButtonPattern::SetBlurButtonStyle(RefPtr<FrameNode>& textNode,
 {
     CHECK_NULL_VOID(toggleTheme_);
     CHECK_NULL_VOID(renderContext);
-    if (isCheckedShadow_ && isOn_.value()) {
+    if (isCheckedShadow_ && isOn_.value_or(false)) {
         isCheckedShadow_ = false;
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal());
         renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
     }
-    if (isShadow_ && !isOn_.value()) {
+    if (isShadow_ && !isOn_.value_or(false)) {
         isShadow_ = false;
         renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
     }

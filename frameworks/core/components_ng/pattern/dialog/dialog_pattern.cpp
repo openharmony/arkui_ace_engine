@@ -901,7 +901,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(bgColor.value());
+    renderContext->UpdateBackgroundColor(bgColor.value_or(Color::TRANSPARENT));
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
@@ -1530,7 +1530,7 @@ void DialogPattern::UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonF
     // update background color
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(bgColor.value());
+    renderContext->UpdateBackgroundColor(bgColor.value_or(Color::TRANSPARENT));
     auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
     CHECK_NULL_VOID(buttonTextNode);
     auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();

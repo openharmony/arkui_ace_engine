@@ -99,7 +99,7 @@ void RadioPattern::UpdateIndicatorType()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
     renderContext->UpdateOpacity(1);
-    if (!radioPaintProperty->GetRadioCheckValue()) {
+    if (!radioPaintProperty->GetRadioCheckValue(false)) {
         SetBuilderState();
     }
 }

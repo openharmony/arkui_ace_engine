@@ -5111,8 +5111,8 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
 
     // create modal page
     auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ModalPresentationPattern>(
-            targetId, static_cast<ModalTransition>(modalTransition.value()), std::move(callback)));
+        AceType::MakeRefPtr<ModalPresentationPattern>(targetId,
+            static_cast<ModalTransition>(modalTransition.value_or(ModalTransition::DEFAULT)), std::move(callback)));
     CHECK_NULL_VOID(modalNode);
     auto modalPagePattern = modalNode->GetPattern<ModalPresentationPattern>();
     CHECK_NULL_VOID(modalPagePattern);
@@ -6009,7 +6009,7 @@ SheetStyle OverlayManager::UpdateSheetStyle(
 {
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetStyle);
-    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (isPartialUpdate) {
         currentStyle.PartialUpdate(sheetStyle);
     } else {
@@ -8938,7 +8938,7 @@ void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t
         }
     } else if (node->GetTag() == V2::SHEET_PAGE_TAG) {
         auto layoutProperty = frameNode->GetLayoutProperty<SheetPresentationProperty>();
-        if (layoutProperty && layoutProperty->GetSheetStyleValue().showInPage.value_or(false)) {
+        if (layoutProperty && layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false)) {
             return;
         }
     }

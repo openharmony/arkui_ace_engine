@@ -546,8 +546,8 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(optionPattern);
 
-    auto idealSize = CreateIdealSize(
-        layoutConstraint.value(), Axis::HORIZONTAL, props->GetMeasureType(MeasureType::MATCH_CONTENT), true);
+    auto idealSize = CreateIdealSize(layoutConstraint.value_or(LayoutConstraintF()), Axis::HORIZONTAL,
+        props->GetMeasureType(MeasureType::MATCH_CONTENT), true);
     float maxChildWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0f;
     // measure child
     auto childConstraint = props->CreateChildConstraint();
