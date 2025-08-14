@@ -994,4 +994,104 @@ HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue032, TestSize.Level1)
     dragDropEventActuator->RestartDragTask(gestureEvent);
     ASSERT_EQ(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
 }
+
+/**
+ * @tc.name: DragDropEventTestNgIssue033
+ * @tc.desc: Test onActionEnd_ callback when dragDropInitiatingHandler_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dragDropEventActuator.
+     * @tc.expected: step1. dragDropEventActuator exit.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    pipelineContext->dragDropManager_ = dragDropManager;
+    RefPtr<UINode> rootNode = AceType::MakeRefPtr<FrameNode>("root_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(rootNode));
+    ASSERT_NE(overlayManager, nullptr);
+    pipelineContext->overlayManager_ = overlayManager;
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    dragDropManager->ResetDragging(DragDropMgrState::IDLE);
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::READY);
+    /**
+     * @tc.steps: step2. call onActionEnd_ function.
+     * @tc.expected: step2. onActionEnd_ exit.
+     */
+    dragDropEventActuator->InitPanAction();
+    GestureEvent gestureEvent;
+    auto callback = *(dragDropEventActuator->panRecognizer_->onActionEnd_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    ASSERT_EQ(dragDropEventActuator->dragDropInitiatingHandler_->GetDragDropInitiatingStatus(),
+        DragDropInitiatingStatus::IDLE);
+}
+
+/**
+ * @tc.name: DragDropEventTestNgIssue034
+ * @tc.desc: Test onActionEnd_ callback when dragDropInitiatingHandler_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropEventTestNgIssue, DragDropEventTestNgIssue034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dragDropEventActuator.
+     * @tc.expected: step1. dragDropEventActuator exit.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    ASSERT_NE(dragDropEventActuator->dragDropInitiatingHandler_, nullptr);
+    dragDropEventActuator->dragDropInitiatingHandler_ = nullptr;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    overlayManager->MountPixelMapToRootNode(columnNode);
+    overlayManager->hasPixelMap_ = true;
+    /**
+     * @tc.steps: step2. call onActionEnd_ function.
+     * @tc.expected: step2. onActionEnd_ exit.
+     */
+    dragDropEventActuator->InitPanAction();
+    GestureEvent gestureEvent;
+    auto callback = *(dragDropEventActuator->panRecognizer_->onActionEnd_);
+    if (callback) {
+        callback(gestureEvent);
+    }
+    EXPECT_FALSE(overlayManager->hasPixelMap_);
+}
 } // namespace OHOS::Ace::NG
