@@ -198,9 +198,12 @@ Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGesture
             break;
         }
         default:
+            peer = Converter::ArkValue<Ark_BaseGestureEvent>(info);
             break;
     }
-    peer->SetRecognizerType(typeName);
+    if (peer) {
+        peer->SetRecognizerType(typeName);
+    }
     return peer;
 }
 }
@@ -4889,6 +4892,7 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         auto arkGestInfo = Converter::ArkValue<Ark_GestureInfo>(*gestureInfo);
         auto arkGestEvent = CreateArkBaseGestureEvent(baseGestureInfo, gestureInfo->GetRecognizerType());
+        CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto resultOpt = callback.InvokeWithOptConvertResult
             <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(arkGestInfo, arkGestEvent);
         return resultOpt.value_or(defVal);
@@ -4927,6 +4931,7 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto gestureInfo = current->GetGestureInfo();
         CHECK_NULL_RETURN(gestureInfo, defVal);
         auto arkGestEvent = CreateArkBaseGestureEvent(info, gestureInfo->GetRecognizerType());
+        CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
         auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(others, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
