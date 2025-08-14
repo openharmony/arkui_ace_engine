@@ -812,6 +812,33 @@ HWTEST_F(SheetPresentationTestNg, OnScrollEndRecursive001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollDragEndRecursive001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::OnScrollDragEndRecursive function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->isSheetPosChanged_ = false;
+    sheetPattern->OnScrollDragEndRecursive();
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+
+    sheetObject->isSheetPosChanged_ = true;
+    sheetPattern->OnScrollDragEndRecursive();
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: HandleScrollVelocity001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleScrollVelocity function.
  * @tc.type: FUNC

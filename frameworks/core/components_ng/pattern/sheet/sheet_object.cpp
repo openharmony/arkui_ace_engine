@@ -446,8 +446,7 @@ ScrollResult SheetObject::HandleScroll(float scrollOffset, int32_t source, Neste
         if (scrollState == ScrollState::SCROLL) {
             return HandleScrollWithSheet(scrollOffset);
         }
-        HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
-        isSheetPosChanged_ = false;
+        dragVelocity_ = scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD;
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
@@ -517,6 +516,14 @@ void SheetObject::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     if (isSheetPosChanged_) {
         HandleDragEnd(velocity.value_or(0.f));
+        isSheetPosChanged_ = false;
+    }
+}
+
+void SheetObject::OnScrollDragEndRecursive()
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(dragVelocity_);
         isSheetPosChanged_ = false;
     }
 }

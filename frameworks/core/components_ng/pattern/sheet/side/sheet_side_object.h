@@ -54,6 +54,7 @@ public:
     }
     void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override {};
     void OnScrollEndRecursive(const std::optional<float>& velocity) override {};
+    void OnScrollDragEndRecursive() override {};
     bool HandleScrollVelocity(float velocity) override
     {
         return false;
