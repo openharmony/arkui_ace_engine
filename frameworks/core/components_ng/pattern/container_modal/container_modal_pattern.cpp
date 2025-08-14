@@ -184,13 +184,13 @@ void ContainerModalPattern::InitContainerEvent()
                 controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 AnimationUtils::Animate(option, [controlButtonsContext]() {
                     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-                });
+                }, nullptr, nullptr, container->GetContextRefPtr());
                 floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 floatingLayoutProperty->UpdateVisibility(
                     container->floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
                 AnimationUtils::Animate(option, [floatingContext]() {
                     floatingContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-                });
+                }, nullptr, nullptr, container->GetContextRefPtr());
             }
             return;
         }
@@ -211,7 +211,7 @@ void ContainerModalPattern::InitContainerEvent()
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-            });
+            }, nullptr, container->GetContextRefPtr());
     });
 
     // init mouse event
@@ -231,13 +231,13 @@ void ContainerModalPattern::InitContainerEvent()
             controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             AnimationUtils::Animate(option, [controlButtonsContext]() {
                 controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            });
+            }, nullptr, nullptr, container->GetContextRefPtr());
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
             floatingLayoutProperty->UpdateVisibility(
                 container->floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
             AnimationUtils::Animate(option, [floatingContext]() {
                 floatingContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            });
+            }, nullptr, nullptr, container->GetContextRefPtr());
         }
 
         if (!container->CanHideFloatingTitle()) {
@@ -256,7 +256,7 @@ void ContainerModalPattern::InitContainerEvent()
                 [floatingLayoutProperty, id = Container::CurrentId()]() {
                     ContainerScope scope(id);
                     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                });
+                }, nullptr, container->GetContextRefPtr());
         }
     });
 }
@@ -1132,5 +1132,11 @@ void ContainerModalPattern::UpdateContainerBgColor()
     } else {
         containerContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     }
+}
+RefPtr<PipelineContext> ContainerModalPattern::GetContextRefPtr()
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_RETURN(containerNode, nullptr);
+    return containerNode->GetContextRefPtr();
 }
 } // namespace OHOS::Ace::NG
