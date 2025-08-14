@@ -100,7 +100,8 @@
             "https://gitee.com/little-bear-sleeps",
             "https://gitee.com/zju_ljz",
             "https://gitee.com/camlostshi",
-            "https://gitee.com/fenglinbailu"
+            "https://gitee.com/fenglinbailu",
+            "https://gitee.com/song-song-song"
         ],
         "https://gitee.com/arkwebinarkuireview": [
             "https://gitee.com/libing23",
@@ -400,7 +401,7 @@
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/lanshouren": {
-            "info": "[布局组件相关 lanshouren]",
+            "info": "[布局类组件 lanshouren]",
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/keerecles": {
@@ -411,8 +412,12 @@
             "info": "[绘制类组件 sunqinjia]",
             "group": "https://gitee.com/arkuilayout"
         },
+        "https://gitee.com/fenglinbailu": {
+            "info": "[布局类组件 liubin]",
+            "group": "https://gitee.com/arkuilayout"
+        },
         "https://gitee.com/little-bear-sleeps": {
-            "info": "[自定义布局相关 linhu]",
+            "info": "[布局类组件 linhu]",
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/zju_ljz": {
@@ -420,11 +425,11 @@
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/camlostshi": {
-            "info": "[弹性、线性布局相关 shibofan]",
+            "info": "[弹性、线性布局及安全区相关 shibofan]",
             "group": "https://gitee.com/arkuilayout"
         },
-        "https://gitee.com/fenglinbailu": {
-            "info": "[堆叠、相对布局相关 liubin]",
+        "https://gitee.com/song-song-song": {
+            "info": "[自定义布局相关 songqifan]",
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/libing23": {
