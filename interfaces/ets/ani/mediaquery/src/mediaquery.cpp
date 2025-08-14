@@ -149,7 +149,7 @@ public:
                 ani_ref ref;
                 ani_boolean wasReleased;
                 listener->env_->WeakReference_GetReference(cbWref, &wasReleased, &ref);
-                ani_object result;
+                ani_object result = {};
                 listener->MediaQueryResult::AniSerializer(listener->env_, result);
                 ani_ref resultRef = static_cast<ani_ref>(result);
                 listener->env_->FunctionalObject_Call(static_cast<ani_fn_object>(ref), 1, &resultRef, nullptr);
@@ -341,7 +341,7 @@ private:
         return TWO_ARGS;
     }
 
-    ani_env *env_;
+    ani_env *env_ = nullptr;
     std::list<ani_ref> cbList_;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static std::set<ani_ref>* delayDeleteCallbacks_;
