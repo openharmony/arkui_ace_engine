@@ -1146,8 +1146,7 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
         return;
     }
 
-    int32_t dimension = cardInfo_.dimension;
-    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadFormSkeleton failed, invalid dimensionHeight!");
         return;
