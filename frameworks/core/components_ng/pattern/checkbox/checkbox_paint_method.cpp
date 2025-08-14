@@ -132,7 +132,7 @@ void CheckBoxPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     checkboxModifier_->SetOffset(offset);
     checkboxModifier_->SetEnabled(enabled_);
     checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
-    checkboxModifier_->UpdateAnimatableProperty(needAnimation_);
+    checkboxModifier_->UpdateAnimatableProperty(needAnimation_, host->GetContextRefPtr());
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto checkBoxTheme = context->GetTheme<CheckboxTheme>(host->GetThemeScopeId());

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +39,7 @@ public:
         return radioModifier_;
     }
 
-    void UpdateUIStatus(bool checked);
+    void UpdateUIStatus(bool checked, const RefPtr<FrameNode>& host);
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 

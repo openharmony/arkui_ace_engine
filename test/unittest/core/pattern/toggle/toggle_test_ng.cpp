@@ -926,6 +926,12 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto switchModifier =
         AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
@@ -933,24 +939,24 @@ HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->hoverColor_ = Color::RED;
     switchModifier->clickEffectColor_ = Color::BLUE;
     switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     switchModifier->animateTouchHoverColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
     switchModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
     switchModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     switchModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     switchModifier->isDragEvent_ = true;
     switchModifier->SetDragOffsetX(0.0f);
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
 }
 
@@ -1033,6 +1039,12 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
  */
 HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto switchModifier =
         AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, SELECTED_COLOR, SWITCH_POINT_COLOR, 0.0f);
     SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
@@ -1046,7 +1058,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->isDragEvent_ = false;
     switchModifier->isFirstCreated_ = true;
     switchModifier->SetDragOffsetX(0.0f);
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         EXPECT_EQ(switchModifier->pointOffset_->Get(),
             switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
@@ -1060,7 +1072,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->isDragEvent_ = false;
     switchModifier->isFirstCreated_ = true;
     switchModifier->SetDragOffsetX(0.0f);
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
     /**
      * @tc.steps: step3. direction is rtl
@@ -1069,7 +1081,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->isDragEvent_ = false;
     switchModifier->isFirstCreated_ = true;
     switchModifier->SetDragOffsetX(0.0f);
-    switchModifier->UpdateAnimatableProperty();
+    switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->pointOffset_->Get(),
         switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
 }

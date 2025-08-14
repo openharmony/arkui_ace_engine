@@ -1317,25 +1317,30 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
  */
 HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest013, TestSize.Level1)
 {
+    const std::optional<std::string> groupName;
+    CheckBoxGroupModelNG checkboxGroupModel;
+    checkboxGroupModel.Create(groupName);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupFrameNode, nullptr);
     CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
     auto checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
     checkBoxGroupModifier_->hoverColor_ = Color::RED;
     checkBoxGroupModifier_->clickEffectColor_ = Color::BLUE;
     checkBoxGroupModifier_->touchHoverType_ = TouchHoverAnimationType::HOVER;
-    checkBoxGroupModifier_->UpdateAnimatableProperty();
+    checkBoxGroupModifier_->UpdateAnimatableProperty(groupFrameNode);
     checkBoxGroupModifier_->animateTouchHoverColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     checkBoxGroupModifier_->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    checkBoxGroupModifier_->UpdateAnimatableProperty();
+    checkBoxGroupModifier_->UpdateAnimatableProperty(groupFrameNode);
     EXPECT_EQ(checkBoxGroupModifier_->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
     checkBoxGroupModifier_->touchHoverType_ = TouchHoverAnimationType::NONE;
-    checkBoxGroupModifier_->UpdateAnimatableProperty();
+    checkBoxGroupModifier_->UpdateAnimatableProperty(groupFrameNode);
     EXPECT_EQ(checkBoxGroupModifier_->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
     checkBoxGroupModifier_->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    checkBoxGroupModifier_->UpdateAnimatableProperty();
+    checkBoxGroupModifier_->UpdateAnimatableProperty(groupFrameNode);
     EXPECT_EQ(checkBoxGroupModifier_->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     checkBoxGroupModifier_->touchHoverType_ = TouchHoverAnimationType::PRESS;
-    checkBoxGroupModifier_->UpdateAnimatableProperty();
+    checkBoxGroupModifier_->UpdateAnimatableProperty(groupFrameNode);
     EXPECT_EQ(checkBoxGroupModifier_->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 

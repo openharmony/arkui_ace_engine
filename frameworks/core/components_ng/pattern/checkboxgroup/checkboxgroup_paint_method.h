@@ -76,10 +76,12 @@ public:
         checkboxGroupModifier_->SetOffset(offset);
         checkboxGroupModifier_->SetSize(size);
         checkboxGroupModifier_->SetTouchHoverAnimationType(touchHoverType_);
-        checkboxGroupModifier_->UpdateAnimatableProperty();
-        SetHoverEffectType(paintProperty);
-        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
         CHECK_NULL_VOID(host);
+        checkboxGroupModifier_->UpdateAnimatableProperty(host);
+        SetHoverEffectType(paintProperty);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto checkboxTheme = context->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
