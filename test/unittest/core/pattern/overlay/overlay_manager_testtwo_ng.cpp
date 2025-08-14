@@ -1011,6 +1011,26 @@ HWTEST_F(OverlayManagerTwoTestNg, FindWebNode002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindWebNode003
+ * @tc.desc: Test FindWebNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, FindWebNode003, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto navDestinationNode = FrameNode::CreateFrameNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    navDestinationNode->isInternal_ = true;
+    rootNode->AddChild(navDestinationNode);
+    RefPtr<NG::FrameNode> webNode;
+    webNode = nullptr;
+    bool isNavDestination = false;
+    overlayManager->FindWebNode(navDestinationNode, webNode, isNavDestination);
+    EXPECT_TRUE(isNavDestination);
+}
+
+/**
  * @tc.name: RemoveAllModalInOverlayByList001
  * @tc.desc: Test RemoveAllModalInOverlayByList
  * @tc.type: FUNC
@@ -1051,6 +1071,24 @@ HWTEST_F(OverlayManagerTwoTestNg, OnRemoveAllModalInOverlayByList001, TestSize.L
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->modalList_.push_back(rootNode);
     EXPECT_FALSE(overlayManager->OnRemoveAllModalInOverlayByList());
+}
+
+/**
+ * @tc.name: OnRemoveAllModalInOverlayByList002
+ * @tc.desc: Test OnRemoveAllModalInOverlayByList
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OnRemoveAllModalInOverlayByList002, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto modalPattern = AceType::MakeRefPtr<ModalPresentationPattern>(-1, ModalTransition::DEFAULT, nullptr);
+    auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, -1, modalPattern);
+    auto builderNode = FrameNode::CreateFrameNode("builder", 3, AceType::MakeRefPtr<Pattern>());
+    modalNode->AddChild(builderNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->modalList_.push_back(modalNode);
+    EXPECT_TRUE(overlayManager->OnRemoveAllModalInOverlayByList());
+    EXPECT_TRUE(overlayManager->modalList_.empty());
 }
 
 /**
@@ -1327,6 +1365,51 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     EXPECT_NE(dialogNode2_, nullptr);
     props.levelOrder = std::make_optional(0.0);
     overlayManager->SetDialogTransitionEffect(dialogNode2_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_SetDialogTransitionEffect004
+ * @tc.desc: Test OverlayManager::SetDialogTransitionEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto dialogTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+        .dialogTransitionEffect = dialogTransitionEffect,
+        .maskTransitionEffect = maskTransitionEffect,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
+    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
