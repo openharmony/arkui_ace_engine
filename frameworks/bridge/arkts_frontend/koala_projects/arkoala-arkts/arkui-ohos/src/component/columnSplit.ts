@@ -86,7 +86,7 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
     }
     public divider(value: ColumnSplitDividerStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
     getPeer(): ArkColumnSplitPeer {

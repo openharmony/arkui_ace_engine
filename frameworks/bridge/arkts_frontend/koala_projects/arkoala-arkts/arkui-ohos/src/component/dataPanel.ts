@@ -268,7 +268,7 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-        }
+    }
 }
 export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
     getPeer(): ArkDataPanelPeer {

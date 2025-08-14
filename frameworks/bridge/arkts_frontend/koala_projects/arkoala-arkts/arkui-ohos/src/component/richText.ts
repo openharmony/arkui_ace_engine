@@ -79,7 +79,7 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
     }
     public onComplete(value: (() => void) | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRichTextComponent extends ArkCommonMethodComponent implements RichTextAttribute {
     getPeer(): ArkRichTextPeer {

@@ -335,7 +335,7 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     }
     public baselineOffset(value: LengthMetrics | undefined): this {
         return this
-        }
+    }
 }
 export type SpanInterface = (value: string | Resource) => SpanAttribute;
 export interface SpanAttribute extends BaseSpan {

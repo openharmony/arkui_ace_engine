@@ -1099,7 +1099,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     }
     public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         return this
-        }
+    }
 }
 export interface CutEvent {
     preventDefault?: (() => void);

@@ -327,7 +327,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     }
     public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements SideBarContainerAttribute {
     getPeer(): ArkSideBarContainerPeer {

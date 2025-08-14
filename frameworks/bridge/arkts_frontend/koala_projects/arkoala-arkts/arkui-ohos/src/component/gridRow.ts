@@ -135,7 +135,7 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
     }
     public alignItems(value: ItemAlign | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGridRowComponent extends ArkCommonMethodComponent implements GridRowAttribute {
     getPeer(): ArkGridRowPeer {

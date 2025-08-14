@@ -106,7 +106,7 @@ export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttri
     }
     public endPoint(value: ShapePoint | undefined): this {
         return this
-        }
+    }
 }
 export class ArkLineComponent extends ArkCommonShapeMethodComponent implements LineAttribute {
     getPeer(): ArkLinePeer {

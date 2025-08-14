@@ -96,7 +96,7 @@ export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements Plu
     }
     public onError(value: PluginErrorCallback | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements PluginComponentAttribute {
     getPeer(): ArkPluginComponentPeer {

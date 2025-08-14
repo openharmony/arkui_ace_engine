@@ -1129,7 +1129,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     }
     public _onChangeEvent_value(callback: ((breakpoints: string) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkSearchComponent extends ArkCommonMethodComponent implements SearchAttribute {
     getPeer(): ArkSearchPeer {

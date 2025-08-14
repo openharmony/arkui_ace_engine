@@ -153,7 +153,7 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
     }
     public order(value: number | GridColColumnOption | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
     getPeer(): ArkGridColPeer {

@@ -183,7 +183,7 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     }
     public _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export interface RadioConfiguration extends CommonConfiguration<RadioConfiguration> {
     value: string;

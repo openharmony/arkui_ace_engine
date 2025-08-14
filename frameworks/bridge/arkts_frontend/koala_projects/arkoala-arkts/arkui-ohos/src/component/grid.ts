@@ -772,7 +772,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGridComponent extends ArkScrollableCommonMethodComponent implements GridAttribute {
     getPeer(): ArkGridPeer {

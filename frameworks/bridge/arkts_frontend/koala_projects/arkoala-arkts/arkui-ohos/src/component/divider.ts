@@ -150,7 +150,7 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
     }
     public lineCap(value: LineCapStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkDividerComponent extends ArkCommonMethodComponent implements DividerAttribute {
     getPeer(): ArkDividerPeer {

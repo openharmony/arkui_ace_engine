@@ -957,7 +957,7 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     }
     public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         return this
-        }
+    }
 }
 export type NavDestinationTransitionDelegate = (operation: NavigationOperation, isEnter: boolean) => Array<NavDestinationTransition> | undefined;
 export type Callback_NavDestinationContext_Void = (parameter: NavDestinationContext) => void;

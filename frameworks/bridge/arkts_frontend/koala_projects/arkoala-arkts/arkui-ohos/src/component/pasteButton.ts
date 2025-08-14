@@ -86,7 +86,7 @@ export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle impleme
     onClick_value?: PasteButtonCallback | undefined
     public onClick(value: PasteButtonCallback | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent implements PasteButtonAttribute {
     getPeer(): ArkPasteButtonPeer {

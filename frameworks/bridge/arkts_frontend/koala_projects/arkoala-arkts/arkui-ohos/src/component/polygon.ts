@@ -88,7 +88,7 @@ export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements Polygo
     points_value?: Array<ShapePoint> | undefined
     public points(value: Array<ShapePoint> | undefined): this {
         return this
-        }
+    }
 }
 export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implements PolygonAttribute {
     getPeer(): ArkPolygonPeer {

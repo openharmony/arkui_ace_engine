@@ -319,7 +319,7 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     }
     public contentModifier(value: ContentModifier | undefined): this {
         return this
-        }
+    }
 }
 export class ArkGaugeComponent extends ArkCommonMethodComponent implements GaugeAttribute {
     getPeer(): ArkGaugePeer {

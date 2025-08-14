@@ -279,7 +279,7 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
     }
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkMenuItemComponent extends ArkCommonMethodComponent implements MenuItemAttribute {
     getPeer(): ArkMenuItemPeer {

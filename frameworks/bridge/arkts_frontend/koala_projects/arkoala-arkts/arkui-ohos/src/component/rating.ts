@@ -229,7 +229,7 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     }
     public _onChangeEvent_rating(callback: ((index: number) => void)): void {
         throw new Error("Unimplmented")
-        }
+    }
 }
 export class ArkRatingComponent extends ArkCommonMethodComponent implements RatingAttribute {
     getPeer(): ArkRatingPeer {
