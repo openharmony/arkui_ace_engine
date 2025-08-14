@@ -25,6 +25,14 @@ export class DrawableDescriptor {
   getPixelMap(): image.PixelMap | undefined {
     return this.pixelMap
   }
+
+  static transferStatic(input: Any): Object {
+    if (typeof (input) !== 'object' || input === null) {
+      return new Object();
+    }
+    let inputVal = ESValue.wrap(input) as ESValue;
+    return DrawableDescriptorInner.nativeTransferStatic(inputVal);
+  }
 }
 
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {
@@ -99,6 +107,12 @@ export interface AnimationOptions {
   iterations?: number;
 }
 
+class AnimationOptionsImpl implements AnimationOptions {
+  duration?: number;
+  iterations?: number;
+  constructor() { }
+}
+
 export class AnimatedDrawableDescriptor extends DrawableDescriptor {
   private pixelMaps: Array<image.PixelMap>
   private options: AnimationOptions | undefined = undefined
@@ -126,4 +140,5 @@ export class DrawableDescriptorInner {
   native static createBackground(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static createMask(value: LayeredDrawableDescriptor): DrawableDescriptor;
   native static getMaskClipPath(): string;
+  native static nativeTransferStatic(input: ESValue): DrawableDescriptor;
 }
