@@ -17839,7 +17839,7 @@ export class Serializer extends SerializerBase {
         value_screenId_type = runtimeType(value_screenId)
         valueSerializer.writeInt8(value_screenId_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_screenId_type)) {
-            const value_screenId_value  = value_screenId!
+            const value_screenId_value  = value_screenId! as number
             valueSerializer.writeNumber(value_screenId_value)
         }
     }

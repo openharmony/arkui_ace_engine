@@ -131,7 +131,7 @@ void SetXComponentOptions3Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                const Opt_OnNativeLoadCallback* value)
+                const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -142,9 +142,7 @@ void OnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
-            Opt_Object loadedObj;
-            loadedObj.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-            arkCallback.InvokeSync(loadedObj);
+            arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
     XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));

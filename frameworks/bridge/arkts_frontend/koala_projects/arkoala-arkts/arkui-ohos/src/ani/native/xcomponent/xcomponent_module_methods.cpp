@@ -136,7 +136,7 @@ void ConvertSurfaceChangeCallback(ani_vm* vm,
 } // namespace
 
 void SetXComponentControllerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_object node, ani_object callbackAni)
+    ani_long node, ani_object callbackAni)
 {
     CHECK_NULL_VOID(env);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
