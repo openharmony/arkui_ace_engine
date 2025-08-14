@@ -1245,6 +1245,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (isRowStyle) {
+        // The text content occupies all the remaining space in the ROW component.
         textLayoutProperty->UpdateLayoutWeight(1);
         textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     }
