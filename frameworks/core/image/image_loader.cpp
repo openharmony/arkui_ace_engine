@@ -225,17 +225,21 @@ std::shared_ptr<RSData> FileImageLoader::BuildImageData(const std::shared_ptr<RS
     auto rsData = std::make_shared<RSData>();
     CHECK_NULL_RETURN(rsData, nullptr);
 #ifdef PREVIEW
-    // on Windows previewer, RSData::MakeFromFileName keeps the file open during Drawing::Data's lifetime
-    // return a copy to release the file handle
     return rsData->BuildWithCopy(result->GetData(), result->GetSize()) ? rsData : nullptr;
 #else
-    DataWrapper* wrapper = new DataWrapper { std::move(result) };
+    DataWrapper* wrapper = new DataWrapper{ std::move(result) };
     CHECK_NULL_RETURN(wrapper, nullptr);
-    auto data = wrapper->data;
-    CHECK_NULL_RETURN(data, nullptr);
-    return rsData->BuildWithProc(data->GetData(), data->GetSize(), DataWrapperReleaseProc, wrapper)
-               ? rsData
-               : nullptr;
+    if (wrapper->data == nullptr) {
+        delete wrapper;
+        return nullptr;
+    }
+    if (!rsData->BuildWithProc(wrapper->data->GetData(), wrapper->data->GetSize(), DataWrapperReleaseProc, wrapper)) {
+        if (wrapper) {
+            delete wrapper;
+        }
+        return nullptr;
+    }
+    return rsData;
 #endif
 }
 
