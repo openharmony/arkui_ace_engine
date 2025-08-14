@@ -73,6 +73,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+const int32_t NUM_18 = 18;
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -178,7 +179,11 @@ void XComponentPattern::InitSurface()
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    std::string res = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-";
+    std::string xcId = GetId();
+    const int32_t length = std::min(static_cast<int32_t>(xcId.size()), NUM_18);
+    const int32_t startPos = xcId.size() - length;
+    renderSurface_->SetBufferUsage(res + xcId.substr(startPos, length));
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
