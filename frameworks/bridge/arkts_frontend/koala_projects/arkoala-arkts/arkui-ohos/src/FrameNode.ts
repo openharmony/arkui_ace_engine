@@ -1337,9 +1337,17 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkImageNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent, options?: ImageAIOptions): ImageAttribute {
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor): ImageAttribute {
             let arkImageNode = this.attribute as ArkImageNode;
             return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor, options: ImageAIOptions): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src, options);
         }
     }
 
@@ -1357,7 +1365,11 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBadgeNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(value: BadgeParamWithNumber | BadgeParamWithString): BadgeAttribute {
+        initialize(value: BadgeParamWithNumber): BadgeAttribute {
+            let arkBadgeNode = this.attribute as ArkBadgeNode;
+            return arkBadgeNode!.initialize(value);
+        }
+        initialize(value: BadgeParamWithString): BadgeAttribute {
             let arkBadgeNode = this.attribute as ArkBadgeNode;
             return arkBadgeNode!.initialize(value);
         }
