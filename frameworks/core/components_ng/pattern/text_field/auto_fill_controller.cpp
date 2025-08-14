@@ -144,7 +144,7 @@ void AutoFillController::PlayAutoFillIconShowAnimation(const AutoFillContentLeng
             CHECK_NULL_VOID(autofillController);
             autofillController->PlayAutoFillTranslationAnimation(mode);
             autofillController->PlayAutoFillDefaultCharAnimation(mode);
-        });
+        }, nullptr, symbolNode->GetContextRefPtr());
 }
 
 void AutoFillController::PlayAutoFillDefaultCharAnimation(const AutoFillContentLengthMode& mode)
@@ -175,7 +175,7 @@ void AutoFillController::PlayAutoFillDefaultCharAnimation(const AutoFillContentL
         CHECK_NULL_VOID(textFieldContentModifier);
         autofillController->autoFillAnimationStatus_ = AutoFillAnimationStatus::TRANSLATION;
         textFieldContentModifier->SetAutoFillDefaultCharIndex(std::max(contentLength - 1.0f, 0.0f));
-    });
+    }, nullptr, nullptr, Claim(pattern->GetContext()));
 }
 
 void AutoFillController::PlayAutoFillTranslationAnimation(const AutoFillContentLengthMode& mode)
@@ -227,7 +227,7 @@ void AutoFillController::PlayAutoFillTranslationAnimation(const AutoFillContentL
         textFieldContentModifier->SetAutoFillEmphasizeCharIndex(std::max(contentLength - 1.0f, 0.0f));
         textFieldContentModifier->SetAutoFillTranslationOffset(translationOffset);
         symbolRenderContext->UpdateTransformTranslate({ translationOffset, 0.0f, 0.0f });
-    });
+    }, nullptr, nullptr, Claim(pattern->GetContext()));
 }
 
 void AutoFillController::PlayAutoFillTextScrollAnimation()
@@ -267,7 +267,7 @@ void AutoFillController::PlayAutoFillTextScrollAnimation()
         CHECK_NULL_VOID(textFieldContentModifier);
         autofillController->autoFillAnimationStatus_ = AutoFillAnimationStatus::TRANSLATION;
         textFieldContentModifier->SetAutoFillTextScrollOffset(endScrollOffset);
-    });
+    }, nullptr, nullptr, Claim(pattern->GetContext()));
 }
 
 void AutoFillController::PlayAutoFillIconHideAnimation(
@@ -318,7 +318,7 @@ void AutoFillController::PlayAutoFillIconHideAnimation(
             if (onFinish) {
                 onFinish();
             }
-        });
+        }, nullptr, symbolNode->GetContextRefPtr());
 }
 
 bool AutoFillController::CreateAutoFillIcon()

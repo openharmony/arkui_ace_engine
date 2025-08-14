@@ -319,7 +319,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbCircles001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
@@ -341,7 +341,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbCircles002, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.SetIsReverse(false);
@@ -364,7 +364,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbCircles003, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.circleOffset_.resize(3);
@@ -382,7 +382,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbBackArrow001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.circleOffset_.resize(3);
@@ -401,7 +401,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbBackArrow002, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.lineEndOffset_.resize(2);
@@ -420,7 +420,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbBackArrow003, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
@@ -442,7 +442,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, onDraw001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     EXPECT_CALL(canvas, Save()).Times(0);
@@ -458,7 +458,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, onDraw002, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.SetIsNewAvoid(true);
@@ -475,7 +475,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, onDraw003, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.SetFirstHandleIsShow(true);
@@ -492,7 +492,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, onDraw004, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
     Testing::MockCanvas canvas;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetHasExtensionMenu(true);
     DrawingContext drawingContext { canvas, 100, 100 };
     selectOverlayModifier.SetSecondHandleIsShow(true);
@@ -508,7 +508,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, onDraw004, TestSize.Level1)
 HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionAnimation001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.BackArrowTransitionAnimation(true);
     EXPECT_EQ(selectOverlayModifier.circleOffset_[1]->Get().GetX(), 0);
     EXPECT_EQ(selectOverlayModifier.circleOffset_[1]->Get().GetY(), 0);
@@ -522,7 +522,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionAnimation001, Te
 HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange001, TestSize.Level1)
 {
     OffsetF menuOptionOffset(5, 5);
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 2);
     EXPECT_EQ(selectOverlayModifier.circleOffset_[2]->Get().GetX(), 5);
@@ -537,7 +537,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange001, TestS
 HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange002, TestSize.Level1)
 {
     OffsetF menuOptionOffset(5, 5);
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.circleOffset_.resize(1);
     selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 2);
@@ -553,7 +553,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange002, TestS
 HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange003, TestSize.Level1)
 {
     OffsetF menuOptionOffset(5, 5);
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.lineEndOffset_.resize(4);
     selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 6);
@@ -569,7 +569,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange003, TestS
 HWTEST_F(SelectOverlayContentModifierTestNg, LineEndOffsetWithAnimation001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.LineEndOffsetWithAnimation(true, true);
     EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 0);
 }
@@ -582,7 +582,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, LineEndOffsetWithAnimation001, Test
 HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.circleOffset_.resize(3);
     selectOverlayModifier.rotationAngle_->Set(1);
     selectOverlayModifier.ChangeCircle();
@@ -597,7 +597,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle001, TestSize.Level1)
 HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle002, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.lineEndOffset_.resize(2);
     selectOverlayModifier.rotationAngle_->Set(1);
     selectOverlayModifier.ChangeCircle();
@@ -612,7 +612,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle002, TestSize.Level1)
 HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle003, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.rotationAngle_->Set(1);
     selectOverlayModifier.ChangeCircle();
@@ -627,7 +627,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle003, TestSize.Level1)
 HWTEST_F(SelectOverlayContentModifierTestNg, SetLineEndOffset001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.lineEndOffset_.resize(2);
     selectOverlayModifier.rotationAngle_->Set(1);
@@ -643,7 +643,7 @@ HWTEST_F(SelectOverlayContentModifierTestNg, SetLineEndOffset001, TestSize.Level
 HWTEST_F(SelectOverlayContentModifierTestNg, SetDefaultCircleAndLineEndOffset001, TestSize.Level1)
 {
     OffsetF menuOptionOffset;
-    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true, nullptr);
     selectOverlayModifier.SetIsReverse(true);
     selectOverlayModifier.circleOffset_.clear();
     selectOverlayModifier.lineEndOffset_.clear();
