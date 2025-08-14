@@ -530,6 +530,27 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 
 void JSUIExtension::Mock(const JSCallbackInfo& info) {}
 
+void JSPreviewUIExtension::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPreviewUIExtension>::Declare("PreviewUIExtensionComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSPreviewUIExtension>::StaticMethod("create", &JSPreviewUIExtension::Create, opt);
+    JSClass<JSPreviewUIExtension>::StaticMethod("onError", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::StaticMethod("width", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::StaticMethod("height", &JSPreviewUIExtension::Mock);
+    JSClass<JSPreviewUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSPreviewUIExtension::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("PreviewUIExtensionComponent");
+}
+
+void JSPreviewUIExtension::Mock(const JSCallbackInfo& info) {}
+
 void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSecurityUIExtension>::Declare("SecurityUIExtensionComponent");

@@ -777,6 +777,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PluginComponent", JSPlugin::JSBind },
     { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
+    { "PreviewUIExtensionComponent", JSPreviewUIExtension::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
@@ -788,6 +789,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Screen", JSScreen::JSBind },
     { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
     { "SecurityUIExtensionProxy", JSSecurityUIExtensionProxy::JSBind },
+    { "PreviewUIExtensionComponent", JSPreviewUIExtension::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },

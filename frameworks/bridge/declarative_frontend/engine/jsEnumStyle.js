@@ -118,6 +118,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
 
+let PreviewDpiFollowStrategy;
+(function (PreviewDpiFollowStrategy) {
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
+})(PreviewDpiFollowStrategy || (PreviewDpiFollowStrategy = {}));
+
 let WindowModeFollowStrategy;
 (function (WindowModeFollowStrategy) {
   WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
