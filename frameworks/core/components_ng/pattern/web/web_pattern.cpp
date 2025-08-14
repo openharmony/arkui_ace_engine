@@ -1090,7 +1090,7 @@ void WebPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->ReleasePageEvent(host, true, true);
+    accessibilityManager->ReleasePageEvent(host, true, false);
 }
 
 void WebPattern::OnAttachToFrameNode()

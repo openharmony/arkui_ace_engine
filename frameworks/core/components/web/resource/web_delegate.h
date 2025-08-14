@@ -1442,7 +1442,7 @@ private:
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ { State::WAITINGFORSIZE };
-    bool isPageFinished_;
+    bool isPageFinished_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
