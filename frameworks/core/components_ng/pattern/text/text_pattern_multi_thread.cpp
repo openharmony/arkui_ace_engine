@@ -181,6 +181,7 @@ void TextPattern::SetTextDetectEnableMultiThread(bool enable)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
     dataDetectorAdapter_->frameNode_ = host;
     if (enable == textDetectEnable_) {
         return;
