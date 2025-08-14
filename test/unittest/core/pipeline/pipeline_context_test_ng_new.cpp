@@ -3976,7 +3976,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
-     * @tc.expected: topNavNode->CallAIFunction result is not AI_CALLER_INVALID.
+     * @tc.expected: topNavNode->CallAIFunction result is AI_CALL_SUCCESS.
      */
     std::vector<std::string> params;
     params.push_back("-bindaihelper");

@@ -249,6 +249,11 @@ void UiReportStub::UnregisterComponentChangeEventCallback()
     ComponentChangeEventCallback_ = nullptr;
 }
 
+void UiReportStub::UnregisterWebUnfocusEventCallback()
+{
+    unfocusEvent_ = nullptr;
+}
+
 void UiReportStub::SendCurrentLanguage(const std::string& data)
 {
     if (getWebViewCurrentLanguageCallback_) {
