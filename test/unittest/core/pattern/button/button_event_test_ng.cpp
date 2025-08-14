@@ -324,7 +324,6 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest001, TestSize.Level1)
     auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(STATE_EFFECT);
-    buttonPattern->isSetClickedColor_ = true;
     buttonPattern->clickedColor_ = FONT_COLOR;
     buttonPattern->HandlePressedStyle();
     buttonPattern->HandleNormalStyle();
@@ -575,7 +574,6 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
     /**
      * @tc.steps: step3. change button params.
      */
-    buttonPattern->isSetClickedColor_ = true;
     buttonPattern->clickedColor_ = Color::RED;
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::BLUE);

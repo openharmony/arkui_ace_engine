@@ -27,6 +27,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "interfaces/include/ws_common.h"
@@ -570,5 +571,124 @@ void JSSecurityUIExtension::OnTerminated(const JSCallbackInfo& info)
         };
     UIExtensionModel::GetInstance()->SetOnTerminated(
         std::move(onTerminated), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+}
+
+void JSPreviewUIExtension::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPreviewUIExtension>::Declare("PreviewUIExtensionComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSPreviewUIExtension>::StaticMethod("create", &JSPreviewUIExtension::Create, opt);
+    JSClass<JSPreviewUIExtension>::StaticMethod("onError", &JSPreviewUIExtension::OnError);
+    JSClass<JSPreviewUIExtension>::StaticMethod("width", &JSPreviewUIExtension::JsWidth);
+    JSClass<JSPreviewUIExtension>::StaticMethod("height", &JSPreviewUIExtension::JsHeight);
+    JSClass<JSPreviewUIExtension>::Bind(globalObj);
+}
+
+static CalcDimension GetSizeValue(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
+        return -1.0;
+    }
+    return value;
+}
+
+void JSPreviewUIExtension::JsWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    CalcDimension value = GetSizeValue(info);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(value);
+}
+
+void JSPreviewUIExtension::JsHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    CalcDimension value = GetSizeValue(info);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetHeight(value);
+}
+
+void JSPreviewUIExtension::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    NG::UIExtensionConfig config;
+    config.sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
+    auto wantObj = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
+    if (want == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_SECURITYUIEXTENSION, "want is nullptr");
+        return;
+    }
+    config.wantWrap = want;
+    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
+        if (transferringCallerValue->IsBoolean()) {
+            config.transferringCaller = transferringCallerValue->ToBoolean();
+        }
+        JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
+        if (enableDensityDPI->IsNumber()) {
+            config.densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+        }
+        do {
+            JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
+            if (!componentContent->IsObject()) {
+                break;
+            }
+            auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
+            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+            if (!builderNode->IsObject()) {
+                break;
+            }
+            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+            if (nodePtr.IsEmpty()) {
+                break;
+            }
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            if (!frameNode) {
+                break;
+            }
+            config.placeholderNode = AceType::Claim(frameNode);
+        } while (false);
+    }
+    NG::PreviewUIExtensionAdapter::GetInstance()->Create(config);
+}
+
+void JSPreviewUIExtension::OnError(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+        instanceId, node = AceType::WeakClaim(frameNode)]
+        (int32_t code, const std::string& name, const std::string& message) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("PreviewUIExtensionComponent.onError");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetProperty<std::string>("name", name);
+            obj->SetProperty<std::string>("message", message);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
+        };
+    NG::PreviewUIExtensionAdapter::GetInstance()->SetOnError(AceType::Claim(frameNode), std::move(onError));
 }
 } // namespace OHOS::Ace::Framework

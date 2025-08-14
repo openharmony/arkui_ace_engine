@@ -363,7 +363,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     }
 
     if (this.links_.get(propName)) {
-      stateMgmtConsole.warn(`PersistentStorage: persistProp: ${propName} is already persisted`);
+      stateMgmtConsole.debug(`PersistentStorage: persistProp: ${propName} is already persisted`);
       return false;
     }
 

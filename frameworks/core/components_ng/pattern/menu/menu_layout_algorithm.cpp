@@ -2877,21 +2877,50 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-bool MenuLayoutAlgorithm::SkipUpdateTargetNodeSize(
+bool MenuLayoutAlgorithm::NeedHoldTargetOffset(
     const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_RETURN(menuPattern, false);
+    if (!menuPattern->GetTargetSize().IsPositive()) {
+        return false;
+    }
     auto menuWrapper = menuPattern->GetMenuWrapper();
     CHECK_NULL_RETURN(menuWrapper, false);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
+    if (menuWrapperPattern->IsHide()) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "offset hold by menu hide");
+        return true;
+    }
+    if (!targetNode) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "offset hold by target not exist");
+        return true;
+    }
+    auto targetRenderContext = targetNode->GetRenderContext();
+    CHECK_NULL_RETURN(targetRenderContext, false);
+    auto targetOpacity = targetRenderContext->GetOpacityValue(0.0);
+    if (NearZero(targetOpacity)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "offset hold by target opacity");
+        return true;
+    }
+    auto targetVisible = targetNode->IsVisible();
+    if (!targetVisible) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "offset hold by target unvisible");
+        return true;
+    }
+    auto targetSize = targetNode->GetPaintRectWithTransform().GetSize();
+    if (!targetSize.IsPositive()) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "offset hold by target size");
+        return true;
+    }
+    return false;
+}
 
-    auto isMenuHide = menuWrapperPattern->IsHide();
-    auto isTargetEmpty = !targetNode && menuPattern->GetTargetSize().IsPositive();
-    if (isMenuHide || isTargetEmpty) {
-        TAG_LOGI(AceLogTag::ACE_MENU,
-            "targetNode empty: %{public}d, menu hidden: %{public}d, update targetNode to last size and position",
-            isTargetEmpty, isMenuHide);
+bool MenuLayoutAlgorithm::SkipUpdateTargetNodeSize(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    if (NeedHoldTargetOffset(targetNode, menuPattern)) {
         targetSize_ = menuPattern->GetTargetSize();
         targetOffset_ = menuPattern->GetTargetOffset();
         return true;

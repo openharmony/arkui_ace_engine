@@ -20,23 +20,8 @@
 
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
-
-enum ActionSheetType {
-    ACTIONSHEET_TITLE,
-    ACTIONSHEET_SUBTITLE,
-    ACTIONSHEET_MESSAGE,
-    ACTIONSHEET_BACKGROUNDCOLOR,
-    ACTIONSHEET_BORDERCOLOR
-};
-
-enum ActionSheetInfoType {
-    ACTIONSHEETINFO_TITLE,
-    ACTIONSHEETINFO_ICON
-};
-
 class ACE_FORCE_EXPORT ActionSheetModel {
 public:
     static ActionSheetModel* GetInstance();

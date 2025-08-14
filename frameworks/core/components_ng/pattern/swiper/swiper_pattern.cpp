@@ -3258,6 +3258,9 @@ std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 
 void SwiperPattern::UpdateAnimationProperty(float velocity)
 {
+    if (fastAnimationRunning_) {
+        return;
+    }
     if (isDragging_ || childScrolling_) {
         targetIndex_ = CheckTargetIndex(ComputeNextIndexByVelocity(velocity));
         velocity_ = velocity;

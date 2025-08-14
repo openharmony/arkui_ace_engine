@@ -19,10 +19,8 @@
 #include <string>
 
 #include "base/memory/referenced.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,20 +32,6 @@ public:
 private:
     static void SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog);
     static std::string GetDialogTag(const DialogProperties& param);
-    static void CreateWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetBackgroundColorWithResourceObj(const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj);
-    static void SetMaskColorWithResourceObj(const RefPtr<FrameNode>& frameNode, const RefPtr<ResourceObject>& resObj);
-    static void SetWidthWithResourceObj(
-        const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj);
-    static void SetHeightWithResourceObj(const RefPtr<FrameNode>& node, const RefPtr<ResourceObject>& resObj);
-    static void SetOffsetWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetShadowWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetEffectWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetBlurStyleWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetMaskRectWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetBorderWidthWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetBorderColorWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
-    static void SetCornerRadiusWithResourceObj(const RefPtr<FrameNode>& node, const DialogProperties& param);
 };
 } // namespace OHOS::Ace::NG
 

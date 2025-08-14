@@ -732,6 +732,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
@@ -1885,6 +1886,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest024, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
  
@@ -1939,6 +1941,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     focusHub->onBlurInternal_();
     ASSERT_FALSE(sliderPattern->bubbleFlag_);
 
