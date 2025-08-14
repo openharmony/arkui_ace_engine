@@ -255,6 +255,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     deviceWidth_ = options.deviceWidth;
     deviceHeight_ = options.deviceHeight;
     isRound_ = options.isRound;
+    isComponentMode_ = options.isComponentMode;
     onRouterChange_ = options.onRouterChange;
     deviceConfig_.orientation = static_cast<DeviceOrientation>(options.deviceConfig.orientation);
     deviceConfig_.deviceType = static_cast<DeviceType>(options.deviceConfig.deviceType);
@@ -392,6 +393,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     }
     container->SetInstallationFree(installationFree_);
     container->SetLabelId(labelId_);
+    AceContainer::SetComponentModeFlag(isComponentMode_);
     auto config = container->GetResourceConfiguration();
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());

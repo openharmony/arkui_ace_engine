@@ -557,8 +557,9 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
 
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
     auto rowChild = child->GetOrCreateChildByIndex(0);
-    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG) && textAlign != TextAlign::CENTER) {
         auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
         CHECK_NULL_VOID(securityLayoutProperty);
         securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
@@ -589,7 +590,6 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
         rowChild->Measure(childConstraint);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
     if (textAlign == TextAlign::CENTER) {
         ExtendTextAndRowNode(child, idealSize, horInterval_, childConstraint);
     }

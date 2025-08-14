@@ -52,7 +52,7 @@ enum class ListPosMapUpdate {
 };
 
 class ListPositionMap : public virtual AceType {
-    DECLARE_ACE_TYPE(ListPositionMap, AceType)
+    DECLARE_ACE_TYPE(ListPositionMap, AceType);
 public:
     ListPositionMap() = default;
     ~ListPositionMap() override = default;

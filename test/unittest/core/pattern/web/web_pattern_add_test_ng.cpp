@@ -1191,4 +1191,70 @@ HWTEST_F(WebPatternAddTestNg, NotifyStartDragTask001, TestSize.Level1)
     EXPECT_FALSE(result);
 #endif
 }
+
+/**
+ * @tc.name: HandleOnDragDropFile001
+ * @tc.desc: WebPatternAddTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, HandleOnDragDropFile001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    RefPtr<UnifiedDataImpl> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    EXPECT_NE(aceUnifiedData, nullptr);
+    webPattern->delegate_->dragData_ = std::make_shared<NWebDragDataTrueDummy>();
+    auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
+    EXPECT_NE(mockUdmfClient, nullptr);
+    std::vector<std::string> urlVec = { "abc/dragdrop/test.txt" };
+    EXPECT_CALL(*mockUdmfClient, GetFileUriEntry(AceType::DynamicCast<UnifiedData>(aceUnifiedData), _))
+        .WillOnce(testing::Invoke([&](const RefPtr<UnifiedData>& data, std::vector<std::string>& outUrlVec) {
+            outUrlVec = urlVec;
+            EXPECT_FALSE(outUrlVec.empty());
+            return true;
+        }));
+    webPattern->HandleOnDragDropFile(aceUnifiedData);
+#endif
+}
+
+/**
+ * @tc.name: handleDragCancelTask001
+ * @tc.desc: WebPatternAddTestNg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, handleDragCancelTask001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_NE(gestureHub, nullptr);
+    webPattern->InitDragEvent(gestureHub);
+    EXPECT_NE(webPattern->dragEvent_, nullptr);
+    auto drag_cancel_task = webPattern->dragEvent_->GetActionCancelEventFunc();
+    EXPECT_NE(drag_cancel_task, nullptr);
+    drag_cancel_task();
+    EXPECT_FALSE(webPattern->isDragging_);
+#endif
+}
 } // namespace OHOS::Ace::NG

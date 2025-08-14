@@ -52,7 +52,7 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
 
     float defaultHeight = contentConstraint.percentReference.Height();
     float defaultWidth = contentConstraint.percentReference.Width();
-    float defaultLoadingSize = progressTheme->GetLoadingDefaultSize().ConvertToPx();
+    float defaultLoadingSize = pipeline->NormalizeToPx(progressTheme->GetLoadingDefaultSize());
     if (LessNotEqual(0.0f, defaultLoadingSize)) {
         defaultHeight = defaultLoadingSize;
         defaultWidth = defaultLoadingSize;

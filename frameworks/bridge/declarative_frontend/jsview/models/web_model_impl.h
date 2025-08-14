@@ -126,6 +126,8 @@ public:
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
     void SetOptimizeParserBudgetEnabled(bool enable) override;
+    void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
 };
 } // namespace OHOS::Ace::Framework

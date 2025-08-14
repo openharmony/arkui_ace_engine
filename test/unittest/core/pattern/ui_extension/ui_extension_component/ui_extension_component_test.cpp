@@ -385,8 +385,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
 
-    pattern->OnVisibleChangeInner(true);
-    pattern->OnVisibleChangeInner(false);
+    pattern->OnRealVisibleChangeInner(true);
+    pattern->OnRealVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -425,8 +425,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     InValidSessionWrapper(pattern);
-    pattern->OnVisibleChangeInner(true);
-    pattern->OnVisibleChangeInner(false);
+    pattern->OnRealVisibleChangeInner(true);
+    pattern->OnRealVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -502,7 +502,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionUsageTest, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
 
@@ -2081,5 +2082,23 @@ HWTEST_F(UIExtensionComponentTestNg, ModalUIExtensionTestNgTestNg, TestSize.Leve
     pattern1->usage_ = UIExtensionUsage::MODAL;
     pattern2->OnConnect();
     EXPECT_EQ(pattern2->isModalRequestFocus_, false);
+}
+
+/**
+ * @tc.name: Visible Test
+ * @tc.desc: Test UIExtension Visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternVisibleTest, TestSize.Level1)
+{
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->visiblityProperty_, true);
+    pattern->OnVisibleChange(false);
+    EXPECT_EQ(pattern->visiblityProperty_, false);
+    pattern->OnVisibleChange(true);
+    EXPECT_EQ(pattern->visiblityProperty_, true);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,17 +131,17 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    if (!SetScrollProperties(dirty)) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!SetScrollProperties(dirty, host)) {
         return false;
     }
     UpdateScrollBarOffset();
-    if (config.frameSizeChange) {
+    if (config.frameSizeChange && isInitialized_) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
@@ -176,7 +176,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             ((config.frameSizeChange || config.contentSizeChange) && paintProperty->GetContentClip().has_value());
 }
 
-bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
+bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host)
 {
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -211,7 +211,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         SetIntervalSize(Dimension(static_cast<double>(viewPortLength_)));
     }
     if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
-        CaleSnapOffsets();
+        CaleSnapOffsets(host);
         scrollSnapUpdate_ = false;
     }
     ProcessZoomScale();
@@ -1050,26 +1050,28 @@ std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapD
     return predictSnapOffset;
 }
 
-void ScrollPattern::CaleSnapOffsets()
+void ScrollPattern::CaleSnapOffsets(const RefPtr<FrameNode>& host)
 {
-    auto scrollSnapAlign = GetScrollSnapAlign();
+    auto scrollSnapAlign = GetScrollSnapAlign(host);
     std::vector<float>().swap(snapOffsets_);
     if (scrollSnapAlign == ScrollSnapAlign::NONE) {
         CHECK_NULL_VOID(enablePagingStatus_ == ScrollPagingStatus::VALID);
         scrollSnapAlign = ScrollSnapAlign::START;
     }
     if (IsSnapToInterval()) {
-        CaleSnapOffsetsByInterval(scrollSnapAlign);
+        CaleSnapOffsetsByInterval(scrollSnapAlign, host);
     } else {
         CaleSnapOffsetsByPaginations(scrollSnapAlign);
     }
 }
 
-void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
+void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign, const RefPtr<FrameNode>& host)
 {
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
-    auto intervalSize =
-        intervalSize_.Unit() == DimensionUnit::PERCENT ? intervalSize_.Value() * mainSize : intervalSize_.ConvertToPx();
+    auto pipeline = host->GetContext();
+    auto intervalSize = intervalSize_.Unit() == DimensionUnit::PERCENT
+                            ? intervalSize_.Value() * mainSize
+                            : (pipeline ? pipeline->NormalizeToPx(intervalSize_) : intervalSize_.ConvertToPx());
     CHECK_NULL_VOID(GreatOrEqual(intervalSize, SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
@@ -1187,6 +1189,14 @@ bool ScrollPattern::NeedScrollSnapToSide(float delta)
         }
     }
     return false;
+}
+
+ScrollSnapAlign ScrollPattern::GetScrollSnapAlign(const RefPtr<FrameNode>& host) const
+{
+    CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
+    auto scrollLayoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
+    return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
 }
 
 std::string ScrollPattern::ProvideRestoreInfo()
@@ -1473,7 +1483,7 @@ void ScrollPattern::OnColorModeChange(uint32_t colorMode)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (scrollSnapUpdate_) {
-        CaleSnapOffsets();
+        CaleSnapOffsets(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

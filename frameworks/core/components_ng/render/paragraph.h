@@ -319,6 +319,14 @@ public:
     {
         return false;
     };
+    virtual bool DidExceedMaxLinesInner()
+    {
+        return false;
+    }
+    virtual std::string GetDumpInfo()
+    {
+        return "";
+    }
 };
 } // namespace OHOS::Ace::NG
 

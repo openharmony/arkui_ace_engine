@@ -488,6 +488,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
     }
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
@@ -844,7 +850,7 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     CalcDimension value;
     value.SetValue(static_cast<double>(radius));
@@ -905,8 +911,11 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        CHECK_NULL_VOID(ctx->bgLoadingCtx_);
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
+        CHECK_NULL_VOID(ctx->GetHost());
+        CHECK_NULL_VOID(ctx->GetHost()->GetGeometryNode());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBackground();
             ctx->RequestNextFrame();
@@ -1167,7 +1176,7 @@ void RosenRenderContext::UpdateBackgroundEffect(
         rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     float radiusPx = context->NormalizeToPx(effectOption->radius);
     float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
@@ -2269,7 +2278,8 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
 
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    if (ShouldSkipAffineTransformation(rsNode_)) {
+    // when the width and height of rect is -1, the func SkewRect will change to 1
+    if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         gRect = rect;
         return rect;
     }
@@ -2565,7 +2575,8 @@ RectF RosenRenderContext::GetPaintRectWithTransformWithoutDegree()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
-    if (ShouldSkipAffineTransformation(rsNode_)) {
+    // when the width and height of rect is -1, the func SkewRect will change to 1
+    if (ShouldSkipAffineTransformation(rsNode_) && rect.Width() != -1 && rect.Height() != -1) {
         return rect;
     }
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
@@ -4001,7 +4012,18 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
-    parent->RebuildRenderContextTree();
+    auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
+        auto parent = weak.Upgrade();
+        CHECK_NULL_VOID(parent);
+        parent->RebuildRenderContextTree();
+    };
+    auto pipeline = parent->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->IsLayouting()) {
+        pipeline->AddAfterLayoutTask(std::move(task));
+        return;
+    }
+    task();
 }
 
 void RosenRenderContext::ResetBlendBgColor()

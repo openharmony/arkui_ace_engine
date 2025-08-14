@@ -411,7 +411,7 @@ protected:
     bool isEnableSecure_ = false;
     bool isSurfaceLock_ = false;
     RenderFit renderFit_ = RenderFit::RESIZE_FILL;
-    RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>(UIObjectType::DISPLAYSYNC_XCOMPONENT);
+    RefPtr<UIXComponentDisplaySync> displaySync_ = AceType::MakeRefPtr<UIXComponentDisplaySync>();
     bool needRecoverDisplaySync_ = false;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     ArkUI_AccessibilityProvider* arkuiAccessibilityProvider_ = nullptr;
@@ -481,14 +481,12 @@ private:
     void RegisterNode();
     void UnregisterNode();
 
-#ifdef ACE_STATIC
     void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
     void InitControllerMultiThread();
     void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
-#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -519,10 +517,6 @@ private:
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     SizeF initSize_;
     OffsetF globalPosition_;
-
-#ifdef ENABLE_ROSEN_BACKEND
-    FrameRateRange lastFrameRateRange_;
-#endif
 
     std::optional<float> selfIdealSurfaceWidth_;
     std::optional<float> selfIdealSurfaceHeight_;

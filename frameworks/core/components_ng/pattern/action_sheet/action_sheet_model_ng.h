@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
 #include "frameworks/base/utils/macros.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ActionSheetModelNG : public OHOS::Ace::ActionSheetModel {
@@ -30,13 +29,6 @@ public:
         ButtonInfo& buttonInfo, DialogProperties& arg) override;
     void SetOnWillDismiss(std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
         DialogProperties& arg) override;
-    static void CreateWithOptionsResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
-        const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type);
-    static std::string DialogTypeStr(ActionSheetType type);
-    static void UpdateActionSheetType(
-        const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern, ActionSheetType type, std::string result);
-    static void CreateWithColorResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
-        const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ACTION_SHEET_ACTION_SHEET_MODEL_NG_H

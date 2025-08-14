@@ -97,7 +97,6 @@ std::string SpanItem::GetFont() const
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
-    /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
@@ -116,8 +115,14 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("textCase",
             V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
-        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
-            .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        if (spanItemType == SpanItemType::SYMBOL) {
+            const std::optional<std::vector<Color>>& colorListOptional = fontStyle->GetSymbolColorList();
+            auto colorListValue = colorListOptional.has_value() ? colorListOptional.value() : std::vector<Color>();
+            json->PutExtAttr("fontColor", StringUtils::SymbolColorListToString(colorListValue).c_str(), filter);
+        } else {
+            json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+                .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        }
         json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
         json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
         json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
@@ -127,19 +132,16 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
         json->Put("symbolEffect",
             GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
-        // Determines if there are multiple textShadows
         auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
         json->PutExtAttr("textShadow", jsonShadow, filter);
     }
+    auto dim = Dimension();
     if (textLineStyle) {
-        json->PutExtAttr("lineHeight",
-            textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str(), filter);
-        json->PutExtAttr("lineSpacing",
-            textLineStyle->GetLineSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineHeight", textLineStyle->GetLineHeight().value_or(dim).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing", textLineStyle->GetLineSpacing().value_or(dim).ToString().c_str(), filter);
         json->PutExtAttr("baselineOffset",
-            textLineStyle->GetBaselineOffset().value_or(Dimension()).ToString().c_str(), filter);
+            textLineStyle->GetBaselineOffset().value_or(dim).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }

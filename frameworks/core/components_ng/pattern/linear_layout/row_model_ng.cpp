@@ -34,6 +34,8 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Row: the space value is illegal due to space is less than zero");
     }
 }
 
@@ -84,7 +86,7 @@ void RowModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& 
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value(), frameNode);
     } else {
-        LOGE("Column: the space value is illegal due to space is less than zero");
+        LOGE("Row: the space value is illegal due to space is less than zero");
     }
 }
 
@@ -118,7 +120,7 @@ void RowModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& sp
     if (GreatOrEqual(value.Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value);
     } else {
-        LOGE("Column: the space value is illegal due to space is less than zero");
+        LOGE("Row: the space value is illegal due to space is less than zero");
     }
 }
 

@@ -56,10 +56,10 @@ class ComponentContent extends Content implements IDisposable {
     this.builderNode_.onRecycleWithBindObject();
   }
   public dispose(): void {
+    this.disposable_.dispose();
     if (this.getNodePtr()) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
     }
-    this.disposable_.dispose();
     this.detachFromParent();
     this.attachNodeRef_?.dispose();
     this.builderNode_?.dispose();

@@ -558,6 +558,7 @@ private:
     bool isNeedSyncLoad_ = false;
     bool measureInNextFrame_ = false;
     bool prevMeasureBreak_ = false;
+    int32_t pauseMeasureCacheItem_ = -1;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

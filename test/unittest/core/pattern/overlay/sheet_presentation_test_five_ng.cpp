@@ -27,6 +27,7 @@
 #include "test/mock/core/common/mock_window.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,6 +53,10 @@ public:
     static void SetSheetType(RefPtr<SheetPresentationPattern> sheetPattern, SheetType sheetType);
     static void TearDownTestCase();
     static void SetApiVersion(int32_t apiTargetVersion);
+    std::function<RefPtr<UINode>()> builderFunc_;
+    std::function<RefPtr<UINode>()> titleBuilderFunc_;
+protected:
+    void CreateSheetBuilder(float builderHeight = 800.f, float titleHeight = 800.f);
 };
 
 void SheetPresentationTestFiveNg::SetUpTestCase()
@@ -116,6 +122,30 @@ void SheetPresentationTestFiveNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void SheetPresentationTestFiveNg::CreateSheetBuilder(float builderHeight, float titleHeight)
+{
+    auto builderFunc = [builderHeight]() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+    auto buildTitleNodeFunc = [titleHeight]() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+    builderFunc_ = builderFunc;
+    titleBuilderFunc_ = buildTitleNodeFunc;
 }
 
 /**
@@ -1578,6 +1608,87 @@ HWTEST_F(SheetPresentationTestFiveNg, UpdateSheetObject001, TestSize.Level1)
      */
     sheetPattern->UpdateSheetObject(SheetType::SHEET_CENTER);
     EXPECT_EQ(sheetObject->sheetType_, SheetType::SHEET_CENTER);
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SheetTransitionForOverlay001
+ * @tc.desc: Branch: if (GetDismissProcess()).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, SheetTransitionForOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto targetNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    context->UpdateTransformTranslate({ 0.0f, 100.0f, 0.0f });
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->pageHeight_ = 800.0f;
+    sheetPattern->isDismissProcess_ = true;
+
+    /**
+     * @tc.steps: step. set sheetHeight_ is 800.0f, SheetTransitionForOverlay.
+     * @tc.expected: GetTransformTranslate()->y.ConvertToPx() is 100.0f.
+     */
+    overlayManager->sheetHeight_ = 800.0f;
+    sheetPattern->SheetTransitionForOverlay(true, true);
+    EXPECT_EQ(context->GetTransformTranslate()->y.ConvertToPx(), 100.0f);
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateMaskBackgroundColorRender001
+ * @tc.desc: Branch: if (GetDismissProcess()).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, UpdateMaskBackgroundColorRender001, TestSize.Level1)
+{
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+    SheetStyle sheetStyle;
+    sheetStyle.maskColor = Color(0x00000000);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetPattern->sheetMaskColor_ = Color(0xff0000ff);
+    sheetPattern->UpdateMaskBackgroundColorRender();
+    EXPECT_EQ(sheetPattern->sheetMaskColor_, Color(0xff0000ff));
+
     SheetPresentationTestFiveNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

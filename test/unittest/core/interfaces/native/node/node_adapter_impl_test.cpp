@@ -402,4 +402,68 @@ HWTEST_F(NodeAdapterImplTest, GetNodeAdapter004, TestSize.Level1)
     auto hostHandle = node->getNodeAdapter(host);
     EXPECT_EQ(hostHandle, nullptr);
 }
+
+/**
+ * @tc.name: GetNodeTypeInNodeAdapter001
+ * @tc.desc: Check get node type from node adapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAdapterImplTest, GetNodeTypeInNodeAdapter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a frameNode.
+     */
+    const ArkUINodeAdapterAPI* node = NodeAdapter::GetNodeAdapterAPI();
+    ASSERT_NE(node, nullptr);
+    ArkUINodeAdapterHandle handle = node->create();
+    ASSERT_NE(handle, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    ArkUINodeHandle host = reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(frameNode1));
+    /**
+     * @tc.steps2: GetNodeTypeInNodeAdapter.
+     * @tc.expected: "".
+     */
+    std::string tag = node->getNodeType(handle);
+    EXPECT_EQ(tag, "");
+    /**
+     * @tc.steps3: GetNodeTypeInNodeAdapter.
+     * @tc.expected: "LazyForEach".
+     */
+    auto attachResult = node->attachHostNode(handle, host);
+    EXPECT_TRUE(attachResult);
+    tag = node->getNodeType(handle);
+    EXPECT_EQ(tag, "LazyForEach");
+}
+
+/**
+ * @tc.name: FireArkUIObjectLifecycleCallback001
+ * @tc.desc: Check fire arkui object life cycle callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeAdapterImplTest, FireArkUIObjectLifecycleCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a frameNode.
+     */
+    const ArkUINodeAdapterAPI* node = NodeAdapter::GetNodeAdapterAPI();
+    ASSERT_NE(node, nullptr);
+    ArkUINodeAdapterHandle handle = node->create();
+    ASSERT_NE(handle, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode1, nullptr);
+    ArkUINodeHandle host = reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(frameNode1));
+    /**
+     * @tc.steps2: FireArkUIObjectLifecycleCallback.
+     * @tc.expected: taskExecuted true.
+     */
+    auto attachResult = node->attachHostNode(handle, host);
+    EXPECT_TRUE(attachResult);
+    auto mockPipeline = NG::MockPipelineContext::GetCurrent();
+    ASSERT_NE(mockPipeline, nullptr);
+    bool taskExecuted = false;
+    mockPipeline->RegisterArkUIObjectLifecycleCallback([&taskExecuted](void*) { taskExecuted = true; });
+    node->fireArkUIObjectLifecycleCallback(reinterpret_cast<void*>(new int), handle);
+    EXPECT_TRUE(taskExecuted);
+}
 } // namespace OHOS::Ace::NG

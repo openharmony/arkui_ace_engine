@@ -32,10 +32,15 @@ class ACE_EXPORT EntryPageInfo : public PageInfo {
 public:
     EntryPageInfo(int32_t pageId, const std::string& url, const std::string& path, std::string params,
         bool recoverable = true, bool isCreateByNamedRouter = false)
-        : PageInfo(pageId, url, path), params_(std::move(params)), recoverable_(recoverable),
+        : PageInfo(pageId, url, path), initParams_(params), params_(std::move(params)), recoverable_(recoverable),
         isCreateByNamedRouter_(isCreateByNamedRouter)
     {}
     ~EntryPageInfo() override = default;
+
+    const std::string& GetPageInitParams() const
+    {
+        return initParams_;
+    }
 
     const std::string& GetPageParams() const
     {
@@ -87,6 +92,7 @@ public:
     }
 
 private:
+    std::string initParams_;
     std::string params_;
     bool recoverable_ = true;
     bool isCreateByNamedRouter_ = false;

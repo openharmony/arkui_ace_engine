@@ -614,6 +614,12 @@ void registerGestureEventExt(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
         };
         gestureRef->SetOnActionEndId(onActionEnd);
     }
+    if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
+        auto onActionCancel = [gestrueFunction, gestureData](GestureEvent& info) {
+            gestrueFunction->cancelFunction(gestureData);
+        };
+        gestureRef->SetOnActionCancelId(onActionCancel);
+    }
 }
 
 void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask)

@@ -119,6 +119,8 @@ RefPtr<FrameNode> TextFieldModelNG::CreateTextInputNode(
     textFieldLayoutProperty->UpdateMaxLines(1);
     textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
     pattern->SetTextInputFlag(true);
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     UpdateTextFieldPattern(frameNode, value);
     return frameNode;
 }
@@ -131,6 +133,10 @@ RefPtr<FrameNode> TextFieldModelNG::CreateTextAreaNode(
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     UpdateTextFieldPattern(frameNode, value);
     return frameNode;
 }

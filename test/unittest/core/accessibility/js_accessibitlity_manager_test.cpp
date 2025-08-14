@@ -2394,6 +2394,35 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest002, TestSize.L
 }
 
 /**
+* @tc.name: DeleteFromPageEventController001
+* @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, DeleteFromPageEventController001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->AddToPageEventController(root);
+    auto result = jsAccessibilityManager->DeleteFromPageEventController(root);
+
+    /**
+     * @tc.steps: step2. save pages when in UIExtensionWindow
+     */
+    EXPECT_EQ(result, true);
+}
+
+/**
 * @tc.name: IsSendAccessibilityEventTest003
 * @tc.desc: IsSendAccessibilityEvent
 * @tc.type: FUNC
@@ -2962,6 +2991,41 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager046, TestSize.Level1)
     auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
     EXPECT_EQ(ret, true);
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager047
+ * @tc.desc: test UpdateAccessibilityVisible nodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto frameNode1 = AceType::MakeRefPtr<NG::FrameNode>(V2::PAGE_ETS_TAG, 555, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode1, nullptr);
+    auto frameNode2 = AceType::MakeRefPtr<NG::FrameNode>(V2::PAGE_ETS_TAG, 666, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(frameNode2, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
+
+    /**
+     * @tc.steps: step2. set accessibility visible
+     */
+    frameNode1->SetAccessibilityVisible(false);
+    frameNode2->SetAccessibilityVisible(true);
+
+    /**
+     * @tc.steps: step3. test UpdateAccessibilityVisible
+     */
+    Accessibility::AccessibilityElementInfo info1;
+    Accessibility::AccessibilityElementInfo info2;
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode1, info1);
+    EXPECT_EQ(info1.GetAccessibilityVisible(), false);
+    jsAccessibilityManager->UpdateAccessibilityVisible(frameNode2, info2);
+    EXPECT_EQ(info2.GetAccessibilityVisible(), true);
 }
 
 #ifdef WEB_SUPPORTED

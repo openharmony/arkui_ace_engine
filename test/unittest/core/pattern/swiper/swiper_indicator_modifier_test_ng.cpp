@@ -2050,6 +2050,14 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1
 
     dotIndicatorModifier.axis_ = Axis::HORIZONTAL;
     dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    /**
+     * @tc.steps: step3.Call vectorBlackPointCenterX.size is 0
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    vectorBlackPointCenterX.clear();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
 }
 
 /**

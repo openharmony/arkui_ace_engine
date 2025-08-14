@@ -331,6 +331,11 @@ OffsetF DragAnimationHelper::CalcBadgeTextOffset(const RefPtr<MenuPattern>& menu
     CHECK_NULL_RETURN(imageNode, OffsetF());
     CHECK_NULL_RETURN(menuPattern, OffsetF());
     auto offset = imageNode->GetPaintRectOffset();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        double textOffsetX = offset.GetX() - BADGE_RELATIVE_OFFSET.ConvertToPx();
+        double textOffsetY = offset.GetY() - BADGE_RELATIVE_OFFSET.ConvertToPx();
+        return OffsetF(textOffsetX, textOffsetY);
+    }
     auto width = imageNode->GetGeometryNode()->GetFrameSize().Width();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     auto menuTheme = context->GetTheme<NG::MenuTheme>();
@@ -848,9 +853,16 @@ void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& f
                       ? DragDropFuncWrapper::GetFrameNodeOffsetToWindow(textNode, frameNode, width, height)
                       : previewOffset;
     auto badgeLength = std::to_string(childSize).size();
-    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx() -
-                         (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    double textOffsetX = 0.0f;
+    double textOffsetY = 0.0f;
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        textOffsetX = offset.GetX() - BADGE_RELATIVE_OFFSET.ConvertToPx() - width * (previewScale - 1) / HALF_DIVIDE;
+        textOffsetY = offset.GetY() - BADGE_RELATIVE_OFFSET.ConvertToPx() - height * (previewScale - 1) / HALF_DIVIDE;
+    } else {
+        textOffsetX = offset.GetX() + width * (previewScale + 1) / HALF_DIVIDE - BADGE_RELATIVE_OFFSET.ConvertToPx() -
+            (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+        textOffsetY = offset.GetY() - height * (previewScale - 1) / HALF_DIVIDE - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    }
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
@@ -1081,15 +1093,7 @@ void DragAnimationHelper::MountPixelMap(const RefPtr<OverlayManager>& manager,
     auto hub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
-    auto container = Container::Current();
-    if (container && container->IsSceneBoardWindow()) {
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto windowScene = manager->FindWindowScene(frameNode);
-        manager->MountPixelMapToWindowScene(columnNode, windowScene, isDragPixelMap);
-    } else {
-        manager->MountPixelMapToRootNode(columnNode, isDragPixelMap);
-    }
+    manager->MountPixelMapToRootNode(columnNode, isDragPixelMap);
     DragEventActuator::SetPreviewDefaultAnimateProperty(data.imageNode);
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
@@ -1283,8 +1287,15 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     auto windowScale = dragDropManager->GetWindowScale();
-    textRowRenderContext->UpdateOffset(OffsetT<Dimension>(Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
-        Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        textRowRenderContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
+                Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    } else {
+        textRowRenderContext->UpdateOffset(
+            OffsetT<Dimension>(Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale),
+                Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx() * windowScale)));
+    }
     textRowProperty->UpdateAlignRules(
         { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
             { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });

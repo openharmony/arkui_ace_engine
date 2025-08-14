@@ -252,7 +252,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       Object.keys(newValue)
         .forEach(propName => {
           // Collect only @Track'ed changed properties
-          if (typeof propName === 'string' && Reflect.has(newValue as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
+          if (typeof propName === 'string' && Reflect.has(newValue as unknown as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
             // if the source is track property, need to notify the property update
             if (oldValue[propName] !== newValue[propName]) {
               this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName, true);

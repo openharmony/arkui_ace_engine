@@ -1213,4 +1213,26 @@ HWTEST_F(AppBarTestNg, RectChangeListener003, TestSize.Level1)
     pattern->CallRectChange();
     EXPECT_EQ(pattern->appBarRect_, std::nullopt);
 }
+
+/**
+ * @tc.name: TestGetAppBarRect003
+ * @tc.desc: Test GetAppBarRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestGetAppBarRect003, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atom = appBar->Create(stage);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    pipeline->SetInstallationFree(0);
+    auto rect = appBar->GetAppBarRect();
+    EXPECT_EQ(rect, std::nullopt);
+
+    pipeline->SetInstallationFree(1);
+    rect = appBar->GetAppBarRect();
+    EXPECT_EQ(rect, std::nullopt);
+}
 } // namespace OHOS::Ace::NG

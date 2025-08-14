@@ -45,7 +45,6 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
-#include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "nweb_helper.h"
@@ -79,6 +78,8 @@ constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_PAGEERROR[] = "onPageError";
 constexpr char WEB_EVENT_ONMESSAGE[] = "onMessage";
 constexpr char WEB_EVENT_ROUTERPUSH[] = "routerPush";
+constexpr char WEB_EVENT_LOADSTART[] = "OnLoadStarted";
+constexpr char WEB_EVENT_LOADFINISH[] = "OnLoadFinished";
 
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
@@ -995,6 +996,8 @@ void WebDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_LOADSTART));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_LOADFINISH));
 }
 
 void WebDelegate::SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb)
@@ -2018,6 +2021,12 @@ void WebDelegate::InitWebEvent()
     if (!webCom->GetMessageEventId().IsEmpty()) {
         onMessage_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetMessageEventId(), context);
     }
+    if (!webCom->GetOnLoadStartedEventId().IsEmpty()) {
+        onLoadStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadStartedEventId(), context);
+    }
+    if (!webCom->GetOnLoadFinishedEventId().IsEmpty()) {
+        onLoadFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadFinishedEventId(), context);
+    }
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -2238,6 +2247,12 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onAdsBlockedV2_ = useNewPipe ? eventHub->GetOnAdsBlockedEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetAdsBlockedEventId(), oldContext);
+        onLoadStartedV2_ = useNewPipe ? eventHub->GetOnLoadStartedEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                          webCom->GetOnLoadStartedEventId(), oldContext);
+        onLoadFinishedV2_ = useNewPipe ? eventHub->GetOnLoadFinishedEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                          webCom->GetOnLoadFinishedEventId(), oldContext);
     }
     return true;
 }
@@ -2391,6 +2406,12 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
     if (!webCom->GetPageErrorEventId().IsEmpty()) {
         onPageError_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context);
+    }
+    if (!webCom->GetOnLoadStartedEventId().IsEmpty()) {
+        onLoadStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadStartedEventId(), context);
+    }
+    if (!webCom->GetOnLoadFinishedEventId().IsEmpty()) {
+        onLoadFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadFinishedEventId(), context);
     }
 }
 
@@ -3426,6 +3447,7 @@ void WebDelegate::InitWebViewWithSurface()
             if (sptr<Rosen::Window> window = OHOS::Rosen::Window::GetWindowWithId(window_id)) {
                 delegate->nweb_->SetPrivacyStatus(window->IsPrivacyMode());
             }
+            delegate->nweb_->SetVisibility(delegate->isVisible_);
             delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
@@ -4935,6 +4957,18 @@ void WebDelegate::RegisterWebEvent()
             delegate->OnMessage(param);
         }
     });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_LOADSTART), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnLoadStarted(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_LOADFINISH), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnLoadFinished(param);
+        }
+    });
 }
 
 // upper ui component which inherited from WebComponent
@@ -5105,6 +5139,41 @@ void WebDelegate::SetPageFinishedState(const bool& state)
 bool WebDelegate::GetPageFinishedState()
 {
     return isPageFinished_;
+}
+
+void WebDelegate::OnLoadStarted(const std::string& param)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnLoadStartedEvent(std::make_shared<LoadStartedEvent>(param));
+            delegate->RecordWebEvent(Recorder::EventType::LOAD_STARTED, param);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebLoadStarted");
+}
+
+void WebDelegate::OnLoadFinished(const std::string& param)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnLoadFinishedEvent(std::make_shared<LoadFinishedEvent>(param));
+            webPattern->OnScrollEndRecursive(std::nullopt);
+            delegate->RecordWebEvent(Recorder::EventType::LOAD_FINISHED, param);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebLoadFinished");
 }
 
 void WebDelegate::OnProgressChanged(int param)
@@ -5548,14 +5617,15 @@ void WebDelegate::OnAccessibilityEvent(
                 webPattern->UpdateFocusedAccessibilityId();
             }
         }
-        if (eventType == AccessibilityEventType::FOCUS) {
-            TextBlurReportByFocusEvent(accessibilityId);
-        }
         if (eventType == AccessibilityEventType::CLICK) {
             WebComponentClickReport(accessibilityId);
         }
-        if (eventType == AccessibilityEventType::BLUR) {
-            TextBlurReportByBlurEvent(accessibilityId);
+        if (eventType == AccessibilityEventType::FOCUS ||
+            eventType == AccessibilityEventType::BLUR ||
+            eventType == AccessibilityEventType::TEXT_CHANGE) {
+            auto report = webPattern->GetAccessibilityEventReport();
+            CHECK_NULL_VOID(report);
+            report->ReportEvent(eventType, accessibilityId);
         }
         event.nodeId = accessibilityId;
         event.type = eventType;
@@ -5569,35 +5639,6 @@ void WebDelegate::OnAccessibilityEvent(
     }
 }
 
-void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
-{
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    auto textBlurCallback = webPattern->GetTextBlurCallback();
-    CHECK_NULL_VOID(textBlurCallback);
-    auto lastFocusNode = webPattern->GetAccessibilityNodeById(lastFocusInputId_);
-    if (lastFocusNode && lastFocusNode->GetIsEditable() && lastFocusInputId_ != accessibilityId) {
-        if (lastFocusNode->GetIsPassword()) {
-            TAG_LOGW(AceLogTag::ACE_WEB, "the input type is password, do not report");
-        } else {
-            std::string blurText = lastFocusNode->GetContent();
-            if (!blurText.empty()) {
-                TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
-                    static_cast<int32_t>(blurText.length()));
-                textBlurCallback(lastFocusInputId_, blurText);
-                lastFocusReportId_ = lastFocusInputId_;
-            }
-        }
-    }
-    if (accessibilityId != 0) {
-        auto focusNode = webPattern->GetAccessibilityNodeById(accessibilityId);
-        if (focusNode) {
-            // record last editable focus id
-            lastFocusInputId_ = accessibilityId;
-        }
-    }
-}
-
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
 {
     auto webPattern = webPattern_.Upgrade();
@@ -5607,23 +5648,6 @@ void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
     auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
     CHECK_NULL_VOID(webComponentClickCallback);
     webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
-}
-
-void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId)
-{
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    auto textBlurCallback = webPattern->GetTextBlurCallback();
-    CHECK_NULL_VOID(textBlurCallback);
-    auto blurNode = webPattern->GetAccessibilityNodeById(accessibilityId);
-    if (blurNode && blurNode->GetIsEditable() && lastFocusReportId_ != accessibilityId) {
-        std::string blurText = blurNode->GetContent();
-        if (!blurNode->GetIsPassword() && !blurText.empty()) {
-            TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
-                static_cast<int32_t>(blurText.length()));
-            textBlurCallback(accessibilityId, blurText);
-        }
-    }
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5653,7 +5677,6 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 
 void WebDelegate::AccessibilitySendPageChange()
 {
-    SetPageFinishedState(true);
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostDelayedTask(
         [weak = WeakClaim(this)]() {
@@ -5670,12 +5693,14 @@ void WebDelegate::AccessibilitySendPageChange()
             if (!accessibilityManager->IsScreenReaderEnabled()) {
                 return;
             }
+            delegate->SetPageFinishedState(true);
             if (webNode->IsOnMainTree()) {
                 if (!webPattern->CheckVisible()) {
+                    bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
                     TAG_LOGI(AceLogTag::ACE_WEB,
                         "WebDelegate::AccessibilitySendPageChange CheckVisible accessibilityId = "
-                        "%{public}" PRId64,
-                        webNode->GetAccessibilityId());
+                        "%{public}" PRId64 ", deleteResult = %{public}d",
+                        webNode->GetAccessibilityId(), deleteResult);
                     return;
                 }
                 if (accessibilityManager->CheckPageEventCached(webNode, false)) {
@@ -6146,7 +6171,7 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::RemoveSnapshotFrameNode");
+    TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
@@ -6183,6 +6208,7 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath)
 
 void WebDelegate::SetVisibility(bool isVisible)
 {
+    isVisible_ = isVisible;
     CHECK_NULL_VOID(nweb_);
     nweb_->SetVisibility(isVisible);
 }
@@ -6219,7 +6245,7 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            if (request->IsAboutMainFrame()) {
+            if (request->IsAboutMainFrame() && !request->IsRequestRedirect()) {
                 bool ret = delegate->nweb_->TriggerBlanklessForUrl(request->Url());
                 TAG_LOGD(AceLogTag::ACE_WEB, "TriggerBlanklessForUrl ret %{public}d", ret);
             }
@@ -7645,6 +7671,9 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
     CHECK_NULL_RETURN(nweb_, -1);
+    if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;

@@ -608,7 +608,7 @@ void WebModelStatic::SetOnPageFinish(FrameNode* frameNode, std::function<void(co
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPageFinishedEvent(std::move(uiCallback));
 }
@@ -617,7 +617,7 @@ void WebModelStatic::SetOnPageStart(FrameNode* frameNode, std::function<void(con
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPageStartedEvent(std::move(uiCallback));
 }
@@ -627,7 +627,7 @@ void WebModelStatic::SetOnProgressChange(FrameNode* frameNode,
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnProgressChangeEvent(std::move(uiCallback));
 }
@@ -636,7 +636,7 @@ void WebModelStatic::SetOnTitleReceive(FrameNode* frameNode, std::function<void(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnTitleReceiveEvent(std::move(uiCallback));
 }
@@ -646,7 +646,7 @@ void WebModelStatic::SetOnGeolocationHide(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnGeolocationHideEvent(std::move(uiCallback));
 }
@@ -656,7 +656,7 @@ void WebModelStatic::SetOnGeolocationShow(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnGeolocationShowEvent(std::move(uiCallback));
 }
@@ -683,7 +683,7 @@ void WebModelStatic::SetOnRequestFocus(FrameNode* frameNode, std::function<void(
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
 #endif // ARKUI_CAPI_UNITTEST
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRequestFocusEvent(std::move(uiCallback));
 }
@@ -695,7 +695,7 @@ void WebModelStatic::SetOnCommonDialog(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
 }
@@ -714,7 +714,7 @@ void WebModelStatic::SetOnConsoleLog(FrameNode* frameNode, std::function<bool(co
 #endif // ARKUI_CAPI_UNITTEST
         return result;
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnConsoleEvent(std::move(onConsole));
 }
@@ -723,7 +723,7 @@ void WebModelStatic::SetOnErrorReceive(FrameNode* frameNode, std::function<void(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnErrorReceiveEvent(std::move(uiCallback));
 }
@@ -733,7 +733,7 @@ void WebModelStatic::SetOnHttpErrorReceive(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnHttpErrorReceiveEvent(std::move(uiCallback));
 }
@@ -742,7 +742,7 @@ void WebModelStatic::SetOnDownloadStart(FrameNode* frameNode, std::function<void
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDownloadStartEvent(std::move(uiCallback));
 }
@@ -752,7 +752,7 @@ void WebModelStatic::SetRefreshAccessedHistoryId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRefreshAccessedHistoryEvent(std::move(uiCallback));
 }
@@ -764,7 +764,7 @@ void WebModelStatic::SetOnUrlLoadIntercept(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnUrlLoadInterceptEvent(std::move(uiCallback));
 }
@@ -773,7 +773,7 @@ void WebModelStatic::SetRenderExitedId(FrameNode* frameNode, std::function<void(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRenderExitedEvent(std::move(uiCallback));
 }
@@ -785,7 +785,7 @@ void WebModelStatic::SetOnFileSelectorShow(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFileSelectorShowEvent(std::move(uiCallback));
 }
@@ -794,7 +794,7 @@ void WebModelStatic::SetResourceLoadId(FrameNode* frameNode, std::function<void(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnResourceLoadEvent(std::move(uiCallback));
 }
@@ -804,7 +804,7 @@ void WebModelStatic::SetOnFullScreenExit(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFullScreenExitEvent(std::move(uiCallback));
 }
@@ -814,7 +814,7 @@ void WebModelStatic::SetOnFullScreenEnter(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFullScreenEnterEvent(std::move(uiCallback));
 }
@@ -823,7 +823,7 @@ void WebModelStatic::SetScaleChangeId(FrameNode* frameNode, std::function<void(c
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScaleChangeEvent(std::move(uiCallback));
 }
@@ -835,7 +835,7 @@ void WebModelStatic::SetOnHttpAuthRequest(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnHttpAuthRequestEvent(std::move(uiCallback));
 }
@@ -847,7 +847,7 @@ void WebModelStatic::SetOnInterceptRequest(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> RefPtr<WebResponse> {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptRequestEvent(std::move(uiCallback));
 }
@@ -857,7 +857,7 @@ void WebModelStatic::SetPermissionRequestEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPermissionRequestEvent(std::move(uiCallback));
 }
@@ -867,7 +867,7 @@ void WebModelStatic::SetScreenCaptureRequestEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
 }
@@ -879,7 +879,7 @@ void WebModelStatic::SetOnContextMenuShow(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnContextMenuShowEvent(std::move(uiCallback));
 }
@@ -889,7 +889,7 @@ void WebModelStatic::SetOnContextMenuHide(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnContextMenuHideEvent(std::move(uiCallback));
 }
@@ -899,7 +899,7 @@ void WebModelStatic::SetSearchResultReceiveEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSearchResultReceiveEvent(std::move(uiCallback));
 }
@@ -909,7 +909,7 @@ void WebModelStatic::SetScrollId(FrameNode* frameNode, std::function<void(const 
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScrollEvent(std::move(uiCallback));
 }
@@ -921,7 +921,7 @@ void WebModelStatic::SetOnSslErrorRequest(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSslErrorRequestEvent(std::move(uiCallback));
 }
@@ -933,7 +933,7 @@ void WebModelStatic::SetOnAllSslErrorRequest(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAllSslErrorRequestEvent(std::move(uiCallback));
 }
@@ -945,7 +945,7 @@ void WebModelStatic::SetOnSslSelectCertRequest(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSslSelectCertRequestEvent(std::move(uiCallback));
 }
@@ -954,7 +954,7 @@ void WebModelStatic::SetWindowNewEvent(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnWindowNewEvent(std::move(callback));
 }
@@ -964,7 +964,7 @@ void WebModelStatic::SetWindowExitEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnWindowExitEvent(std::move(uiCallback));
 }
@@ -995,7 +995,7 @@ void WebModelStatic::SetOnInterceptKeyEventCallback(
 #endif // ARKUI_CAPI_UNITTEST
         return result;
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPreKeyEvent(std::move(onConsole));
 }
@@ -1003,7 +1003,7 @@ void WebModelStatic::SetOnInterceptKeyEventCallback(
 void WebModelStatic::SetTouchIconUrlId(FrameNode* frameNode, OnWebAsyncFunc&& touchIconUrlId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
 }
@@ -1011,7 +1011,7 @@ void WebModelStatic::SetTouchIconUrlId(FrameNode* frameNode, OnWebAsyncFunc&& to
 void WebModelStatic::SetFaviconReceivedId(FrameNode* frameNode, OnWebAsyncFunc&& faviconReceivedId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFaviconReceivedEvent(std::move(faviconReceivedId));
 }
@@ -1019,7 +1019,7 @@ void WebModelStatic::SetFaviconReceivedId(FrameNode* frameNode, OnWebAsyncFunc&&
 void WebModelStatic::SetPageVisibleId(FrameNode* frameNode, OnWebAsyncFunc&& pageVisibleId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPageVisibleEvent(std::move(pageVisibleId));
 }
@@ -1028,7 +1028,7 @@ void WebModelStatic::SetOnDataResubmitted(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
 }
@@ -1037,7 +1037,7 @@ void WebModelStatic::SetAudioStateChangedId(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
 }
@@ -1046,7 +1046,7 @@ void WebModelStatic::SetFirstContentfulPaintId(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
 }
@@ -1055,7 +1055,7 @@ void WebModelStatic::SetFirstMeaningfulPaintId(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstMeaningfulPaintId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnFirstMeaningfulPaintEvent(std::move(firstMeaningfulPaintId));
 }
@@ -1064,7 +1064,7 @@ void WebModelStatic::SetLargestContentfulPaintId(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& largestContentfulPaintId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnLargestContentfulPaintEvent(std::move(largestContentfulPaintId));
 }
@@ -1075,7 +1075,7 @@ void WebModelStatic::SetOnLoadIntercept(FrameNode* frameNode, std::function<bool
     auto uiCallback = [func = сallback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnLoadInterceptEvent(std::move(uiCallback));
 }
@@ -1092,7 +1092,7 @@ void WebModelStatic::SetOverScrollId(FrameNode* frameNode, std::function<void(co
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
@@ -1101,7 +1101,7 @@ void WebModelStatic::SetSafeBrowsingCheckResultId(FrameNode* frameNode,
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
 }
@@ -1110,7 +1110,7 @@ void WebModelStatic::SetNavigationEntryCommittedId(FrameNode* frameNode,
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNavigationEntryCommittedEvent(std::move(navigationEntryCommittedId));
 }
@@ -1119,7 +1119,7 @@ void WebModelStatic::SetIntelligentTrackingPreventionResultId(FrameNode* frameNo
     std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& intelligentTrackingPreventionResultId)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnIntelligentTrackingPreventionResultEvent(std::move(intelligentTrackingPreventionResultId));
 }
@@ -1130,7 +1130,7 @@ void WebModelStatic::SetNativeEmbedLifecycleChangeId(
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     CHECK_NULL_VOID(frameNode);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNativeEmbedLifecycleChangeEvent(std::move(uiCallback));
 }
@@ -1140,7 +1140,7 @@ void WebModelStatic::SetNativeEmbedVisibilityChangeId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNativeEmbedVisibilityChangeEvent(std::move(uiCallback));
 }
@@ -1150,7 +1150,7 @@ void WebModelStatic::SetNativeEmbedGestureEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
 }
@@ -1162,7 +1162,7 @@ void WebModelStatic::SetOnOverrideUrlLoading(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> bool {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnOverrideUrlLoadingEvent(std::move(uiCallback));
 }
@@ -1172,7 +1172,7 @@ void WebModelStatic::SetRenderProcessNotRespondingId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRenderProcessNotRespondingEvent(std::move(uiCallback));
 }
@@ -1182,7 +1182,7 @@ void WebModelStatic::SetRenderProcessRespondingId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
 }
@@ -1192,7 +1192,7 @@ void WebModelStatic::SetViewportFitChangedId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
 }
@@ -1204,7 +1204,7 @@ void WebModelStatic::SetOnInterceptKeyboardAttach(
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) -> WebKeyboardOption {
         return func(info.get());
     };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptKeyboardAttachEvent(std::move(uiCallback));
 }
@@ -1214,7 +1214,7 @@ void WebModelStatic::SetAdsBlockedEventId(
 {
     CHECK_NULL_VOID(frameNode);
     auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }

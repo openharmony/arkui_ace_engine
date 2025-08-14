@@ -20,6 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -155,6 +156,15 @@ void JSView::RestoreInstanceId()
 void JSView::GetInstanceId(const JSCallbackInfo& info)
 {
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(instanceId_)));
+}
+
+void JSView::GetMainInstanceId(const JSCallbackInfo& info)
+{
+    int32_t currentInstance = instanceId_;
+    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(currentInstance)));
 }
 
 void JSView::JsSetCardId(int64_t cardId)
@@ -1270,6 +1280,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("syncInstanceId", &JSViewPartialUpdate::SyncInstanceId);
     JSClass<JSViewPartialUpdate>::Method("restoreInstanceId", &JSViewPartialUpdate::RestoreInstanceId);
     JSClass<JSViewPartialUpdate>::CustomMethod("getInstanceId", &JSViewPartialUpdate::GetInstanceId);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getMainInstanceId", &JSViewPartialUpdate::GetMainInstanceId);
     JSClass<JSViewPartialUpdate>::Method("markStatic", &JSViewPartialUpdate::MarkStatic);
     JSClass<JSViewPartialUpdate>::Method("finishUpdateFunc", &JSViewPartialUpdate::JsFinishUpdateFunc);
     JSClass<JSViewPartialUpdate>::Method("setCardId", &JSViewPartialUpdate::JsSetCardId);

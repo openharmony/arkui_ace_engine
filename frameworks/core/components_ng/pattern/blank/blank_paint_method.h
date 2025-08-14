@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_Blank_Blank_PAINT_METHOD_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_Blank_Blank_PAINT_METHOD_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BLANK_BLANK_PAINT_METHOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BLANK_BLANK_PAINT_METHOD_H
 
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT BlankPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(BlankPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(BlankPaintMethod, NodePaintMethod);
 public:
     BlankPaintMethod() = default;
     ~BlankPaintMethod() override = default;
@@ -45,4 +45,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_Blank_Blank_PAINT_METHOD_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BLANK_BLANK_PAINT_METHOD_H

@@ -441,7 +441,7 @@ HWTEST_F(VelocityTrackerTest, sampleDatas1, TestSize.Level1)
         }
         velocityTracker.UpdateVelocity();
     }
-    EXPECT_NE(velocityTracker.velocity_.GetVelocityX(), 0.0);
+    EXPECT_EQ(velocityTracker.velocity_.GetVelocityX(), 0.0);
 }
 
 /**

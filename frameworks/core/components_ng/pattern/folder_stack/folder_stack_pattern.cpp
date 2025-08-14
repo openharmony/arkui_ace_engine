@@ -31,7 +31,9 @@ const RefPtr<Curve> FOLDER_STACK_ANIMATION_CURVE =
 void FolderStackPattern::OnAttachToFrameNode()
 {
     Pattern::OnAttachToFrameNode();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
@@ -45,7 +47,8 @@ void FolderStackPattern::OnAttachToFrameNode()
 
 void FolderStackPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldStatusChangedCallbackId()) {
         pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
@@ -122,7 +125,9 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -279,13 +284,13 @@ void FolderStackPattern::UpdateChildAlignment()
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
     auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
+    if (controlPartsStackNode && controlPartsStackNode->GetLayoutProperty()) {
         auto controlPartsLayoutProperty =
             AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
         controlPartsLayoutProperty->UpdateAlignment(align);
     }
     auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
+    if (hoverStackNode && hoverStackNode->GetLayoutProperty()) {
         auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
         hoverLayoutProperty->UpdateAlignment(align);
     }

@@ -42,7 +42,7 @@ enum class ScrollType {
 };
 
 class RenderScroll : public RenderNode, public RenderRefreshTarget {
-    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget)
+    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget);
 
 public:
     ~RenderScroll() override;

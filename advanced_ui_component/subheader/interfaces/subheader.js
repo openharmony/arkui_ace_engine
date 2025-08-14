@@ -44,7 +44,6 @@ const DEFAULT_FONT_SCALE = 1;
 const SINGLE_LINE_NUM = 1;
 const DOUBLE_LINE_NUM = 2;
 const RESOURCE_TYPE_SYMBOL = 40000;
-const LEFT_ICON_SIZE = '16vp';
 const LEFT_ICON_SIZE_NUMBER = 16;
 const LEFT_TEXT_NUMBER = 8;
 const OPERATE_ITEM_LENGTH = 24;
@@ -207,6 +206,15 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_single_title_height', { resourceId: 
 RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceId: 125834253, defaultValue: 56 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
 RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_size', { resourceId: 125835678, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_start', { resourceId: 125835679, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_margin_end', { resourceId: 125835680, defaultValue: 16 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_content_padding', { resourceId: 125835681, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_padding', { resourceId: 125835682, defaultValue: 12 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_select_padding', { resourceId: 125835683, defaultValue: 4 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_left_icon_end_margin', { resourceId: 125835684, defaultValue: 8 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_subtitle_font_weight', { resourceId: 125835685, defaultValue: 400 });
+RESOURCE_CACHE_MAP.set('sys.float.subheader_titles_space', { resourceId: 125835686, defaultValue: 2 });
 
 export class SubHeader extends ViewPU {
     constructor(c16, d16, e16, f16 = -1, g16 = undefined, h16) {
@@ -248,8 +256,8 @@ export class SubHeader extends ViewPU {
         this.__contentMargin = new SynchedPropertyObjectOneWayPU(d16.contentMargin, this, 'contentMargin');
         this.__contentPadding = new SynchedPropertyObjectOneWayPU(d16.contentPadding, this, 'contentPadding');
         this.subHeaderMargin = {
-            start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
-            end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
+            start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
+            end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
         };
         this.__subHeaderTheme = new ObservedPropertyObjectPU(new SubHeaderTheme(), this, 'subHeaderTheme');
         this.addProvidedVar('subHeaderTheme', this.__subHeaderTheme, false);
@@ -1145,13 +1153,13 @@ export class SubHeader extends ViewPU {
         if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
             (!this.primaryTitle && this.secondaryTitle))) {
             w11 = {
-                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
-                end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+                start: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
+                end: LengthMetrics.vp(getResourceValue('sys.float.subheader_single_subtitle_padding')),
             };
         } else if (this.select) {
             w11 = {
-                top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
-                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+                top: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
+                bottom: LengthMetrics.vp(getResourceValue('sys.float.subheader_select_padding')),
             };
         }
         return w11;
@@ -1276,9 +1284,9 @@ export class SubHeader extends ViewPU {
             Flex.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Flex);
         this.observeComponentCreation2((z9, a10) => {
@@ -1288,13 +1296,14 @@ export class SubHeader extends ViewPU {
                     this.observeComponentCreation2((h10, i10) => {
                         SymbolGlyph.create(s9.iconOptions?.icon);
                         SymbolGlyph.fontSize(s9.iconOptions?.symbolicIconOption?.fontSize ?
-                        Util.symbolFontSize(s9.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE);
+                        Util.symbolFontSize(s9.iconOptions?.symbolicIconOption?.fontSize) :
+                            getResourceValue('sys.float.subheader_left_icon_size'));
                         SymbolGlyph.fontColor(s9.iconOptions?.symbolicIconOption?.fontColor ??
                             [this.subHeaderTheme.leftIconColor]);
                         SymbolGlyph.fontWeight(s9.iconOptions?.symbolicIconOption?.fontWeight);
                         SymbolGlyph.renderingStrategy(s9.iconOptions?.symbolicIconOption?.renderingStrategy);
                         SymbolGlyph.effectStrategy(s9.iconOptions?.symbolicIconOption?.effectStrategy);
-                        SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                        SymbolGlyph.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
                         SymbolGlyph.flexShrink(0);
                     }, SymbolGlyph);
                 });
@@ -1303,9 +1312,9 @@ export class SubHeader extends ViewPU {
                     this.observeComponentCreation2((d10, e10) => {
                         Image.create(s9.iconOptions?.icon);
                         Image.fillColor(this.subHeaderTheme.leftIconColor);
-                        Image.width(LEFT_ICON_SIZE);
-                        Image.height(LEFT_ICON_SIZE);
-                        Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')) });
+                        Image.width(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.height(getResourceValue('sys.float.subheader_left_icon_size'));
+                        Image.margin({ end: LengthMetrics.vp(getResourceValue('sys.float.subheader_left_icon_end_margin')) });
                         Image.draggable(false);
                         Image.flexShrink(0);
                     }, Image);
@@ -1335,9 +1344,9 @@ export class SubHeader extends ViewPU {
             Column.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
@@ -1356,12 +1365,12 @@ export class SubHeader extends ViewPU {
             Text.create(h9.subContent);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
-                fontWeight: FontWeight.Regular,
+                fontWeight: getResourceValue('sys.float.subheader_subtitle_font_weight'),
                 alignment: Alignment.Start,
                 fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
             Text.margin({
-                top: getResourceValue('sys.float.padding_level1'),
+                top: getResourceValue('sys.float.subheader_titles_space'),
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
         }, Text);
@@ -1382,9 +1391,9 @@ export class SubHeader extends ViewPU {
             Text.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Text);
         Text.pop();
@@ -1428,9 +1437,9 @@ export class SubHeader extends ViewPU {
             Text.padding({
                 end: LengthMetrics.vp(getResourceValue('sys.float.padding_level0')),
                 top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
                 bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.vp(getResourceValue('sys.float.padding_level0'))
-                    : LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+                    : LengthMetrics.vp(getResourceValue('sys.float.subheader_content_padding')),
             });
         }, Text);
         Text.pop();
@@ -2202,7 +2211,7 @@ class Util {
             let p1 = o1.code;
             let q1 = o1.message;
             hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${p1}, message: ${q1}`);
-            return 0;
+            return n1;
         }
     }
 

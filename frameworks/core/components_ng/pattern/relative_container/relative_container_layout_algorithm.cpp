@@ -955,6 +955,7 @@ bool RelativeContainerLayoutAlgorithm::PreCalcChildSize(LayoutWrapper* layoutWra
     RefPtr<LayoutWrapper> childWrapper, const std::string& nodeName, LayoutConstraintF& childConstraint)
 {
     auto childLayoutProp = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProp, false);
     const auto &flexItem = childLayoutProp->GetFlexItemProperty();
     if (!flexItem) {
         childWrapper->Measure(childConstraint);
@@ -1310,10 +1311,12 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto left = padding_.left.value_or(0.0f);
     auto top = padding_.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
-    auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto textDirection = relativeContainerLayoutProperty->GetNonAutoLayoutDirection();
     for (auto&& childWrapper : layoutWrapper->GetAllChildrenWithBuild()) {
         auto nodeName = GetOrCreateNodeInspectorId(childWrapper->GetHostNode());
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (!childLayoutProperty->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             childWrapper->Layout();
             continue;
@@ -1530,7 +1533,9 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection(LayoutWrapper
     for (const auto& mapItem : idNodeMap_) {
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
-        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
         if (!flexItem || !flexItem->HasAlignRules()) {
             visitedNode.push(mapItem.first);
             layoutQueue.push(mapItem.second.id);
@@ -1617,8 +1622,8 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     auto childWrapper = it->second.layoutWrapper;
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
-    CHECK_NULL_VOID(childWrapper->GetLayoutProperty()->GetFlexItemProperty());
-    CHECK_NULL_VOID(childWrapper->GetLayoutProperty()->GetFlexItemProperty()->HasAlignRules());
+    CHECK_NULL_VOID(childLayoutProperty->GetFlexItemProperty());
+    CHECK_NULL_VOID(childLayoutProperty->GetFlexItemProperty()->HasAlignRules());
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
@@ -1629,7 +1634,7 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     if (layoutPolicy.has_value() && layoutPolicy.value().IsHeightMatch()) {
         childConstraint.parentIdealSize.SetHeight(containerSizeWithoutPaddingBorder_.Height());
     }
-    auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
+    auto alignRules = childLayoutProperty->GetFlexItemProperty()->GetAlignRulesValue();
     const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
     bool horizontalHasIdealSize = false;
     bool verticalHasIdealSize = false;
@@ -2065,7 +2070,9 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     if (!anchorIsContainer && !IsGuidelineOrBarrier(alignRule.anchor)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor].layoutWrapper;
         CHECK_NULL_RETURN(anchorWrapper, 0.0f);
-        auto textDirection = anchorWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        auto layoutProperty = anchorWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, 0.0f);
+        auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
         marginLeft = GetOriginMarginLeft(textDirection, anchorWrapper->GetGeometryNode()->GetMargin());
     }
     switch (alignDirection) {

@@ -118,7 +118,7 @@ void RepeatVirtualScroll2Caches::DropFromL1ByIndex(IndexType index)
     if (ridOpt.has_value()) {
         const auto cacheIter = cacheItem4Rid_.find(ridOpt.value());
         if (cacheIter != cacheItem4Rid_.end()) {
-            cacheIter->second->isL1_ = false;
+            UpdateIsL1(cacheIter->second, false);
         }
     }
 
@@ -143,7 +143,8 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Rid(RIDType rid)
     return std::nullopt;
 }
 
-void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index)
+void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l1Rd4Index,
+    std::unordered_set<uint32_t> ridNeedToRecycle)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "UpdateL1Rid4Index");
 
@@ -151,8 +152,11 @@ void RepeatVirtualScroll2Caches::UpdateL1Rid4Index(std::map<int32_t, uint32_t> l
     TAG_LOGD(AceLogTag::ACE_REPEAT, "L1Rid4Index: %{public}s", DumpL1Rid4Index().c_str());
 
     ForEachCacheItem([&](RIDType rid, const CacheItem& cacheItem) {
-      cacheItem->isL1_ = (GetL1Index4RID(rid) != std::nullopt);
-      TAG_LOGD(AceLogTag::ACE_REPEAT, "DumpCacheItem: %{public}s", DumpCacheItem(cacheItem).c_str());
+        if (ridNeedToRecycle.find(rid) != ridNeedToRecycle.end()) {
+            UpdateIsL1(cacheItem, false);
+        }
+        UpdateIsL1(cacheItem, GetL1Index4RID(rid) != std::nullopt);
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "DumpCacheItem: %{public}s", DumpCacheItem(cacheItem).c_str());
     });
 }
 
@@ -258,7 +262,7 @@ OptCacheItem RepeatVirtualScroll2Caches::GetUpdatedRid4Index(IndexType index, RI
     }
     // add to L1 but do not Set Active or add to render tree.
     l1Rid4Index_[index] = rid;
-    optCacheItem.value()->isL1_ = true;
+    UpdateIsL1(optCacheItem.value(), true);
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "CallOnGetRid4Index(index %{public}d -> rid %{public}d): returns CacheItem with updated node "
         "%{public}s .", index, static_cast<int32_t>(rid), DumpCacheItem(cacheItem4Rid_[rid]).c_str());
@@ -329,9 +333,10 @@ bool RepeatVirtualScroll2Caches::RebuildL1(const std::function<bool(int32_t inde
             if (optCacheItem.value()->node_ != nullptr && cbFunc(indexMapped, optCacheItem.value())) {
                 // keep in L1
                 l1Rid4Index_[index] = rid;
-                optCacheItem.value()->isL1_ = true;
+                // don't trigger reuse here
+                UpdateIsL1(optCacheItem.value(), true, false);
             } else {
-                optCacheItem.value()->isL1_ = false;
+                UpdateIsL1(optCacheItem.value(), false);
                 optCacheItem.value()->isActive_ = false;
                 optCacheItem.value()->isOnRenderTree_ = false;
                 modified = true;
@@ -430,6 +435,28 @@ std::string RepeatVirtualScroll2Caches::DumpL1Rid4Index() const
             "\n";
     }
     return result;
+}
+
+void RepeatVirtualScroll2Caches::UpdateIsL1(const CacheItem& cacheItem, bool isL1, bool shouldTriggerRecycleOrReuse)
+{
+    cacheItem->isL1_ = isL1;
+    if (!shouldTriggerRecycleOrReuse) {
+        return;
+    }
+    CHECK_NULL_VOID(cacheItem->node_);
+    auto child = cacheItem->node_->GetFrameChildByIndex(0, false);
+    CHECK_NULL_VOID(child);
+    if (isL1) {
+        if (recycledNodeIds_.erase(child->GetId()) == 0) {
+            return;
+        }
+        child->OnReuse();
+    } else {
+        if (recycledNodeIds_.emplace(child->GetId()).second == false) {
+            return;
+        }
+        child->OnRecycle();
+    }
 }
 
 } // namespace OHOS::Ace::NG

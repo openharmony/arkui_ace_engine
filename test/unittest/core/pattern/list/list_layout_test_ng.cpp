@@ -109,6 +109,33 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
 }
 
 /**
+ * @tc.name: GetListDriection001
+ * @tc.desc: Test GetListDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetListDriection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list, default direction is vertical.
+     */
+    CreateList();
+    CreateDone();
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+
+    /**
+     * @tc.steps: step2. Set direction to horizontal.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::HORIZONTAL));
+
+    /**
+     * @tc.steps: step3. Set direction to vertical.
+     */
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::VERTICAL));
+    EXPECT_EQ(ListModelNG::GetListDirection(AceType::RawPtr(frameNode_)), static_cast<int32_t>(Axis::VERTICAL));
+}
+
+/**
  * @tc.name: GetOverScrollOffset001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC
@@ -2657,7 +2684,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetSpace(Dimension(SPACE));
-    model.SetCachedCount(1, true);
+    model.SetCachedCount(2, true);
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         CreateListItem();
@@ -2675,8 +2702,9 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     auto listPattern = frameNode_->GetPattern<ListPattern>();
     FlushIdleTask(listPattern);
     int32_t childrenCount = repeat->GetChildren().size();
-    EXPECT_EQ(childrenCount, 5);
+    EXPECT_EQ(childrenCount, 6);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), true);
     EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
 
@@ -2691,11 +2719,56 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
     cachedItem->SetLayoutDirtyMarked(true);
     cachedItem->CreateLayoutTask();
-    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
-    EXPECT_EQ(cachedItem->oldGeometryNode_->GetFrameSize().Height(), 0);
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 550);
     FlushUITasks(frameNode_);
-    EXPECT_TRUE(sizeChanged);
-    EXPECT_EQ(cachedItem->oldGeometryNode_->GetFrameSize().Height(), 150);
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 600);
+}
+
+/**
+ * @tc.name: ListRepeatCacheCount006
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step3. Flush UI Task
+     * @tc.expected: After ListItem 4 is marked as dirty， ListItem 5 and 6 still remains cached.
+     */
+    cachedItem->SetLayoutDirtyMarked(true);
+    FlushUITasks();
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
 }
 
 /**

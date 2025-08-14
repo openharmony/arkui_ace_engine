@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
@@ -97,6 +98,7 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
+    NG::UiNodeGc::PostReleaseNodeRawMemoryTask(taskExecutor_);
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }
@@ -527,26 +529,7 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
-    auto frontend = weakFrontend_.Upgrade();
-    CHECK_NULL_VOID(frontend);
-    auto lock = frontend->GetLock();
-    auto& windowConfig = frontend->GetWindowConfig();
-    if (windowConfig.designWidth <= 0) {
-        return;
-    }
-    if (GetIsDeclarative()) {
-        viewScale_ = DEFAULT_VIEW_SCALE;
-        double pageWidth = width;
-        if (IsContainerModalVisible()) {
-            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-        }
-        pageWidth = CalcPageWidth(pageWidth);
-        designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
-        windowConfig.designWidthScale = designWidthScale_;
-    } else {
-        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
-    }
+    ForceUpdateDesignWidthScale(width);
     if (NearZero(viewScale_)) {
         return;
     }
@@ -931,9 +914,12 @@ void PipelineBase::ContainerModalUnFocus() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     if (window_) {
-        return window_->GetCurrentWindowRect();
+        Rect res = window_->GetCurrentWindowRect();
+        if (res.IsValid()) {
+            return res;
+        }
     }
-    return {};
+    return Rect { 0.0, 0.0, width_, height_ };
 }
 
 Rect PipelineBase::GetGlobalDisplayWindowRect() const
@@ -1180,5 +1166,29 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
     commandTimeUpdate_ = true;
     dvsyncTimeUpdate_ = true;
     dvsyncTimeUseCount_ = 0;
+}
+
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
+    auto frontend = weakFrontend_.Upgrade();
+    CHECK_NULL_VOID(frontend);
+    auto lock = frontend->GetLock();
+    auto& windowConfig = frontend->GetWindowConfig();
+    if (windowConfig.designWidth <= 0) {
+        return;
+    }
+    if (GetIsDeclarative()) {
+        viewScale_ = DEFAULT_VIEW_SCALE;
+        double pageWidth = width;
+        if (IsContainerModalVisible()) {
+            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+        }
+        pageWidth = CalcPageWidth(pageWidth);
+        designWidthScale_ =
+            windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
+        windowConfig.designWidthScale = designWidthScale_;
+    } else {
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
 }
 } // namespace OHOS::Ace

@@ -100,7 +100,8 @@ public:
 #ifdef WEB_SUPPORTED
     MOCK_METHOD(bool, RegisterWebInteractionOperationAsChildTree,
         (int64_t accessibilityId, const WeakPtr<NG::WebPattern>& webPattern), (override));
-    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
+    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree,
+        (int32_t treeId, const WeakPtr<NG::WebPattern>& webPattern), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
         int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
@@ -749,6 +750,15 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
     }
 }
 
+void PipelineContext::AddAfterModifierTask(std::function<void()>&& task)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddAfterModifierTask(std::move(task));
+    } else if (task) {
+        task();
+    }
+}
+
 void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
 {
     if (task) {
@@ -1361,6 +1371,10 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
 {
 }
 
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
+}
+
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
@@ -1468,6 +1482,11 @@ void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
 std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
 {
     return nullptr;
+}
+
+std::string NG::PipelineContext::GetCurrentPageNameCallback()
+{
+    return "";
 }
 
 void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)

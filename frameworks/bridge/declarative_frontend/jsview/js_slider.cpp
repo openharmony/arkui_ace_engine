@@ -264,9 +264,9 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     }
     NG::Gradient gradient;
     bool isResourceColor = false;
+    RefPtr<ResourceObject> resObj;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        RefPtr<ResourceObject> resObj;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
             if (SystemProperties::ConfigChangePerform()) {
@@ -278,12 +278,12 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
-        if (SystemProperties::ConfigChangePerform()) {
-            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
-        }
     }
     // Set track gradient color to NG::SliderModelNG
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+    }
 }
 
 bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)

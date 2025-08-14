@@ -772,7 +772,7 @@ void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preIn
             if (!preUseCustomTransition) {
                 preNavDestination->SystemTransitionPopEnd(false);
             }
-    }, option.GetOnFinishEvent());
+        }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -950,6 +950,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
+    NavigationTitleUtil::SetTitleAnimationElapsedTime(option, curNode);
     pattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         preNode, curNode, isNavBarOrHomeDestination, preUseCustomTransition, curUseCustomTransition, pattern]() {
@@ -1195,7 +1196,7 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(co
             auto context = weakRender.Upgrade();
             CHECK_NULL_VOID(context);
             context->SetActualForegroundColor(MASK_COLOR);
-        });
+        }, nullptr /* finishCallback */, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 void NavigationGroupNode::TransitionWithReplace(
@@ -1292,7 +1293,7 @@ void NavigationGroupNode::TransitionWithReplace(
                 curNode->GetRenderContext()->UpdateOpacity(1.0f);
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     isOnAnimation_ = true;
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
@@ -1718,7 +1719,8 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
                 CHECK_NULL_VOID(nodeBase);
                 nodeBase->SystemTransitionPopEnd(true);
             }
-    }, option.GetOnFinishEvent());
+        },
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -1822,7 +1824,8 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
                     curDestination->SystemTransitionPushEnd(true);
                 }
             }
-    }, option.GetOnFinishEvent());
+        },
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2008,7 +2011,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
                 }
             }
         },
-    option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2117,7 +2120,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 CHECK_NULL_VOID(preNode);
                 preNode->InitDialogTransition(false);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
@@ -2393,7 +2396,7 @@ void NavigationGroupNode::SoftTransitionAnimationPush(const RefPtr<FrameNode>& p
                 CHECK_NULL_VOID(curNavdestination);
                 curNavdestination->StartSoftTransitionPush(true);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
@@ -2484,7 +2487,7 @@ void NavigationGroupNode::SoftTransitionAnimationPop(const RefPtr<FrameNode>& pr
             if (!preUseCustomTransition) {
                 preNavDestination->StartSoftTransitionPop(false);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }

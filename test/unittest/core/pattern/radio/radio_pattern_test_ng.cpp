@@ -2185,4 +2185,38 @@ HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetRadioIndicatorColorValue(), Color::BLACK);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    ASSERT_NE(radioTheme, nullptr);
+    pattern->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern->SetUncheckedBorderColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioUncheckedBorderColorSetByUser(false);
+    pattern->SetIndicatorColorByJSRadioTheme(false);
+    paintProperty->UpdateRadioIndicatorColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetRadioUncheckedBorderColorValue(), radioTheme->GetUnCheckBorderColor());
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG

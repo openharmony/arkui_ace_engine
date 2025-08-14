@@ -458,6 +458,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
     maxLines(value: number): RichEditorAttribute;
+    enableAutoSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2107,7 +2109,7 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
-    shaderStyle(value: ShaderStyle[]): SymbolGlyphAttribute;
+    shaderStyle(value: (ShaderStyle | undefined)[] | ShaderStyle): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

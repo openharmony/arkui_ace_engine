@@ -631,6 +631,7 @@ struct ArkUIProgressStyle {
     ArkUI_Bool enableScanEffect;
     ArkUI_Bool shadow;
     ArkUI_Bool showDefaultPercentage;
+    ArkUI_Bool fontColorSetByUser;
     ArkUIFontStruct fontInfo;
     ArkUI_Float32 borderRadiusValue;
     ArkUI_Int32 borderRadiusUnit;
@@ -1002,6 +1003,7 @@ struct GestrueFunction {
     ActionFuncPtr acceptFunction;
     ActionFuncPtr updateFunction;
     ActionFuncPtr endFunction;
+    ActionFuncPtr cancelFunction;
 };
 
 struct ArkUISliderCustomContentOptions {
@@ -4464,6 +4466,7 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationOnReady)(ArkUINodeHandle node);
     void (*setNavDestinationBeforeCreateLayoutWrapperCallBack)(ArkUINodeHandle node,
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
+    void (*setTitleAnimationElapsedTime)(ArkUINodeHandle node, ArkUI_Int32 elapsedTime);
 };
 
 struct ArkUITextAreaModifier {
@@ -6555,6 +6558,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnDidIMEInput)(ArkUINodeHandle node);
     void (*setRichEditorEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setRichEditorEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetRichEditorEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setRichEditorUndoStyle)(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue);
+    void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -7573,7 +7580,8 @@ typedef struct {
     ArkUI_Bool (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
     void (*detachHostNode)(ArkUINodeHandle host);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
-    ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getNodeType)(ArkUINodeAdapterHandle handle);
+    void (*fireArkUIObjectLifecycleCallback)(void* data, ArkUINodeAdapterHandle handle);
 } ArkUINodeAdapterAPI;
 
 typedef struct {

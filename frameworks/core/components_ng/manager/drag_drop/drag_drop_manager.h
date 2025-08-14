@@ -387,6 +387,7 @@ public:
         RectF dragPreviewRect;
         bool isMenuShow = false;
         NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+        bool isDragController = false;
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const DragPointerEvent& pointerEvent);

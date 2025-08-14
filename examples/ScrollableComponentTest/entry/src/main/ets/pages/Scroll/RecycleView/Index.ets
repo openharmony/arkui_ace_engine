@@ -27,7 +27,7 @@ import {
 
 
 class Param extends Object {
-  title: string = '';
+  public title: string = '';
 }
 
 @Builder

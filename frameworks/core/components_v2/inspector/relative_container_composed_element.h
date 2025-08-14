@@ -25,7 +25,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT RelativeContainerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(RelativeContainerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(RelativeContainerComposedElement, InspectorComposedElement);
 
 public:
     explicit RelativeContainerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

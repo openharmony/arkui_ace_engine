@@ -200,10 +200,11 @@ const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
 template<typename T>
 void ProcessResourceObj(UINode* uinode, std::string key, T value, void* objRawPtr)
 {
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     CHECK_NULL_VOID(uinode);
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uinode);
     CHECK_NULL_VOID(spanNode);
-    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+    if (objRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
         spanNode->RegisterResource<T>(key, resObj, value);
     } else {

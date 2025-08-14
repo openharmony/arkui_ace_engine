@@ -2105,11 +2105,13 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     if (!resourceWrapper) {
         return false;
     }
-    auto strValue = resourceWrapper->GetString(resId->Uint32Value(vm));
-    if (!strValue.empty()) {
-        auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
-        symbolId = customSymbolId;
-        return true;
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto strValue = resourceWrapper->GetString(resId->Uint32Value(vm));
+        if (!strValue.empty()) {
+            auto customSymbolId = static_cast<uint32_t>(strtol(strValue.c_str(), nullptr, 16));
+            symbolId = customSymbolId;
+            return true;
+        }
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {

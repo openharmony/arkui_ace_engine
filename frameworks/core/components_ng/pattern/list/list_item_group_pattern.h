@@ -394,6 +394,9 @@ public:
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "scroll_test_ng.h"
-#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1058,7 +1057,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval001, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 0.0f);
 }
 
@@ -1088,7 +1087,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval002, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::CENTER);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::CENTER, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -2.0f);
 }
 
@@ -1118,7 +1117,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval003, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::END);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::END, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -4.0f);
 }
 
@@ -1148,7 +1147,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval004, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -2.0f);
 }
 
@@ -1178,7 +1177,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval005, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -8.0f);
 }
 
@@ -1208,7 +1207,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval006, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -4.0f);
 }
 
@@ -1238,7 +1237,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval007, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::START, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 0.0f);
 }
 
@@ -1268,7 +1267,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval008, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::CENTER);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::CENTER, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -0.5f);
 }
 
@@ -1298,7 +1297,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval009, TestSize.Level1)
     Dimension dimension(2.0f);
     scrollPattern->snapPaginations_ = { dimension };
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::END);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::END, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -1.0f);
 }
 
@@ -1330,7 +1329,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval010, TestSize.Level1)
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
     ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::VALID;
     scrollPattern->SetEnablePaging(enablePagingStatus);
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), -1.0f);
 }
 
@@ -1362,7 +1361,7 @@ HWTEST_F(ScrollPatternTestNg, CaleSnapOffsetsByInterval011, TestSize.Level1)
     scrollPattern->snapOffsets_ = { 2.0f, 3.0f, 4.0f, 5.0f };
     ScrollPagingStatus enablePagingStatus = ScrollPagingStatus::VALID;
     scrollPattern->SetEnablePaging(enablePagingStatus);
-    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE);
+    scrollPattern->CaleSnapOffsetsByInterval(ScrollSnapAlign::NONE, frameNode);
     EXPECT_EQ(*(scrollPattern->snapOffsets_.rbegin()), 0.0f);
 }
 

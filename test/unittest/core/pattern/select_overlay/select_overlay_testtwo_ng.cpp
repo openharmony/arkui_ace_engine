@@ -1248,6 +1248,10 @@ HWTEST_F(SelectOverlayTestTwoNg, CreateMenuNode, TestSize.Level1)
             return AceType::MakeRefPtr<TextOverlayTheme>();
         } else if (type == IconTheme::TypeId()) {
             return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+            selectTheme->optionContentNormalAlign_ = 1.0f;
+            return selectTheme;
         }
         return AceType::MakeRefPtr<TextOverlayTheme>();
     });

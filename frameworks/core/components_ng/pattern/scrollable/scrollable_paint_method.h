@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ScrollablePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ScrollablePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ScrollablePaintMethod, NodePaintMethod);
 public:
     ScrollablePaintMethod() = default;
     ScrollablePaintMethod(bool vertical, bool isReverse, bool isVerticalReverse = false)

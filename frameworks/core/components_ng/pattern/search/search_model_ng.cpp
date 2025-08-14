@@ -2418,7 +2418,7 @@ void SearchModelNG::SetOnWillAttachIME(std::function<void(const IMEClient&)>&& f
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
     textFieldEventHub->SetOnWillAttachIME(std::move(func));
 }

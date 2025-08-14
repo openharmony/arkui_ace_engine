@@ -26,13 +26,10 @@ namespace OHOS::Ace::NG {
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
-ani_ref* GetHostContext()
+ani_ref* GetHostContext(ArkUI_Int32 key)
 {
 #ifndef PREVIEW
-    auto contextValue = OHOS::Ace::Framework::AniContextModule::GetAniContext();
-    if (contextValue) {
-        return contextValue.get();
-    }
+    return OHOS::Ace::Framework::AniContextModule::GetAniContext(key);
 #endif
     return nullptr;
 }

@@ -65,7 +65,8 @@ public:
         CHECK_NULL_RETURN(layoutProps, nullptr);
         bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
-            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse);
+            selectOverlayModifier_ =
+                AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse, WeakClaim(this));
         }
         if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>(WeakClaim(this));
@@ -76,12 +77,12 @@ public:
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
                 defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
-                defaultMenuStartOffset_, isReverse);
+                defaultMenuStartOffset_, isReverse, WeakClaim(this));
         } else {
             paintMethodCreated_ = true;
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
                 defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_,
-                defaultMenuStartOffset_, isReverse);
+                defaultMenuStartOffset_, isReverse, WeakClaim(this));
         }
     }
 

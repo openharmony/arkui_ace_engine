@@ -17,7 +17,6 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -98,112 +97,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetOnWillDismiss(arg.onWillDismiss);
-            if (SystemProperties::ConfigChangePerform()) {
-                CreateWithResourceObj(pattern, arg);
-            }
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
-}
-
-void AlertDialogModelNG::CreateWithResourceObj(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg)
-{
-    ProcessContentResourceObj(pattern, arg.resourceTitleObj, DialogResourceType::TITLE);
-    ProcessContentResourceObj(pattern, arg.resourceSubTitleObj, DialogResourceType::SUBTITLE);
-    ProcessContentResourceObj(pattern, arg.resourceContentObj, DialogResourceType::MESSAGE);
-    ProcessButtonInfo(pattern, arg);
-}
-
-void AlertDialogModelNG::ProcessContentResourceObj(
-    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& object, const DialogResourceType type)
-{
-    CHECK_NULL_VOID(pattern);
-    std::string key = "dialog." + DialogTypeUtils::ConvertDialogTypeToString(type);
-    if (!object) {
-        pattern->RemoveResObj(key);
-        return;
-    }
-    auto&& updateFunc = [pattern, type](const RefPtr<ResourceObject>& resObj) {
-        std::string result;
-        if (!ResourceParseUtils::ParseResString(resObj, result)) {
-            return;
-        }
-        pattern->UpdateContentValue(result, type);
-    };
-    pattern->AddResObj(key, object, std::move(updateFunc));
-}
-
-void AlertDialogModelNG::SetButtonText(
-    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
-{
-    CHECK_NULL_VOID(pattern);
-    std::string key = "dialog.button.text" + std::to_string(index);
-    if (!resObj) {
-        pattern->RemoveResObj(key);
-        return;
-    }
-    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
-        std::string result;
-        if (!ResourceParseUtils::ParseResString(resObj, result)) {
-            return;
-        }
-        pattern->UpdateButtonText(result, index);
-    };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
-}
-
-void AlertDialogModelNG::SetButtonFontColor(
-    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
-{
-    CHECK_NULL_VOID(pattern);
-    std::string key = "dialog.button.fontColor" + std::to_string(index);
-    if (!resObj) {
-        pattern->RemoveResObj(key);
-        return;
-    }
-    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
-        Color color;
-        if (!ResourceParseUtils::ParseResColor(resObj, color)) {
-            return;
-        }
-        pattern->UpdateButtonFontColor(color.ToString(), index);
-    };
-    updateFunc(resObj);
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
-}
-
-void AlertDialogModelNG::SetButtonBackgroundColor(
-    const RefPtr<DialogPattern>& pattern, const RefPtr<ResourceObject>& resObj, int32_t index)
-{
-    CHECK_NULL_VOID(pattern);
-    std::string key = "dialog.button.backgroundColor" + std::to_string(index);
-    if (!resObj) {
-        pattern->RemoveResObj(key);
-        return;
-    }
-    auto&& updateFunc = [pattern, index](const RefPtr<ResourceObject>& resObj) {
-        Color color;
-        if (!ResourceParseUtils::ParseResColor(resObj, color)) {
-            return;
-        }
-        pattern->UpdateButtonBackgroundColor(color, index);
-    };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
-}
-
-void AlertDialogModelNG::ProcessButtonInfo(const RefPtr<DialogPattern>& pattern, const DialogProperties& arg)
-{
-    std::int32_t index = 0;
-    for (auto& button : arg.buttons) {
-        if (button.resourceTextObj) {
-            SetButtonText(pattern, button.resourceTextObj, index);
-        }
-        if (button.resourceFontColorObj) {
-            SetButtonFontColor(pattern, button.resourceFontColorObj, index);
-        }
-        if (button.resourceBgColorObj) {
-            SetButtonBackgroundColor(pattern, button.resourceBgColorObj, index);
-        }
-        ++index;
-    }
 }
 } // namespace OHOS::Ace::NG

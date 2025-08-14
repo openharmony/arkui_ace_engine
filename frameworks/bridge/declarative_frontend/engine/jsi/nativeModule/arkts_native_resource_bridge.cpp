@@ -69,14 +69,15 @@ ArkUINativeModuleValue ResourceBridge::UpdateColorMode(ArkUIRuntimeCallInfo* run
         colorModeValue = MapJsColorModeToColorMode(firstArgValue);
     }
     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, panda::JSValueRef::Undefined(vm));
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
         UpdateColorModeForThemeConstants(colorModeValue);
 #else
-        ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+        ResourceManager::GetInstance().UpdateColorMode(
+            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), colorModeValue);
 #endif
-        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-        pipelineContext->SetLocalColorMode(colorModeValue);
+        pipeline->SetLocalColorMode(colorModeValue);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -86,15 +87,16 @@ ArkUINativeModuleValue ResourceBridge::Restore(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-    pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, panda::JSValueRef::Undefined(vm));
+    pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 
-    auto colorModeValue = pipelineContext->GetColorMode();
+    auto colorModeValue = pipeline->GetColorMode();
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else
-    ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+    ResourceManager::GetInstance().UpdateColorMode(
+        pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), colorModeValue);
 #endif
     return panda::JSValueRef::Undefined(vm);
 }

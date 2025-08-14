@@ -56,7 +56,7 @@ constexpr Dimension FORM_PAN_DISTANCE = 1.0_vp;
 constexpr Dimension PAN_MOVE_DISTANCE = 5.0_vp;
 constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
-constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
+constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 100;
 constexpr int32_t NONE_POINT_OFFSET = 2;
 constexpr int32_t STEP_POINT_OFFSET = 1;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
@@ -150,12 +150,6 @@ void SliderPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    auto inputEventHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputEventHub);
     auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -170,6 +164,33 @@ void SliderPattern::OnModifyDone()
     }
     InitSliderEnds();
     UpdateBlock();
+    InitializeBubble();
+    SetAccessibilityAction();
+    InitAccessibilityHoverEvent();
+    AccessibilityVirtualNodeRenderTask();
+    InitSliderAccessibilityEnabledRegister();
+    InitOrRefreshSlipFactor();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->InitEvent();
+    };
+    context->AddBuildFinishCallBack(callback);
+}
+
+void SliderPattern::InitEvent()
+{
+    RegisterVisibleAreaChange();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputEventHub = hub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
@@ -177,16 +198,12 @@ void SliderPattern::OnModifyDone()
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    InitializeBubble();
-    SetAccessibilityAction();
 #ifdef SUPPORT_DIGITAL_CROWN
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
     InitDigitalCrownEvent(focusHub);
 #endif
-    InitAccessibilityHoverEvent();
-    AccessibilityVirtualNodeRenderTask();
-    InitSliderAccessibilityEnabledRegister();
-    InitOrRefreshSlipFactor();
 }
 
 void SliderPattern::InitSliderEnds()
@@ -2173,31 +2190,45 @@ void SliderPattern::LayoutImageNode()
 void SliderPattern::UpdateImagePositionX(float centerX)
 {
     CHECK_NULL_VOID(imageFrameNode_);
-    auto renderContext = imageFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = imageFrameNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto offset = geometryNode->GetMarginFrameOffset();
-    offset.SetX(centerX - blockSize_.Width() * HALF);
-    geometryNode->SetMarginFrameOffset(offset);
-    renderContext->SavePaintRect();
-    renderContext->SyncGeometryProperties(nullptr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerX, blocksize = blockSize_]() {
+        auto imageNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        const auto& renderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto& geometryNode = imageNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto offset = geometryNode->GetMarginFrameOffset();
+        offset.SetX(centerX - blocksize.Width() * HALF);
+        geometryNode->SetMarginFrameOffset(offset);
+        renderContext->SavePaintRect();
+        renderContext->SyncGeometryProperties(nullptr);
+    });
 }
 
 void SliderPattern::UpdateImagePositionY(float centerY)
 {
     CHECK_NULL_VOID(imageFrameNode_);
-    auto renderContext = imageFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = imageFrameNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto offset = geometryNode->GetMarginFrameOffset();
-    offset.SetY(centerY - blockSize_.Height() * HALF);
-    geometryNode->SetMarginFrameOffset(offset);
-    renderContext->SavePaintRect();
-    renderContext->SyncGeometryProperties(nullptr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterModifierTask([weakNode = WeakPtr(imageFrameNode_), centerY, blocksize = blockSize_]() {
+        auto imageNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        const auto& renderContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        const auto& geometryNode = imageNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto offset = geometryNode->GetMarginFrameOffset();
+        offset.SetY(centerY - blocksize.Height() * HALF);
+        geometryNode->SetMarginFrameOffset(offset);
+        renderContext->SavePaintRect();
+        renderContext->SyncGeometryProperties(nullptr);
+    });
 }
 
 void SliderPattern::OpenTranslateAnimation(SliderStatus status)
@@ -2509,7 +2540,6 @@ void SliderPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    RegisterVisibleAreaChange();
 }
 
 void SliderPattern::OnAttachToMainTree()

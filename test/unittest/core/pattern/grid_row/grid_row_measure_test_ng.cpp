@@ -902,6 +902,61 @@ HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBreakpointChangeTest03
+ * @tc.desc: Test OnBreakpointChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowMeasureTestNG, OnBreakpointChangeTest03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GridRow
+     */
+    auto gridRow = CreateGridRow([this](GridRowModelNG model) {
+        V2::BreakPoints breakpoints;
+        breakpoints.reference = V2::BreakPointsReference::ComponentSize;
+        breakpoints.breakpoints.assign({ "100px", "200px", "300px" });
+        ViewAbstract::SetWidth(CalcLength(400));
+        ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, breakpoints);
+    });
+    auto eventHub = gridRow->GetOrCreateEventHub<GridRowEventHub>();
+    bool eventTriggerFlag = false;
+    auto layoutProperty = gridRow->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    /**
+     * @tc.steps: step2. Set OnBreakpointChange callback
+     * @tc.expected: breakpoint is changed to lg
+     */
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("lg")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(250), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("md")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+    eventTriggerFlag = false;
+    /**
+     * @tc.expected: breakpoint is changed to xxl
+     */
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(150), CalcLength(DEFAULT_CHILD_HEIGHT)));
+    eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("sm")](const std::string& size) {
+        eventTriggerFlag = true;
+        EXPECT_EQ(size, expectSize);
+    });
+    CreateMeasureLayoutTask(gridRow);
+    EXPECT_TRUE(eventTriggerFlag);
+}
+
+/**
  * @tc.name: MeasureSelfTest
  * @tc.desc: Test MeasureSelf
  * @tc.type: FUNC

@@ -580,8 +580,8 @@ HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(themeManager);
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
 
     pattern->showSelect_ = false;
     pattern->InitAiSelection(offset, false);

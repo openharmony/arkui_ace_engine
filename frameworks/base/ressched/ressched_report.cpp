@@ -164,10 +164,20 @@ void ResSchedReport::TriggerModuleSerializer()
     taskExecutor->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delay, "TriggerModuleSerializer");
 }
 
-void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
+void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param,
+    int64_t tid)
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[Ressched::NAME] = name;
+#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
+    if (tid == ResDefine::INVALID_DATA) {
+        tid = GetTid();
+    }
+    int64_t pid = GetPid();
+    if (pid != tid) {
+        payload["scrTid"] = std::to_string(static_cast<uint64_t>(GetPthreadSelf()));
+    }
+#endif
     if (!reportDataFunc_) {
         reportDataFunc_ = LoadReportDataFunc();
     }

@@ -113,6 +113,7 @@ public:
     static void UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
         const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
     static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
+    static bool SetTitleAnimationElapsedTime(AnimationOption& option, const RefPtr<FrameNode>& pushEnterNode);
 };
 
 } // namespace OHOS::Ace::NG

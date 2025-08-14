@@ -131,17 +131,19 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, ContentPrope
 
     auto [rectLeft, rectRight, rectTop, rectBottom] =
         CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
-    auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
-    leftCenterX = std::min(leftCenterX, contentProperty.vectorBlackPointCenterX[0]);
-    rightCenterX = std::max(rightCenterX,
-        contentProperty.vectorBlackPointCenterX[static_cast<int32_t>(pointNumber) - 1]);
-    auto rectPadding = contentProperty.indicatorPadding + itemWidth / 2;
-    if (axis_ == Axis::VERTICAL) {
-        rectTop = std::min(rectTop, leftCenterX - rectPadding);
-        rectBottom = std::max(rectBottom, rightCenterX + rectPadding);
-    } else {
-        rectLeft = std::min(rectLeft, leftCenterX - rectPadding);
-        rectRight = std::max(rectRight, rightCenterX + rectPadding);
+    if (Positive(pointNumber)) {
+        auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
+        leftCenterX = std::min(leftCenterX, contentProperty.vectorBlackPointCenterX[0]);
+        rightCenterX = std::max(rightCenterX,
+            contentProperty.vectorBlackPointCenterX[static_cast<int32_t>(pointNumber) - 1]);
+        auto rectPadding = contentProperty.indicatorPadding + itemWidth / 2;
+        if (axis_ == Axis::VERTICAL) {
+            rectTop = std::min(rectTop, leftCenterX - rectPadding);
+            rectBottom = std::max(rectBottom, rightCenterX + rectPadding);
+        } else {
+            rectLeft = std::min(rectLeft, leftCenterX - rectPadding);
+            rectRight = std::max(rectRight, rightCenterX + rectPadding);
+        }
     }
     // Paint background
     RSCanvas& canvas = context.canvas;

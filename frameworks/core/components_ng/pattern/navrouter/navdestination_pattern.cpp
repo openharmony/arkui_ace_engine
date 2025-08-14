@@ -788,7 +788,8 @@ void NavDestinationPattern::StartHideOrShowBarInner(
         ctx.isBarShowing = true;
     }
     NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(nodeBase, barNode, curTranslate, isTitle);
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    AnimationUtils::Animate(
+        option, propertyCallback, finishCallback, nullptr /* repeatCallback */, nodeBase->GetContextRefPtr());
 }
 
 void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle)
@@ -810,7 +811,10 @@ void NavDestinationPattern::StopHideBarIfNeeded(float curTranslate, bool isTitle
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, propertyCallback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationUtils::Animate(
+        option, propertyCallback, nullptr /* finishCallback */, nullptr /* repeatCallback */, host->GetContextRefPtr());
     ctx.isBarHiding = false;
 }
 

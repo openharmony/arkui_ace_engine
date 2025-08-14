@@ -13321,7 +13321,7 @@ const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
     g_numberValues[2].i32 = values[2];
     //size
     g_attributeItem.size = NUM_3;
-    if (resultValue < NUM_1) {
+    if (resultValue < NUM_1 || resultValue > NUM_10) {
         return &g_attributeItem;
     }
 
@@ -13428,7 +13428,7 @@ const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
     g_numberValues[NUM_3].i32 = values[NUM_3];
     //size
     g_attributeItem.size = NUM_3;
-    if (resultValue < NUM_1) {
+    if (resultValue < NUM_1 || resultValue > NUM_10) {
         return &g_attributeItem;
     }
 

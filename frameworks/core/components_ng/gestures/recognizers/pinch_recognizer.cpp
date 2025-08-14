@@ -451,10 +451,12 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         info.SetInputEventType(inputEventType_);
@@ -519,7 +521,9 @@ GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputDeviceId(deviceId_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
     if (gestureRecognizerJudgeFunc) {

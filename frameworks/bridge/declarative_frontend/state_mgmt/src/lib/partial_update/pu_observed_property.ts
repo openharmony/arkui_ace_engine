@@ -78,8 +78,8 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
       // for interop
       } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.wrappedValue_ === 'object' &&
-        'removeWatchSubscriber' in this.wrappedValue_ && typeof (this.wrappedValue_ as any).removeWatchSubscriber === 'function') {
-          (this.wrappedValue_ as any).removeWatchSubscriber(this.staticWatchId);
+        'removeWatchSubscriber' in this.wrappedValue_ && typeof this.wrappedValue_.removeWatchSubscriber === 'function') {
+          this.wrappedValue_.removeWatchSubscriber(this.staticWatchId);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
 

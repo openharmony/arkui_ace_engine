@@ -997,6 +997,30 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     PushOuterBorderColorVector(bottomColor, values);
 }
 
+void ParseOutLineColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    ParseOuterBorderEdgeColor(vm, leftArg, leftColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, rightArg, rightColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, topArg, topColor, resObjs, nodeInfo);
+    ParseOuterBorderEdgeColor(vm, bottomArg, bottomColor, resObjs, nodeInfo);
+    
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+    PushOuterBorderColorVector(leftColor, values);
+}
+
 bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
@@ -2254,7 +2278,7 @@ ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runti
     std::vector<uint32_t> colorOptions;
     std::vector<RefPtr<ResourceObject>> vectorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
+    ParseOutLineColor(runtimeCallInfo, vm, colorOptions, NUM_1, vectorResObj, nodeInfo);
     auto rawPtr = static_cast<void*>(&vectorResObj);
     GetArkUINodeModifiers()->getCommonModifier()->setOutlineColor(
         nativeNode, colorOptions.data(), colorOptions.size(), rawPtr);
@@ -6505,6 +6529,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
     std::string stringValue;
     std::string extraInfoValue;
     RefPtr<PixelMap> pixmap = nullptr;
+    std::shared_ptr<Media::PixelMap> pixelMapSharedPtr = nullptr;
     if (valueObj->IsObject(vm)) {
         auto obj = valueObj->ToObject(vm);
         auto inspectorId = obj->Get(vm, "inspetorId");
@@ -6527,7 +6552,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreview(ArkUIRuntimeCallInfo* runtim
             pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, pixelMap);
 #endif
             if (pixmap) {
-                auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+                pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
                 dragPreview.pixelMap = static_cast<void*>(&pixelMapSharedPtr);
             }
         }
@@ -9318,8 +9343,15 @@ ArkUINativeModuleValue CommonBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* runtim
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto obj = CreateHoverInfo(vm, hoverInfo);
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltX().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltY().value_or(0.0f))));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { obj };
@@ -10908,10 +10940,10 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    JsiRef<JsiValue> secondeArg =
+    JsiRef<JsiValue> secondArg =
         JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_1));
-
-    auto ratioArray = JSRef<JSArray>::Cast(secondeArg);
+    CHECK_NULL_RETURN(secondArg->IsArray(), panda::JSValueRef::Undefined(vm));
+    auto ratioArray = JSRef<JSArray>::Cast(secondArg);
     size_t size = ratioArray->Length();
     std::vector<double> ratioList;
     for (size_t i = 0; i < size; i++) {

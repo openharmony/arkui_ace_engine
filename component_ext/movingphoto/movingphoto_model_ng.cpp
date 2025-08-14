@@ -105,6 +105,14 @@ void MovingPhotoModelNG::SetHdrBrightness(float hdrBrightness)
     movingPhotoPattern->SetHdrBrightness(hdrBrightness);
 }
 
+void MovingPhotoModelNG::SetEnableCameraPostprocessing(bool isEnabled)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    movingPhotoPattern->SetEnableCameraPostprocessing(isEnabled);
+}
+
 void MovingPhotoModelNG::SetMuted(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

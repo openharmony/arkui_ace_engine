@@ -45,7 +45,7 @@ void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32
             CalcDimension start(0.0, DimensionUnit::VP);
             info.start = start;
         }
-        if (rawPtr) {
+        if (SystemProperties::ConfigChangePerform() && rawPtr) {
             auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
             RelativeContainerModelNG::SetPositionResObj(
                 objs[NUM_2 * i], info, "relativeContainer.guideLine.position.start");

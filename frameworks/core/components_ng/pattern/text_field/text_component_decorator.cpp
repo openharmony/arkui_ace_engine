@@ -182,8 +182,7 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     std::string counterText;
     if (isVisible) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        accessibilityProperty->SetAccessibilityText(
-            GetAccessibilityText(theme->GetCounterContent(), textLength, maxLength));
+        accessibilityProperty->SetAccessibilityText(GetAccessibilityText(textLength, maxLength));
     } else {
         accessibilityProperty->SetAccessibilityText("");
     }
@@ -208,27 +207,40 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
 }
 
-std::string CounterDecorator::GetAccessibilityText(
-    const std::string& originStr, uint32_t textLength, uint32_t maxLength)
+std::string CounterDecorator::GetAccessibilityText(uint32_t textLength, uint32_t maxLength)
 {
-    std::string result = originStr;
+    std::string result = "";
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_RETURN(textNode, result);
+    auto pipelineContext = textNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, result);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, result);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, result);
+
     std::string textLengthStr = std::to_string(textLength);
     std::string maxLengthStr = std::to_string(maxLength);
-    std::string toFindStrFirst = "%1$d";
-    std::string toFindStrSecond = "%2$d";
+    std::string toFindStr = "%d";
 
-    size_t pos = result.find(toFindStrFirst);
-    if (pos == std::string::npos) {
-        return "";
+    auto firstStr = themeConstants->GetPluralStringByName("sys.plurals.textfield_counter_content_part_one", textLength);
+    if (firstStr.empty()) {
+        return result;
     }
-    result.replace(pos, toFindStrFirst.length(), textLengthStr);
-
-    pos = result.find(toFindStrSecond, pos + textLengthStr.length());
-    if (pos == std::string::npos) {
-        return "";
+    size_t posFirst = firstStr.find(toFindStr);
+    if (posFirst != std::string::npos) {
+        firstStr.replace(posFirst, toFindStr.length(), textLengthStr);
     }
-    result.replace(pos, toFindStrSecond.length(), maxLengthStr);
 
+    auto secondStr = themeConstants->GetPluralStringByName("sys.plurals.textfield_counter_content_part_two", maxLength);
+    if (secondStr.empty()) {
+        return result;
+    }
+    size_t posSecond = secondStr.find(toFindStr);
+    if (posSecond != std::string::npos) {
+        secondStr.replace(posSecond, toFindStr.length(), maxLengthStr);
+    }
+    result = firstStr + secondStr;
     return result;
 }
 

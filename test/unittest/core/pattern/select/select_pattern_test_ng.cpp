@@ -246,6 +246,38 @@ HWTEST_F(SelectPatternTestNg, RemoveParentRestrictionsForFixIdeal001, TestSize.L
     EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
 }
 
+/**
+ * @tc.name: RemoveParentRestrictionsForFixIdeal002
+ * @tc.desc: Test Select RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, RemoveParentRestrictionsForFixIdeal002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    auto selectPattern = AceType::MakeRefPtr<SelectPattern>();
+    auto selectNode = FrameNode::CreateFrameNode(V2::SELECT_ETS_TAG, -1, selectPattern);
+    auto algorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(selectNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+    /**
+     * @tc.steps: step2. LayoutCalPolicy is NO_MATCH and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is equal to FULL_SCREEN_SIZE.
+     */
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = FULL_SCREEN_SIZE;
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProp->layoutPolicy_ = layoutPolicyProperty;
+    algorithm->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_EQ(childConstraint.maxSize.Width(), FULL_SCREEN_SIZE.Width());
+    EXPECT_EQ(childConstraint.maxSize.Height(), FULL_SCREEN_SIZE.Height());
+}
 
 /**
  * @tc.name: OnModifyDone003
@@ -3177,5 +3209,52 @@ HWTEST_F(SelectPatternTestNg, UpdateComponentColor001, TestSize.Level1)
             pattern->UpdateComponentColor(Color::RED, SelectColorType::MENU_BACKGROUND_COLOR);
         }
     }
+}
+
+/**
+ * @tc.name: UpdateMenuOption
+ * @tc.desc: Test UpdateMenuOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, UpdateMenuOption, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    // Ensure there is at least one option
+    ASSERT_FALSE(menuPattern->GetOptions().empty());
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(menuPattern->GetOptions().at(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    // Test text update
+    const std::string newText = "UpdatedText";
+    selectPattern->UpdateMenuOption(0, newText, SelectOptionType::TEXT);
+    EXPECT_EQ(menuItemPattern->GetText(), newText);
+
+    // Test invalid update
+    selectPattern->UpdateMenuOption(0, "UnusedValue", static_cast<SelectOptionType>(999));
+
+    // Test icon update
+    const std::string newIcon = "/path/to/icon.png";
+    selectPattern->UpdateMenuOption(0, newIcon, SelectOptionType::ICON);
+    auto iconNode = menuItemPattern->icon_;
+    ASSERT_NE(iconNode, nullptr);
+    ASSERT_EQ(iconNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(props, nullptr);
+    auto imageSrcInfo = props->GetImageSourceInfo();
+    EXPECT_EQ(imageSrcInfo->GetSrc(), newIcon);
 }
 } // namespace OHOS::Ace::NG

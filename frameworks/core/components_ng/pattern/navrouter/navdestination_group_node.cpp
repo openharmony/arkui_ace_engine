@@ -685,7 +685,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
             auto renderContext = weakRender.Upgrade();
             CHECK_NULL_VOID(renderContext);
             renderContext->SetOpacity(1.0f);
-        });
+        }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     // recover after transition animation.
     opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
@@ -695,7 +695,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetOpacity(0.0f);
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
@@ -726,7 +726,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
             auto renderContext = weakRender.Upgrade();
             CHECK_NULL_VOID(renderContext);
             renderContext->SetOpacity(1.0f);
-        });
+        }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
     }
     transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
     backButtonNodeContext->SetOpacity(1.0f);
@@ -735,7 +735,7 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetOpacity(0.0f);
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
@@ -968,19 +968,20 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
             CHECK_NULL_VOID(navDestination);
             auto renderContext = navDestination->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            auto frameSize = navDestination->GetGeometryNode()->GetFrameSize();
-            auto translate = navDestination->CalcTranslateForSlideTransition(frameSize, isRight, isEnter, true);
+            auto paintRect = renderContext->GetPaintRectWithoutTransform().GetSize();
+            auto translate = navDestination->CalcTranslateForSlideTransition(paintRect, isRight, isEnter, true);
             renderContext->UpdateTranslateInXY(translate);
         };
         RefPtr<Curve> curve = isRight ? MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f)
             : MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
         auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback());
         auto renderContext = GetRenderContext();
-        auto frameSize = GetGeometryNode()->GetFrameSize();
-        auto translate = CalcTranslateForSlideTransition(frameSize, isRight, isEnter, false);
+        auto paintRect = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto translate = CalcTranslateForSlideTransition(paintRect, isRight, isEnter, false);
         renderContext->UpdateTranslateInXY(translate);
         OnStartOneTransitionAnimation();
-        AnimationUtils::Animate(option, translateEvent, option.GetOnFinishEvent());
+        AnimationUtils::Animate(
+            option, translateEvent, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     } else {
         // mask animation
         auto option = BuildAnimationOption(
@@ -1079,7 +1080,8 @@ void NavDestinationGroupNode::DoMaskAnimation(const AnimationOption& option, Col
 
     // initial property
     renderContext->SetActualForegroundColor(begin);
-    AnimationUtils::Animate(option, maskEvent, option.GetOnFinishEvent());
+    AnimationUtils::Animate(
+        option, maskEvent, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
 }
 
 int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operation, bool isEnter)
@@ -1167,7 +1169,7 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
         };
     }
     OnStartOneTransitionAnimation();
-    AnimationUtils::Animate(option, event, finish);
+    AnimationUtils::Animate(option, event, finish, nullptr /* repeatCallback */, GetContextRefPtr());
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,

@@ -40,14 +40,19 @@ public:
     void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
         bool canOverScroll = false) override;
+    bool AnimateToMultiThread(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
+        bool canOverScroll = false);
     void SetCanStayOverScroll(bool canStayOverScroll) override;
     Offset GetCurrentOffset() const override;
     Axis GetScrollDirection() const override;
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;
+    void ScrollByMultiThread(double pixelX, double pixelY, bool smooth);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+    void ScrollToEdgeMultiThread(ScrollEdgeType scrollEdgeType, bool smooth);
     void ScrollPage(bool reverse, bool smooth) override;
     void Fling(double flingVelocity) override;
+    void FlingMultiThread(double flingVelocity);
     bool IsAtEnd() const override;
     Rect GetItemRect(int32_t index) const override;
     int32_t GetItemIndex(double x, double y) const override;

@@ -86,6 +86,7 @@ public:
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
     void AddAfterRenderTask(std::function<void()>&& task);
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterModifierTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
@@ -96,6 +97,7 @@ public:
     void FlushAfterLayoutCallbackInImplicitAnimationTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
+    void FlushAfterModifierTask();
     void ExpandSafeArea();
 
     void FlushDelayJsActive();
@@ -198,6 +200,7 @@ private:
     std::list<std::function<void()>> afterRenderTasks_;
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
+    std::list<std::function<void()>> afterModifierTasks_;
     std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
     std::set<RefPtr<FrameNode>> singleDirtyNodesToFlush_;
     std::queue<bool> layoutWithImplicitAnimation_;

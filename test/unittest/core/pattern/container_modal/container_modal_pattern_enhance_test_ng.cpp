@@ -877,4 +877,32 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest031
     EXPECT_FALSE(titleResult);
     EXPECT_FALSE(floatingTitleResult);
 }
+
+/**
+ * @tc.name: GetContainerModalButtonsRect001
+ * @tc.desc: Test use GetContainerModalButtonsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, GetContainerModalButtonsRect001, TestSize.Level1)
+{
+    RectF containerModal(0.0f, 0.0f, 1000.0f, 1000.0f);
+    RectF buttons(0.0f, 0.0f, 50.0f, 50.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto cloumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    cloumn->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    cloumn->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(cloumn);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    buttonNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(buttonNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto pattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    pattern->SetContainerButtonHide(true, true, true, true);
+    auto ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_FALSE(ret);
+}
+
 } // namespace OHOS::Ace::NG

@@ -507,6 +507,10 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
             napi_get_null(env, &result);
             NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
             break;
+        case ERROR_CODE_PARAM_INVALID :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
+            break;
     }
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -603,6 +607,10 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
         case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT :
             napi_get_null(env, &result);
             NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
+            break;
+        case ERROR_CODE_PARAM_INVALID :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
             break;
     }
     napi_escape_handle(env, scope, result, &result);

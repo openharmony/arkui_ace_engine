@@ -591,8 +591,21 @@ HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
     bool isFirst = true;
     pattern->textForDisplay_ = u"";
     pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+
+    manager->selectOverlayNode_ = nullptr;
 }
 
 /**
@@ -609,8 +622,21 @@ HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
     RectF handleRect = { 0, 0, 10, 10 };
     bool isFirst = true;
     pattern->textForDisplay_ = u"1";
+
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayNode_ = overlayNode;
+    pattern->selectOverlay_->OnBind(manager);
+
     pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
     EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+
+    manager->selectOverlayNode_ = nullptr;
 }
 
 /**
@@ -950,6 +976,72 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle006, TestSize.Level1)
     ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
     EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result);
     EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle007
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle007, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value1 = 5.0;
+    auto values1 = CalcDimension(value1);
+    auto value2 = 10.0;
+    auto values2 = CalcDimension(value2);
+    gradient.GetRadialGradient()->radialCenterX = values1;
+    gradient.GetRadialGradient()->radialCenterY = values2;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result1(value1);
+    AnimatableDimension result2(value2);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterX, result1);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialCenterY, result2);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateShaderStyle008
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle008, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+    auto value1 = 5.0;
+    auto values1 = CalcDimension(value1);
+    auto value2 = 10.0;
+    auto values2 = CalcDimension(value2);
+    gradient.GetRadialGradient()->radialVerticalSize = values1;
+    gradient.GetRadialGradient()->radialHorizontalSize = values2;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result1(value1);
+    AnimatableDimension result2(value2);
+    ASSERT_NE(gradientValue.GetRadialGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialVerticalSize, result1);
+    EXPECT_EQ(gradientValue.GetRadialGradient()->radialHorizontalSize, result2);
     layoutProperty->ResetGradientShaderStyle();
     auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
     EXPECT_EQ(gradientValue1.GetRadialGradient(), nullptr);

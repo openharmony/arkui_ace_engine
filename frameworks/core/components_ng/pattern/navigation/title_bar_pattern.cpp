@@ -875,7 +875,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanSpringAnimation();
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void TitleBarPattern::ClearDragState()
@@ -923,6 +923,8 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
 
 void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
@@ -948,7 +950,7 @@ void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanAnimation();
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void TitleBarPattern::SetMaxTitleBarHeight()

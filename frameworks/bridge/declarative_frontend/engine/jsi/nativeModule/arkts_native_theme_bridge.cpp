@@ -33,10 +33,11 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> darkColorsArg = runtimeCallInfo->GetCallArgRef(3); // 3: darkColorsArg index
     Local<JSValueRef> colorModeArg = runtimeCallInfo->GetCallArgRef(4); // 4: colorModeArg index
     Local<JSValueRef> onThemeScopeDestroyArg = runtimeCallInfo->GetCallArgRef(5); // 5: destroy callback arg index
+    Local<JSValueRef> darkSetStatus = runtimeCallInfo->GetCallArgRef(6); // 6: is set darkColors
 
     // check all argument valid
     if (!themeScopeIdArg->IsNumber() || !themeIdArg->IsNumber() || !colorsArg->IsArray(vm) ||
-        !darkColorsArg->IsArray(vm) || !colorModeArg->IsNumber() || !onThemeScopeDestroyArg->IsFunction(vm)) {
+        !darkSetStatus->IsBoolean() || !colorModeArg->IsNumber() || !onThemeScopeDestroyArg->IsFunction(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUI_Int32 themeScopeId = static_cast<ArkUI_Int32>(themeScopeIdArg->Int32Value(vm));
@@ -48,9 +49,14 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
 
+    ArkUI_Bool isDarkSet = static_cast<ArkUI_Bool>(darkSetStatus->BooleaValue(vm));
     std::vector<ArkUI_Uint32> darkColors;
     std::vector<RefPtr<ResourceObject>> darkResObjs;
-    if (!HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true)) {
+    if (!isDarkSet) {
+        darkColors = lightColors; // if darkColors is not set, use lightColors
+        darkResObjs = lightResObjs; // if darkColors is not set, use lightResObjs
+    } else if (!darkColorsArg->IsArray(vm) ||
+    !HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme darkColors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }

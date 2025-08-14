@@ -1057,4 +1057,18 @@ bool TxtParagraph::IsIndexAtLineEnd(const Offset& offset, int32_t index)
     LineMetrics lineMetrics;
     return GetLineMetricsByCoordinate(offset, lineMetrics) && (index == lineMetrics.endIndex);
 }
+
+bool TxtParagraph::DidExceedMaxLinesInner()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, false);
+    return !paragrah->CanPaintAllText();
+}
+
+std::string TxtParagraph::GetDumpInfo()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, "");
+    return paragrah->GetDumpInfo();
+}
 } // namespace OHOS::Ace::NG

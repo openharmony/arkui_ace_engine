@@ -2571,32 +2571,7 @@ HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText001, TestSize.Level1)
     pattern_->AddCounterNode();
     auto counter = pattern_->GetCounterDecorator();
     ASSERT_NE(counter, nullptr);
-    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(
-        "Number of characters entered: %1$d, Maximum number of characters allowed: %2$d", 10, 20);
-    EXPECT_EQ(result, "Number of characters entered: 10, Maximum number of characters allowed: 20");
-}
-
-/**
- * @tc.name: GetAccessibilityText002
- * @tc.desc: test CounterDecorator GetAccessibilityText
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputUpdateTestNg, GetAccessibilityText002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.step: step2. call AddCounterNode
-     */
-    ASSERT_NE(pattern_, nullptr);
-    pattern_->AddCounterNode();
-    auto counter = pattern_->GetCounterDecorator();
-    ASSERT_NE(counter, nullptr);
-    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(
-        "Number of characters entered: %1$d", 10, 20);
+    auto result = AceType::DynamicCast<CounterDecorator>(counter)->GetAccessibilityText(10, 20);
     EXPECT_EQ(result, "");
 }
 } // namespace OHOS::Ace::NG

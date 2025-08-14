@@ -1768,14 +1768,20 @@ void ListPattern::ScrollTo(float position)
     isScrollEnd_ = true;
 }
 
+void ListPattern::ResetScrollToIndexParams()
+{
+    targetIndex_.reset();
+    targetIndexInGroup_.reset();
+    scrollAlign_ = ScrollAlign::START;
+}
+
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     // When snap align scrolling with the mouse wheel, do not interrupt the animation.
     if (!smooth && !lastSnapTargetIndex_.has_value()) {
+        ResetScrollToIndexParams();
         StopAnimate();
-        targetIndex_.reset();
-        targetIndexInGroup_.reset();
     }
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
@@ -2038,6 +2044,9 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         if (!indexInGroup.has_value()) {
             scrollTarget_ = { index, extraOffset, align, targetPos + currentOffset_ };
         }
+    } else {
+        ResetScrollToIndexParams();
+        StopAnimate();
     }
     return true;
 }
@@ -4134,6 +4143,26 @@ void ListPattern::ProcessFocusEvent(bool indexChanged)
     }
 }
 
+void ListPattern::HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(childFocusHub);
+    auto child = childFocusHub->GetFrameNode();
+    CHECK_NULL_VOID(child);
+    auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    auto parentNode = childNode->GetParent();
+    while (parentNode && !AceType::InstanceOf<FrameNode>(parentNode)) {
+        if (AceType::InstanceOf<LazyForEachNode>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScroll2Node>(parentNode) ||
+            AceType::InstanceOf<RepeatVirtualScrollNode>(parentNode)) {
+            focusHub->LostChildFocusToSelf();
+            return;
+        }
+        parentNode = parentNode->GetParent();
+    }
+}
+
 void ListPattern::FireFocus()
 {
     CHECK_NULL_VOID(focusIndex_);
@@ -4180,7 +4209,7 @@ void ListPattern::FireFocus()
         auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
         CHECK_NULL_VOID(childFocusHub);
         if (childFocusHub->IsCurrentFocus()) {
-            focusHub->LostChildFocusToSelf();
+            HandleFocusParentCheck(childFocusHub, focusHub);
         }
     }
 }

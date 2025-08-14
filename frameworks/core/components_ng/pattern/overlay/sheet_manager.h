@@ -100,7 +100,7 @@ public:
         if (sheetTheme->GetSheetBottomType() == "center") {
             sheetType = SheetType::SHEET_CENTER;
         }
-        if (sheetTheme->GetSheetBottomType() == "popup") {
+        if (sheetTheme->GetSheetType() == "popup") {
             sheetType = sheetStyle.sheetType.has_value() ?
                 sheetStyle.sheetType.value() : SheetType::SHEET_CENTER;
         }

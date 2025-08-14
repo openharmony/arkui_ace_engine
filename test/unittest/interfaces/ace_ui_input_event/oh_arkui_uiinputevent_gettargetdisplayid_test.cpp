@@ -108,7 +108,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId105, TestSize
     ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, TOUCH_EVENT_ID, &pointerEvent };
 
     auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(&event);
-    EXPECT_GE(result, 0);
+    EXPECT_NE(result, 0);
 }
 
 /**
@@ -122,7 +122,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId106, TestSize
     ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, AXIS_EVENT_ID, &pointerEvent };
 
     auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(&event);
-    EXPECT_TRUE(result == DEFAULT_DISPLAY_ID || result == TEST_DISPLAY_ID);
+    EXPECT_FALSE(result == DEFAULT_DISPLAY_ID || result == TEST_DISPLAY_ID);
 }
 
 /**

@@ -75,6 +75,7 @@ const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const uint32_t XCOMPONENT_ID_LEN_MAX = 10;
+const uint64_t XCOMPONENT_SCREEN_ID = 12345u;
 const float MAX_WIDTH = 400.0f;
 const float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
@@ -93,6 +94,7 @@ const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 bool isAxis = false;
 bool isLock = true;
+bool g_isDestroyed = false;
 const RenderFit g_renderFitCases[] = {
     RenderFit::CENTER,
     RenderFit::TOP,
@@ -181,6 +183,7 @@ public:
         testProperty.surfaceCreatedEvent = std::nullopt;
         testProperty.surfaceChangedEvent = std::nullopt;
         testProperty.surfaceDestroyedEvent = std::nullopt;
+        g_isDestroyed = false;
     }
 
 protected:
@@ -193,6 +196,7 @@ void XComponentTestNg::SetUpTestSuite()
     testProperty.xcId = XCOMPONENT_ID;
     testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
     testProperty.soPath = XCOMPONENT_SO_PATH;
+    g_isDestroyed = false;
 }
 
 void XComponentTestNg::TearDownTestSuite()
@@ -228,6 +232,565 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
     return AceType::DynamicCast<FrameNode>(element);
+}
+
+/**
+ * @tc.name: InitControllerMultiThreadTest001
+ * @tc.desc: Test InitControllerMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, InitControllerMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->xcomponentController_);
+    pattern->isTypedNode_ = false;
+    pattern->surfaceId_ = SURFACE_ID;
+    pattern->xcomponentController_->surfaceId_ = "";
+    /**
+     * @tc.steps: step2. call InitControllerMultiThread
+     * @tc.expected: xcomponent controller is initialized
+     */
+    pattern->InitControllerMultiThread();
+    pattern->xcomponentController_->ConfigSurface(
+        static_cast<uint32_t>(SURFACE_WIDTH), static_cast<uint32_t>(SURFACE_HEIGHT));
+    EXPECT_EQ(pattern->xcomponentController_->surfaceId_, pattern->surfaceId_);
+    auto controllerNG = static_cast<XComponentControllerNG*>(pattern->xcomponentController_.get());
+    EXPECT_TRUE(controllerNG);
+    EXPECT_FALSE(controllerNG->pattern_.Invalid());
+    EXPECT_EQ(controllerNG->pattern_.Upgrade(), pattern);
+}
+
+/**
+ * @tc.name: InitControllerMultiThreadTest002
+ * @tc.desc: Test InitControllerMultiThread func for typedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, InitControllerMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->xcomponentController_);
+    pattern->isTypedNode_ = true;
+    pattern->surfaceId_ = SURFACE_ID;
+    pattern->xcomponentController_->surfaceId_ = "";
+    /**
+     * @tc.steps: step2. call InitControllerMultiThread
+     * @tc.expected: xcomponent controller is not initialized
+     */
+    pattern->InitControllerMultiThread();
+    EXPECT_NE(pattern->xcomponentController_->surfaceId_, pattern->surfaceId_);
+}
+
+/**
+ * @tc.name: RegisterContextEventMultiThreadTest
+ * @tc.desc: Test RegisterContextEventMultiThread func for typedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, RegisterContextEventMultiThreadTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->transformHintChangedCallbackId_ = std::nullopt;
+    /**
+     * @tc.steps: step2. call RegisterContextEventMultiThread
+     * @tc.expected: pipeline context event is registered.
+     */
+    pattern->RegisterContextEventMultiThread(frameNode);
+    EXPECT_TRUE(pattern->transformHintChangedCallbackId_.has_value());
+}
+
+/**
+ * @tc.name: InitSurfaceMultiThreadTest001
+ * @tc.desc: Test InitSurfaceMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, InitSurfaceMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->renderSurface_ = nullptr;
+    pattern->renderContextForSurface_ = nullptr;
+    pattern->isCNode_ = true;
+    /**
+     * @tc.steps: step2. call InitSurfaceMultiThread
+     * @tc.expected: surface is initialized
+     */
+    pattern->InitSurfaceMultiThread(frameNode);
+    EXPECT_TRUE(pattern->renderSurface_);
+    EXPECT_TRUE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: InitSurfaceMultiThreadTest002
+ * @tc.desc: Test InitSurfaceMultiThread func for XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, InitSurfaceMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->renderSurface_ = nullptr;
+    pattern->renderContextForSurface_ = nullptr;
+    pattern->isTypedNode_ = true;
+    /**
+     * @tc.steps: step2. call InitSurfaceMultiThread
+     * @tc.expected: surface is initialized
+     */
+    pattern->InitSurfaceMultiThread(frameNode);
+    EXPECT_FALSE(pattern->renderContextForSurface_);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest001
+ * @tc.desc: Test OnAttachToMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnAttachToMainTreeMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = false;
+    pattern->isTypedNode_ = false;
+    /**
+     * @tc.steps: step2. call OnAttachToMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is on tree
+     */
+    pattern->OnAttachToMainTreeMultiThread(frameNode);
+    EXPECT_TRUE(pattern->isOnTree_);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest002
+ * @tc.desc: Test OnAttachToMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnAttachToMainTreeMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = false;
+    pattern->isTypedNode_ = true;
+    pattern->surfaceId_ = SURFACE_ID;
+    pattern->screenId_ = XCOMPONENT_SCREEN_ID;
+    pattern->surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
+    /**
+     * @tc.steps: step2. call OnAttachToMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is on tree
+     */
+    pattern->OnAttachToMainTreeMultiThread(frameNode);
+    EXPECT_TRUE(pattern->isOnTree_);
+    EXPECT_TRUE(pattern->surfaceId_.empty());
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThreadTest003
+ * @tc.desc: Test OnAttachToMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnAttachToMainTreeMultiThreadTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = false;
+    pattern->isTypedNode_ = true;
+    pattern->surfaceId_ = SURFACE_ID;
+    pattern->screenId_ = XCOMPONENT_SCREEN_ID;
+    pattern->surfaceCallbackMode_ = SurfaceCallbackMode::PIP;
+    /**
+     * @tc.steps: step2. call OnAttachToMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is on tree
+     */
+    pattern->OnAttachToMainTreeMultiThread(frameNode);
+    EXPECT_TRUE(pattern->isOnTree_);
+    EXPECT_EQ(pattern->surfaceId_, SURFACE_ID);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest001
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromMainTreeMultiThreadTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isOnTree_ = true;
+    pattern->isTypedNode_ = false;
+    pattern->transformHintChangedCallbackId_ = std::nullopt;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is not on tree
+     */
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+    EXPECT_FALSE(pattern->isOnTree_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest002
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromMainTreeMultiThreadTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->xcomponentController_);
+    pattern->xcomponentController_->SetSurfaceId(SURFACE_ID);
+    pattern->isOnTree_ = true;
+    pattern->isTypedNode_ = true;
+    pattern->surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is not on tree
+     */
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+    EXPECT_FALSE(pattern->isOnTree_);
+    EXPECT_TRUE(pattern->xcomponentController_->surfaceId_.empty());
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThreadTest003
+ * @tc.desc: Test OnDetachFromMainTreeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromMainTreeMultiThreadTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->xcomponentController_);
+    pattern->xcomponentController_->SetSurfaceId(SURFACE_ID);
+    pattern->isOnTree_ = true;
+    pattern->isTypedNode_ = true;
+    pattern->surfaceCallbackMode_ = SurfaceCallbackMode::PIP;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: xcomponent pattern is not on tree
+     */
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+    EXPECT_FALSE(pattern->isOnTree_);
+    EXPECT_FALSE(pattern->xcomponentController_->surfaceId_.empty());
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread001
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func when xcomponent is not initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = false;
+    pattern->hasXComponentInit_ = false;
+    /**
+     * @tc.steps: step2. register surface events
+     * @tc.expected: surface event is registered
+     */
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+    auto onSurfaceDestroyed = [](OH_NativeXComponent* component, void* window) {
+        g_isDestroyed = true;
+    };
+    OH_NativeXComponent_Callback callback = {
+        .OnSurfaceDestroyed = onSurfaceDestroyed
+    };
+    nativeXComponent->RegisterCallback(&callback);
+    /**
+     * @tc.steps: step3. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: surface is not destroyed
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(g_isDestroyed);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread002
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = false;
+    pattern->hasXComponentInit_ = true;
+    /**
+     * @tc.steps: step2. register surface events
+     * @tc.expected: surface event is registered
+     */
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+    auto onSurfaceDestroyed = [](OH_NativeXComponent* component, void* window) {
+        g_isDestroyed = true;
+    };
+    OH_NativeXComponent_Callback callback = {
+        .OnSurfaceDestroyed = onSurfaceDestroyed
+    };
+    nativeXComponent->RegisterCallback(&callback);
+    /**
+     * @tc.steps: step3. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: surface is not destroyed
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(g_isDestroyed);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread003
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func for type node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->hasLoadNativeDone_ = true;
+    pattern->isNativeXComponent_ = true;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: OnNativeUnload is called
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->hasLoadNativeDone_);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread004
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func for type node
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    ASSERT_TRUE(pattern->xcomponentController_);
+    pattern->isTypedNode_ = true;
+    pattern->surfaceCallbackMode_ = SurfaceCallbackMode::PIP;
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: surface is destroyed
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(pattern->xcomponentController_->surfaceId_.empty());
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread005
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func for XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = false;
+    pattern->hasXComponentInit_ = true;
+    /**
+     * @tc.steps: step2. register surface events
+     * @tc.expected: surface event is registered
+     */
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+    auto onSurfaceDestroyed = [](OH_NativeXComponent* component, void* window) {
+        g_isDestroyed = true;
+    };
+    OH_NativeXComponent_Callback callback = {
+        .OnSurfaceDestroyed = onSurfaceDestroyed
+    };
+    nativeXComponent->RegisterCallback(&callback);
+    /**
+     * @tc.steps: step3. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: surface is not destroyed
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_TRUE(g_isDestroyed);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeMultiThread006
+ * @tc.desc: Test OnDetachFromFrameNodeMultiThread func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, OnDetachFromFrameNodeMultiThread006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    testProperty.xcId = XCOMPONENT_ID;
+    testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->isNativeXComponent_ = false;
+    EXPECT_TRUE(pattern->accessibilityChildTreeCallback_);
+    /**
+     * @tc.steps: step2. call OnDetachFromMainTreeMultiThread
+     * @tc.expected: Child tree callback is released
+     */
+    pattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->accessibilityChildTreeCallback_);
 }
 
 /**

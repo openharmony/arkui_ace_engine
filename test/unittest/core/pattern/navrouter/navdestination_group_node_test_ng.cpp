@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -892,7 +893,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
     ASSERT_NE(navDestinationRenderContext, nullptr);
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
     navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_RIGHT;
-    navDestinationNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 100.0f));
+    navDestinationNode->GetRenderContext()->UpdatePaintRect(RectF{0.0f, 0.0f, 200.0f, 100.0f});
 
     navDestinationNode->DoSystemSlideTransition(NavigationOperation::POP, false);
     EXPECT_FALSE(eventHub->enabled_);
@@ -1580,5 +1581,107 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
     int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
     EXPECT_EQ(ret, 1);
     NavDestinationGroupNodeTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest001
+ * @tc.desc: Branch 1: if has set elapsedTime from modifier
+ *           Expect 1: navDestination got correct elapsed time value
+ *           Branch 2: if has NOT set elapsedTime from modifier
+ *           Expect 2: navDestination got default elapsed time value, which is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest001, TestSize.Level1)
+{
+    NavDestinationGroupNodeTestNg::SetUpTestCase();
+    /**
+     * @tc.steps: step1. create navDestination and set elpased time.
+     */
+    const int32_t elapsedTime = 150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    ASSERT_NE(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), 0);
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    model.SetTitleAnimationElapsedTime(navDestination, elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest002
+ * @tc.desc: Branch 1: if (elapsed time < 0)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
+ *           Branch 2: if (elapsed time > 450)
+ *           Expect 2: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t invalidElapsedTimeA = -150;
+    const int32_t invalidElapsedTimeB = 1150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, invalidElapsedTimeA);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), invalidElapsedTimeA);
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    navDestination->titleAnimationElapsedTime_ = invalidElapsedTimeB;
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest003
+ * @tc.desc: Branch 1: if (elapsed time > 0 && elapsed time < 450 && transitionType_ != TransitionType::TITLE)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
+ *           Branch 2: if (elapsed time > 0 && elapsed time < 450 && transitionType_ == TransitionType::TITLE)
+ *           Expect 2: run SetTitleAnimationElapsedTime will mark flag `isTitleConsumedElapsedTime` SUCCESSFULLY
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t elapsedTime = 150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, elapsedTime);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), elapsedTime);
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+    /**
+     * @tc.steps: step2. call SetTitleAnimationElapsedTime several times and check flag value.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+    ASSERT_TRUE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_TRUE(navDestination->IsTitleConsumedElapsedTime());
+    /**
+     * @tc.steps: step3. call SetTitleAnimationElapsedTime again and check flag value. function call should be ignored
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_TRUE(navDestination->IsTitleConsumedElapsedTime());
 }
 } // namespace OHOS::Ace::NG

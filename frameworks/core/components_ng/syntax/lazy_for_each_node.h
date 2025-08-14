@@ -41,15 +41,11 @@ public:
         int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
 
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
-        : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
-    {}
+        : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder) {}
 
-    ~LazyForEachNode() {
-        CHECK_NULL_VOID(builder_);
-        builder_->UnregisterDataChangeListener(this);
-        builder_->ClearAllOffscreenNode();
-        isRegisterListener_ = false;
-    }
+    ~LazyForEachNode() override;
+
+    void OnDelete() override;
 
     bool IsAtomicNode() const override
     {

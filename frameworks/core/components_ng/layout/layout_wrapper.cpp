@@ -92,7 +92,9 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 
 void LayoutWrapper::OffsetNodeToSafeArea()
 {
-    auto&& insets = GetLayoutProperty()->GetSafeAreaInsets();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& insets = layoutProperty->GetSafeAreaInsets();
     CHECK_NULL_VOID(insets);
     auto geometryNode = GetGeometryNode();
     auto offset = geometryNode->GetMarginFrameOffset();
@@ -118,7 +120,9 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 RectF LayoutWrapper::GetBackGroundAccumulatedSafeAreaExpand()
 {
-    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, {});
+    auto ignoreLayoutSafeAreaEdges = layoutProperty->GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges();
     IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = ignoreLayoutSafeAreaEdges };
     auto expandEdges = GetAccumulatedSafeAreaExpand(false, opts);
     auto geometryNode = GetGeometryNode();
@@ -155,7 +159,9 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             "pageCurrentOffset: %f, keyboardOffset: %f", isFocusOnPage, isFocusOnOverlay,
             pageCurrentOffset, keyboardOffset);
         if (!(isFocusOnPage || (isFocusOnOverlay && isOverlay) || pageHasOffset) && LessNotEqual(keyboardOffset, 0.0)) {
-            renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
+            const auto& layoutProperty = GetLayoutProperty();
+            CHECK_NULL_RETURN(layoutProperty, false);
+            renderContext->SavePaintRect(true, layoutProperty->GetPixelRound());
             return false;
         }
         auto geometryNode = GetGeometryNode();
@@ -187,7 +193,9 @@ bool LayoutWrapper::CheckValidSafeArea()
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
     SafeAreaInsets safeArea;
-    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     // if self does not have opts, check parent's
     if (!opts) {
         auto parent = host->GetAncestorNodeOfFrame(false);
@@ -299,6 +307,8 @@ void LayoutWrapper::ExpandSafeArea()
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive) {
@@ -354,49 +364,6 @@ void LayoutWrapper::ExpandSafeArea()
     }
 }
 
-void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
-{
-    CHECK_NULL_VOID(opts);
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
-    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
-        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
-        frame.SetLeft(safeArea.left_.start);
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
-        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
-        frame.SetTop(safeArea.top_.start);
-    }
-
-    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
-        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
-    }
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
-        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
-    }
-}
-
-void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
-{
-    // reset if User has fixed size
-    auto layoutProperty = GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (layoutProperty->HasFixedWidth()) {
-        frame.SetWidth(geometryNode->GetFrameRect().Width());
-    }
-    if (layoutProperty->HasFixedHeight()) {
-        frame.SetHeight(geometryNode->GetFrameRect().Height());
-    }
-    if (layoutProperty->HasAspectRatio()) {
-        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
-    }
-}
-
 void LayoutWrapper::ResetSafeAreaPadding()
 {
     // meant to reset everything each frame
@@ -414,7 +381,7 @@ bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand, const Pad
     CHECK_NULL_RETURN(geometryNode, false);
     auto& selfAccumulateExpand = geometryNode->GetAccumulatedSafeAreaExpand();
     CHECK_NULL_RETURN(selfAccumulateExpand, false);
-    // if parent has expand cache that covers child's, for expample child expands toward left, top
+    // if parent has expand cache that covers child's, for example child expands toward left, top
     // and parent already has cache toward left, top, bottom, then this is a cache hit
     // and we can concatenate left and top cache to result
     // otherwise meaning child is expanding toward a direction that parent does not have cache
@@ -624,6 +591,49 @@ bool LayoutWrapper::PredictMeasureResult(
     return false;
 }
 
+void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
+{
+    CHECK_NULL_VOID(opts);
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
+    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
+        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
+        frame.SetLeft(safeArea.left_.start);
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
+        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
+        frame.SetTop(safeArea.top_.start);
+    }
+
+    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
+        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
+        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
+    }
+}
+
+void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
+{
+    // reset if User has fixed size
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (layoutProperty->HasFixedWidth()) {
+        frame.SetWidth(geometryNode->GetFrameRect().Width());
+    }
+    if (layoutProperty->HasFixedHeight()) {
+        frame.SetHeight(geometryNode->GetFrameRect().Height());
+    }
+    if (layoutProperty->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
+    }
+}
+
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
 {
     auto host = GetHostNode();
@@ -693,7 +703,9 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
             // keep child expand into keyboard
             break;
         }
-        auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        const auto& parentLayoutProperty = parent->GetLayoutProperty();
+        CHECK_NULL_RETURN(parentLayoutProperty, OffsetF());
+        auto&& opts = parentLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
             return OffsetF();
         }
@@ -743,6 +755,7 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     GetGeometryNode()->SetParentLayoutConstraint(constraint);
 
     auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty.HasAspectRatio()) {
         std::optional<CalcSize> idealSize = std::nullopt;
@@ -776,6 +789,7 @@ void LayoutWrapper::CreateRootConstraint()
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
     auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty.HasAspectRatio()) {
         auto aspectRatio = magicItemProperty.GetAspectRatioValue();

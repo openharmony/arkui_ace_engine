@@ -96,6 +96,8 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private parentallowFreeze: boolean;
   private isFreeze: boolean;
   public __parentViewOfBuildNode?: ViewBuildNodeBase;
+  private updateParams_: Object;
+  private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
@@ -107,6 +109,8 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.parentallowFreeze = false;
     this.isFreeze = false;
     this.__parentViewOfBuildNode = undefined;
+    this.updateParams_ = null;
+    this.activeCount_ = 1;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
@@ -249,7 +253,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   }
   public update(param: Object) {
     if (this.isFreeze) {
-      this.params_ = param;
+      this.updateParams_ = param;
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -299,14 +303,22 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     }
   }
 
+  private isBuilderNodeActive(): boolean {
+    return this.activeCount_ > 0;
+  }
+
   public setActiveInternal(active: boolean, isReuse: boolean = false): void {
     stateMgmtProfiler.begin('BuilderNode.setActive');
     if (!isReuse) {
-      if (active && this.isFreeze) {
-        this.isFreeze = false;
-        this.update(this.params_);
-      } else if (!active) {
-        this.isFreeze = this.allowFreezeWhenInactive;
+      this.activeCount_ += active ? 1 : -1;
+      if (this.isBuilderNodeActive()) {
+          this.isFreeze = false;
+      } else {
+          this.isFreeze = this.allowFreezeWhenInactive;
+      }
+      if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
+          this.update(this.updateParams_);
+          this.updateParams_ = null;
       }
     }
     if (this.inheritFreeze) {

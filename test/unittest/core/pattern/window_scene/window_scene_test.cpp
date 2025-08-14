@@ -292,6 +292,73 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddPersistentImage
+ * @tc.desc: add persistent image
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, AddPersistentImage, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
+    /**
+     * @tc.steps: step2. Test add persistent image return false.
+     */
+    auto result = windowScene->AddPersistentImage(windowScene->session_->surfaceNode_, windowScene->GetHost());
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AddBackgroundColorDelayed
+ * @tc.desc: add background color delayed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, AddBackgroundColorDelayed, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->session_->enableRemoveStartingWindow_ = false;
+    windowScene->session_->appBufferReady_ = false;
+    windowScene->session_->surfaceNode_->bufferAvailable_ = false;
+    /**
+     * @tc.steps: step2. Test add snapshot background color delayed.
+     */
+    windowScene->session_->SetExitSplitOnBackground(false);
+    windowScene->AddBackgroundColorDelayed();
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
+
+    windowScene->session_->SetExitSplitOnBackground(true);
+    windowScene->AddBackgroundColorDelayed();
+    EXPECT_EQ(windowScene->needAddBackgroundColor_, true);
+}
+
+/**
  * @tc.name: OnAppRemoveStartingWindow01
  * @tc.desc: App ready callback when enable app remove starting window and rs not ready
  * @tc.type: FUNC

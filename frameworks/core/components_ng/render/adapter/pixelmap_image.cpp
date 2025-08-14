@@ -108,12 +108,13 @@ std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
     }
 }
 
-void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
+void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter, bool isHdr = false)
 {
     if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
     } else if (config.colorFilter_.colorFilterDrawing_) {
         auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
             config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
@@ -123,7 +124,8 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix, RSClamp::NO_CLAMP));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(
+            colorMatrix, isHdr ? RSClamp::NO_CLAMP : RSClamp::YES_CLAMP));
     }
 }
 
@@ -211,7 +213,7 @@ bool PixelMapImage::StretchImageWithLattice(
     }
 
     auto filter = brush.GetFilter();
-    UpdateRSFilter(config, filter);
+    UpdateRSFilter(config, filter, pixmap->IsHdr());
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
@@ -261,7 +263,7 @@ bool PixelMapImage::StretchImageWithSlice(
     }
 
     auto filter = brush.GetFilter();
-    UpdateRSFilter(config, filter);
+    UpdateRSFilter(config, filter, pixmap->IsHdr());
     brush.SetFilter(filter);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
@@ -339,7 +341,7 @@ void PixelMapImage::DrawToRSCanvas(
     const auto& config = GetPaintConfig();
     RSBrush brush;
     RSSamplingOptions options;
-    ImagePainterUtils::AddFilter(brush, options, config);
+    ImagePainterUtils::AddFilter(brush, options, config, pixmap->IsHdr());
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;

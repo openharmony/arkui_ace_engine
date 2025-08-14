@@ -679,6 +679,7 @@ bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const s
     summary.summary = dragSummaryInfo.summary;
     summary.specificSummary = dragSummaryInfo.detailedSummary;
     summary.summaryFormat = dragSummaryInfo.summaryFormat;
+    summary.version = dragSummaryInfo.version;
     summary.totalSize = dragSummaryInfo.totalSize;
     auto& client = UDMF::UdmfClient::GetInstance();
     std::vector<std::string> allowTypesArr(allowTypes.begin(), allowTypes.end());

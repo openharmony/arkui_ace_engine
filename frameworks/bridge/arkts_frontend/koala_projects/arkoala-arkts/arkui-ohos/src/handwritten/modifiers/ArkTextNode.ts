@@ -20,7 +20,7 @@ import { CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, 
 import { ArkCommonMethodPeer } from "../../component";
 import { ArkTextPeer } from "../../component";
 import { LengthMetrics } from "../../Graphics";
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { runtimeType, RuntimeType,  } from "@koalaui/interop"
 import { TextOptions } from "../../component/text";
 export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {

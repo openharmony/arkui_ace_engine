@@ -26,7 +26,6 @@
 namespace OHOS::Ace::NG {
 
 void TextPatternTestNg::SetUp() {}
-
 void TextPatternTestNg::TearDown() {}
 
 /**
@@ -2219,6 +2218,48 @@ HWTEST_F(TextPatternTestNg, GetOrCreatePreviewMenuController002, TestSize.Level1
 }
 
 /**
+ * @tc.name: IsPreviewMenuShow001
+ * @tc.desc: Test TextPattern IsPreviewMenuShow function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, IsPreviewMenuShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test when previewController_ is null
+     * @tc.expected: Returns false
+     */
+    pattern->previewController_ = nullptr;
+    EXPECT_FALSE(pattern->IsPreviewMenuShow());
+
+    /**
+     * @tc.steps: step3. Create PreviewMenuController and test when menu is not showing
+     * @tc.expected: Returns false
+     */
+    RefPtr<TextPattern> textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<PreviewMenuController> controller = AceType::MakeRefPtr<PreviewMenuController>(textPattern);
+    pattern->previewController_ = controller;
+    EXPECT_FALSE(pattern->IsPreviewMenuShow());
+
+    pattern->previewController_->isShow_ = true;
+
+    /**
+     * @tc.steps: step4. Test when menu is showing
+     * @tc.expected: Returns true
+     */
+    // Note: This part would need implementation of ShowPreviewMenu in PreviewMenuController
+    EXPECT_TRUE(pattern->IsPreviewMenuShow());
+}
+
+/**
  * @tc.name: AddPixelMapToUdmfData001
  * @tc.desc: Test AddPixelMapToUdmfData
  * @tc.type: FUNC
@@ -2383,6 +2424,8 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftReleaseAction020, TestSize.Level1)
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     textPattern->HandleMouseLeftReleaseAction(info, textOffset);
     EXPECT_EQ(textPattern->isMousePressed_, false);
+    textPattern->HandleMouseLeftPressAction(info, textOffset);
+    EXPECT_EQ(textPattern->blockPress_, false);
 }
 
 /**

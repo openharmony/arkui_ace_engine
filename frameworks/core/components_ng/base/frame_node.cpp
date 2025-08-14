@@ -474,6 +474,14 @@ FrameNode::FrameNode(
     paintProperty_->SetHost(WeakClaim(this));
 }
 
+
+void FrameNode::OnDelete()
+{
+    frameProxy_.reset();
+    nodeAnimatablePropertyMap_.clear();
+    UINode::OnDelete();
+}
+
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();
@@ -1984,6 +1992,18 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     }
     auto visibleResult = GetCacheVisibleRect(timestamp, IsDebugInspectorId());
     SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::VISIBLE_AREA_CHANGE);
+    DispatchVisibleAreaChangeEvent(visibleResult);
+}
+
+void FrameNode::DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
+    auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
+    auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
+    auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
     if (hasInnerCallback) {
         if (isCalculateInnerVisibleRectClip_) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
@@ -1994,8 +2014,13 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
         }
     }
     if (hasUserCallback) {
-        ProcessVisibleAreaChangeEvent(
-            visibleResult.visibleRect, visibleResult.frameRect, visibleAreaUserRatios, visibleAreaUserCallback, true);
+        if (visibleAreaUserCallback.isOutOfBoundsAllowed) {
+            ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.innerFrameRect,
+                visibleAreaUserRatios, visibleAreaUserCallback, true);
+        } else {
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaUserRatios,
+                visibleAreaUserCallback, true);
+        }
     }
 }
 
@@ -2012,6 +2037,10 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
             NearEqual(currentVisibleRatio, lastVisibleRatio_) ? "non-execution" : "execution");
     }
     if (isUser) {
+        if (visibleAreaCallback.isOutOfBoundsAllowed) {
+            auto rect = renderContext_->GetPaintRectWithoutTransform();
+            currentVisibleRatio = rect.IsEmpty() ? VISIBLE_RATIO_MIN : currentVisibleRatio;
+        }
         if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
             auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
             ProcessAllVisibleCallback(
@@ -2170,6 +2199,14 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 
     auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
+        if (subtreeIgnoreCount_ != 0 && activeChanged) {
+            int inc = isActive_ ? subtreeIgnoreCount_ : -subtreeIgnoreCount_;
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE(
+                    "UpdateIgnoreCount:SetActive[%s][self:%d] updateCount=%d", tag_.c_str(), nodeId_, inc);
+            }
+            parent->UpdateIgnoreCount(inc);
+        }
         parent->MarkNeedSyncRenderTree();
         if (needRebuildRenderContext) {
             auto pipeline = GetContext();
@@ -4482,20 +4519,21 @@ std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int3
     return nodes;
 }
 
-double FrameNode::GetPreviewScaleVal() const
+double FrameNode::GetPreviewScaleVal()
 {
     double scale = 1.0;
     auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(GetContextRefPtr());
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
-    if (tag_ != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
+    auto previewOption = GetDragPreviewOption();
+    if (tag_ != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
         scale = maxWidth / width;
     }
     return scale;
 }
 
-bool FrameNode::IsPreviewNeedScale() const
+bool FrameNode::IsPreviewNeedScale()
 {
     return GetPreviewScaleVal() < 1.0f;
 }
@@ -4658,15 +4696,21 @@ void FrameNode::CollectDelayMeasureChild(LayoutWrapper* childWrapper)
     delayMeasureChildren_.emplace_back(childNode);
 }
 
-void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
+void FrameNode::PostTaskForIgnore()
 {
     if (delayMeasureChildren_.empty() && delayLayoutChildren_.empty()) {
         return;
     }
+    PostBundle(std::move(delayMeasureChildren_));
+}
+
+void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes)
+{
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     IgnoreLayoutSafeAreaBundle bundle;
     bundle.second = Claim(this);
-    bundle.first = std::move(delayMeasureChildren_);
+    bundle.first = std::move(nodes);
     pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
 }
 
@@ -4706,6 +4750,52 @@ bool FrameNode::PostponedTaskForIgnore()
     }
     delayLayoutChildren_.clear();
     return true;
+}
+
+void FrameNode::TraverseForIgnore()
+{
+    if (!SubtreeWithIgnoreChild() || (layoutProperty_ && layoutProperty_->IsIgnoreOptsValid())) {
+        return;
+    }
+    std::vector<RefPtr<FrameNode>> effectedNodes;
+    int recheckCount = 0;
+    TraverseSubtreeToPostBundle(effectedNodes, recheckCount);
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("TraverseForIgnore[%s][self:%d] subtreeIgnoreCount=%d, recheckCount=%d", tag_.c_str(),
+            nodeId_, subtreeIgnoreCount_, recheckCount);
+    }
+    if (recheckCount != subtreeIgnoreCount_) {
+        UpdateIgnoreCount(recheckCount - subtreeIgnoreCount_);
+    }
+    if (!effectedNodes.empty()) {
+        PostBundle(std::move(effectedNodes));
+    }
+}
+
+void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subtreeCollection, int& subtreeRecheck)
+{
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthVisibleFrame(children);
+    for (const auto& child : children) {
+        if (!child || !child->SubtreeWithIgnoreChild()) {
+            continue;
+        }
+        auto property = child->GetLayoutProperty();
+        if (property && property->IsIgnoreOptsValid()) {
+            subtreeCollection.emplace_back(child);
+        } else {
+            std::vector<RefPtr<FrameNode>> effectedNodes;
+            int recheckCount = 0;
+            child->TraverseSubtreeToPostBundle(effectedNodes, recheckCount);
+            if (recheckCount != child->subtreeIgnoreCount_) {
+                child->UpdateIgnoreCount(recheckCount - child->subtreeIgnoreCount_);
+            }
+            if (!effectedNodes.empty()) {
+                child->PostBundle(std::move(effectedNodes));
+            }
+        }
+        subtreeRecheck += child->subtreeIgnoreCount_;
+    }
 }
 
 bool FrameNode::EnsureDelayedMeasureBeingOnlyOnce()
@@ -4798,6 +4888,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
+            TraverseForIgnore();
             ACE_SCOPED_TRACE(
                 "SkipMeasure [%s][self:%d] reason:ConstraintNotChanged and no force-flag", tag_.c_str(), nodeId_);
             layoutAlgorithm_->SetSkipMeasure();
@@ -4854,7 +4945,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         measureCallback_(kitNode_);
     }
 
-    PostTaskForIgnore(pipeline);
+    PostTaskForIgnore();
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
@@ -5147,9 +5238,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
             tag_.c_str(), nodeId_, GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
             renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
         ACE_LAYOUT_TRACE_END()
-    }
-    if (!needSyncRsNode) {
-        ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d] don't needSyncRsNode", tag_.c_str(), nodeId_);
     }
 
     // update border.
@@ -5991,6 +6079,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     eventTarget.id = GetInspectorId().value_or("").c_str();
     event.SetTarget(eventTarget);
     event.SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
+    event.SetTargetDisplayId(touchEvent.targetDisplayId);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
@@ -6661,13 +6750,12 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     if (tag_ == V2::WEB_ETS_TAG) {
         auto pattern = GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(pattern);
+        auto report = pattern->GetAccessibilityEventReport();
+        CHECK_NULL_VOID(report);
         if (isRegister) {
-            auto callback = [](int64_t accessibilityId, const std::string data) {
-                UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data);
-            };
-            pattern->RegisterTextBlurCallback(callback);
+            report->RegisterAllReportEventCallBack();
         } else {
-            pattern->UnRegisterTextBlurCallback();
+            report->UnRegisterCallback();
         }
     }
 #endif
@@ -7241,5 +7329,41 @@ void FrameNode::UpdateBackground()
             renderContext_->UpdateCustomBackground();
         }
     }
+}
+
+void FrameNode::UpdateIgnoreCount(int inc)
+{
+    subtreeIgnoreCount_ += inc;
+    if (!isActive_) {
+        return;
+    }
+    auto parent = GetAncestorNodeOfFrame(false);
+    if (parent) {
+        parent->UpdateIgnoreCount(inc);
+    }
+}
+
+void FrameNode::MountToParent(const RefPtr<UINode>& parent,
+    int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
+    if (SubtreeWithIgnoreChild()) {
+        auto parentFrame = GetAncestorNodeOfFrame(false);
+        if (parentFrame && IsActive()) {
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE("UpdateIgnoreCount:MountToParent[%s][self:%d] updateCount=%d", tag_.c_str(),
+                    nodeId_, subtreeIgnoreCount_);
+            }
+            parentFrame->UpdateIgnoreCount(subtreeIgnoreCount_);
+        }
+    }
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
 }
 } // namespace OHOS::Ace::NG

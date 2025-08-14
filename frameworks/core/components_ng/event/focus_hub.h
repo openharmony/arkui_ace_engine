@@ -518,6 +518,7 @@ public:
     bool TriggerFocusScroll();
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest = false);
+    RefPtr<FocusHub> GetFocusNodeFromSubWindow(const std::string& id);
     RefPtr<FocusView> GetFirstChildFocusView();
 
     bool IsFocusableByTab();

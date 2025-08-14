@@ -144,14 +144,12 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void OnAttachToFrameNodeMultiThread() {}
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}

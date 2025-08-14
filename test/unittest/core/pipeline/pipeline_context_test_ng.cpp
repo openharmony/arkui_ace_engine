@@ -2410,6 +2410,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNgForBundleName, TestSize.Lev
 }
 
 /**
+ * @tc.name: PipelineContextTestNgForWindowRect
+ * @tc.desc: Test GetCurrentWindowRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNgForWindowRect, TestSize.Level1)
+{
+    static const uint32_t length = 666;
+    context_->width_ = length;
+    context_->height_ = length;
+    auto rect = context_->GetCurrentWindowRect();
+    EXPECT_EQ(rect.Width(), length);
+    EXPECT_EQ(rect.Height(), length);
+}
+
+/**
  * @tc.name: PipelineContextTestNg122
  * @tc.desc: Test FlushMouseEventForHover.
  * @tc.type: FUNC

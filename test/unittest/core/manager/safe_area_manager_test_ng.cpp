@@ -1377,7 +1377,7 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
-    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 4);
+    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 5);
 
     // repeat add should not work
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), false);
@@ -1388,24 +1388,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
 
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
-}
-
-/**
- * @tc.name: GetKeyboardWebInset
- * @tc.desc: Use GetKeyboardWebInset and test.
- * @tc.type: FUNC
- */
-HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
-{
-    SafeAreaInsets::Inset inset;
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
-    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, inset.start);
-    EXPECT_EQ(keyboardInset.end, inset.end);
-    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
-    keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
-    EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
-    EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
 }
 
 /**
@@ -1436,6 +1418,24 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetKeyboardWebInset
+ * @tc.desc: Use GetKeyboardWebInset and test.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInsetTest, TestSize.Level1)
+ {
+     SafeAreaInsets::Inset inset;
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, inset.start);
+     EXPECT_EQ(keyboardInset.end, inset.end);
+     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+     keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
+     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
+     EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
+ }
+ 
 /**
  * @tc.name: SetAndGetKeyboardInsetImplTest
  * @tc.desc: test Set And GetKeyboardInsetImplTest interface

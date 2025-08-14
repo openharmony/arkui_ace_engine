@@ -211,6 +211,8 @@ public:
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
+    static void OnLoadStarted(const JSCallbackInfo& args);
+    static void OnLoadFinished(const JSCallbackInfo& args);
     static void GestureFocusMode(int32_t gestureFocusMode);
     static void OnPdfScrollAtBottom(const JSCallbackInfo& args);
     static void OnPdfLoadEvent(const JSCallbackInfo& args);

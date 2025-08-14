@@ -1056,10 +1056,6 @@ class SegmentButtonItem extends ViewPU {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create({ space: 2 });
       Column.direction(this.options.direction);
-      Column.focusScopePriority(
-        this.groupId,
-        Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO
-      );
       Column.justifyContent(FlexAlign.Center);
       Column.padding(this.getButtonPadding());
       Column.constraintSize({ minHeight: segmentButtonTheme.CONSTRAINT_SIZE_MIN_HEIGHT });
@@ -1335,7 +1331,7 @@ class PressAndHoverEffectArray extends ViewPU {
                         undefined,
                         elmtId,
                         () => {},
-                        { page: 'library/src/main/ets/components/MainPage.ets', line: 730, col: 13 }
+                        { page: 'library/src/main/ets/components/MainPage.ets', line: 732, col: 13 }
                       );
                       ViewPU.create(componentCall);
                       let paramsLambda = () => {
@@ -1755,7 +1751,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
       Stack.direction(this.options.direction);
       Stack.size({ width: 1, height: 1 });
       Stack.align(Alignment.Center);
-      Stack.visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None);
+      Stack.visibility(
+        !this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None
+      );
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
@@ -1900,6 +1898,10 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                   this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                       Button.createWithChild();
+                      Button.focusScopePriority(
+                        this.groupId,
+                        Math.min(...this.selectedIndexes) === index ? FocusPriority.PREVIOUS : FocusPriority.AUTO
+                      );
                       Button.type(ButtonType.Normal);
                       Button.stateEffect(false);
                       Button.hoverEffect(HoverEffect.None);
@@ -1948,21 +1950,27 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                           };
                         }
                       });
-                      Button.overlay({
-                        builder: () => {
-                          this.focusStack.call(this, index);
-                        }
-                      }, { align: Alignment.Center });
-                      Button.attributeModifier.bind(this)(this.isSegmentFocusStyleCustomized ? undefined :
-                        new FocusStyleButtonModifier((isFocused) => {
-                          if (!isFocused && this.focusIndex === index) {
-                            this.focusIndex = -1;
-                            return;
-                          }
-                          if (isFocused) {
-                            this.focusIndex = index;
-                          }
-                        }));
+                      Button.overlay(
+                        {
+                          builder: () => {
+                            this.focusStack.call(this, index);
+                          },
+                        },
+                        { align: Alignment.Center }
+                      );
+                      Button.attributeModifier.bind(this)(
+                        this.isSegmentFocusStyleCustomized
+                          ? undefined
+                          : new FocusStyleButtonModifier(isFocused => {
+                              if (!isFocused && this.focusIndex === index) {
+                                this.focusIndex = -1;
+                                return;
+                              }
+                              if (isFocused) {
+                                this.focusIndex = index;
+                              }
+                            })
+                      );
                       Button.onFocus(() => {
                         this.focusIndex = index;
                         if (this.isSegmentFocusStyleCustomized) {
@@ -2085,7 +2093,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                               undefined,
                               elmtId,
                               () => {},
-                              { page: 'library/src/main/ets/components/MainPage.ets', line: 1048, col: 15 }
+                              { page: 'library/src/main/ets/components/MainPage.ets', line: 1063, col: 15 }
                             );
                             ViewPU.create(componentCall);
                             let paramsLambda = () => {
@@ -2713,7 +2721,7 @@ export class SegmentButton extends ViewPU {
         }
       });
       SwipeGesture.pop();
-      PanGesture.create();
+      PanGesture.create({ direction: PanDirection.Horizontal });
       PanGesture.onActionStart(event => {
         this.isGestureInProgress = true;
         if (this.options === void 0 || this.options.buttons === void 0) {
@@ -2857,7 +2865,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1390, col: 11 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1419, col: 11 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -2910,7 +2918,7 @@ export class SegmentButton extends ViewPU {
                                 undefined,
                                 elmtId,
                                 () => {},
-                                { page: 'library/src/main/ets/components/MainPage.ets', line: 1397, col: 15 }
+                                { page: 'library/src/main/ets/components/MainPage.ets', line: 1426, col: 15 }
                               );
                               ViewPU.create(componentCall);
                               let paramsLambda = () => {
@@ -2971,7 +2979,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1417, col: 13 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1446, col: 13 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -3009,7 +3017,7 @@ export class SegmentButton extends ViewPU {
                           undefined,
                           elmtId,
                           () => {},
-                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1423, col: 13 }
+                          { page: 'library/src/main/ets/components/MainPage.ets', line: 1452, col: 13 }
                         );
                         ViewPU.create(componentCall);
                         let paramsLambda = () => {
@@ -3055,7 +3063,7 @@ export class SegmentButton extends ViewPU {
                     undefined,
                     elmtId,
                     () => {},
-                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1439, col: 9 }
+                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1468, col: 9 }
                   );
                   ViewPU.create(componentCall);
                   let paramsLambda = () => {

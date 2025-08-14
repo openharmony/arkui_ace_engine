@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
@@ -1302,6 +1303,8 @@ public:
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
     void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
+    void OnLoadStarted(const std::string& param);
+    void OnLoadFinished(const std::string& param);
     void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
     bool IsFileSelectorShow() { return isFileSelectorShow_; }
 
@@ -1341,9 +1344,7 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
-    void TextBlurReportByBlurEvent(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
 
@@ -1433,13 +1434,15 @@ private:
     EventCallback onPageFinished_;
     EventCallback onPageError_;
     EventCallback onMessage_;
+    EventCallback onLoadStarted_;
+    EventCallback onLoadFinished_;
     Method reloadMethod_;
     Method updateUrlMethod_;
     Method routerBackMethod_;
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ { State::WAITINGFORSIZE };
-    bool isPageFinished_;
+    bool isPageFinished_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
@@ -1488,6 +1491,8 @@ private:
     EventCallbackV2 onViewportFitChangedV2_;
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    EventCallbackV2 onLoadStartedV2_;
+    EventCallbackV2 onLoadFinishedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1566,6 +1571,8 @@ private:
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
     double density_ = 0.0;
+
+    bool isVisible_ = false;
 #endif
 };
 

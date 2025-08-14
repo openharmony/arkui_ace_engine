@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
+#include "core/components_ng/pattern/web/web_accessibility_event_report.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
@@ -749,12 +750,6 @@ public:
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
     int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
-    void RegisterTextBlurCallback(TextBlurCallback&& callback);
-    void UnRegisterTextBlurCallback();
-    TextBlurCallback GetTextBlurCallback() const
-    {
-        return textBlurCallback_;
-    }
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
@@ -852,6 +847,10 @@ public:
     {
         return mouseInfo_;
     }
+
+    // WebAccessibilityEventReport funcs
+    RefPtr<WebAccessibilityEventReport> GetAccessibilityEventReport();
+    void SetTextEventAccessibilityEnable(bool enable);
 
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
@@ -1000,6 +999,7 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
+    void DragResizeNoMoveTimer();
     void WindowDrag(int32_t width, int32_t height);
     void WindowMaximize();
     void OnOverlayScrollbarEnabledUpdate(bool enable);
@@ -1355,7 +1355,6 @@ private:
     bool inspectorAccessibilityEnable_ = false;
     std::optional<std::string> sharedRenderProcessToken_;
     bool textBlurAccessibilityEnable_ = false;
-    TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
     std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
@@ -1399,6 +1398,9 @@ private:
 
     MouseInfo mouseInfo_;
 
+    // properties for WebAccessibilityEventReport
+    RefPtr<WebAccessibilityEventReport> webAccessibilityEventReport_ = nullptr;
+
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
@@ -1416,6 +1418,9 @@ private:
     RectF secondInfoHandle_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::u16string content_;
+    int64_t lastDragTime_ = 0L;
+    bool dragResizeTimerFlag_ = false;
+    int32_t dragResizeTimerCount_ = 0;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

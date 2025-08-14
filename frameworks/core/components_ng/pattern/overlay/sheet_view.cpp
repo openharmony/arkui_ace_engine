@@ -48,7 +48,6 @@ constexpr int32_t SHEET_DETENTS_THREE = 3;
 constexpr int32_t SHEET_OPERATION_INDEX = 0;
 constexpr int32_t SHEET_CLOSE_ICON_INDEX = 1;
 constexpr int32_t SHEET_SCROLL_INDEX = 2;
-constexpr Dimension WINDOW_RADIUS = 16.0_vp;
 } // namespace
 RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
@@ -435,11 +434,6 @@ RefPtr<FrameNode> SheetView::CreateSheetMaskShowInSubwindow(const RefPtr<FrameNo
         AceType::MakeRefPtr<SheetMaskPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(maskNode, nullptr);
     if (sheetWrapperPattern->ShowInUEC()) {
-        auto maskRenderContext = maskNode->GetRenderContext();
-        CHECK_NULL_RETURN(maskRenderContext, nullptr);
-        BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(WINDOW_RADIUS);
-        maskRenderContext->UpdateBorderRadius(borderRadius);
         maskNode->MountToParent(sheetWrapperNode);
     } else {
         auto subwindowId = sheetWrapperPattern->GetSubWindowId();

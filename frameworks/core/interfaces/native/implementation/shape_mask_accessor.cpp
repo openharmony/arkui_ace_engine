@@ -81,7 +81,7 @@ void SetFillColorImpl(Ark_ShapeMask peer,
                       const Ark_Number* fillColor)
 {
     CHECK_NULL_VOID(peer && fillColor);
-    peer->fillColor = Converter::Convert<int32_t>(*fillColor);
+    peer->fillColor = Converter::Convert<uint32_t>(*fillColor);
 }
 Ark_Number GetStrokeColorImpl(Ark_ShapeMask peer)
 {
@@ -92,7 +92,7 @@ void SetStrokeColorImpl(Ark_ShapeMask peer,
                         const Ark_Number* strokeColor)
 {
     CHECK_NULL_VOID(peer && strokeColor);
-    peer->strokeColor = Converter::Convert<int32_t>(*strokeColor);
+    peer->strokeColor = Converter::Convert<uint32_t>(*strokeColor);
 }
 Ark_Number GetStrokeWidthImpl(Ark_ShapeMask peer)
 {

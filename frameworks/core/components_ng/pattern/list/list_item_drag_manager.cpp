@@ -173,6 +173,8 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     AnimationOption option;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(300); /* 300:animate duration */
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -185,7 +187,7 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
             renderContext->UpdateZIndex(DEFAULT_Z_INDEX);
             renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -546,6 +548,10 @@ void ListItemDragManager::HandleZIndexAndPosition()
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 400, 38); /* 400:stiffness, 38:damping */
     option.SetCurve(curve);
     option.SetDuration(30); /* 30:duration */
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -558,7 +564,7 @@ void ListItemDragManager::HandleZIndexAndPosition()
             renderContext->ResetPosition();
             renderContext->OnPositionUpdate(OffsetT<Dimension>());
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -577,6 +583,10 @@ void ListItemDragManager::HandleBackShadow()
             manager->SetIsNeedDividerAnimation(true);
         }
     });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -586,7 +596,7 @@ void ListItemDragManager::HandleBackShadow()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackShadow(manager->prevShadow_);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 
@@ -597,6 +607,10 @@ void ListItemDragManager::HandleTransformScale()
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(14, 1, 170, 17));
     option.SetDuration(30);  /* 30:duration */
     option.SetDelay(150); /* 150:animate delay */
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
@@ -606,7 +620,7 @@ void ListItemDragManager::HandleTransformScale()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale(manager->prevScale_);
         },
-        option.GetOnFinishEvent()
+        option.GetOnFinishEvent(), nullptr, context
     );
 }
 

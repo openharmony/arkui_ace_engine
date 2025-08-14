@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -397,6 +398,8 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest009, Test
     int32_t containerId = 100;
     bool hasTouchPoint = true;
     DragPointerEvent dragPointerEvent(100, 100);
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
     NG::DragPreviewOption previewOption;
     previewOption.options.opacity = 0.3f;
     DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
@@ -565,7 +568,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
      * @tc.steps: step2. Prepare darg data and asyncCtxData.
      */
     bool hasTouchPoint = true;
-    DragPointerEvent dragPointerEvent(100, 100);
+    DragPointerEvent dragPointerEvent(100, 100, 100, 100, 100, 100);
     NG::DragPreviewOption previewOption;
     previewOption.options.opacity = 0.3f;
     DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
@@ -588,14 +591,15 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0013, Tes
 
     /**
      * @tc.steps: step4. Call DoDragStartAnimation function deviceId != RESERVED_DEVICEID.
-     * @tc.expected: step4. dragDropManager->isStartAnimationFinished_ is false
+     * @tc.expected: step4. dragDropManager->isStartAnimationFinished_ is true
      */
     asyncCtxData.dragPointerEvent.deviceId = 0;
     NG::DragControllerFuncWrapper::DoDragStartAnimation(overlayManager, data, asyncCtxData);
     EXPECT_FALSE(dragDropManager->IsPullMoveReceivedForCurrentDrag());
     EXPECT_EQ(dragDropManager->GetCurrentAnimationCnt(), 0);
     EXPECT_EQ(dragDropManager->GetAllAnimationCnt(), 0);
-    EXPECT_FALSE(dragDropManager->IsStartAnimationFInished());
+    EXPECT_EQ(dragDropManager->GetDragAnimationPointerEvent().windowX, 100);
+    EXPECT_TRUE(dragDropManager->IsStartAnimationFInished());
 }
 
 /**
@@ -685,5 +689,176 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragDropControllerFuncWrapperTest016, 
      */
     auto touchPointOffset = NG::DragControllerFuncWrapper::GetTouchPointOffset(data, asyncCtxData);
     EXPECT_EQ(touchPointOffset, NG::OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest017
+ * @tc.desc: Test UpdatePreviewAttr. ImageContext's opacity can be updated when has opacity value.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare darg data and asyncCtxData and Invoke CreatePreviewNode function.
+     * @tc.expected: step1. ImageNode is not null.
+     */
+    int32_t containerId = 100;
+    bool hasTouchPoint = true;
+    DragPointerEvent dragPointerEvent(100, 100);
+    NG::DragPreviewOption previewOption;
+    previewOption.options.opacity = 0.3f;
+    previewOption.options.shadow = DragDropFuncWrapper::GetDefaultShadow();
+    previewOption.options.borderRadius = DragDropFuncWrapper::GetDefaultBorderRadius();
+    previewOption.options.blurbgEffect.backGroundEffect = EffectOption();
+    previewOption.options.blurbgEffect.backGroundEffect.radius.SetValue(1.0F);
+    DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    NG::PreparedInfoForDrag data = { false, 10, 0.5f, false, NG::OffsetF(),
+        NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
+    NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
+        touchPoint, pixelMapList };
+    RefPtr<FrameNode> imageNode = nullptr;
+    NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdatePreviewAttr function when has opacity value.
+     * @tc.expected: step2. opacityValue is equal to 0.3f.
+     */
+    NG::DragControllerFuncWrapper::UpdatePreviewAttr(imageNode, asyncCtxData.dragPreviewOption);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    auto opacityValue = imageContext->GetOpacityValue();
+    EXPECT_EQ(opacityValue, 0.3f);
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest018
+ * @tc.desc: Test UpdatePreviewPositionAndScale when scale is 0.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare darg data, asyncCtxData and Invoke CreatePreviewNode function.
+     * @tc.expected: step1. ImageNode is not null.
+     */
+    int32_t containerId = 100;
+    bool hasTouchPoint = true;
+    DragPointerEvent dragPointerEvent(100, 100);
+    NG::DragPreviewOption previewOption;
+    DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    NG::PreparedInfoForDrag data = { false, 10, 0.0f, false, NG::OffsetF(),
+        NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
+    NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
+        touchPoint, pixelMapList };
+    RefPtr<FrameNode> imageNode = nullptr;
+    NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call UpdatePreviewPositionAndScale function.
+     * @tc.expected: step2. GetClickEffectLevelValue is correct.
+     */
+    auto frameOffset = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
+    NG::DragControllerFuncWrapper::UpdatePreviewPositionAndScale(imageNode, frameOffset, data.previewScale);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    auto clickEffectInfo = imageContext->GetClickEffectLevelValue();
+    EXPECT_EQ(clickEffectInfo.level, ClickEffectLevel::LIGHT);
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest020
+ * @tc.desc: Test MountPixelMap function. isDragPixelMap is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare darg data, imageNode, textNode, pipeline and overlayManager.
+     * @tc.expected: step1. imageNode, textNode, pipeline and overlayManager is not null.
+     */
+    int32_t containerId = 100;
+    bool hasTouchPoint = true;
+    DragPointerEvent dragPointerEvent(100, 100);
+    NG::DragPreviewOption previewOption;
+    previewOption.options.opacity = 0.3f;
+    DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    NG::PreparedInfoForDrag data = { false, 10, 0.5f, false, NG::OffsetF(),
+        NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
+    NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
+        touchPoint, pixelMapList };
+    RefPtr<FrameNode> imageNode = nullptr;
+    NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
+    ASSERT_NE(imageNode, nullptr);
+    auto textNode = NG::DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
+    ASSERT_NE(textNode, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MountPixelMap function.
+     * @tc.expected: step2. MountPixelMapToRootNode success, overlayManager's hasPixelMap is true.
+     */
+    NG::DragControllerFuncWrapper::MountPixelMap(overlayManager, data, imageNode, textNode, false);
+    EXPECT_EQ(overlayManager->GetHasPixelMap(), true);
+
+    /**
+     * @tc.steps: step3. Call MountPixelMap function when textNode is nullptr.
+     * @tc.expected: step3. MountPixelMapToRootNode success, overlayManager's GetHasDragPixelMap is true
+     */
+    NG::DragControllerFuncWrapper::MountPixelMap(overlayManager, data, imageNode, nullptr, true);
+    EXPECT_EQ(overlayManager->GetHasDragPixelMap(), true);
+}
+
+/**
+ * @tc.name: DragDropControllerFuncWrapperTest021
+ * @tc.desc: Test UpdateBadgeTextNodePosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare darg data, imageNode, textNode, pipeline and overlayManager.
+     * @tc.expected: step1. imageNode, textNode, pipeline and overlayManager is not null.
+     */
+    int32_t containerId = 100;
+    bool hasTouchPoint = true;
+    DragPointerEvent dragPointerEvent(100, 100);
+    NG::DragPreviewOption previewOption;
+    previewOption.options.opacity = 0.3f;
+    DimensionOffset touchPoint = DimensionOffset(10.0_vp, 10.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
+
+    NG::PreparedInfoForDrag data = { false, 1, 0.5f, false, NG::OffsetF(),
+        NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
+    NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
+        touchPoint, pixelMapList };
+
+    /**
+     * @tc.steps: step2. Call UpdateBadgeTextNodePosition function when badgeNumber is 1.
+     * @tc.expected: step2. TranslateOptions x value is 0.0f.
+     */
+    NG::DragControllerFuncWrapper::UpdateBadgeTextNodePosition(
+        nullptr, data, asyncCtxData, data.dragPreviewOffsetToScreen);
+    EXPECT_EQ(data.badgeNumber, 1);
 }
 } // namespace OHOS::Ace::NG

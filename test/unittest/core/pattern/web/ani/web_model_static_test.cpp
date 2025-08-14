@@ -2457,6 +2457,7 @@ HWTEST_F(WebModelStaticTest, SetOnInterceptKeyboardAttach001, TestSize.Level1)
     WebModelStatic::SetOnInterceptKeyboardAttach(AccessibilityManager::RawPtr(frameNode), callback);
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
+    ASSERT_NE(frameNode->GetEventHub(), nullptr);
     webEventHub->propOnInterceptKeyboardAttachEvent_(nullptr);
     EXPECT_NE(callCount, 0);
 #endif

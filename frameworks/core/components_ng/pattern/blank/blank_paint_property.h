@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
 class BlankPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(BlankPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(BlankPaintProperty, PaintProperty);
 public:
     BlankPaintProperty() = default;
     ~BlankPaintProperty() override = default;

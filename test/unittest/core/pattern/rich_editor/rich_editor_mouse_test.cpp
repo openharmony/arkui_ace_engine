@@ -296,6 +296,26 @@ HWTEST_F(RichEditorMouseTest, MouseRightFocus003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseRightFocus006
+ * @tc.desc: test MouseRightFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, MouseRightFocus006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(u"test1");
+    AddImageSpan();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->textSelector_.Update(4, 5);
+    MouseInfo info;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
+}
+
+/**
  * @tc.name: RichEditorPatternTestInitMouseEvent001
  * @tc.desc: test InitMouseEvent
  * @tc.type: FUNC

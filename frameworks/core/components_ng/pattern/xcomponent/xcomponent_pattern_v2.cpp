@@ -16,9 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 #include "base/log/dump_log.h"
-#ifdef ACE_STATIC
 #include "base/utils/multi_thread.h"
-#endif
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
@@ -97,10 +95,8 @@ void XComponentPatternV2::OnAttachToMainTree()
         XComponentPattern::OnAttachToMainTree();
         return;
     }
-#ifdef ACE_STATIC
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
-#endif
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
@@ -111,6 +107,7 @@ void XComponentPatternV2::OnAttachToMainTree()
         displaySync_->AddToPipelineOnContainer();
         needRecoverDisplaySync_ = false;
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
 }
 
 void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -218,10 +215,8 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
-#ifdef ACE_STATIC
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
-#endif
     isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
@@ -232,6 +227,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
         displaySync_->DelFromPipelineOnContainer();
         needRecoverDisplaySync_ = true;
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
 void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -242,9 +238,7 @@ void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
         XComponentPattern::OnDetachFromFrameNode(frameNode);
         return;
     }
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
-#endif
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -269,15 +263,14 @@ void XComponentPatternV2::InitSurface()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(host, InitSurface, host);
-#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         renderSurface_->SetRenderContext(renderContextForSurface_);
@@ -567,8 +560,8 @@ void XComponentPatternV2::SetExpectedRateRange(int32_t min, int32_t max, int32_t
     CHECK_NULL_VOID(displaySync_);
     FrameRateRange frameRateRange;
     frameRateRange.Set(min, max, expected);
-    displaySync_->SetExpectedFrameRateRange(frameRateRange);
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), isOnTree_, frameRateRange);
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " NotifyXComponentExpectedFrameRate"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), min, max, expected);
 }
 

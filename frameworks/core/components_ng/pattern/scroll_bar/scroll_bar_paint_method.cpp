@@ -28,6 +28,7 @@ void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto paintProperty = DynamicCast<ScrollBarPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto barColor = paintProperty->GetBarColor();
+    scrollBar->SetForegroundColor(barColor);
 
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
@@ -45,7 +46,7 @@ void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
             Rect(offset.GetX(), offset.GetY(), 0.0, 0.0));
     }
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(barColor);
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

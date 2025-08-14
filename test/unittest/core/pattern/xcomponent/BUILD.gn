@@ -29,3 +29,16 @@ ace_unittest("xcomponent_test_ng") {
     external_deps += [ "napi:ace_napi" ]
   }
 }
+
+ace_unittest("xcomponent_test_set_rate_range") {
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+    "xcomponent_test_set_rate_range.cpp",
+  ]
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  defines = [ "ENABLE_ROSEN_BACKEND" ]
+  if (current_os == "ohos") {
+    external_deps += [ "napi:ace_napi" ]
+  }
+}

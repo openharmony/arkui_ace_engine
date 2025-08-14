@@ -979,7 +979,7 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         gestureLog += "}";
         log += gestureLog;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)
@@ -2041,6 +2041,14 @@ void EventManager::AddGestureSnapshot(
         info->nodeId = frameNode->GetId();
     }
     info->depth = depth;
+    if (info->type == "TouchEventActuator") {
+        auto touchEventActuator = AceType::DynamicCast<NG::TouchEventActuator>(target);
+        if (touchEventActuator) {
+            std::stringstream oss;
+            oss << "NeedProgation: " << std::to_string(touchEventActuator->IsNeedPropagation());
+            info->customInfo = oss.str();
+        }
+    }
     auto& eventTree = GetEventTreeRecord(type);
     eventTree.AddGestureSnapshot(finger, std::move(info));
 
@@ -2261,15 +2269,19 @@ bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         return false;
     }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::NORMAL);
     auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::SCREEN);
+    auto newGlobalDisplayXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::GLOBALDISPLAY);
     bool ret = false;
     if (newXy.x != 0 && newXy.y != 0) {
         newTouchEvent.x = newXy.x;
         newTouchEvent.y = newXy.y;
         newTouchEvent.screenX = newScreenXy.x;
         newTouchEvent.screenY = newScreenXy.y;
+        newTouchEvent.globalDisplayX = newGlobalDisplayXy.x;
+        newTouchEvent.globalDisplayY = newGlobalDisplayXy.y;
         std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
         newTouchEvent.time = TimeStamp(nanoseconds);
         newTouchEvent.history = current;
@@ -2321,14 +2333,18 @@ MouseEvent EventManager::GetResampleMouseEvent(
         return newMouseEvent;
     }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::NORMAL);
     auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::SCREEN);
+    auto newGlobalDisplayXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::GLOBALDISPLAY);
     if (newXy.x != 0 && newXy.y != 0) {
         newMouseEvent.x = newXy.x;
         newMouseEvent.y = newXy.y;
         newMouseEvent.screenX = newScreenXy.x;
         newMouseEvent.screenY = newScreenXy.y;
+        newMouseEvent.globalDisplayX = newGlobalDisplayXy.x;
+        newMouseEvent.globalDisplayY = newGlobalDisplayXy.y;
         std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
         newMouseEvent.time = TimeStamp(nanoseconds);
         newMouseEvent.history = current;
@@ -2376,7 +2392,7 @@ DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPoi
         return newPointerEvent;
     }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
-        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::NORMAL);
 
     if (newXy.x != 0 && newXy.y != 0) {
         newPointerEvent.x = newXy.x;

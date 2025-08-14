@@ -167,6 +167,9 @@ protected:
 private:
     void SetAccessibilityAction();
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
     void InitFocusPaintRect(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     Color GetBlendGgColor();

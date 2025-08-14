@@ -364,8 +364,8 @@ public:
     virtual void SetAllowDrop(const std::set<std::string>& allowDrop) = 0;
     virtual void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier) = 0;
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
-    virtual void SetOnVisibleChange(
-        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratios, bool isOutOfBoundsAllowed = false) = 0;
     virtual void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
         const std::vector<double>& ratioList, int32_t expectedUpdateInterval) = 0;
     virtual void SetOnAreaChanged(

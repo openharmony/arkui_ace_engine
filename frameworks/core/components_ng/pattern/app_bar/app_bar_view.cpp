@@ -484,10 +484,16 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     CHECK_NULL_RETURN(atom, std::nullopt);
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto menuBarRow = pattern->GetMenuBarRow();
+    CHECK_NULL_RETURN(menuBarRow, std::nullopt);
+    auto rowGeometryNode = menuBarRow->GetGeometryNode();
+    CHECK_NULL_RETURN(rowGeometryNode, std::nullopt);
     auto menuBar = pattern->GetMenuBar();
     CHECK_NULL_RETURN(menuBar, std::nullopt);
-    auto size = menuBar->GetGeometryNode()->GetMarginFrameSize();
-    auto offset = menuBar->GetGeometryNode()->GetMarginFrameOffset();
+    auto geometryNode = menuBar->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, std::nullopt);
+    auto size = geometryNode->GetMarginFrameSize();
+    auto offset = geometryNode->GetMarginFrameOffset();
     auto parent = menuBar->GetParent();
     while (parent) {
         auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -498,14 +504,21 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     }
     auto atomRect = atom->GetGeometryNode()->GetFrameRect();
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto left = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto right = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    auto defalutLeftMargin = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
+    auto defalutRightMargin = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    auto left = defalutLeftMargin;
+    auto right = defalutRightMargin;
+    if (rowGeometryNode->GetMargin()) {
+        left = rowGeometryNode->GetMargin()->left.value_or(defalutLeftMargin);
+        right = rowGeometryNode->GetMargin()->right.value_or(defalutRightMargin);
+    }
     if (LessOrEqual(offset.GetX(), 0.0) && atomRect.Width() > 0) {
         auto width = Dimension(ATOMIC_SERVICE_MENU_BAR_WIDTH, DimensionUnit::VP).ConvertToPx();
         offset.SetX(isRtl ? (right) : (atomRect.Width() - width - left));
     } else {
-        size.AddWidth((left + right));
-        offset.AddX(isRtl ? 0 : -left);
+        auto addEnd = isRtl ? left : right;
+        size.AddWidth((defalutLeftMargin + addEnd));
+        offset.AddX(isRtl ? -addEnd : -defalutLeftMargin);
     }
     return RectF(offset, size);
 }

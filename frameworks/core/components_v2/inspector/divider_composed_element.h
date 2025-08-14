@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT DividerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(DividerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(DividerComposedElement, InspectorComposedElement);
 
 public:
     explicit DividerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

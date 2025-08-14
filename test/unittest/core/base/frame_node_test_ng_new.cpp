@@ -3207,6 +3207,100 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateIgnoreCountTest001
+ * @tc.desc: Test UpdateIgnoreCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest001, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->UpdateIgnoreCount(2);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest002
+ * @tc.desc: Test UpdateIgnoreCount when MountToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest002, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+
+    node->UpdateIgnoreCount(2);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->MountToParent(parent);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest003
+ * @tc.desc: Test UpdateIgnoreCount when RemoveChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest003, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+    node->UpdateIgnoreCount(2);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    parent->RemoveChild(node);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    parent->TraverseForIgnore();
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+}
+
+/**
+ * @tc.name: UpdateIgnoreCountTest004
+ * @tc.desc: Test UpdateIgnoreCount when SetActive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest004, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->SetActive(true);
+    auto node = FrameNode::CreateFrameNode("node", 2, AceType::MakeRefPtr<Pattern>(), false);
+    node->SetActive(true);
+    node->MountToParent(parent);
+    node->UpdateIgnoreCount(2);
+
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+    node->SetActive(false);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), false);
+    node->SetActive(true);
+    EXPECT_EQ(parent->SubtreeWithIgnoreChild(), true);
+}
+
+/**
+ * @tc.name: TestPreMeasure
+ * @tc.desc: Test PreMeasure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TestPreMeasure, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetIgnoreLayoutProcess(true);
+    frameNode->SetHasPreMeasured();
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+}
+
+/**
  * @tc.name: FrameNodeSetCustomPropertyMapFlagByKey001
  * @tc.desc: Test SetCustomPropertyMapFlagByKey.
  * @tc.type: FUNC

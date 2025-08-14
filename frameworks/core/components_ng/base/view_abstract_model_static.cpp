@@ -1029,7 +1029,9 @@ void ViewAbstractModelStatic::SetPositionEdges(FrameNode* frameNode, const Edges
 void ViewAbstractModelStatic::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetPositionLocalizedEdges(frameNode, needLocalized);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
 
@@ -1058,7 +1060,9 @@ void ViewAbstractModelStatic::MarkAnchor(FrameNode* frameNode, const std::option
 void ViewAbstractModelStatic::ResetMarkAnchorStart(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::ResetMarkAnchorStart(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
 }
 
 void ViewAbstractModelStatic::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -1076,7 +1080,9 @@ void ViewAbstractModelStatic::SetOffsetEdges(FrameNode* frameNode, const EdgesPa
 void ViewAbstractModelStatic::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
 {
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetOffsetLocalizedEdges(frameNode, needLocalized);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
 }
 
 void ViewAbstractModelStatic::UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts)

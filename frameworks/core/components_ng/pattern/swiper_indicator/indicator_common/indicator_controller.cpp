@@ -65,7 +65,13 @@ void IndicatorController::SetSwiperNode(const RefPtr<FrameNode>& swiperNode)
         CHECK_NULL_VOID(indicatorNode);
         auto pattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(pattern);
+        auto lastIndicatorNode = pattern->GetIndicatorNode();
         pattern->SetIndicatorNode(indicatorNode);
+        if (lastIndicatorNode && lastIndicatorNode != indicatorNode) {
+            auto lastIndicatorPattern = lastIndicatorNode->GetPattern<IndicatorPattern>();
+            CHECK_NULL_VOID(lastIndicatorPattern);
+            lastIndicatorPattern->ResetSwiperNode();
+        }
     }
 }
 

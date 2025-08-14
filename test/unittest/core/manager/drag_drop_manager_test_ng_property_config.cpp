@@ -438,6 +438,16 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnDragEventTest001, TestSi
     EXPECT_EQ(onDropInfo, "");
     dragDropManager->FireOnDragEvent(frameNode, point, DragEventType::START, EXTRA_INFO);
     EXPECT_EQ(onDropInfo, "");
+
+    /**
+     * @tc.steps: step4. call FireOnDragEvent with UIExtensionComponent
+     * @tc.expected: step4. FireOnDrop will be called
+     */
+    auto UIExtensionComponent =
+        AceType::MakeRefPtr<FrameNode>(V2::DYNAMIC_COMPONENT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(UIExtensionComponent, nullptr);
+    dragDropManager->FireOnDragEvent(UIExtensionComponent, point, DragEventType::START, EXTRA_INFO);
+    EXPECT_EQ(onDropInfo, "");
 }
 
 /**

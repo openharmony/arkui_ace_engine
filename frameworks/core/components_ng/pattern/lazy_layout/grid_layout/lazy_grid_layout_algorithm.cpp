@@ -66,7 +66,9 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize,
     const PaddingPropertyF& padding)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto property = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    const auto& layoutConstraint = property->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
     OptionalSizeF frameSize;
@@ -77,14 +79,13 @@ void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, Optiona
         return;
     }
 
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto layoutPolicy = property->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
         auto isVertical = axis_ == Axis::VERTICAL;
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
-            layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis_);
+            property->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis_);
         contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
         auto isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;

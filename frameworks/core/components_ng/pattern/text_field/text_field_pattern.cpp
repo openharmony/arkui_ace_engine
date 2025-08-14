@@ -773,6 +773,7 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
         CHECK_NULL_VOID(pattern);
         pattern->parentGlobalOffset_ = pattern->GetPaintRectGlobalOffset();
         if (pattern->SelectOverlayIsOn()) {
+            pattern->selectOverlay_->UpdateIsSingleHandle(!pattern->IsSelected());
             if (pattern->IsSelected()) {
                 pattern->selectOverlay_->UpdateAllHandlesOffset();
             } else {
@@ -2532,6 +2533,9 @@ void TextFieldPattern::InitDragDropCallBack()
         pattern->ResetPreviewTextState();
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
+        if (pattern->dragStatus_ != DragStatus::DRAGGING) {
+            pattern->CloseKeyboard(true, false);
+        }
         if (pattern->TextFieldRequestFocus(RequestFocusReason::DRAG_ENTER)) {
             pattern->StartTwinkling();
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
@@ -3391,7 +3395,6 @@ void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldThem
 void TextFieldPattern::OnModifyDone()
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -4802,9 +4805,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .abilityToken = container ? container->GetToken() : nullptr
     };
 
-    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
-        textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;
-    }
     return textConfig;
 }
 
@@ -8747,6 +8747,9 @@ void TextFieldPattern::ProcessResponseArea()
             return;
         }
         // responseArea_ may not be a password area.
+        if (responseArea_) {
+            responseArea_->ClearArea();
+        }
         responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(WeakClaim(this), GetTextObscured());
         if (IsShowPasswordIcon()) {
             responseArea_->InitResponseArea();
@@ -8758,6 +8761,9 @@ void TextFieldPattern::ProcessResponseArea()
     }
 
     if (IsUnderlineMode()) {
+        if (responseArea_) {
+            responseArea_->ClearArea();
+        }
         responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
         responseArea_->InitResponseArea();
         auto host = GetHost();

@@ -62,6 +62,8 @@ public:
     int32_t SetPlayRangeWithMode(int64_t startTime, int64_t endTime, OHOS::Ace::SeekMode mode) override;
     int32_t SetPlayRangeUsWithMode(int64_t startTime, int64_t endTime, SeekMode mode) override;
     int32_t SetParameter(const std::string& key, int64_t value) override;
+    int32_t EnableCameraPostprocessing() override;
+    int32_t SetCameraPostprocessing(bool isOpen) override;
 
 private:
     // Interim programme

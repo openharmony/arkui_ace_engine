@@ -1431,6 +1431,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest0041, TestSize.Level1)
     extraData.targetReceiver = MockTargetReceiver2;
     event3.extraParam = reinterpret_cast<ArkUI_Int64>(&extraData);
     OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event3.gestureAsyncEvent);
+    ASSERT_EQ(gestureEvent->eventData.rawPointerEvent, nullptr);
 }
 
 /**

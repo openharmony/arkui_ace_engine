@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ScrollableEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ScrollableEventHub, EventHub)
+    DECLARE_ACE_TYPE(ScrollableEventHub, EventHub);
 
 public:
     ScrollableEventHub() = default;

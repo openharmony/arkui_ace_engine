@@ -330,15 +330,6 @@ public:
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
-    void SetPredictLayoutParam(std::optional<ListPredictLayoutParam> param)
-    {
-        predictLayoutParam_ = param;
-    }
-    std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
-    {
-        return predictLayoutParam_;
-    }
-
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
         predictLayoutParamV2_ = param;
@@ -534,6 +525,7 @@ protected:
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
+    void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -625,6 +617,7 @@ private:
     bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
+    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
     void FireFocus();
     bool CheckValidInList(int32_t index);
     void ProcessFocusEvent(bool indexChanged);
@@ -676,7 +669,6 @@ private:
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
-    std::optional<ListPredictLayoutParam> predictLayoutParam_;
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;

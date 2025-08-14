@@ -80,7 +80,8 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight)
 {
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
@@ -95,13 +96,13 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
         idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } else {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(idealSize,
-            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
-            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+            layoutProperty->GetCalcLayoutConstraint(),
+            layoutProperty->GetLayoutConstraint()->percentReference);
         idealSize.SetWidth(finalSize.Width());
         idealSize.SetHeight(finalSize.Height());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     CHECK_NULL_VOID(layoutPolicy.has_value());
     auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
     auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
@@ -153,7 +154,9 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         OptionalSize<float> ideaSize;
         ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(layoutProperty);
+        LayoutConstraintF parentConstraint = layoutProperty->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
         // the max size need to minus the already allocated height.
         parentConstraint.maxSize.MinusHeight(totalHeight);
@@ -203,12 +206,14 @@ float GridRowLayoutAlgorithm::CalcCrossAxisOffset(LayoutWrapper* gridRow, RefPtr
 {
     CHECK_NULL_RETURN(child, 0.0f);
     CHECK_NULL_RETURN(gridRow, 0.0f);
+    const auto& layoutProperty = gridRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
     auto childSize = child->GetGeometryNode()->GetFrameSize();
     const auto& childMargin = child->GetGeometryNode()->GetMargin();
     switch (alignSelf) {
         case FlexAlign::STRETCH:
             if (!NearEqual(currentRowHeight, childSize.Height())) {
-                auto parentConstraint = gridRow->GetLayoutProperty()->CreateChildConstraint();
+                auto parentConstraint = layoutProperty->CreateChildConstraint();
                 parentConstraint.selfIdealSize = OptionalSizeF(childSize.Width(), currentRowHeight);
                 child->Measure(parentConstraint);
             }
@@ -272,7 +277,6 @@ bool GridRowLayoutAlgorithm::GetSizeTypeAndMaxSize(LayoutWrapper* layoutWrapper,
     SizeF &maxSize, V2::GridSizeType& sizeType)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    const auto& hostLayoutProperty = layoutWrapper->GetHostNode()->GetLayoutProperty<GridRowLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
@@ -314,9 +318,10 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutPolicyChildren_.clear();
     gridColChildrenRows_.clear();
     gridColChildrenOfOneRow_.clear();
-    const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    const auto& hostLayoutProperty = layoutWrapper->GetHostNode()->GetLayoutProperty<GridRowLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& hostLayoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(hostLayoutProperty);
     SizeF maxSize;
     V2::GridSizeType sizeType;
     if (!GetSizeTypeAndMaxSize(layoutWrapper, maxSize, sizeType)) {
@@ -388,7 +393,9 @@ OffsetF GridRowLayoutAlgorithm::GetPaddingOffset(LayoutWrapper* layoutWrapper, b
 void GridRowLayoutAlgorithm::LayoutWithMatchParentInfo(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto realSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     MinusPaddingToNonNegativeSize(padding, realSize);
     auto matchParentHeight = realSize.Height();
@@ -421,7 +428,8 @@ void GridRowLayoutAlgorithm::UpdateRowHeightWhenIgnoreOpts(
     float& rowHeightAdjust, const RefPtr<LayoutWrapper>& childLayoutWrapper, float saeAdjust)
 {
     CHECK_NULL_VOID(childLayoutWrapper);
-    if (!childLayoutWrapper->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+    const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    if (!childLayoutProperty || !childLayoutProperty->IsExpandConstraintNeeded()) {
         return;
     }
     auto childHeight = childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() - saeAdjust;
@@ -513,7 +521,9 @@ OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* l
     LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy)
 {
     OptionalSizeF realSize;
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, {});
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto matchParentSize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
         widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL).ConvertToSizeT();
     realSize.UpdateSizeWithCheck(matchParentSize);
@@ -521,8 +531,8 @@ OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* l
         return realSize;
     }
     auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint({std::nullopt, childHeight},
-        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
-        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        layoutProperty->GetCalcLayoutConstraint(),
+        layoutProperty->GetLayoutConstraint()->percentReference);
     realSize.SetHeight(fixIdealSize.Height());
     return realSize;
 }
@@ -530,7 +540,9 @@ OptionalSizeF GridRowLayoutAlgorithm::MeasureSelfByLayoutPolicy(LayoutWrapper* l
 void GridRowLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, V2::GridSizeType sizeType)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto realSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     MinusPaddingToNonNegativeSize(padding, realSize);
     auto host = layoutWrapper->GetHostNode();
@@ -543,7 +555,7 @@ void GridRowLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layout
         auto span = gridCol->GetSpan(sizeType) >= 0 ? std::min(gridCol->GetSpan(sizeType), columnNum_) : columnNum_;
         OptionalSize<float> ideaSize;
         ideaSize.SetWidth(columnUnitWidth_ * span + (span - 1) * gutterInDouble_.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        LayoutConstraintF parentConstraint = layoutProperty->CreateChildConstraint();
         parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
         parentConstraint.parentIdealSize.SetSize(realSize);
         auto childNode = child->GetHostNode();
@@ -622,7 +634,9 @@ float GridRowLayoutAlgorithm::MeasureChild(LayoutWrapper* gridRow, RefPtr<Layout
     auto span = gridCol->GetSpan(sizeType) >= 0 ? std::min(gridCol->GetSpan(sizeType), columnNum_) : columnNum_;
     OptionalSize<float> ideaSize;
     ideaSize.SetWidth(columnUnitWidth_ * span + (span - 1) * gutterInDouble_.first);
-    LayoutConstraintF parentConstraint = gridRow->GetLayoutProperty()->CreateChildConstraint();
+    const auto& gridrowLayoutProperty = gridRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(gridrowLayoutProperty, 0.0f);
+    LayoutConstraintF parentConstraint = gridrowLayoutProperty->CreateChildConstraint();
     parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
     // the max size need to minus the already allocated height.
     parentConstraint.maxSize.MinusHeight(totalHeight);

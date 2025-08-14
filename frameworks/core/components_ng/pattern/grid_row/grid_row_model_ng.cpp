@@ -86,63 +86,38 @@ void GridRowModelNG::SetAlignItems(FlexAlign alignItem)
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem);
 }
 
-void GridRowModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& alignItem)
+void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
 {
     CHECK_NULL_VOID(frameNode);
-    if (alignItem.has_value()) {
-        auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateAlignItems(alignItem.value());
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, frameNode);
-    }
+    auto layoutPriority = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutPriority);
+    layoutPriority->UpdateAlignItems(alignItem);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem, frameNode);
 }
 
 void GridRowModelNG::SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (gutter) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
 }
 
 void GridRowModelNG::SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (col) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col, frameNode);
 }
 
 void GridRowModelNG::SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (breakpoints) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints, frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints, frameNode);
 }
 
-void GridRowModelNG::SetDirection(FrameNode* frameNode, const std::optional<V2::GridRowDirection>& direction)
+void GridRowModelNG::SetDirection(FrameNode* frameNode, V2::GridRowDirection direction)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (direction.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction, frameNode);
 }
 
 void GridRowModelNG::SetOnBreakPointChange(FrameNode* frameNode,
     std::function<void(const std::string)>&& onBreakPointChange)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<GridRowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBreakpointChange(std::move(onBreakPointChange));

@@ -370,6 +370,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
+    // FIXME enable the check when V1-V2 interoperability is forbidden
+    // && !ObserveV2.IsProxiedObservedV2(value)
     let res = ((typeof value === 'object' && typeof value !== 'function' &&
       !ObserveV2.IsObservedObjectV2(value) &&
       !ObserveV2.IsMakeObserved(value)) ||

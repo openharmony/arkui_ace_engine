@@ -19,26 +19,26 @@ export namespace displaySync {
   loadLibrary("display_sync_ani")
 
   export class IntervalInfo {
-    _timestamp: number;
-    _targetTimestamp: number;
+    _timestamp: long;
+    _targetTimestamp: long;
 
-    public get timestamp(): number {
+    public get timestamp(): long {
       return this._timestamp;
     }
 
-    public get targetTimestamp(): number {
+    public get targetTimestamp(): long {
       return this._targetTimestamp;
     }
 
-    public set timestamp(value: number) {
+    public set timestamp(value: long) {
       this._timestamp = value;
     }
 
-    public set targetTimestamp(value: number) {
+    public set targetTimestamp(value: long) {
       this._targetTimestamp = value;
     }
 
-    constructor(timestamp: number, targetTimestamp: number) {
+    constructor(timestamp: long, targetTimestamp: long) {
         this._timestamp = timestamp;
         this._targetTimestamp = targetTimestamp;
     }

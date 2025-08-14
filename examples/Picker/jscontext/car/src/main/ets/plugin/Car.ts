@@ -25,12 +25,13 @@ class Car {
     });
   }
 
-  callFileIo(filePath:string) {
+  callFileIo(filePath:string): boolean {
     // Load native module failed, so is @ohos:file.fs
-    setTimeout("");
+    setTimeout('');
     console.log('callFileIo plugin. hms = ' + globalThis.hms);
     let isAccess = globalThis.hms.callFile(filePath);
     console.log('Car isAccess = ' + isAccess + ' , ' + globalThis.aaa);
+    return isAccess;
   }
 }
 

@@ -311,6 +311,9 @@ HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level1)
     layoutProp->UpdateEnableHoverMode(true);
     AceEngine::Get().AddContainer(0, containerOne);
     AceEngine::Get().AddContainer(1, containerTwo);
+    auto context = frameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->isHalfFoldHoverStatus_ = true;
     bubbleLayoutAlgorithm.InitWrapperRect(layoutWrapper, layoutProp);
     EXPECT_FALSE(bubbleLayoutAlgorithm.isHalfFoldHover_);
     bubbleLayoutAlgorithm.foldCreaseBottom_ = -1;

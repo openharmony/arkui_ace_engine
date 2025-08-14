@@ -2735,7 +2735,7 @@ void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, con
 }
 
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
-    const std::vector<double> &ratioList)
+    const std::vector<double> &ratioList, bool isOutOfBoundsAllowed)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2743,6 +2743,10 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     CHECK_NULL_VOID(frameNode);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto& visibleAreaUserCallback = eventHub->GetVisibleAreaCallback(true);
+    visibleAreaUserCallback.isOutOfBoundsAllowed = isOutOfBoundsAllowed;
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -3683,7 +3687,9 @@ void ViewAbstract::BindPopup(
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    if (popupInfo.popupNode) {
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    // Do not need change showInSubWindow to false when targetNode is in subwindow.
+    if (popupInfo.popupNode && container && !container->IsSubContainer()) {
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
@@ -3703,6 +3709,7 @@ void ViewAbstract::BindPopup(
             }
         }
     }
+    param->SetShowInSubWindow(showInSubWindow);
     if (popupInfo.popupNode && popupInfo.isTips) {
         // subwindow need to handle
         overlayManager->ErasePopup(targetId);

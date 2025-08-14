@@ -2235,113 +2235,6 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateWithResourceObjFriction
- * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
-{
-    WaterFlowModelNG model = CreateWaterFlow();
-    ASSERT_NE(frameNode_, nullptr);
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
-
-    const double defaultiction = 10000000.0f;
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
-
-    // remove callback function
-    model.ParseResObjFriction(nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    // add callback function
-    model.ParseResObjFriction(resObj);
-    ASSERT_NE(pattern_->resourceMgr_, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
-
-    pattern_->friction_ = defaultiction;
-    pattern_->resourceMgr_->ReloadResources();
-    EXPECT_NE(pattern_->friction_, defaultiction);
-
-    // remove callback function
-    model.ParseResObjFriction(nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    std::vector<ResourceObjectParams> params;
-    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
-
-    // add callback function
-    model.ParseResObjFriction(resObj);
-    ASSERT_NE(pattern_->resourceMgr_, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
-
-    pattern_->friction_ = defaultiction;
-    pattern_->resourceMgr_->ReloadResources();
-    EXPECT_NE(pattern_->friction_, defaultiction);
-
-    // remove callback function
-    model.ParseResObjFriction(nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-}
-
-/**
- * @tc.name: CreateWithResourceObjFriction
- * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
-{
-    WaterFlowModelNG model = CreateWaterFlow();
-    ASSERT_NE(frameNode_, nullptr);
-    ASSERT_NE(pattern_, nullptr);
-    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
-
-    const double defaultiction = 10000000.0f;
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
-
-    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    // add callback function
-    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
-    ASSERT_NE(pattern_->resourceMgr_, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
-    pattern_->friction_ = defaultiction;
-    pattern_->resourceMgr_->ReloadResources();
-    EXPECT_NE(pattern_->friction_, defaultiction);
-
-    // remove callback function
-    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_, nullptr);
-    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    std::vector<ResourceObjectParams> params;
-    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
-
-    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-
-    // add callback function
-    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
-    ASSERT_NE(pattern_->resourceMgr_, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
-    pattern_->friction_ = defaultiction;
-    pattern_->resourceMgr_->ReloadResources();
-    EXPECT_NE(pattern_->friction_, defaultiction);
-
-    // remove callback function
-    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
-    EXPECT_NE(pattern_->resourceMgr_, nullptr);
-    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
-    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
-}
-/**
  * @tc.name: ScrollBarMarginColumnReverseTest001
  * @tc.desc: Test scrollBar margin behavior comparison between normal and reverse modes
  * @tc.type: FUNC
@@ -2640,5 +2533,113 @@ HWTEST_F(WaterFlowTestNg, ScrollBarMarginRowReverseTest003, TestSize.Level1) {
     EXPECT_GE(rect.Left(), 15.0f);
     EXPECT_LE(rect.Right(), viewSize.Width() - 15.0f);
     EXPECT_GT(rect.Width(), 0.0f);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -1148,6 +1148,7 @@ void DragDropManager::DoDragReset()
     isAnyDraggableHit_ = false;
     isPullThrow_ = false;
     fingerPointInfo_.clear();
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 
@@ -2245,6 +2246,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     dragPreviewInfo.imageNode = imageNode;
     dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
     dragPreviewInfo.originScale = imageNode->GetTransformScale();
+    dragPreviewInfo.isDragController = false;
     CopyPreparedInfoForDrag(dragPreviewInfo, data);
     return true;
 }
@@ -2417,7 +2419,7 @@ void DragDropManager::DoDragMoveAnimate(const DragPointerEvent& pointerEvent)
     CHECK_NULL_VOID(overlayManager);
     auto point = pointerEvent.GetPoint();
     Offset newOffset = { 0, 0 };
-    if (info_.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT && !info_.textNode) {
+    if ((info_.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT && !info_.textNode) || info_.isDragController) {
         newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, point.GetX(), point.GetY(), info_);
     } else if (info_.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
                info_.sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION || info_.textNode) {
@@ -2483,6 +2485,9 @@ void DragDropManager::DragMoveDefaultAnimation(const RefPtr<OverlayManager>& ove
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
             renderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
+            if (info.isDragController) {
+                UpdateTextNodePosition(info.textNode, localPoint);
+            }
             UpdateGatherNodePosition(overlayManager, info.imageNode);
         },
         option.GetOnFinishEvent());

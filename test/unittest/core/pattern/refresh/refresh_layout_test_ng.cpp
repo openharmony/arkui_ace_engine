@@ -447,13 +447,76 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
     EXPECT_TRUE(pattern_->isHigherVersion_);
     EXPECT_TRUE(pattern_->hasLoadingText_);
-    
+
     pattern_->OnColorConfigurationUpdate();
     auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     EXPECT_EQ(progressPaintProperty->GetColorValue(Color::WHITE), Color::BLACK);
     auto textLayoutProperty = pattern_->loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
     EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance001
+ * @tc.desc: Test does not set SetMaxPullDownDistance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is Infinity
+     * @tc.expected: The GetMaxPullDownDistance method returns infinity
+     */
+    float value = std::numeric_limits<float>::infinity();
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), value);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance002
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from GetMaxPullDownDistance method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 100.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(100.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test MaxPullDownDistance is 100.0f
+     * @tc.expected: The GetMaxPullDownDistance method returns 100.0f
+     */
+    EXPECT_EQ(pattern_->GetMaxPullDownDistance(), 100.0f);
+}
+
+/**
+ * @tc.name: SetMaxPullDownDistance003
+ * @tc.desc: Test set SetMaxPullDownDistance, obtain data from layoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, SetMaxPullDownDistance003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh ModelNG and set 200.0f
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetMaxPullDownDistance(200.0f);
+    CreateDone();
+    /**
+     * @tc.steps: step2. Test layoutProperty maxpulldowndistance is 200.0f
+     * @tc.expected: The layoutProperty maxpulldowndistance property returns 200.0f
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxPullDownDistance().value(), 200.0f);
 }
 
 /**
@@ -599,11 +662,10 @@ HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
      * @tc.steps: step3. refresh sets accessibilityLevel
      * @tc.expected: progress node and loadingText node have accessibilityLevel.
      */
-    
     refreshAccessibilityProperty->SetAccessibilityLevel("no");
     EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
     EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");
-    pattern_->InitChildNode();
+    pattern_->InitChildNode(frameNode_);
     EXPECT_TRUE(progressAccessibilityProperty->accessibilityLevel_.has_value());
     EXPECT_EQ(progressAccessibilityProperty->accessibilityLevel_.value(), "no");
     EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());

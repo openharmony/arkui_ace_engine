@@ -216,6 +216,7 @@ private:
     int32_t compatibleVersion_ = 0;
     int32_t targetVersion_ = 0;
     bool installationFree_ = false;
+    bool isComponentMode_ = false;
     uint32_t labelId_ = 0;
     bool useNewPipeline_ = true;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;

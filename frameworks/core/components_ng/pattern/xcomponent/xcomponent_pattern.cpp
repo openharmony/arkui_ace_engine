@@ -29,9 +29,7 @@
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
-#ifdef ACE_STATIC
 #include "base/utils/multi_thread.h"
-#endif
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
@@ -49,7 +47,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
-#include "transaction/rs_interfaces.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "ui/rs_ui_context.h"
@@ -162,9 +159,7 @@ void XComponentPattern::InitXComponent()
 void XComponentPattern::InitSurface()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(host, InitSurface, host);
-#endif
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -280,9 +275,7 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
-#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
@@ -298,14 +291,13 @@ void XComponentPattern::OnAttachToMainTree()
             needRecoverDisplaySync_ = false;
         }
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
 }
 
 void XComponentPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
-#endif
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     isOnTree_ = false;
@@ -321,6 +313,7 @@ void XComponentPattern::OnDetachFromMainTree()
             needRecoverDisplaySync_ = true;
         }
     }
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
 }
 
 void XComponentPattern::InitializeRenderContext()
@@ -489,9 +482,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     UnregisterNode();
     CHECK_NULL_VOID(frameNode);
-#ifdef ACE_STATIC
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode);
-#endif
     UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
@@ -538,9 +529,7 @@ void XComponentPattern::InitController()
     CHECK_NULL_VOID(xcomponentController_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-#ifdef ACE_STATIC
     FREE_NODE_CHECK(host, InitController);
-#endif
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -639,9 +628,16 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
-    if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        pattern->UpdateAnalyzerUIConfig(geometryNode);
+    });
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
         initSize_ = paintRect_.GetSize();
@@ -1462,14 +1458,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     CHECK_NULL_VOID(range);
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
-    displaySync_->SetExpectedFrameRateRange(frameRateRange);
-#ifdef ENABLE_ROSEN_BACKEND
-    if (frameRateRange.preferred_ != lastFrameRateRange_.preferred_) {
-        Rosen::RSInterfaces::GetInstance().NotifyXComponentExpectedFrameRate(GetId(), frameRateRange.preferred_);
-    }
-    lastFrameRateRange_.Set(range->min, range->max, range->expected);
-#endif
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId(), isOnTree_, frameRateRange);
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " NotifyXComponentExpectedFrameRate"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 

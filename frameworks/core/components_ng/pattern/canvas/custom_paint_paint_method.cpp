@@ -135,16 +135,16 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
         case FilterType::OPACITY:
         case FilterType::BRIGHTNESS:
         case FilterType::CONTRAST: {
-            std::regex contrastRegexExpression(R"((-?0)|(\d+(\.\d+)?%?)|(^$))");
-            return std::regex_match(filterParam, contrastRegexExpression);
+            static const std::regex contrastRegexExpression(R"((?:-?0)|(?:\d+(?:\.\d+)?%?))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem))|(^$))");
-            return std::regex_match(filterParam, blurRegexExpression);
+            static const std::regex blurRegexExpression(R"((?:-?0)|(?:\d+(?:\.\d+)?(?:px|vp|rem)))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
-            std::regex hueRotateRegexExpression(R"((-?0)|(-?\d+(\.\d+)?(deg|grad|rad|turn))|(^$))");
-            return std::regex_match(filterParam, hueRotateRegexExpression);
+            static const std::regex hueRotateRegexExpression(R"((?:-?0)|(?:-?\d+(?:\.\d+)?(?:deg|grad|rad|turn)))");
+            return filterParam.empty() ? true : std::regex_match(filterParam, hueRotateRegexExpression);
         }
         default:
             return false;

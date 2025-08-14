@@ -1227,6 +1227,7 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
+            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetX = resourceWrapper->GetDimension(recv.resId);
             double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
             shadow.SetOffsetX(xValue);
@@ -1239,6 +1240,7 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
+            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetY = resourceWrapper->GetDimension(recv.resId);
             shadow.SetOffsetY(offsetY.Value());
         } else {
@@ -2261,11 +2263,23 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             napi_value paramObj = nullptr;
             napi_create_object(env, &paramObj);
 
-            napi_value id = nullptr;
-            napi_create_int32(env, instanceId, &id);
+            int32_t* id = new int32_t(instanceId);
             napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveCustomDialog, id, &funcValue);
             napi_set_named_property(env, paramObj, "dismiss", funcValue);
-
+            napi_status status = napi_add_finalizer(
+                env, funcValue, id,
+                [](napi_env env, void* data, void* hint) {
+                    int32_t* id = reinterpret_cast<int32_t*>(data);
+                    CHECK_NULL_VOID(id);
+                    delete id;
+                },
+                nullptr, nullptr);
+            if (status != napi_ok) {
+                delete id;
+                LOGE("Fail to add the finalizer method for instanceId.");
+                napi_close_handle_scope(env, scope);
+                return;
+            }
             napi_create_int32(env, info, &value);
             napi_set_named_property(env, paramObj, "reason", value);
             napi_get_reference_value(env, onWillDismissRef, &onWillDismissFunc);

@@ -50,8 +50,8 @@ const std::map<std::string, Ace::SymbolEffectType> SYMBOL_EFFECT_TYPE_MAP = {
     { "BounceSymbolEffect", SymbolEffectType::BOUNCE },
     { "ReplaceSymbolEffect", SymbolEffectType::REPLACE },
     { "PulseSymbolEffect", SymbolEffectType::PULSE },
-    { "QuickReplaceSymbolEffect", SymbolEffectType::QuickReplace },
-    { "DisableSymbolEffect", SymbolEffectType::Disable },
+    { "QuickReplaceSymbolEffect", SymbolEffectType::QUICK_REPLACE },
+    { "DisableSymbolEffect", SymbolEffectType::DISABLE },
 };
 
 const std::map<std::string, Ace::SymbolGradientType> SYMBOL_SHADER_TYPE_MAP = {
@@ -309,7 +309,17 @@ void JSSymbol::SetSymbolShadow(const JSCallbackInfo& info)
 void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
 {
     std::vector<SymbolGradient> gradients;
-    if (info.Length() < 1 || !info[0]->IsArray()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        SymbolModel::GetInstance()->SetShaderStyle(gradients);
+        return;
+    }
+    
+    if (!info[0]->IsArray()) {
+        JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(info[0]);
+        SymbolGradient gradient;
+        gradient.isDefined = true;
+        ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
         SymbolModel::GetInstance()->SetShaderStyle(gradients);
         return;
     }
@@ -319,20 +329,20 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
 
     for (size_t i = 0; i < jsArray->Length(); ++i) {
         auto jsValue = jsArray->GetValueAt(i);
+        SymbolGradient gradient;
         if (!jsValue->IsObject()) {
+            gradients.emplace_back(std::move(gradient));
             continue;
         }
         JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsValue);
-        SymbolGradient gradient;
-        if (ParseShaderStyle(jsGradientObj, gradient)) {
-            gradients.emplace_back(std::move(gradient));
-        }
+        ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
     }
 
     SymbolModel::GetInstance()->SetShaderStyle(gradients);
 }
 
-bool JSSymbol::ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& gradient)
+bool JSSymbol::ParseShaderStyle(const JSRef<JSObject>& shaderStyleObj, SymbolGradient& gradient)
 {
     auto typeParam = shaderStyleObj->GetProperty("type");
     if (!typeParam->IsString()) {
@@ -419,7 +429,7 @@ void JSSymbol::ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gr
     }
 }
 
-void JSSymbol::ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow)
+void JSSymbol::ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolShadow& symbolShadow)
 {
     auto colorValue = symbolShadowObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
     Color color;

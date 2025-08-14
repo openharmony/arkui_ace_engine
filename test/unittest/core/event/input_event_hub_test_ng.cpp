@@ -722,4 +722,49 @@ HWTEST_F(InputEventHubTestNg, RemoveAllTipsHoverEvents001, TestSize.Level1)
     inputEventHub->RemoveAllTipsHoverEvents();
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), 0);
 }
+
+/**
+ * @tc.name: HandleHoverEventTest001
+ * @tc.desc: Create InputEventHub and HoverEventTarget HandleHoverEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, HandleHoverEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and eventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    Offset actualGlobalLocation;
+    Offset actualDisplayLocation;
+    Offset actualGlobalDisplayLocation;
+    const OnHoverFunc onHoverCallback =
+        [&actualGlobalLocation, &actualDisplayLocation, &actualGlobalDisplayLocation](bool isHover, HoverInfo& info) {
+            actualGlobalLocation = info.GetGlobalLocation();
+            actualDisplayLocation = info.GetScreenLocation();
+            actualGlobalDisplayLocation = info.GetGlobalDisplayLocation();
+        };
+    hoverEventTarget->SetCallback(onHoverCallback);
+
+    MouseEvent mouseEvent;
+    const Offset expectedOffset(1, 1);
+    mouseEvent.x = expectedOffset.GetX();
+    mouseEvent.y = expectedOffset.GetY();
+    mouseEvent.screenX = expectedOffset.GetX();
+    mouseEvent.screenY = expectedOffset.GetY();
+    mouseEvent.globalDisplayX = expectedOffset.GetX();
+    mouseEvent.globalDisplayY = expectedOffset.GetY();
+
+    /**
+     * @tc.steps: step1. Test HandleHoverEvent Func.
+     * @tc.expected: Get location same as expectedOffset.
+     */
+    hoverEventTarget->HandleHoverEvent(false, mouseEvent);
+    EXPECT_EQ(actualGlobalLocation, expectedOffset);
+    EXPECT_EQ(actualDisplayLocation, expectedOffset);
+    EXPECT_EQ(actualGlobalDisplayLocation, expectedOffset);
+}
 } // namespace OHOS::Ace::NG

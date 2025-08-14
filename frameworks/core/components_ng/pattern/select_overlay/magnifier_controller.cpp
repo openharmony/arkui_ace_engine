@@ -218,10 +218,11 @@ void MagnifierController::ChangeMagnifierVisibility(const bool& visible)
     AnimationOption option;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(ANIMATION_DURATION_150);
+    auto contextPtr = magnifierFrameNode_ ? magnifierFrameNode_->GetContextRefPtr() : nullptr;
     if (removeFrameNode_) {
-        AnimationUtils::Animate(option, callBack, endCallBack);
+        AnimationUtils::Animate(option, callBack, endCallBack, nullptr, contextPtr);
     } else {
-        AnimationUtils::Animate(option, callBack);
+        AnimationUtils::Animate(option, callBack, nullptr, nullptr, contextPtr);
     }
 }
 

@@ -16,7 +16,6 @@
 
 #include <ani.h>
 
-#include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
 
 #include "base/subwindow/subwindow_manager.h"
@@ -252,7 +251,9 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     env_->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
     auto legacyEntryPointObj = LegacyLoadPage(env_);
-    std::string moduleName = Container::Current()->GetModuleName();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, UIContentErrorCode::INVALID_URL);
+    std::string moduleName = container->GetModuleName();
     ani_string module;
     env_->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
     if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
@@ -396,7 +397,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
-    std::shared_ptr<ani_ref> shared_ptr(context);
-    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+    Framework::AniContextModule::AddAniContext(instanceId, context);
 }
 } // namespace OHOS::Ace

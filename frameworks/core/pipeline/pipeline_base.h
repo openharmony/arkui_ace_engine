@@ -917,6 +917,11 @@ public:
         return rootHeight_;
     }
 
+    int32_t GetWindowOriginalWidth() const
+    {
+        return width_;
+    }
+
     void SetWindowModal(WindowModal modal)
     {
         windowModal_ = modal;
@@ -1618,6 +1623,7 @@ public:
     }
 
     void SetUiDVSyncCommandTime(uint64_t vsyncTime);
+    void ForceUpdateDesignWidthScale(int32_t width);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

@@ -239,6 +239,16 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
+    // interrupt FAST_ANIMATION and end in JUMP_NEAR_VALUE Page
+    if (oldIndex == targetIndex && fastAnimationRunning_) {
+        fastAnimationChange_ = true;
+        unselectedIndex_ = -1;
+        FireSelectedEvent(oldIndex, targetIndex);
+    }
+    if (fastAnimationChange_ && !fastAnimationRunning_) {
+        fastAnimationChange_ = false;
+        FireChangeEvent(oldIndex, targetIndex, isInLayout);
+    }
 }
 
 void SwiperPattern::StopAndResetSpringAnimation()
@@ -1644,9 +1654,13 @@ void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationC
 
 void SwiperPattern::FireSelectedEvent(int32_t currentIndex, int32_t targetIndex)
 {
-    if (currentIndex == targetIndex) {
+    if (jumpOnChange_) {
         return;
     }
+    if (currentIndex == targetIndex && !fastAnimationRunning_) {
+        return;
+    }
+
     auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (selectedIndex_ != GetLoopIndex(targetIndex)) {
@@ -1903,7 +1917,7 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
-void SwiperPattern::SwipeToWithoutAnimation(int32_t index, bool byUser)
+void SwiperPattern::SwipeToWithoutAnimation(int32_t index, std::optional<int32_t> rawIndex)
 {
     if (currentIndex_ != index) {
         FireWillShowEvent(index);
@@ -1922,8 +1936,10 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index, bool byUser)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    if (byUser) {
-        jumpIndexByUser_ = index;
+    if (rawIndex.has_value()) {
+        auto tempIndex = CheckIndexRange(rawIndex.value());
+        tempIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(tempIndex, GetDisplayCount()) : tempIndex;
+        jumpIndexByUser_ = CheckTargetIndex(tempIndex);
     }
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
@@ -2227,7 +2243,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex), index);
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2292,7 +2308,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
+        SwipeToWithoutAnimation(GetLoopIndex(targetIndex), index);
     }
 }
 
@@ -2457,6 +2473,7 @@ void SwiperPattern::OnTranslateAnimationFinish()
     if (!translateAnimationIsRunning_) {
         return;
     }
+    fastAnimationRunning_ = false;
     translateAnimationIsRunning_ = false;
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
@@ -2466,6 +2483,7 @@ void SwiperPattern::StopTranslateAnimation()
     if (translateAnimationIsRunning_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        fastAnimationRunning_ = false;
         translateAnimationIsRunning_ = false;
         prevFrameAnimationRunning_ = true;
 
@@ -3240,6 +3258,9 @@ std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 
 void SwiperPattern::UpdateAnimationProperty(float velocity)
 {
+    if (fastAnimationRunning_) {
+        return;
+    }
     if (isDragging_ || childScrolling_) {
         targetIndex_ = CheckTargetIndex(ComputeNextIndexByVelocity(velocity));
         velocity_ = velocity;
@@ -3943,6 +3964,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         swiperPattern->UpdateTranslateForCaptureNode(offset);
         swiperPattern->FireScrollStateEvent(ScrollState::FLING);
     };
+    if (fastCurrentIndex_.has_value()) {
+        fastAnimationRunning_ = true;
+        unselectedIndex_ = GetLoopIndex(currentIndex_);
+    }
     propertyAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     contentMainSizeBeforeAni_ = contentMainSize_;
@@ -4016,6 +4041,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
         hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
         !IsItemOverlay());
+    fastAnimationRunning_ = false;
     propertyAnimationIsRunning_ = false;
     syncCancelAniIsFailed_ = false;
     fastCurrentIndex_.reset();
@@ -4082,6 +4108,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     if (!propertyAnimationIsRunning_ || syncCancelAniIsFailed_) {
         return;
     }
+    fastAnimationRunning_ = false;
     propertyAnimationIsRunning_ = false;
     AnimationOption option;
     option.SetDuration(0);
@@ -4334,7 +4361,10 @@ void SwiperPattern::PlayTranslateAnimation(
             swiper->OnTranslateAnimationFinish();
             swiper->FireScrollStateEvent(ScrollState::IDLE);
         });
-
+    if (fastCurrentIndex_.has_value()) {
+        fastAnimationRunning_ = true;
+        unselectedIndex_ = GetLoopIndex(currentIndex_);
+    }
     SetLazyLoadFeature(true);
     UpdateItemRenderGroup(true);
 }

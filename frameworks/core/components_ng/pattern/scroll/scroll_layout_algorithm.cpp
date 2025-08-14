@@ -45,14 +45,14 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
+    auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     auto isMainFix = false;
     if (layoutPolicy.has_value()) {
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto layoutPolicySize =
-            ConstrainIdealSizeByLayoutPolicy(constraint.value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            constraint.value_or(LayoutConstraintF()), widthLayoutPolicy, heightLayoutPolicy, axis);
         isMainFix = (axis == Axis::VERTICAL && layoutPolicy.value().IsHeightFix()) ||
                     (axis == Axis::HORIZONTAL && layoutPolicy.value().IsWidthFix());
         idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);

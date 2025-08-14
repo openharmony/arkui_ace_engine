@@ -201,6 +201,7 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
+        delete observer;
         return nullptr;
     }
     return context_object;

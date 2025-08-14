@@ -1430,11 +1430,12 @@ ArkUINativeModuleValue WebBridge::SetOnAudioStateChanged(ArkUIRuntimeCallInfo* r
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(AudioStateChangedEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(AudioStateChangedEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                func = panda::CopyableGlobal(vm, func)](
                                                                 AudioStateChangedEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "playing" };
         Local<JSValueRef> values[] = {
             panda::BooleanRef::New(vm, event.IsPlaying()),

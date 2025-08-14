@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT GridColComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(GridColComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(GridColComposedElement, InspectorComposedElement);
 
 public:
     explicit GridColComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

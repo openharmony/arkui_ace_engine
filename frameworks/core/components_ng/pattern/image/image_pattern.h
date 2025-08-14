@@ -430,13 +430,11 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
 
-#if defined(ACE_STATIC)
     void OnAttachToMainTree() override;
     void OnAttachToFrameNodeMultiThread() {}
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
     void OnModifyDone() override;
     void OnPixelMapDrawableModifyDone();
     ImagePaintConfig CreatePaintConfig();
@@ -461,6 +459,8 @@ private:
     void OnImageLoadFail(const std::string& errorMsg, const ImageErrorInfo& errorInfo);
     void OnImageLoadSuccess();
     bool SetPixelMapMemoryName(RefPtr<PixelMap>& pixelMap);
+    std::string HandleSrcForMemoryName(std::string url);
+    std::string MaskUrl(std::string url);
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
@@ -475,6 +475,7 @@ private:
     void InitCopy();
     void HandleCopy();
     void OpenSelectOverlay();
+    void HandleMoveDone(bool isFirst);
     void CloseSelectOverlay();
 
     void TriggerFirstVisibleAreaChange();
@@ -536,6 +537,7 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent(const KeyEvent& event);
+    void InitFromThemeIfNeed();
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
@@ -575,11 +577,13 @@ private:
     bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSceneBoardWindow_ = false;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
+    bool isFullyInitializedFromTheme_ = false;
     Color selectedColor_;
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
@@ -617,6 +621,7 @@ private:
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
     bool hasSetPixelMapMemoryName_ = false;
+    bool previousVisibility_ = false;
 };
 
 } // namespace OHOS::Ace::NG

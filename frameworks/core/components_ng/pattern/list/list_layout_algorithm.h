@@ -443,6 +443,8 @@ public:
 
     void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
 
+    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -566,9 +568,6 @@ protected:
     virtual void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     virtual void FixPredictSnapPos();
     void FixPredictSnapOffsetAlignCenter();
-    bool LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index, bool forward, float &currPos, float crossSize);
-    virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
 
     void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount,
@@ -693,7 +692,6 @@ private:
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

@@ -59,6 +59,7 @@ constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 1024;
 constexpr int32_t DEFAULT_DRAG_DROP_STATUS = 0;
 constexpr int32_t NEW_DRAG_DROP_STATUS = 1;
 constexpr int32_t OLD_DRAG_DROP_STATUS = 3;
+constexpr float HALF_DIVIDE = 2.0f;
 const std::unordered_set<std::string> OLD_FRAMEWORK_TAG = {
     V2::WEB_ETS_TAG,
     V2::TEXTAREA_ETS_TAG,
@@ -264,10 +265,17 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        auto rect = DragDropFuncWrapper::GetPaintRectToScreen(frameNode) -
+        auto center = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode) -
             DragDropFuncWrapper::GetCurrentWindowOffset(PipelineContext::GetCurrentContextSafelyWithCheck());
-        frameNodeOffset_ = rect.GetOffset();
-        frameNodeSize_ = rect.GetSize();
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (geometryNode) {
+            auto scale = frameNode->GetTransformScaleRelativeToWindow();
+            auto size = geometryNode->GetFrameSize();
+            frameNodeSize_ = SizeF(size.Width() * scale.x, size.Height() * scale.y);
+        } else {
+            frameNodeSize_ = SizeF(0.0f, 0.0f);
+        }
+        frameNodeOffset_ = center - OffsetF(frameNodeSize_.Width(), frameNodeSize_.Height()) / HALF_DIVIDE;
 #ifdef WEB_SUPPORTED
         if (frameTag == V2::WEB_ETS_TAG) {
             auto webPattern = frameNode->GetPattern<WebPattern>();
@@ -282,7 +290,8 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
 
     // use menuPreview's size and offset for drag framework.
     if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f) &&
-        GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f)) {
+        (GreatNotEqual(DragAnimationHelper::GetPreviewMenuAnimationRate(), 0.0f) ||
+            frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT)) {
         auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(menuPreviewRect.Height(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
@@ -809,7 +818,7 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     auto previewScale = rate * (previewAfterAnimationScale - previewBeforeAnimationScale) + previewBeforeAnimationScale;
     if (!GreatNotEqual(rate, 0.0f)) {
         data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
-        data.dragPreviewRect = data.originPreviewRect;
+        data.originPreviewRect = data.dragPreviewRect;
         return;
     }
     auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth() * previewScale;
@@ -841,7 +850,6 @@ void GestureEventHub::PrepareDragStartInfo(
     data.relativeContainerNode = relativeContainerNode;
     auto relativeContainerLayoutProperty = relativeContainerNode->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
-    relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
         { CalcLength(data.originPreviewRect.Width(), DimensionUnit::PX),
             CalcLength(data.originPreviewRect.Height(), DimensionUnit::PX) });
@@ -1935,6 +1943,13 @@ void GestureEventHub::SetThumbnailCallback(std::function<void(Offset)>&& callbac
 {
     if (dragEventActuator_) {
         dragEventActuator_->SetThumbnailCallback(std::move(callback));
+    }
+}
+
+void GestureEventHub::DragNodeDetachFromParent()
+{
+    if (dragEventActuator_) {
+        dragEventActuator_->RemovePixelMap();
     }
 }
 

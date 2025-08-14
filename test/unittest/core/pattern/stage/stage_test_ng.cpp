@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/adapter/mock_uisession_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -36,6 +37,9 @@
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
+
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #undef private
 #undef protected
 
@@ -583,7 +587,7 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
 
     /**
-     * @tc.steps: step4. Call StartTransition.
+     * @tc.steps: step4. Call StartTransition,with route type NONE..
      * @tc.expected: Start Successful.
      */
     stageManager.SetSrcPage(outPageNode);
@@ -591,6 +595,22 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
     inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
     EXPECT_EQ(stageManager.destPageNode_, inPageNode);
+
+    /**
+     * @tc.steps: step5. Call StartTransition with route type POP.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPopPage".
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPopPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::POP);
+
+    /**
+     * @tc.steps: step6. Call StartTransition with route type PUSH.
+     * @tc.expected: Start Successful. and call ui session on OnRouterChange with "routerPushPage".
+     */
+    EXPECT_CALL(*mockUiSessionManager, OnRouterChange(_, "routerPushPage")).Times(testing::AtLeast(AT_LEAST_TIME));
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::PUSH);
 }
 
 /**

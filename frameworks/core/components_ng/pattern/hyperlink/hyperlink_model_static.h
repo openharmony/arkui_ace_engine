@@ -25,6 +25,7 @@ public:
     static void SetColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetTextStyle(FrameNode* frameNode, const std::string& address,
         const std::optional<std::string>& content);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
 };
 } // namespace OHOS::Ace::NG
 

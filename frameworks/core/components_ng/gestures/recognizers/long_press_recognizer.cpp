@@ -616,6 +616,7 @@ void LongPressRecognizer::UpdateGestureEventInfo(std::shared_ptr<LongPressGestur
     info->SetRawInputDeviceId(deviceId_);
     info->SetLastAction(lastAction_);
     info->SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
+    info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
 }
 
 RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()

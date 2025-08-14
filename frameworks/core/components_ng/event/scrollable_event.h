@@ -43,7 +43,7 @@ using GetAnimateVelocityCallback = std::function<double()>;
 using ClickJudgeCallback = std::function<bool(const PointF&)>;
 
 class ScrollableEvent : public AceType {
-    DECLARE_ACE_TYPE(ScrollableEvent, AceType)
+    DECLARE_ACE_TYPE(ScrollableEvent, AceType);
 public:
     explicit ScrollableEvent(Axis axis);
     ~ScrollableEvent() override;
@@ -174,7 +174,7 @@ private:
 };
 
 class ScrollableActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator);
 public:
     explicit ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ScrollableActuator() override = default;

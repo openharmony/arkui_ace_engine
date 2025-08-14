@@ -527,18 +527,16 @@ void PagePattern::StopPageTransition()
 
 void PagePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("[%s][self:%d] SafeArea already applied to AppBar", host->GetTag().c_str(), host->GetId());
         return;
     }
     ContentRootPattern::BeforeCreateLayoutWrapper();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto&& insets = host->GetLayoutProperty()->GetSafeAreaInsets();
     CHECK_NULL_VOID(insets);
     auto manager = pipeline->GetSafeAreaManager();
@@ -547,7 +545,9 @@ void PagePattern::BeforeCreateLayoutWrapper()
 
 bool PagePattern::AvoidKeyboard() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);

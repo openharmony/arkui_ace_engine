@@ -1056,6 +1056,7 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
      */
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     sliderPattern->focusFlag_ = true;
     sliderPattern->OnIsFocusActiveUpdate(true);
     EXPECT_TRUE(sliderPattern->bubbleFlag_);

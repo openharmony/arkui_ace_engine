@@ -56,6 +56,7 @@ struct RotateTransform {
 };
 
 class ComposedElement;
+class PipelineBase;
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
@@ -261,7 +262,8 @@ public:
     {
         return false;
     }
-    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
         return false;
     }
@@ -373,6 +375,7 @@ public:
         bool deleteController = true,
         bool releaseAll = false) {}
     virtual void AddToPageEventController(const RefPtr<NG::FrameNode>& node) {}
+    virtual bool DeleteFromPageEventController(const RefPtr<NG::FrameNode>& node) {return false;}
     virtual bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) {return false;}
     virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
 

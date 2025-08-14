@@ -186,8 +186,14 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
-            layoutProperty->UpdateLayoutWeight(1);
+            if (settingData.columnWidths.empty()) {
+                layoutProperty->UpdateLayoutWeight(1);
+            }
             stackNode->MountToParent(textPickerNode);
+        }
+
+        if (!settingData.columnWidths.empty()) {
+            textPickerPattern->SetColumnWidths(settingData.columnWidths);
         }
     }
     if (settingData.options.size() > 0) {
@@ -841,7 +847,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelEventHub->SetStateEffect(true);
 
     UpdateButtonCancelLayoutProperty(buttonCancelNode, pipeline);
-    
+
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -1033,7 +1039,7 @@ void TextPickerDialogView::SetTextNormalProperties(
         properties.normalTextStyle_.fontFamily.value_or(normalStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle,
         properties.normalTextStyle_.fontStyle.value_or(normalStyle.GetFontStyle()));
-    
+
     if (properties.normalTextStyle_.minFontSize.has_value() && properties.normalTextStyle_.minFontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, MinFontSize,
             ConvertFontScaleValue(properties.normalTextStyle_.minFontSize.value()));
@@ -1252,7 +1258,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     buttonForwardEventHub->SetStateEffect(true);
 
     UpdateButtonForwardLayoutProperty(buttonForwardNode, pipeline);
-    
+
     const auto& buttonForwardRenderContext = buttonForwardNode->GetRenderContext();
     buttonForwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -1300,7 +1306,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     buttonBackwardEventHub->SetStateEffect(true);
 
     UpdateButtonBackwardLayoutProperty(buttonBackwardNode, pipeline);
-    
+
     const auto& buttonBackwardRenderContext = buttonBackwardNode->GetRenderContext();
     buttonBackwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();

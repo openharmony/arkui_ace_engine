@@ -236,7 +236,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     GestureEvent gestureInfo;
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
-    gestureInfo.SetPointerEvent(info.GetPointerEvent());
+    gestureInfo.SetClickPointerEvent(info.GetPointerEvent());
     std::string message;
     int res = ReportSecurityComponentClickEvent(gestureInfo, message);
     if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {

@@ -389,6 +389,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     EXPECT_EQ(sliderPattern->value_, VALUE);
     EXPECT_EQ(sliderPattern->valueRatio_, .5f);
     EXPECT_EQ(sliderPattern->showTips_, false);
@@ -404,6 +405,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
      */
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     sliderPaintProperty->UpdatePadding(sliderTheme->GetTipTextPadding());
     sliderPaintProperty->UpdateTipColor(sliderTheme->GetTipColor());
     sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
@@ -601,6 +603,7 @@ HWTEST_F(SliderTestNg, SliderTestNg008, TestSize.Level1)
      *                   and take 100 as max value by default.
      */
     sliderPattern->OnModifyDone();
+    sliderPattern->InitEvent();
     EXPECT_EQ(paintProperty->GetMin().value(), MIN);
     EXPECT_EQ(paintProperty->GetMax().value(), MAX);
     /**

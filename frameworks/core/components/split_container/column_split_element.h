@@ -22,7 +22,7 @@
 namespace OHOS::Ace {
 
 class ColumnSplitElement : public SplitContainerElement {
-    DECLARE_ACE_TYPE(ColumnSplitElement, SplitContainerElement)
+    DECLARE_ACE_TYPE(ColumnSplitElement, SplitContainerElement);
 
 public:
     ColumnSplitElement() = default;

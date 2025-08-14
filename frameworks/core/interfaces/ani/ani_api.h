@@ -57,7 +57,7 @@ struct ArkUIAniWebModifier {
     void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
 };
 struct ArkUIAniCommonModifier {
-    ani_ref* (*getHostContext)();
+    ani_ref* (*getHostContext)(ArkUI_Int32 key);
     void (*syncInstanceId)(ArkUI_Int32 id);
     void (*restoreInstanceId)();
     void (*setDrawCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObj);

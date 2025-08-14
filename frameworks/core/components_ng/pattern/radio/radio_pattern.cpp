@@ -99,14 +99,7 @@ void RadioPattern::UpdateIndicatorType()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
     renderContext->UpdateOpacity(1);
-    if (!radioModifier_) {
-        radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
-    }
-    if (!radioPaintProperty->HasRadioCheck()) {
-        radioPaintProperty->UpdateRadioCheck(false);
-    }
     if (!radioPaintProperty->GetRadioCheckValue()) {
-        radioModifier_->InitOpacityScale(false);
         SetBuilderState();
     }
 }
@@ -122,7 +115,23 @@ void RadioPattern::OnModifyDone()
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
     if (!makeFunc_.has_value() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateIndicatorType();
+        auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();
+        if (!radioModifier_) {
+            radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+        }
+        if (radioPaintProperty && !radioPaintProperty->HasRadioCheck()) {
+            radioPaintProperty->UpdateRadioCheck(false);
+        }
+        if (radioPaintProperty && !radioPaintProperty->GetRadioCheckValue()) {
+            radioModifier_->InitOpacityScale(false);
+        }
+        auto callback = [weak = WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateIndicatorType();
+            }
+        };
+        pipeline->AddBuildFinishCallBack(callback);
     }
     UpdateState();
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();

@@ -83,7 +83,6 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontForegroudGradiantColor, FontForegroudGradiantColor);
 
     if (isSymbol) {
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
@@ -91,8 +90,8 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
+        textStyle.SetSymbolShadow(property->GetSymbolShadowValue(textTheme->GetTextStyle().GetSymbolShadow()));
+        textStyle.SetShaderStyle(property->GetShaderStyleValue(textTheme->GetTextStyle().GetShaderStyle()));
     }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
@@ -153,8 +152,6 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
             UPDATE_TEXT_STYLE(fontStyle, SymbolType, SetSymbolType);
-            UPDATE_TEXT_STYLE(fontStyle, SymbolShadow, SetSymbolShadow);
-            UPDATE_TEXT_STYLE(fontStyle, ShaderStyle, SetShaderStyle);
         }
     }
     if (textLineStyle) {

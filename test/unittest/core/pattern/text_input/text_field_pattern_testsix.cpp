@@ -498,4 +498,16 @@ HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword005, TestSize.Level0)
     layoutProperty_->UpdateTextContentType(TextContentType::PASSPORT_NUMBER);
     EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
 }
+
+/**
+ * @tc.name: IsTriggerAutoFillPassword006
+ * @tc.desc: test testInput text IsTriggerAutoFillPassword
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword006, TestSize.Level0)
+{
+    CreateTextField();
+    layoutProperty_->UpdateTextContentType(TextContentType::PROVINCE_ADDRESS);
+    EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
+}
 } // namespace OHOS::Ace::NG

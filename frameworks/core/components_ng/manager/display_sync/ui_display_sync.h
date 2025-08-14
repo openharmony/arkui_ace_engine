@@ -144,6 +144,22 @@ private:
     int32_t drawFPS_ = 0;
     std::unordered_map<int32_t, std::vector<int32_t>> refreshRateToFactorsMap_;
 };
+
+class ACE_FORCE_EXPORT UIXComponentDisplaySync : public UIDisplaySync {
+    DECLARE_ACE_TYPE(UIXComponentDisplaySync, UIDisplaySync);
+public:
+    UIXComponentDisplaySync() : UIDisplaySync(UIObjectType::DISPLAYSYNC_XCOMPONENT) {}
+    ~UIXComponentDisplaySync() noexcept override;
+
+    void NotifyXComponentExpectedFrameRate(const std::string& id);
+    void NotifyXComponentExpectedFrameRate(const std::string& id, int32_t preferred);
+    void NotifyXComponentExpectedFrameRate(const std::string& id,
+        bool isOnTree, const FrameRateRange& expectedFrameRate);
+
+private:
+    std::string lastId_;
+    std::optional<FrameRateRange> lastFrameRateRange_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_UI_DISPLAY_SYNC_H

@@ -15,26 +15,38 @@
 
 #define protected public
 #define private public
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <unistd.h>
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
-
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+namespace {
+    const std::string BUNDLE_NAME = "com.example.testImageLoader";
+    const int32_t TEST_SIZE = 100;
+    const std::string CACHE_FILE_PATH = "/data";
+}
 
-const std::string CACHE_FILE_PATH = "/data";
 class ImageLoaderTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() {}
     void TearDown() {}
 };
+
+void ImageLoaderTest::SetUpTestCase()
+{
+    Testing::g_imageDataSize = 0;
+}
+
+void ImageLoaderTest::TearDownTestCase()
+{
+    Testing::g_imageDataSize = 0;
+}
 
 /**
  * @tc.name: LoadDataFromCachedFile001
@@ -60,5 +72,48 @@ HWTEST_F(ImageLoaderTest, LoadDataFromCachedFile001, TestSize.Level1)
     ImageFileCache::GetInstance().SetImageCacheFilePath(cacheFilePath);
     imageFileCache = ImageLoader::LoadDataFromCachedFile(url);
     EXPECT_EQ(imageFileCache, nullptr);
+}
+
+/**
+ * @tc.name: LoadImageData001
+ * @tc.desc: Test for LoadImageData of SrcType::FILE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageLoaderTest, LoadImageData001, TestSize.Level1)
+{
+    std::string uri = "file:///data/storage/" + BUNDLE_NAME + "/test_file.png";
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetSrc(uri);
+    imageSourceInfo.srcType_ = SrcType::FILE;
+    NG::ImageDfxConfig imageDfxConfig;
+    imageSourceInfo.SetImageDfxConfig(imageDfxConfig);
+
+    Testing::g_imageDataSize = 0;
+    FileImageLoader loader;
+    NG::ImageLoadResultInfo errorInfo;
+    auto result = loader.LoadImageData(imageSourceInfo, errorInfo);
+    EXPECT_EQ(result, nullptr);
+
+    Testing::g_imageDataSize = TEST_SIZE;
+    result = loader.LoadImageData(imageSourceInfo, errorInfo);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: BuildImageData
+ * @tc.desc: Test for BuildImageData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageLoaderTest, BuildImageData, TestSize.Level1)
+{
+    auto rsData = std::make_shared<RSData>();
+    Testing::g_imageDataSize = 0;
+    FileImageLoader loader;
+    auto result = loader.BuildImageData(rsData);
+    EXPECT_EQ(result, nullptr);
+
+    Testing::g_imageDataSize = TEST_SIZE;
+    result = loader.BuildImageData(rsData);
+    EXPECT_NE(result, nullptr);
 }
 } // namespace OHOS::Ace

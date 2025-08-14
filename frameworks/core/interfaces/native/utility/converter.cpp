@@ -166,6 +166,7 @@ RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundle
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
@@ -815,7 +816,7 @@ template<>
 Color Convert(const Ark_Number& src)
 {
     uint32_t value = static_cast<uint32_t>(Convert<int>(src));
-    return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
+    return Color(ColorAlphaAdapt(value));
 }
 
 template<>
@@ -2125,15 +2126,16 @@ template<>
 BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
-    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        " handles invalid structure"
-    );
-    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
     dst.leftColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
     dst.rightColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    dst.leftColor = isRightToLeft? OptConvert<Color>(src.end) : OptConvert<Color>(src.start);
+    dst.rightColor = isRightToLeft? OptConvert<Color>(src.start) : OptConvert<Color>(src.end);
+
     return dst;
 }
 
@@ -2248,6 +2250,13 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    widthProperty.leftDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
+    widthProperty.rightDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
+
     return widthProperty;
 }
 
@@ -2505,6 +2514,7 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     auto timestamp = reinterpret_cast<int64_t>(src);
     time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&time);
+    CHECK_NULL_VOID(local);
     // tm_year is years since 1900
     // tm_mon from 0 to 11
     dst = PickerDate(local->tm_year + STD_TM_START_YEAR, local->tm_mon + 1, local->tm_mday);

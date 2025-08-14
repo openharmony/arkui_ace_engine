@@ -955,11 +955,13 @@ void PanRecognizer::UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& inf
         info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
         info->SetVelocity(panVelocity_.GetVelocity());
         info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
         info->SetSourceTool(lastTouchEvent_.sourceTool);
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);

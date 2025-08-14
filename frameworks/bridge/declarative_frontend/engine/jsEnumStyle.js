@@ -118,6 +118,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
 
+let PreviewDpiFollowStrategy;
+(function (PreviewDpiFollowStrategy) {
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
+  PreviewDpiFollowStrategy[PreviewDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
+})(PreviewDpiFollowStrategy || (PreviewDpiFollowStrategy = {}));
+
 let WindowModeFollowStrategy;
 (function (WindowModeFollowStrategy) {
   WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
@@ -1369,6 +1375,11 @@ let PlaybackSpeed;
   PlaybackSpeed.Speed_Forward_1_25_X = '1.25';
   PlaybackSpeed.Speed_Forward_1_75_X = '1.75';
   PlaybackSpeed.Speed_Forward_2_00_X = '2.00';
+  PlaybackSpeed.Speed_Forward_0_50_X = '0.50';
+  PlaybackSpeed.Speed_Forward_1_50_X = '1.50';
+  PlaybackSpeed.Speed_Forward_3_00_X = '3.00';
+  PlaybackSpeed.Speed_Forward_0_25_X = '0.25';
+  PlaybackSpeed.Speed_Forward_0_125_X = '0.125';
 })(PlaybackSpeed || (PlaybackSpeed = {}));
 
 let MixedMode;
@@ -1604,14 +1615,34 @@ class BounceSymbolEffect extends SymbolEffect {
 }
 
 class ReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
+  constructor(scope, replaceType) {
     super();
     this.type = 'ReplaceSymbolEffect';
     this.scope = scope;
+    this.replaceType_ = replaceType;
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
   }
   scope(value) {
     this.scope = value;
     return this;
+  }
+
+  set replaceType(value) {
+    this.replaceType_ = value;
+    this.type = 'ReplaceSymbolEffect';
+    if (this.replaceType_ === 1) {
+      this.type = 'QuickReplaceSymbolEffect';
+    } else if (this.replaceType_ === 2) {
+      this.type = 'DisableSymbolEffect';
+    }
+  }
+
+  get replaceType() {
+    return this.replaceType_;
   }
 }
 
@@ -1619,30 +1650,6 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = 'PulseSymbolEffect';
-  }
-}
-
-class DisableSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'DisableSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
-  }
-}
-
-class QuickReplaceSymbolEffect extends SymbolEffect {
-  constructor(scope) {
-    super();
-    this.type = 'QuickReplaceSymbolEffect';
-    this.scope = scope;
-  }
-  scope(value) {
-    this.scope = value;
-    return this;
   }
 }
 
@@ -4287,3 +4294,10 @@ let PdfLoadResult;
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_PASSWORD = 3] = 'PARSE_ERROR_PASSWORD';
   PdfLoadResult[PdfLoadResult.PARSE_ERROR_HANDLER = 4] = 'PARSE_ERROR_HANDLER';
 })(PdfLoadResult || (PdfLoadResult = {}));
+
+let ReplaceEffectType;
+(function (ReplaceEffectType) {
+  ReplaceEffectType[ReplaceEffectType.SEQUENTIAL = 0] = 'SEQUENTIAL';
+  ReplaceEffectType[ReplaceEffectType.CROSS_FADE = 1] = 'CROSS_FADE';
+  ReplaceEffectType[ReplaceEffectType.SLASH_OVERLAY = 2] = 'SLASH_OVERLAY';
+})(ReplaceEffectType || (ReplaceEffectType = {}));

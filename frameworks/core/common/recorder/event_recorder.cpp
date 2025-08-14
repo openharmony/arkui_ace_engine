@@ -22,6 +22,7 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::Recorder {
@@ -44,6 +45,13 @@ void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const
     auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(property);
     builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
+}
+
+std::string GetNavDstNameByNode(const RefPtr<NG::FrameNode>& host)
+{
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, "");
+    return context->GetCurrentPageNameCallback();
 }
 } // namespace
 
@@ -143,6 +151,7 @@ EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& nod
     if (!node) {
         return *this;
     }
+    ContainerScope scope(Container::CurrentIdSafely());
     if (EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_RECT)) {
         auto rect = node->GetTransformRectRelativeToWindow().ToBounds();
         params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
@@ -150,6 +159,7 @@ EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& nod
     params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
     params_->emplace("accessilityId", std::to_string(node->GetAccessibilityId()));
     SetPageUrl(GetPageUrlByNode(node));
+    SetNavDst(GetNavDstNameByNode(node));
     FillExtraTextIfNeed(eventType_, *this, node);
     auto parent = node->GetParent();
     if (parent) {
@@ -401,7 +411,6 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto params = builder.build();
     taskExecutor_->PostTask(
         [taskExecutor = taskExecutor_, params]() {
@@ -416,7 +425,6 @@ void EventRecorder::OnChange(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto params = builder.build();
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(EventType::CHANGE), std::move(params));
@@ -427,7 +435,6 @@ void EventRecorder::OnEvent(EventParamsBuilder&& builder)
     if (builder.GetValue(KEY_PAGE).empty()) {
         builder.SetPageUrl(GetPageUrl());
     }
-    builder.SetNavDst(navDstName_);
     auto eventType = builder.GetEventType();
     auto params = builder.build();
     EventController::Get().NotifyEvent(builder.GetEventCategory(), static_cast<int32_t>(eventType), std::move(params));

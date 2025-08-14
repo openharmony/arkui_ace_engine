@@ -545,6 +545,11 @@ public:
         TextPattern::OnAttachToMainTree();
     }
 
+    void OnDetachFromMainTree() override
+    {
+        TextPattern::OnDetachFromMainTree();
+    }
+    
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
@@ -912,6 +917,7 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
+    bool CheckAIPreviewMenuEnable() override;
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,

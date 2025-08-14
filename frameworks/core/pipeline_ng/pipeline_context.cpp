@@ -54,6 +54,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
@@ -83,7 +84,7 @@ constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
 constexpr int32_t PARAM_NUM = 2;
-constexpr int32_t MAX_MISS_COUNT = 3;
+constexpr int64_t MAX_MISS_COUNT = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
@@ -801,6 +802,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
+    taskScheduler_->FlushAfterModifierTask();
     // the application is in the background and the dark and light colors are switched.
     if (!onShow_ && backgroundColorModeUpdated_) {
         backgroundColorModeUpdated_ = false;
@@ -3773,7 +3775,7 @@ void PipelineContext::ConsumeTouchEvents(
     bool needInterpolation = true;
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
 
-    int32_t inputIndex = touchEvents.size() - 1;
+    int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
         idToTouchPoints.emplace(scalePoint.id, scalePoint);
@@ -3823,7 +3825,7 @@ void PipelineContext::AccelerateConsumeTouchEvents(
     std::map<int32_t, int32_t> timestampToIds;
     std::unordered_set<int32_t> ids;
 
-    int32_t inputIndex = touchEvents.size() - 1;
+    int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     // consume touchEvents and generate idToTouchPoints.
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = iter->CreateScalePoint(GetViewScale());
@@ -5293,6 +5295,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     }
 
     TriggerIdleCallback(deadline);
+    UiNodeGc::ReleaseNodeRawMemory(deadline, taskExecutor_);
 }
 
 void PipelineContext::Finish(bool /* autoFinish */) const
@@ -5316,6 +5319,11 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
+}
+
+void PipelineContext::AddAfterModifierTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddAfterModifierTask(std::move(task));
 }
 
 void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
@@ -5599,6 +5607,7 @@ void PipelineContext::RestoreDefault(int32_t windowId, MouseStyleChangeReason re
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
     mouseStyleManager->SetUserSetCursor(false);
+    eventManager_->FlushCursorStyleRequests();
 }
 
 void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& option)
@@ -6339,6 +6348,11 @@ bool PipelineContext::CheckThreadSafe()
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
+    static constexpr int64_t LARGE_TIME = INT64_MAX >> 2;
+    if (static_cast<int64_t>(nanoTimestamp) > LARGE_TIME || period > LARGE_TIME) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "time is too huge, nanoTime:%{public}" PRIu64 ", period:%{public}" PRId64,
+            nanoTimestamp, period);
+    }
     if (period > 0 && recvTime_ > static_cast<int64_t>(nanoTimestamp) + MAX_MISS_COUNT * period) {
         return static_cast<uint64_t>(recvTime_ - ((recvTime_ - static_cast<int64_t>(nanoTimestamp)) % period));
     }

@@ -2749,6 +2749,44 @@ HWTEST_F(WebPatternTestNg, WindowDrag_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WindowDragResize_001
+ * @tc.desc: WindowDragResize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WindowDragResize_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("8");
+    auto webInfoType = webPattern->GetWebInfoType();
+    EXPECT_EQ(webInfoType, WebInfoType::TYPE_2IN1);
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
+    webPattern->isAttachedToMainTree_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->renderContextForSurface_ = RenderContext::Create();
+    webPattern->dragResizeTimerCount_ = 0;
+    webPattern->dragResizeTimerFlag_ = false;
+    webPattern->DragResizeNoMoveTimer();
+    webPattern->dragResizeTimerFlag_ = true;
+    webPattern->DragResizeNoMoveTimer();
+    int32_t width = 2500;
+    int32_t height = 1000;
+    webPattern->dragWindowFlag_ = true;
+    webPattern->WindowDrag(width, height);
+#endif
+}
+
+/**
  * @tc.name: WindowMaximize_001
  * @tc.desc: WindowMaximize.
  * @tc.type: FUNC

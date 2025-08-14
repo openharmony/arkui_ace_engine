@@ -476,7 +476,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     int32_t windowId = 5;
     context->SetRealHostWindowId(windowId);
     std::string bundleName = "com.example.myapplication";
-    MockContainer::Current()->SetBundleName(bundleName);
+    AceApplicationInfo::GetInstance().SetPackageName(bundleName);
 
     int64_t elementId = -1;
     int32_t requestId = 2;

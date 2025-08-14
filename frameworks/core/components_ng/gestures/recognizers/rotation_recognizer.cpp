@@ -398,10 +398,12 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.SetSourceTool(touchPoint.sourceTool);
             info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
             info.CopyConvertInfoFrom(touchPoint.convertInfo);
+            info.SetTargetDisplayId(touchPoint.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         info.SetInputEventType(inputEventType_);
@@ -468,6 +470,11 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     info->SetRawInputEvent(lastPointEvent_);
     info->SetRawInputDeviceId(deviceId_);
     info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+    } else {
+        info->SetTargetDisplayId(touchPoint.targetDisplayId);
+    }
     if (gestureRecognizerJudgeFunc) {
         return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }

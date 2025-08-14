@@ -58,6 +58,7 @@
 #include "test/mock/core/render/mock_rosen_render_context.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
+#include "transaction/rs_transaction.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -213,6 +214,10 @@ HWTEST_F(SessionWrapperImplTestNg, SessionWrapperImplTestNg003, TestSize.Level1)
 
     sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::ROTATION, rsTransaction);
     ASSERT_EQ(sessionWrapper->transaction_.lock(), nullptr);
+
+    rsTransaction = std::make_shared<Rosen::RSTransaction>();
+    sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::SNAPSHOT_ROTATION, rsTransaction);
+    ASSERT_EQ(sessionWrapper->transaction_.lock(), rsTransaction);
 #endif
 }
 

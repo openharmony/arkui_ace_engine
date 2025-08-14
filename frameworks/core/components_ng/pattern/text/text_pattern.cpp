@@ -69,6 +69,7 @@ constexpr Dimension CLICK_THRESHOLD = 5.0_vp;
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr int MAX_SELECTED_AI_ENTITY = 1;
 constexpr int32_t PREVIEW_MENU_DELAY = 600;
+constexpr int32_t DRAG_NODE_HIDE = 300;
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -200,6 +201,8 @@ void TextPattern::CloseSelectOverlay()
 
 void TextPattern::CloseSelectOverlay(bool animation)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, CloseSelectOverlay, animation);  // call CloseSelectOverlayMultiThread() by multi thread
     // Deprecated use selectOverlay_ instead.
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close(animation);
@@ -294,8 +297,7 @@ bool TextPattern::CanAIEntityDrag()
 
 bool TextPattern::CheckAIPreviewMenuEnable()
 {
-    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_
-        && copyOption_ != CopyOptions::None
+    return GetDataDetectorAdapter() && dataDetectorAdapter_->enablePreviewMenu_
         && NeedShowAIDetect()
         && IsShowHandle();
 }
@@ -351,6 +353,21 @@ void TextPattern::InitAiSelection(const Offset& globalOffset)
 bool TextPattern::IsAiSelected()
 {
     return textSelector_.aiStart && textSelector_.aiEnd;
+}
+
+bool TextPattern::IsPreviewMenuShow()
+{
+    CHECK_NULL_RETURN(previewController_, false);
+    return previewController_->IsPreviewMenuShow();
+}
+
+void TextPattern::DragNodeDetachFromParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->DragNodeDetachFromParent();
 }
 
 void TextPattern::ShowAIEntityMenuForCancel()
@@ -606,6 +623,7 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
         CHECK_NULL_VOID(dragNode);
         auto parent = dragNode->GetParent();
         CHECK_NULL_VOID(parent);
+        pattern->PreviewDragNodeHideAnimation();
         previewController->BindContextMenu(dragNode);
     };
     auto context = host->GetContext();
@@ -614,6 +632,22 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
         task, TaskExecutor::TaskType::UI, PREVIEW_MENU_DELAY, "ArkShowAIEntityPreviewMenuTimer");
+}
+
+void TextPattern::PreviewDragNodeHideAnimation()
+{
+    CHECK_NULL_VOID(dragNode_);
+    auto renderContext = dragNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(1.0f);
+    AnimationOption option;
+    option.SetDuration(DRAG_NODE_HIDE);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(
+        option, [renderContext, mainId = Container::CurrentIdSafelyWithCheck()]() {
+            ContainerScope scope(mainId);
+            renderContext->UpdateOpacity(0.0);
+        });
 }
 
 RefPtr<FrameNode> TextPattern::CreateAIEntityMenu()
@@ -1238,6 +1272,8 @@ void TextPattern::HiddenMenu()
 void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     auto host = GetHost();
+    // call SetTextSelectionMultiThread() by multi thread
+    FREE_NODE_CHECK(host, SetTextSelection, selectionStart, selectionEnd);
     CHECK_NULL_VOID(host);
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE("TextPattern::SetTextSelection[id:%d][selectionStart:%d][selectionStart:%d]",
@@ -2542,10 +2578,6 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CheckPressedSpanPosition(textOffset);
     leftMousePressed_ = true;
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
-        blockPress_ = true;
-        return;
-    }
     mouseStatus_ = MouseStatus::PRESSED;
     lastLeftMouseClickStyle_ = currentMouseStyle_;
     CHECK_NULL_VOID(pManager_);
@@ -3755,7 +3787,6 @@ void TextPattern::LogForFormRender(const std::string& logTag)
 void TextPattern::OnModifyDone()
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -5147,13 +5178,15 @@ void TextPattern::DumpTextEngineInfo()
     dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
     dumpLog.AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
     if (pManager_) {
-        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :"));
+        dumpLog.AddDesc(std::string("from TextEngine paragraphs_ info :").append(pManager_->GetDumpInfo()));
         auto paragraphs = pManager_->GetParagraphs();
         if (paragraphs.empty()) {
             dumpLog.AddDesc(std::string("paragraphs is empty!"));
             return;
         }
-        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines())));
+        dumpLog.AddDesc(std::string("DidExceedMaxLines:").append(std::to_string(pManager_->DidExceedMaxLines()))
+                        .append(" DidExceedMaxLinesInner:")
+                        .append(std::to_string(pManager_->DidExceedMaxLinesInner())));
         dumpLog.AddDesc(std::string("GetTextWidth:")
                             .append(std::to_string(pManager_->GetTextWidth()))
                             .append(" GetHeight:")
@@ -6723,5 +6756,4 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
-
 } // namespace OHOS::Ace::NG

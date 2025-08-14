@@ -26,6 +26,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_scope.h"
+#include "core/common/display_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Kit {
@@ -180,5 +181,73 @@ sptr<IRemoteObject> UIContextImpl::GetToken()
     CHECK_NULL_RETURN(container, nullptr);
     return container->GetToken();
 }
+
+RefPtr<DisplayInfo> UIContextImpl::GetDisplayInfo()
+{
+    CHECK_NULL_RETURN(context_, nullptr);
+    ContainerScope scope(context_->GetInstanceId());
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetDisplayInfo();
+}
+
+WindowMode UIContextImpl::GetWindowMode()
+{
+    CHECK_NULL_RETURN(context_, WindowMode::WINDOW_MODE_UNDEFINED);
+    auto windowManager = context_->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, WindowMode::WINDOW_MODE_UNDEFINED);
+    return windowManager->GetWindowMode();
+}
+bool UIContextImpl::GetIsMidScene()
+{
+    CHECK_NULL_RETURN(context_, false);
+    auto windowManager = context_->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    bool isMidScene = false;
+    windowManager->GetIsMidScene(isMidScene);
+    return isMidScene;
+}
+bool UIContextImpl::IsAccessibilityEnabled()
+{
+    return AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+}
+
+int32_t UIContextImpl::RegisterSurfaceChangedCallback(
+    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+{
+    CHECK_NULL_RETURN(context_, 0);
+    return context_->RegisterSurfaceChangedCallback(std::move(callback));
+}
+
+void UIContextImpl::UnregisterSurfaceChangedCallback(int32_t callbackId)
+{
+    CHECK_NULL_VOID(context_);
+    context_->UnregisterSurfaceChangedCallback(callbackId);
+}
+
+int32_t UIContextImpl::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+{
+    CHECK_NULL_RETURN(context_, 0);
+    return context_->RegisterFoldStatusChangedCallback(std::move(callback));
+}
+
+void UIContextImpl::UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+{
+    CHECK_NULL_VOID(context_);
+    context_->UnRegisterFoldStatusChangedCallback(callbackId);
+}
+
+int32_t UIContextImpl::RegisterRotationEndCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_RETURN(context_, 0);
+    return context_->RegisterRotationEndCallback(std::move(callback));
+}
+
+void UIContextImpl::UnregisterRotationEndCallback(int32_t callbackId)
+{
+    CHECK_NULL_VOID(context_);
+    context_->UnregisterRotationEndCallback(callbackId);
+}
+
 
 } // namespace OHOS::Ace::Kit

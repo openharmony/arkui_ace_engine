@@ -710,17 +710,8 @@ void HandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [ctx = asyncCtx, context = pipelineContext]() {
-            context->OnDragEvent({ ctx->dragPointerEvent.displayX, ctx->dragPointerEvent.displayY },
-                DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
-            NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
-                { ctx->dragPointerEvent.displayX, ctx->dragPointerEvent.displayY }, ctx->extraParams,
-                ctx->dragPointerEvent.pointerId, ctx->instanceId);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
+    pipelineContext->OnDragEvent({ asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY },
+        DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
 }
 
 std::shared_ptr<Media::PixelMap> CopyMediaPixelMap(const RefPtr<PixelMap>& pixelMap)

@@ -1342,6 +1342,60 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestMirrorOffset, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestGenIgnoreOpts
+ * @tc.desc: Test GenIgnoreOpts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestGenIgnoreOpts, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    IgnoreLayoutSafeAreaOpts expectedRes = {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE
+    };
+    EXPECT_EQ(layoutProperty->GenIgnoreOpts(), expectedRes);
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    expectedRes = {
+        .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
+    };
+    EXPECT_EQ(layoutProperty->GenIgnoreOpts(), expectedRes);
+}
+
+/**
+ * @tc.name: ExpandConstraintWithSafeAreaTest001
+ * @tc.desc: Test ExpandConstraintWithSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, ExpandConstraintWithSafeAreaTest001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), false);
+    layoutProperty->SetHost(frameNodeHost);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    frameNodeHost->SetIgnoreLayoutProcess(true);
+    frameNodeHost->SetRootMeasureNode(true);
+    frameNodeHost->SetEscapeDelayForIgnore(true);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    auto parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    frameNodeHost->MountToParent(parent);
+    layoutProperty->ExpandConstraintWithSafeArea();
+
+    EXPECT_EQ(frameNodeHost->GetIgnoreLayoutProcess(), true);
+}
+
+/**
  * @tc.name: TestConvertSafeAreaPadding
  * @tc.desc: Test ConvertWithResidueToPaddingPropertyF
  * @tc.type: FUNC

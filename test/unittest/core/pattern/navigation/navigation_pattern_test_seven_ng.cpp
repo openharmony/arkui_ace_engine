@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -93,6 +94,857 @@ void NavigationPatternTestSevenNg::MockPipelineContextGetTheme()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
+/**
+ * @tc.name: IsHideNavBarInForceSplitModeNeeded001
+ * @tc.desc: Branch: if (primaryNodes_.empty()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsHideNavBarInForceSplitModeNeeded001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->primaryNodes_.clear();
+    property->UpdateHideNavBar(true);
+    auto hide = pattern->IsHideNavBarInForceSplitModeNeeded();
+    EXPECT_TRUE(hide);
+
+    pattern->primaryNodes_.clear();
+    property->UpdateHideNavBar(false);
+    hide = pattern->IsHideNavBarInForceSplitModeNeeded();
+    EXPECT_FALSE(hide);
+}
+
+/**
+ * @tc.name: IsHideNavBarInForceSplitModeNeeded002
+ * @tc.desc: Branch: if (primaryNodes_.empty()) { => false
+ *                   if (node->GetNavDestinationMode() == NavDestinationMode::STANDARD) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsHideNavBarInForceSplitModeNeeded002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+
+    pattern->primaryNodes_.clear();
+    pattern->primaryNodes_.push_back(WeakPtr(dest));
+    dest->mode_ = NavDestinationMode::STANDARD;
+    auto hide = pattern->IsHideNavBarInForceSplitModeNeeded();
+    EXPECT_TRUE(hide);
+}
+
+/**
+ * @tc.name: IsHideNavBarInForceSplitModeNeeded003
+ * @tc.desc: Branch: if (primaryNodes_.empty()) { => false
+ *                   if (node->GetNavDestinationMode() == NavDestinationMode::STANDARD) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsHideNavBarInForceSplitModeNeeded003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+
+    pattern->primaryNodes_.clear();
+    pattern->primaryNodes_.push_back(WeakPtr(dest));
+    dest->mode_ = NavDestinationMode::DIALOG;
+    auto hide = pattern->IsHideNavBarInForceSplitModeNeeded();
+    EXPECT_FALSE(hide);
+}
+
+/**
+ * @tc.name: IsNavBarValid001
+ * @tc.desc: Branch: return !property->GetHideNavBarValue(false) &&
+ *                      (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
+ *                      (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)); => false
+ *                   !property->GetHideNavBarValue(false) => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsNavBarValid001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    property->UpdateHideNavBar(true);
+    auto isValid = pattern->IsNavBarValid();
+    EXPECT_FALSE(isValid);
+}
+
+/**
+ * @tc.name: IsNavBarValid002
+ * @tc.desc: Branch: return !property->GetHideNavBarValue(false) &&
+ *                      (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
+ *                      (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)); => false
+ *                   !property->GetHideNavBarValue(false) => true
+ *                   (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsNavBarValid002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    property->UpdateHideNavBar(false);
+    pattern->userSetNavBarWidthFlag_ = true;
+    pattern->initNavBarWidthValue_ = 0.0_vp;
+    auto isValid = pattern->IsNavBarValid();
+    EXPECT_FALSE(isValid);
+}
+
+/**
+ * @tc.name: IsNavBarValid003
+ * @tc.desc: Branch: return !property->GetHideNavBarValue(false) &&
+ *                      (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
+ *                      (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)); => false
+ *                   !property->GetHideNavBarValue(false) => true
+ *                   (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) => true
+ *                   (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)) => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsNavBarValid003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    property->UpdateHideNavBar(false);
+    pattern->userSetNavBarWidthFlag_ = false;
+    constexpr  Dimension ZERO_WIDTH = 0.0_vp;
+    property->UpdateMaxNavBarWidth(ZERO_WIDTH);
+    auto isValid = pattern->IsNavBarValid();
+    EXPECT_FALSE(isValid);
+}
+
+/**
+ * @tc.name: IsNavBarValid004
+ * @tc.desc: Branch: return !property->GetHideNavBarValue(false) &&
+ *                      (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
+ *                      (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)); => true
+ *                   !property->GetHideNavBarValue(false) => true
+ *                   (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) => true
+ *                   (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0)) => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, IsNavBarValid004, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    property->UpdateHideNavBar(false);
+    pattern->userSetNavBarWidthFlag_ = false;
+    constexpr  Dimension TEST_WIDTH = 500.0_vp;
+    property->UpdateMaxNavBarWidth(TEST_WIDTH);
+    auto isValid = pattern->IsNavBarValid();
+    EXPECT_TRUE(isValid);
+}
+
+/**
+ * @tc.name: ReplaceNodeWithProxyNodeIfNeeded001
+ * @tc.desc: Branch: if (!proxyNode) { => false
+ *                   if (property) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto destProperty = dest->GetLayoutProperty();
+    ASSERT_NE(destProperty, nullptr);
+    destProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
+    EXPECT_EQ(destProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: ReplaceNodeWithProxyNodeIfNeeded002
+ * @tc.desc: Branch: if (!proxyNode) { => false
+ *                   if (property) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto destProperty = dest->GetLayoutProperty();
+    ASSERT_NE(destProperty, nullptr);
+    dest->layoutProperty_ = nullptr;
+    destProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
+    EXPECT_EQ(destProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: ReplaceNodeWithProxyNodeIfNeeded003
+ * @tc.desc: Branch: if (!proxyNode) { => false
+ *                   if (property) { => true
+ *                   if (childIndex < 0) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    dest->SetIndex(1);
+    auto proxyNode = dest->GetOrCreateProxyNode();
+    ASSERT_NE(proxyNode, nullptr);
+    proxyNode->SetIndex(2, false);
+
+    pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
+    EXPECT_EQ(proxyNode->GetIndex(), 2);
+}
+
+/**
+ * @tc.name: ReplaceNodeWithProxyNodeIfNeeded004
+ * @tc.desc: Branch: if (!proxyNode) { => false
+ *                   if (property) { => true
+ *                   if (childIndex < 0) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded004, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    navContentNode->AddChild(dest);
+    dest->SetIndex(1);
+    auto proxyNode = dest->GetOrCreateProxyNode();
+    ASSERT_NE(proxyNode, nullptr);
+    proxyNode->SetIndex(2, false);
+
+    pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
+    EXPECT_EQ(proxyNode->GetIndex(), 1);
+}
+
+/**
+ * @tc.name: RestoreNodeFromProxyNodeIfNeeded001
+ * @tc.desc: Branch: if (childIndex < 0) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, RestoreNodeFromProxyNodeIfNeeded001, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    dest->SetIndex(1);
+    auto proxyNode = dest->GetOrCreateProxyNode();
+    ASSERT_NE(proxyNode, nullptr);
+    proxyNode->SetIndex(2, false);
+
+    pattern->RestoreNodeFromProxyNodeIfNeeded(primaryContentNode, navContentNode, dest);
+    EXPECT_EQ(dest->GetIndex(), 1);
+}
+
+/**
+ * @tc.name: RestoreNodeFromProxyNodeIfNeeded002
+ * @tc.desc: Branch: if (childIndex < 0) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, RestoreNodeFromProxyNodeIfNeeded002, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    dest->SetIndex(1);
+    auto proxyNode = dest->GetOrCreateProxyNode();
+    ASSERT_NE(proxyNode, nullptr);
+    proxyNode->SetIndex(2, false);
+    navContentNode->AddChild(proxyNode);
+    primaryContentNode->AddChild(dest);
+
+    pattern->RestoreNodeFromProxyNodeIfNeeded(primaryContentNode, navContentNode, dest);
+    EXPECT_EQ(dest->GetIndex(), 2);
+    const auto& childs = navContentNode->GetChildren();
+    ASSERT_EQ(childs.size(), 1);
+    auto navContentFirstChildNode = *childs.begin();
+    EXPECT_EQ(navContentFirstChildNode, dest);
+}
+
+/**
+ * @tc.name: ReorderPrimaryNodes001
+ * @tc.desc: Branch: if (childIndex < 0) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReorderPrimaryNodes001, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::vector<WeakPtr<NavDestinationGroupNode>> nodes;
+    nodes.push_back(dest);
+
+    auto& primaryChilds = primaryContentNode->GetChildren();
+    EXPECT_TRUE(primaryChilds.empty());
+    pattern->ReorderPrimaryNodes(primaryContentNode, nodes);
+    EXPECT_EQ(primaryChilds.size(), 1);
+}
+
+/**
+ * @tc.name: ReorderPrimaryNodes002
+ * @tc.desc: Branch: } else if (slot != childIndex) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReorderPrimaryNodes002, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::vector<WeakPtr<NavDestinationGroupNode>> nodes;
+    nodes.push_back(dest1);
+    nodes.push_back(dest2);
+    primaryContentNode->AddChild(dest2);
+    primaryContentNode->AddChildAfter(dest1, dest2);
+
+    pattern->ReorderPrimaryNodes(primaryContentNode, nodes);
+    const auto& childs = primaryContentNode->GetChildren();
+    EXPECT_EQ(childs.size(), 2);
+    auto it = childs.begin();
+    EXPECT_EQ(*it, dest1);
+    it++;
+    EXPECT_EQ(*it, dest2);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Branch: if (pattern->IsForceSplitSuccess()) { => true
+ *                   if (pattern->IsHideNavBarInForceSplitModeNeeded()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    if (!context->taskExecutor_) {
+        context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    }
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    pattern->primaryNodes_.clear();
+    pattern->forceSplitSuccess_ = true;
+    navProperty->UpdateHideNavBar(true);
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, config);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Branch: if (pattern->IsForceSplitSuccess()) { => true
+ *                   if (pattern->IsHideNavBarInForceSplitModeNeeded()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    if (!context->taskExecutor_) {
+        context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    }
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    pattern->primaryNodes_.clear();
+    pattern->forceSplitSuccess_ = true;
+    navProperty->UpdateHideNavBar(false);
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, config);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: AdjustNodeForNonDestForceSplit001
+ * @tc.desc: Branch: if (forceSplitUseNavBar_) { => true
+ *                   if (forceSplitSuccess_ && stackNodePairs.empty()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForNonDestForceSplit001, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    ASSERT_NE(navContentProperty, nullptr);
+    auto phNode = AceType::DynamicCast<FrameNode>(navNode->GetForceSplitPlaceHolderNode());
+    ASSERT_NE(phNode, nullptr);
+    auto phProperty = phNode->GetLayoutProperty();
+    ASSERT_NE(phProperty, nullptr);
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    phProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
+    pattern->forceSplitUseNavBar_ = true;
+    pattern->forceSplitSuccess_ = true;
+    pattern->AdjustNodeForNonDestForceSplit(false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: AdjustNodeForNonDestForceSplit002
+ * @tc.desc: Branch: if (forceSplitUseNavBar_) { => false
+ *                   if (forceSplitSuccess_ && stackNodePairs.empty()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForNonDestForceSplit002, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    auto& pathList = stack->GetAllNavDestinationNodes();
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    ASSERT_NE(navContentProperty, nullptr);
+    auto phNode = AceType::DynamicCast<FrameNode>(navNode->GetForceSplitPlaceHolderNode());
+    ASSERT_NE(phNode, nullptr);
+    auto phProperty = phNode->GetLayoutProperty();
+    ASSERT_NE(phProperty, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    pattern->forceSplitUseNavBar_ = false;
+    navProperty->UpdateHideNavBar(true);
+
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+    phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    // forceSplitSuccess_ => false stackNodePairs.empty() => true
+    pattern->forceSplitSuccess_ = false;
+    pathList.clear();
+    pattern->AdjustNodeForNonDestForceSplit(false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+
+    phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    // forceSplitSuccess_ => true stackNodePairs.empty() => false
+    pattern->forceSplitSuccess_ = true;
+    pathList.push_back(testPair);
+    pattern->AdjustNodeForNonDestForceSplit(false);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+
+    phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    // forceSplitSuccess_ => false stackNodePairs.empty() => false
+    pattern->forceSplitSuccess_ = false;
+    pathList.clear();
+    pathList.push_back(testPair);
+    pattern->AdjustNodeForNonDestForceSplit(false);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: AdjustNodeForDestForceSplit001
+ * @tc.desc: Branch: if (destNodes.empty()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForDestForceSplit001, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    auto& pathList = stack->GetAllNavDestinationNodes();
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    ASSERT_NE(navContentProperty, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto primaryProperty = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(primaryProperty, nullptr);
+    auto phNode = AceType::DynamicCast<FrameNode>(navNode->GetForceSplitPlaceHolderNode());
+    ASSERT_NE(phNode, nullptr);
+    auto phProperty = phNode->GetLayoutProperty();
+    ASSERT_NE(phProperty, nullptr);
+    navProperty->UpdateHideNavBar(true);
+
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+    phProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    primaryProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
+    pathList.clear();
+    pattern->AdjustNodeForDestForceSplit(false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(primaryProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: AdjustNodeForDestForceSplit002
+ * @tc.desc: Branch: if (destNodes.empty()) { => false
+ *                   if (primaryNodes_.empty()) { => false
+ *                   if (primaryNodes_.empty() || primaryNodes_.back().Upgrade() != destNodes.back()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForDestForceSplit002, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    auto& pathList = stack->GetAllNavDestinationNodes();
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    ASSERT_NE(navContentProperty, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto primaryProperty = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(primaryProperty, nullptr);
+    auto phNode = AceType::DynamicCast<FrameNode>(navNode->GetForceSplitPlaceHolderNode());
+    ASSERT_NE(phNode, nullptr);
+    auto phProperty = phNode->GetLayoutProperty();
+    ASSERT_NE(phProperty, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    pathList.push_back(testPair1);
+    pathList.push_back(testPair2);
+    pattern->forceSplitSuccess_ = true;
+    pattern->forceSplitUseNavBar_ = false;
+    pattern->homeNode_ = nullptr;
+    navProperty->UpdateHideNavBar(true);
+
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+    primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    phProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
+    pattern->AdjustNodeForDestForceSplit(false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(primaryProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: AdjustNodeForDestForceSplit003
+ * @tc.desc: Branch: if (destNodes.empty()) { => false
+ *                   if (primaryNodes_.empty()) { => false
+ *                   if (primaryNodes_.empty() || primaryNodes_.back().Upgrade() != destNodes.back()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, AdjustNodeForDestForceSplit003, TestSize.Level1)
+{
+    SetForceSplitEnabled(true);
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navProperty = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navProperty, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    auto& pathList = stack->GetAllNavDestinationNodes();
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    ASSERT_NE(navContentProperty, nullptr);
+    auto primaryContentNode = AceType::DynamicCast<FrameNode>(navNode->GetPrimaryContentNode());
+    ASSERT_NE(primaryContentNode, nullptr);
+    auto primaryProperty = primaryContentNode->GetLayoutProperty();
+    ASSERT_NE(primaryProperty, nullptr);
+    auto phNode = AceType::DynamicCast<FrameNode>(navNode->GetForceSplitPlaceHolderNode());
+    ASSERT_NE(phNode, nullptr);
+    auto phProperty = phNode->GetLayoutProperty();
+    ASSERT_NE(phProperty, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    pathList.push_back(testPair1);
+    pathList.push_back(testPair2);
+    pattern->forceSplitSuccess_ = true;
+    pattern->forceSplitUseNavBar_ = false;
+    pattern->navBarIsHome_ = false;
+    pattern->homeNode_ = WeakPtr(dest1);
+    navProperty->UpdateHideNavBar(false);
+
+    navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+    primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    pattern->AdjustNodeForDestForceSplit(false);
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(primaryProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(phProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(navContentProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
 }
 
 /**
@@ -1600,5 +2452,154 @@ HWTEST_F(NavigationPatternTestSevenNg, TitleBarNode_MarkIsInitialTitle001, TestS
 
     titleBarNode->MarkIsInitialTitle(false);
     EXPECT_FALSE(pattern->isInitialTitle_);
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest001
+ * @tc.desc: if navBar -> navDestination and mode has changed from stack to split.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_TRUE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest002
+ * @tc.desc: if navBar -> navDestination and mode has changed from split to stack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_FALSE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest003
+ * @tc.desc: if navBar -> navDestination and mode NOT changed(SPLIT).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_TRUE(homeNode->IsVisible());
+}
+
+/**
+ * @tc.name: TransitionWithOutAnimationTest004
+ * @tc.desc: if navBar -> navDestination and mode NOT changed(STACK).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, TransitionWithOutAnimationTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation, and check the homeNode visibility.
+     */
+    mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest"), false);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    auto homeNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+    ASSERT_TRUE(homeNode->IsVisible());
+    /**
+     * @tc.steps: step3. mock layout property navigationMode, do stack sync and check the homeNode visibility.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    auto layoutProperty = navigationPattern->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    navigationPattern->SyncWithJsStackIfNeeded();
+    ASSERT_FALSE(homeNode->IsVisible());
 }
 } // namespace OHOS::Ace::NG

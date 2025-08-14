@@ -166,7 +166,7 @@ abstract class ViewBuildNodeBase {
         this.builderNodeWeakrefMap_.delete(elmtId);
     }
     /**
-     * Clears a child BuilderNode from this view
+     * Clears all child BuilderNodes from this view
      */
     public clearChildBuilderNode(): void {
         this.builderNodeWeakrefMap_.clear();
@@ -250,7 +250,7 @@ abstract class ViewBuildNodeBase {
             return;
         }
         if (this.isView_ || (!this.isView_ && Utils.isApiVersionEQAbove(16))) {
-            ViewBuildNodeBase.arkThemeScopeManager?.onIfElseBranchUpdateEnter()
+            ViewBuildNodeBase.arkThemeScopeManager?.onIfElseBranchUpdateEnter();
         }
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
@@ -277,11 +277,11 @@ abstract class ViewBuildNodeBase {
         branchfunc();
         this.ifElseBranchUpdateFunctionDirtyRetaken();
         if (this.isView_ || (!this.isView_ && Utils.isApiVersionEQAbove(16))) {
-            ViewBuildNodeBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds)
+            ViewBuildNodeBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds);
         }
     }
     public static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void {
-        ViewBuildNodeBase.arkThemeScopeManager = mgr
+        ViewBuildNodeBase.arkThemeScopeManager = mgr;
     }
     public onWillApplyThemeInternally(): void {
         const theme = ViewBuildNodeBase.arkThemeScopeManager?.getFinalTheme(this);

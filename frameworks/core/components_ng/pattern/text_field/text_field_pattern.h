@@ -245,6 +245,13 @@ struct ContentScroller {
     }
 };
 
+struct MoveCaretToContentRectData {
+    int32_t index = 0;
+    TextAffinity textAffinity = TextAffinity::UPSTREAM;
+    bool isEditorValueChanged = true;
+    bool moveContent = true;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -338,9 +345,7 @@ public:
     }
 
     void OnModifyDone() override;
-    void OnModifyDoneMultiThread();
-    void OnModifyDoneMultiThreadPart();
-    void OnModifyDoneMultiThreadAddition();
+    void MultiThreadDelayedExecution();
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
@@ -2038,6 +2043,7 @@ private:
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
     Offset GetCaretClickLocalOffset(const Offset& offset);
+    void MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value);
     bool ShouldSkipUpdateParagraph();
     void UpdateParagraphForDragNode(bool skipUpdate);
 
@@ -2273,6 +2279,8 @@ private:
     bool setSelectionFlagMultiThread_ = false;
     bool setCustomKeyboardWithNodeMultiThread_ = false;
     RefPtr<UINode> setCustomKeyboardWithNodeMultiThreadValue_;
+    bool moveCaretToContentRectMultiThread_ = false;
+    MoveCaretToContentRectData moveCaretToContentRectMultiThreadValue_;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

@@ -672,6 +672,10 @@ void SheetObject::BeforeCreateLayoutWrapper()
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollLayoutProperty);
     scrollLayoutProperty->ResetSafeAreaPadding();
+
+    auto scrollablePattern = scrollNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetNeedFullSafeArea(false);
 }
 
 SheetKeyboardAvoidMode SheetObject::GetAvoidKeyboardModeByDefault() const

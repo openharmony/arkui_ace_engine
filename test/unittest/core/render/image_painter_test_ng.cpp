@@ -802,6 +802,19 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize002, TestSiz
 }
 
 /**
+ * @tc.name: ImagePainterTestNg_TestDrawingClamp
+ * @tc.desc: Test cast to DrawingClamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_TestDrawingClamp, TestSize.Level1)
+{
+    RSClamp rsClamp = Testing::TestingClamp::NO_CLAMP;
+    EXPECT_EQ(rsClamp, Testing::TestingClamp::NO_CLAMP);
+    rsClamp = Testing::TestingClamp::YES_CLAMP;
+    EXPECT_EQ(rsClamp, Testing::TestingClamp::YES_CLAMP);
+}
+
+/**
  * @tc.name: ImagePainterTestNg_DrawImageWithRepeat12
  * @tc.desc: Test cast to CirclePainterTestNg
  * @tc.type: FUNC

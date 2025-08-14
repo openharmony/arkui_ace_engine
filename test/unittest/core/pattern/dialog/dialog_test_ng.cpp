@@ -2131,7 +2131,8 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest034, TestSize.Level1)
     MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
     AceEngine::Get().AddContainer(0, containerOne);
     AceEngine::Get().AddContainer(1, containerTwo);
+    dialogLayoutAlgorithm.expandDisplay_ = true;
     dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
-    EXPECT_TRUE(dialogLayoutAlgorithm.isHoverMode_);
+    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
 }
 } // namespace OHOS::Ace::NG

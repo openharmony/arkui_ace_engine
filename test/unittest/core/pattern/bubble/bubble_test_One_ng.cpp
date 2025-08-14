@@ -1660,6 +1660,10 @@ HWTEST_F(BubbleTestOneNg, BubblePatternTest018, TestSize.Level1)
     bubblePattern->OnWindowSizeChanged(20, 10, WindowSizeChangeReason::TRANSFORM);
     bubblePattern->OnWindowHide();
     EXPECT_TRUE(layoutProp->GetShowInSubWindow().value_or(false));
+    layoutProp->UpdateShowInSubWindow(true);
+    bubblePattern->OnWindowSizeChanged(20, 10, WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    bubblePattern->OnWindowHide();
+    EXPECT_TRUE(layoutProp->GetShowInSubWindow().value_or(false));
 }
 
 /**

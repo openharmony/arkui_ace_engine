@@ -722,6 +722,7 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(NearZero(GetChildY(frameNode_, 0)));
     // can't enter the refreshing status when refresh updates scroll offset by animation source
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);

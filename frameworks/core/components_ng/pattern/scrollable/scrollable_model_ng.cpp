@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -393,6 +394,8 @@ void ScrollableModelNG::ResetBackToTop()
 
 void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
 {
+    // call SetBackToTopMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetBackToTop, frameNode, backToTop);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);

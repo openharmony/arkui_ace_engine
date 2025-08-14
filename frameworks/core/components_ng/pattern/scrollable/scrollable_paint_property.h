@@ -48,7 +48,7 @@ enum class ContentClipMode {
 using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 
 class ScrollablePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty);
 
 public:
     ScrollablePaintProperty() = default;
@@ -98,7 +98,7 @@ private:
 };
 
 class GridPaintProperty : public ScrollablePaintProperty {
-    DECLARE_ACE_TYPE(GridPaintProperty, ScrollablePaintProperty)
+    DECLARE_ACE_TYPE(GridPaintProperty, ScrollablePaintProperty);
 public:
     RefPtr<PaintProperty> Clone() const override;
 
@@ -109,7 +109,7 @@ public:
 };
 
 class ScrollPaintProperty : public ScrollablePaintProperty {
-    DECLARE_ACE_TYPE(ScrollPaintProperty, ScrollablePaintProperty)
+    DECLARE_ACE_TYPE(ScrollPaintProperty, ScrollablePaintProperty);
 public:
     RefPtr<PaintProperty> Clone() const override;
 
