@@ -35021,7 +35021,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};
@@ -35170,7 +35170,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};
@@ -35531,6 +35531,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, fingerList);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getType(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     } // BaseGestureEventAccessor
     namespace TapGestureEventAccessor {
@@ -46233,6 +46243,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseGestureEventAccessor::GetFinalizerImpl,
             BaseGestureEventAccessor::GetFingerListImpl,
             BaseGestureEventAccessor::SetFingerListImpl,
+            BaseGestureEventAccessor::GetTypeImpl
         };
         return &BaseGestureEventAccessorImpl;
     }

@@ -31,7 +31,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { DrawingCanvas, DrawingCanvasInternal } from "./arkui-drawing"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Callback } from "./common"
 import { VoidCallback } from "./units"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -752,16 +752,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set globalCompositeOperation(globalCompositeOperation: string) {
         this.setGlobalCompositeOperation(globalCompositeOperation)
     }
-    get fillStyle(): string | number | CanvasGradient | CanvasPattern {
+    get fillStyle(): string | int32 | CanvasGradient | CanvasPattern {
         throw new Error("Not implemented")
     }
-    set fillStyle(fillStyle: string | number | CanvasGradient | CanvasPattern) {
+    set fillStyle(fillStyle: string | int32 | CanvasGradient | CanvasPattern) {
         this.setFillStyle(fillStyle)
     }
-    get strokeStyle(): string | number | CanvasGradient | CanvasPattern {
+    get strokeStyle(): string | int32 | CanvasGradient | CanvasPattern {
         throw new Error("Not implemented")
     }
-    set strokeStyle(strokeStyle: string | number | CanvasGradient | CanvasPattern) {
+    set strokeStyle(strokeStyle: string | int32 | CanvasGradient | CanvasPattern) {
         this.setStrokeStyle(strokeStyle)
     }
     get filter(): string {
@@ -1110,19 +1110,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setGlobalCompositeOperation_serialize(globalCompositeOperation_casted)
         return
     }
-    private getFillStyle(): string | number | CanvasGradient | CanvasPattern {
+    private getFillStyle(): string | int32 | CanvasGradient | CanvasPattern {
         return this.getFillStyle_serialize()
     }
-    private setFillStyle(fillStyle: string | number | CanvasGradient | CanvasPattern): void {
-        const fillStyle_casted = fillStyle as (string | number | CanvasGradient | CanvasPattern)
+    private setFillStyle(fillStyle: string | int32 | CanvasGradient | CanvasPattern): void {
+        const fillStyle_casted = fillStyle as (string | int32 | CanvasGradient | CanvasPattern)
         this.setFillStyle_serialize(fillStyle_casted)
         return
     }
-    private getStrokeStyle(): string | number | CanvasGradient | CanvasPattern {
+    private getStrokeStyle(): string | int32 | CanvasGradient | CanvasPattern {
         return this.getStrokeStyle_serialize()
     }
-    private setStrokeStyle(strokeStyle: string | number | CanvasGradient | CanvasPattern): void {
-        const strokeStyle_casted = strokeStyle as (string | number | CanvasGradient | CanvasPattern)
+    private setStrokeStyle(strokeStyle: string | int32 | CanvasGradient | CanvasPattern): void {
+        const strokeStyle_casted = strokeStyle as (string | int32 | CanvasGradient | CanvasPattern)
         this.setStrokeStyle_serialize(strokeStyle_casted)
         return
     }
@@ -1613,11 +1613,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setGlobalCompositeOperation_serialize(globalCompositeOperation: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setGlobalCompositeOperation(this.peer!.ptr, globalCompositeOperation)
     }
-    private getFillStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
+    private getFillStyle_serialize(): string | int32 | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getFillStyle(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setFillStyle_serialize(fillStyle: string | number | CanvasGradient | CanvasPattern): void {
+    private setFillStyle_serialize(fillStyle: string | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : Serializer = Serializer.hold()
         let fillStyle_type : int32 = RuntimeType.UNDEFINED
         fillStyle_type = runtimeType(fillStyle)
@@ -1628,8 +1628,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (RuntimeType.NUMBER == fillStyle_type) {
             thisSerializer.writeInt8(1 as int32)
-            const fillStyle_1  = fillStyle as number
-            thisSerializer.writeNumber(fillStyle_1)
+            const fillStyle_1  = fillStyle as int32
+            thisSerializer.writeNumber(fillStyle_1 as number)
         }
         else if (TypeChecker.isCanvasGradient(fillStyle)) {
             thisSerializer.writeInt8(2 as int32)
@@ -1644,11 +1644,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasRenderer_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getStrokeStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
+    private getStrokeStyle_serialize(): string | int32 | CanvasGradient | CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getStrokeStyle(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private setStrokeStyle_serialize(strokeStyle: string | number | CanvasGradient | CanvasPattern): void {
+    private setStrokeStyle_serialize(strokeStyle: string | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer : Serializer = Serializer.hold()
         let strokeStyle_type : int32 = RuntimeType.UNDEFINED
         strokeStyle_type = runtimeType(strokeStyle)
@@ -1659,8 +1659,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (RuntimeType.NUMBER == strokeStyle_type) {
             thisSerializer.writeInt8(1 as int32)
-            const strokeStyle_1  = strokeStyle as number
-            thisSerializer.writeNumber(strokeStyle_1)
+            const strokeStyle_1  = strokeStyle as int32
+            thisSerializer.writeNumber(strokeStyle_1 as number)
         }
         else if (TypeChecker.isCanvasGradient(strokeStyle)) {
             thisSerializer.writeInt8(2 as int32)
@@ -1833,9 +1833,9 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getFinalizer()
     }
-    public toDataURL(type?: string, quality?: float32): string {
+    public toDataURL(type?: string, quality?: number): string {
         const type_casted = type as (string | undefined)
-        const quality_casted = quality as (float32 | undefined)
+        const quality_casted = quality as (number | undefined)
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
     public startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void> {
@@ -1846,23 +1846,23 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.stopImageAnalyzer_serialize()
         return
     }
-    public onOnAttach(callback_: (() => void)): void {
-        const callback__casted = callback_ as ((() => void))
+    public onOnAttach(callback_: Callback<void>): void {
+        const callback__casted = callback_ as (Callback<void>)
         this.onOnAttach_serialize(callback__casted)
         return
     }
-    public onOnDetach(callback_: (() => void)): void {
-        const callback__casted = callback_ as ((() => void))
+    public onOnDetach(callback_: Callback<void>): void {
+        const callback__casted = callback_ as (Callback<void>)
         this.onOnDetach_serialize(callback__casted)
         return
     }
-    public offOnAttach(callback_?: (() => void)): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public offOnAttach(callback_?: Callback<void>): void {
+        const callback__casted = callback_ as (Callback<void> | undefined)
         this.offOnAttach_serialize(callback__casted)
         return
     }
-    public offOnDetach(callback_?: (() => void)): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public offOnDetach(callback_?: Callback<void>): void {
+        const callback__casted = callback_ as (Callback<void> | undefined)
         this.offOnDetach_serialize(callback__casted)
         return
     }
@@ -1873,15 +1873,15 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return this.getWidth_serialize()
     }
     private getCanvas(): FrameNode {
-        return this.getCanvas_serialize()
+        return hookGetCanvas(this)
     }
-    on(type: string, callback_: (() => void)): void {
-        throw new Error("TBD")
+    on(type: string, callback_: Callback<void>): void {
+        hookOn(this, type, callback_)
     }
-    off(type: string, callback_: (() => void)): void {
-        throw new Error("TBD")
+    off(type: string, callback_?: Callback<void>): void {
+        hookOff(this, type, callback_)
     }
-    private toDataURL_serialize(type?: string, quality?: float32): string {
+    private toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : Serializer = Serializer.hold()
         let type_type : int32 = RuntimeType.UNDEFINED
         type_type = runtimeType(type)
@@ -1895,7 +1895,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         thisSerializer.writeInt8(quality_type as int32)
         if ((RuntimeType.UNDEFINED) != (quality_type)) {
             const quality_value  = quality!
-            thisSerializer.writeFloat32(quality_value)
+            thisSerializer.writeNumber(quality_value)
         }
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1912,19 +1912,19 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     private stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_stopImageAnalyzer(this.peer!.ptr)
     }
-    private onOnAttach_serialize(callback_: (() => void)): void {
+    private onOnAttach_serialize(callback_: Callback<void>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private onOnDetach_serialize(callback_: (() => void)): void {
+    private onOnDetach_serialize(callback_: Callback<void>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offOnAttach_serialize(callback_?: (() => void)): void {
+    private offOnAttach_serialize(callback_?: Callback<void>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1936,7 +1936,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offOnDetach_serialize(callback_?: (() => void)): void {
+    private offOnDetach_serialize(callback_?: Callback<void>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1955,11 +1955,6 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     private getWidth_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getWidth(this.peer!.ptr)
         return retval
-    }
-    private getCanvas_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getCanvas(this.peer!.ptr)
-        const obj : FrameNode = FrameNodeInternal.fromPtr(retval)
-        return obj
     }
 }
 export class OffscreenCanvasRenderingContext2DInternal {
@@ -1998,15 +1993,15 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_getFinalizer()
     }
-    public toDataURL(type?: string, quality?: float32): string {
+    public toDataURL(type?: string, quality?: number): string {
         const type_casted = type as (string | undefined)
-        const quality_casted = quality as (float32 | undefined)
+        const quality_casted = quality as (number | undefined)
         return this.toDataURL_serialize(type_casted, quality_casted)
     }
     public transferToImageBitmap(): ImageBitmap {
         return this.transferToImageBitmap_serialize()
     }
-    private toDataURL_serialize(type?: string, quality?: float32): string {
+    private toDataURL_serialize(type?: string, quality?: number): string {
         const thisSerializer : Serializer = Serializer.hold()
         let type_type : int32 = RuntimeType.UNDEFINED
         type_type = runtimeType(type)
@@ -2020,7 +2015,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         thisSerializer.writeInt8(quality_type as int32)
         if ((RuntimeType.UNDEFINED) != (quality_type)) {
             const quality_value  = quality!
-            thisSerializer.writeFloat32(quality_value)
+            thisSerializer.writeNumber(quality_value)
         }
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()

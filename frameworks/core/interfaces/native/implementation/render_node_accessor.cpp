@@ -50,6 +50,7 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
 namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer)
 {
+    RenderNodePeer::Destroy(peer);
 }
 Ark_RenderNode ConstructImpl()
 {

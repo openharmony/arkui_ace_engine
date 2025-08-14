@@ -22,6 +22,10 @@ interface ResourceInfo {
     holdersCount: int32
 }
 
+export interface Disposable {
+    dispose(): void;
+}
+
 export class ResourceHolder {
     private static nextResourceId: ResourceId = 100 
     private resources: Map<ResourceId, ResourceInfo> = new Map<ResourceId, ResourceInfo>()

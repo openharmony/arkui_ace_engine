@@ -32,7 +32,8 @@ class MutableStateMetaBase {
 
 export interface IBindingSource {
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void;
-    weakThis: WeakRef<IBindingSource>;
+    changeMutableState(): void;
+    readonly weakThis: WeakRef<IBindingSource>;
 }
 
 export interface ITrackedDecoratorRef {
@@ -91,12 +92,16 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
             });
         }
         if (this.shouldFireChange()) {
-            this.__metaDependency!.value = ++this.metaValue;
+            ObserveSingleton.instance.changeMutableState(this);
             if (StateUpdateLoop.canRequestFrame) {
                 ArkUIAniModule._CustomNode_RequestFrame();
                 StateUpdateLoop.canRequestFrame = false;
             }
         }
+    }
+
+    public changeMutableState(): void {
+        this.__metaDependency!.value = ++this.metaValue;
     }
 
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void {
