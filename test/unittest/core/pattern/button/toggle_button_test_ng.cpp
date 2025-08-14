@@ -54,7 +54,6 @@ const double dimensionValue = 1.0;
 const double childDimensionValue = 5.0;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr int32_t TOUCH_DURATION = 250;
-const Color FONT_COLOR = Color(0XFFFF0000);
 constexpr bool STATE_EFFECT = false;
 } // namespace
 
@@ -522,12 +521,10 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest012, TestSize.Level1)
     auto togglebuttonEventHub = togglebuttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(togglebuttonEventHub);
     togglebuttonEventHub->SetStateEffect(STATE_EFFECT);
-    togglebuttonPattern->isSetClickedColor_ = false;
-    togglebuttonPattern->clickedColor_ = FONT_COLOR;
+    togglebuttonPattern->clickedColor_ = std::nullopt;
     togglebuttonPattern->OnTouchDown();
     togglebuttonPattern->OnTouchUp();
     togglebuttonEventHub->SetStateEffect(IS_ON);
-    togglebuttonPattern->isSetClickedColor_ = false;
     togglebuttonEventHub->SetEnabled(false);
     togglebuttonPattern->OnTouchUp();
     EXPECT_FALSE(togglebuttonPattern->isOn_);

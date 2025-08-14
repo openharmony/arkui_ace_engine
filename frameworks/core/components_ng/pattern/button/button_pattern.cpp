@@ -297,20 +297,6 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
     }
 }
 
-void ButtonPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    clickedColor_ = buttonTheme->GetClickedColor();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetAlphaOffscreen(true);
-}
-
 bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
 {
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -646,6 +632,7 @@ void ButtonPattern::InitButtonLabel()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    InitButtonAlphaOffscreen();
     CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
@@ -656,6 +643,19 @@ void ButtonPattern::OnModifyDone()
     HandleBorderAndShadow();
     HandleFocusStatusStyle();
     HandleFocusActiveStyle();
+}
+
+void ButtonPattern::InitButtonAlphaOffscreen()
+{
+    if (isInitButtonAlphaOffscreen_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
+    isInitButtonAlphaOffscreen_ = true;
 }
 
 void ButtonPattern::CheckLocalizedBorderRadiuses()
@@ -786,9 +786,9 @@ void ButtonPattern::HandlePressedStyle()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_);
+            renderContext->UpdateBackgroundColor(clickedColor_.value());
             return;
         }
         // for system default
@@ -815,7 +815,7 @@ void ButtonPattern::HandleNormalStyle()
     }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (isSetClickedColor_) {
+        if (clickedColor_.has_value()) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }

@@ -69,7 +69,6 @@ public:
     void SetClickedColor(const Color& color)
     {
         clickedColor_ = color;
-        isSetClickedColor_ = true;
     }
 
     void SetBlendColor(const std::optional<Color>& blendClickColor, const std::optional<Color>& blendHoverColor)
@@ -229,7 +228,6 @@ public:
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
-    void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();
     void HandlePressedStyle();
@@ -242,7 +240,7 @@ protected:
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
-    Color clickedColor_;
+    std::optional<Color> clickedColor_ = std::nullopt;
 
 private:
     static void UpdateTextLayoutProperty(
@@ -254,11 +252,11 @@ private:
     static void UpdateTextFontScale(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void OnFontScaleConfigurationUpdate() override;
+    void InitButtonAlphaOffscreen();
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
-    bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -274,6 +272,7 @@ private:
     bool isPress_ = false;
     bool isApplyShadow_ = true;
     bool isLayoutUpdate_ = false;
+    bool isInitButtonAlphaOffscreen_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;

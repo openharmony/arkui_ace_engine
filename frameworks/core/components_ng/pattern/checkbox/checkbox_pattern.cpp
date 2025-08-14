@@ -129,7 +129,6 @@ void CheckBoxPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
-    RegisterVisibleAreaChange();
 }
 
 void CheckBoxPattern::SetBuilderNodeHidden()
@@ -178,6 +177,7 @@ void CheckBoxPattern::OnModifyDone()
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitDefaultMargin();
+    RegisterVisibleAreaChange();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -1259,6 +1259,9 @@ void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
 
 void CheckBoxPattern::RegisterVisibleAreaChange()
 {
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -1270,6 +1273,7 @@ void CheckBoxPattern::RegisterVisibleAreaChange()
     };
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    hasVisibleChangeRegistered_ = true;
 }
 
 void CheckBoxPattern::SetNeedAnimation(bool visible)
