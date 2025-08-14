@@ -266,6 +266,7 @@ public:
     void RebuildAllPages() override {}
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
     bool HandleMessage(void* frameNode, int32_t type, const std::string& param) override;
+    napi_value GetContextValue() override;
 
     RefPtr<AceEventHandler> GetEventHandler() override
     {
