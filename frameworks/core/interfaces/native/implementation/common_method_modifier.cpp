@@ -4461,10 +4461,16 @@ void GeometryTransition0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto id = Converter::OptConvertPtr<std::string>(value).value_or("");
-    bool followWithoutTransition {false};
-    bool doRegisterSharedTransition {false};
-    ViewAbstractModelStatic::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    auto idOpt = Converter::OptConvertPtr<std::string>(value);
+    if (!idOpt) {
+        return; // undefined return, same with ArkTS1.1
+    }
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -4472,18 +4478,24 @@ void GeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(id && options, false);
-    auto idValue = Converter::OptConvertPtr<std::string>(id).value_or("");
-    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
-    auto followWithoutTransition {false};
-    auto hierarchyStrategy = TransitionHierarchyStrategy::NONE;
-    auto doRegisterSharedTransition {false};
-    if (optOptions.has_value()) {
-        followWithoutTransition = optOptions.value().follow.value_or(false);
-        hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
-        doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
+    auto idOpt = Converter::OptConvertPtr<std::string>(id);
+    if (!idOpt) {
+        return; // undefined return, same with ArkTS1.1
     }
-    // ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
+    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    if (optOptions.has_value()) {
+        followWithoutTransition = optOptions->follow.value_or(false);
+        if (optOptions->hierarchyStrategy &&
+            optOptions->hierarchyStrategy.value() == TransitionHierarchyStrategy::NONE) {
+            doRegisterSharedTransition = false;
+        }
+    }
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void StateStylesImpl(Ark_NativePointer node,
                      const Opt_StateStyles* value)
