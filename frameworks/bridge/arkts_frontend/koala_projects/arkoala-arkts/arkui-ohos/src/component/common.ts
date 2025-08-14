@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { TypeChecker, ArkUIGeneratedNativeModule, ArkUINativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
@@ -69,7 +69,7 @@ import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookC
     hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl,
     hookCustomPropertyImpl
 } from "../handwritten/CommonHandWritten"
-import { CommonMethodModifier } from "../CommonMethodModifier"
+import { CommonMethodModifier, AttributeUpdaterFlag } from "../CommonMethodModifier"
 import { ScrollableCommonMethodModifier } from '../ScrollableCommonMethodModifier'
 import { ICurve as ICurve_} from "#external"
 export type ICurve = ICurve_
@@ -9282,16 +9282,13 @@ export interface DateRange {
 }
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
 
-    protected _modifierHost: ArkBaseNode | undefined
-    setModifierHost(value: ArkBaseNode): void {
-        this._modifierHost = value
+    _attributeOptimizer: CommonAttributeOptimizer;
+
+    constructor(optimizer: CommonAttributeOptimizer) {
+        this._attributeOptimizer = optimizer;
     }
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkBaseNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
+    constructor() {
+        this._attributeOptimizer = new CommonAttributeOptimizer(new CommonMethodModifier());
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -11394,6 +11391,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        this._attributeOptimizer.applyModifierPatch(this.getPeer()); 
         super.applyAttributesFinish()
     }
 }
@@ -13414,3 +13412,67 @@ export interface Bindable<T> {
 }
 export type BindableResourceStr = string | Resource | ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>
 export type BindableResourceStrArray = string[] | Resource[] | ResourceStr[] | Bindable<ResourceStr[]> | Bindable<Resource[]> | Bindable<string[]>
+
+export class CommonAttributeOptimizer {
+    _attribute: CommonMethodModifier;
+    _disable: boolean = false;
+    _updater: boolean = false;
+    _peer?: PeerNode // frameNode 和 attributeUpdater 需要设置
+    constructor(attributeSet: CommonMethodModifier) {
+        this._attribute = attributeSet;
+    }
+    requestMarkDirty(): boolean {
+        markDirty(this._peer!, NodeDirtyFlag.NODE_NEED_ALL);
+        return true;
+    }
+    nextFrame(): void {
+        setFrameCallback();
+    }
+    applyModifierPatch(node: ArkCommonMethodPeer): void {
+        if (this._disable) {
+            return;
+        }
+        this._attribute.applyModifierPatch(node);
+    }
+    checkWidthPriority(value: Length | LayoutPolicy | undefined): boolean {
+        if (!this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.width(value);
+        if (this._attribute._width_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._width_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+    checkBackgroundColorPriority(value: ResourceColor | undefined): boolean {
+        if (this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.backgroundColor(value);
+        if (this._attribute._backgroundColor_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._backgroundColor_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+}
+export enum NodeDirtyFlag {
+    NODE_NEED_MEASURE = 1,
+    NODE_NEED_LAYOUT = 2,
+    NODE_NEED_RENDER = 3,
+    NODE_NEED_ALL = 4,
+}
+export function markDirty(node: PeerNode, flag: NodeDirtyFlag) {
+    ArkUIAniModule._FrameNode_MarkDirtyNode(node.getPeerPtr());
+}
+export function setFrameCallback(): void {
+    const thisSerializer: Serializer = Serializer.hold()
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
+        thisSerializer.length(), 0);
+    thisSerializer.release()
+}

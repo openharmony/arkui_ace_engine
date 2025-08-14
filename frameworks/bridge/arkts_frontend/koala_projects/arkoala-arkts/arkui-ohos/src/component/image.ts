@@ -756,14 +756,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         return (this.peer as ArkImagePeer)
     }
 
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost == undefined || this._modifierHost == null) {
-            this._modifierHost = new ArkImageNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
-    }
-
+  
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
             hookSetImageOptions(this, src, imageAIOptions)
