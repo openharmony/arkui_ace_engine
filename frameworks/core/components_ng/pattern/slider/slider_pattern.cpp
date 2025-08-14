@@ -199,6 +199,8 @@ void SliderPattern::InitEvent()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
 #ifdef SUPPORT_DIGITAL_CROWN
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
     InitDigitalCrownEvent(focusHub);
 #endif
