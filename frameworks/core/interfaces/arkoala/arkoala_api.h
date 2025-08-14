@@ -6910,6 +6910,7 @@ struct ArkUIFrameNodeModifier {
         ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color));
     void (*setFocusDependence)(ArkUINodeHandle node, ArkUI_Uint32 focusDependence);
     void (*resetFocusDependence)(ArkUINodeHandle node);
+    void (*applyAttributesFinish)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

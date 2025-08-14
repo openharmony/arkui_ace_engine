@@ -9562,6 +9562,22 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index);
 
 /**
+ * @brief Triggers node updates in the current frame.
+ *
+ * When node attributes are modified after the current frame's build phase (i.e., after
+ * the unified processing of dirty nodes), the node updates will be deferred to the next
+ * frame. This function forces immediate node updates within the current frame to
+ * ensure rendering effects are applied synchronously.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.

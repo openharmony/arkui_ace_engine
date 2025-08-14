@@ -72,6 +72,13 @@ void InvalidateInFrameNode(ArkUINodeHandle node)
     renderContext->RequestNextFrame();
 }
 
+void ApplyAttributesFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+}
+
 RefPtr<FrameNode> GetParentNode(UINode* node)
 {
     auto uiNode = AceType::Claim<UINode>(node);
@@ -1169,6 +1176,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setForceDarkConfig = SetForceDarkConfig,
         .setFocusDependence = SetFocusDependence,
         .resetFocusDependence = ResetFocusDependence,
+        .applyAttributesFinish = ApplyAttributesFinish,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -504,6 +504,17 @@ int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target
     return errorCode;
 }
 
+int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
+{
+    if (node == nullptr || !OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    impl->getNodeModifiers()->getFrameNodeModifier()->applyAttributesFinish(node->uiNodeHandle);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
 {
     if (node == nullptr) {
