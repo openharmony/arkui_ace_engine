@@ -10692,14 +10692,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("geometryTransition")) {
             const id_type = runtimeType(id)
             const options_type = runtimeType(options)
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && (RuntimeType.UNDEFINED == options_type)) {
                 const value_casted = id as (string | undefined)
                 this.getPeer()?.geometryTransition0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const id_casted = id as (string | undefined)
-                const options_casted = options as (GeometryTransitionOptions)
+                const options_casted = options as (GeometryTransitionOptions | undefined)
                 this.getPeer()?.geometryTransition1Attribute(id_casted, options_casted)
                 return this
             }
