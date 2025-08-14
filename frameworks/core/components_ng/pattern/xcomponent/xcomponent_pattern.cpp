@@ -292,7 +292,7 @@ void XComponentPattern::OnAttachToMainTree()
             needRecoverDisplaySync_ = false;
         }
     }
-    displaySync_->AddToPipeline(pipelineContext);
+    displaySync_->NotifyXComponentExpectedFrameRate(GetId());
 }
 
 void XComponentPattern::OnDetachFromMainTree()
