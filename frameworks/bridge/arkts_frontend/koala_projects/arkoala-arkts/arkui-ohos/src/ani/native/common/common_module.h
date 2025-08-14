@@ -79,6 +79,18 @@ void* GetMouseEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
 void* GetAxisEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long axisEventPeer);
 void* GetClickEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long clickEventPeer);
 void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long hoverEventPeer);
+ani_int GetColorValue(ani_env* env, ani_object aniClass, ani_object src);
+ani_int GetStringColorValue(ani_env* env, ani_object aniClass, ani_string src);
+ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src);
+void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id);
+void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark);
+void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId);
+void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode);
+void RestoreColorMode(ani_env* env, ani_object aniClass);
+void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId);
+void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
+    ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
+void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

@@ -962,6 +962,56 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLescompat/Uint8ClampedArray;DDIIDDDD:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
         },
+        ani_native_function {
+            "_GetStringColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
+        },
+        ani_native_function {
+            "_GetNumberColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
+        },
+        ani_native_function {
+            "_SendThemeToNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SendThemeToNative)
+        },
+        ani_native_function {
+            "_RemoveThemeInNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveThemeInNative)
+        },
+        ani_native_function {
+            "_SetDefaultTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDefaultTheme)
+        },
+        ani_native_function {
+            "_UpdateColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UpdateColorMode)
+        },
+        ani_native_function {
+            "_RestoreColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreColorMode)
+        },
+        ani_native_function {
+            "_SetThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetThemeScopeId)
+        },
+        ani_native_function {
+            "_CreateAndBindTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAndBindTheme)
+        },
+        ani_native_function {
+            "_ApplyParentThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

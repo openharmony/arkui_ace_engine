@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -274,4 +274,22 @@ export class ArkUIAniModule {
     native static _CanvasRenderer_PutImageData0(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt): void
     native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
+
+    native static _GetColorValue(color: number | string): KUInt
+    native static _GetStringColorValue(color: string): KUInt
+    native static _GetNumberColorValue(color: number): KUInt
+    native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
+    native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
+    native static _RemoveThemeInNative(withThemeId: number): void
+    native static _UpdateColorMode(colorMode: KInt): void
+    native static _RestoreColorMode(): void
+    native static _SetThemeScopeId(themeScopeId: number): void
+    native static _CreateAndBindTheme(
+        themeScopeId: KInt,
+        themeId: KInt,
+        thisArray: KSerializerBuffer, thisLength: number,
+        colorMode: KInt,
+        onThemeScopeDestroy: () => void
+    ): void;
+    native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
 }

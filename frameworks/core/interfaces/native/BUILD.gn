@@ -144,6 +144,8 @@ template("ace_core_interfaces_native_node") {
 
     
     sources += [
+      "ani/ani_theme.cpp",
+      "ani/ani_theme_module.cpp",
       "ani/ani_utils.cpp",
       "ani/animation_ani_modifier.cpp",
       "ani/canvas_ani_modifier.cpp",
@@ -176,6 +178,8 @@ template("ace_core_interfaces_native_node") {
     ]
     if (build_ohos_sdk) {
       sources -= [
+        "ani/ani_theme.cpp",
+        "ani/ani_theme_module.cpp",
         "ani/ani_utils.cpp",
         "ani/animation_ani_modifier.cpp",
         "ani/common_ani_modifier.cpp",
@@ -208,6 +212,7 @@ template("ace_core_interfaces_native_node") {
       ]
     }
     include_dirs = [
+      "${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/",
       "${ace_root}/frameworks/core/interfaces/native/generated/interface",
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",

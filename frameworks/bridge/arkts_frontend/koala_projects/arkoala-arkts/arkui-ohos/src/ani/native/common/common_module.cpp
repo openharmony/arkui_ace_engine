@@ -15,11 +15,18 @@
 
 #include "common_module.h"
 
+#include <cstdint>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "ani.h"
 #include "load.h"
+#include "log/log.h"
 
 #include "base/utils/utils.h"
+#include "core/interfaces/ani/ani_api.h"
+#include "arkoala/framework/native/src/resource_color_helper.h"
 #include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
 
@@ -687,5 +694,101 @@ void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
         return nullptr;
     }
     return modifier->getCommonAniModifier()->getMouseEventPointer(hoverEventPeer);
+}
+
+ani_int GetStringColorValue(ani_env* env, ani_object aniClass, ani_string src)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    auto srcString = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(src));
+    return modifier->getCommonAniModifier()->getColorValueByString(srcString);
+}
+
+ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->getColorValueByNumber(static_cast<uint32_t>(src));
+}
+
+void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
+}
+
+void RemoveThemeInNative(ani_env* env, ani_object aniClass, ani_int withThemeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->removeThemeInNative(env, withThemeId);
+}
+
+void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    std::vector<Ark_ResourceColor> colorArray = GetResourceColorArray(thisArray, thisLength);
+    modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
+}
+
+void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->updateColorMode(colorMode);
+}
+
+void RestoreColorMode(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->restoreColorMode();
+}
+
+void SetThemeScopeId(ani_env* env, ani_object aniClass, ani_int themeScopeId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setThemeScopeId(env, themeScopeId);
+}
+
+void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId, ani_int themeId, ani_long thisArray,
+    ani_double thisLength, ani_int colorMode, ani_fn_object onThemeScopeDestroy)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    std::vector<Ark_ResourceColor> colors = GetResourceColorArray(thisArray, thisLength);
+    modifier->getCommonAniModifier()->createAndBindTheme(
+        env, themeScopeId, themeId, colors, colorMode, onThemeScopeDestroy);
+}
+
+void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
 }
 } // namespace OHOS::Ace::Ani

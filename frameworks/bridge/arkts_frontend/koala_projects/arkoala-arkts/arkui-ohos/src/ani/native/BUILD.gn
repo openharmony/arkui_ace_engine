@@ -27,7 +27,15 @@ ohos_shared_library("arkoala_native_ani") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
-  include_dirs = [ "./" ]
+  include_dirs = [
+    "./",
+    "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/"
+  ]
+
+  deps = []
+  if (!build_ohos_sdk) {
+    deps += ["$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"]
+  }
 
   sources = [
     "animation/animation_ani_impl.cpp",

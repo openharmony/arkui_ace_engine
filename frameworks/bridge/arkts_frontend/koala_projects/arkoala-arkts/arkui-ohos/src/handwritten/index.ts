@@ -53,6 +53,7 @@ export * from "./SwiperOpsHandWritten"
 export * from "./RefreshOpsHandWritten"
 export * from "./AttributeModifierOpsHandWritten"
 export * from  "./ContentModifierHooks"
+export * from "./utils/SerializeUtils"
 
 // export interface PageTransitionExitInterface { }
 // export interface CommonTransition { }

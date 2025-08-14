@@ -14,7 +14,6 @@
  */
 
 import {
-    Theme,
     ConstraintSizeOptions,
     GeometryInfo,
     Layoutable,
@@ -22,6 +21,7 @@ import {
     SizeResult,
 } from "./component"
 import { PeerNode } from "./PeerNode"
+import { Theme } from '@ohos/arkui/theme';
 
 /**
  * This is basically the CustomComponent
@@ -51,6 +51,7 @@ export interface ArkCustomComponent {
 
     // Theme
     onWillApplyTheme(theme: Theme): void
+    onGlobalThemeChanged(theme: Theme): void
 
     // Form recover
     onFormRecycle(): string

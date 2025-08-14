@@ -53,8 +53,10 @@ typedef class __ani_error* ani_error;
 typedef struct __ani_resolver *ani_resolver;
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_array* ani_array;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
+typedef uint32_t ArkUI_Uint32;
 typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
@@ -62,6 +64,8 @@ typedef _ArkUIStyledString* ArkUIStyledString;
 typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
+struct Array_ResourceColor;
+struct Ark_ResourceColor;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -309,6 +313,17 @@ struct ArkUIAniCommonModifier {
     void* (*getAxisEventPointer)(ani_long peer);
     void* (*getClickEventPointer)(ani_long peer);
     void* (*getHoverEventPointer)(ani_long peer);
+    ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
+    ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
+    void (*sendThemeToNative)(ani_env* env, const std::vector<Ark_ResourceColor>& colors, ani_int id);
+    void (*setDefaultTheme)(ani_env* env, const std::vector<Ark_ResourceColor>& colors, ani_boolean isDark);
+    void (*removeThemeInNative)(ani_env* env, ani_int withThemeId);
+    void (*updateColorMode)(ani_int colorMode);
+    void (*restoreColorMode)();
+    void (*setThemeScopeId)(ani_env* env, ani_int themeScopeId);
+    void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId,
+        const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
+    void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
