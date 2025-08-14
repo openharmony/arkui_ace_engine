@@ -403,4 +403,56 @@ HWTEST_F(WaterFlowPropertyTest, RTLayoutTest001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 0), RectF(WATER_FLOW_WIDTH/2, 0, WATER_FLOW_WIDTH/2, 100)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 1), RectF(0, 0, WATER_FLOW_WIDTH/2, 200)));
 }
+
+/**
+ * @tc.name: InvalidColumnTemplate001
+ * @tc.desc: Test WaterFlow behavior when setting invalid column template at runtime
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, InvalidColumnTemplate001, TestSize.Level1)
+{
+    // Create normal WaterFlow
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    // Verify initial state is normal
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+
+    /**
+     * @tc.steps: step1. Set invalid column template dynamically
+     * @tc.expected: WaterFlow should maintain previous layout state without crashing
+     */
+    layoutProperty_->UpdateColumnsTemplate(""); // Empty string
+    FlushUITasks();
+
+    // Verify layout is still valid
+    EXPECT_GE(pattern_->layoutInfo_->endIndex_, 0);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    /**
+     * @tc.steps: step2. Set column template with invalid syntax
+     * @tc.expected: Should fallback to default behavior or maintain original state
+     */
+    layoutProperty_->UpdateColumnsTemplate("invalid syntax");
+    FlushUITasks();
+
+    // Verify no crash and reasonable fallback behavior
+    EXPECT_GE(pattern_->layoutInfo_->endIndex_, 0);
+
+    /**
+     * @tc.steps: step3. Restore valid column template
+     * @tc.expected: Layout should recover normally
+     */
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    FlushUITasks();
+
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_GE(pattern_->layoutInfo_->endIndex_, 2);
+}
 }
