@@ -31,6 +31,7 @@
 
 #include "nweb.h"
 #include "nweb_handler.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -2093,6 +2094,40 @@ HWTEST_F(WebSelectOverlayTest, RunQuickMenu_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RunQuickMenu_004
+ * @tc.desc: RunQuickMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, RunQuickMenu_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    WebSelectOverlay overlay(webPattern);
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    overlay.isQuickMenuMouseTrigger_ = true;
+    g_isEnable = true;
+    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
+    bool result = overlay.RunQuickMenu(params, callback);
+    g_isEnable = false;
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
  * @tc.name: OnTouchSelectionChangedTest_001
  * @tc.desc: Test OnTouchSelectionChanged.
  * @tc.type: FUNC
@@ -2208,6 +2243,13 @@ HWTEST_F(WebSelectOverlayTest, OnTouchSelectionChangedTest_004, TestSize.Level1)
     auto endSelectionHandle = std::make_shared<NWebTouchHandleStateBeginTestImpl>();
     overlay.selectTemporarilyHidden_ = false;
     overlay.selectTemporarilyHiddenByScroll_ = false;
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
+    overlay.OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+    EXPECT_NE(overlay.insertHandle_, nullptr);
+    EXPECT_NE(overlay.startSelectionHandle_, nullptr);
+    EXPECT_NE(overlay.endSelectionHandle_, nullptr);
+    overlay.isShowHandle_ = false;
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     overlay.OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
     MockPipelineContext::TearDown();
     EXPECT_NE(overlay.insertHandle_, nullptr);
@@ -5026,8 +5068,12 @@ HWTEST_F(WebSelectOverlayTest, OnUpdateSelectOverlayInfo_001, TestSize.Level1)
     int32_t requestCode = 0;
     overlay.SetIsSingleHandle(false);
     overlay.webSelectInfo_.isHandleLineShow = false;
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, true);
+    EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
+    overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    EXPECT_EQ(selectInfo.isHandleLineShow, false);
 }
 
 /**

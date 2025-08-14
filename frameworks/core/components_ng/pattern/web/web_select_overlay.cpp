@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -66,7 +67,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
         pattern->ShowMagnifier(static_cast<int>(pattern->touchPointX), static_cast<int>(pattern->touchPointY));
         return false;
     }
-    if (overlayType == INSERT_OVERLAY) {
+    if (overlayType == INSERT_OVERLAY && !IS_CALLING_FROM_M114()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
     selectTemporarilyHidden_ = false;
@@ -123,7 +124,24 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
     if (!isShowHandle_) {
         if (overlayType == INSERT_OVERLAY) {
-            CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+            if (IS_CALLING_FROM_M114()) {
+                SelectOverlayInfo selectInfo;
+                selectInfo.isSingleHandle = true;
+                selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
+                CheckHandles(selectInfo.firstHandle, insertHandle_);
+                selectInfo.secondHandle.isShow = false;
+                selectInfo.menuInfo.menuDisable = true;
+                selectInfo.menuInfo.menuIsShow = false;
+                selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+                SetEditMenuOptions(selectInfo);
+                RegisterSelectOverlayEvent(selectInfo);
+                selectInfo.isHandleLineShow = false;
+                isShowHandle_ = true;
+                webSelectInfo_ = selectInfo;
+                ProcessOverlay({ .animation = true });
+            } else {
+                CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+            }
             return;
         }
     } else {
@@ -1130,6 +1148,9 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     selectInfo.onClick = webSelectInfo_.onClick;
     selectInfo.enableHandleLevel = true;
     selectInfo.enableSubWindowMenu = true;
+    if (IS_CALLING_FROM_M114()) {
+        selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
+    }
     selectInfo.computeMenuOffset = webSelectInfo_.computeMenuOffset;
 }
 
