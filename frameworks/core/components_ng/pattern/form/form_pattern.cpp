@@ -1246,6 +1246,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (isRowStyle) {
         textLayoutProperty->UpdateLayoutWeight(1);
+        textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     }
     textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -1392,6 +1393,10 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode(FormChildNodeType formChildNodeT
         layoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
         auto space = Dimension(8, DimensionUnit::VP);
         layoutProperty->UpdateSpace(space);
+        PaddingProperty padding;
+        padding.left = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
+        padding.right = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
+        layoutProperty->UpdatePadding(padding);
 
         columnNode->AddChild(CreateIconNode(false));
         columnNode->AddChild(CreateTextNode(false));
