@@ -1614,9 +1614,9 @@ HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest001, TestSi
 
 /**
  * @tc.name: TitleAnimationElapsedTimeTest002
- * @tc.desc: Branch 1: if (elapsed time < 0)
+ * @tc.desc: Branch 1: if (elapsed time < 0 && transitionType_ != TransitionType::TITLE)
  *           Expect 1: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
- *           Branch 2: if (elapsed time > 450)
+ *           Branch 2: if (elapsed time > 450 && transitionType_ != TransitionType::TITLE)
  *           Expect 2: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
  * @tc.type: FUNC
  */
@@ -1636,6 +1636,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest002, TestSi
     model.SetTitleAnimationElapsedTime(navDestination, invalidElapsedTimeA);
     ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), invalidElapsedTimeA);
     ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
     /**
      * @tc.steps: step2. check the value of elpased time.
      */
@@ -1648,13 +1649,49 @@ HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest002, TestSi
 
 /**
  * @tc.name: TitleAnimationElapsedTimeTest003
+ * @tc.desc: Branch 1: if (elapsed time < 0 && transitionType_ == TransitionType::TITLE)
+ *           Expect 1: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
+ *           Branch 2: if (elapsed time > 450 && transitionType_ == TransitionType::TITLE)
+ *           Expect 2: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and mock necessary properties.
+     */
+    AnimationOption option;
+    const int32_t invalidElapsedTimeA = -150;
+    const int32_t invalidElapsedTimeB = 1150;
+    NavDestinationModelNG model;
+    model.Create();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navDestination, nullptr);
+    model.SetTitleAnimationElapsedTime(navDestination, invalidElapsedTimeA);
+    ASSERT_EQ(navDestination->GetTitleAnimationElapsedTime(), invalidElapsedTimeA);
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    navDestination->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+    ASSERT_EQ(navDestination->GetSystemTransitionType(), NavigationSystemTransitionType::TITLE);
+    /**
+     * @tc.steps: step2. check the value of elpased time.
+     */
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+    navDestination->titleAnimationElapsedTime_ = invalidElapsedTimeB;
+    ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
+    ASSERT_FALSE(navDestination->IsTitleConsumedElapsedTime());
+}
+
+/**
+ * @tc.name: TitleAnimationElapsedTimeTest004
  * @tc.desc: Branch 1: if (elapsed time > 0 && elapsed time < 450 && transitionType_ != TransitionType::TITLE)
  *           Expect 1: run SetTitleAnimationElapsedTime will NOT mark flag `isTitleConsumedElapsedTime` to true
  *           Branch 2: if (elapsed time > 0 && elapsed time < 450 && transitionType_ == TransitionType::TITLE)
  *           Expect 2: run SetTitleAnimationElapsedTime will mark flag `isTitleConsumedElapsedTime` SUCCESSFULLY
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest003, TestSize.Level1)
+HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navDestination and mock necessary properties.
