@@ -330,15 +330,6 @@ public:
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
-    void SetPredictLayoutParam(std::optional<ListPredictLayoutParam> param)
-    {
-        predictLayoutParam_ = param;
-    }
-    std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
-    {
-        return predictLayoutParam_;
-    }
-
     void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
     {
         predictLayoutParamV2_ = param;
@@ -678,7 +669,6 @@ private:
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
-    std::optional<ListPredictLayoutParam> predictLayoutParam_;
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
