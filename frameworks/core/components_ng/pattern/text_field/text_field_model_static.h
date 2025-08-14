@@ -32,6 +32,10 @@ public:
     static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool isTextArea);
+    static RefPtr<FrameNode> CreateTextInputNode(
+        int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value);
+    static RefPtr<FrameNode> CreateTextAreaNode(
+        int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& valueOpt);
