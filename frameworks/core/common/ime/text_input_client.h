@@ -254,6 +254,7 @@ public:
     virtual void HandleOnPageDown() {};
     virtual void ResetOriginCaretPosition() {};
     virtual bool RecordOriginCaretPosition() { return false; };
+    virtual bool IsShortCutBlocked() { return false; };
 protected:
     int32_t instanceId_ = -1;
     bool shiftFlag_ = false;
