@@ -32,7 +32,7 @@ bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
 RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
 {
     if (!dataPanelModifier_) {
-        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>();
+        dataPanelModifier_ = AceType::MakeRefPtr<DataPanelModifier>(WeakClaim(this));
     }
     auto paintMethod = MakeRefPtr<DataPanelPaintMethod>(dataPanelModifier_);
     auto host = GetHost();

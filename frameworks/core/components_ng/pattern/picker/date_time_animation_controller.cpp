@@ -31,6 +31,7 @@ void DateTimeAnimationController::PlayTitleInAnimation()
     auto buttonIcon = buttonIcon_.Upgrade();
     CHECK_NULL_VOID(buttonIcon);
     auto renderContext = buttonIcon->GetRenderContext();
+    auto context = buttonIcon->GetContextRefPtr();
     AnimationOption animationOption;
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
@@ -40,7 +41,7 @@ void DateTimeAnimationController::PlayTitleInAnimation()
         [renderContext]() {
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayTitleOutAnimation()
@@ -48,6 +49,7 @@ void DateTimeAnimationController::PlayTitleOutAnimation()
     auto buttonIcon = buttonIcon_.Upgrade();
     CHECK_NULL_VOID(buttonIcon);
     auto renderContext = buttonIcon->GetRenderContext();
+    auto context = buttonIcon->GetContextRefPtr();
     AnimationOption animationOption;
     animationOption.SetDuration(TRIANGLE_DURATION);
     animationOption.SetCurve(Curves::SHARP);
@@ -57,7 +59,7 @@ void DateTimeAnimationController::PlayTitleOutAnimation()
         [renderContext]() {
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayMovingInAnimation()
@@ -71,6 +73,7 @@ void DateTimeAnimationController::PlayMovingInAnimation()
     auto yearRenderContext = year->GetRenderContext();
     auto monthRenderContext = month->GetRenderContext();
     auto dayRenderContext = day->GetRenderContext();
+    auto context = year->GetContextRefPtr();
     AnimationOption animationOption;
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
@@ -88,7 +91,7 @@ void DateTimeAnimationController::PlayMovingInAnimation()
             yearRenderContext->UpdateTransformTranslate({ ref->yearEnd_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthEnd_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayEnd_, 0.0f, 0.0f });
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayMovingOutAnimation()
@@ -102,6 +105,7 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
     auto yearRenderContext = year->GetRenderContext();
     auto monthRenderContext = month->GetRenderContext();
     auto dayRenderContext = day->GetRenderContext();
+    auto context = year->GetContextRefPtr();
     AnimationOption animationOption;
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
@@ -119,7 +123,7 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
             yearRenderContext->UpdateTransformTranslate({ ref->yearStart_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthStart_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayStart_, 0.0f, 0.0f });
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
@@ -181,6 +185,7 @@ void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
     CHECK_NULL_VOID(day);
     auto monthRender = month->GetRenderContext();
     auto dayRender = day->GetRenderContext();
+    auto context = month->GetContextRefPtr();
     CHECK_NULL_VOID(monthRender);
     CHECK_NULL_VOID(dayRender);
 
@@ -196,7 +201,7 @@ void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
             CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(1);
             dayRender->UpdateOpacity(1);
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayYearColumnOpacityInAnimation()
@@ -298,6 +303,7 @@ void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
     CHECK_NULL_VOID(day);
     auto monthRender = month->GetRenderContext();
     auto dayRender = day->GetRenderContext();
+    auto context = month->GetContextRefPtr();
     CHECK_NULL_VOID(monthRender);
     CHECK_NULL_VOID(dayRender);
 
@@ -314,7 +320,7 @@ void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
             CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(0);
             dayRender->UpdateOpacity(0);
-        });
+        }, nullptr, nullptr, context);
 }
 
 void DateTimeAnimationController::PlayYearColumnOpacityOutAnimation()

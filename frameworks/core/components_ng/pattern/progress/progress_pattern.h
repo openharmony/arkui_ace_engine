@@ -51,7 +51,8 @@ public:
         if (!progressModifier_) {
             ProgressAnimatableProperty progressAnimatableProperty {};
             InitAnimatableProperty(progressAnimatableProperty);
-            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(GetHost(), progressAnimatableProperty);
+            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(
+                GetHost(), progressAnimatableProperty, WeakClaim(this));
         }
         bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (isRightToLeft_ != isRtl) {

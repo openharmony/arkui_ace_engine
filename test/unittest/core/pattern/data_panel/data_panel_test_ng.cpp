@@ -813,7 +813,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level0)
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -854,7 +854,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level0)
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -875,7 +875,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -891,7 +891,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
 }
@@ -908,7 +908,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -936,7 +936,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
     /**
      * @tc.case: layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegment(rsCanvas, linerData);
 }
@@ -953,7 +953,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level0)
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
@@ -977,7 +977,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level0)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DataPanelTheme>()));
 
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1007,7 +1007,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1043,7 +1043,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1112,7 +1112,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     
@@ -1167,7 +1167,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     
@@ -1222,7 +1222,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1279,7 +1279,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1310,7 +1310,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level0)
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1340,7 +1340,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1387,7 +1387,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     /**
      * @tc.case: case. layout direction rtl
      */
-    DataPanelModifier dataPanelModifierRtl;
+    DataPanelModifier dataPanelModifierRtl(nullptr);
     dataPanelModifierRtl.SetIsRtl(true);
     dataPanelModifierRtl.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
 }
@@ -1407,7 +1407,7 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level0)
     /**
      * @tc.cases: case. cover branch isEffect_.
      */
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     dataPanelModifier.isEffect_->Set(true);
     dataPanelModifier.date_->Set(0.0f);
     dataPanelModifier.UpdateDate();
@@ -1433,7 +1433,7 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level0)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. construct context and call onDraw().
@@ -1472,7 +1472,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Lev
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test positive sequence gradientColor.
@@ -1513,7 +1513,7 @@ HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Lev
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test Reverse GradientColor.
@@ -1554,7 +1554,7 @@ HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level0)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
 
     /**
      * @tc.steps: step2. Test the setting of Shadow attribute.
@@ -2328,7 +2328,7 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest006, TestSize.Level1)
  */
 HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level0)
 {
-    DataPanelModifier dataPanelModifier;
+    DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 50.0f, 50.0f };
     // test Solid color when the valueColors >0 and valueColors <=9

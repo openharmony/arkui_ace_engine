@@ -117,7 +117,7 @@ void PatternLockPatternTestNg::Create(const std::function<void(PatternLockModelN
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest001, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
 
     /**
     * @tc.steps: step3. Set PatternLock pattern variable and call OnTouchDown
@@ -145,7 +145,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest001, TestSize.Level1)
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest002, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
 
     /**
     * @tc.steps: step3. Set PatternLock pattern variable and call OnTouchUp
@@ -168,7 +168,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest002, TestSize.Level1)
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest003, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
 
     /**
     * @tc.steps: step3. Set PatternLock pattern variable and call HandleTouchEvent
@@ -480,7 +480,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest010, TestSize.Level1)
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest011, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
 
     /**
     * @tc.steps: step1. call HandleReset
@@ -565,7 +565,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest014, TestSize.Level1)
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     auto paintProperty_ = frameNode_->GetPaintProperty<PatternLockPaintProperty>();
     paintProperty_->UpdateCircleRadius(Dimension(CIRCLE_RADIUS_FLOAT));
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -614,7 +614,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest014, TestSize.Level1)
 HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest015, TestSize.Level1)
 {
     Create([](PatternLockModelNG model) {});
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
 
     /**
     * @tc.steps: step1: choosePoint_ is empty.
@@ -795,7 +795,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest019, TestSize.Level1)
     Create([](PatternLockModelNG model) {});
 
     frameNode_->GetGeometryNode()->SetContentSize(SizeF(300.0f, 300.0f));
-    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
+    pattern_->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>(nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
