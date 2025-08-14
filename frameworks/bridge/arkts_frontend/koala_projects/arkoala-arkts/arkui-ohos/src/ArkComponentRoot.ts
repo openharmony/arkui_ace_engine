@@ -17,7 +17,8 @@ import {
     MutableState,
     NodeAttach,
     rememberDisposable,
-    scheduleCallback }
+    scheduleCallback,
+    GlobalStateManager }
 from '@koalaui/runtime';
 import { ArkCustomComponentRootPeer } from './component';
 import { ArkCustomComponent } from './ArkCustomComponent';
@@ -29,8 +30,8 @@ let _isNeedCreate: boolean = false;
 
 export function setNeedCreate(isNeedCreate: boolean): boolean
 {
-    const temp = _isNeedCreate
-    _isNeedCreate = isNeedCreate
+    const temp = GlobalStateManager.instance._isNeedCreate
+    GlobalStateManager.instance._isNeedCreate = isNeedCreate
     return temp
 }
 

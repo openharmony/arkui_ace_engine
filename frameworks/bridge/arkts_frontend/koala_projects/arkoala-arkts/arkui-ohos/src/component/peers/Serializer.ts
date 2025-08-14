@@ -189,9 +189,6 @@ export class Serializer extends SerializerBase {
         if (Serializer.multithread) {
             return
         }
-        if (Serializer.poolTop != -1) {
-            throw new Error("Serializer pool is being used. Check if you had released serializers before")
-        }
         Serializer.multithread = true
         Serializer.pool = undefined;
     }
