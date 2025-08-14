@@ -2088,4 +2088,5 @@ HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
     int32_t num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 }
+
 } // namespace OHOS::Ace::NG
