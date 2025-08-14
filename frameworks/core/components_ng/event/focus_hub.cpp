@@ -2925,6 +2925,12 @@ RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead)
     if (!IsFocusableWholePath()) {
         return nullptr;
     }
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (context && context->GetIsFocusingByTab()) {
+        if (!IsFocusableByTab()) {
+            return nullptr;
+        }
+    }
     // focus moves within current scope
     if (IsCurrentFocus() && !IsAllowedLoop()) {
         return nullptr;
