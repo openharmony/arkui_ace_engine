@@ -45,7 +45,6 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
-#include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "nweb_helper.h"
