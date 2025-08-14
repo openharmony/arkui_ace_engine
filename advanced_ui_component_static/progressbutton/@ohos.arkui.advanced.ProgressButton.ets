@@ -15,11 +15,12 @@
 
 import {
   $r, Row, Area, Text, Color, Stack, Button, Length, Padding, Progress, Component, FontWeight, ResourceStr, ButtonType,
-  ClickEvent, HoverEffect, TextOverflow, ProgressType, ResourceColor, ButtonOptions, ProgressOptions,
+  ClickEvent, HoverEffect, TextOverflow, ProgressType, ResourceColor, ButtonOptions, ProgressOptions, Resource,
   CapsuleStyleOptions
 } from '@ohos.arkui.component';
 import { State, PropRef, Watch } from '@ohos.arkui.stateManagement';
 import { LengthUnit, LengthMetrics } from '@ohos.arkui.node';
+import common from '@ohos.app.ability.common';
 import { Theme } from '@ohos.arkui.theme';
 
 export interface ProgressButtonColorOptions {
@@ -141,6 +142,28 @@ export struct ProgressButton {
     return lengthString;
   }
 
+  private getButtonWidth(): Length {
+    if(!this.progressButtonWidth) {
+      return BUTTON_NORMARL_WIDTH;
+    }
+    if (typeof this.progressButtonWidth === 'number') {
+      return this.progressButtonWidth as number > BUTTON_NORMARL_WIDTH ?
+        this.progressButtonWidth as number : BUTTON_NORMARL_WIDTH;
+    }
+    let resourceString: string = '';
+    if (typeof this.progressButtonWidth === 'string') {
+      resourceString = this.progressButtonWidth as string;
+    } else {
+      resourceString = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+      getStringSync((this.progressButtonWidth as Resource).id) as string;
+    }
+    const regex = new RegExp('^(?:[0-9]+(\\.[0-9]+)?|([0-9]+(\\.[0-9]+)?)%|([0-9]+(\\.[0-9]+)?)vp)$');
+    if (regex.test(resourceString)) {
+      return resourceString as Length;
+    }
+    return BUTTON_NORMARL_WIDTH;
+  }
+
   build() {
     Button({ type: ButtonType.Normal } as ButtonOptions) {
       Stack() {
@@ -203,16 +226,14 @@ export struct ProgressButton {
       this.colorOptions?.backgroundColor : this.containerBackgroundColor)
     .constraintSize({ minWidth: 44 })
     .padding({ top: 0, bottom: 0 } as Padding)
-    .width((!(this.progressButtonWidth as Length) ||
-      (this.progressButtonWidth as number) < BUTTON_NORMARL_WIDTH as number) ?
-      BUTTON_NORMARL_WIDTH as number : this.progressButtonWidth as Length)
+    .width(this.getButtonWidth())
     .stateEffect(this.enable)
     .onClick((event?: ClickEvent) => {
       if (!this.enable) {
-        return
+        return;
       }
       if (this.progress < MAX_PROGRESS) {
-        this.isLoading = !this.isLoading
+        this.isLoading = !this.isLoading;
       }
       if (this.clickCallback) {
         this.clickCallback();
