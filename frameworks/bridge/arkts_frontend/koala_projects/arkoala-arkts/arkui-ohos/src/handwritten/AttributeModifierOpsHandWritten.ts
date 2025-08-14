@@ -36,10 +36,18 @@ import { ArkTextAreaComponent, TextAreaAttribute, ArkTextAreaPeer, TextAreaOptio
 import { ArkMarqueeComponent, MarqueeAttribute, ArkMarqueePeer, MarqueeOptions } from '../component/marquee';
 import { ArkHyperlinkComponent, HyperlinkAttribute, ArkHyperlinkPeer } from '../component/hyperlink';
 import { ArkRichEditorComponent, RichEditorAttribute, RichEditorOptions, RichEditorStyledStringOptions } from '../component/richEditor';
-import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
+import { ArkSpanComponent, SpanAttribute, ArkSpanPeer } from '../component/span';
+import { ArkImageSpanComponent, ImageSpanAttribute, ArkImageSpanPeer } from '../component/imageSpan';
+import { ArkSymbolSpanComponent, SymbolSpanAttribute, ArkSymbolSpanPeer } from '../component/symbolSpan';
+import { ArkContainerSpanComponent, ContainerSpanAttribute, ArkContainerSpanPeer } from '../component/containerSpan';
+import { applyAttributeModifierBase, applyCommonModifier, applyAttributeModifierNoCommonMethod } from "./modifiers/ArkCommonModifier";
 import { CommonModifier } from '../CommonModifier';
 import { ButtonModifier } from "../ButtonModifier";
 import { TextModifier } from '../TextModifier';
+import { SpanModifier } from '../SpanModifier';
+import { ImageSpanModifier } from '../ImageSpanModifier';
+import { SymbolSpanModifier } from '../SymbolSpanModifier';
+import { ContainerSpanModifier } from '../ContainerSpanModifier';
 import { BlankModifier } from '../BlankModifier';
 import { ColumnModifier } from '../ColumnModifier';
 import { ColumnSplitModifier } from '../ColumnSplitModifier';
@@ -62,6 +70,8 @@ import { HyperlinkModifier } from '../HyperlinkModifier';
 import { RichEditorModifier } from '../RichEditorModifier';
 import { Resource } from 'global.resource';
 import { runtimeType, RuntimeType } from '@koalaui/interop';
+import { ResourceStr } from "../component/units"
+import { PixelMap } from "#external"
 import { ArkGridComponent, GridAttribute } from '../component/grid';
 import { GridModifier } from '../GridModifier';
 import { ArkGridItemComponent, GridItemAttribute } from '../component/gridItem';
@@ -110,6 +120,148 @@ export function hookButtonAttributeModifier(component: ArkButtonComponent, modif
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ButtonAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): SpanModifier => {
+        let isSpanModifier: boolean = modifier instanceof SpanModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SpanModifier();
+        if (isSpanModifier) {
+            let spanModifier = modifier as object as SpanModifier;
+            initModifier.mergeModifier(spanModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length !== 1) {
+            throw new Error('must only 1 parameter')
+        }
+        let content_casted: string | Resource = params[0] as (string | Resource)
+        let spanPeer: ArkSpanPeer = component.getPeer() as Object as ArkSpanPeer;
+        spanPeer.setSpanOptionsAttribute(content_casted)
+    };
+    let updaterReceiver = (): ArkSpanComponent => {
+        let initComponent: ArkSpanComponent = new ArkSpanComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+}
+
+export function hookImageSpanAttributeModifier(component: ArkImageSpanComponent, modifier: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): ImageSpanModifier => {
+        let isImageSpanModifier: boolean = modifier instanceof ImageSpanModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ImageSpanModifier();
+        if (isImageSpanModifier) {
+            let imageSpanModifier = modifier as object as ImageSpanModifier;
+            initModifier.mergeModifier(imageSpanModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length !== 1) {
+            throw new Error('must only 1 parameter')
+        }
+        let content_casted: ResourceStr | PixelMap = params[0] as ResourceStr | PixelMap
+        let imageSpanPeer: ArkImageSpanPeer = component.getPeer() as Object as ArkImageSpanPeer;
+        imageSpanPeer.setImageSpanOptionsAttribute(content_casted)
+    };
+    let updaterReceiver = (): ArkImageSpanComponent => {
+        let initComponent: ArkImageSpanComponent = new ArkImageSpanComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ImageSpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookSymbolSpanAttributeModifier(component: ArkSymbolSpanComponent, modifier: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): SymbolSpanModifier => {
+        let isSymbolSpanModifier: boolean = modifier instanceof SymbolSpanModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SymbolSpanModifier();
+        if (isSymbolSpanModifier) {
+            let symbolSpanModifier = modifier as object as SymbolSpanModifier;
+            initModifier.mergeModifier(symbolSpanModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length !== 1) {
+            throw new Error('must only 1 parameter')
+        }
+        let content_casted: Resource = params[0] as Resource
+        let symbolSpanPeer: ArkSymbolSpanPeer = component.getPeer() as Object as ArkSymbolSpanPeer;
+        symbolSpanPeer.setSymbolSpanOptionsAttribute(content_casted)
+    };
+    let updaterReceiver = (): ArkSymbolSpanComponent => {
+        let initComponent: ArkSymbolSpanComponent = new ArkSymbolSpanComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SymbolSpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+}
+
+export function hookContainerSpanAttributeModifier(component: ArkContainerSpanComponent, modifier: AttributeModifier<ContainerSpanAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let attributeSet = (): ContainerSpanModifier => {
+        let isContainerSpanModifier: boolean = modifier instanceof ContainerSpanModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ContainerSpanModifier();
+        if (isContainerSpanModifier) {
+            let containerSpanModifier = modifier as object as ContainerSpanModifier;
+            initModifier.mergeModifier(containerSpanModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkContainerSpanComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkContainerSpanComponent => {
+        let initComponent: ArkContainerSpanComponent = new ArkContainerSpanComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    let attributeSet_ = applyAttributeModifierNoCommonMethod(modifier as Object as AttributeModifier<ContainerSpanAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer(), false);
+    attributeSet_!.applyModifierPatch(component.getPeer());
 }
 
 export function hookTextAttributeModifier(component: ArkTextComponent, modifier: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): void {

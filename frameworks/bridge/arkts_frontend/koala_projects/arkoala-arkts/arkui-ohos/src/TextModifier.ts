@@ -912,8 +912,12 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             }
         }
     }
-    mergeModifier(modifier: TextModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof TextModifier)) {
+            return
+        }
+        const modifier = value as TextModifier;
         if (modifier._fontColor_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_flag) {
