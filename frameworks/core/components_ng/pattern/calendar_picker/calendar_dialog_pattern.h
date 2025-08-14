@@ -100,6 +100,7 @@ public:
 
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     void UpdateCaretInfoToController();
 
