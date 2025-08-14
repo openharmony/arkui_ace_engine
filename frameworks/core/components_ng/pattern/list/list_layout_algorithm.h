@@ -443,6 +443,8 @@ public:
 
     void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
 
+    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
