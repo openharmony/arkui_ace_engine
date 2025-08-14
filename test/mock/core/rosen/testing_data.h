@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,14 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H
-
 #include <cstddef>
 #include <memory>
 namespace OHOS::Ace::Testing {
+inline size_t g_imageDataSize = 0;
 class TestingData {
 public:
+    typedef void (*DataReleaseProc)(const void* ptr, void* context);
+    
     TestingData() = default;
     virtual ~TestingData() = default;
 
@@ -29,9 +31,17 @@ public:
         return length > 0 ? true : false;
     }
 
+    virtual bool BuildWithProc(const void* ptr, size_t length, DataReleaseProc proc, void* ctx)
+    {
+        return length > 0 ? true : false;
+    }
+
     virtual size_t GetSize() const
     {
-        return 0;
+        if (!testImageDataSize) {
+            return 0;
+        }
+        return *testImageDataSize;
     }
 
     virtual void* GetData() const
@@ -58,6 +68,8 @@ public:
     {
         return nullptr;
     }
+
+    inline static size_t* testImageDataSize = &g_imageDataSize;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DATA_H

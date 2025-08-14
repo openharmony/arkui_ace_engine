@@ -324,7 +324,10 @@ ohos_unittest("image_loader_test") {
   module_out_path = image_test_output_path
 
   sources = [
+    "$ace_root/adapter/ohos/osal/file_uri_helper_ohos.cpp",
     "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/test/mock/base/mock_ace_trace.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
@@ -349,6 +352,8 @@ ohos_unittest("image_loader_test") {
   ]
   
   external_deps = [
+    "ability_base:zuri",
+    "app_file_service:fileuri_native",
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_base",

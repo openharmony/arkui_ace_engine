@@ -73,6 +73,7 @@ public:
     std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
         NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
+    std::shared_ptr<RSData> BuildImageData(const std::shared_ptr<RSData>& result);
 };
 
 // data provider image loader.
