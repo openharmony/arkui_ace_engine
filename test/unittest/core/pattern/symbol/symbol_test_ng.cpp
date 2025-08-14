@@ -258,7 +258,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest003, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. test get renderStrategy property
+     * @tc.steps: step3. test get renderStrategy property.
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
