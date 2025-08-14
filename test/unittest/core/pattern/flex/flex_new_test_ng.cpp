@@ -14,6 +14,7 @@
  */
 #include "flex_base_test_ng.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_ng/pattern/text/text_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1179,7 +1180,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest004, TestSize.Level1)
     /* corresponding ets code:
         Flex() {
             Flex() {
-                Flex().width("300px").height("400px")
+                Flex().width("300px").height("400px").flexShrink(0)
             }
             .width(LayoutPolicy.wrapContent)
             .height(LayoutPolicy.wrapContent)
@@ -1293,7 +1294,7 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level1)
     /* corresponding ets code:
         Flex() {
             Flex() {
-                Flex().width("300px").height("400px")
+                Flex().width("300px").height("400px").flexShrink(0)
             }
             .width(LayoutPolicy.fixAtIdealSize)
             .height(LayoutPolicy.fixAtIdealSize)
@@ -1428,5 +1429,65 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest008, TestSize.Level1)
     auto offset1 = geometryNode1->GetFrameOffset();
     EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
     EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: FlexWrapTest001
+ * @tc.desc: test the measure result in flex wrap and pixel_round_after_measure mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, FlexWrapTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner1, flexInner2;
+    auto flexWrap = CreateFlexWrapRow([this, &flexInner1, &flexInner2](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(325.0f));
+        flexInner1 = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(162.5f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+        });
+        flexInner2 = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(162.5f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+        });
+    });
+    ASSERT_NE(flexWrap, nullptr);
+    ASSERT_EQ(flexWrap->GetChildren().size(), 2);
+    CreateLayoutTask(flexWrap);
+
+    /* corresponding ets code:
+        Flex({wrap : FlexWrap.Wrap}) {
+          Flex()
+            .width("162.5px")
+            .height("100px")
+          Flex()
+            .width("162.5px")
+            .height("100px")
+        }
+        .width("325px")
+    */
+
+    // Expect flexWrap's width is 325, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode = flexWrap->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(325.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner1's width is 162.5, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner1->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(162.5f, 100.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner2's width is 162.5, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode2 = flexInner2->GetGeometryNode();
+    ASSERT_NE(geometryNode2, nullptr);
+    auto size2 = geometryNode2->GetFrameSize();
+    auto offset2 = geometryNode2->GetFrameOffset();
+    EXPECT_EQ(size2, SizeF(162.5f, 100.0f));
+    EXPECT_EQ(offset2, OffsetF(162.5f, 0.0f));
 }
 } // namespace OHOS::Ace::NG
