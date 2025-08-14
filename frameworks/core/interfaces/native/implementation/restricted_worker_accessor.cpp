@@ -52,13 +52,13 @@ void PostMessageWithSharedSendableImpl(Ark_VMContext vmContext,
 void OnImpl(Ark_VMContext vmContext,
             Ark_RestrictedWorker peer,
             const Ark_String* Type,
-            const Ark_WorkerEventListener* listener)
+            const WorkerEventListener* listener)
 {
 }
 void OnceImpl(Ark_VMContext vmContext,
               Ark_RestrictedWorker peer,
               const Ark_String* Type,
-              const Ark_WorkerEventListener* listener)
+              const WorkerEventListener* listener)
 {
 }
 void OffImpl(Ark_VMContext vmContext,
@@ -74,7 +74,7 @@ void TerminateImpl(Ark_VMContext vmContext,
 void AddEventListenerImpl(Ark_VMContext vmContext,
                           Ark_RestrictedWorker peer,
                           const Ark_String* Type,
-                          const Ark_WorkerEventListener* listener)
+                          const WorkerEventListener* listener)
 {
 }
 Ark_Boolean DispatchEventImpl(Ark_VMContext vmContext,

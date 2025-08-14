@@ -200,6 +200,30 @@ void SetRowsGapImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convValue);
     GridModelStatic::SetRowsGap(frameNode, convValue);
 }
+void SetScrollBarWidthImpl(Ark_NativePointer node,
+                           const Opt_Union_Number_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetScrollBarWidth(frameNode, convValue);
+}
+void SetScrollBarColorImpl(Ark_NativePointer node,
+                           const Opt_Union_Color_Number_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetScrollBarColor(frameNode, convValue);
+}
+void SetScrollBarImpl(Ark_NativePointer node,
+                      const Opt_BarState* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetScrollBar(frameNode, convValue);
+}
 void SetOnScrollBarUpdateImpl(Ark_NativePointer node,
                               const Opt_Callback_Number_Number_ComputedBarAttribute* value)
 {
@@ -434,6 +458,30 @@ void SetOnItemDropImpl(Ark_NativePointer node,
     };
     GridModelStatic::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
+void SetNestedScrollImpl(Ark_NativePointer node,
+                         const Opt_NestedScrollOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetNestedScroll(frameNode, convValue);
+}
+void SetEnableScrollInteractionImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetEnableScrollInteraction(frameNode, convValue);
+}
+void SetFrictionImpl(Ark_NativePointer node,
+                     const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GridModelNG::SetFriction(frameNode, convValue);
+}
 void SetAlignItemsImpl(Ark_NativePointer node,
                        const Opt_GridItemAlignment* value)
 {
@@ -500,6 +548,16 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto showValue = Converter::OptConvertPtr<bool>(show).value_or(false);
     GridModelStatic::SetShowCached(frameNode, showValue);
 }
+void SetEdgeEffectImpl(Ark_NativePointer node,
+                       const Opt_EdgeEffect* value,
+                       const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //GridModelNG::SetEdgeEffect(frameNode, convValue);
+}
 } // GridAttributeModifier
 const GENERATED_ArkUIGridModifier* GetGridModifier()
 {
@@ -510,6 +568,9 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetRowsTemplateImpl,
         GridAttributeModifier::SetColumnsGapImpl,
         GridAttributeModifier::SetRowsGapImpl,
+        GridAttributeModifier::SetScrollBarWidthImpl,
+        GridAttributeModifier::SetScrollBarColorImpl,
+        GridAttributeModifier::SetScrollBarImpl,
         GridAttributeModifier::SetOnScrollBarUpdateImpl,
         GridAttributeModifier::SetOnScrollIndexImpl,
         GridAttributeModifier::SetCachedCount0Impl,
@@ -525,11 +586,15 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetOnItemDragMoveImpl,
         GridAttributeModifier::SetOnItemDragLeaveImpl,
         GridAttributeModifier::SetOnItemDropImpl,
+        GridAttributeModifier::SetNestedScrollImpl,
+        GridAttributeModifier::SetEnableScrollInteractionImpl,
+        GridAttributeModifier::SetFrictionImpl,
         GridAttributeModifier::SetAlignItemsImpl,
         GridAttributeModifier::SetOnScrollFrameBeginImpl,
         GridAttributeModifier::SetOnWillScrollImpl,
         GridAttributeModifier::SetOnDidScrollImpl,
         GridAttributeModifier::SetCachedCount1Impl,
+        GridAttributeModifier::SetEdgeEffectImpl,
     };
     return &ArkUIGridModifierImpl;
 }

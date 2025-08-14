@@ -551,6 +551,14 @@ void SetMenuOutlineImpl(Ark_NativePointer node,
     auto optConvert = Converter::OptConvertPtr<MenuParam>(value);
     SelectModelStatic::SetMenuOutline(frameNode, optConvert);
 }
+void SetBackgroundColorImpl(Ark_NativePointer node,
+                            const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetBackgroundColor(frameNode, convValue);
+}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
@@ -600,6 +608,7 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetDividerStyleImpl,
         SelectAttributeModifier::SetAvoidanceImpl,
         SelectAttributeModifier::SetMenuOutlineImpl,
+        SelectAttributeModifier::SetBackgroundColorImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;

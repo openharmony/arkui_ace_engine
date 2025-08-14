@@ -137,7 +137,6 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
         RowInterfaceModifier::SetRowOptionsImpl,
         RowAttributeModifier::SetAlignItemsImpl,
         RowAttributeModifier::SetJustifyContentImpl,
-        RowAttributeModifier::SetPointLightImpl,
         RowAttributeModifier::SetReverseImpl,
     };
     return &ArkUIRowModifierImpl;

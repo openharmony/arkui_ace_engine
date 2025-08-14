@@ -50,6 +50,11 @@ Ark_Edges BorderStylesImpl(Ark_BorderStyle all)
 {
     return {};
 }
+Ark_image_PixelMap ComponentSnapshot_getSyncImpl(const Ark_String* id,
+                                                 const Opt_componentSnapshot_SnapshotOptions* options)
+{
+    return {};
+}
 void CursorControl_restoreDefaultImpl()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -142,6 +147,10 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
         TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return Converter::ArkValue<Ark_Boolean>(result);
 }
+Ark_font_UIFontConfig Font_getUIFontConfigImpl()
+{
+    return {};
+}
 Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
 {
     return {};
@@ -233,6 +242,7 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
         GlobalScopeAccessor::AnimateToImmediatelyImpl,
         GlobalScopeAccessor::BorderRadiusesImpl,
         GlobalScopeAccessor::BorderStylesImpl,
+        GlobalScopeAccessor::ComponentSnapshot_getSyncImpl,
         GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
         GlobalScopeAccessor::CursorControl_setCursorImpl,
         GlobalScopeAccessor::Curves_cubicBezierCurveImpl,
@@ -246,6 +256,7 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
         GlobalScopeAccessor::EdgeColorsImpl,
         GlobalScopeAccessor::EdgeWidthsImpl,
         GlobalScopeAccessor::FocusControl_requestFocusImpl,
+        GlobalScopeAccessor::Font_getUIFontConfigImpl,
         GlobalScopeAccessor::GetRectangleByIdImpl,
         GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,

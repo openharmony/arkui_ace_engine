@@ -681,14 +681,14 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
     dst.id = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(src.GetId()));
 
-    std::vector<std::string> paramsArray;
+    std::vector<Ark_Union_String_I32_I64_F64_Resource> paramsArray;
     auto params = src.GetParams();
     for (const ResourceObjectParams& param : params) {
         if (param.value) {
-            paramsArray.push_back(*param.value);
+            paramsArray.push_back(ArkUnion<Ark_Union_String_I32_I64_F64_Resource, Ark_String>(*param.value, ctx));
         }
     }
-    dst.params = Converter::ArkValue<Opt_Array_String>(paramsArray, ctx);
+    dst.params = Converter::ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(paramsArray, ctx);
     dst.type = Converter::ArkValue<Opt_Int32>(src.GetType());
 }
 
@@ -837,20 +837,20 @@ Ark_Resource ArkCreate(int64_t id, ResourceType type)
         .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
         .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
-        .params = ArkValue<Opt_Array_String>(),
+        .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(),
     };
 }
 
 template<>
 Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
 {
-    std::vector<Ark_String> params = { ArkValue<Ark_String>(name, ctx) };
+    std::vector params = { ArkUnion<Ark_Union_String_I32_I64_F64_Resource, Ark_String>(name, ctx) };
     return {
         .id = ArkValue<Ark_Int64>(static_cast<int64_t>(-1)),
         .type = ArkValue<Opt_Int32>(static_cast<int32_t>(type)),
         .moduleName = ArkValue<Ark_String>(""),
         .bundleName = ArkValue<Ark_String>(""),
-        .params = ArkValue<Opt_Array_String>(params, ctx),
+        .params = ArkValue<Opt_Array_Union_String_I32_I64_F64_Resource>(params, ctx),
     };
 }
 

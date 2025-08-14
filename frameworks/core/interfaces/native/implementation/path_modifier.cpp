@@ -34,11 +34,9 @@ template<>
 PathOptions Convert(const Ark_PathOptions& src)
 {
     return {
-#ifdef WRONG_GEN
         .width = Converter::OptConvert<Dimension>(src.width),
         .height = Converter::OptConvert<Dimension>(src.height),
         .commands = OptConvert<std::string>(src.commands),
-#endif
     };
 }
 } // namespace Converter
@@ -74,8 +72,8 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 }
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
-void CommandsImpl(Ark_NativePointer node,
-                  const Opt_String* value)
+void SetCommandsImpl(Ark_NativePointer node,
+                     const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,6 +90,7 @@ const GENERATED_ArkUIPathModifier* GetPathModifier()
     static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
         PathModifier::ConstructImpl,
         PathInterfaceModifier::SetPathOptionsImpl,
+        PathAttributeModifier::SetCommandsImpl,
     };
     return &ArkUIPathModifierImpl;
 }

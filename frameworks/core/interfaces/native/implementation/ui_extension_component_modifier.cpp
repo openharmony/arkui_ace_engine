@@ -147,7 +147,7 @@ void SetOnRemoteReadyImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void SetOnReceiveImpl(Ark_NativePointer node,
-                      const Opt_Callback_Map_String_Object_Void* value)
+                      const Opt_Callback_Map_String_RecordData_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

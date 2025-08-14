@@ -41,12 +41,11 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
+namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t NUM_0 = 0;
     constexpr int32_t NUM_1 = 1;
     constexpr int32_t NUM_2 = 2;
-    constexpr int32_t NUM_3 = 3;
-    constexpr int32_t NUM_4 = 4;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
     constexpr double NUM_DOUBLE_0 = 0.;
@@ -104,23 +103,24 @@ namespace {
     static const int32_t MAX_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W900);
     const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
-    std::string GetReplaceContentStr(
-        int32_t pos, const std::string& type, std::vector<std::string>& params, int32_t containCount)
+    std::string GetReplaceContentStr(int32_t pos, const std::string& type,
+        std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
     {
         auto index = pos + containCount;
-        if (index < 0) {
+        if (index < 0 || index >= params.size()) {
             return std::string();
         }
-        return params.at(index);
+        //return params.at(index);
+        return ""; // TODO: Correct formatting for all types
     }
-    void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)
+    void ReplaceHolder(std::optional<std::string>& originStr,
+        std::vector<Converter::ResourceConverter::ParamType>& params, size_t containCount)
     {
-        auto size = static_cast<int32_t>(params.size());
-        if (containCount == size) {
+        if (containCount == params.size() || !originStr.has_value()) {
             return;
         }
-        std::string::const_iterator start = originStr.begin();
-        std::string::const_iterator end = originStr.end();
+        std::string::const_iterator start = originStr->begin();
+        std::string::const_iterator end = originStr->end();
         std::smatch matches;
         bool shortHolderType = false;
         bool firstMatch = true;
@@ -145,15 +145,14 @@ namespace {
                     GetReplaceContentStr(OHOS::Ace::Framework::StringToInt(pos) - 1, type, params, containCount);
             }
 
-            originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
-            start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
-            end = originStr.end();
+            originStr->replace(matches[0].first - originStr->begin(), matches[0].length(), replaceContentStr);
+            start = originStr->begin() + matches.prefix().length() + replaceContentStr.length();
+            end = originStr->end();
             searchTime++;
         }
     }
 } // namespace
 
-namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src)
 {
     return src ? std::optional(static_cast<double>(src.value())) : std::nullopt;
@@ -271,13 +270,44 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
+// Converters needed for ResourceConverter should be declared before usage!
+template<>
+ResourceConverter::ParamType::value_type Convert(const Ark_String& src)
+{
+    return Convert<std::string>(src);
+}
+
+template<>
+ResourceConverter::ParamType::value_type Convert(const Ark_Int32& src)
+{
+    return Convert<int32_t>(src);
+}
+
+template<>
+ResourceConverter::ParamType::value_type Convert(const Ark_Int64& src)
+{
+    return Convert<int64_t>(src);
+}
+
+template<>
+ResourceConverter::ParamType::value_type Convert(const Ark_Float64& src)
+{
+    return Convert<double>(src);
+}
+
+template<>
+ResourceConverter::ParamType::value_type Convert(const Ark_Resource& src)
+{
+    return ResourceConverter(src);
+}
+
 ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
     id_ = resource.id;
     type_ = static_cast<ResourceType>(OptConvert<int>(resource.type).value_or(0));
     bundleName_ = Convert<std::string>(resource.bundleName);
     moduleName_ = Convert<std::string>(resource.moduleName);
-    params_ = OptConvert<StringArray>(resource.params).value_or(StringArray{});
+    params_ = OptConvert<std::vector<ParamType>>(resource.params).value_or(std::vector<ParamType>{});
     themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
     if (!themeConstants_) {
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -290,15 +320,27 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     resWrapper_ = AceType::MakeRefPtr<ResourceWrapper>(themeConstants_, resAdapter);
 }
 
+std::optional<std::string> ResourceConverter::GetResourceName()
+{
+    if (params_.empty() || !params_[0].has_value())
+    {
+        return std::nullopt;
+    }
+    if (auto str = std::get_if<std::string>(&(params_[0].value())); str) {
+        return *str;
+    }
+    return std::nullopt;
+}
+
 std::optional<std::string> ResourceConverter::GetStringResource()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
         result = resWrapper_->GetString(id_);
-        ReplaceHolder(result.value(), params_, 0);
-    } else if (!params_.empty()) {
-        result = resWrapper_->GetStringByName(params_.front());
-        ReplaceHolder(result.value(), params_, 1);
+        ReplaceHolder(result, params_, 0);
+    } else if (auto name = GetResourceName(); name) {
+        result = resWrapper_->GetStringByName(*name);
+        ReplaceHolder(result, params_, 1);
     } else {
         LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -308,8 +350,8 @@ std::optional<std::string> ResourceConverter::GetStringResource()
 std::optional<std::string> ResourceConverter::GetRawfilePath()
 {
     std::optional<std::string> result;
-    if (!params_.empty()) {
-        result = resWrapper_->GetRawfile(params_.front());
+    if (auto name = GetResourceName(); name) {
+        result = resWrapper_->GetRawfile(*name);
     }
     return result;
 }
@@ -319,21 +361,35 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
     std::optional<std::string> result;
     if (id_ != -1) {
         result = resWrapper_->GetMediaPath(id_);
-    } else if (!params_.empty()) {
-        result = resWrapper_->GetMediaPathByName(params_.front());
+    } else if (auto name = GetResourceName(); name) {
+        result = resWrapper_->GetMediaPathByName(*name);
     }
     return result;
+}
+
+static std::optional<int> GetIntParam(std::vector<ResourceConverter::ParamType>& src, size_t index) {
+    if (index >= src.size() || !src[index].has_value()) {
+        return std::nullopt;
+    }
+    if (auto value = std::get_if<int64_t>(&(src[index].value())); value) {
+        return *value;
+    }
+    return std::nullopt;
 }
 
 std::optional<std::string> ResourceConverter::GetPluralResource()
 {
     std::optional<std::string> result;
-    if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
-        result = resWrapper_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
-        ReplaceHolder(result.value(), params_, 1);
-    } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
-        result = resWrapper_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
-        ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
+    if (id_ != -1) {
+        if (auto count = GetIntParam(params_, 0); count) {
+            result = resWrapper_->GetPluralString(id_, *count);
+            ReplaceHolder(result, params_, 1);
+        }
+    } else if (auto name = GetResourceName(); name) {
+        if (auto count = GetIntParam(params_, 1); count) {
+            result = resWrapper_->GetPluralStringByName(*name, *count);
+            ReplaceHolder(result, params_, 2);  // 2 means data get from params_[2]
+        }
     } else {
         LOGE("Invalid PLURAL resource OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -345,8 +401,8 @@ std::optional<int32_t> ResourceConverter::GetIntegerResource()
     std::optional<int32_t> result;
     if (id_ != -1) {
         result = resWrapper_->GetInt(id_);
-    } else if (!params_.empty()) {
-        result = resWrapper_->GetIntByName(params_.front());
+    } else if (auto name = GetResourceName(); name) {
+        result = resWrapper_->GetIntByName(*name);
     } else {
         LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -358,8 +414,8 @@ std::optional<double> ResourceConverter::GetFloatResource()
     std::optional<double> result;
     if (id_ != -1) {
         result = resWrapper_->GetDouble(id_);
-    } else if (!params_.empty()) {
-        result = resWrapper_->GetDoubleByName(params_.front());
+    } else if (auto name = GetResourceName(); name) {
+        result = resWrapper_->GetDoubleByName(*name);
     } else {
         LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -397,8 +453,8 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
     if (type_ == ResourceType::STRARRAY) {
         if (id_ != -1) {
             return resWrapper_->GetStringArray(id_);
-        } else if (params_.size() > 0) {
-            return resWrapper_->GetStringArrayByName(params_.front());
+        } else if (auto name = GetResourceName(); name) {
+            return resWrapper_->GetStringArrayByName(*name);
         } else {
             LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
         }
@@ -413,8 +469,8 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
         std::optional<std::string> str;
         if (id_ != -1) {
             str = resWrapper_->GetString(id_);
-        } else if (!params_.empty()) {
-            str = resWrapper_->GetStringByName(params_.front());
+        } else if (auto name = GetResourceName(); name) {
+            str = resWrapper_->GetStringByName(*name);
         } else {
             LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
@@ -433,14 +489,14 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
-        auto resource = ToInt();
+        auto resource = GetIntegerResource();
         if (!resource) return std::nullopt;
         return Dimension(*resource, DimensionUnit::VP);
     } else if (type_ == ResourceType::FLOAT) {
-        if (id_ == -1 && !params_.empty()) {
-            return resWrapper_->GetDimensionByName(params_.front());
-        } else if (id_ != -1) {
+        if (id_ != -1) {
             return resWrapper_->GetDimension(id_);
+        } else if (auto name = GetResourceName(); name) {
+            return resWrapper_->GetDimensionByName(*name);
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
@@ -452,11 +508,9 @@ std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::STRING) {
-        if (id_ != -1) {
-            return CalcLength(resWrapper_->GetString(id_));
-        }
-        if (!params_.empty()) {
-            return CalcLength(resWrapper_->GetStringByName(params_.front()));
+        auto str = GetStringResource();
+        if (str) {
+            return CalcLength(*str);
         }
         LOGE("ResourceConverter::ToCalcLength Unknown resource value");
         return std::nullopt;
@@ -470,25 +524,25 @@ std::optional<float> ResourceConverter::ToFloat()
     std::optional<float> optFloat = std::nullopt;
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::FLOAT) {
-        if (id_ == -1 && params_.size() > 0) {
-            optFloat = static_cast<float>(resWrapper_->GetDoubleByName(params_[0]));
-        } else {
+        if (id_ != -1) {
             optFloat = static_cast<float>(resWrapper_->GetDouble(id_));
+        } else if (auto name = GetResourceName(); name) {
+            optFloat = static_cast<float>(resWrapper_->GetDoubleByName(*name));
         }
     } else if (type_ == ResourceType::INTEGER) {
-        if (id_ == -1 && params_.size() > 0) {
-            optFloat = static_cast<float>(resWrapper_->GetIntByName(params_[0]));
-        } else {
+        if (id_ != -1) {
             optFloat = static_cast<float>(resWrapper_->GetInt(id_));
+        } else if (auto name = GetResourceName(); name) {
+            optFloat = static_cast<float>(resWrapper_->GetIntByName(*name));
         }
     } else if (type_ == ResourceType::STRING) {
         std::optional<std::string> result;
         if (id_ != -1) {
             result = resWrapper_->GetString(id_);
-            ReplaceHolder(result.value(), params_, 0);
-        } else if (!params_.empty()) {
-            result = resWrapper_->GetStringByName(params_.front());
-            ReplaceHolder(result.value(), params_, 1);
+            ReplaceHolder(result, params_, 0);
+        } else if (auto name = GetResourceName(); name) {
+            result = resWrapper_->GetStringByName(*name);
+            ReplaceHolder(result, params_, 1);
         }
         if (result.has_value()) {
             double floatVal;
@@ -504,7 +558,7 @@ std::optional<int32_t> ResourceConverter::ToInt()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
-        return resWrapper_->GetInt(id_);
+        return GetIntegerResource();
     }
     return std::nullopt;
 }
@@ -512,10 +566,10 @@ std::optional<int32_t> ResourceConverter::ToInt()
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
     CHECK_NULL_RETURN(resWrapper_, std::nullopt);
-    if (id_ == -1 && !params_.empty()) {
-        return resWrapper_->GetSymbolByName(params_.front().c_str());
-    } else if (id_ != -1) {
+    if (id_ != -1) {
         return resWrapper_->GetSymbolById(id_);
+    } else if (auto name = GetResourceName(); name) {
+        return resWrapper_->GetSymbolByName(name->c_str());
     }
     return std::nullopt;
 }
@@ -524,26 +578,27 @@ std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
     CHECK_NULL_RETURN(resWrapper_, result);
-    if (id_ == -1 && params_.size() > 0) {
-        result = resWrapper_->GetColorByName(params_[0]);
-        return result;
-    }
-
     switch (type_) {
         case ResourceType::STRING: {
             Color color;
-            if (Color::ParseColorString(resWrapper_->GetString(id_), color)) {
+            if (auto str = GetStringResource(); str && Color::ParseColorString(*str, color)) {
                 result = color;
             }
             break;
         }
 
         case ResourceType::INTEGER:
-            result = Color(ColorAlphaAdapt(resWrapper_->GetInt(id_)));
+            if (auto value = GetIntegerResource(); value) {
+                result = Color(ColorAlphaAdapt(*value));
+            }
             break;
 
         case ResourceType::COLOR:
-            result = resWrapper_->GetColor(id_);
+            if (id_ != -1) {
+                result = resWrapper_->GetColor(id_);
+            } else if (auto name = GetResourceName(); name) {
+                result = resWrapper_->GetColorByName(*name);
+            }
             break;
 
         default:

@@ -97,18 +97,18 @@ void SetScaleXImpl(Ark_Matrix2D peer,
     CHECK_NULL_VOID(sx);
     peer->SetScaleX(*sx);
 }
-Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
+Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetRotateY());
+    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
 }
-void SetRotateYImpl(Ark_Matrix2D peer,
-                    const Opt_Number* rotateY)
+void SetScaleYImpl(Ark_Matrix2D peer,
+                   const Opt_Number* scaleY)
 {
     CHECK_NULL_VOID(peer);
-    auto ry = Converter::OptConvertPtr<double>(rotateY);
-    CHECK_NULL_VOID(ry);
-    peer->SetRotateY(*ry);
+    auto sy = Converter::OptConvertPtr<double>(scaleY);
+    CHECK_NULL_VOID(sy);
+    peer->SetScaleY(*sy);
 }
 Opt_Number GetRotateXImpl(Ark_Matrix2D peer)
 {
@@ -123,18 +123,18 @@ void SetRotateXImpl(Ark_Matrix2D peer,
     CHECK_NULL_VOID(rx);
     peer->SetRotateX(*rx);
 }
-Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
+Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
+    return Converter::ArkValue<Opt_Number>(peer->GetRotateY());
 }
-void SetScaleYImpl(Ark_Matrix2D peer,
-                   const Opt_Number* scaleY)
+void SetRotateYImpl(Ark_Matrix2D peer,
+                    const Opt_Number* rotateY)
 {
     CHECK_NULL_VOID(peer);
-    auto sy = Converter::OptConvertPtr<double>(scaleY);
-    CHECK_NULL_VOID(sy);
-    peer->SetScaleY(*sy);
+    auto ry = Converter::OptConvertPtr<double>(rotateY);
+    CHECK_NULL_VOID(ry);
+    peer->SetRotateY(*ry);
 }
 Opt_Number GetTranslateXImpl(Ark_Matrix2D peer)
 {
@@ -177,12 +177,12 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
         Matrix2DAccessor::ScaleImpl,
         Matrix2DAccessor::GetScaleXImpl,
         Matrix2DAccessor::SetScaleXImpl,
-        Matrix2DAccessor::GetRotateYImpl,
-        Matrix2DAccessor::SetRotateYImpl,
-        Matrix2DAccessor::GetRotateXImpl,
-        Matrix2DAccessor::SetRotateXImpl,
         Matrix2DAccessor::GetScaleYImpl,
         Matrix2DAccessor::SetScaleYImpl,
+        Matrix2DAccessor::GetRotateXImpl,
+        Matrix2DAccessor::SetRotateXImpl,
+        Matrix2DAccessor::GetRotateYImpl,
+        Matrix2DAccessor::SetRotateYImpl,
         Matrix2DAccessor::GetTranslateXImpl,
         Matrix2DAccessor::SetTranslateXImpl,
         Matrix2DAccessor::GetTranslateYImpl,

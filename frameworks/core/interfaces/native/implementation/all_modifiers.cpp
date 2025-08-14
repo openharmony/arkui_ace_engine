@@ -98,6 +98,7 @@ const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier();
 const GENERATED_ArkUIComponentRootModifier* GetComponentRootModifier();
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier();
 const GENERATED_ArkUICounterModifier* GetCounterModifier();
+const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
@@ -179,6 +180,7 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier();
 const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier();
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier();
 const GENERATED_ArkUIToggleModifier* GetToggleModifier();
+const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
 const GENERATED_ArkUIVideoModifier* GetVideoModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
@@ -285,7 +287,6 @@ const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor();
 const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor();
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 const GENERATED_ArkUILayoutableAccessor* GetLayoutableAccessor();
-const GENERATED_ArkUILayoutCallbackAccessor* GetLayoutCallbackAccessor();
 const GENERATED_ArkUILayoutChildAccessor* GetLayoutChildAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
@@ -314,7 +315,6 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
 const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor();
 const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor();
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
-const GENERATED_ArkUIPageLifeCycleAccessor* GetPageLifeCycleAccessor();
 const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor();
 const GENERATED_ArkUIPanGestureInterfaceAccessor* GetPanGestureInterfaceAccessor();
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
@@ -331,6 +331,7 @@ const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor();
+const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor();
 const GENERATED_ArkUIRenderingContextSettingsAccessor* GetRenderingContextSettingsAccessor();
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
@@ -442,6 +443,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetComponentRootModifier,
         GetContainerSpanModifier,
         GetCounterModifier,
+        GetCustomBuilderRootModifier,
         GetCustomLayoutRootModifier,
         GetDataPanelModifier,
         GetDatePickerModifier,
@@ -523,6 +525,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetTextTimerModifier,
         GetTimePickerModifier,
         GetToggleModifier,
+        GetToolBarItemModifier,
         GetUIExtensionComponentModifier,
         GetVideoModifier,
         GetWaterFlowModifier,
@@ -635,7 +638,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetJsResultAccessor,
         GetKeyEventAccessor,
         GetLayoutableAccessor,
-        GetLayoutCallbackAccessor,
         GetLayoutChildAccessor,
         GetLayoutManagerAccessor,
         GetLayoutPolicyAccessor,
@@ -664,7 +666,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetNodeContentAccessor,
         GetOffscreenCanvasAccessor,
         GetOffscreenCanvasRenderingContext2DAccessor,
-        GetPageLifeCycleAccessor,
         GetPanGestureEventAccessor,
         GetPanGestureInterfaceAccessor,
         GetPanGestureOptionsAccessor,
@@ -681,6 +682,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPixelMapMockAccessor,
         GetProgressMaskAccessor,
         GetPromptActionAccessor,
+        GetPulseSymbolEffectAccessor,
         GetRectShapeAccessor,
         GetRenderingContextSettingsAccessor,
         GetRenderNodeAccessor,

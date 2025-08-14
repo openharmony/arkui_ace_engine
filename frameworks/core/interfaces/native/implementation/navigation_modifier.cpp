@@ -61,21 +61,18 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 } // namespace NavigationModifier
 
 namespace NavigationInterfaceModifier {
-void SetNavigationOptions0Impl(Ark_NativePointer node)
-{
-}
-
-void SetNavigationOptions1Impl(Ark_NativePointer node,
-                               Ark_NavPathStack pathInfos)
+void SetNavigationOptionsImpl(Ark_NativePointer node,
+                              const Opt_NavPathStack* pathInfos)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(pathInfos);
     auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+#ifdef WRONG_GEN
     auto navigationStack = pathInfos->GetNavPathStack();
     navigationPattern->SetNavigationStack(navigationStack);
     navigationStack->SetOnStateChangedCallback(nullptr);
+#endif
 }
 } // namespace NavigationInterfaceModifier
 
@@ -693,8 +690,7 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
 {
     static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
         NavigationModifier::ConstructImpl,
-        NavigationInterfaceModifier::SetNavigationOptions0Impl,
-        NavigationInterfaceModifier::SetNavigationOptions1Impl,
+        NavigationInterfaceModifier::SetNavigationOptionsImpl,
         NavigationAttributeModifier::SetNavBarWidthImpl,
         NavigationAttributeModifier::SetNavBarPositionImpl,
         NavigationAttributeModifier::SetNavBarWidthRangeImpl,

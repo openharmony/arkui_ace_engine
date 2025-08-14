@@ -114,7 +114,6 @@ const GENERATED_ArkUIStackModifier* GetStackModifier()
         StackModifier::ConstructImpl,
         StackInterfaceModifier::SetStackOptionsImpl,
         StackAttributeModifier::SetAlignContentImpl,
-        StackAttributeModifier::SetPointLightImpl,
     };
     return &ArkUIStackModifierImpl;
 }

@@ -248,6 +248,10 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
 
     options->controller->AddTargetController(controller);
 }
+void SetRichEditorOptionsImpl(Ark_NativePointer node,
+                              const Ark_Union_RichEditorOptions_RichEditorStyledStringOptions* options)
+{
+}
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
 void SetOnReadyImpl(Ark_NativePointer node,
@@ -719,8 +723,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
         RichEditorModifier::ConstructImpl,
-        RichEditorInterfaceModifier::SetRichEditorOptions0Impl,
-        RichEditorInterfaceModifier::SetRichEditorOptions1Impl,
+        RichEditorInterfaceModifier::SetRichEditorOptionsImpl,
         RichEditorAttributeModifier::SetOnReadyImpl,
         RichEditorAttributeModifier::SetOnSelectImpl,
         RichEditorAttributeModifier::SetOnSelectionChangeImpl,

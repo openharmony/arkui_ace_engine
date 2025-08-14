@@ -45,8 +45,8 @@ namespace Converter {
     RequestPluginInfo Convert(const Ark_PluginComponentTemplate& temp)
     {
         RequestPluginInfo info;
-        info.source = Convert<std::string>(temp.source);
-        info.bundleName = Convert<std::string>(temp.bundleName);
+        info.source = OptConvert<std::string>(temp.source).value_or("");
+        info.bundleName = OptConvert<std::string>(temp.bundleName).value_or("");
         return info;
     }
 } // Converter
@@ -114,7 +114,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
-        errorData.errcode = Converter::ArkValue<Ark_Number>(StringUtils::StringToInt(json->GetString("errcode")));
+        errorData.errcode = Converter::ArkValue<Ark_Int32>(StringUtils::StringToInt(json->GetString("errcode")));
         auto msg = json->GetString("msg");
         errorData.msg = Converter::ArkValue<Ark_String>(msg);
         arkCallback.Invoke(errorData);

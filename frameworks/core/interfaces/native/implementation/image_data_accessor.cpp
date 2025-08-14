@@ -60,22 +60,22 @@ void SetDataImpl(Ark_ImageData peer,
                  const Ark_Buffer* data)
 {
 }
-Ark_Number GetHeightImpl(Ark_ImageData peer)
+Ark_Int32 GetHeightImpl(Ark_ImageData peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    return Converter::ArkValue<Ark_Number>(peer->value.dirtyHeight);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    return Converter::ArkValue<Ark_Int32>(peer->value.dirtyHeight);
 }
 void SetHeightImpl(Ark_ImageData peer,
-                   const Ark_Number* height)
+                   Ark_Int32 height)
 {
 }
-Ark_Number GetWidthImpl(Ark_ImageData peer)
+Ark_Int32 GetWidthImpl(Ark_ImageData peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    return Converter::ArkValue<Ark_Number>(peer->value.dirtyWidth);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Int32>(0));
+    return Converter::ArkValue<Ark_Int32>(peer->value.dirtyWidth);
 }
 void SetWidthImpl(Ark_ImageData peer,
-                  const Ark_Number* width)
+                  Ark_Int32 width)
 {
 }
 } // ImageDataAccessor

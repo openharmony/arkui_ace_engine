@@ -33,7 +33,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // CanvasModifier
 namespace CanvasInterfaceModifier {
-
 template<typename T>
 void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
 {
@@ -91,6 +90,13 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 
     LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - Ark_ImageAIOptions is not supported.");
 }
+void SetCanvasOptionsImpl(Ark_NativePointer node,
+                          const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
+                          const Opt_ImageAIOptions* imageAIOptions)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void SetOnReadyImpl(Ark_NativePointer node,
@@ -123,8 +129,7 @@ const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
 {
     static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
         CanvasModifier::ConstructImpl,
-        CanvasInterfaceModifier::SetCanvasOptions0Impl,
-        CanvasInterfaceModifier::SetCanvasOptions1Impl,
+        CanvasInterfaceModifier::SetCanvasOptionsImpl,
         CanvasAttributeModifier::SetOnReadyImpl,
         CanvasAttributeModifier::SetEnableAnalyzerImpl,
     };

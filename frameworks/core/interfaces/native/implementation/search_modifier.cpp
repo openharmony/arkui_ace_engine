@@ -38,10 +38,6 @@ struct SearchButtonOptions {
     std::optional<bool> autoDisable;
 };
 
-using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
-using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
-using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_SymbolGlyphModifier>;
-
 std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_String_Bindable& value)
 {
     std::optional<std::string> result;
@@ -70,23 +66,9 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
     NG::IconOptions options;
     auto iconColor = Converter::OptConvert<Color>(src.color);
     auto iconSize = Converter::OptConvert<Dimension>(src.size);
-    auto iconSrc = Converter::OptConvert<UnionStringResource>(src.src);
+    auto iconSrc = Converter::OptConvert<Ark_Resource_Simple>(src.src);
     if (iconSrc) {
-        if (auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
-            srcArkStr != nullptr) {
-            auto srcStr = Converter::Convert<std::string>(*srcArkStr);
-            if (!srcStr.empty()) {
-                options.UpdateSrc(srcStr, "", "");
-            }
-        } else if (auto srcArkStr = std::get_if<Ark_Resource>(&iconSrc.value());
-            srcArkStr != nullptr) {
-            auto srcStr = Converter::OptConvert<std::string>(*srcArkStr);
-            auto moduleName = Converter::Convert<std::string>(srcArkStr->moduleName);
-            auto bundleName = Converter::Convert<std::string>(srcArkStr->bundleName);
-            if (!srcStr->empty()) {
-                options.UpdateSrc(*srcStr, moduleName, bundleName);
-            }
-        }
+        options.UpdateSrc(iconSrc->content, iconSrc->moduleName, iconSrc->bundleName);
     }
     if (iconColor) {
         options.UpdateColor(iconColor.value());
@@ -163,38 +145,36 @@ void SetSearchIconImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto iconObjOpt = Converter::OptConvertPtr<UnionIconOptionsObject>(value);
-    if (iconObjOpt) {
-        auto arkIconOpt = std::get_if<Ark_IconOptions>(&iconObjOpt.value());
-        if (arkIconOpt != nullptr) {
-            auto options = Converter::OptConvert<NG::IconOptions>(*arkIconOpt);
+    Converter::VisitUnionPtr(value,
+        [frameNode](const Ark_IconOptions& src) {
+            auto options = Converter::OptConvert<NG::IconOptions>(src);
             SearchModelStatic::SetSearchImageIcon(frameNode, options);
-        } else {
+        },
+        [](const Ark_SymbolGlyphModifier& src) {
             LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
-        }
-    } else {
-        SearchModelStatic::SetSearchDefaultIcon(frameNode);
-    }
+        },
+        [frameNode]() {
+            SearchModelStatic::SetSearchDefaultIcon(frameNode);
+        });
 }
 void SetCancelButtonImpl(Ark_NativePointer node,
                          const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto cancelOptions = Converter::OptConvertPtr<UnionButtonOptions>(value);
-    if (cancelOptions) {
-        auto options = std::get_if<Ark_CancelButtonOptions>(&cancelOptions.value());
-        if (options != nullptr) {
-            auto cancelButtonStyle = Converter::OptConvert<CancelButtonStyle>(options->style);
-            auto iconOptions = Converter::OptConvert<NG::IconOptions>(options->icon);
+    Converter::VisitUnionPtr(value, 
+        [frameNode](const Ark_CancelButtonOptions& src) {
+            auto cancelButtonStyle = Converter::OptConvert<CancelButtonStyle>(src.style);
+            auto iconOptions = Converter::OptConvert<NG::IconOptions>(src.icon);
             SearchModelStatic::SetCancelImageIcon(frameNode, iconOptions);
             SearchModelStatic::SetCancelButtonStyle(frameNode, cancelButtonStyle);
-        } else {
+        },
+        [](const Ark_CancelButtonSymbolOptions& src) {
             LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
-        }
-    } else {
-        SearchModelStatic::SetCancelDefaultIcon(frameNode);
-    }
+        },
+        [frameNode]() {
+            SearchModelStatic::SetCancelDefaultIcon(frameNode);
+        });
 }
 void SetTextIndentImpl(Ark_NativePointer node,
                        const Opt_Dimension* value)
@@ -736,7 +716,7 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     SearchModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
 void SetSearchButtonImpl(Ark_NativePointer node,
-                         const Opt_ResourceStr* value,
+                         const Opt_String* value,
                          const Opt_SearchButtonOptions* option)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

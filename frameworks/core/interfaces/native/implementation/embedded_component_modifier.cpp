@@ -83,7 +83,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 namespace EmbeddedComponentInterfaceModifier {
 void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      const Ark_Want* loader,
-                                     Ark_EmbeddedType type)
+                                     const Opt_EmbeddedType* type)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);

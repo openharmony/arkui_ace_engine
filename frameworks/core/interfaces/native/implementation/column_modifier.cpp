@@ -149,7 +149,6 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
         ColumnInterfaceModifier::SetColumnOptionsImpl,
         ColumnAttributeModifier::SetAlignItemsImpl,
         ColumnAttributeModifier::SetJustifyContentImpl,
-        ColumnAttributeModifier::SetPointLightImpl,
         ColumnAttributeModifier::SetReverseImpl,
     };
     return &ArkUIColumnModifierImpl;

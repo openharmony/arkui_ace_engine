@@ -219,10 +219,6 @@ using OffsetOrEdgesParam = std::variant<
     std::optional<OffsetT<Dimension>>,
     std::optional<EdgesParamOptions>
 >;
-using BackgroundImagePositionType = std::variant<
-    Ark_Position,
-    Ark_Alignment
->;
 
 auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
     auto targetId = frameNode->GetId();
@@ -2040,17 +2036,16 @@ void SetBackgroundImagePositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto varValue = Converter::OptConvertPtr<BackgroundImagePositionType>(value);
     BackgroundImagePosition bgImgPosition;
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     double valueX = 0.0;
     double valueY = 0.0;
     DimensionUnit typeX = DimensionUnit::PX;
     DimensionUnit typeY = DimensionUnit::PX;
-    if (varValue) {
-        if (auto arkPosition = std::get_if<Ark_Position>(&varValue.value()); arkPosition) {
+    Converter::VisitUnionPtr(value,
+        [&valueX,&valueY,&typeX,&typeY](const Ark_Position& src) {
             auto position =
-                Converter::Convert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(*arkPosition);
+                Converter::Convert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(src);
             CalcDimension x;
             CalcDimension y;
             if (position.first) {
@@ -2069,8 +2064,9 @@ void SetBackgroundImagePositionImpl(Ark_NativePointer node,
                 valueY = y.Value();
                 typeY = DimensionUnit::PERCENT;
             }
-        } else if (auto arkAlign = std::get_if<Ark_Alignment>(&varValue.value()); arkAlign) {
-            auto alignment = Converter::OptConvertPtr<std::pair<double, double>>(arkAlign);
+        },
+        [&valueX,&valueY,&typeX,&typeY,&bgImgPosition](const Ark_Alignment& src) {
+            auto alignment = Converter::OptConvert<std::pair<double, double>>(src);
             if (alignment) {
                 bgImgPosition.SetIsAlign(true);
                 typeX = DimensionUnit::PERCENT;
@@ -2078,8 +2074,8 @@ void SetBackgroundImagePositionImpl(Ark_NativePointer node,
                 valueX = alignment.value().first;
                 valueY = alignment.value().second;
             }
-        }
-    }
+        },
+        []{});
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
@@ -3453,8 +3449,8 @@ void SetEnabledImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
 }
-void SetAlignRules0Impl(Ark_NativePointer node,
-                        const Opt_AlignRuleOption* value)
+void SetAlignRulesWithAlignRuleOptionTypedValueImpl(Ark_NativePointer node,
+                                                    const Opt_AlignRuleOption* value)
 {
     LOGE("Ark_AlignRuleOption is stubbed");
 #ifdef WRONG_GEN
@@ -3471,8 +3467,8 @@ void SetAlignRules0Impl(Ark_NativePointer node,
     }
 #endif
 }
-void SetAlignRules1Impl(Ark_NativePointer node,
-                        const Opt_LocalizedAlignRuleOptions* value)
+void SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl(Ark_NativePointer node,
+                                                              const Opt_LocalizedAlignRuleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3940,8 +3936,8 @@ void SetPixelStretchEffectImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<PixStretchEffectOption>(value);
     ViewAbstractModelStatic::SetPixelStretchEffect(frameNode, convValue);
 }
-void SetAccessibilityGroup0Impl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
+void SetAccessibilityGroupWithValueImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3952,8 +3948,8 @@ void SetAccessibilityGroup0Impl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
 }
-void SetAccessibilityText0Impl(Ark_NativePointer node,
-                               const Opt_String* value)
+void SetAccessibilityTextOfStringTypeImpl(Ark_NativePointer node,
+                                          const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4017,8 +4013,8 @@ void SetAccessibilityScrollTriggerableImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
 }
-void SetAccessibilityText1Impl(Ark_NativePointer node,
-                               const Opt_Resource* value)
+void SetAccessibilityTextOfResourceTypeImpl(Ark_NativePointer node,
+                                            const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4075,8 +4071,8 @@ void SetAccessibilityTextHintImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetAccessibilityTextHint(frameNode, *convValue);
 }
-void SetAccessibilityDescription0Impl(Ark_NativePointer node,
-                                      const Opt_String* value)
+void SetAccessibilityDescriptionOfStringTypeImpl(Ark_NativePointer node,
+                                                 const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4087,8 +4083,8 @@ void SetAccessibilityDescription0Impl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
 }
-void SetAccessibilityDescription1Impl(Ark_NativePointer node,
-                                      const Opt_Resource* value)
+void SetAccessibilityDescriptionOfResourceTypeImpl(Ark_NativePointer node,
+                                                   const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5335,9 +5331,9 @@ void SetKeyboardShortcutImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, nullptr);
 }
-void SetAccessibilityGroup1Impl(Ark_NativePointer node,
-                                const Opt_Boolean* isGroup,
-                                const Opt_AccessibilityOptions* accessibilityOptions)
+void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
+                                         const Opt_Boolean* isGroup,
+                                         const Opt_AccessibilityOptions* config)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5346,7 +5342,7 @@ void SetAccessibilityGroup1Impl(Ark_NativePointer node,
     if (isGroupValue) {
         isGroupFlag = *isGroupValue;
     }
-    auto optValue = Converter::GetOptPtr(accessibilityOptions);
+    auto optValue = Converter::GetOptPtr(config);
     auto accessibilityPreferred = optValue ?
         Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
@@ -5492,8 +5488,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMarkAnchorImpl,
         CommonMethodModifier::SetOffsetImpl,
         CommonMethodModifier::SetEnabledImpl,
-        CommonMethodModifier::SetAlignRules0Impl,
-        CommonMethodModifier::SetAlignRules1Impl,
+        CommonMethodModifier::SetAlignRulesWithAlignRuleOptionTypedValueImpl,
+        CommonMethodModifier::SetAlignRulesWithLocalizedAlignRuleOptionsTypedValueImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,
@@ -5522,18 +5518,18 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSphericalEffectImpl,
         CommonMethodModifier::SetLightUpEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
-        CommonMethodModifier::SetAccessibilityGroup0Impl,
-        CommonMethodModifier::SetAccessibilityText0Impl,
+        CommonMethodModifier::SetAccessibilityGroupWithValueImpl,
+        CommonMethodModifier::SetAccessibilityTextOfStringTypeImpl,
         CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
         CommonMethodModifier::SetAccessibilityUseSamePageImpl,
         CommonMethodModifier::SetAccessibilityScrollTriggerableImpl,
-        CommonMethodModifier::SetAccessibilityText1Impl,
+        CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
         CommonMethodModifier::SetAccessibilityRoleImpl,
         CommonMethodModifier::SetOnAccessibilityFocusImpl,
         CommonMethodModifier::SetAccessibilityTextHintImpl,
-        CommonMethodModifier::SetAccessibilityDescription0Impl,
-        CommonMethodModifier::SetAccessibilityDescription1Impl,
+        CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
+        CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,
         CommonMethodModifier::SetAccessibilityLevelImpl,
         CommonMethodModifier::SetAccessibilityVirtualNodeImpl,
         CommonMethodModifier::SetAccessibilityCheckedImpl,
@@ -5591,7 +5587,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnVisibleAreaChangeImpl,
         CommonMethodModifier::SetOnVisibleAreaApproximateChangeImpl,
         CommonMethodModifier::SetKeyboardShortcutImpl,
-        CommonMethodModifier::SetAccessibilityGroup1Impl,
+        CommonMethodModifier::SetAccessibilityGroupWithConfigImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
     };
     return &ArkUICommonMethodModifierImpl;

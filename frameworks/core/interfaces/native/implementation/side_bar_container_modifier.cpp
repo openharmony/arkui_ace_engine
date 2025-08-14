@@ -67,14 +67,14 @@ std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_U
     return result;
 }
 
-std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Number_Bindable* value)
+std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable* value)
 {
     std::optional<Dimension> result;
     Converter::VisitUnionPtr(value,
-        [&result](const Ark_Number& src) {
+        [&result](const Ark_Length& src) {
             result = Converter::OptConvert<Dimension>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Number& src) {
+        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_Length& src) {
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
@@ -250,8 +250,8 @@ void SetOnChangeImpl(Ark_NativePointer node,
     };
     SideBarContainerModelStatic::SetOnChange(frameNode, std::move(onEvent));
 }
-void SetSideBarWidth0Impl(Ark_NativePointer node,
-                          const Opt_Union_Number_Bindable* value)
+void SetSideBarWidthImpl(Ark_NativePointer node,
+                         const Opt_Union_Length_Bindable* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -292,15 +292,6 @@ void SetMaxSideBarWidth0Impl(Ark_NativePointer node,
         width.SetValue(DEFAULT_MAX_SIDEBAR_WIDTH);
     }
     SideBarContainerModelStatic::SetMaxSideBarWidth(frameNode, width);
-}
-void SetSideBarWidth1Impl(Ark_NativePointer node,
-                          const Opt_Length* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(width);
-    SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
 }
 void SetMinSideBarWidth1Impl(Ark_NativePointer node,
                              const Opt_Length* value)
@@ -387,10 +378,9 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::SetControlButtonImpl,
         SideBarContainerAttributeModifier::SetShowControlButtonImpl,
         SideBarContainerAttributeModifier::SetOnChangeImpl,
-        SideBarContainerAttributeModifier::SetSideBarWidth0Impl,
+        SideBarContainerAttributeModifier::SetSideBarWidthImpl,
         SideBarContainerAttributeModifier::SetMinSideBarWidth0Impl,
         SideBarContainerAttributeModifier::SetMaxSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::SetSideBarWidth1Impl,
         SideBarContainerAttributeModifier::SetMinSideBarWidth1Impl,
         SideBarContainerAttributeModifier::SetMaxSideBarWidth1Impl,
         SideBarContainerAttributeModifier::SetAutoHideImpl,

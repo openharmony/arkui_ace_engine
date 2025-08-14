@@ -57,10 +57,6 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
     return arkSurfaceId;
 }
-Ark_Object GetXComponentContextImpl(Ark_XComponentController peer)
-{
-    return {};
-}
 void SetXComponentSurfaceRectImpl(Ark_XComponentController peer,
                                   const Ark_SurfaceRect* rect)
 {
@@ -225,7 +221,6 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
         XComponentControllerAccessor::ConstructImpl,
         XComponentControllerAccessor::GetFinalizerImpl,
         XComponentControllerAccessor::GetXComponentSurfaceIdImpl,
-        XComponentControllerAccessor::GetXComponentContextImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,

@@ -88,7 +88,6 @@ void CloseImpl(Ark_CustomDialogController peer)
     CHECK_NULL_VOID(peer);
     peer->CloseDialog();
 }
-#ifdef WRONG_SDK
 Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
 {
     Ark_CustomDialogControllerExternalOptions result = {
@@ -104,7 +103,6 @@ void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
     CHECK_NULL_VOID(node);
     peer->SetOwnerView(node);
 }
-#endif
 } // CustomDialogControllerAccessor
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
 {
@@ -114,6 +112,7 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
         CustomDialogControllerAccessor::GetFinalizerImpl,
         CustomDialogControllerAccessor::OpenImpl,
         CustomDialogControllerAccessor::CloseImpl,
+        CustomDialogControllerAccessor::GetExternalOptionsImpl,
     };
     return &CustomDialogControllerAccessorImpl;
 }

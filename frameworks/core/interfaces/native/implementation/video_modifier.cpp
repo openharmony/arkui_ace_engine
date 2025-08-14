@@ -258,7 +258,7 @@ void SetOnPreparedImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(data);
         auto duration = data->GetValue("duration")->GetDouble();
         Ark_PreparedInfo event = {
-            .duration = Converter::ArkValue<Ark_Number>(static_cast<float>(duration))
+            .duration = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(duration))
         };
         arkCallback.InvokeSync(event);
     };
@@ -278,7 +278,7 @@ void SetOnSeekingImpl(Ark_NativePointer node,
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
-            .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
+            .time = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(time))
         };
         arkCallback.InvokeSync(event);
     };
@@ -298,7 +298,7 @@ void SetOnSeekedImpl(Ark_NativePointer node,
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
-            .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
+            .time = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(time))
         };
         arkCallback.InvokeSync(event);
     };
@@ -318,7 +318,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
         Ark_PlaybackInfo event = {
-            .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
+            .time = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(time))
         };
         arkCallback.InvokeSync(event);
     };
@@ -340,7 +340,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     VideoModelStatic::SetOnError(frameNode, onError);
 }
 void SetOnStopImpl(Ark_NativePointer node,
-                   const Opt_Callback_Void* value)
+                   const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -416,7 +416,6 @@ const GENERATED_ArkUIVideoModifier* GetVideoModifier()
         VideoAttributeModifier::SetOnStopImpl,
         VideoAttributeModifier::SetEnableAnalyzerImpl,
         VideoAttributeModifier::SetAnalyzerConfigImpl,
-        VideoAttributeModifier::SetSurfaceBackgroundColorImpl,
         VideoAttributeModifier::SetEnableShortcutKeyImpl,
     };
     return &ArkUIVideoModifierImpl;

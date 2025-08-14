@@ -97,7 +97,7 @@ void SetFillImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
-                             const Opt_Length* value)
+                             const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -145,7 +145,7 @@ void SetStrokeLineJoinImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void SetStrokeMiterLimitImpl(Ark_NativePointer node,
-                             const Opt_Length* value)
+                             const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -156,7 +156,7 @@ void SetStrokeMiterLimitImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeMiterLimit(frameNode, limit);
 }
 void SetStrokeOpacityImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_Resource* value)
+                          const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -165,7 +165,7 @@ void SetStrokeOpacityImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 void SetFillOpacityImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,7 +174,7 @@ void SetFillOpacityImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFillOpacity(frameNode, strokeOpacity);
 }
 void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_Length* value)
+                        const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,9 +196,9 @@ void SetAntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, *convValue);
 }
 void SetMeshImpl(Ark_NativePointer node,
-                 const Opt_Array_Number* value,
-                 const Opt_Number* column,
-                 const Opt_Number* row)
+                 const Opt_Array_Float64* value,
+                 const Opt_Int32* column,
+                 const Opt_Int32* row)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -168,61 +168,17 @@ void ParseArrayNumber(Color& color, std::vector<uint32_t>& indexes, bool result)
         indexes.emplace_back(0);
     }
 }
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
 Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
 {
     Color colorColor;
     std::vector<uint32_t> indexes;
     ParseArrayNumber(colorColor, indexes, false);
     Array_Number errValue = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    auto resId = Converter::Convert<int64_t>(color->id);
-    auto bundleName = Converter::Convert<std::string>(color->bundleName);
-    auto moduleName = Converter::Convert<std::string>(color->moduleName);
-    auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
-    CHECK_NULL_RETURN(resourceWrapper, errValue);
-    if (resId == -1) {
-        auto optParams = Converter::OptConvert<std::vector<std::string>>(color->params);
-        if (!optParams.has_value() || optParams->size() < 1) {
-            return errValue;
-        }
-        auto params = optParams.value();
-        colorColor = resourceWrapper->GetColorByName(params[0]);
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    auto resType = Converter::OptConvert<int32_t>(color->type);
-    if (!resType.has_value()) {
-        return errValue;
-    }
-    auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
-        if (!Color::ParseColorString(value, colorColor)) {
-            return errValue;
-        }
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId);
-        colorColor = Color(ColorAlphaAdapt(value));
-        ParseArrayNumber(colorColor, indexes, true);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    if (typeValue == static_cast<int32_t>(ResourceType::COLOR)) {
-        colorColor = resourceWrapper->GetColor(resId);
-        ParseArrayNumber(colorColor, indexes, true);
-        indexes.emplace_back(resId);
-        return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
-    }
-    return errValue;
+    CHECK_NULL_RETURN(color, errValue);
+    auto result = Converter::OptConvert<Color>(*color);
+    CHECK_NULL_RETURN(result, errValue);
+    ParseArrayNumber(*result, indexes, true);
+    return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()

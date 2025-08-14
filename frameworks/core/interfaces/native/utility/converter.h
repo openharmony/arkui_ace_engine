@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 // SORTED_SECTION
@@ -114,12 +115,6 @@ namespace Converter {
         dst = src;
     }
 
-    template<typename T, typename... Types>
-    void AssignTo(std::variant<Types...>& dst, const T& src)
-    {
-        dst = src;
-    }
-
     template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
     void AssignTo(std::vector<To>& dst, const From& src)
     {
@@ -173,10 +168,14 @@ namespace Converter {
 
     class ResourceConverter {
         public:
+            constexpr static int64_t INVALID_ID = -1;
+            using ParamType = std::optional<std::variant<std::string, int64_t, double, ResourceConverter>>;
             ResourceConverter() = delete;
             ~ResourceConverter() = default;
             ResourceConverter(const ResourceConverter&) = delete;
             ResourceConverter& operator=(const ResourceConverter&) = delete;
+            ResourceConverter(ResourceConverter&&) = default;
+            ResourceConverter& operator=(ResourceConverter&&) = default;
 
             explicit ResourceConverter(const Ark_Resource& resource);
 
@@ -195,6 +194,7 @@ namespace Converter {
             const std::string& ModuleName() { return moduleName_; }
 
         private:
+            std::optional<std::string> GetResourceName();
             std::optional<std::string> GetStringResource();
             std::optional<std::string> GetRawfilePath();
             std::optional<std::string> GetMediaPath();
@@ -207,8 +207,8 @@ namespace Converter {
             ResourceType type_;
             std::string bundleName_;
             std::string moduleName_;
-            int32_t id_;
-            StringArray params_;
+            int64_t id_;
+            std::vector<ParamType> params_;
     };
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,

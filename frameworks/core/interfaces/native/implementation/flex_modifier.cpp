@@ -207,7 +207,6 @@ const GENERATED_ArkUIFlexModifier* GetFlexModifier()
     static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
         FlexModifier::ConstructImpl,
         FlexInterfaceModifier::SetFlexOptionsImpl,
-        FlexAttributeModifier::SetPointLightImpl,
     };
     return &ArkUIFlexModifierImpl;
 }

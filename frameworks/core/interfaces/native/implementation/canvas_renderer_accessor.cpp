@@ -824,14 +824,14 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     auto compositeStr = Converter::Convert<std::string>(*globalCompositeOperation);
     peerImpl->SetGlobalCompositeOperation(compositeStr);
 }
-Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetFillStyleImpl there is no implementation in controller "
         "for getter method of FillStyle.");
     return {};
 }
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                      const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
+                      const Ark_Union_String_I32_CanvasGradient_CanvasPattern* fillStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -843,8 +843,8 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetFillStyle(colorStr);
         },
-        [peerImpl](const Ark_Number& style) {
-            auto colorNum = Converter::Convert<uint32_t>(style);
+        [peerImpl](const Ark_Int32& style) {
+            auto colorNum = Converter::Convert<int32_t>(style);
             peerImpl->SetFillStyle(colorNum);
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
@@ -857,14 +857,14 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         []() {});
 }
-Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetStrokeStyleImpl there is no implementation in controller "
         "for getter method of StrokeStyle.");
     return {};
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                        const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
+                        const Ark_Union_String_I32_CanvasGradient_CanvasPattern* strokeStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -876,8 +876,8 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetStrokeStyle(colorStr);
         },
-        [peerImpl](const Ark_Number& style) {
-            auto colorNum = Converter::Convert<uint32_t>(style);
+        [peerImpl](const Ark_Int32& style) {
+            auto colorNum = Converter::Convert<int32_t>(style);
             peerImpl->SetStrokeStyle(colorNum);
         },
         [peerImpl](const Ark_CanvasGradient& gradient) {
