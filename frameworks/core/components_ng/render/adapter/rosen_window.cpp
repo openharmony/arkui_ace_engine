@@ -189,14 +189,14 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
 #ifdef VSYNC_TIMEOUT_CHECK
     CHECK_NULL_VOID(taskExecutor);
     auto windowId = rsWindow_->GetWindowId();
-    static auto task = [windowId, instanceId = id_, timeStamp = lastRequestVsyncTime_]() {
+    auto task = [windowId, instanceId = id_, timeStamp = lastRequestVsyncTime_]() {
         LOGE("ArkUI request vsync,but no vsync received in 3 seconds");
         EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
     };
     taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::UI,
         VSYNC_TASK_DELAY_MILLISECOND, VSYNC_TIMEOUT_CHECK_TASKNAME);
 
-    static auto recoverTask = [ weakWindow = weak_from_this() ] {
+    auto recoverTask = [ weakWindow = weak_from_this() ] {
         LOGW("ArkUI request vsync, but no vsync received in 500ms");
         auto window = weakWindow.lock();
         if (window) {

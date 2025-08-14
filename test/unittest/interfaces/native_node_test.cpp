@@ -58,6 +58,650 @@ public:
 };
 
 /**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutSize001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntSize size;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutSize(node, &size);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutSize002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntSize size;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutSize(node, &size);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPosition001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntOffset localOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPosition(node, &localOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPosition002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntOffset localOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPosition(node, &localOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPositionInWindow001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntOffset globalOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(node, &globalOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPositionInWindow002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInWindow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntOffset globalOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(node, &globalOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPositionInScreen001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInScreen001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntOffset screenOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(node, &screenOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPositionInWindow002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInScreen002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntOffset screenOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(node, &screenOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntOffset translateOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(node, &translateOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntOffset translateOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(node, &translateOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    ArkUI_IntOffset translateOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(node, &translateOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    ArkUI_IntOffset translateOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(node, &translateOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RegisterSystemColorModeChangeEvent001
+ * @tc.desc: Test OH_ArkUI_RegisterSystemColorModeChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemColorModeChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    void* userData = nullptr;
+    void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData) = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_RegisterSystemColorModeChangeEvent(node, userData, onColorModeChange);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RegisterSystemColorModeChangeEvent002
+ * @tc.desc: Test OH_ArkUI_RegisterSystemColorModeChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemColorModeChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    void* userData = nullptr;
+    void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData) = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_RegisterSystemColorModeChangeEvent(node, userData, onColorModeChange);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RegisterSystemFontStyleChangeEvent001
+ * @tc.desc: Test OH_ArkUI_RegisterSystemFontStyleChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemFontStyleChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    void* userData = nullptr;
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData) = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_RegisterSystemFontStyleChangeEvent(node, userData, onFontStyleChange);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RegisterSystemFontStyleChangeEvent002
+ * @tc.desc: Test OH_ArkUI_RegisterSystemFontStyleChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemFontStyleChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    void* userData = nullptr;
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData) = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_RegisterSystemFontStyleChangeEvent(node, userData, onFontStyleChange);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale001
+ * @tc.desc: Test OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a event, fontSize undefined.
+     * @tc.expect: result is 0.0.
+     */
+    ArkUI_SystemFontStyleEvent event;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    float result = OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(&event);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is 0.0.
+     */
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale002
+ * @tc.desc: Test OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a event, fontSize is 1.5f.
+     * @tc.expect: result is 1.5f.
+     */
+    ArkUI_SystemFontStyleEvent event;
+    event.fontSize = 1.5f;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    float result = OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(&event);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is 1.5f.
+     */
+    EXPECT_EQ(result, 1.5f);
+
+    /**
+     * @tc.steps: step4. Create a event, fontSize is -1.2f.
+     * @tc.expect: result is -1.2f.
+     */
+    event.fontSize = -1.2f;
+
+    /**
+     * @tc.steps: step5. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    result = OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(&event);
+
+    /**
+     * @tc.steps: step6. Verify the result.
+     * @tc.expect: result is -1.2f.
+     */
+    EXPECT_EQ(result, -1.2f);
+}
+
+/**
+ * @tc.name: OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale001
+ * @tc.desc: Test OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a event, fontWeight undefined.
+     * @tc.expect: result is 0.0f.
+     */
+    ArkUI_SystemFontStyleEvent event;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    float result = OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(&event);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is 0.0f.
+     */
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale002
+ * @tc.desc: Test OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a event, fontWeight is 500.0f.
+     * @tc.expect: result is 500.0f.
+     */
+    ArkUI_SystemFontStyleEvent event;
+    event.fontWeight = 500.0f;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    float result = OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(&event);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is 500.0f.
+     */
+    EXPECT_EQ(result, 500.0f);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetCustomProperty001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = nullptr;
+    const char* name = "test_name";
+    ArkUI_CustomProperty* handle = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetCustomProperty002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create name nullptr.
+     * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    const char* name = nullptr;
+    ArkUI_CustomProperty* handle = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetCustomProperty003
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    const char* name = "test_name";
+    ArkUI_CustomProperty* handle = nullptr;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
  * @tc.name: NativeNodeTest001
  * @tc.desc: Test OH_ArkUI_NodeEvent_GetEventType function.
  * @tc.type: FUNC
