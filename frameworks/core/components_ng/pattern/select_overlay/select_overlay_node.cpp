@@ -65,6 +65,7 @@ constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
 constexpr int32_t OPTION_INDEX_PASTE = 2;
 constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
+// Advanced options, consider to support disableMenuItems and disableSystemServiceMenuItems
 constexpr int32_t OPTION_INDEX_TRANSLATE = 4;
 constexpr int32_t OPTION_INDEX_SEARCH = 5;
 constexpr int32_t OPTION_INDEX_SHARE = 6;
@@ -903,6 +904,7 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
         theme->GetPasteLabelInfo(), info->menuInfo.showPaste);
     params.emplace_back(theme->GetSelectAllLabel(), GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll),
         theme->GetSelectAllLabelInfo(), info->menuInfo.showCopyAll);
+    // Below is advanced options, consider support disableMenuItems and disableSystemServiceMenuItems by TextSystemMenu
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
         TextSystemMenu::IsShowTranslate()) {
         params.emplace_back(theme->GetTranslateLabel(),
@@ -2481,6 +2483,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowCopy(maxWidth, allocatedSize, info, theme->GetCopyLabel());
     ShowPaste(maxWidth, allocatedSize, info, theme->GetPasteLabel());
     ShowCopyAll(maxWidth, allocatedSize, info, theme->GetSelectAllLabel());
+    // Below is advanced options, consider support disableMenuItems and disableSystemServiceMenuItems by TextSystemMenu
     ShowTranslate(maxWidth, allocatedSize, info, theme->GetTranslateLabel());
     ShowShare(maxWidth, allocatedSize, info, theme->GetShareLabel());
     ShowSearch(maxWidth, allocatedSize, info, theme->GetSearchLabel());
@@ -2855,6 +2858,7 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     AddMenuItemParamIf(menuInfo.showCut || isUsingMouse, OH_DEFAULT_CUT, theme->GetCutLabel(), systemItemParams);
     AddMenuItemParamIf(menuInfo.showCopyAll || isUsingMouse, OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel(),
         systemItemParams);
+    // Below is advanced options, consider support disableMenuItems and disableSystemServiceMenuItems by TextSystemMenu
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
         TextSystemMenu::IsShowTranslate()) {
         AddMenuItemParamIf(menuInfo.showTranslate || isUsingMouse, OH_DEFAULT_TRANSLATE,
@@ -3542,7 +3546,7 @@ void SelectOverlayNode::UpdateToolBarFromMainWindow(bool menuItemChanged, bool n
 void SelectOverlayNode::ShowAskCelia(
     float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
-    if (info->menuInfo.isAskCeliaEnabled) {
+    if (info->menuInfo.isAskCeliaEnabled && TextSystemMenu::IsShowAskCelia()) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
         ButtonBasicInfo buttonBasicInfo = { .data = label, .buttonType = SelectOverlayMenuButtonType::AIBUTTON };
