@@ -5629,6 +5629,13 @@ bool RichEditorPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isCustomKeyboardAttached_ = false;
     contentChange_ = false;
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
+    }
     return true;
 }
 
