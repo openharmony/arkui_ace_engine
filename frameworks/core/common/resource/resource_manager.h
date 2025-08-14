@@ -26,6 +26,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/resource_configuration.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/theme/resource_adapter.h"
@@ -83,6 +84,7 @@ public:
     void UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
         RefPtr<ResourceAdapter>& resourceAdapter)
     {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         auto defaultKey = MakeCacheKey("", "", instanceId);
         auto key = MakeCacheKey(bundleName, moduleName, instanceId);
         resourceAdapters_[key] = resourceAdapter;
@@ -97,6 +99,13 @@ public:
             return true;
         }
         return cache_.find(key) != cache_.end();
+    }
+
+    std::string GetCacheKeyInstanceId(const std::string& key)
+    {
+        std::vector<std::string> splitter;
+        StringUtils::StringSplitter(key, '.', splitter);
+        return splitter.back();
     }
 
     RefPtr<ResourceAdapter> GetResourceAdapter(
@@ -135,21 +144,8 @@ public:
         return nullptr;
     }
 
-    void UpdateResourceConfig(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
-        const ResourceConfiguration& config, bool themeFlag = false)
-    {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
-        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
-        auto iter = resourceAdapters_.find(key);
-        if (iter != resourceAdapters_.end()) {
-            iter->second->UpdateConfig(config, themeFlag);
-        }
-        auto cacheAdapter =
-            CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
-        if (cacheAdapter != nullptr) {
-            cacheAdapter->UpdateConfig(config, themeFlag);
-        }
-    }
+    void UpdateResourceConfig(const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId,
+        const ResourceConfiguration& config, bool themeFlag = false);
 
     void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
     {
@@ -172,20 +168,7 @@ public:
     }
 
     void UpdateColorMode(
-        const std::string& bundleName, const std::string& moduleName, int32_t instanceId, ColorMode colorMode)
-    {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
-        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
-        auto iter = resourceAdapters_.find(key);
-        if (iter != resourceAdapters_.end()) {
-            iter->second->UpdateColorMode(colorMode);
-        }
-        auto cacheAdapter =
-            CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
-        if (cacheAdapter != nullptr) {
-            cacheAdapter->UpdateColorMode(colorMode);
-        }
-    }
+        const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId, ColorMode colorMode);
 
     void RegisterMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
         const RefPtr<ResourceAdapter>& resAdapter);

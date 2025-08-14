@@ -251,7 +251,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ResourceConfiguration resConfig;
-    ResourceManager::GetInstance().UpdateResourceConfig(bundleName, moduleName, DEFAULT_INSTANCE_ID, resConfig);
+    ResourceManager::GetInstance().UpdateResourceConfig("", "", DEFAULT_INSTANCE_ID, resConfig);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 
     /**
@@ -260,7 +260,7 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest004, TestSize.Level1)
      * @tc.expect: resourceAdapters_ has a element.
      */
     ColorMode colorMode = ColorMode::DARK;
-    ResourceManager::GetInstance().UpdateColorMode(bundleName, moduleName, DEFAULT_INSTANCE_ID, colorMode);
+    ResourceManager::GetInstance().UpdateColorMode("", "", DEFAULT_INSTANCE_ID, colorMode);
     EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.size(), 1);
 }
 } // namespace OHOS::Ace
