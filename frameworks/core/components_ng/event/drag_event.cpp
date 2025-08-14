@@ -530,6 +530,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else {
                 auto renderContext = frameNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                auto context = frameNode->GetContextRefPtr();
+                CHECK_NULL_VOID(context);
                 BorderRadiusProperty borderRadius;
                 if (renderContext->GetBorderRadius().has_value()) {
                     borderRadius.UpdateWithCheck(renderContext->GetBorderRadius().value());
@@ -543,7 +546,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     [renderContext_ = renderContext, borderRadius_ = borderRadius]() {
                         renderContext_->UpdateBorderRadius(borderRadius_);
                     },
-                    option.GetOnFinishEvent());
+                    option.GetOnFinishEvent(), nullptr, context);
                 actuator->HidePixelMap();
                 actuator->HideFilter();
             }
@@ -752,6 +755,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
+        auto context = imageNode->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
         if (actuator->IsNeedGather()) {
             DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
             DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, manager);
@@ -778,7 +783,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             [imageContext]() {
                 imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
             },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, context);
         actuator->SetEventColumn(actuator);
     };
     auto longPressCancel = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -984,9 +989,11 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             manager->SetFilterActive(false);
         });
         columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_VALUE);
+        auto context = columnNode->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
         AnimationUtils::Animate(
             option, [columnNode, styleOption]() { columnNode->GetRenderContext()->UpdateBackBlurStyle(styleOption); },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, context);
     }
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set filter success.");
 }
@@ -1360,6 +1367,8 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     CHECK_NULL_VOID(frameNode);
+    auto context = imageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     frameNode->SetOptionsAfterApplied(optionsAfterApplied_);
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     // update scale
@@ -1395,7 +1404,7 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
             }
             DragDropFuncWrapper::ResetNode(frameNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode)
@@ -1622,6 +1631,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
+    auto dragcontext = dragNode->GetContextRefPtr();
+    CHECK_NULL_VOID(dragcontext);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
     AnimationUtils::Animate(
         option,
@@ -1633,7 +1644,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
                 context->OnModifyDone();
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, dragcontext);
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set hide text animation success.");
 }
 
