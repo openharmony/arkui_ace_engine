@@ -51,6 +51,8 @@ public:
     static void SetIsAtomic(FrameNode* frameNode, bool isAtomic);
     static void SetBeforeCreateLayoutWrapperCallback(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
+    static void SetOnWindowSizeChangedCallback(FrameNode* frameNode,
+        std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>&& onWindowSizeChanged);
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_NODE_EXT_CUSTOM_NODE_EXT_MODEL_NG_H

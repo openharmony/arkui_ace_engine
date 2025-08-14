@@ -24,6 +24,7 @@
 
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/ng/offset_t.h"
+#include "ui/base/geometry/ng/size_t.h"
 #include "ui/base/macros.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
@@ -100,6 +101,9 @@ public:
     virtual void ResetCompositingFilter() = 0;
     virtual bool NeedAvoidContainerModal() = 0;
     virtual NG::OffsetF GetParentGlobalOffsetDuringLayout() = 0;
+    virtual int32_t GetContainerModalTitleHeight() = 0;
+    virtual NG::OffsetF GetContainerModalButtonsOffset() = 0;
+    virtual NG::SizeF GetContainerModalButtonsSize() = 0;
 
     virtual RefPtr<UIContext> GetUIContext() const = 0;
     virtual void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) = 0;

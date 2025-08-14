@@ -3110,6 +3110,19 @@ bool NavigationModelNG::IsDoubleBindBlock(const RefPtr<NavigationPattern>& navig
     return navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag();
 }
 
+void NavigationModelNG::SetIsCustomTitleBarSize(FrameNode* frameNode, bool isCustom)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateIsCustomTitleBarSize(isCustom);
+}
+
 void NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(
     FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper)
 {

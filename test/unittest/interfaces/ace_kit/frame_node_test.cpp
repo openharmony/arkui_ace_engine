@@ -21,6 +21,8 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_pattern.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_property.h"
+#include "ui/base/geometry/ng/offset_t.h"
+#include "ui/base/geometry/ng/size_t.h"
 #include "ui/properties/dirty_flag.h"
 #include "ui/view/frame_node.h"
 #include "ui/view_factory/abstract_view_factory.h"
@@ -802,5 +804,76 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest116, TestSize.Level1)
     auto offset = frameNode->GetParentGlobalOffsetDuringLayout();
     EXPECT_TRUE(NearEqual(offset.GetX(), 0.0f));
     EXPECT_TRUE(NearEqual(offset.GetY(), 0.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestTest117
+ * @tc.desc: test ContainerModalTitleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest117, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST117";
+    const int32_t id = 117;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test GetContainerModalTitleHeight.
+     */
+    auto titleHeight = frameNode->GetContainerModalTitleHeight();
+    EXPECT_EQ(titleHeight, 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest118
+ * @tc.desc: test ContainerModalButtonsOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest118, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST118";
+    const int32_t id = 118;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test ContainerModalButtonsOffset.
+     */
+    auto buttonsOffset = frameNode->GetContainerModalButtonsOffset();
+    EXPECT_TRUE(NearEqual(buttonsOffset.GetX(), 0.0f));
+    EXPECT_TRUE(NearEqual(buttonsOffset.GetY(), 0.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestTest119
+ * @tc.desc: test ContainerModalButtonsSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest119, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST119";
+    const int32_t id = 119;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test ContainerModalButtonsSize.
+     */
+    auto buttonsSize = frameNode->GetContainerModalButtonsSize();
+    EXPECT_TRUE(NearEqual(buttonsSize.Width(), 0.0f));
+    EXPECT_TRUE(NearEqual(buttonsSize.Height(), 0.0f));
 }
 } // namespace OHOS::Ace

@@ -192,4 +192,13 @@ void CustomNodeExtModelNG::SetBeforeCreateLayoutWrapperCallback(
     CHECK_NULL_VOID(pattern);
     pattern->SetBeforeCreateLayoutWrapperCallback(std::move(beforeCreateLayoutWrapper));
 }
+
+void CustomNodeExtModelNG::SetOnWindowSizeChangedCallback(FrameNode* frameNode,
+    std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>&& onWindowSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowSizeChangedCallback(std::move(onWindowSizeChanged));
+}
 } // OHOS::Ace::NG

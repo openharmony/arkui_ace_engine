@@ -69,6 +69,7 @@ public:
     void UnRegisterFoldStatusChangedCallback(int32_t callbackId) override;
     int32_t RegisterRotationEndCallback(std::function<void()>&& callback) override;
     void UnregisterRotationEndCallback(int32_t callbackId) override;
+    void AddWindowSizeChangeCallback(int32_t nodeId) override;
 
 private:
     NG::PipelineContext* context_ = nullptr;

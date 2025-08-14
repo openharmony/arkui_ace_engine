@@ -120,6 +120,11 @@ public:
     {
         beforeCreateLayoutWrapperCallback_ = std::move(beforeCreateLayoutWrapper);
     }
+    void SetOnWindowSizeChangedCallback(
+        std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>&& onWindowSizeChanged)
+    {
+        onWindowSizeChangedCallback_ = std::move(onWindowSizeChanged);
+    }
 
     void OnModifyDone() override;
     void OnWindowFocused() override;
@@ -143,6 +148,7 @@ public:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void BeforeCreateLayoutWrapper() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnAttachToFrameNode() override;
@@ -163,6 +169,7 @@ private:
     std::function<void()> onDetachFromMainTreeCallback_;
     std::function<void()> onAvoidInfoChangeCallback_;
     std::function<void()> beforeCreateLayoutWrapperCallback_;
+    std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)> onWindowSizeChangedCallback_;
 
     bool isNeedRegisterAvoidInfoChangeListener_ = false;
     

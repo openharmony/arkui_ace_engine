@@ -173,6 +173,9 @@ void CustomNodeExtPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowFocusChangedCallback(id);
     pipeline->RemoveWindowActivateChangedCallback(id);
+    if (onWindowSizeChangedCallback_) {
+        pipeline->RemoveWindowSizeChangeCallback(id);
+    }
 }
 
 void CustomNodeExtPattern::OnAttachToMainTree()
@@ -228,6 +231,13 @@ void CustomNodeExtPattern::BeforeCreateLayoutWrapper()
 {
     if (beforeCreateLayoutWrapperCallback_) {
         beforeCreateLayoutWrapperCallback_();
+    }
+}
+
+void CustomNodeExtPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (onWindowSizeChangedCallback_) {
+        onWindowSizeChangedCallback_(width, height, type);
     }
 }
 } // OHOS::Ace::NG

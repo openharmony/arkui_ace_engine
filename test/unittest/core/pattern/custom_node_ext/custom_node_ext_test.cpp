@@ -445,4 +445,30 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetBeforeCreateLayoutWrapperCallback0
         std::move(beforeCreateLayoutWrapperCallbackfunction));
     ASSERT_NE(pattern->beforeCreateLayoutWrapperCallback_, nullptr);
 }
+
+/**
+ * @tc.name: CustomNodeExtSetOnWindowSizeChangedCallback001
+ * @tc.desc: Test the set of OnWindowSizeChangedCallback in CustomNodeExt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetOnWindowSizeChangedCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNodeExt Create function.
+     * @tc.expected: Create CustomNodeExt.
+     */
+    auto customExtFrameNode = CreateNode();
+    ASSERT_NE(customExtFrameNode, nullptr);
+    auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. CustomNodeExtPattern set OnWindowSizeChangedCallback.
+     * @tc.expected: onWindowSizeChangedCallback_ has value.
+     */
+    auto onWindowSizeChangedCallbackFunction = [](int32_t width, int32_t height, WindowSizeChangeReason type){};
+    CustomNodeExtModelNG::SetOnWindowSizeChangedCallback(AceType::RawPtr(customExtFrameNode),
+        std::move(onWindowSizeChangedCallbackFunction));
+    ASSERT_NE(pattern->onWindowSizeChangedCallback_, nullptr);
+}
 } // namespace OHOS::Ace::NG

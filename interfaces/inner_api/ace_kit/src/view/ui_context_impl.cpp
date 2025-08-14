@@ -249,5 +249,10 @@ void UIContextImpl::UnregisterRotationEndCallback(int32_t callbackId)
     context_->UnregisterRotationEndCallback(callbackId);
 }
 
+void UIContextImpl::AddWindowSizeChangeCallback(int32_t nodeId)
+{
+    CHECK_NULL_VOID(context_);
+    context_->AddWindowSizeChangeCallback(nodeId);
+}
 
 } // namespace OHOS::Ace::Kit
