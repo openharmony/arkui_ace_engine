@@ -84,7 +84,7 @@ constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
 constexpr int32_t PARAM_NUM = 2;
-constexpr int32_t MAX_MISS_COUNT = 3;
+constexpr int64_t MAX_MISS_COUNT = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
@@ -6348,6 +6348,11 @@ bool PipelineContext::CheckThreadSafe()
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
+    static constexpr int64_t LARGE_TIME = INT64_MAX >> 2;
+    if (static_cast<int64_t>(nanoTimestamp) > LARGE_TIME || period > LARGE_TIME) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "time is too huge, nanoTime:%{public}" PRIu64 ", period:%{public}" PRId64,
+            nanoTimestamp, period);
+    }
     if (period > 0 && recvTime_ > static_cast<int64_t>(nanoTimestamp) + MAX_MISS_COUNT * period) {
         return static_cast<uint64_t>(recvTime_ - ((recvTime_ - static_cast<int64_t>(nanoTimestamp)) % period));
     }
