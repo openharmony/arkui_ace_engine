@@ -30,6 +30,7 @@ import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 
 export class ArkUIAniModule {
     static {
@@ -193,6 +194,9 @@ export class ArkUIAniModule {
     // for StyledString
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
+    // for search
+    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
 
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void

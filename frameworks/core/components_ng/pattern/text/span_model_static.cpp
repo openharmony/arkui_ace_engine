@@ -117,8 +117,7 @@ void SpanModelStatic::SetFontFamily(UINode* uiNode, const std::optional<std::vec
 void SpanModelStatic::SetTextDecoration(UINode* uiNode, const std::optional<TextDecoration>& value)
 {
     if (value) {
-        SetTextDecoration(uiNode, value.value());
-        // ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecoration, value.value(), uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecoration, {value.value()}, uiNode);
     } else {
         ACE_RESET_NODE_SPAN_PROPERTY(TextDecoration, uiNode);
     }

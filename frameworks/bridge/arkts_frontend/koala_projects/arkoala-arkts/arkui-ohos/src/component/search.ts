@@ -1152,8 +1152,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     }
     public searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("searchIcon")) {
-            const value_casted = value as (IconOptions | SymbolGlyphModifier | undefined)
-            this.getPeer()?.searchIconAttribute(value_casted)
+            hookSetSearchIconSymbol(this, value)
             return this
         }
         return this

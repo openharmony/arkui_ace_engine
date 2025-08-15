@@ -2857,6 +2857,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
         }
         frontend_->AttachPipelineContext(pipelineContext_);
+        if ((type_ == FrontendType::STATIC_HYBRID_DYNAMIC || type_ == FrontendType::DYNAMIC_HYBRID_STATIC) &&
+            subFrontend_) {
+            subFrontend_->AttachPipelineContext(pipelineContext_);
+        }
     } else if (frontend_->GetType() == FrontendType::DECLARATIVE_JS) {
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);

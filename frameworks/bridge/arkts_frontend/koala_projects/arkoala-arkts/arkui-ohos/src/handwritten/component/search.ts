@@ -2,6 +2,7 @@ import { InteropNativeModule, RuntimeType } from "@koalaui/interop";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { SearchOpsHandWritten } from "./../handwritten"
+import { ArkUIAniModule } from "arkui.ani";
 
 function SearchOptionsValueIsBindable(value?: SearchOptions) : boolean {
     if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
@@ -21,4 +22,15 @@ function hookSetSearchOptions(searchComponent: ArkSearchComponent, options?: Sea
         SearchOpsHandWritten.hookSearchInputValueImpl(searchComponent.getPeer().getPeerPtr(),
         (options!.value as Bindable<string>));
     }
+}
+
+function hookSetSearchIconSymbol(searchComponent: ArkSearchComponent,
+    value: IconOptions | SymbolGlyphModifier | undefined): void {
+    const value_casted = value as (IconOptions | SymbolGlyphModifier | undefined)
+    if (value_casted !== undefined && value_casted instanceof SymbolGlyphModifier) {
+        ArkUIAniModule._Search_SetSearchIcon_Symbol(searchComponent.getPeer().getPeerPtr(),
+            value_casted as SymbolGlyphModifier)
+        return
+    }
+    searchComponent.getPeer()?.searchIconAttribute(value_casted)
 }
