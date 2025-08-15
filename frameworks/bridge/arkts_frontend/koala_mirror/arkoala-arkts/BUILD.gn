@@ -15,6 +15,8 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
+import("./arkui_components.gni")
+import("./modules_components.gni")
 
 koala_root = ".."
 koala_path = ""
@@ -130,6 +132,7 @@ npm_cmd("arkui_build") {
       "$koala_root/incremental:incremental_abc",
       "$koala_root/interop:interop",
     ]
+    inputs = arkui_files
     project_path = rebase_path("./arkui")
     target_out_path = rebase_path("$target_out_dir/arkui.abc")
     built_file_path = rebase_path("./arkui/build/arkui.abc")
@@ -144,6 +147,7 @@ npm_cmd("global_resource_build") {
       "$koala_root/incremental:incremental_abc",
       "$koala_root/interop:interop",
     ]
+    inputs = modules_files
     project_path = rebase_path("./modules/global.resource")
     target_out_path = rebase_path("$target_out_dir/resource.abc")
     built_file_path = rebase_path("./modules/global.resource/build/src/resource.abc")

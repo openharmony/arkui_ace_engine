@@ -23,6 +23,9 @@ template("npm_cmd") {
         if (defined(invoker.deps)) {
             deps = invoker.deps
         }
+        if (defined(invoker.inputs)) {
+            inputs = invoker.inputs
+        }
         if (defined(invoker.external_deps)) {
             external_deps = invoker.external_deps
         }

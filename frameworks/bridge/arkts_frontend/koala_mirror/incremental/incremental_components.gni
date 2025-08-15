@@ -1,0 +1,93 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# DO NOT MODIFY THIS FILE MANUALLY.
+
+incremental_files = [
+  "common/src/Finalization.ts",
+  "common/src/index.ts",
+  "common/src/koalaKey.ts",
+  "common/src/math.ts",
+  "common/src/sha1.ts",
+  "common/src/stringUtils.ts",
+  "common/src/uniqueId.ts",
+  "compat/src/arkts/array.ts",
+  "compat/src/arkts/atomic.ts",
+  "compat/src/arkts/finalization.ts",
+  "compat/src/arkts/index.ts",
+  "compat/src/arkts/observable.ts",
+  "compat/src/arkts/performance.ts",
+  "compat/src/arkts/primitive.ts",
+  "compat/src/arkts/prop-deep-copy.ts",
+  "compat/src/arkts/reflection.ts",
+  "compat/src/arkts/strings.ts",
+  "compat/src/arkts/ts-reflection.ts",
+  "compat/src/arkts/types.ts",
+  "compat/src/arkts/utils.ts",
+  "compat/src/index.ts",
+  "compat/src/ohos/index.ts",
+  "compat/src/ohos/performance.ts",
+  "compat/src/typescript/Types.d.ts",
+  "compat/src/typescript/array.ts",
+  "compat/src/typescript/atomic.ts",
+  "compat/src/typescript/finalization.ts",
+  "compat/src/typescript/index.ts",
+  "compat/src/typescript/observable.ts",
+  "compat/src/typescript/performance.ts",
+  "compat/src/typescript/primitive.ts",
+  "compat/src/typescript/prop-deep-copy.ts",
+  "compat/src/typescript/reflection.ts",
+  "compat/src/typescript/strings.ts",
+  "compat/src/typescript/ts-reflection.ts",
+  "compat/src/typescript/types.ts",
+  "compat/src/typescript/utils.ts",
+  "runtime/annotations/index.ts",
+  "runtime/src/animation/AnimatedState.ts",
+  "runtime/src/animation/AnimationRange.ts",
+  "runtime/src/animation/Easing.ts",
+  "runtime/src/animation/EasingSupport.ts",
+  "runtime/src/animation/GlobalTimer.ts",
+  "runtime/src/animation/TimeAnimation.ts",
+  "runtime/src/animation/memo.ts",
+  "runtime/src/common/MarkableQueue.ts",
+  "runtime/src/common/RuntimeProfiler.ts",
+  "runtime/src/common/Unique.ts",
+  "runtime/src/index.ts",
+  "runtime/src/internals.ts",
+  "runtime/src/memo/bind.ts",
+  "runtime/src/memo/changeListener.ts",
+  "runtime/src/memo/contextLocal.ts",
+  "runtime/src/memo/entry.ts",
+  "runtime/src/memo/node.ts",
+  "runtime/src/memo/remember.ts",
+  "runtime/src/memo/repeat.ts",
+  "runtime/src/memo/testing.ts",
+  "runtime/src/states/Dependency.ts",
+  "runtime/src/states/Disposable.ts",
+  "runtime/src/states/GlobalStateManager.ts",
+  "runtime/src/states/Journal.ts",
+  "runtime/src/states/State.ts",
+  "runtime/src/tree/IncrementalNode.ts",
+  "runtime/src/tree/PrimeNumbers.ts",
+  "runtime/src/tree/ReadonlyTreeNode.ts",
+  "runtime/src/tree/TreeNode.ts",
+  "runtime/src/tree/TreePath.ts",
+  "runtime/src/tree/TreeUpdater.ts",
+  "runtime/types/State.d.ts",
+]
+
+incremental_path_keys = [
+]
+
+incremental_path_values = [
+]

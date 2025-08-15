@@ -560,4 +560,3 @@ export class LocalStoragePropDecoratorProperty<Value> extends LinkDecoratorPrope
         this.linkTo(storage.setAndProp<Value>(storageKey ?? this.info(), value))
     }
 }
-
