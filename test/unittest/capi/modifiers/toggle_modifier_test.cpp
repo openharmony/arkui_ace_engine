@@ -317,7 +317,8 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> sele
         Color::BLACK.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(SELECTED_COLOR_RESOURCE), Color::BLACK.ToString() }
+    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(SELECTED_COLOR_RESOURCE),
+        Color::BLACK.ToString() }
 };
 
 /*
@@ -587,7 +588,8 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
         Color::BLACK.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), Color::BLACK.ToString() }
+    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE),
+        Color::BLACK.ToString() }
 };
 
 /*
