@@ -182,19 +182,19 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
     attributeModifier_value?: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined
-    public fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public fontColor(value: Array<ResourceColor> | undefined): this {
+    fontColor(value: Array<ResourceColor> | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public effectStrategy(value: SymbolEffectStrategy | undefined): this {
+    effectStrategy(value: SymbolEffectStrategy | undefined): this {
         return this
     }
-    public renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {

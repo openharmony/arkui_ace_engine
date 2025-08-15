@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSUndefinedKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 97)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSUndefinedKeyword(): TSUndefinedKeyword {
-        const result: TSUndefinedKeyword = new TSUndefinedKeyword(global.generatedEs2panda._CreateTSUndefinedKeyword(global.context))
+        const result: TSUndefinedKeyword = new TSUndefinedKeyword(global.generatedEs2panda._CreateTSUndefinedKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSUndefinedKeyword(original?: TSUndefinedKeyword): TSUndefinedKeyword {
-        const result: TSUndefinedKeyword = new TSUndefinedKeyword(global.generatedEs2panda._UpdateTSUndefinedKeyword(global.context, passNode(original)))
+        const result: TSUndefinedKeyword = new TSUndefinedKeyword(global.generatedEs2panda._UpdateTSUndefinedKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSUndefinedKeyword(node: object | undefined): node is TSUndefi
     return node instanceof TSUndefinedKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD, (peer: KNativePointer) => new TSUndefinedKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD, (peer: KNativePointer) => new TSUndefinedKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNDEFINED_KEYWORD))
 }

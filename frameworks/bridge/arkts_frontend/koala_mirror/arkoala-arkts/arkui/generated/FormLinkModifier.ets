@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkFormLinkPeer, FormLinkAttribute } from "./component/formLink"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class FormLinkModifier extends CommonMethodModifier implements FormLinkAttribute,AttributeModifier<FormLinkAttribute> {
     _instanceId: number = -1;

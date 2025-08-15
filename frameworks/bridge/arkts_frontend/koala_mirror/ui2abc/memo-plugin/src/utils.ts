@@ -21,6 +21,9 @@ import {
     correctFunctionParamType,
     correctObjectExpression,
     isMemo,
+    isMemoAllowedType,
+    isMemoAnnotatableType,
+    MemoAllowedType,
     MemoAnnotatable,
     MemoSkipAnnotatable,
     MemoStableAnnotatable
@@ -153,8 +156,7 @@ export function hasWrapAnnotation(node: arkts.ETSParameterExpression) {
     )
 }
 
-export function getMemoFunctionKind(node: MemoAnnotatable): MemoFunctionKind {
-    const mask = (+hasMemoEntryAnnotation(node) << 2) + (+hasMemoIntrinsicAnnotation(node) << 1) + (+hasMemoAnnotation(node))
+export function maskToKind(mask: number): MemoFunctionKind {
     switch (mask) {
         case 0:
             return MemoFunctionKind.NONE
@@ -168,6 +170,46 @@ export function getMemoFunctionKind(node: MemoAnnotatable): MemoFunctionKind {
             console.error(`Conflicting @memo annotations are not allowed`)
             throw new Error(`Invalid @memo usage`)
     }
+}
+
+export function getMemoFunctionKind(node: MemoAnnotatable): MemoFunctionKind {
+    const mask = (+hasMemoEntryAnnotation(node) << 2) + (+hasMemoIntrinsicAnnotation(node) << 1) + (+hasMemoAnnotation(node))
+    return maskToKind(mask)
+}
+
+export function getMemoTypeKind(node: MemoAllowedType): MemoFunctionKind {
+    if (arkts.isETSFunctionType(node)) {
+        return getMemoFunctionKind(node)
+    }
+    if (arkts.isETSUnionType(node)) {
+        const directKind = getMemoFunctionKind(node)
+        const childKinds = node.types.map(it => isMemoAllowedType(it) ? getMemoTypeKind(it) : MemoFunctionKind.NONE)
+        const mask = childKinds.reduce((prev: number, cur: number) => prev | cur, directKind)
+        return maskToKind(mask)
+    }
+    if (arkts.isETSTypeReference(node)) {
+        const name = node.part?.name
+        if (!name) {
+            return MemoFunctionKind.NONE
+        }
+        const decl = getDeclResolveGensym(name)
+        if (!arkts.isTSTypeAliasDeclaration(decl)) {
+            return MemoFunctionKind.NONE
+        }
+        const directKind = getMemoFunctionKind(decl)
+        const typeKind = isMemoAllowedType(decl.typeAnnotation) ? getMemoTypeKind(decl.typeAnnotation) : MemoFunctionKind.NONE
+        return maskToKind(directKind | typeKind)
+    }
+    return MemoFunctionKind.NONE
+}
+
+export function getMemoParameterKind(node: arkts.ETSParameterExpression): MemoFunctionKind {
+    const directKind = getMemoFunctionKind(node)
+    const typeAnnotation = node.ident?.typeAnnotation
+    const typeKind = isMemoAllowedType(typeAnnotation)
+        ? getMemoTypeKind(typeAnnotation)
+        : MemoFunctionKind.NONE
+    return maskToKind(directKind | typeKind)
 }
 
 export function isWrappable(type: arkts.TypeNode | undefined, arg: arkts.Expression) {

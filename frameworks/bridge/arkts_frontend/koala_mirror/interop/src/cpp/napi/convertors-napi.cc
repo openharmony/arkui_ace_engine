@@ -244,6 +244,14 @@ napi_value makeFloat32(napi_env env, float value) {
     return result;
 }
 
+napi_value makeFloat64(napi_env env, double value) {
+    napi_value result;
+    napi_status status;
+    status = napi_create_double(env, value, &result);
+    KOALA_NAPI_THROW_IF_FAILED(env, status, result);
+    return result;
+}
+
 napi_value makePointer(napi_env env, void* value) {
     napi_value result;
     napi_status status;

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class BigIntLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 5)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createBigIntLiteral(src: string): BigIntLiteral {
-        const result: BigIntLiteral = new BigIntLiteral(global.generatedEs2panda._CreateBigIntLiteral(global.context, src))
+        const result: BigIntLiteral = new BigIntLiteral(global.generatedEs2panda._CreateBigIntLiteral(global.context, src), Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateBigIntLiteral(original: BigIntLiteral | undefined, src: string): BigIntLiteral {
-        const result: BigIntLiteral = new BigIntLiteral(global.generatedEs2panda._UpdateBigIntLiteral(global.context, passNode(original), src))
+        const result: BigIntLiteral = new BigIntLiteral(global.generatedEs2panda._UpdateBigIntLiteral(global.context, passNode(original), src), Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isBigIntLiteral(node: object | undefined): node is BigIntLiteral
     return node instanceof BigIntLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL, (peer: KNativePointer) => new BigIntLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL, (peer: KNativePointer) => new BigIntLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BIGINT_LITERAL))
 }

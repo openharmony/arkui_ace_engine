@@ -23,7 +23,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -190,13 +190,13 @@ export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements Lin
     indicatorLoop_value?: boolean | undefined
     onChange_value?: OnLinearIndicatorChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined
-    public indicatorStyle(value: LinearIndicatorStyle | undefined): this {
+    indicatorStyle(value: LinearIndicatorStyle | undefined): this {
         return this
     }
-    public indicatorLoop(value: boolean | undefined): this {
+    indicatorLoop(value: boolean | undefined): this {
         return this
     }
-    public onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
+    onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

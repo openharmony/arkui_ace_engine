@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSConditionalType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 113)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSConditionalType(checkType?: Expression, extendsType?: Expression, trueType?: Expression, falseType?: Expression): TSConditionalType {
-        const result: TSConditionalType = new TSConditionalType(global.generatedEs2panda._CreateTSConditionalType(global.context, passNode(checkType), passNode(extendsType), passNode(trueType), passNode(falseType)))
+        const result: TSConditionalType = new TSConditionalType(global.generatedEs2panda._CreateTSConditionalType(global.context, passNode(checkType), passNode(extendsType), passNode(trueType), passNode(falseType)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSConditionalType(original?: TSConditionalType, checkType?: Expression, extendsType?: Expression, trueType?: Expression, falseType?: Expression): TSConditionalType {
-        const result: TSConditionalType = new TSConditionalType(global.generatedEs2panda._UpdateTSConditionalType(global.context, passNode(original), passNode(checkType), passNode(extendsType), passNode(trueType), passNode(falseType)))
+        const result: TSConditionalType = new TSConditionalType(global.generatedEs2panda._UpdateTSConditionalType(global.context, passNode(original), passNode(checkType), passNode(extendsType), passNode(trueType), passNode(falseType)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isTSConditionalType(node: object | undefined): node is TSConditi
     return node instanceof TSConditionalType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE, (peer: KNativePointer) => new TSConditionalType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE, (peer: KNativePointer) => new TSConditionalType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONDITIONAL_TYPE))
 }

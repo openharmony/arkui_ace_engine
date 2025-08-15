@@ -37,17 +37,16 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class ImportSpecifier extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 43)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createImportSpecifier(imported?: Identifier, local?: Identifier): ImportSpecifier {
-        const result: ImportSpecifier = new ImportSpecifier(global.generatedEs2panda._CreateImportSpecifier(global.context, passNode(imported), passNode(local)))
+        const result: ImportSpecifier = new ImportSpecifier(global.generatedEs2panda._CreateImportSpecifier(global.context, passNode(imported), passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static updateImportSpecifier(original?: ImportSpecifier, imported?: Identifier, local?: Identifier): ImportSpecifier {
-        const result: ImportSpecifier = new ImportSpecifier(global.generatedEs2panda._UpdateImportSpecifier(global.context, passNode(original), passNode(imported), passNode(local)))
+        const result: ImportSpecifier = new ImportSpecifier(global.generatedEs2panda._UpdateImportSpecifier(global.context, passNode(original), passNode(imported), passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
@@ -71,5 +70,5 @@ export function isImportSpecifier(node: object | undefined): node is ImportSpeci
     return node instanceof ImportSpecifier
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER, (peer: KNativePointer) => new ImportSpecifier(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER, (peer: KNativePointer) => new ImportSpecifier(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER))
 }

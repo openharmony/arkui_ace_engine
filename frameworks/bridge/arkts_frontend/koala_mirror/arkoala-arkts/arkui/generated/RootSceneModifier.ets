@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRootScenePeer, RootSceneAttribute } from "./component/rootScene"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RootSceneModifier extends CommonMethodModifier implements RootSceneAttribute,AttributeModifier<RootSceneAttribute> {
     _instanceId: number = -1;

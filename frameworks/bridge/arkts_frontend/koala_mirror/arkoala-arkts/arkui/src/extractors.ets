@@ -23,7 +23,7 @@ export namespace extractors {
     }
 
     export function fromImagePixelMapPtr(ptr: KPointer): image.PixelMap {
-        return new image.PixelMapInner(ptr)
+        return fromPointer("@ohos.multimedia.image.image.PixelMapInner", ptr) as image.PixelMap
     }
 
     function toPointer(obj: Object, declarationName: string, pointerPropName: string): long {
@@ -32,6 +32,17 @@ export namespace extractors {
             if (entry[0] == pointerPropName) return entry[1] as long
         }
         throw new Error(`native pointer for ${declarationName} declaration is not found!`)
+    }
+
+    // Get Type for exported classes: Type.from<ns.ClassName>()
+    // Get Type for non exported classes: Type.resolve("package.ns.ClassName")
+    function fromPointer(typeName: string, ptr: long): Object {
+        const type = Type.resolve(typeName)
+        if (type instanceof ClassType) {
+            const classType = type as ClassType
+            return classType.make([ptr])
+        }
+        throw new Error(`Type "${typeName}" is not a class type: ${type}`)
     }
 }
 

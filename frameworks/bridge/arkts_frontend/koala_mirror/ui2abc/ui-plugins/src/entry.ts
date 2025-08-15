@@ -16,6 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 import checkedTransformer from "./checked-state-plugin"
 import parsedTransformer from "./parsed-state-plugin"
+import { ProjectConfig } from "./component-transformer"
 
 export function init(parsedJson?: Object, checkedJson?: Object) {
     let pluginContext = new arkts.PluginContextImpl()
@@ -24,11 +25,12 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
 
     return {
         name: "ui",
-        parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
+        parsed(this: any, hooks: arkts.RunTransformerHooks = parsedHooks) {
             arkts.Tracer.pushContext('ui-plugin')
-            arkts.trace(() => "Run parsed state plugin", true)
-            const transform = parsedTransformer(parsedJson)
-            const prog = arkts.arktsGlobal.compilerContext.program
+            arkts.traceGlobal(() => "Run parsed state plugin", true)
+            let projectConfig: ProjectConfig | undefined = this.projectConfig
+            const transform = parsedTransformer(parsedJson, projectConfig)
+            const prog = arkts.arktsGlobal.compilerContext!.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
@@ -40,9 +42,9 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
         },
         checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
             arkts.Tracer.pushContext('ui-plugin')
-            arkts.trace(() => "Run checked state plugin", true)
+            arkts.traceGlobal(() => "Run checked state plugin", true)
             const transform = checkedTransformer(checkedJson)
-            const prog = arkts.arktsGlobal.compilerContext.program
+            const prog = arkts.arktsGlobal.compilerContext!.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
@@ -55,7 +57,7 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
         },
         clean() {
             arkts.Tracer.pushContext('ui-plugin')
-            arkts.trace(() => "Clean", true)
+            arkts.traceGlobal(() => "Clean", true)
             arkts.Tracer.popContext()
             pluginContext = new arkts.PluginContextImpl()
         }

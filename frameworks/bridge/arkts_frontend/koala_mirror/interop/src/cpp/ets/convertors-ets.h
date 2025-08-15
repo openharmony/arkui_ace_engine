@@ -79,6 +79,14 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KDouble> {
+    using InteropType = ets_double;
+    static KDouble convertFrom(EtsEnv* env, InteropType value) { return value; }
+    static InteropType convertTo(EtsEnv* env, InteropFloat64 value) { return value; }
+    static void release(EtsEnv* env, InteropType value, KDouble converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KSerializerBuffer> {
     using InteropType = ets_long;
     static KSerializerBuffer convertFrom(EtsEnv* env, InteropType value) {

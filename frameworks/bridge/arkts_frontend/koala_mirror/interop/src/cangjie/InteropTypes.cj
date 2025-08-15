@@ -18,6 +18,7 @@ import std.collection.*
 
 public type KPointer = UInt64
 public type KFloat = Float32
+public type KDouble = Float64
 public type pointer = KPointer
 public type KInt = Int32
 public type KLong = Int64

@@ -23,7 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -72,15 +72,16 @@ export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export interface PluginComponentTemplate {
-    source: string;
-    bundleName: string;
+    source: string | undefined;
+    bundleName: string | undefined;
 }
+export type RecordData = Object | undefined;
 export interface PluginComponentOptions {
     template: PluginComponentTemplate;
-    data: Object | undefined;
+    data: RecordData;
 }
 export interface PluginErrorData {
-    errcode: number;
+    errcode: int32;
     msg: string;
 }
 export type PluginErrorCallback = (info: PluginErrorData) => void;
@@ -99,10 +100,10 @@ export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements Plu
     onComplete_value?: VoidCallback | undefined
     onError_value?: PluginErrorCallback | undefined
     attributeModifier_value?: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onComplete(value: VoidCallback | undefined): this {
+    onComplete(value: VoidCallback | undefined): this {
         return this
     }
-    public onError(value: PluginErrorCallback | undefined): this {
+    onError(value: PluginErrorCallback | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -170,14 +171,36 @@ export class PluginComponentTemplate_serializer {
     public static write(buffer: SerializerBase, value: PluginComponentTemplate): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForSource  = value.source
-        valueSerializer.writeString(valueHolderForSource)
+        if (valueHolderForSource !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSourceTmpValue  = valueHolderForSource!
+            valueSerializer.writeString(valueHolderForSourceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForBundleName  = value.bundleName
-        valueSerializer.writeString(valueHolderForBundleName)
+        if (valueHolderForBundleName !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForBundleNameTmpValue  = valueHolderForBundleName!
+            valueSerializer.writeString(valueHolderForBundleNameTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): PluginComponentTemplate {
         let valueDeserializer : DeserializerBase = buffer
-        const sourceTmpResult : string = (valueDeserializer.readString() as string)
-        const bundleNameTmpResult : string = (valueDeserializer.readString() as string)
+        const sourceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sourceTmpBuf : string | undefined
+        if ((sourceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sourceTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const sourceTmpResult : string | undefined = sourceTmpBuf
+        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let bundleNameTmpBuf : string | undefined
+        if ((bundleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            bundleNameTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const bundleNameTmpResult : string | undefined = bundleNameTmpBuf
         let value : PluginComponentTemplate = ({source: sourceTmpResult, bundleName: bundleNameTmpResult} as PluginComponentTemplate)
         return value
     }
@@ -186,13 +209,13 @@ export class PluginErrorData_serializer {
     public static write(buffer: SerializerBase, value: PluginErrorData): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForErrcode  = value.errcode
-        valueSerializer.writeNumber(valueHolderForErrcode)
+        valueSerializer.writeInt32(valueHolderForErrcode)
         const valueHolderForMsg  = value.msg
         valueSerializer.writeString(valueHolderForMsg)
     }
     public static read(buffer: DeserializerBase): PluginErrorData {
         let valueDeserializer : DeserializerBase = buffer
-        const errcodeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const errcodeTmpResult : int32 = valueDeserializer.readInt32()
         const msgTmpResult : string = (valueDeserializer.readString() as string)
         let value : PluginErrorData = ({errcode: errcodeTmpResult, msg: msgTmpResult} as PluginErrorData)
         return value
@@ -220,7 +243,7 @@ export class PluginComponentOptions_serializer {
         if ((dataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dataTmpBuf = (valueDeserializer.readObject() as object)
         }
-        const dataTmpResult : Object | undefined = dataTmpBuf
+        const dataTmpResult : RecordData = dataTmpBuf
         let value : PluginComponentOptions = ({template: templateTmpResult, data: dataTmpResult} as PluginComponentOptions)
         return value
     }

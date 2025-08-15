@@ -27,13 +27,13 @@ import { TextDecorationType, Color, TextDecorationStyle, ImageSpanAlignment, Ima
 import { ResourceColor, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from "./units"
 import { Resource } from "global.resource"
 import { drawing_ColorFilter_serializer, drawing } from "./../framework/ohos.graphics.drawing"
+import { extractors } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
 import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GestureEvent, GestureEvent_serializer } from "./gesture"
-import { extractors } from "#handwritten"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 export class BackgroundColorStyleInternal {
     public static fromPtr(ptr: KPointer): BackgroundColorStyle {
@@ -1093,8 +1093,8 @@ export type StyledStringMarshallingValue = UserDataSpan;
 export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => ArrayBuffer;
 export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => UserDataSpan;
 export interface StyleOptions {
-    start?: number;
-    length?: number;
+    start?: int32;
+    length?: int32;
     styledKey: StyledStringKey;
     styledValue: StyledStringValue;
 }
@@ -1344,7 +1344,7 @@ export class GestureStyleInterface_serializer {
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCall);
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCallSync);
                 ClickEvent_serializer.write(onClickTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(1097178637, onClickTmpBuf_BufArgsSerializer.asBuffer(), onClickTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1097178637, onClickTmpBuf_BufArgsSerializer.asBuffer(), onClickTmpBuf_BufArgsSerializer.length());
                 onClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1362,7 +1362,7 @@ export class GestureStyleInterface_serializer {
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
                 GestureEvent_serializer.write(onLongPressTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(-1143194492, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1143194492, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2167,7 +2167,7 @@ export class StyleOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            valueSerializer.writeNumber(valueHolderForStartTmpValue)
+            valueSerializer.writeInt32(valueHolderForStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2175,7 +2175,7 @@ export class StyleOptions_serializer {
         if (valueHolderForLength !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLengthTmpValue  = valueHolderForLength!
-            valueSerializer.writeNumber(valueHolderForLengthTmpValue)
+            valueSerializer.writeInt32(valueHolderForLengthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2239,17 +2239,17 @@ export class StyleOptions_serializer {
     public static read(buffer: DeserializerBase): StyleOptions {
         let valueDeserializer : DeserializerBase = buffer
         const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : number | undefined
+        let startTmpBuf : int32 | undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = (valueDeserializer.readNumber() as number)
+            startTmpBuf = valueDeserializer.readInt32()
         }
-        const startTmpResult : number | undefined = startTmpBuf
+        const startTmpResult : int32 | undefined = startTmpBuf
         const lengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let lengthTmpBuf : number | undefined
+        let lengthTmpBuf : int32 | undefined
         if ((lengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lengthTmpBuf = (valueDeserializer.readNumber() as number)
+            lengthTmpBuf = valueDeserializer.readInt32()
         }
-        const lengthTmpResult : number | undefined = lengthTmpBuf
+        const lengthTmpResult : int32 | undefined = lengthTmpBuf
         const styledKeyTmpResult : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let styledValueTmpBuf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined

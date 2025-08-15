@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSParenthesizedType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 110)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSParenthesizedType(type?: TypeNode): TSParenthesizedType {
-        const result: TSParenthesizedType = new TSParenthesizedType(global.generatedEs2panda._CreateTSParenthesizedType(global.context, passNode(type)))
+        const result: TSParenthesizedType = new TSParenthesizedType(global.generatedEs2panda._CreateTSParenthesizedType(global.context, passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSParenthesizedType(original?: TSParenthesizedType, type?: TypeNode): TSParenthesizedType {
-        const result: TSParenthesizedType = new TSParenthesizedType(global.generatedEs2panda._UpdateTSParenthesizedType(global.context, passNode(original), passNode(type)))
+        const result: TSParenthesizedType = new TSParenthesizedType(global.generatedEs2panda._UpdateTSParenthesizedType(global.context, passNode(original), passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSParenthesizedType(node: object | undefined): node is TSParen
     return node instanceof TSParenthesizedType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE, (peer: KNativePointer) => new TSParenthesizedType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE, (peer: KNativePointer) => new TSParenthesizedType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARENT_TYPE))
 }

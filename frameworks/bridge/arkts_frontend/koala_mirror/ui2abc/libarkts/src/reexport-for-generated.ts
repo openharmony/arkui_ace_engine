@@ -46,4 +46,6 @@ export {
     extension_SourcePositionGetLine,
     extension_SourcePositionToString,
     extension_NumberLiteralValue,
+    extension_ScriptFunctionSetParams,
+    extension_ClassDefinitionSetBody,
 } from "./arkts-api/utilities/extensions"

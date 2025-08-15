@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class CharLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 13)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createCharLiteral(): CharLiteral {
-        const result: CharLiteral = new CharLiteral(global.generatedEs2panda._CreateCharLiteral(global.context))
+        const result: CharLiteral = new CharLiteral(global.generatedEs2panda._CreateCharLiteral(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateCharLiteral(original?: CharLiteral): CharLiteral {
-        const result: CharLiteral = new CharLiteral(global.generatedEs2panda._UpdateCharLiteral(global.context, passNode(original)))
+        const result: CharLiteral = new CharLiteral(global.generatedEs2panda._UpdateCharLiteral(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isCharLiteral(node: object | undefined): node is CharLiteral {
     return node instanceof CharLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL, (peer: KNativePointer) => new CharLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL, (peer: KNativePointer) => new CharLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CHAR_LITERAL))
 }

@@ -37,17 +37,16 @@ import { TSTypeParameter } from "./TSTypeParameter"
 import { TypeNode } from "./TypeNode"
 
 export class TSInferType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 112)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSInferType(typeParam?: TSTypeParameter): TSInferType {
-        const result: TSInferType = new TSInferType(global.generatedEs2panda._CreateTSInferType(global.context, passNode(typeParam)))
+        const result: TSInferType = new TSInferType(global.generatedEs2panda._CreateTSInferType(global.context, passNode(typeParam)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSInferType(original?: TSInferType, typeParam?: TSTypeParameter): TSInferType {
-        const result: TSInferType = new TSInferType(global.generatedEs2panda._UpdateTSInferType(global.context, passNode(original), passNode(typeParam)))
+        const result: TSInferType = new TSInferType(global.generatedEs2panda._UpdateTSInferType(global.context, passNode(original), passNode(typeParam)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSInferType(node: object | undefined): node is TSInferType {
     return node instanceof TSInferType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE, (peer: KNativePointer) => new TSInferType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE, (peer: KNativePointer) => new TSInferType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INFER_TYPE))
 }

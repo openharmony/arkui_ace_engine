@@ -39,22 +39,21 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class AnnotationDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 1)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1AnnotationDeclaration(expr: Expression | undefined, properties: readonly AstNode[]): AnnotationDeclaration {
-        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._CreateAnnotationDeclaration1(global.context, passNode(expr), passNodeArray(properties), properties.length))
+        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._CreateAnnotationDeclaration1(global.context, passNode(expr), passNodeArray(properties), properties.length), Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateAnnotationDeclaration(original?: AnnotationDeclaration, expr?: Expression): AnnotationDeclaration {
-        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._UpdateAnnotationDeclaration(global.context, passNode(original), passNode(expr)))
+        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._UpdateAnnotationDeclaration(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static update1AnnotationDeclaration(original: AnnotationDeclaration | undefined, expr: Expression | undefined, properties: readonly AstNode[]): AnnotationDeclaration {
-        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._UpdateAnnotationDeclaration1(global.context, passNode(original), passNode(expr), passNodeArray(properties), properties.length))
+        const result: AnnotationDeclaration = new AnnotationDeclaration(global.generatedEs2panda._UpdateAnnotationDeclaration1(global.context, passNode(original), passNode(expr), passNodeArray(properties), properties.length), Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -164,5 +163,5 @@ export function isAnnotationDeclaration(node: object | undefined): node is Annot
     return node instanceof AnnotationDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION, (peer: KNativePointer) => new AnnotationDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION, (peer: KNativePointer) => new AnnotationDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ANNOTATION_DECLARATION))
 }

@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethod
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookLoadingProgressContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookLoadingProgressContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -114,13 +114,13 @@ export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements Loa
     enableLoading_value?: boolean | undefined
     contentModifier_value?: ContentModifier<LoadingProgressConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined
-    public color(value: ResourceColor | undefined): this {
+    color(value: ResourceColor | undefined): this {
         return this
     }
-    public enableLoading(value: boolean | undefined): this {
+    enableLoading(value: boolean | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {

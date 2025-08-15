@@ -33,29 +33,27 @@ import {
 } from "../../reexport-for-generated"
 
 import { ClassDefinition } from "./ClassDefinition"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 import { TypedStatement } from "./TypedStatement"
 
 export class TSEnumDeclaration extends TypedStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 89)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1TSEnumDeclaration(key: Identifier | undefined, members: readonly AstNode[], isConst: boolean, isStatic: boolean, isDeclare: boolean, typeNode?: TypeNode): TSEnumDeclaration {
-        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._CreateTSEnumDeclaration1(global.context, passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare, passNode(typeNode)))
+        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._CreateTSEnumDeclaration1(global.context, passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare, passNode(typeNode)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSEnumDeclaration(original: TSEnumDeclaration | undefined, key: Identifier | undefined, members: readonly AstNode[], isConst: boolean, isStatic: boolean, isDeclare: boolean): TSEnumDeclaration {
-        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._UpdateTSEnumDeclaration(global.context, passNode(original), passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare))
+        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._UpdateTSEnumDeclaration(global.context, passNode(original), passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static update1TSEnumDeclaration(original: TSEnumDeclaration | undefined, key: Identifier | undefined, members: readonly AstNode[], isConst: boolean, isStatic: boolean, isDeclare: boolean, typeNode?: TypeNode): TSEnumDeclaration {
-        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._UpdateTSEnumDeclaration1(global.context, passNode(original), passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare, passNode(typeNode)))
+        const result: TSEnumDeclaration = new TSEnumDeclaration(global.generatedEs2panda._UpdateTSEnumDeclaration1(global.context, passNode(original), passNode(key), passNodeArray(members), members.length, isConst, isStatic, isDeclare, passNode(typeNode)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -87,27 +85,6 @@ export class TSEnumDeclaration extends TypedStatement {
     get isConst(): boolean {
         return global.generatedEs2panda._TSEnumDeclarationIsConstConst(global.context, this.peer)
     }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSEnumDeclarationDecoratorsConst(global.context, this.peer))
-    }
-    /** @deprecated */
-    emplaceDecorators(source?: Decorator): this {
-        global.generatedEs2panda._TSEnumDeclarationEmplaceDecorators(global.context, this.peer, passNode(source))
-        return this
-    }
-    /** @deprecated */
-    clearDecorators(): this {
-        global.generatedEs2panda._TSEnumDeclarationClearDecorators(global.context, this.peer)
-        return this
-    }
-    /** @deprecated */
-    setValueDecorators(source: Decorator | undefined, index: number): this {
-        global.generatedEs2panda._TSEnumDeclarationSetValueDecorators(global.context, this.peer, passNode(source), index)
-        return this
-    }
-    get decoratorsForUpdate(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSEnumDeclarationDecoratorsForUpdate(global.context, this.peer))
-    }
     /** @deprecated */
     emplaceMembers(source?: AstNode): this {
         global.generatedEs2panda._TSEnumDeclarationEmplaceMembers(global.context, this.peer, passNode(source))
@@ -132,5 +109,5 @@ export function isTSEnumDeclaration(node: object | undefined): node is TSEnumDec
     return node instanceof TSEnumDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION, (peer: KNativePointer) => new TSEnumDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION, (peer: KNativePointer) => new TSEnumDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_DECLARATION))
 }

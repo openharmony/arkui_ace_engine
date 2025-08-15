@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Bindable_Boolean_serializer, Bindable_Number_serializer, DividerStyle_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, DividerStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Bindable_Boolean_serializer, Bindable_Arkui_Component_Units_Length_serializer, DividerStyle_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, DividerStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
@@ -25,11 +25,11 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Length, Dimension } from "./units"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -112,24 +112,36 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSideBarWidth0Attribute(value: number | Bindable<number> | undefined): void {
+    setSideBarWidthAttribute(value: Length | Bindable<Length> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof number) {
+            if (valueTmpValue instanceof Length) {
                 thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<number>) {
+                const valueTmpValueForIdx0  = valueTmpValue as Length
+                if (valueTmpValueForIdx0 instanceof string) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
+                } else if (valueTmpValueForIdx0 instanceof number) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                    thisSerializer.writeInt8((2).toChar())
+                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueTmpValue instanceof Bindable<Length>) {
                 thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as Bindable<number>
-                Bindable_Number_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<Length>
+                Bindable_Arkui_Component_Units_Length_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinSideBarWidth0Attribute(value: number | undefined): void {
@@ -154,30 +166,6 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMaxSideBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setSideBarWidth1Attribute(value: Length | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof number) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as number
-                thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SideBarContainerAttribute_setSideBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setMinSideBarWidth1Attribute(value: Length | undefined): void {
@@ -327,7 +315,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     onChange(value: ((value: boolean) => void) | undefined): this {
         throw new Error("Unimplemented method onChange")
     }
-    sideBarWidth(value: number | Bindable<number> | undefined): this {
+    sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         throw new Error("Unimplemented method sideBarWidth")
     }
     minSideBarWidth(value: number | undefined): this {
@@ -335,9 +323,6 @@ export interface SideBarContainerAttribute extends CommonMethod {
     }
     maxSideBarWidth(value: number | undefined): this {
         throw new Error("Unimplemented method maxSideBarWidth")
-    }
-    sideBarWidth(value: Length | undefined): this {
-        throw new Error("Unimplemented method sideBarWidth")
     }
     minSideBarWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method minSideBarWidth")
@@ -366,54 +351,50 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     controlButton_value?: ButtonStyle | undefined
     showControlButton_value?: boolean | undefined
     onChange_value?: ((value: boolean) => void) | undefined
-    sideBarWidth_value?: number | Bindable<number> | undefined
+    sideBarWidth_value?: Length | Bindable<Length> | undefined
     minSideBarWidth_value?: number | undefined
     maxSideBarWidth_value?: number | undefined
     autoHide_value?: boolean | undefined
     sideBarPosition_value?: SideBarPosition | undefined
     divider_value?: DividerStyle | undefined
     minContentWidth_value?: Dimension | undefined
-    attributeModifier_value?: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
+    showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public controlButton(value: ButtonStyle | undefined): this {
+    controlButton(value: ButtonStyle | undefined): this {
         return this
     }
-    public showControlButton(value: boolean | undefined): this {
+    showControlButton(value: boolean | undefined): this {
         return this
     }
-    public onChange(value: ((value: boolean) => void) | undefined): this {
+    onChange(value: ((value: boolean) => void) | undefined): this {
         return this
     }
-    public sideBarWidth(value: number | Bindable<number> | undefined): this {
+    sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
-    public minSideBarWidth(value: number | undefined): this {
+    minSideBarWidth(value: number | undefined): this {
         return this
     }
-    public maxSideBarWidth(value: number | undefined): this {
+    maxSideBarWidth(value: number | undefined): this {
         return this
     }
-    public sideBarWidth(value: Length | undefined): this {
+    minSideBarWidth(value: Length | undefined): this {
         return this
     }
-    public minSideBarWidth(value: Length | undefined): this {
+    maxSideBarWidth(value: Length | undefined): this {
         return this
     }
-    public maxSideBarWidth(value: Length | undefined): this {
+    autoHide(value: boolean | undefined): this {
         return this
     }
-    public autoHide(value: boolean | undefined): this {
+    sideBarPosition(value: SideBarPosition | undefined): this {
         return this
     }
-    public sideBarPosition(value: SideBarPosition | undefined): this {
+    divider(value: DividerStyle | undefined): this {
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
-        return this
-    }
-    public minContentWidth(value: Dimension | undefined): this {
+    minContentWidth(value: Dimension | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -465,10 +446,10 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    public sideBarWidth(value: number | Bindable<number> | undefined): this {
+    public sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         if (this.checkPriority("sideBarWidth")) {
-            const value_casted = value as (number | Bindable<number> | undefined)
-            this.getPeer()?.setSideBarWidth0Attribute(value_casted)
+            const value_casted = value as (Length | Bindable<Length> | undefined)
+            this.getPeer()?.setSideBarWidthAttribute(value_casted)
             return this
         }
         return this
@@ -485,14 +466,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         if (this.checkPriority("maxSideBarWidth")) {
             const value_casted = value as (number | undefined)
             this.getPeer()?.setMaxSideBarWidth0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public sideBarWidth(value: Length | undefined): this {
-        if (this.checkPriority("sideBarWidth")) {
-            const value_casted = value as (Length | undefined)
-            this.getPeer()?.setSideBarWidth1Attribute(value_casted)
             return this
         }
         return this

@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -144,13 +144,13 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
     gridColOffset_value?: number | GridColColumnOption | undefined
     order_value?: number | GridColColumnOption | undefined
     attributeModifier_value?: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined
-    public span(value: number | GridColColumnOption | undefined): this {
+    span(value: number | GridColColumnOption | undefined): this {
         return this
     }
-    public gridColOffset(value: number | GridColColumnOption | undefined): this {
+    gridColOffset(value: number | GridColColumnOption | undefined): this {
         return this
     }
-    public order(value: number | GridColColumnOption | undefined): this {
+    order(value: number | GridColColumnOption | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {

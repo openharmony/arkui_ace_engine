@@ -5,6 +5,5 @@ import { anotherFunction as anotherFunction } from "./library";
 
 function main() {}
 
-console.log("test");
 
 testFunction()

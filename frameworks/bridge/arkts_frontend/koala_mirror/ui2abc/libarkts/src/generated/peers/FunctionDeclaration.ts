@@ -33,28 +33,26 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotationUsage } from "./AnnotationUsage"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { ScriptFunction } from "./ScriptFunction"
 import { Statement } from "./Statement"
 
 export class FunctionDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 34)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createFunctionDeclaration(func: ScriptFunction | undefined, annotations: readonly AnnotationUsage[], isAnonymous: boolean): FunctionDeclaration {
-        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._CreateFunctionDeclaration(global.context, passNode(func), passNodeArray(annotations), annotations.length, isAnonymous))
+        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._CreateFunctionDeclaration(global.context, passNode(func), passNodeArray(annotations), annotations.length, isAnonymous), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateFunctionDeclaration(original: FunctionDeclaration | undefined, func: ScriptFunction | undefined, annotations: readonly AnnotationUsage[], isAnonymous: boolean): FunctionDeclaration {
-        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._UpdateFunctionDeclaration(global.context, passNode(original), passNode(func), passNodeArray(annotations), annotations.length, isAnonymous))
+        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._UpdateFunctionDeclaration(global.context, passNode(original), passNode(func), passNodeArray(annotations), annotations.length, isAnonymous), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static update1FunctionDeclaration(original: FunctionDeclaration | undefined, func: ScriptFunction | undefined, isAnonymous: boolean): FunctionDeclaration {
-        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._UpdateFunctionDeclaration1(global.context, passNode(original), passNode(func), isAnonymous))
+        const result: FunctionDeclaration = new FunctionDeclaration(global.generatedEs2panda._UpdateFunctionDeclaration1(global.context, passNode(original), passNode(func), isAnonymous), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -63,9 +61,6 @@ export class FunctionDeclaration extends Statement {
     }
     get isAnonymous(): boolean {
         return global.generatedEs2panda._FunctionDeclarationIsAnonymousConst(global.context, this.peer)
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationDecoratorsConst(global.context, this.peer))
     }
     /** @deprecated */
     emplaceAnnotations(source?: AnnotationUsage): this {
@@ -109,5 +104,5 @@ export function isFunctionDeclaration(node: object | undefined): node is Functio
     return node instanceof FunctionDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION, (peer: KNativePointer) => new FunctionDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION, (peer: KNativePointer) => new FunctionDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION))
 }

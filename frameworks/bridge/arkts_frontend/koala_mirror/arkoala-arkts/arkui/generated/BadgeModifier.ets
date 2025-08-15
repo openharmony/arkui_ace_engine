@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkBadgePeer, BadgeAttribute } from "./component/badge"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class BadgeModifier extends CommonMethodModifier implements BadgeAttribute,AttributeModifier<BadgeAttribute> {
     _instanceId: number = -1;

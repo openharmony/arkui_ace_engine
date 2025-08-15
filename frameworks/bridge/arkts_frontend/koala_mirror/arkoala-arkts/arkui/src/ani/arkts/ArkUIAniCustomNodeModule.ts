@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Measurable, Layoutable, Position, ConstraintSizeOptions, MeasureResult, DirectionalEdgesT,  Length, Padding, Margin, EdgeWidths, GeometryInfo, SizeResult } from 'arkui/component'
+import { Measurable, Layoutable, Position, ConstraintSizeOptions, MeasureResult, DirectionalEdgesT,  Length, Padding, Margin, EdgeWidths, GeometryInfo, SizeResult } from '../../framework'
 import { int64, int32 } from '@koalaui/common'
 import { KPointer, KInt } from '@koalaui/interop'
-import { ArkCustomComponent } from 'arkui/ArkCustomComponent'
+import { ArkCustomComponent } from '../../ArkCustomComponent'
 
 export class ArkUIAniCustomNodeModule {
     static {
@@ -25,41 +25,41 @@ export class ArkUIAniCustomNodeModule {
     native static _CustomNode_Construct(id: int32, component: ArkCustomComponent): KPointer
 
 }
-export class MeasurableLayoutableInner implements Measurable, Layoutable {
+// export class MeasurableLayoutableInner implements Measurable, Layoutable {
 
-    private  measureLayoutChild: int64 = 0;
+//     private  measureLayoutChild: int64 = 0;
     
-    constructor(measureLayoutChild:int64) {
-        if(this.measureLayoutChild == 0){
-            this.measureLayoutChild = measureLayoutChild;
-        }
-    }
+//     constructor(measureLayoutChild:int64) {
+//         if(this.measureLayoutChild == 0){
+//             this.measureLayoutChild = measureLayoutChild;
+//         }
+//     }
     
-    uniqueId?: number | undefined;
-    measureResult: MeasureResult = {};
+//     uniqueId?: number | undefined;
+//     measureResult: MeasureResult = {};
 
-    public override measure(constraint: ConstraintSizeOptions): MeasureResult {
-        return this.measureInner(constraint);
-    }
-    public override layout(position: Position) {
-        this.layoutInner(position)
-    }
-    public override getMargin(): DirectionalEdgesT<number> {
-        return this.getMarginInner()
-    }
-    public override getPadding(): DirectionalEdgesT<number> {
-        return this.getPaddingInner()
-    }
-    public override getBorderWidth(): DirectionalEdgesT<number> {
-        return this.getBorderWidthInner()
-    }
+//     public override measure(constraint: ConstraintSizeOptions): MeasureResult {
+//         return this.measureInner(constraint);
+//     }
+//     public override layout(position: Position) {
+//         this.layoutInner(position)
+//     }
+//     public override getMargin(): DirectionalEdgesT<number> {
+//         return this.getMarginInner()
+//     }
+//     public override getPadding(): DirectionalEdgesT<number> {
+//         return this.getPaddingInner()
+//     }
+//     public override getBorderWidth(): DirectionalEdgesT<number> {
+//         return this.getBorderWidthInner()
+//     }
     
-    public native layoutInner(position: Position): void;
-    public native measureInner(constraint: ConstraintSizeOptions): MeasureResult;
-    public native getMarginInner(): DirectionalEdgesT<double>;
-    public native getPaddingInner(): DirectionalEdgesT<double>;
-    public native getBorderWidthInner(): DirectionalEdgesT<double>;
-}
+//     public native layoutInner(position: Position): void;
+//     public native measureInner(constraint: ConstraintSizeOptions): MeasureResult;
+//     public native getMarginInner(): DirectionalEdgesT<double>;
+//     public native getPaddingInner(): DirectionalEdgesT<double>;
+//     public native getBorderWidthInner(): DirectionalEdgesT<double>;
+// }
 
 export class ConstraintSizeOptionsInner implements ConstraintSizeOptions {
     minWidth?: Length ;
@@ -117,19 +117,19 @@ export class EdgeWidthsInner implements EdgeWidths {
     }
 }
 
-export class DirectionalEdgesTInner implements DirectionalEdgesT<double> {
-    start: number;
-    end: number;
-    top: number;
-    bottom: number;
-    constructor(top: number, bottom: number, start: number, end: number )
-    {
-        this.start = start;
-        this.end = end;
-        this.top = top;
-        this.bottom = bottom;
-    }
-}
+// export class DirectionalEdgesTInner implements DirectionalEdgesT<double> {
+//     start: number;
+//     end: number;
+//     top: number;
+//     bottom: number;
+//     constructor(top: number, bottom: number, start: number, end: number )
+//     {
+//         this.start = start;
+//         this.end = end;
+//         this.top = top;
+//         this.bottom = bottom;
+//     }
+// }
 
 export class GeometryInfoInner implements GeometryInfo {
     width: number = 0;

@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -51,16 +51,38 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._PathInterface_setPathOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCommandsAttribute(value: string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeString(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._PathAttribute_setCommands(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface PathOptions {
+    width?: double | string;
+    height?: double | string;
+    commands?: string;
 }
 export interface PathAttribute extends CommonShapeMethod {
+    commands(value: string | undefined): this {
+        throw new Error("Unimplemented method commands")
+    }
     attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
+    commands_value?: string | undefined
     attributeModifier_value?: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined
+    commands(value: string | undefined): this {
+        return this
+    }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -74,6 +96,14 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         if (this.checkPriority("setPathOptions")) {
             const options_casted = options as (PathOptions | undefined)
             this.getPeer()?.setPathOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public commands(value: string | undefined): this {
+        if (this.checkPriority("commands")) {
+            const value_casted = value as (string | undefined)
+            this.getPeer()?.setCommandsAttribute(value_casted)
             return this
         }
         return this
@@ -108,9 +138,87 @@ export function Path(
 
 export class PathOptions_serializer {
     public static write(buffer: SerializerBase, value: PathOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForWidth  = value.width
+        if (valueHolderForWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            if (valueHolderForWidthTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForHeight  = value.height
+        if (valueHolderForHeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            if (valueHolderForHeightTmpValue instanceof double) {
+                valueSerializer.writeInt8((0).toChar())
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof string) {
+                valueSerializer.writeInt8((1).toChar())
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCommands  = value.commands
+        if (valueHolderForCommands !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCommandsTmpValue  = valueHolderForCommands!
+            valueSerializer.writeString(valueHolderForCommandsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): PathOptions {
-        let value : PathOptions = ({} as PathOptions)
+        let valueDeserializer : DeserializerBase = buffer
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let widthTmpBuf : double | string | undefined
+        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBuf_ : double | string | undefined
+            if (widthTmpBuf_UnionSelector == (0).toChar()) {
+                widthTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            widthTmpBuf = (widthTmpBuf_ as double | string)
+        }
+        const widthTmpResult : double | string | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let heightTmpBuf : double | string | undefined
+        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBuf_ : double | string | undefined
+            if (heightTmpBuf_UnionSelector == (0).toChar()) {
+                heightTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else {
+                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+            }
+            heightTmpBuf = (heightTmpBuf_ as double | string)
+        }
+        const heightTmpResult : double | string | undefined = heightTmpBuf
+        const commandsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let commandsTmpBuf : string | undefined
+        if ((commandsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            commandsTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const commandsTmpResult : string | undefined = commandsTmpBuf
+        let value : PathOptions = ({width: widthTmpResult, height: heightTmpResult, commands: commandsTmpResult} as PathOptions)
         return value
     }
 }

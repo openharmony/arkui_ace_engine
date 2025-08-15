@@ -25,7 +25,7 @@ export function setAppBgColor(value: string): void {
     GlobalScope.setAppBgColor(value)
 }
 export namespace Profiler {
-    export function registerVsyncCallback(callback_: ((info: string) => void)): void {
+    export function registerVsyncCallback(callback_: ((value0: string) => void)): void {
         GlobalScope.Profiler_registerVsyncCallback(callback_)
     }
     export function unregisterVsyncCallback(): void {

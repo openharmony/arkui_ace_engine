@@ -27,7 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { Length, ResourceColor, Dimension } from "./units"
 import { Resource } from "global.resource"
 import { EdgeEffect, Color, PageFlipMode } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -772,88 +772,88 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     onContentWillChange_value?: OnTabsContentWillChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined
-    public vertical(value: boolean | undefined): this {
+    vertical(value: boolean | undefined): this {
         return this
     }
-    public barPosition(value: BarPosition | undefined): this {
+    barPosition(value: BarPosition | undefined): this {
         return this
     }
-    public scrollable(value: boolean | undefined): this {
+    scrollable(value: boolean | undefined): this {
         return this
     }
-    public barWidth(value: Length | undefined): this {
+    barWidth(value: Length | undefined): this {
         return this
     }
-    public barHeight(value: Length | undefined): this {
+    barHeight(value: Length | undefined): this {
         return this
     }
-    public animationDuration(value: number | undefined): this {
+    animationDuration(value: number | undefined): this {
         return this
     }
-    public animationMode(value: AnimationMode | undefined): this {
+    animationMode(value: AnimationMode | undefined): this {
         return this
     }
-    public edgeEffect(value: EdgeEffect | undefined): this {
+    edgeEffect(value: EdgeEffect | undefined): this {
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onTabBarClick(value: ((value0: number) => void) | undefined): this {
+    onTabBarClick(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
+    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
         return this
     }
-    public onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
+    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
         return this
     }
-    public onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
+    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
         return this
     }
-    public fadingEdge(value: boolean | undefined): this {
+    fadingEdge(value: boolean | undefined): this {
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
+    divider(value: DividerStyle | undefined): this {
         return this
     }
-    public barOverlap(value: boolean | undefined): this {
+    barOverlap(value: boolean | undefined): this {
         return this
     }
-    public barBackgroundColor(value: ResourceColor | undefined): this {
+    barBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public barGridAlign(value: BarGridColumnOptions | undefined): this {
+    barGridAlign(value: BarGridColumnOptions | undefined): this {
         return this
     }
-    public customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
+    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
         return this
     }
-    public barBackgroundBlurStyle(value: BlurStyle | undefined): this {
+    barBackgroundBlurStyle(value: BlurStyle | undefined): this {
         return this
     }
-    public pageFlipMode(value: PageFlipMode | undefined): this {
+    pageFlipMode(value: PageFlipMode | undefined): this {
         return this
     }
-    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
         return this
     }
-    public onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
+    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
         return this
     }
-    public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
+    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
         return this
     }
-    public barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
+    barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
         return this
     }
-    public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1204,7 +1204,7 @@ export class TabContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
             TabContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, value0);
-            InteropNativeModule._CallCallback(-1223938478, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1223938478, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
             transitionTmpBufBufArgsSerializer.release();
             return;
         }

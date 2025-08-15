@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkTextInputPeer, InputType, ContentType, EnterKeyType, OnSubmitCallback, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputAttribute } from "./component/textInput"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./component/common"
 import { ResourceColor, Dimension, Font, Length, ResourceStr } from "./component/units"
 import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode } from "./component/enums"
@@ -74,7 +75,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | ResourceStr | undefined
+    _fontWeight_0_0value?: number | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _onCopy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -496,7 +497,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -506,7 +507,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
                 }
             }
         }
@@ -1697,7 +1698,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | ResourceStr | undefined));
+                    this.fontWeight((undefined as number | FontWeight | string | undefined));
                 }
             }
         }
@@ -2578,7 +2579,7 @@ export class TextInputModifier extends CommonMethodModifier implements TextInput
         }
         return this
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

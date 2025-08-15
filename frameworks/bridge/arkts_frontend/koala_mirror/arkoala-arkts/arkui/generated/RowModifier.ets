@@ -20,7 +20,8 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRowPeer, RowAttribute } from "./component/row"
-import { CommonMethod, PointLightStyle } from "./component/common"
+import { int32 } from "@koalaui/common"
+import { CommonMethod } from "./component/common"
 import { VerticalAlign, FlexAlign } from "./component/enums"
 export class RowModifier extends CommonMethodModifier implements RowAttribute,AttributeModifier<RowAttribute> {
     _instanceId: number = -1;
@@ -37,8 +38,6 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
     _alignItems_0_0value?: VerticalAlign | undefined
     _justifyContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _justifyContent_0_0value?: FlexAlign | undefined
-    _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pointLight_0_0value?: PointLightStyle | undefined
     _reverse_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _reverse_0_0value?: boolean | undefined
     applyModifierPatch(peer: ArkRowPeer): void {
@@ -76,24 +75,6 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
                 default: {
                     this._justifyContent_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setJustifyContentAttribute((undefined as FlexAlign | undefined));
-                }
-            }
-        }
-        if (this._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._pointLight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPointLightAttribute((this._pointLight_0_0value as PointLightStyle | undefined));
-                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._pointLight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPointLightAttribute((undefined as PointLightStyle | undefined));
                 }
             }
         }
@@ -144,19 +125,6 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
                 }
             }
         }
-        if (modifier._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._pointLight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.pointLight(modifier._pointLight_0_0value);
-                    break;
-                }
-                default: {
-                    this.pointLight((undefined as PointLightStyle | undefined));
-                }
-            }
-        }
         if (modifier._reverse_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._reverse_0_flag) {
@@ -190,17 +158,6 @@ export class RowModifier extends CommonMethodModifier implements RowAttribute,At
         } else
         {
             this._justifyContent_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    pointLight(value: PointLightStyle | undefined): this {
-        if (((this._pointLight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._pointLight_0_0value = value
-        } else
-        {
-            this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

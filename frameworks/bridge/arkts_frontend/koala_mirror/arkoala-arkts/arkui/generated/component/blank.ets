@@ -103,7 +103,7 @@ export interface BlankAttribute extends CommonMethod {
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
     color_value?: ResourceColor | undefined
     attributeModifier_value?: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined
-    public color(value: ResourceColor | undefined): this {
+    color(value: ResourceColor | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {

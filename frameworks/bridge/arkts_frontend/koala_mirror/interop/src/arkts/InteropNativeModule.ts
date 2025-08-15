@@ -48,8 +48,8 @@ export class InteropNativeModule {
     native static _CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: int32): int32
     native static _HoldCallbackResource(resourceId: int32): void
     native static _ReleaseCallbackResource(resourceId: int32): void
-    native static _CallCallback(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
-    native static _CallCallbackSync(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
+    native static _CallCallback(apiKind: int32, callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
+    native static _CallCallbackSync(apiKind: int32, callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
     native static _CallCallbackResourceHolder(holder: KPointer, resourceId: int32): void
     native static _CallCallbackResourceReleaser(releaser: KPointer, resourceId: int32): void
     native static _CallbackAwait(pipeline: KPointer): Object

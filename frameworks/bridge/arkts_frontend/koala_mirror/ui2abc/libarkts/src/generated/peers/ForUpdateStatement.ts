@@ -38,12 +38,11 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 
 export class ForUpdateStatement extends LoopStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 33)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createForUpdateStatement(init?: AstNode, test?: Expression, update?: Expression, body?: Statement): ForUpdateStatement {
-        const result: ForUpdateStatement = new ForUpdateStatement(global.generatedEs2panda._CreateForUpdateStatement(global.context, passNode(init), passNode(test), passNode(update), passNode(body)))
+        const result: ForUpdateStatement = new ForUpdateStatement(global.generatedEs2panda._CreateForUpdateStatement(global.context, passNode(init), passNode(test), passNode(update), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_FOR_UPDATE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -65,5 +64,5 @@ export function isForUpdateStatement(node: object | undefined): node is ForUpdat
     return node instanceof ForUpdateStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_UPDATE_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_UPDATE_STATEMENT, (peer: KNativePointer) => new ForUpdateStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_UPDATE_STATEMENT, (peer: KNativePointer) => new ForUpdateStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_FOR_UPDATE_STATEMENT))
 }

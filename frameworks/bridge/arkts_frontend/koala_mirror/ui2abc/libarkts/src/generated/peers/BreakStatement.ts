@@ -37,22 +37,21 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class BreakStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 9)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1BreakStatement(ident?: Identifier): BreakStatement {
-        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._CreateBreakStatement1(global.context, passNode(ident)))
+        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._CreateBreakStatement1(global.context, passNode(ident)), Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateBreakStatement(original?: BreakStatement): BreakStatement {
-        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._UpdateBreakStatement(global.context, passNode(original)))
+        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._UpdateBreakStatement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1BreakStatement(original?: BreakStatement, ident?: Identifier): BreakStatement {
-        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._UpdateBreakStatement1(global.context, passNode(original), passNode(ident)))
+        const result: BreakStatement = new BreakStatement(global.generatedEs2panda._UpdateBreakStatement1(global.context, passNode(original), passNode(ident)), Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -76,5 +75,5 @@ export function isBreakStatement(node: object | undefined): node is BreakStateme
     return node instanceof BreakStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT, (peer: KNativePointer) => new BreakStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT, (peer: KNativePointer) => new BreakStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BREAK_STATEMENT))
 }

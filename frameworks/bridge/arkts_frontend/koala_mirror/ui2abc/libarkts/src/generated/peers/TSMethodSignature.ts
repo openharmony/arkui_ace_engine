@@ -39,17 +39,16 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 
 export class TSMethodSignature extends AstNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 108)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSMethodSignature(key: Expression | undefined, signature: FunctionSignature | undefined, computed: boolean, optional_arg: boolean): TSMethodSignature {
-        const result: TSMethodSignature = new TSMethodSignature(global.generatedEs2panda._CreateTSMethodSignature(global.context, passNode(key), passNode(signature), computed, optional_arg))
+        const result: TSMethodSignature = new TSMethodSignature(global.generatedEs2panda._CreateTSMethodSignature(global.context, passNode(key), passNode(signature), computed, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSMethodSignature(original: TSMethodSignature | undefined, key: Expression | undefined, signature: FunctionSignature | undefined, computed: boolean, optional_arg: boolean): TSMethodSignature {
-        const result: TSMethodSignature = new TSMethodSignature(global.generatedEs2panda._UpdateTSMethodSignature(global.context, passNode(original), passNode(key), passNode(signature), computed, optional_arg))
+        const result: TSMethodSignature = new TSMethodSignature(global.generatedEs2panda._UpdateTSMethodSignature(global.context, passNode(original), passNode(key), passNode(signature), computed, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
@@ -77,5 +76,5 @@ export function isTSMethodSignature(node: object | undefined): node is TSMethodS
     return node instanceof TSMethodSignature
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE, (peer: KNativePointer) => new TSMethodSignature(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE, (peer: KNativePointer) => new TSMethodSignature(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_METHOD_SIGNATURE))
 }

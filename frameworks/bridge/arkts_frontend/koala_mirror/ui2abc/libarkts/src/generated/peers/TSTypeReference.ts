@@ -39,17 +39,16 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeReference extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 130)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeReference(typeName?: Expression, typeParams?: TSTypeParameterInstantiation): TSTypeReference {
-        const result: TSTypeReference = new TSTypeReference(global.generatedEs2panda._CreateTSTypeReference(global.context, passNode(typeName), passNode(typeParams)))
+        const result: TSTypeReference = new TSTypeReference(global.generatedEs2panda._CreateTSTypeReference(global.context, passNode(typeName), passNode(typeParams)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeReference(original?: TSTypeReference, typeName?: Expression, typeParams?: TSTypeParameterInstantiation): TSTypeReference {
-        const result: TSTypeReference = new TSTypeReference(global.generatedEs2panda._UpdateTSTypeReference(global.context, passNode(original), passNode(typeName), passNode(typeParams)))
+        const result: TSTypeReference = new TSTypeReference(global.generatedEs2panda._UpdateTSTypeReference(global.context, passNode(original), passNode(typeName), passNode(typeParams)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
@@ -68,5 +67,5 @@ export function isTSTypeReference(node: object | undefined): node is TSTypeRefer
     return node instanceof TSTypeReference
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE, (peer: KNativePointer) => new TSTypeReference(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE, (peer: KNativePointer) => new TSTypeReference(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_REFERENCE))
 }

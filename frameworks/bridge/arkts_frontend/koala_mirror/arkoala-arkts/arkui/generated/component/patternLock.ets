@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -431,43 +431,43 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     activateCircleStyle_value?: CircleStyleOptions | undefined
     skipUnselectedPoint_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined
-    public sideLength(value: Length | undefined): this {
+    sideLength(value: Length | undefined): this {
         return this
     }
-    public circleRadius(value: Length | undefined): this {
+    circleRadius(value: Length | undefined): this {
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public regularColor(value: ResourceColor | undefined): this {
+    regularColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
+    selectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public activeColor(value: ResourceColor | undefined): this {
+    activeColor(value: ResourceColor | undefined): this {
         return this
     }
-    public pathColor(value: ResourceColor | undefined): this {
+    pathColor(value: ResourceColor | undefined): this {
         return this
     }
-    public pathStrokeWidth(value: number | string | undefined): this {
+    pathStrokeWidth(value: number | string | undefined): this {
         return this
     }
-    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
         return this
     }
-    public autoReset(value: boolean | undefined): this {
+    autoReset(value: boolean | undefined): this {
         return this
     }
-    public onDotConnect(value: ((value0: number) => void) | undefined): this {
+    onDotConnect(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public activateCircleStyle(value: CircleStyleOptions | undefined): this {
+    activateCircleStyle(value: CircleStyleOptions | undefined): this {
         return this
     }
-    public skipUnselectedPoint(value: boolean | undefined): this {
+    skipUnselectedPoint(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class NullLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 50)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createNullLiteral(): NullLiteral {
-        const result: NullLiteral = new NullLiteral(global.generatedEs2panda._CreateNullLiteral(global.context))
+        const result: NullLiteral = new NullLiteral(global.generatedEs2panda._CreateNullLiteral(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateNullLiteral(original?: NullLiteral): NullLiteral {
-        const result: NullLiteral = new NullLiteral(global.generatedEs2panda._UpdateNullLiteral(global.context, passNode(original)))
+        const result: NullLiteral = new NullLiteral(global.generatedEs2panda._UpdateNullLiteral(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isNullLiteral(node: object | undefined): node is NullLiteral {
     return node instanceof NullLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL, (peer: KNativePointer) => new NullLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL, (peer: KNativePointer) => new NullLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_NULL_LITERAL))
 }

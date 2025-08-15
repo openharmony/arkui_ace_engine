@@ -21,6 +21,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkPathPeer, PathAttribute } from "./component/path"
+import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
 export class PathModifier extends CommonShapeMethodModifier implements PathAttribute,AttributeModifier<PathAttribute> {
     _instanceId: number = -1;
@@ -33,11 +34,55 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
     applyFocusedAttribute(instance: PathAttribute): void { }
     applyDisabledAttribute(instance: PathAttribute): void { }
     applySelectedAttribute(instance: PathAttribute): void { }
+    _commands_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _commands_0_0value?: string | undefined
     applyModifierPatch(peer: ArkPathPeer): void {
         super.applyModifierPatch(peer)
+        if (this._commands_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._commands_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setCommandsAttribute((this._commands_0_0value as string | undefined));
+                    this._commands_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._commands_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._commands_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setCommandsAttribute((undefined as string | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: PathModifier): void {
         super.mergeModifier(modifier)
+        if (modifier._commands_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._commands_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.commands(modifier._commands_0_0value);
+                    break;
+                }
+                default: {
+                    this.commands((undefined as string | undefined));
+                }
+            }
+        }
+    }
+    commands(value: string | undefined): this {
+        if (((this._commands_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._commands_0_0value) !== (value)))
+        {
+            this._commands_0_flag = AttributeUpdaterFlag.UPDATE
+            this._commands_0_0value = value
+        } else
+        {
+            this._commands_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")

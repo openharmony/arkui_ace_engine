@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 
 export class DirectEvalExpression extends CallExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 23)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createDirectEvalExpression(callee: Expression | undefined, _arguments: readonly Expression[], typeParams: TSTypeParameterInstantiation | undefined, optional_arg: boolean, parserStatus: number): DirectEvalExpression {
-        const result: DirectEvalExpression = new DirectEvalExpression(global.generatedEs2panda._CreateDirectEvalExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, parserStatus))
+        const result: DirectEvalExpression = new DirectEvalExpression(global.generatedEs2panda._CreateDirectEvalExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, parserStatus), Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateDirectEvalExpression(original: DirectEvalExpression | undefined, callee: Expression | undefined, _arguments: readonly Expression[], typeParams: TSTypeParameterInstantiation | undefined, optional_arg: boolean, parserStatus: number): DirectEvalExpression {
-        const result: DirectEvalExpression = new DirectEvalExpression(global.generatedEs2panda._UpdateDirectEvalExpression(global.context, passNode(original), passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, parserStatus))
+        const result: DirectEvalExpression = new DirectEvalExpression(global.generatedEs2panda._UpdateDirectEvalExpression(global.context, passNode(original), passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, parserStatus), Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -58,5 +57,5 @@ export function isDirectEvalExpression(node: object | undefined): node is Direct
     return node instanceof DirectEvalExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL, (peer: KNativePointer) => new DirectEvalExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL, (peer: KNativePointer) => new DirectEvalExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_DIRECT_EVAL))
 }

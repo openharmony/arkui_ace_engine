@@ -19,16 +19,16 @@
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
+import { NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Length } from "./units"
 import { Resource } from "global.resource"
+import { Color, BarState, ScrollSource, EdgeEffect } from "./enums"
 import { ScrollState } from "./list"
-import { ScrollSource } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -134,6 +134,62 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GridAttribute_setRowsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarWidthAttribute(value: number | string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarColorAttribute(value: Color | number | string | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toChar())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarAttribute(value: BarState | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as BarState)
+            thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollBarUpdateAttribute(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): void {
@@ -316,6 +372,50 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setOnItemDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setNestedScrollAttribute(value: NestedScrollOptions | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            NestedScrollOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableScrollInteractionAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setEnableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFrictionAttribute(value: number | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setFriction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setAlignItemsAttribute(value: GridItemAlignment | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -383,6 +483,25 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setCachedCount1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEdgeEffectAttribute(value: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as EdgeEffect)
+            thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(valueTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            EdgeEffectOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setEdgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface GridLayoutOptions {
     regularSize: [ number, number ];
@@ -421,6 +540,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     rowsGap(value: Length | undefined): this {
         throw new Error("Unimplemented method rowsGap")
     }
+    scrollBarWidth(value: number | string | undefined): this
+    scrollBarColor(value: Color | number | string | undefined): this
+    scrollBar(value: BarState | undefined): this
     onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
         throw new Error("Unimplemented method onScrollBarUpdate")
     }
@@ -466,6 +588,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
         throw new Error("Unimplemented method onItemDrop")
     }
+    nestedScroll(value: NestedScrollOptions | undefined): this
+    enableScrollInteraction(value: boolean | undefined): this
+    friction(value: number | Resource | undefined): this
     alignItems(value: GridItemAlignment | undefined): this {
         throw new Error("Unimplemented method alignItems")
     }
@@ -481,6 +606,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     cachedCount(count: number | undefined, show: boolean | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        throw new Error("Unimplemented method edgeEffect")
+    }
     attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -490,6 +618,9 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     rowsTemplate_value?: string | undefined
     columnsGap_value?: Length | undefined
     rowsGap_value?: Length | undefined
+    scrollBarWidth_value?: number | string | undefined
+    scrollBarColor_value?: Color | number | string | undefined
+    scrollBar_value?: BarState | undefined
     onScrollBarUpdate_value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
     cachedCount_value?: number | undefined
@@ -505,81 +636,105 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onItemDragMove_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined
     onItemDragLeave_value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
     onItemDrop_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    nestedScroll_value?: NestedScrollOptions | undefined
+    enableScrollInteraction_value?: boolean | undefined
+    friction_value?: number | Resource | undefined
     alignItems_value?: GridItemAlignment | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     attributeModifier_value?: AttributeModifier<GridAttribute> | AttributeModifier<CommonMethod> | undefined
-    public columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | undefined): this {
         return this
     }
-    public rowsTemplate(value: string | undefined): this {
+    rowsTemplate(value: string | undefined): this {
         return this
     }
-    public columnsGap(value: Length | undefined): this {
+    columnsGap(value: Length | undefined): this {
         return this
     }
-    public rowsGap(value: Length | undefined): this {
+    rowsGap(value: Length | undefined): this {
         return this
     }
-    public onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+    scrollBarWidth(value: number | string | undefined): this {
         return this
     }
-    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    scrollBarColor(value: Color | number | string | undefined): this {
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    scrollBar(value: BarState | undefined): this {
         return this
     }
-    public editMode(value: boolean | undefined): this {
+    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
         return this
     }
-    public multiSelectable(value: boolean | undefined): this {
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         return this
     }
-    public maxCount(value: number | undefined): this {
+    cachedCount(value: number | undefined): this {
         return this
     }
-    public minCount(value: number | undefined): this {
+    editMode(value: boolean | undefined): this {
         return this
     }
-    public cellLength(value: number | undefined): this {
+    multiSelectable(value: boolean | undefined): this {
         return this
     }
-    public layoutDirection(value: GridDirection | undefined): this {
+    maxCount(value: number | undefined): this {
         return this
     }
-    public supportAnimation(value: boolean | undefined): this {
+    minCount(value: number | undefined): this {
         return this
     }
-    public onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+    cellLength(value: number | undefined): this {
         return this
     }
-    public onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+    layoutDirection(value: GridDirection | undefined): this {
         return this
     }
-    public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    supportAnimation(value: boolean | undefined): this {
         return this
     }
-    public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragStart(value: OnItemDragStartCallback | undefined): this {
         return this
     }
-    public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
         return this
     }
-    public alignItems(value: GridItemAlignment | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
         return this
     }
-    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
         return this
     }
-    public onDidScroll(value: OnScrollCallback | undefined): this {
+    nestedScroll(value: NestedScrollOptions | undefined): this {
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+    enableScrollInteraction(value: boolean | undefined): this {
+        return this
+    }
+    friction(value: number | Resource | undefined): this {
+        return this
+    }
+    alignItems(value: GridItemAlignment | undefined): this {
+        return this
+    }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        return this
+    }
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
+        return this
+    }
+    onDidScroll(value: OnScrollCallback | undefined): this {
+        return this
+    }
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        return this
+    }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -628,6 +783,30 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("rowsGap")) {
             const value_casted = value as (Length | undefined)
             this.getPeer()?.setRowsGapAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarWidth(value: number | string | undefined): this {
+        if (this.checkPriority("scrollBarWidth")) {
+            const value_casted = value as (number | string | undefined)
+            this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarColor(value: Color | number | string | undefined): this {
+        if (this.checkPriority("scrollBarColor")) {
+            const value_casted = value as (Color | number | string | undefined)
+            this.getPeer()?.setScrollBarColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBar(value: BarState | undefined): this {
+        if (this.checkPriority("scrollBar")) {
+            const value_casted = value as (BarState | undefined)
+            this.getPeer()?.setScrollBarAttribute(value_casted)
             return this
         }
         return this
@@ -752,6 +931,30 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
+    public nestedScroll(value: NestedScrollOptions | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (NestedScrollOptions | undefined)
+            this.getPeer()?.setNestedScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableScrollInteraction(value: boolean | undefined): this {
+        if (this.checkPriority("enableScrollInteraction")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableScrollInteractionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public friction(value: number | Resource | undefined): this {
+        if (this.checkPriority("friction")) {
+            const value_casted = value as (number | Resource | undefined)
+            this.getPeer()?.setFrictionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public alignItems(value: GridItemAlignment | undefined): this {
         if (this.checkPriority("alignItems")) {
             const value_casted = value as (GridItemAlignment | undefined)
@@ -789,6 +992,15 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
             const count_casted = count as (number | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
+            return this
+        }
+        return this
+    }
+    public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        if (this.checkPriority("edgeEffect")) {
+            const value_casted = value as (EdgeEffect | undefined)
+            const options_casted = options as (EdgeEffectOptions | undefined)
+            this.getPeer()?.setEdgeEffectAttribute(value_casted, options_casted)
             return this
         }
         return this
@@ -907,7 +1119,7 @@ export class GridLayoutOptions_serializer {
                 onGetIrregularSizeByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetIrregularSizeByIndexTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallback(1602877440, onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1602877440, onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.length());
                 onGetIrregularSizeByIndexTmpBuf_BufArgsSerializer.release();
                 return (onGetIrregularSizeByIndexTmpBuf_BufContinuationValue as [ number, number ]);
             }
@@ -930,7 +1142,7 @@ export class GridLayoutOptions_serializer {
                 onGetRectByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetRectByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetRectByIndexTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallback(1618565120, onGetRectByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetRectByIndexTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1618565120, onGetRectByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetRectByIndexTmpBuf_BufArgsSerializer.length());
                 onGetRectByIndexTmpBuf_BufArgsSerializer.release();
                 return (onGetRectByIndexTmpBuf_BufContinuationValue as [ number, number, number, number ]);
             }

@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -666,82 +666,82 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     popupTitleBackground_value?: ResourceColor | undefined
     enableHapticFeedback_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public color(value: ResourceColor | undefined): this {
+    color(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
+    selectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public popupColor(value: ResourceColor | undefined): this {
+    popupColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public popupBackground(value: ResourceColor | undefined): this {
+    popupBackground(value: ResourceColor | undefined): this {
         return this
     }
-    public popupSelectedColor(value: ResourceColor | undefined): this {
+    popupSelectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public popupUnselectedColor(value: ResourceColor | undefined): this {
+    popupUnselectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public popupItemBackgroundColor(value: ResourceColor | undefined): this {
+    popupItemBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public usingPopup(value: boolean | undefined): this {
+    usingPopup(value: boolean | undefined): this {
         return this
     }
-    public selectedFont(value: Font | undefined): this {
+    selectedFont(value: Font | undefined): this {
         return this
     }
-    public popupFont(value: Font | undefined): this {
+    popupFont(value: Font | undefined): this {
         return this
     }
-    public popupItemFont(value: Font | undefined): this {
+    popupItemFont(value: Font | undefined): this {
         return this
     }
-    public itemSize(value: string | number | undefined): this {
+    itemSize(value: string | number | undefined): this {
         return this
     }
-    public font(value: Font | undefined): this {
+    font(value: Font | undefined): this {
         return this
     }
-    public onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this {
+    onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this {
         return this
     }
-    public onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this {
+    onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this {
         return this
     }
-    public onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
+    onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         return this
     }
-    public selected(value: number | Bindable<number> | undefined): this {
+    selected(value: number | Bindable<number> | undefined): this {
         return this
     }
-    public popupPosition(value: Position | undefined): this {
+    popupPosition(value: Position | undefined): this {
         return this
     }
-    public autoCollapse(value: boolean | undefined): this {
+    autoCollapse(value: boolean | undefined): this {
         return this
     }
-    public popupItemBorderRadius(value: number | undefined): this {
+    popupItemBorderRadius(value: number | undefined): this {
         return this
     }
-    public itemBorderRadius(value: number | undefined): this {
+    itemBorderRadius(value: number | undefined): this {
         return this
     }
-    public popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
+    popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
         return this
     }
-    public popupTitleBackground(value: ResourceColor | undefined): this {
+    popupTitleBackground(value: ResourceColor | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
+    alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkListItemGroupPeer, ListItemGroupAttribute } from "./component/listItemGroup"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, ChildrenMainSize } from "./component/common"
 import { ListDividerOptions } from "./component/list"
 export class ListItemGroupModifier extends CommonMethodModifier implements ListItemGroupAttribute,AttributeModifier<ListItemGroupAttribute> {

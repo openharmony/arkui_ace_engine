@@ -31,7 +31,7 @@ export class StructDescriptor {
     static fromJSON(parsed: any): StructDescriptor[] {
         return parsed.structs.map((struct: any) => new StructDescriptor(struct.name, struct.annotations,
             struct.properties.map((property: any) =>
-                new PropertyDescriptor(property.name, property.decorators)
+                new PropertyDescriptor(property.name, property.annotations)
             )
         ))
     }
@@ -61,7 +61,7 @@ export class StructsResolver {
     }
 
     init() {
-        for (let source of arkts.global.compilerContext.program.getExternalSources()) {
+        for (let source of arkts.arktsGlobal.compilerContext!.program.getExternalSources()) {
             const name = source.getName()
             if (name.startsWith("std.")) continue
             if (name.startsWith("escompat")) continue
@@ -178,13 +178,10 @@ export class StructTable {
         )
     }
     static extractDecorators(property: arkts.ClassProperty): string[] {
-        let decorators = property.decorators
-            .filter(it => arkts.isIdentifier(it.expr))
-            .map(it => (it.expr as arkts.Identifier).name!)
         let annotations = property.annotations
             .filter(it => arkts.isIdentifier(it.expr))
             .map(it => (it.expr as arkts.Identifier).name!)
-        return decorators.concat(annotations)
+        return annotations;
     }
     static extractAnnotations(declaration: arkts.ETSStructDeclaration): string[] {
         let annotations = declaration?.definition?.annotations
@@ -215,7 +212,7 @@ export class StructRecorder extends arkts.AbstractVisitor {
         if (arkts.isFunctionDeclaration(node)) {
             return node
         }
-        if (arkts.isInterfaceDecl(node)) {
+        if (arkts.isTSInterfaceDeclaration(node)) {
             return node
         }
         return this.visitEachChild(node)

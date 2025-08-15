@@ -28,7 +28,7 @@ import { EditMenuOptions_serializer, EditMenuOptions, MenuType } from "./textCom
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CopyOptions, NestedScrollMode } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, extractors, AttributeUpdater } from "#handwritten"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -3197,7 +3197,7 @@ export interface OnOverScrollEvent {
     yOffset: double;
 }
 export interface JavaScriptProxy {
-    object_: Object;
+    jsObject: Object;
     name: string;
     methodList: Array<string>;
     controller: webview.WebviewController;
@@ -3701,358 +3701,358 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
     nativeEmbedOptions_value?: EmbedOptions | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
-    public javaScriptAccess(value: boolean | undefined): this {
+    javaScriptAccess(value: boolean | undefined): this {
         return this
     }
-    public fileAccess(value: boolean | undefined): this {
+    fileAccess(value: boolean | undefined): this {
         return this
     }
-    public onlineImageAccess(value: boolean | undefined): this {
+    onlineImageAccess(value: boolean | undefined): this {
         return this
     }
-    public domStorageAccess(value: boolean | undefined): this {
+    domStorageAccess(value: boolean | undefined): this {
         return this
     }
-    public imageAccess(value: boolean | undefined): this {
+    imageAccess(value: boolean | undefined): this {
         return this
     }
-    public mixedMode(value: MixedMode | undefined): this {
+    mixedMode(value: MixedMode | undefined): this {
         return this
     }
-    public zoomAccess(value: boolean | undefined): this {
+    zoomAccess(value: boolean | undefined): this {
         return this
     }
-    public geolocationAccess(value: boolean | undefined): this {
+    geolocationAccess(value: boolean | undefined): this {
         return this
     }
-    public javaScriptProxy(value: JavaScriptProxy | undefined): this {
+    javaScriptProxy(value: JavaScriptProxy | undefined): this {
         return this
     }
-    public cacheMode(value: CacheMode | undefined): this {
+    cacheMode(value: CacheMode | undefined): this {
         return this
     }
-    public darkMode(value: WebDarkMode | undefined): this {
+    darkMode(value: WebDarkMode | undefined): this {
         return this
     }
-    public forceDarkAccess(value: boolean | undefined): this {
+    forceDarkAccess(value: boolean | undefined): this {
         return this
     }
-    public mediaOptions(value: WebMediaOptions | undefined): this {
+    mediaOptions(value: WebMediaOptions | undefined): this {
         return this
     }
-    public overviewModeAccess(value: boolean | undefined): this {
+    overviewModeAccess(value: boolean | undefined): this {
         return this
     }
-    public overScrollMode(value: OverScrollMode | undefined): this {
+    overScrollMode(value: OverScrollMode | undefined): this {
         return this
     }
-    public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
+    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
         return this
     }
-    public textZoomRatio(value: int32 | undefined): this {
+    textZoomRatio(value: int32 | undefined): this {
         return this
     }
-    public databaseAccess(value: boolean | undefined): this {
+    databaseAccess(value: boolean | undefined): this {
         return this
     }
-    public initialScale(value: double | undefined): this {
+    initialScale(value: double | undefined): this {
         return this
     }
-    public metaViewport(value: boolean | undefined): this {
+    metaViewport(value: boolean | undefined): this {
         return this
     }
-    public onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
+    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
         return this
     }
-    public onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
+    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
         return this
     }
-    public onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
+    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
         return this
     }
-    public onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
+    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
         return this
     }
-    public onGeolocationHide(value: (() => void) | undefined): this {
+    onGeolocationHide(value: (() => void) | undefined): this {
         return this
     }
-    public onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
+    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
         return this
     }
-    public onRequestSelected(value: (() => void) | undefined): this {
+    onRequestSelected(value: (() => void) | undefined): this {
         return this
     }
-    public onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
+    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
         return this
     }
-    public onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
+    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
         return this
     }
-    public onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
+    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
         return this
     }
-    public onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
+    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
         return this
     }
-    public onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
+    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
         return this
     }
-    public onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
+    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
         return this
     }
-    public onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
+    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
         return this
     }
-    public onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
+    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
         return this
     }
-    public onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
+    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
         return this
     }
-    public onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
+    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
         return this
     }
-    public onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
+    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
         return this
     }
-    public onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
+    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
         return this
     }
-    public onFullScreenExit(value: (() => void) | undefined): this {
+    onFullScreenExit(value: (() => void) | undefined): this {
         return this
     }
-    public onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
+    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
         return this
     }
-    public onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
+    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
         return this
     }
-    public onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
+    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
         return this
     }
-    public onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
+    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
         return this
     }
-    public onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
+    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
         return this
     }
-    public onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
+    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
         return this
     }
-    public onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
+    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
         return this
     }
-    public mediaPlayGestureAccess(value: boolean | undefined): this {
+    mediaPlayGestureAccess(value: boolean | undefined): this {
         return this
     }
-    public onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
+    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
         return this
     }
-    public onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
+    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
         return this
     }
-    public onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
+    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
         return this
     }
-    public onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
+    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
         return this
     }
-    public onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
+    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
         return this
     }
-    public onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
+    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
         return this
     }
-    public onWindowExit(value: (() => void) | undefined): this {
+    onWindowExit(value: (() => void) | undefined): this {
         return this
     }
-    public multiWindowAccess(value: boolean | undefined): this {
+    multiWindowAccess(value: boolean | undefined): this {
         return this
     }
-    public onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+    onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
         return this
     }
-    public webStandardFont(value: string | undefined): this {
+    webStandardFont(value: string | undefined): this {
         return this
     }
-    public webSerifFont(value: string | undefined): this {
+    webSerifFont(value: string | undefined): this {
         return this
     }
-    public webSansSerifFont(value: string | undefined): this {
+    webSansSerifFont(value: string | undefined): this {
         return this
     }
-    public webFixedFont(value: string | undefined): this {
+    webFixedFont(value: string | undefined): this {
         return this
     }
-    public webFantasyFont(value: string | undefined): this {
+    webFantasyFont(value: string | undefined): this {
         return this
     }
-    public webCursiveFont(value: string | undefined): this {
+    webCursiveFont(value: string | undefined): this {
         return this
     }
-    public defaultFixedFontSize(value: int32 | undefined): this {
+    defaultFixedFontSize(value: int32 | undefined): this {
         return this
     }
-    public defaultFontSize(value: int32 | undefined): this {
+    defaultFontSize(value: int32 | undefined): this {
         return this
     }
-    public minFontSize(value: int32 | undefined): this {
+    minFontSize(value: int32 | undefined): this {
         return this
     }
-    public minLogicalFontSize(value: int32 | undefined): this {
+    minLogicalFontSize(value: int32 | undefined): this {
         return this
     }
-    public defaultTextEncodingFormat(value: string | undefined): this {
+    defaultTextEncodingFormat(value: string | undefined): this {
         return this
     }
-    public forceDisplayScrollBar(value: boolean | undefined): this {
+    forceDisplayScrollBar(value: boolean | undefined): this {
         return this
     }
-    public blockNetwork(value: boolean | undefined): this {
+    blockNetwork(value: boolean | undefined): this {
         return this
     }
-    public horizontalScrollBarAccess(value: boolean | undefined): this {
+    horizontalScrollBarAccess(value: boolean | undefined): this {
         return this
     }
-    public verticalScrollBarAccess(value: boolean | undefined): this {
+    verticalScrollBarAccess(value: boolean | undefined): this {
         return this
     }
-    public onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
+    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
         return this
     }
-    public onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
+    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
         return this
     }
-    public onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
+    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
         return this
     }
-    public onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
+    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
         return this
     }
-    public pinchSmooth(value: boolean | undefined): this {
+    pinchSmooth(value: boolean | undefined): this {
         return this
     }
-    public allowWindowOpenMethod(value: boolean | undefined): this {
+    allowWindowOpenMethod(value: boolean | undefined): this {
         return this
     }
-    public onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
+    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
         return this
     }
-    public onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
+    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
         return this
     }
-    public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
+    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
         return this
     }
-    public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
+    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
         return this
     }
-    public onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
+    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
         return this
     }
-    public onControllerAttached(value: (() => void) | undefined): this {
+    onControllerAttached(value: (() => void) | undefined): this {
         return this
     }
-    public onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
+    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
         return this
     }
-    public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
         return this
     }
-    public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
+    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
         return this
     }
-    public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
+    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
         return this
     }
-    public javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
         return this
     }
-    public javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
         return this
     }
-    public layoutMode(value: WebLayoutMode | undefined): this {
+    layoutMode(value: WebLayoutMode | undefined): this {
         return this
     }
-    public nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
+    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
         return this
     }
-    public enableNativeEmbedMode(value: boolean | undefined): this {
+    enableNativeEmbedMode(value: boolean | undefined): this {
         return this
     }
-    public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
+    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
         return this
     }
-    public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
+    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
         return this
     }
-    public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
+    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
         return this
     }
-    public copyOptions(value: CopyOptions | undefined): this {
+    copyOptions(value: CopyOptions | undefined): this {
         return this
     }
-    public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
+    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
         return this
     }
-    public textAutosizing(value: boolean | undefined): this {
+    textAutosizing(value: boolean | undefined): this {
         return this
     }
-    public enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
+    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
         return this
     }
-    public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
+    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
         return this
     }
-    public onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
+    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
         return this
     }
-    public onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
+    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
         return this
     }
-    public onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
+    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
         return this
     }
-    public onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
+    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
         return this
     }
-    public keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
+    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public optimizeParserBudget(value: boolean | undefined): this {
+    optimizeParserBudget(value: boolean | undefined): this {
         return this
     }
-    public enableFollowSystemFontWeight(value: boolean | undefined): this {
+    enableFollowSystemFontWeight(value: boolean | undefined): this {
         return this
     }
-    public enableWebAVSession(value: boolean | undefined): this {
+    enableWebAVSession(value: boolean | undefined): this {
         return this
     }
-    public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
         return this
     }
-    public runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
         return this
     }
-    public runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
+    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
         return this
     }
-    public nativeEmbedOptions(value: EmbedOptions | undefined): this {
+    nativeEmbedOptions(value: EmbedOptions | undefined): this {
         return this
     }
-    public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         return this
     }
-    public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -5640,8 +5640,8 @@ export class IntelligentTrackingPreventionDetails_serializer {
 export class JavaScriptProxy_serializer {
     public static write(buffer: SerializerBase, value: JavaScriptProxy): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForObject_  = value.object_
-        valueSerializer.holdAndWriteObject(valueHolderForObject_)
+        const valueHolderForJsObject  = value.jsObject
+        valueSerializer.holdAndWriteObject(valueHolderForJsObject)
         const valueHolderForName  = value.name
         valueSerializer.writeString(valueHolderForName)
         const valueHolderForMethodList  = value.methodList
@@ -5675,7 +5675,7 @@ export class JavaScriptProxy_serializer {
     }
     public static read(buffer: DeserializerBase): JavaScriptProxy {
         let valueDeserializer : DeserializerBase = buffer
-        const object_TmpResult : Object = (valueDeserializer.readObject() as object)
+        const jsObjectTmpResult : Object = (valueDeserializer.readObject() as object)
         const nameTmpResult : string = (valueDeserializer.readString() as string)
         const methodListTmpBufLength : int32 = valueDeserializer.readInt32()
         let methodListTmpBuf : Array<string> = new Array<string>(methodListTmpBufLength)
@@ -5701,7 +5701,7 @@ export class JavaScriptProxy_serializer {
             permissionTmpBuf = (valueDeserializer.readString() as string)
         }
         const permissionTmpResult : string | undefined = permissionTmpBuf
-        let value : JavaScriptProxy = ({object_: object_TmpResult, name: nameTmpResult, methodList: methodListTmpResult, controller: controllerTmpResult, asyncMethodList: asyncMethodListTmpResult, permission: permissionTmpResult} as JavaScriptProxy)
+        let value : JavaScriptProxy = ({jsObject: jsObjectTmpResult, name: nameTmpResult, methodList: methodListTmpResult, controller: controllerTmpResult, asyncMethodList: asyncMethodListTmpResult, permission: permissionTmpResult} as JavaScriptProxy)
         return value
     }
 }
@@ -6465,7 +6465,7 @@ export class SelectionMenuOptionsExt_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -6482,7 +6482,7 @@ export class SelectionMenuOptionsExt_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -6499,7 +6499,7 @@ export class SelectionMenuOptionsExt_serializer {
                 previewTmpBuf_BufArgsSerializer.writeInt32(previewTmpBuf_BufResource.resourceId);
                 previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCall);
                 previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, previewTmpBuf_BufArgsSerializer.asBuffer(), previewTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufArgsSerializer.asBuffer(), previewTmpBuf_BufArgsSerializer.length());
                 previewTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -6618,7 +6618,7 @@ export class WebKeyboardOptions_serializer {
                 customKeyboardTmpBuf_BufArgsSerializer.writeInt32(customKeyboardTmpBuf_BufResource.resourceId);
                 customKeyboardTmpBuf_BufArgsSerializer.writePointer(customKeyboardTmpBuf_BufCall);
                 customKeyboardTmpBuf_BufArgsSerializer.writePointer(customKeyboardTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, customKeyboardTmpBuf_BufArgsSerializer.asBuffer(), customKeyboardTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, customKeyboardTmpBuf_BufArgsSerializer.asBuffer(), customKeyboardTmpBuf_BufArgsSerializer.length());
                 customKeyboardTmpBuf_BufArgsSerializer.release();
                 return;
             }

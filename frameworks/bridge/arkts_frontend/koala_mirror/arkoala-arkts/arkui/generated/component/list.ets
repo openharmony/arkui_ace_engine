@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Axis, ScrollSource, Color } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from "./scroll"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -597,85 +597,85 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     attributeModifier_value?: AttributeModifier<ListAttribute> | AttributeModifier<CommonMethod> | undefined
-    public alignListItem(value: ListItemAlign | undefined): this {
+    alignListItem(value: ListItemAlign | undefined): this {
         return this
     }
-    public listDirection(value: Axis | undefined): this {
+    listDirection(value: Axis | undefined): this {
         return this
     }
-    public contentStartOffset(value: number | undefined): this {
+    contentStartOffset(value: number | undefined): this {
         return this
     }
-    public contentEndOffset(value: number | undefined): this {
+    contentEndOffset(value: number | undefined): this {
         return this
     }
-    public divider(value: ListDividerOptions | undefined): this {
+    divider(value: ListDividerOptions | undefined): this {
         return this
     }
-    public multiSelectable(value: boolean | undefined): this {
+    multiSelectable(value: boolean | undefined): this {
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    cachedCount(value: number | undefined): this {
         return this
     }
-    public chainAnimation(value: boolean | undefined): this {
+    chainAnimation(value: boolean | undefined): this {
         return this
     }
-    public chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
+    chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
         return this
     }
-    public sticky(value: StickyStyle | undefined): this {
+    sticky(value: StickyStyle | undefined): this {
         return this
     }
-    public scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
+    scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
         return this
     }
-    public childrenMainSize(value: ChildrenMainSize | undefined): this {
+    childrenMainSize(value: ChildrenMainSize | undefined): this {
         return this
     }
-    public maintainVisibleContentPosition(value: boolean | undefined): this {
+    maintainVisibleContentPosition(value: boolean | undefined): this {
         return this
     }
-    public stackFromEnd(value: boolean | undefined): this {
+    stackFromEnd(value: boolean | undefined): this {
         return this
     }
-    public onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this {
+    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this {
         return this
     }
-    public onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
+    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
         return this
     }
-    public onItemMove(value: ((from: number,to: number) => boolean) | undefined): this {
+    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this {
         return this
     }
-    public onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+    onItemDragStart(value: OnItemDragStartCallback | undefined): this {
         return this
     }
-    public onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
         return this
     }
-    public onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
         return this
     }
-    public onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
         return this
     }
-    public onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
-    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
         return this
     }
-    public onDidScroll(value: OnScrollCallback | undefined): this {
+    onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
-    public lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
+    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -977,7 +977,7 @@ export class CloseSwipeActionOptions_serializer {
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }

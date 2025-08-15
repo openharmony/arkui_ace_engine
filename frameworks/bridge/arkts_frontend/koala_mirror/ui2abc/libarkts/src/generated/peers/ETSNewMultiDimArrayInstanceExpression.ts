@@ -37,22 +37,21 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class ETSNewMultiDimArrayInstanceExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 79)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSNewMultiDimArrayInstanceExpression(typeReference: TypeNode | undefined, dimensions: readonly Expression[]): ETSNewMultiDimArrayInstanceExpression {
-        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._CreateETSNewMultiDimArrayInstanceExpression(global.context, passNode(typeReference), passNodeArray(dimensions), dimensions.length))
+        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._CreateETSNewMultiDimArrayInstanceExpression(global.context, passNode(typeReference), passNodeArray(dimensions), dimensions.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSNewMultiDimArrayInstanceExpression(original: ETSNewMultiDimArrayInstanceExpression | undefined, typeReference: TypeNode | undefined, dimensions: readonly Expression[]): ETSNewMultiDimArrayInstanceExpression {
-        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewMultiDimArrayInstanceExpression(global.context, passNode(original), passNode(typeReference), passNodeArray(dimensions), dimensions.length))
+        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewMultiDimArrayInstanceExpression(global.context, passNode(original), passNode(typeReference), passNodeArray(dimensions), dimensions.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static update1ETSNewMultiDimArrayInstanceExpression(original?: ETSNewMultiDimArrayInstanceExpression, other?: ETSNewMultiDimArrayInstanceExpression): ETSNewMultiDimArrayInstanceExpression {
-        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewMultiDimArrayInstanceExpression1(global.context, passNode(original), passNode(other)))
+        const result: ETSNewMultiDimArrayInstanceExpression = new ETSNewMultiDimArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewMultiDimArrayInstanceExpression1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isETSNewMultiDimArrayInstanceExpression(node: object | undefined
     return node instanceof ETSNewMultiDimArrayInstanceExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewMultiDimArrayInstanceExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewMultiDimArrayInstanceExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_MULTI_DIM_ARRAY_INSTANCE_EXPRESSION))
 }

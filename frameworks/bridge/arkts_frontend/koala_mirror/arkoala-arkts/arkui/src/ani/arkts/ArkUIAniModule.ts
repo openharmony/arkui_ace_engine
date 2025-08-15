@@ -22,7 +22,7 @@ import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 //import { DrawContext } from "arkui/Graphics"
 //import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
-//import { ArkCustomComponent } from "arkui/ArkCustomComponent"
+import { ArkCustomComponent } from "../../ArkCustomComponent"
 //import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
 //import { ChildrenMainSize } from "arkui/component"
 //import { HookDragInfo } from "arkui/handwritten"
@@ -50,7 +50,7 @@ export class ArkUIAniModule {
 //    native static _Common_Get_Current_InstanceId(): KInt
 //    native static _Common_GetFocused_InstanceId(): KInt
 //    native static _Common_GetSharedLocalStorage(): LocalStorage
-//    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
 //    native static _CustomNode_RequestFrame(): void
 //    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
 //    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo

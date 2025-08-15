@@ -23,7 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Alignment, FoldStatus, AppRotation } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -150,19 +150,19 @@ export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderS
     enableAnimation_value?: boolean | undefined
     autoHalfFold_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined
-    public alignContent(value: Alignment | undefined): this {
+    alignContent(value: Alignment | undefined): this {
         return this
     }
-    public onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
+    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
         return this
     }
-    public onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
+    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
         return this
     }
-    public enableAnimation(value: boolean | undefined): this {
+    enableAnimation(value: boolean | undefined): this {
         return this
     }
-    public autoHalfFold(value: boolean | undefined): this {
+    autoHalfFold(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {

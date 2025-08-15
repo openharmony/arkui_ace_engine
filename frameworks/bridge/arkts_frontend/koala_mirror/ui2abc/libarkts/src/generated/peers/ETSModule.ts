@@ -43,17 +43,16 @@ import { Statement } from "./Statement"
 import { extension_ETSModuleGetNamespaceFlag } from "./../../reexport-for-generated"
 
 export class ETSModule extends BlockStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 84)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSModule(statementList: readonly Statement[], ident: Identifier | undefined, flag: Es2pandaModuleFlag, program?: Program): ETSModule {
-        const result: ETSModule = new ETSModule(global.generatedEs2panda._CreateETSModule(global.context, passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)))
+        const result: ETSModule = new ETSModule(global.generatedEs2panda._CreateETSModule(global.context, passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSModule(original: ETSModule | undefined, statementList: readonly Statement[], ident: Identifier | undefined, flag: Es2pandaModuleFlag, program?: Program): ETSModule {
-        const result: ETSModule = new ETSModule(global.generatedEs2panda._UpdateETSModule(global.context, passNode(original), passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)))
+        const result: ETSModule = new ETSModule(global.generatedEs2panda._UpdateETSModule(global.context, passNode(original), passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE)
         result.setChildrenParentPtr()
         return result
     }
@@ -128,5 +127,5 @@ export function isETSModule(node: object | undefined): node is ETSModule {
     return node instanceof ETSModule
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE, (peer: KNativePointer) => new ETSModule(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE, (peer: KNativePointer) => new ETSModule(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE))
 }

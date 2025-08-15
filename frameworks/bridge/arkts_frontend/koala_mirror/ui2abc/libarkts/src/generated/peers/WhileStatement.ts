@@ -38,17 +38,16 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 
 export class WhileStatement extends LoopStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 154)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createWhileStatement(test?: Expression, body?: Statement): WhileStatement {
-        const result: WhileStatement = new WhileStatement(global.generatedEs2panda._CreateWhileStatement(global.context, passNode(test), passNode(body)))
+        const result: WhileStatement = new WhileStatement(global.generatedEs2panda._CreateWhileStatement(global.context, passNode(test), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateWhileStatement(original?: WhileStatement, test?: Expression, body?: Statement): WhileStatement {
-        const result: WhileStatement = new WhileStatement(global.generatedEs2panda._UpdateWhileStatement(global.context, passNode(original), passNode(test), passNode(body)))
+        const result: WhileStatement = new WhileStatement(global.generatedEs2panda._UpdateWhileStatement(global.context, passNode(original), passNode(test), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isWhileStatement(node: object | undefined): node is WhileStateme
     return node instanceof WhileStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT, (peer: KNativePointer) => new WhileStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT, (peer: KNativePointer) => new WhileStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_WHILE_STATEMENT))
 }

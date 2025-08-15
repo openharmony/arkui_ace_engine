@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class OmittedExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 53)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createOmittedExpression(): OmittedExpression {
-        const result: OmittedExpression = new OmittedExpression(global.generatedEs2panda._CreateOmittedExpression(global.context))
+        const result: OmittedExpression = new OmittedExpression(global.generatedEs2panda._CreateOmittedExpression(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateOmittedExpression(original?: OmittedExpression): OmittedExpression {
-        const result: OmittedExpression = new OmittedExpression(global.generatedEs2panda._UpdateOmittedExpression(global.context, passNode(original)))
+        const result: OmittedExpression = new OmittedExpression(global.generatedEs2panda._UpdateOmittedExpression(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isOmittedExpression(node: object | undefined): node is OmittedEx
     return node instanceof OmittedExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION, (peer: KNativePointer) => new OmittedExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION, (peer: KNativePointer) => new OmittedExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_OMITTED_EXPRESSION))
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/compat"
+import { float64toInt32, int32, int64to32 } from "@koalaui/compat"
 
 
 /**
@@ -22,8 +22,7 @@ import { int32 } from "@koalaui/compat"
 export function hashCodeFromString(value: string): int32 {
     let hash = 5381
     for(let i = 0; i < value.length; i++) {
-        hash = (hash * 33) ^ value.charCodeAt(i).toInt()
-        hash |= 0
+        hash = int64to32((hash * 33) ^ float64toInt32(value.charCodeAt(i)))
     }
     return hash
 }

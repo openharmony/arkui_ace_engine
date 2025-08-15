@@ -1,11 +1,10 @@
 
 function main() {}
 
-
 function foo(x: (X | undefined)) {
-  let zzz = ({let gensym%%_806 = ({let gensym%%_805 = x;
-  (((gensym%%_805) == (null)) ? undefined : gensym%%_805.y)});
-  (((gensym%%_806) == (null)) ? undefined : gensym%%_806.length)});
+  let zzz = ({let gensym%%_890 = ({let gensym%%_889 = x;
+  (((gensym%%_889) == (null)) ? undefined : gensym%%_889.y)});
+  (((gensym%%_890) == (null)) ? undefined : gensym%%_890.length)});
 }
 
 

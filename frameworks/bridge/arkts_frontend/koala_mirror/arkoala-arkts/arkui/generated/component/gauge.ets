@@ -28,7 +28,7 @@ import { ResourceColor, Length, ResourceStr, Dimension } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { ContentModifier, AttributeModifier, hookGaugeContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookGaugeContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -294,34 +294,34 @@ export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribut
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<GaugeConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined
-    public value(value: number | undefined): this {
+    value(value: number | undefined): this {
         return this
     }
-    public startAngle(value: number | undefined): this {
+    startAngle(value: number | undefined): this {
         return this
     }
-    public endAngle(value: number | undefined): this {
+    endAngle(value: number | undefined): this {
         return this
     }
-    public colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
+    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
         return this
     }
-    public strokeWidth(value: Length | undefined): this {
+    strokeWidth(value: Length | undefined): this {
         return this
     }
-    public description(value: CustomBuilder | undefined): this {
+    description(value: CustomBuilder | undefined): this {
         return this
     }
-    public trackShadow(value: GaugeShadowOptions | undefined): this {
+    trackShadow(value: GaugeShadowOptions | undefined): this {
         return this
     }
-    public indicator(value: GaugeIndicatorOptions | undefined): this {
+    indicator(value: GaugeIndicatorOptions | undefined): this {
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
+    privacySensitive(value: boolean | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {

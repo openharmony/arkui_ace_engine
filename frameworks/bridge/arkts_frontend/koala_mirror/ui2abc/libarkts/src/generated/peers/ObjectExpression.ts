@@ -33,24 +33,22 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotatedExpression } from "./AnnotatedExpression"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 
 export class ObjectExpression extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 163)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createObjectExpression(nodeType: Es2pandaAstNodeType, properties: readonly Expression[], trailingComma: boolean): ObjectExpression {
-        const result: ObjectExpression = new ObjectExpression(global.generatedEs2panda._CreateObjectExpression(global.context, nodeType, passNodeArray(properties), properties.length, trailingComma))
+        const result: ObjectExpression = new ObjectExpression(global.generatedEs2panda._CreateObjectExpression(global.context, nodeType, passNodeArray(properties), properties.length, trailingComma), Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateObjectExpression(original: ObjectExpression | undefined, nodeType: Es2pandaAstNodeType, properties: readonly Expression[], trailingComma: boolean): ObjectExpression {
-        const result: ObjectExpression = new ObjectExpression(global.generatedEs2panda._UpdateObjectExpression(global.context, passNode(original), nodeType, passNodeArray(properties), properties.length, trailingComma))
+        const result: ObjectExpression = new ObjectExpression(global.generatedEs2panda._UpdateObjectExpression(global.context, passNode(original), nodeType, passNodeArray(properties), properties.length, trailingComma), Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -62,9 +60,6 @@ export class ObjectExpression extends AnnotatedExpression {
     }
     get isOptional(): boolean {
         return global.generatedEs2panda._ObjectExpressionIsOptionalConst(global.context, this.peer)
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ObjectExpressionDecoratorsConst(global.context, this.peer))
     }
     get validateExpression(): ValidationInfo | undefined {
         return new ValidationInfo(global.generatedEs2panda._ObjectExpressionValidateExpression(global.context, this.peer))
@@ -96,5 +91,5 @@ export function isObjectExpression(node: object | undefined): node is ObjectExpr
     return node instanceof ObjectExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION, (peer: KNativePointer) => new ObjectExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION, (peer: KNativePointer) => new ObjectExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION))
 }

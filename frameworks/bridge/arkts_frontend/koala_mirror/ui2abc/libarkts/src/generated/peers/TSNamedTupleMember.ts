@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSNamedTupleMember extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 137)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSNamedTupleMember(label: Expression | undefined, elementType: TypeNode | undefined, optional_arg: boolean): TSNamedTupleMember {
-        const result: TSNamedTupleMember = new TSNamedTupleMember(global.generatedEs2panda._CreateTSNamedTupleMember(global.context, passNode(label), passNode(elementType), optional_arg))
+        const result: TSNamedTupleMember = new TSNamedTupleMember(global.generatedEs2panda._CreateTSNamedTupleMember(global.context, passNode(label), passNode(elementType), optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSNamedTupleMember(original: TSNamedTupleMember | undefined, label: Expression | undefined, elementType: TypeNode | undefined, optional_arg: boolean): TSNamedTupleMember {
-        const result: TSNamedTupleMember = new TSNamedTupleMember(global.generatedEs2panda._UpdateTSNamedTupleMember(global.context, passNode(original), passNode(label), passNode(elementType), optional_arg))
+        const result: TSNamedTupleMember = new TSNamedTupleMember(global.generatedEs2panda._UpdateTSNamedTupleMember(global.context, passNode(original), passNode(label), passNode(elementType), optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isTSNamedTupleMember(node: object | undefined): node is TSNamedT
     return node instanceof TSNamedTupleMember
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER, (peer: KNativePointer) => new TSNamedTupleMember(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER, (peer: KNativePointer) => new TSNamedTupleMember(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_NAMED_TUPLE_MEMBER))
 }

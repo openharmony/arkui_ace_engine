@@ -41,12 +41,11 @@ import { SpreadElement } from "./SpreadElement"
 import { TypeNode } from "./TypeNode"
 
 export class ETSParameterExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 82)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSParameterExpression(identOrSpread: AnnotatedExpression | undefined, isOptional: boolean, annotations?: readonly AnnotationUsage[]): ETSParameterExpression {
-        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._CreateETSParameterExpression(global.context, passNode(identOrSpread), isOptional))
+        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._CreateETSParameterExpression(global.context, passNode(identOrSpread), isOptional), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -55,7 +54,7 @@ export class ETSParameterExpression extends Expression {
         return result
     }
     static updateETSParameterExpression(original: ETSParameterExpression | undefined, identOrSpread: AnnotatedExpression | undefined, isOptional: boolean, annotations?: readonly AnnotationUsage[]): ETSParameterExpression {
-        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._UpdateETSParameterExpression(global.context, passNode(original), passNode(identOrSpread), isOptional))
+        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._UpdateETSParameterExpression(global.context, passNode(original), passNode(identOrSpread), isOptional), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -64,7 +63,7 @@ export class ETSParameterExpression extends Expression {
         return result
     }
     static create1ETSParameterExpression(identOrSpread?: AnnotatedExpression, initializer?: Expression, annotations?: readonly AnnotationUsage[]): ETSParameterExpression {
-        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._CreateETSParameterExpression1(global.context, passNode(identOrSpread), passNode(initializer)))
+        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._CreateETSParameterExpression1(global.context, passNode(identOrSpread), passNode(initializer)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -73,7 +72,7 @@ export class ETSParameterExpression extends Expression {
         return result
     }
     static update1ETSParameterExpression(original?: ETSParameterExpression, identOrSpread?: AnnotatedExpression, initializer?: Expression, annotations?: readonly AnnotationUsage[]): ETSParameterExpression {
-        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._UpdateETSParameterExpression1(global.context, passNode(original), passNode(identOrSpread), passNode(initializer)))
+        const result: ETSParameterExpression = new ETSParameterExpression(global.generatedEs2panda._UpdateETSParameterExpression1(global.context, passNode(original), passNode(identOrSpread), passNode(initializer)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -188,5 +187,5 @@ export function isETSParameterExpression(node: object | undefined): node is ETSP
     return node instanceof ETSParameterExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION, (peer: KNativePointer) => new ETSParameterExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION, (peer: KNativePointer) => new ETSParameterExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION))
 }

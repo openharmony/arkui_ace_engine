@@ -14,13 +14,13 @@
  */
 
 import { ArkTsConfig } from "../../generated"
-import { trace } from "../../tracer"
+import { traceGlobal } from "../../tracer"
 
 export function dumpArkTsConfigInfo(arkTsConfig: ArkTsConfig) {
-    trace(() => `ArkTsConfig info:`)
-    trace(() => `\tBaseUrl:          ${arkTsConfig.baseUrl}`)
-    trace(() => `\tConfigPath:       ${arkTsConfig.configPath}`)
-    trace(() => `\tOutDir:           ${arkTsConfig.outDir}`)
-    trace(() => `\tPackage:          ${arkTsConfig.package}`)
-    trace(() => `\tRootDir:          ${arkTsConfig.rootDir}`)
+    traceGlobal(() => `ArkTsConfig info:`)
+    traceGlobal(() => `\tBaseUrl:          ${arkTsConfig.baseUrl}`)
+    traceGlobal(() => `\tConfigPath:       ${arkTsConfig.configPath}`)
+    traceGlobal(() => `\tOutDir:           ${arkTsConfig.outDir}`)
+    traceGlobal(() => `\tPackage:          ${arkTsConfig.package}`)
+    traceGlobal(() => `\tRootDir:          ${arkTsConfig.rootDir}`)
 }

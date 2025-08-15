@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TSInterfaceBody extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 134)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSInterfaceBody(body: readonly AstNode[]): TSInterfaceBody {
-        const result: TSInterfaceBody = new TSInterfaceBody(global.generatedEs2panda._CreateTSInterfaceBody(global.context, passNodeArray(body), body.length))
+        const result: TSInterfaceBody = new TSInterfaceBody(global.generatedEs2panda._CreateTSInterfaceBody(global.context, passNodeArray(body), body.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSInterfaceBody(original: TSInterfaceBody | undefined, body: readonly AstNode[]): TSInterfaceBody {
-        const result: TSInterfaceBody = new TSInterfaceBody(global.generatedEs2panda._UpdateTSInterfaceBody(global.context, passNode(original), passNodeArray(body), body.length))
+        const result: TSInterfaceBody = new TSInterfaceBody(global.generatedEs2panda._UpdateTSInterfaceBody(global.context, passNode(original), passNodeArray(body), body.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSInterfaceBody(node: object | undefined): node is TSInterface
     return node instanceof TSInterfaceBody
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY, (peer: KNativePointer) => new TSInterfaceBody(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY, (peer: KNativePointer) => new TSInterfaceBody(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_BODY))
 }

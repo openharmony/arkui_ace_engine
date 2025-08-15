@@ -38,17 +38,16 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 
 export class DoWhileStatement extends LoopStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 24)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createDoWhileStatement(body?: Statement, test?: Expression): DoWhileStatement {
-        const result: DoWhileStatement = new DoWhileStatement(global.generatedEs2panda._CreateDoWhileStatement(global.context, passNode(body), passNode(test)))
+        const result: DoWhileStatement = new DoWhileStatement(global.generatedEs2panda._CreateDoWhileStatement(global.context, passNode(body), passNode(test)), Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateDoWhileStatement(original?: DoWhileStatement, body?: Statement, test?: Expression): DoWhileStatement {
-        const result: DoWhileStatement = new DoWhileStatement(global.generatedEs2panda._UpdateDoWhileStatement(global.context, passNode(original), passNode(body), passNode(test)))
+        const result: DoWhileStatement = new DoWhileStatement(global.generatedEs2panda._UpdateDoWhileStatement(global.context, passNode(original), passNode(body), passNode(test)), Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isDoWhileStatement(node: object | undefined): node is DoWhileSta
     return node instanceof DoWhileStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT, (peer: KNativePointer) => new DoWhileStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT, (peer: KNativePointer) => new DoWhileStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_DO_WHILE_STATEMENT))
 }

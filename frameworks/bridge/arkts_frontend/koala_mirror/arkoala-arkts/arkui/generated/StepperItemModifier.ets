@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkStepperItemPeer, ItemState, StepperItemAttribute } from "./component/stepperItem"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class StepperItemModifier extends CommonMethodModifier implements StepperItemAttribute,AttributeModifier<StepperItemAttribute> {
     _instanceId: number = -1;

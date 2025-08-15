@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TSExternalModuleReference extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 91)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSExternalModuleReference(expr?: Expression): TSExternalModuleReference {
-        const result: TSExternalModuleReference = new TSExternalModuleReference(global.generatedEs2panda._CreateTSExternalModuleReference(global.context, passNode(expr)))
+        const result: TSExternalModuleReference = new TSExternalModuleReference(global.generatedEs2panda._CreateTSExternalModuleReference(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSExternalModuleReference(original?: TSExternalModuleReference, expr?: Expression): TSExternalModuleReference {
-        const result: TSExternalModuleReference = new TSExternalModuleReference(global.generatedEs2panda._UpdateTSExternalModuleReference(global.context, passNode(original), passNode(expr)))
+        const result: TSExternalModuleReference = new TSExternalModuleReference(global.generatedEs2panda._UpdateTSExternalModuleReference(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSExternalModuleReference(node: object | undefined): node is T
     return node instanceof TSExternalModuleReference
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE, (peer: KNativePointer) => new TSExternalModuleReference(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE, (peer: KNativePointer) => new TSExternalModuleReference(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_EXTERNAL_MODULE_REFERENCE))
 }

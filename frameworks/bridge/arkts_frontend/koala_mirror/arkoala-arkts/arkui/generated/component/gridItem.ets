@@ -22,7 +22,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -186,25 +186,25 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     selected_value?: boolean | Bindable<boolean> | undefined
     onSelect_value?: ((isSelected: boolean) => void) | undefined
     attributeModifier_value?: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    public rowStart(value: number | undefined): this {
+    rowStart(value: number | undefined): this {
         return this
     }
-    public rowEnd(value: number | undefined): this {
+    rowEnd(value: number | undefined): this {
         return this
     }
-    public columnStart(value: number | undefined): this {
+    columnStart(value: number | undefined): this {
         return this
     }
-    public columnEnd(value: number | undefined): this {
+    columnEnd(value: number | undefined): this {
         return this
     }
-    public selectable(value: boolean | undefined): this {
+    selectable(value: boolean | undefined): this {
         return this
     }
-    public selected(value: boolean | Bindable<boolean> | undefined): this {
+    selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public onSelect(value: ((isSelected: boolean) => void) | undefined): this {
+    onSelect(value: ((isSelected: boolean) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSThisType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 118)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSThisType(): TSThisType {
-        const result: TSThisType = new TSThisType(global.generatedEs2panda._CreateTSThisType(global.context))
+        const result: TSThisType = new TSThisType(global.generatedEs2panda._CreateTSThisType(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSThisType(original?: TSThisType): TSThisType {
-        const result: TSThisType = new TSThisType(global.generatedEs2panda._UpdateTSThisType(global.context, passNode(original)))
+        const result: TSThisType = new TSThisType(global.generatedEs2panda._UpdateTSThisType(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSThisType(node: object | undefined): node is TSThisType {
     return node instanceof TSThisType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE, (peer: KNativePointer) => new TSThisType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE, (peer: KNativePointer) => new TSThisType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_THIS_TYPE))
 }

@@ -197,6 +197,18 @@ KFloat getFloat(JSContextRef context, JSValueRef value) {
     return static_cast<KFloat>(result);
 }
 
+KDouble getDouble(JSContextRef context, JSValueRef value) {
+    JSValueRef exception {};
+    if (JSValueIsNull(context, value)) {
+        return 0;
+    }
+    if (JSValueIsUndefined(context, value)) {
+        ASSERT(false);
+        return 0;
+    }
+    return JSValueToNumber(context, value, &exception);
+}
+
 KShort getShort(JSContextRef context, JSValueRef value) {
     JSValueRef exception {};
     if (JSValueIsNull(context, value)) {
@@ -257,6 +269,10 @@ JSValueRef makePointer(JSContextRef context, KNativePointer value) {
 }
 
 JSValueRef makeFloat(JSContextRef context, KFloat value) {
+    return JSValueMakeNumber(context, value);
+}
+
+JSValueRef makeDouble(JSContextRef context, KDouble value) {
     return JSValueMakeNumber(context, value);
 }
 

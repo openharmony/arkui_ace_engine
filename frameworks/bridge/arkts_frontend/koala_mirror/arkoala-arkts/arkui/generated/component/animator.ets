@@ -25,7 +25,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, FillMode, PlayMode } from "./enums"
 import { curves } from "./../framework/ohos.curves"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -384,46 +384,46 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
     onFinish_value?: (() => void) | undefined
     onFrame_value?: ((value: number) => void) | undefined
     attributeModifier_value?: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined
-    public state(value: AnimationStatus | undefined): this {
+    state(value: AnimationStatus | undefined): this {
         return this
     }
-    public duration(value: number | undefined): this {
+    duration(value: number | undefined): this {
         return this
     }
-    public curve(value: curves.Curve | undefined): this {
+    curve(value: curves.Curve | undefined): this {
         return this
     }
-    public delay(value: number | undefined): this {
+    delay(value: number | undefined): this {
         return this
     }
-    public fillMode(value: FillMode | undefined): this {
+    fillMode(value: FillMode | undefined): this {
         return this
     }
-    public iterations(value: number | undefined): this {
+    iterations(value: number | undefined): this {
         return this
     }
-    public playMode(value: PlayMode | undefined): this {
+    playMode(value: PlayMode | undefined): this {
         return this
     }
-    public motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this {
+    motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this {
         return this
     }
-    public onStart(value: (() => void) | undefined): this {
+    onStart(value: (() => void) | undefined): this {
         return this
     }
-    public onPause(value: (() => void) | undefined): this {
+    onPause(value: (() => void) | undefined): this {
         return this
     }
-    public onRepeat(value: (() => void) | undefined): this {
+    onRepeat(value: (() => void) | undefined): this {
         return this
     }
-    public onCancel(value: (() => void) | undefined): this {
+    onCancel(value: (() => void) | undefined): this {
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
+    onFinish(value: (() => void) | undefined): this {
         return this
     }
-    public onFrame(value: ((value: number) => void) | undefined): this {
+    onFrame(value: ((value: number) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

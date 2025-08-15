@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
-import { ContentModifier, AttributeModifier, hookRatingContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookRatingContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -147,19 +147,19 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     onChange_value?: OnRatingChangeCallback | undefined
     contentModifier_value?: ContentModifier<RatingConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined
-    public stars(value: number | undefined): this {
+    stars(value: number | undefined): this {
         return this
     }
-    public stepSize(value: number | undefined): this {
+    stepSize(value: number | undefined): this {
         return this
     }
-    public starStyle(value: StarStyleOptions | undefined): this {
+    starStyle(value: StarStyleOptions | undefined): this {
         return this
     }
-    public onChange(value: OnRatingChangeCallback | undefined): this {
+    onChange(value: OnRatingChangeCallback | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -280,7 +280,7 @@ export class RatingConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
             triggerChangeTmpBufBufArgsSerializer.writeNumber(value0);
-            InteropNativeModule._CallCallback(36519084, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 36519084, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }

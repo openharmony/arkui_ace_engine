@@ -33,18 +33,16 @@ import {
 } from "../../reexport-for-generated"
 
 import { ClassDefinition } from "./ClassDefinition"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Es2pandaModifierFlags } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class ClassDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 15)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createClassDeclaration(def?: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
-        const result: ClassDeclaration = new ClassDeclaration(global.generatedEs2panda._CreateClassDeclaration(global.context, passNode(def)))
+        const result: ClassDeclaration = new ClassDeclaration(global.generatedEs2panda._CreateClassDeclaration(global.context, passNode(def)), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION)
         if (modifierFlags)
         {
             result.modifierFlags = modifierFlags
@@ -53,7 +51,7 @@ export class ClassDeclaration extends Statement {
         return result
     }
     static updateClassDeclaration(original?: ClassDeclaration, def?: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
-        const result: ClassDeclaration = new ClassDeclaration(global.generatedEs2panda._UpdateClassDeclaration(global.context, passNode(original), passNode(def)))
+        const result: ClassDeclaration = new ClassDeclaration(global.generatedEs2panda._UpdateClassDeclaration(global.context, passNode(original), passNode(def)), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION)
         if (modifierFlags)
         {
             result.modifierFlags = modifierFlags
@@ -63,27 +61,6 @@ export class ClassDeclaration extends Statement {
     }
     get definition(): ClassDefinition {
         return unpackNonNullableNode(global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer))
-    }
-    /** @deprecated */
-    emplaceDecorators(decorators?: Decorator): this {
-        global.generatedEs2panda._ClassDeclarationEmplaceDecorators(global.context, this.peer, passNode(decorators))
-        return this
-    }
-    /** @deprecated */
-    clearDecorators(): this {
-        global.generatedEs2panda._ClassDeclarationClearDecorators(global.context, this.peer)
-        return this
-    }
-    /** @deprecated */
-    setValueDecorators(decorators: Decorator | undefined, index: number): this {
-        global.generatedEs2panda._ClassDeclarationSetValueDecorators(global.context, this.peer, passNode(decorators), index)
-        return this
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ClassDeclarationDecorators(global.context, this.peer))
-    }
-    get decoratorsForUpdate(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ClassDeclarationDecoratorsForUpdate(global.context, this.peer))
     }
     /** @deprecated */
     setDefinition(def?: ClassDefinition): this {
@@ -96,5 +73,5 @@ export function isClassDeclaration(node: object | undefined): node is ClassDecla
     return node instanceof ClassDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION, (peer: KNativePointer) => new ClassDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION, (peer: KNativePointer) => new ClassDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION))
 }

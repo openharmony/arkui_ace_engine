@@ -33,24 +33,22 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotatedExpression } from "./AnnotatedExpression"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 
 export class SpreadElement extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 165)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createSpreadElement(nodeType: Es2pandaAstNodeType, argument?: Expression): SpreadElement {
-        const result: SpreadElement = new SpreadElement(global.generatedEs2panda._CreateSpreadElement(global.context, nodeType, passNode(argument)))
+        const result: SpreadElement = new SpreadElement(global.generatedEs2panda._CreateSpreadElement(global.context, nodeType, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateSpreadElement(original: SpreadElement | undefined, nodeType: Es2pandaAstNodeType, argument?: Expression): SpreadElement {
-        const result: SpreadElement = new SpreadElement(global.generatedEs2panda._UpdateSpreadElement(global.context, passNode(original), nodeType, passNode(argument)))
+        const result: SpreadElement = new SpreadElement(global.generatedEs2panda._UpdateSpreadElement(global.context, passNode(original), nodeType, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,9 +57,6 @@ export class SpreadElement extends AnnotatedExpression {
     }
     get isOptional(): boolean {
         return global.generatedEs2panda._SpreadElementIsOptionalConst(global.context, this.peer)
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._SpreadElementDecoratorsConst(global.context, this.peer))
     }
     /** @deprecated */
     setOptional(optional_arg: boolean): this {
@@ -85,5 +80,5 @@ export function isSpreadElement(node: object | undefined): node is SpreadElement
     return node instanceof SpreadElement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT, (peer: KNativePointer) => new SpreadElement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT, (peer: KNativePointer) => new SpreadElement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_SPREAD_ELEMENT))
 }

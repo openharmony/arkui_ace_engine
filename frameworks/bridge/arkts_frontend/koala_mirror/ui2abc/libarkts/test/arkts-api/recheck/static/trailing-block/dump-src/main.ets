@@ -2,7 +2,6 @@
 function main() {}
 
 
-
 class C {
   public f(arg: (()=> void)): void {}
   

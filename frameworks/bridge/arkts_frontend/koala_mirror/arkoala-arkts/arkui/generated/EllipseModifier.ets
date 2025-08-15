@@ -21,6 +21,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkEllipsePeer, EllipseAttribute } from "./component/ellipse"
+import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
 export class EllipseModifier extends CommonShapeMethodModifier implements EllipseAttribute,AttributeModifier<EllipseAttribute> {
     _instanceId: number = -1;

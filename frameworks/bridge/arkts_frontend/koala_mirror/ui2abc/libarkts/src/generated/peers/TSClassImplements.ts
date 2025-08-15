@@ -37,22 +37,21 @@ import { Expression } from "./Expression"
 import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 
 export class TSClassImplements extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 141)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSClassImplements(expression?: Expression, typeParameters?: TSTypeParameterInstantiation): TSClassImplements {
-        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._CreateTSClassImplements(global.context, passNode(expression), passNode(typeParameters)))
+        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._CreateTSClassImplements(global.context, passNode(expression), passNode(typeParameters)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSClassImplements(original?: TSClassImplements, expression?: Expression, typeParameters?: TSTypeParameterInstantiation): TSClassImplements {
-        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._UpdateTSClassImplements(global.context, passNode(original), passNode(expression), passNode(typeParameters)))
+        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._UpdateTSClassImplements(global.context, passNode(original), passNode(expression), passNode(typeParameters)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS)
         result.setChildrenParentPtr()
         return result
     }
     static update1TSClassImplements(original?: TSClassImplements, expression?: Expression): TSClassImplements {
-        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._UpdateTSClassImplements1(global.context, passNode(original), passNode(expression)))
+        const result: TSClassImplements = new TSClassImplements(global.generatedEs2panda._UpdateTSClassImplements1(global.context, passNode(original), passNode(expression)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS)
         result.setChildrenParentPtr()
         return result
     }
@@ -68,5 +67,5 @@ export function isTSClassImplements(node: object | undefined): node is TSClassIm
     return node instanceof TSClassImplements
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS, (peer: KNativePointer) => new TSClassImplements(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS, (peer: KNativePointer) => new TSClassImplements(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_CLASS_IMPLEMENTS))
 }

@@ -24,7 +24,6 @@ import { SourceTool, BaseEvent, BaseEventInternal } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { InteractionHand } from "./enums"
-import { extractors } from "#handwritten"
 export class EventTargetInfoInternal {
     public static fromPtr(ptr: KPointer): EventTargetInfo {
         return new EventTargetInfo(ptr)

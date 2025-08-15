@@ -25,7 +25,6 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ResourceColor } from "./../component/units"
 import { Color } from "./../component/enums"
 import { Resource } from "global.resource"
-import { extractors } from "#handwritten"
 import { Resource_serializer } from "./resource"
 export class ThemeControlInternal {
     public static fromPtr(ptr: KPointer): ThemeControl {

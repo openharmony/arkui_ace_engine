@@ -24,7 +24,6 @@ import { Resource } from "global.resource"
 import { FontStyle, FontWeight, TextOverflow, TextCase } from "./../component/enums"
 import { text } from "./ohos.graphics.text"
 import { Resource_serializer } from "./resource"
-import { extractors } from "#handwritten"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export interface MeasureOptions {

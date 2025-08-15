@@ -18,16 +18,15 @@
 
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, Finalizable, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { extractors } from "#handwritten"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { NavPathStack_serializer, NavPathStack, NavigationOperation, NavBar } from "./../component/navigation"
+import { NavPathStack_serializer, NavPathStack, NavBar, NavigationOperation } from "./../component/navigation"
 import { Resource_serializer } from "./resource"
 import { ResourceStr } from "./../component/units"
+import { Resource } from "global.resource"
 import { UIContext, UIContextInternal } from "./ohos.arkui.UIContext"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Resource } from "global.resource"
 export class uiObserver_DensityInfo_serializer {
     public static write(buffer: SerializerBase, value: uiObserver.DensityInfo): void {
         let valueSerializer : SerializerBase = buffer

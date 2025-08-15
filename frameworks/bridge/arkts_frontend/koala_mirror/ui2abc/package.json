@@ -20,7 +20,7 @@
     },
     "devDependencies": {
         "@koalaui/ets-tsc": "4.9.5-r6",
-        "@koalaui/harness": "1.7.6+devel",
+        "@koalaui/harness": "1.7.8+devel",
         "bin-links": "^4.0.4",
         "node-addon-api": "8.0.0",
         "node-api-headers": "0.0.5",

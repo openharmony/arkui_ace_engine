@@ -37,17 +37,16 @@ import { Es2pandaTSOperatorType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeOperator extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 119)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeOperator(type: TypeNode | undefined, operatorType: Es2pandaTSOperatorType): TSTypeOperator {
-        const result: TSTypeOperator = new TSTypeOperator(global.generatedEs2panda._CreateTSTypeOperator(global.context, passNode(type), operatorType))
+        const result: TSTypeOperator = new TSTypeOperator(global.generatedEs2panda._CreateTSTypeOperator(global.context, passNode(type), operatorType), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeOperator(original: TSTypeOperator | undefined, type: TypeNode | undefined, operatorType: Es2pandaTSOperatorType): TSTypeOperator {
-        const result: TSTypeOperator = new TSTypeOperator(global.generatedEs2panda._UpdateTSTypeOperator(global.context, passNode(original), passNode(type), operatorType))
+        const result: TSTypeOperator = new TSTypeOperator(global.generatedEs2panda._UpdateTSTypeOperator(global.context, passNode(original), passNode(type), operatorType), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isTSTypeOperator(node: object | undefined): node is TSTypeOperat
     return node instanceof TSTypeOperator
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR, (peer: KNativePointer) => new TSTypeOperator(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR, (peer: KNativePointer) => new TSTypeOperator(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_OPERATOR))
 }

@@ -41,8 +41,8 @@ export class InteropNativeModule {
     public static _CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: int32): int32 { throw "method not loaded" }
     public static _HoldCallbackResource(resourceId: int32): void { throw "method not loaded" }
     public static _ReleaseCallbackResource(resourceId: int32): void { throw "method not loaded" }
-    public static _CallCallback(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void { throw "method not loaded" }
-    public static _CallCallbackSync(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void { throw "method not loaded" }
+    public static _CallCallback(apiKind: int32, callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void { throw "method not loaded" }
+    public static _CallCallbackSync(apiKind: int32, callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void { throw "method not loaded" }
     public static _CallCallbackResourceHolder(holder: KPointer, resourceId: int32): void { throw "method not loaded" }
     public static _CallCallbackResourceReleaser(releaser: KPointer, resourceId: int32): void { throw "method not loaded" }
     public static _CallbackAwait(pipeline: KPointer): Object { throw "method not loaded" }

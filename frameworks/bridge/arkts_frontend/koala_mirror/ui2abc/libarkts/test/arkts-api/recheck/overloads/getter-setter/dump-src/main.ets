@@ -2,7 +2,6 @@
 function main() {}
 
 
-
 interface I {
   get f(): ((createdParam: boolean)=> void)
   

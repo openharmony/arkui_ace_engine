@@ -6,10 +6,9 @@ import { memo as memo } from "@koalaui/runtime/annotations";
 function main() {}
 
 
-
 class Test {
   @memo() public method_with_type_parameter<T>(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: T): T {
-    const __memo_scope = __memo_context.scope<T>(((__memo_id) + (__hash("id_method_with_type_parameter_@test/input/HQ/type-param-method.ets"))), 2);
+    const __memo_scope = __memo_context.scope<T>(((__memo_id) + (__hash("id_method_with_type_parameter_type-param-method.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
       return __memo_scope.cached;
@@ -23,14 +22,14 @@ class Test {
 
 class Use {
   @memo() public test(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test_@test/input/HQ/type-param-method.ets"))), 1);
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test_type-param-method.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, this);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;
       return;
     }
     const test = new Test();
-    test.method_with_type_parameter(__memo_context, ((__memo_id) + (__hash("id_method_with_type_parameter_@test/input/HQ/type-param-method.ets"))), "I'm string");
+    test.method_with_type_parameter(__memo_context, ((__memo_id) + (__hash("id_method_with_type_parameter_type-param-method.ets"))), "I'm string");
     {
       __memo_scope.recache();
       return;

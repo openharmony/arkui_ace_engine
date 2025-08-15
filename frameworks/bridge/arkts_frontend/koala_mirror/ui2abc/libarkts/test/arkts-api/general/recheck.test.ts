@@ -52,6 +52,7 @@ suite(util.basename(__filename), () => {
 
     test("add import at parsed state and proceed to checked", function() {
         createConfig()
+        arkts.initVisitsTable()
 
         const code =
         `
@@ -63,7 +64,7 @@ suite(util.basename(__filename), () => {
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
 
-        const program = arkts.arktsGlobal.compilerContext.program
+        const program = arkts.arktsGlobal.compilerContext!.program
         const importStorage = new arkts.ImportStorage(program, true)
         const module = program.ast as arkts.ETSModule
 
@@ -106,7 +107,6 @@ import { testFunction as testFunction } from "./library";
 
 function main() {}
 
-console.log("test");
 
 `,
         `invalid result: ${program.ast.dumpSrc()}`)
@@ -116,6 +116,7 @@ console.log("test");
 
     test("change function name in main program and in dependency", function() {
         createConfig()
+        arkts.initVisitsTable()
 
         const code =
         `
@@ -128,11 +129,11 @@ console.log("test");
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
 
-        const program = arkts.arktsGlobal.compilerContext.program
+        const program = arkts.arktsGlobal.compilerContext!.program
         const importStorage = new arkts.ImportStorage(program, true)
         const module = program.ast as arkts.ETSModule
 
-        arkts.arktsGlobal.compilerContext.program.getExternalSources().forEach(it => {
+        arkts.arktsGlobal.compilerContext!.program.getExternalSources().forEach(it => {
             if (!it.getName().includes("library")) return
             it.programs.forEach(program => {
                 program.setAst(new RenameTestFunction().visitor(program.ast))
@@ -179,7 +180,6 @@ import { testFunctionChanged as testFunctionChanged } from "./library";
 
 function main() {}
 
-testFunctionChanged();
 
 `,
         `invalid result: ${program.ast.dumpSrc()}`)

@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TSTypeParameter } from "./TSTypeParameter"
 
 export class TSTypeParameterDeclaration extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 121)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeParameterDeclaration(params: readonly TSTypeParameter[], requiredParams: number): TSTypeParameterDeclaration {
-        const result: TSTypeParameterDeclaration = new TSTypeParameterDeclaration(global.generatedEs2panda._CreateTSTypeParameterDeclaration(global.context, passNodeArray(params), params.length, requiredParams))
+        const result: TSTypeParameterDeclaration = new TSTypeParameterDeclaration(global.generatedEs2panda._CreateTSTypeParameterDeclaration(global.context, passNodeArray(params), params.length, requiredParams), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeParameterDeclaration(original: TSTypeParameterDeclaration | undefined, params: readonly TSTypeParameter[], requiredParams: number): TSTypeParameterDeclaration {
-        const result: TSTypeParameterDeclaration = new TSTypeParameterDeclaration(global.generatedEs2panda._UpdateTSTypeParameterDeclaration(global.context, passNode(original), passNodeArray(params), params.length, requiredParams))
+        const result: TSTypeParameterDeclaration = new TSTypeParameterDeclaration(global.generatedEs2panda._UpdateTSTypeParameterDeclaration(global.context, passNode(original), passNodeArray(params), params.length, requiredParams), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isTSTypeParameterDeclaration(node: object | undefined): node is 
     return node instanceof TSTypeParameterDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION, (peer: KNativePointer) => new TSTypeParameterDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION, (peer: KNativePointer) => new TSTypeParameterDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION))
 }

@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRefreshPeer, RefreshStatus, RefreshAttribute } from "./component/refresh"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RefreshModifier extends CommonMethodModifier implements RefreshAttribute,AttributeModifier<RefreshAttribute> {
     _instanceId: number = -1;

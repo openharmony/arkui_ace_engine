@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { VReg } from "./VReg"
 
 export class ChainExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 12)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createChainExpression(expression?: Expression): ChainExpression {
-        const result: ChainExpression = new ChainExpression(global.generatedEs2panda._CreateChainExpression(global.context, passNode(expression)))
+        const result: ChainExpression = new ChainExpression(global.generatedEs2panda._CreateChainExpression(global.context, passNode(expression)), Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateChainExpression(original?: ChainExpression, expression?: Expression): ChainExpression {
-        const result: ChainExpression = new ChainExpression(global.generatedEs2panda._UpdateChainExpression(global.context, passNode(original), passNode(expression)))
+        const result: ChainExpression = new ChainExpression(global.generatedEs2panda._UpdateChainExpression(global.context, passNode(original), passNode(expression)), Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isChainExpression(node: object | undefined): node is ChainExpres
     return node instanceof ChainExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION, (peer: KNativePointer) => new ChainExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION, (peer: KNativePointer) => new ChainExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CHAIN_EXPRESSION))
 }

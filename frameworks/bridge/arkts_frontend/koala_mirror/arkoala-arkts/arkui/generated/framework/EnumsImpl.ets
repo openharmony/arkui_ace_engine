@@ -2435,16 +2435,6 @@ export enum SliderBlockType {
     IMAGE = 1,
     SHAPE = 2
 }
-export enum ColorMode {
-    LIGHT = 0,
-    DARK = 1
-}
-export enum LayoutDirection {
-    LTR = 0,
-    RTL = 1,
-    AUTO = 2,
-    Auto = 2
-}
 export enum ItemState {
     NORMAL = 0,
     Normal = 0,
@@ -2685,6 +2675,10 @@ export enum ToggleType {
     Switch = 1,
     BUTTON = 2,
     Button = 2
+}
+export enum ToolBarItemPlacement {
+    TOP_BAR_LEADING = 0,
+    TOP_BAR_TRAILING = 1
 }
 export enum DpiFollowStrategy {
     FOLLOW_HOST_DPI = 0,

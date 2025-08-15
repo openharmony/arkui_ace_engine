@@ -24,8 +24,7 @@ export default makeConfig()
 function makeConfig(input, output) {
     return {
         input: {
-            'libarkts': "./src/index.ts",
-            'libarkts-compat': "./src/wrapper-compat/index.ts"
+            'libarkts': "./src/index.ts"
         },
         output: {
             dir: "lib",

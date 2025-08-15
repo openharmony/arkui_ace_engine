@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRichTextPeer, RichTextAttribute } from "./component/richText"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RichTextModifier extends CommonMethodModifier implements RichTextAttribute,AttributeModifier<RichTextAttribute> {
     _instanceId: number = -1;

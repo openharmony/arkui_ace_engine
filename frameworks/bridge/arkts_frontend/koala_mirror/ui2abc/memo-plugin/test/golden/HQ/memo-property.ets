@@ -6,7 +6,6 @@ import { memo as memo } from "@koalaui/runtime/annotations";
 function main() {}
 
 
-
 class A {
   @memo() public memo_arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void);
   
@@ -15,13 +14,13 @@ class A {
   }
   
   @memo() public build(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_build_@test/input/HQ/memo-property.ets"))), 1);
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_build_memo-property.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, this);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;
       return;
     }
-    __memo_parameter_this.value.memo_arg(__memo_context, ((__memo_id) + (__hash("id_memo_arg_@test/input/HQ/memo-property.ets"))));
+    __memo_parameter_this.value.memo_arg(__memo_context, ((__memo_id) + (__hash("id_memo_arg_memo-property.ets"))));
     {
       __memo_scope.recache();
       return;

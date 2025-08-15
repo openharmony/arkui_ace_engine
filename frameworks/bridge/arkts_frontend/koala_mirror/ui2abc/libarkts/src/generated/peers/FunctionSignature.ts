@@ -65,3 +65,6 @@ export class FunctionSignature extends ArktsObject {
     }
     protected readonly brandFunctionSignature: undefined
 }
+export function isFunctionSignature(node: object | undefined): node is FunctionSignature {
+    return node instanceof FunctionSignature
+}

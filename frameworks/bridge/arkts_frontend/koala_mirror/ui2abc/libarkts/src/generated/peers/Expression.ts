@@ -33,6 +33,7 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotatedExpression } from "./AnnotatedExpression"
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 import { TypeNode } from "./TypeNode"
 import { TypedAstNode } from "./TypedAstNode"
@@ -40,8 +41,8 @@ import { extension_ExpressionGetPreferredTypePointer } from "./../../reexport-fo
 import { extension_ExpressionSetPreferredTypePointer } from "./../../reexport-for-generated"
 
 export class Expression extends TypedAstNode {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     get isGrouped(): boolean {
         return global.generatedEs2panda._ExpressionIsGroupedConst(global.context, this.peer)

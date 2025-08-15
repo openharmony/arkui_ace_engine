@@ -39,12 +39,11 @@ import { MaybeOptionalExpression } from "./MaybeOptionalExpression"
 import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 
 export class CallExpression extends MaybeOptionalExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 10)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createCallExpression(callee: Expression | undefined, _arguments: readonly Expression[], typeParams: TSTypeParameterInstantiation | undefined, optional_arg: boolean, trailingComma: boolean, trailingBlock?: BlockStatement): CallExpression {
-        const result: CallExpression = new CallExpression(global.generatedEs2panda._CreateCallExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, trailingComma))
+        const result: CallExpression = new CallExpression(global.generatedEs2panda._CreateCallExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, trailingComma), Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION)
         if (trailingBlock)
         {
             result.setTrailingBlock(trailingBlock)
@@ -53,7 +52,7 @@ export class CallExpression extends MaybeOptionalExpression {
         return result
     }
     static update1CallExpression(original?: CallExpression, other?: CallExpression, trailingBlock?: BlockStatement): CallExpression {
-        const result: CallExpression = new CallExpression(global.generatedEs2panda._UpdateCallExpression1(global.context, passNode(original), passNode(other)))
+        const result: CallExpression = new CallExpression(global.generatedEs2panda._UpdateCallExpression1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION)
         if (trailingBlock)
         {
             result.setTrailingBlock(trailingBlock)
@@ -122,5 +121,5 @@ export function isCallExpression(node: object | undefined): node is CallExpressi
     return node instanceof CallExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION, (peer: KNativePointer) => new CallExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION, (peer: KNativePointer) => new CallExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION))
 }

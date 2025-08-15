@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { getDeclResolveGensym, getMemoFunctionKind, MemoFunctionKind } from "./utils"
+import { getDeclResolveGensym, getMemoFunctionKind, getMemoParameterKind, MemoFunctionKind } from "./utils"
 import { getParams, isMemoAnnotatable, isMemoizable, MemoAnnotatable } from "./api-utils"
 
 class AnalysisVisitorOptions {
@@ -77,7 +77,7 @@ export class AnalysisVisitor extends arkts.AbstractVisitor {
             return arkts.factory.updateCallExpression(
                 node,
                 this.visitor(node.callee!, options),
-                node.arguments.map((arg, index) => this.visitor(arg, { applyMemo: params[index] ? getMemoFunctionKind(params[index]) : undefined })),
+                node.arguments.map((arg, index) => this.visitor(arg, { applyMemo: params[index] ? getMemoParameterKind(params[index]) : undefined })),
                 node.typeParams ? this.visitor(node.typeParams, options) as arkts.TSTypeParameterInstantiation : undefined,
                 node.isOptional,
                 node.hasTrailingComma,

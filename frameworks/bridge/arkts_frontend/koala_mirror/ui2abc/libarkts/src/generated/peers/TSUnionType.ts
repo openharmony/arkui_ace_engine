@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSUnionType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 105)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSUnionType(types: readonly TypeNode[]): TSUnionType {
-        const result: TSUnionType = new TSUnionType(global.generatedEs2panda._CreateTSUnionType(global.context, passNodeArray(types), types.length))
+        const result: TSUnionType = new TSUnionType(global.generatedEs2panda._CreateTSUnionType(global.context, passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSUnionType(original: TSUnionType | undefined, types: readonly TypeNode[]): TSUnionType {
-        const result: TSUnionType = new TSUnionType(global.generatedEs2panda._UpdateTSUnionType(global.context, passNode(original), passNodeArray(types), types.length))
+        const result: TSUnionType = new TSUnionType(global.generatedEs2panda._UpdateTSUnionType(global.context, passNode(original), passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSUnionType(node: object | undefined): node is TSUnionType {
     return node instanceof TSUnionType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE, (peer: KNativePointer) => new TSUnionType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE, (peer: KNativePointer) => new TSUnionType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_UNION_TYPE))
 }

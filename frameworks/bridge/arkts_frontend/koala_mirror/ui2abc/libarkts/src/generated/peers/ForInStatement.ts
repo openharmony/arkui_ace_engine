@@ -38,17 +38,16 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 
 export class ForInStatement extends LoopStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 31)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createForInStatement(left?: AstNode, right?: Expression, body?: Statement): ForInStatement {
-        const result: ForInStatement = new ForInStatement(global.generatedEs2panda._CreateForInStatement(global.context, passNode(left), passNode(right), passNode(body)))
+        const result: ForInStatement = new ForInStatement(global.generatedEs2panda._CreateForInStatement(global.context, passNode(left), passNode(right), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateForInStatement(original?: ForInStatement, left?: AstNode, right?: Expression, body?: Statement): ForInStatement {
-        const result: ForInStatement = new ForInStatement(global.generatedEs2panda._UpdateForInStatement(global.context, passNode(original), passNode(left), passNode(right), passNode(body)))
+        const result: ForInStatement = new ForInStatement(global.generatedEs2panda._UpdateForInStatement(global.context, passNode(original), passNode(left), passNode(right), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -67,5 +66,5 @@ export function isForInStatement(node: object | undefined): node is ForInStateme
     return node instanceof ForInStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT, (peer: KNativePointer) => new ForInStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT, (peer: KNativePointer) => new ForInStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_FOR_IN_STATEMENT))
 }

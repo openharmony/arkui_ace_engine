@@ -39,17 +39,16 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 
 export class TSFunctionType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 127)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSFunctionType(signature?: FunctionSignature): TSFunctionType {
-        const result: TSFunctionType = new TSFunctionType(global.generatedEs2panda._CreateTSFunctionType(global.context, passNode(signature)))
+        const result: TSFunctionType = new TSFunctionType(global.generatedEs2panda._CreateTSFunctionType(global.context, passNode(signature)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSFunctionType(original?: TSFunctionType, signature?: FunctionSignature): TSFunctionType {
-        const result: TSFunctionType = new TSFunctionType(global.generatedEs2panda._UpdateTSFunctionType(global.context, passNode(original), passNode(signature)))
+        const result: TSFunctionType = new TSFunctionType(global.generatedEs2panda._UpdateTSFunctionType(global.context, passNode(original), passNode(signature)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isTSFunctionType(node: object | undefined): node is TSFunctionTy
     return node instanceof TSFunctionType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE, (peer: KNativePointer) => new TSFunctionType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE, (peer: KNativePointer) => new TSFunctionType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_FUNCTION_TYPE))
 }

@@ -28,7 +28,7 @@ import { PeerNode } from "./../PeerNode"
 import { ResourceStr, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
 import { Color, FontStyle, FontWeight } from "./enums"
-import { ContentModifier, AttributeModifier, hookTextClockContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookTextClockContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -343,37 +343,37 @@ export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClock
     contentModifier_value?: ContentModifier<TextClockConfiguration> | undefined
     dateTimeOptions_value?: intl.DateTimeOptions | undefined
     attributeModifier_value?: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined
-    public format(value: ResourceStr | undefined): this {
+    format(value: ResourceStr | undefined): this {
         return this
     }
-    public onDateChange(value: ((value: number) => void) | undefined): this {
+    onDateChange(value: ((value: number) => void) | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: Length | undefined): this {
+    fontSize(value: Length | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public fontFamily(value: ResourceStr | undefined): this {
+    fontFamily(value: ResourceStr | undefined): this {
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
-    public fontFeature(value: string | undefined): this {
+    fontFeature(value: string | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
         return this
     }
-    public dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
+    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -8,7 +8,6 @@ import { __context as __context, __id as __id, __memo_context_type as __memo_con
 function main() {}
 
 
-
 class Test {
   @memo_entry() public memoEntry<R>(__memo_context: __memo_context_type, __memo_id: __memo_id_type, @memo() entry: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> R)): R {
     const getContext = (() => {
@@ -20,7 +19,7 @@ class Test {
     {
       const __memo_context = getContext();
       const __memo_id = getId();
-      return entry(__memo_context, ((__memo_id) + (__hash("id_entry_@test/input/HQ/entry.ets"))));
+      return entry(__memo_context, ((__memo_id) + (__hash("id_entry_entry.ets"))));
     }
   }
   

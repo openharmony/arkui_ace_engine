@@ -31,7 +31,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight, TextOverflow } from "./enums"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1029,133 +1029,133 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public lineSpacing(value: LengthMetrics | undefined): this {
+    lineSpacing(value: LengthMetrics | undefined): this {
         return this
     }
-    public textAlign(value: TextAlign | undefined): this {
+    textAlign(value: TextAlign | undefined): this {
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: number | string | Resource | undefined): this {
         return this
     }
-    public textOverflow(value: TextOverflowOptions | undefined): this {
+    textOverflow(value: TextOverflowOptions | undefined): this {
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
+    fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    public maxLines(value: number | undefined): this {
+    maxLines(value: number | undefined): this {
         return this
     }
-    public decoration(value: DecorationStyleInterface | undefined): this {
+    decoration(value: DecorationStyleInterface | undefined): this {
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: number | string | undefined): this {
         return this
     }
-    public textCase(value: TextCase | undefined): this {
+    textCase(value: TextCase | undefined): this {
         return this
     }
-    public baselineOffset(value: number | string | undefined): this {
+    baselineOffset(value: number | string | undefined): this {
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
+    copyOption(value: CopyOptions | undefined): this {
         return this
     }
-    public draggable(value: boolean | undefined): this {
+    draggable(value: boolean | undefined): this {
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
-    public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         return this
     }
-    public textIndent(value: Length | undefined): this {
+    textIndent(value: Length | undefined): this {
         return this
     }
-    public wordBreak(value: WordBreak | undefined): this {
+    wordBreak(value: WordBreak | undefined): this {
         return this
     }
-    public lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         return this
     }
-    public onCopy(value: ((value: string) => void) | undefined): this {
+    onCopy(value: ((value: string) => void) | undefined): this {
         return this
     }
-    public caretColor(value: ResourceColor | undefined): this {
+    caretColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public ellipsisMode(value: EllipsisMode | undefined): this {
+    ellipsisMode(value: EllipsisMode | undefined): this {
         return this
     }
-    public enableDataDetector(value: boolean | undefined): this {
+    enableDataDetector(value: boolean | undefined): this {
         return this
     }
-    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         return this
     }
-    public onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
         return this
     }
-    public fontFeature(value: string | undefined): this {
+    fontFeature(value: string | undefined): this {
         return this
     }
-    public marqueeOptions(value: TextMarqueeOptions | undefined): this {
+    marqueeOptions(value: TextMarqueeOptions | undefined): this {
         return this
     }
-    public onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this {
+    onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this {
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
+    privacySensitive(value: boolean | undefined): this {
         return this
     }
-    public textSelectable(value: TextSelectableMode | undefined): this {
+    textSelectable(value: TextSelectableMode | undefined): this {
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
         return this
     }
-    public halfLeading(value: boolean | undefined): this {
+    halfLeading(value: boolean | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public font(fontValue: Font | undefined, options?: FontSettingOptions): this {
+    font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         return this
     }
-    public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
         return this
     }
-    public selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
         return this
     }
-    public bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
+    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {

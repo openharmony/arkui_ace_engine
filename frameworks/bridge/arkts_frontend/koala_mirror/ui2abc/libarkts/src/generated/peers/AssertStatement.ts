@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class AssertStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 3)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createAssertStatement(test?: Expression, second?: Expression): AssertStatement {
-        const result: AssertStatement = new AssertStatement(global.generatedEs2panda._CreateAssertStatement(global.context, passNode(test), passNode(second)))
+        const result: AssertStatement = new AssertStatement(global.generatedEs2panda._CreateAssertStatement(global.context, passNode(test), passNode(second)), Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateAssertStatement(original?: AssertStatement, test?: Expression, second?: Expression): AssertStatement {
-        const result: AssertStatement = new AssertStatement(global.generatedEs2panda._UpdateAssertStatement(global.context, passNode(original), passNode(test), passNode(second)))
+        const result: AssertStatement = new AssertStatement(global.generatedEs2panda._UpdateAssertStatement(global.context, passNode(original), passNode(test), passNode(second)), Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -63,5 +62,5 @@ export function isAssertStatement(node: object | undefined): node is AssertState
     return node instanceof AssertStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT, (peer: KNativePointer) => new AssertStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT, (peer: KNativePointer) => new AssertStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ASSERT_STATEMENT))
 }

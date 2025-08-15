@@ -41,17 +41,16 @@ import { Identifier } from "./Identifier"
 import { SrcDumper } from "./SrcDumper"
 
 export class OverloadDeclaration extends ClassElement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 54)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createOverloadDeclaration(key: Expression | undefined, modifiers: Es2pandaModifierFlags): OverloadDeclaration {
-        const result: OverloadDeclaration = new OverloadDeclaration(global.generatedEs2panda._CreateOverloadDeclaration(global.context, passNode(key), modifiers))
+        const result: OverloadDeclaration = new OverloadDeclaration(global.generatedEs2panda._CreateOverloadDeclaration(global.context, passNode(key), modifiers), Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateOverloadDeclaration(original: OverloadDeclaration | undefined, key: Expression | undefined, modifiers: Es2pandaModifierFlags): OverloadDeclaration {
-        const result: OverloadDeclaration = new OverloadDeclaration(global.generatedEs2panda._UpdateOverloadDeclaration(global.context, passNode(original), passNode(key), modifiers))
+        const result: OverloadDeclaration = new OverloadDeclaration(global.generatedEs2panda._UpdateOverloadDeclaration(global.context, passNode(original), passNode(key), modifiers), Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -99,5 +98,5 @@ export function isOverloadDeclaration(node: object | undefined): node is Overloa
     return node instanceof OverloadDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION, (peer: KNativePointer) => new OverloadDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION, (peer: KNativePointer) => new OverloadDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_OVERLOAD_DECLARATION))
 }

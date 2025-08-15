@@ -191,22 +191,22 @@ export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute 
     menuItemGroupDivider_value?: DividerStyleOptions | undefined
     subMenuExpandingMode_value?: SubMenuExpandingMode | undefined
     attributeModifier_value?: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined
-    public font(value: Font | undefined): this {
+    font(value: Font | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public radius(value: Dimension | BorderRadiuses | undefined): this {
+    radius(value: Dimension | BorderRadiuses | undefined): this {
         return this
     }
-    public menuItemDivider(value: DividerStyleOptions | undefined): this {
+    menuItemDivider(value: DividerStyleOptions | undefined): this {
         return this
     }
-    public menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
+    menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
         return this
     }
-    public subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
+    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {

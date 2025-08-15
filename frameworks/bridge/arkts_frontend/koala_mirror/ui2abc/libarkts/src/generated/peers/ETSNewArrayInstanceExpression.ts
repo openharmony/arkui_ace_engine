@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class ETSNewArrayInstanceExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 78)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSNewArrayInstanceExpression(typeReference?: TypeNode, dimension?: Expression): ETSNewArrayInstanceExpression {
-        const result: ETSNewArrayInstanceExpression = new ETSNewArrayInstanceExpression(global.generatedEs2panda._CreateETSNewArrayInstanceExpression(global.context, passNode(typeReference), passNode(dimension)))
+        const result: ETSNewArrayInstanceExpression = new ETSNewArrayInstanceExpression(global.generatedEs2panda._CreateETSNewArrayInstanceExpression(global.context, passNode(typeReference), passNode(dimension)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSNewArrayInstanceExpression(original?: ETSNewArrayInstanceExpression, typeReference?: TypeNode, dimension?: Expression): ETSNewArrayInstanceExpression {
-        const result: ETSNewArrayInstanceExpression = new ETSNewArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewArrayInstanceExpression(global.context, passNode(original), passNode(typeReference), passNode(dimension)))
+        const result: ETSNewArrayInstanceExpression = new ETSNewArrayInstanceExpression(global.generatedEs2panda._UpdateETSNewArrayInstanceExpression(global.context, passNode(original), passNode(typeReference), passNode(dimension)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isETSNewArrayInstanceExpression(node: object | undefined): node 
     return node instanceof ETSNewArrayInstanceExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewArrayInstanceExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewArrayInstanceExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_ARRAY_INSTANCE_EXPRESSION))
 }

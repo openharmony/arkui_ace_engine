@@ -6,7 +6,6 @@ import { memo as memo } from "@koalaui/runtime/annotations";
 function main() {}
 
 
-
 class A {
   @memo() public memo_optional_arg?: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined);
   

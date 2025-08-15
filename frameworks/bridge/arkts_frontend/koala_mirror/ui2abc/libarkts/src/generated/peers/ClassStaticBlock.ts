@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { ScriptFunction } from "./ScriptFunction"
 
 export class ClassStaticBlock extends ClassElement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 18)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createClassStaticBlock(value?: Expression): ClassStaticBlock {
-        const result: ClassStaticBlock = new ClassStaticBlock(global.generatedEs2panda._CreateClassStaticBlock(global.context, passNode(value)))
+        const result: ClassStaticBlock = new ClassStaticBlock(global.generatedEs2panda._CreateClassStaticBlock(global.context, passNode(value)), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK)
         result.setChildrenParentPtr()
         return result
     }
     static updateClassStaticBlock(original?: ClassStaticBlock, value?: Expression): ClassStaticBlock {
-        const result: ClassStaticBlock = new ClassStaticBlock(global.generatedEs2panda._UpdateClassStaticBlock(global.context, passNode(original), passNode(value)))
+        const result: ClassStaticBlock = new ClassStaticBlock(global.generatedEs2panda._UpdateClassStaticBlock(global.context, passNode(original), passNode(value)), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isClassStaticBlock(node: object | undefined): node is ClassStati
     return node instanceof ClassStaticBlock
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK, (peer: KNativePointer) => new ClassStaticBlock(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK, (peer: KNativePointer) => new ClassStaticBlock(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_STATIC_BLOCK))
 }

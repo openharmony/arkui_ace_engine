@@ -38,22 +38,21 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class AssignmentExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 161)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1AssignmentExpression(type: Es2pandaAstNodeType, left: Expression | undefined, right: Expression | undefined, assignmentOperator: Es2pandaTokenType): AssignmentExpression {
-        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._CreateAssignmentExpression1(global.context, type, passNode(left), passNode(right), assignmentOperator))
+        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._CreateAssignmentExpression1(global.context, type, passNode(left), passNode(right), assignmentOperator), Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateAssignmentExpression(original: AssignmentExpression | undefined, left: Expression | undefined, right: Expression | undefined, assignmentOperator: Es2pandaTokenType): AssignmentExpression {
-        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._UpdateAssignmentExpression(global.context, passNode(original), passNode(left), passNode(right), assignmentOperator))
+        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._UpdateAssignmentExpression(global.context, passNode(original), passNode(left), passNode(right), assignmentOperator), Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static update1AssignmentExpression(original: AssignmentExpression | undefined, type: Es2pandaAstNodeType, left: Expression | undefined, right: Expression | undefined, assignmentOperator: Es2pandaTokenType): AssignmentExpression {
-        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._UpdateAssignmentExpression1(global.context, passNode(original), type, passNode(left), passNode(right), assignmentOperator))
+        const result: AssignmentExpression = new AssignmentExpression(global.generatedEs2panda._UpdateAssignmentExpression1(global.context, passNode(original), type, passNode(left), passNode(right), assignmentOperator), Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -109,5 +108,5 @@ export function isAssignmentExpression(node: object | undefined): node is Assign
     return node instanceof AssignmentExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION, (peer: KNativePointer) => new AssignmentExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION, (peer: KNativePointer) => new AssignmentExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ASSIGNMENT_EXPRESSION))
 }

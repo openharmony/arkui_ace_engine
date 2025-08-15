@@ -37,17 +37,16 @@ import { Es2pandaRegExpFlags } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class RegExpLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 57)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createRegExpLiteral(pattern: string, flags: Es2pandaRegExpFlags, flagsStr: string): RegExpLiteral {
-        const result: RegExpLiteral = new RegExpLiteral(global.generatedEs2panda._CreateRegExpLiteral(global.context, pattern, flags, flagsStr))
+        const result: RegExpLiteral = new RegExpLiteral(global.generatedEs2panda._CreateRegExpLiteral(global.context, pattern, flags, flagsStr), Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateRegExpLiteral(original: RegExpLiteral | undefined, pattern: string, flags: Es2pandaRegExpFlags, flagsStr: string): RegExpLiteral {
-        const result: RegExpLiteral = new RegExpLiteral(global.generatedEs2panda._UpdateRegExpLiteral(global.context, passNode(original), pattern, flags, flagsStr))
+        const result: RegExpLiteral = new RegExpLiteral(global.generatedEs2panda._UpdateRegExpLiteral(global.context, passNode(original), pattern, flags, flagsStr), Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -63,5 +62,5 @@ export function isRegExpLiteral(node: object | undefined): node is RegExpLiteral
     return node instanceof RegExpLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL, (peer: KNativePointer) => new RegExpLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL, (peer: KNativePointer) => new RegExpLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_REGEXP_LITERAL))
 }

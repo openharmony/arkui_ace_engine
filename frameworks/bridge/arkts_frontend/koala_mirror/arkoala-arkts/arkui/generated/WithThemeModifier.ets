@@ -19,6 +19,7 @@
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkWithThemePeer, WithThemeAttribute } from "./component/withTheme"
+import { int32 } from "@koalaui/common"
 export class WithThemeModifier implements WithThemeAttribute,AttributeModifier<WithThemeAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkSymbolGlyphPeer, SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute, SymbolEffect } from "./component/symbolglyph"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./component/units"
 import { Color, FontWeight } from "./component/enums"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {

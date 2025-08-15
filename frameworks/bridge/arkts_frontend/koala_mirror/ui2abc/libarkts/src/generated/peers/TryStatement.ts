@@ -39,22 +39,21 @@ import { LabelPair } from "./LabelPair"
 import { Statement } from "./Statement"
 
 export class TryStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 149)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTryStatement(block: BlockStatement | undefined, catchClauses: readonly CatchClause[], finalizer: BlockStatement | undefined, finalizerInsertionsLabelPair: readonly LabelPair[], finalizerInsertionsStatement: readonly Statement[]): TryStatement {
-        const result: TryStatement = new TryStatement(global.generatedEs2panda._CreateTryStatement(global.context, passNode(block), passNodeArray(catchClauses), catchClauses.length, passNode(finalizer), passNodeArray(finalizerInsertionsLabelPair), finalizerInsertionsLabelPair.length, passNodeArray(finalizerInsertionsStatement), finalizerInsertionsStatement.length))
+        const result: TryStatement = new TryStatement(global.generatedEs2panda._CreateTryStatement(global.context, passNode(block), passNodeArray(catchClauses), catchClauses.length, passNode(finalizer), passNodeArray(finalizerInsertionsLabelPair), finalizerInsertionsLabelPair.length, passNodeArray(finalizerInsertionsStatement), finalizerInsertionsStatement.length), Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateTryStatement(original: TryStatement | undefined, block: BlockStatement | undefined, catchClauses: readonly CatchClause[], finalizer: BlockStatement | undefined, finalizerInsertionsLabelPair: readonly LabelPair[], finalizerInsertionsStatement: readonly Statement[]): TryStatement {
-        const result: TryStatement = new TryStatement(global.generatedEs2panda._UpdateTryStatement(global.context, passNode(original), passNode(block), passNodeArray(catchClauses), catchClauses.length, passNode(finalizer), passNodeArray(finalizerInsertionsLabelPair), finalizerInsertionsLabelPair.length, passNodeArray(finalizerInsertionsStatement), finalizerInsertionsStatement.length))
+        const result: TryStatement = new TryStatement(global.generatedEs2panda._UpdateTryStatement(global.context, passNode(original), passNode(block), passNodeArray(catchClauses), catchClauses.length, passNode(finalizer), passNodeArray(finalizerInsertionsLabelPair), finalizerInsertionsLabelPair.length, passNodeArray(finalizerInsertionsStatement), finalizerInsertionsStatement.length), Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1TryStatement(original?: TryStatement, other?: TryStatement): TryStatement {
-        const result: TryStatement = new TryStatement(global.generatedEs2panda._UpdateTryStatement1(global.context, passNode(original), passNode(other)))
+        const result: TryStatement = new TryStatement(global.generatedEs2panda._UpdateTryStatement1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -87,5 +86,5 @@ export function isTryStatement(node: object | undefined): node is TryStatement {
     return node instanceof TryStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT, (peer: KNativePointer) => new TryStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT, (peer: KNativePointer) => new TryStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TRY_STATEMENT))
 }

@@ -32,12 +32,13 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class AnnotatedExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._AnnotatedExpressionTypeAnnotationConst(global.context, this.peer))

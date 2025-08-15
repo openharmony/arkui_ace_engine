@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSInterfaceHeritage extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 135)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSInterfaceHeritage(expr?: TypeNode): TSInterfaceHeritage {
-        const result: TSInterfaceHeritage = new TSInterfaceHeritage(global.generatedEs2panda._CreateTSInterfaceHeritage(global.context, passNode(expr)))
+        const result: TSInterfaceHeritage = new TSInterfaceHeritage(global.generatedEs2panda._CreateTSInterfaceHeritage(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSInterfaceHeritage(original?: TSInterfaceHeritage, expr?: TypeNode): TSInterfaceHeritage {
-        const result: TSInterfaceHeritage = new TSInterfaceHeritage(global.generatedEs2panda._UpdateTSInterfaceHeritage(global.context, passNode(original), passNode(expr)))
+        const result: TSInterfaceHeritage = new TSInterfaceHeritage(global.generatedEs2panda._UpdateTSInterfaceHeritage(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSInterfaceHeritage(node: object | undefined): node is TSInter
     return node instanceof TSInterfaceHeritage
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE, (peer: KNativePointer) => new TSInterfaceHeritage(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE, (peer: KNativePointer) => new TSInterfaceHeritage(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_HERITAGE))
 }

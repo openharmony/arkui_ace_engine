@@ -32,9 +32,9 @@ import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLig
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
+import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { Color, ImageFit, ImageRepeat, CopyOptions } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -681,85 +681,85 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     enhancedImageQuality_value?: image.ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
     attributeModifier_value?: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined
-    public alt(value: string | Resource | image.PixelMap | undefined): this {
+    alt(value: string | Resource | image.PixelMap | undefined): this {
         return this
     }
-    public matchTextDirection(value: boolean | undefined): this {
+    matchTextDirection(value: boolean | undefined): this {
         return this
     }
-    public fitOriginalSize(value: boolean | undefined): this {
+    fitOriginalSize(value: boolean | undefined): this {
         return this
     }
-    public fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
+    fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
         return this
     }
-    public objectFit(value: ImageFit | undefined): this {
+    objectFit(value: ImageFit | undefined): this {
         return this
     }
-    public imageMatrix(value: matrix4.Matrix4Transit | undefined): this {
+    imageMatrix(value: matrix4.Matrix4Transit | undefined): this {
         return this
     }
-    public objectRepeat(value: ImageRepeat | undefined): this {
+    objectRepeat(value: ImageRepeat | undefined): this {
         return this
     }
-    public autoResize(value: boolean | undefined): this {
+    autoResize(value: boolean | undefined): this {
         return this
     }
-    public renderMode(value: ImageRenderMode | undefined): this {
+    renderMode(value: ImageRenderMode | undefined): this {
         return this
     }
-    public dynamicRangeMode(value: DynamicRangeMode | undefined): this {
+    dynamicRangeMode(value: DynamicRangeMode | undefined): this {
         return this
     }
-    public interpolation(value: ImageInterpolation | undefined): this {
+    interpolation(value: ImageInterpolation | undefined): this {
         return this
     }
-    public sourceSize(value: ImageSourceSize | undefined): this {
+    sourceSize(value: ImageSourceSize | undefined): this {
         return this
     }
-    public syncLoad(value: boolean | undefined): this {
+    syncLoad(value: boolean | undefined): this {
         return this
     }
-    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
+    copyOption(value: CopyOptions | undefined): this {
         return this
     }
-    public draggable(value: boolean | undefined): this {
+    draggable(value: boolean | undefined): this {
         return this
     }
-    public pointLight(value: PointLightStyle | undefined): this {
+    pointLight(value: PointLightStyle | undefined): this {
         return this
     }
-    public edgeAntialiasing(value: number | undefined): this {
+    edgeAntialiasing(value: number | undefined): this {
         return this
     }
-    public onComplete(value: ImageOnCompleteCallback | undefined): this {
+    onComplete(value: ImageOnCompleteCallback | undefined): this {
         return this
     }
-    public onError(value: ImageErrorCallback | undefined): this {
+    onError(value: ImageErrorCallback | undefined): this {
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
+    onFinish(value: (() => void) | undefined): this {
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
+    enableAnalyzer(value: boolean | undefined): this {
         return this
     }
-    public analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
         return this
     }
-    public resizable(value: ResizableOptions | undefined): this {
+    resizable(value: ResizableOptions | undefined): this {
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
+    privacySensitive(value: boolean | undefined): this {
         return this
     }
-    public enhancedImageQuality(value: image.ResolutionQuality | undefined): this {
+    enhancedImageQuality(value: image.ResolutionQuality | undefined): this {
         return this
     }
-    public orientation(value: ImageRotateOrientation | undefined): this {
+    orientation(value: ImageRotateOrientation | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -783,16 +783,16 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
-    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent): this {
-        if (this.checkPriority("setImageOptions")) {
+    public setImageOptions0(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent): this {
+        if (this.checkPriority("setImageOptions0")) {
             const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
             this.getPeer()?.setImageOptions0Attribute(src_casted)
             return this
         }
         return this
     }
-    public setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor, imageAIOptions: ImageAIOptions): this {
-        if (this.checkPriority("setImageOptions")) {
+    public setImageOptions1(src: image.PixelMap | ResourceStr | DrawableDescriptor, imageAIOptions: ImageAIOptions): this {
+        if (this.checkPriority("setImageOptions1")) {
             const src_casted = src as (image.PixelMap | ResourceStr | DrawableDescriptor)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
             this.getPeer()?.setImageOptions1Attribute(src_casted, imageAIOptions_casted)
@@ -1037,7 +1037,7 @@ export function Image(
         return new ArkImageComponent()
     })
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
-        receiver.setImageOptions(src)
+        receiver.setImageOptions0(src)
         style?.(receiver)
         content_?.()
         receiver.applyAttributesFinish()
@@ -1057,7 +1057,7 @@ export function Image(
         return new ArkImageComponent()
     })
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer): void => {
-        receiver.setImageOptions(src,imageAIOptions)
+        receiver.setImageOptions1(src,imageAIOptions)
         style?.(receiver)
         content_?.()
         receiver.applyAttributesFinish()

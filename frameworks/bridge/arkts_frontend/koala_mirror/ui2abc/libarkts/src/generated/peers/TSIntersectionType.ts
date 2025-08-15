@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSIntersectionType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 115)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSIntersectionType(types: readonly Expression[]): TSIntersectionType {
-        const result: TSIntersectionType = new TSIntersectionType(global.generatedEs2panda._CreateTSIntersectionType(global.context, passNodeArray(types), types.length))
+        const result: TSIntersectionType = new TSIntersectionType(global.generatedEs2panda._CreateTSIntersectionType(global.context, passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSIntersectionType(original: TSIntersectionType | undefined, types: readonly Expression[]): TSIntersectionType {
-        const result: TSIntersectionType = new TSIntersectionType(global.generatedEs2panda._UpdateTSIntersectionType(global.context, passNode(original), passNodeArray(types), types.length))
+        const result: TSIntersectionType = new TSIntersectionType(global.generatedEs2panda._UpdateTSIntersectionType(global.context, passNode(original), passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSIntersectionType(node: object | undefined): node is TSInters
     return node instanceof TSIntersectionType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE, (peer: KNativePointer) => new TSIntersectionType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE, (peer: KNativePointer) => new TSIntersectionType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERSECTION_TYPE))
 }

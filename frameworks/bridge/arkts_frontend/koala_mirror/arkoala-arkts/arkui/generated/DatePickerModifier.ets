@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkDatePickerPeer, DatePickerAttribute } from "./component/datePicker"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { CrownSensitivity } from "./component/enums"
 export class DatePickerModifier extends CommonMethodModifier implements DatePickerAttribute,AttributeModifier<DatePickerAttribute> {

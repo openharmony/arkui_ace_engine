@@ -29,7 +29,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { VoidCallback, ResourceColor, Length, ResourceStr, Font, Padding, Dimension, LocalizedPadding, Font_serializer, Padding_serializer, LocalizedPadding_serializer } from "./units"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -258,13 +258,13 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     onWillShow_value?: VoidCallback | undefined
     onWillHide_value?: VoidCallback | undefined
     attributeModifier_value?: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         return this
     }
-    public onWillShow(value: VoidCallback | undefined): this {
+    onWillShow(value: VoidCallback | undefined): this {
         return this
     }
-    public onWillHide(value: VoidCallback | undefined): this {
+    onWillHide(value: VoidCallback | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -38,17 +38,16 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 
 export class ETSTypeReference extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 74)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSTypeReference(part?: ETSTypeReferencePart): ETSTypeReference {
-        const result: ETSTypeReference = new ETSTypeReference(global.generatedEs2panda._CreateETSTypeReference(global.context, passNode(part)))
+        const result: ETSTypeReference = new ETSTypeReference(global.generatedEs2panda._CreateETSTypeReference(global.context, passNode(part)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSTypeReference(original?: ETSTypeReference, part?: ETSTypeReferencePart): ETSTypeReference {
-        const result: ETSTypeReference = new ETSTypeReference(global.generatedEs2panda._UpdateETSTypeReference(global.context, passNode(original), passNode(part)))
+        const result: ETSTypeReference = new ETSTypeReference(global.generatedEs2panda._UpdateETSTypeReference(global.context, passNode(original), passNode(part)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isETSTypeReference(node: object | undefined): node is ETSTypeRef
     return node instanceof ETSTypeReference
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE, (peer: KNativePointer) => new ETSTypeReference(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE, (peer: KNativePointer) => new ETSTypeReference(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE))
 }

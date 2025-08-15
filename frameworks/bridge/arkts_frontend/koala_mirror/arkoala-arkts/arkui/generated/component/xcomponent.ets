@@ -25,7 +25,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -74,9 +74,6 @@ export class XComponentController implements MaterializedBase {
     }
     public getXComponentSurfaceId(): string {
         return this.getXComponentSurfaceId_serialize()
-    }
-    public getXComponentContext(): Object {
-        return this.getXComponentContext_serialize()
     }
     public setXComponentSurfaceRect(rect: SurfaceRect): void {
         const rect_casted = rect as (SurfaceRect)
@@ -128,10 +125,6 @@ export class XComponentController implements MaterializedBase {
     }
     private getXComponentSurfaceId_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceId(this.peer!.ptr)
-        return retval
-    }
-    private getXComponentContext_serialize(): Object {
-        const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentContext(this.peer!.ptr)
         return retval
     }
     private setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
@@ -211,25 +204,25 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setXComponentOptions0Attribute(value: XComponentParameter): void {
+    setXComponentOptionsAttribute(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        XComponentParameter_serializer.write(thisSerializer, value)
-        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        if (params instanceof XComponentParameters) {
+            thisSerializer.writeInt8((0).toChar())
+            const paramsForIdx0  = params as XComponentParameters
+            XComponentParameters_serializer.write(thisSerializer, paramsForIdx0)
+        } else if (params instanceof XComponentOptions) {
+            thisSerializer.writeInt8((1).toChar())
+            const paramsForIdx1  = params as XComponentOptions
+            XComponentOptions_serializer.write(thisSerializer, paramsForIdx1)
+        } else if (params instanceof NativeXComponentParameters) {
+            thisSerializer.writeInt8((2).toChar())
+            const paramsForIdx2  = params as NativeXComponentParameters
+            NativeXComponentParameters_serializer.write(thisSerializer, paramsForIdx2)
+        }
+        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setXComponentOptions1Attribute(options: XComponentOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        XComponentOptions_serializer.write(thisSerializer, options)
-        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setXComponentOptions2Attribute(params: NativeXComponentParameters): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        NativeXComponentParameters_serializer.write(thisSerializer, params)
-        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnLoadAttribute(value: OnNativeLoadCallback | undefined): void {
+    setOnLoadAttribute(value: VoidCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -277,37 +270,26 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableSecure(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setHdrBrightnessAttribute(value: number | undefined): void {
+    setHdrBrightnessAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._XComponentAttribute_setHdrBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setEnableTransparentLayerAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeBoolean(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._XComponentAttribute_setEnableTransparentLayer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export interface SurfaceRect {
-    offsetX?: number;
-    offsetY?: number;
-    surfaceWidth: number;
-    surfaceHeight: number;
+    offsetX?: double;
+    offsetY?: double;
+    surfaceWidth: double;
+    surfaceHeight: double;
 }
+export type NativeXComponentPointer = int64;
 export interface SurfaceRotationOptions {
     lock?: boolean;
 }
@@ -315,15 +297,14 @@ export interface XComponentOptions {
     type: XComponentType;
     controller: XComponentController;
     imageAIOptions?: ImageAIOptions;
-    screenId?: number;
+    screenId?: int64;
 }
 export interface NativeXComponentParameters {
     type: XComponentType;
     imageAIOptions?: ImageAIOptions;
 }
-export type OnNativeLoadCallback = (event?: Object) => void;
 export interface XComponentAttribute extends CommonMethod {
-    onLoad(value: OnNativeLoadCallback | undefined): this {
+    onLoad(value: VoidCallback | undefined): this {
         throw new Error("Unimplemented method onLoad")
     }
     onDestroy(value: VoidCallback | undefined): this {
@@ -335,50 +316,43 @@ export interface XComponentAttribute extends CommonMethod {
     enableSecure(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableSecure")
     }
-    hdrBrightness(value: number | undefined): this {
+    hdrBrightness(value: double | undefined): this {
         throw new Error("Unimplemented method hdrBrightness")
-    }
-    enableTransparentLayer(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableTransparentLayer")
     }
     attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
-    onLoad_value?: OnNativeLoadCallback | undefined
+    onLoad_value?: VoidCallback | undefined
     onDestroy_value?: VoidCallback | undefined
     enableAnalyzer_value?: boolean | undefined
     enableSecure_value?: boolean | undefined
-    hdrBrightness_value?: number | undefined
-    enableTransparentLayer_value?: boolean | undefined
+    hdrBrightness_value?: double | undefined
     attributeModifier_value?: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onLoad(value: OnNativeLoadCallback | undefined): this {
+    onLoad(value: VoidCallback | undefined): this {
         return this
     }
-    public onDestroy(value: VoidCallback | undefined): this {
+    onDestroy(value: VoidCallback | undefined): this {
         return this
     }
-    public enableAnalyzer(value: boolean | undefined): this {
+    enableAnalyzer(value: boolean | undefined): this {
         return this
     }
-    public enableSecure(value: boolean | undefined): this {
+    enableSecure(value: boolean | undefined): this {
         return this
     }
-    public hdrBrightness(value: number | undefined): this {
-        return this
-    }
-    public enableTransparentLayer(value: boolean | undefined): this {
+    hdrBrightness(value: double | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
 }
-export interface XComponentParameter {
+export interface XComponentParameters {
     id: string;
     type: XComponentType;
-    libraryname?: string;
+    nativeXComponentHandler: ((value0: NativeXComponentPointer) => void);
     controller?: XComponentController;
 }
 
@@ -386,33 +360,17 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkXComponentPeer {
         return (this.peer as ArkXComponentPeer)
     }
-    public setXComponentOptions(value: XComponentParameter): this {
+    public setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
-            const value_casted = value as (XComponentParameter)
-            this.getPeer()?.setXComponentOptions0Attribute(value_casted)
+            const params_casted = params as (XComponentParameters | XComponentOptions | NativeXComponentParameters)
+            this.getPeer()?.setXComponentOptionsAttribute(params_casted)
             return this
         }
         return this
     }
-    public setXComponentOptions(options: XComponentOptions): this {
-        if (this.checkPriority("setXComponentOptions")) {
-            const options_casted = options as (XComponentOptions)
-            this.getPeer()?.setXComponentOptions1Attribute(options_casted)
-            return this
-        }
-        return this
-    }
-    public setXComponentOptions(params: NativeXComponentParameters): this {
-        if (this.checkPriority("setXComponentOptions")) {
-            const params_casted = params as (NativeXComponentParameters)
-            this.getPeer()?.setXComponentOptions2Attribute(params_casted)
-            return this
-        }
-        return this
-    }
-    public onLoad(value: OnNativeLoadCallback | undefined): this {
+    public onLoad(value: VoidCallback | undefined): this {
         if (this.checkPriority("onLoad")) {
-            const value_casted = value as (OnNativeLoadCallback | undefined)
+            const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnLoadAttribute(value_casted)
             return this
         }
@@ -442,18 +400,10 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public hdrBrightness(value: number | undefined): this {
+    public hdrBrightness(value: double | undefined): this {
         if (this.checkPriority("hdrBrightness")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setHdrBrightnessAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public enableTransparentLayer(value: boolean | undefined): this {
-        if (this.checkPriority("enableTransparentLayer")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnableTransparentLayerAttribute(value_casted)
             return this
         }
         return this
@@ -471,47 +421,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
 export function XComponent(
     @memo
     style: ((attributes: XComponentAttribute) => void) | undefined,
-    value: XComponentParameter,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
-        return new ArkXComponentComponent()
-    })
-    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
-        receiver.setXComponentOptions(value)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
-
-
-@memo
-export function XComponent(
-    @memo
-    style: ((attributes: XComponentAttribute) => void) | undefined,
-    options: XComponentOptions,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
-        return new ArkXComponentComponent()
-    })
-    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
-        receiver.setXComponentOptions(options)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
-
-
-@memo
-export function XComponent(
-    @memo
-    style: ((attributes: XComponentAttribute) => void) | undefined,
-    params: NativeXComponentParameters,
+    params: XComponentParameters | XComponentOptions | NativeXComponentParameters,
     @memo
     content_?: () => void,
 ): void {
@@ -533,7 +443,7 @@ export class SurfaceRect_serializer {
         if (valueHolderForOffsetX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetXTmpValue  = valueHolderForOffsetX!
-            valueSerializer.writeNumber(valueHolderForOffsetXTmpValue)
+            valueSerializer.writeFloat64(valueHolderForOffsetXTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -541,31 +451,31 @@ export class SurfaceRect_serializer {
         if (valueHolderForOffsetY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForOffsetYTmpValue  = valueHolderForOffsetY!
-            valueSerializer.writeNumber(valueHolderForOffsetYTmpValue)
+            valueSerializer.writeFloat64(valueHolderForOffsetYTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForSurfaceWidth  = value.surfaceWidth
-        valueSerializer.writeNumber(valueHolderForSurfaceWidth)
+        valueSerializer.writeFloat64(valueHolderForSurfaceWidth)
         const valueHolderForSurfaceHeight  = value.surfaceHeight
-        valueSerializer.writeNumber(valueHolderForSurfaceHeight)
+        valueSerializer.writeFloat64(valueHolderForSurfaceHeight)
     }
     public static read(buffer: DeserializerBase): SurfaceRect {
         let valueDeserializer : DeserializerBase = buffer
         const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetXTmpBuf : number | undefined
+        let offsetXTmpBuf : double | undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            offsetXTmpBuf = (valueDeserializer.readNumber() as number)
+            offsetXTmpBuf = valueDeserializer.readFloat64()
         }
-        const offsetXTmpResult : number | undefined = offsetXTmpBuf
+        const offsetXTmpResult : double | undefined = offsetXTmpBuf
         const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offsetYTmpBuf : number | undefined
+        let offsetYTmpBuf : double | undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            offsetYTmpBuf = (valueDeserializer.readNumber() as number)
+            offsetYTmpBuf = valueDeserializer.readFloat64()
         }
-        const offsetYTmpResult : number | undefined = offsetYTmpBuf
-        const surfaceWidthTmpResult : number = (valueDeserializer.readNumber() as number)
-        const surfaceHeightTmpResult : number = (valueDeserializer.readNumber() as number)
+        const offsetYTmpResult : double | undefined = offsetYTmpBuf
+        const surfaceWidthTmpResult : double = valueDeserializer.readFloat64()
+        const surfaceHeightTmpResult : double = valueDeserializer.readFloat64()
         let value : SurfaceRect = ({offsetX: offsetXTmpResult, offsetY: offsetYTmpResult, surfaceWidth: surfaceWidthTmpResult, surfaceHeight: surfaceHeightTmpResult} as SurfaceRect)
         return value
     }
@@ -651,7 +561,7 @@ export class XComponentOptions_serializer {
         if (valueHolderForScreenId !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForScreenIdTmpValue  = valueHolderForScreenId!
-            valueSerializer.writeNumber(valueHolderForScreenIdTmpValue)
+            valueSerializer.writeInt64(valueHolderForScreenIdTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -667,30 +577,24 @@ export class XComponentOptions_serializer {
         }
         const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
         const screenIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let screenIdTmpBuf : number | undefined
+        let screenIdTmpBuf : int64 | undefined
         if ((screenIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            screenIdTmpBuf = (valueDeserializer.readNumber() as number)
+            screenIdTmpBuf = valueDeserializer.readInt64()
         }
-        const screenIdTmpResult : number | undefined = screenIdTmpBuf
+        const screenIdTmpResult : int64 | undefined = screenIdTmpBuf
         let value : XComponentOptions = ({type: typeTmpResult, controller: controllerTmpResult, imageAIOptions: imageAIOptionsTmpResult, screenId: screenIdTmpResult} as XComponentOptions)
         return value
     }
 }
-export class XComponentParameter_serializer {
-    public static write(buffer: SerializerBase, value: XComponentParameter): void {
+export class XComponentParameters_serializer {
+    public static write(buffer: SerializerBase, value: XComponentParameters): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForId  = value.id
         valueSerializer.writeString(valueHolderForId)
         const valueHolderForType  = value.type
         valueSerializer.writeInt32(TypeChecker.XComponentType_ToNumeric(valueHolderForType))
-        const valueHolderForLibraryname  = value.libraryname
-        if (valueHolderForLibraryname !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLibrarynameTmpValue  = valueHolderForLibraryname!
-            valueSerializer.writeString(valueHolderForLibrarynameTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+        const valueHolderForNativeXComponentHandler  = value.nativeXComponentHandler
+        valueSerializer.holdAndWriteCallback(valueHolderForNativeXComponentHandler)
         const valueHolderForController  = value.controller
         if (valueHolderForController !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -700,23 +604,30 @@ export class XComponentParameter_serializer {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
-    public static read(buffer: DeserializerBase): XComponentParameter {
+    public static read(buffer: DeserializerBase): XComponentParameters {
         let valueDeserializer : DeserializerBase = buffer
         const idTmpResult : string = (valueDeserializer.readString() as string)
         const typeTmpResult : XComponentType = TypeChecker.XComponentType_FromNumeric(valueDeserializer.readInt32())
-        const librarynameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let librarynameTmpBuf : string | undefined
-        if ((librarynameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            librarynameTmpBuf = (valueDeserializer.readString() as string)
+        const nativeXComponentHandlerTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const nativeXComponentHandlerTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const nativeXComponentHandlerTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const nativeXComponentHandlerTmpResult : ((value0: NativeXComponentPointer) => void) = (value0: NativeXComponentPointer):void => {
+            const nativeXComponentHandlerTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt32(nativeXComponentHandlerTmpBufBufResource.resourceId);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCall);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCallSync);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt64(value0);
+            InteropNativeModule._CallCallbackSync(10, -141504638, nativeXComponentHandlerTmpBufBufArgsSerializer.asBuffer(), nativeXComponentHandlerTmpBufBufArgsSerializer.length());
+            nativeXComponentHandlerTmpBufBufArgsSerializer.release();
+            return;
         }
-        const librarynameTmpResult : string | undefined = librarynameTmpBuf
         const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controllerTmpBuf : XComponentController | undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             controllerTmpBuf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
         }
         const controllerTmpResult : XComponentController | undefined = controllerTmpBuf
-        let value : XComponentParameter = ({id: idTmpResult, type: typeTmpResult, libraryname: librarynameTmpResult, controller: controllerTmpResult} as XComponentParameter)
+        let value : XComponentParameters = ({id: idTmpResult, type: typeTmpResult, nativeXComponentHandler: nativeXComponentHandlerTmpResult, controller: controllerTmpResult} as XComponentParameters)
         return value
     }
 }

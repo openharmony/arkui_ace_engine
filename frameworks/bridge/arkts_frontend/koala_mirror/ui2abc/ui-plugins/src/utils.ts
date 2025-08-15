@@ -119,6 +119,14 @@ export function getRouterPackage(): string {
     }
 }
 
+export function getResourcePackage(): string {
+    if (isKoalaWorkspace()) {
+        return 'arkui'
+    } else {
+        return 'arkui.component.resources'
+    }
+}
+
 export function uiAttributeName(componentName: string): string {
     return `${componentName}Attribute`
 }
@@ -348,7 +356,7 @@ export function hasDecorator(property:
         return findDecorator(property.definition!.annotations, decoratorName) != undefined
     }
     if (arkts.isClassDeclaration(property)) {
-        return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName)
+        return findDecorator(property.definition!.annotations, decoratorName) != undefined
     }
     return findDecorator(property.annotations, decoratorName) != undefined
 }

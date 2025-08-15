@@ -19,6 +19,7 @@
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkContainerSpanPeer, ContainerSpanAttribute } from "./component/containerSpan"
+import { int32 } from "@koalaui/common"
 import { TextBackgroundStyle } from "./component/span"
 export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeModifier<ContainerSpanAttribute> {
     _instanceId: number = -1;

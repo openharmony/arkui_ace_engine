@@ -17,9 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
-import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavigationMenuItem, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationAttribute, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions } from "./component/navigation"
+import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode, NavigationMenuItem, NavContentInfo, NavigationOperation, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute } from "./component/navigation"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { Length, Dimension, ResourceStr } from "./component/units"
 import { Resource } from "global.resource"

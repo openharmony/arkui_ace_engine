@@ -24,10 +24,10 @@ import { DotIndicator_serializer, DigitIndicator_serializer, DotIndicator, Digit
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class IndicatorComponentControllerInternal {
     public static fromPtr(ptr: KPointer): IndicatorComponentController {
@@ -219,23 +219,22 @@ export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements 
     loop_value?: boolean | undefined
     vertical_value?: boolean | undefined
     onChange_value?: ((value0: number) => void) | undefined
-    attributeModifier_value?: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public initialIndex(value: number | undefined): this {
+    initialIndex(value: number | undefined): this {
         return this
     }
-    public count(value: number | undefined): this {
+    count(value: number | undefined): this {
         return this
     }
-    public style(value: DotIndicator | DigitIndicator | undefined): this {
+    style(value: DotIndicator | DigitIndicator | undefined): this {
         return this
     }
-    public loop(value: boolean | undefined): this {
+    loop(value: boolean | undefined): this {
         return this
     }
-    public vertical(value: boolean | undefined): this {
+    vertical(value: boolean | undefined): this {
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: number) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

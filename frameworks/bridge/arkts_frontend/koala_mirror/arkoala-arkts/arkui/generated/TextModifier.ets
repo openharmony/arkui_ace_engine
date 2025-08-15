@@ -17,9 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkTextPeer, TextOverflowOptions, TextMarqueeOptions, MarqueeState, TextAttribute, TextSpanType, TextResponseType } from "./component/text"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CommonMethod, ShadowOptions } from "./component/common"
 import { ResourceColor, Length, Font } from "./component/units"
 import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight } from "./component/enums"
@@ -30,7 +31,6 @@ import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from "./c
 import { CustomBuilder } from "./component/builder"
 import { SelectionMenuOptions } from "./component/richEditor"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 export class TextModifier extends CommonMethodModifier implements TextAttribute,AttributeModifier<TextAttribute> {

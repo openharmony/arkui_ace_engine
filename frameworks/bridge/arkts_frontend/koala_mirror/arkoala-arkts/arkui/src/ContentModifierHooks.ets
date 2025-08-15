@@ -45,6 +45,11 @@ function memoWrapper<Args>(
 // @memo
 export function hookButtonContentModifier(
     receiver: ArkButtonComponent, value?: ContentModifier<ButtonConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierButton(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -54,13 +59,18 @@ export function hookButtonContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierButton(receiver.getPeer().peer.ptr, value!, buttonBuilder)
+        ContentModifierHelper.contentModifierButton(ptr, value!, buttonBuilder)
     }
 }
 
 // @memo
 export function hookCheckBoxContentModifier(
     receiver: ArkCheckboxComponent, value?: ContentModifier<CheckBoxConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierCheckBox(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -70,13 +80,18 @@ export function hookCheckBoxContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierCheckBox(receiver.getPeer().peer.ptr, value!, checkboxBuilder)
+        ContentModifierHelper.contentModifierCheckBox(ptr, value!, checkboxBuilder)
     }
 }
 
 // @memo
 export function hookDataPanelContentModifier(
     receiver: ArkDataPanelComponent, value?: ContentModifier<DataPanelConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierDataPanel(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -86,13 +101,18 @@ export function hookDataPanelContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierDataPanel(receiver.getPeer().peer.ptr, value!, dataPanelBuilder)
+        ContentModifierHelper.contentModifierDataPanel(ptr, value!, dataPanelBuilder)
     }
 }
 
 // @memo
 export function hookGaugeContentModifier(
     receiver: ArkGaugeComponent, value?: ContentModifier<GaugeConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierGauge(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -102,13 +122,18 @@ export function hookGaugeContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierGauge(receiver.getPeer().peer.ptr, value!, gaugeBuilder)
+        ContentModifierHelper.contentModifierGauge(ptr, value!, gaugeBuilder)
     }
 }
 
 // @memo
 export function hookLoadingProgressContentModifier(
     receiver: ArkLoadingProgressComponent, value?: ContentModifier<LoadingProgressConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierLoadingProgress(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -118,13 +143,18 @@ export function hookLoadingProgressContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierLoadingProgress(receiver.getPeer().peer.ptr, value!, loadingProgressBuilder)
+        ContentModifierHelper.contentModifierLoadingProgress(ptr, value!, loadingProgressBuilder)
     }
 }
 
 // @memo
 export function hookProgressContentModifier(
     receiver: ArkProgressComponent, value?: ContentModifier<ProgressConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierProgress(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -134,13 +164,18 @@ export function hookProgressContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierProgress(receiver.getPeer().peer.ptr, value!, progressBuilder)
+        ContentModifierHelper.contentModifierProgress(ptr, value!, progressBuilder)
     }
 }
 
 // @memo
 export function hookRadioContentModifier(
     receiver: ArkRadioComponent, value?: ContentModifier<RadioConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierRadio(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -150,13 +185,18 @@ export function hookRadioContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierRadio(receiver.getPeer().peer.ptr, value!, radioBuilder)
+        ContentModifierHelper.contentModifierRadio(ptr, value!, radioBuilder)
     }
 }
 
 // @memo
 export function hookRatingContentModifier(
     receiver: ArkRatingComponent, value?: ContentModifier<RatingConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierRating(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -166,13 +206,18 @@ export function hookRatingContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierRating(receiver.getPeer().peer.ptr, value!, ratingBuilder)
+        ContentModifierHelper.contentModifierRating(ptr, value!, ratingBuilder)
     }
 }
 
 // @memo
 export function hookSelectContentModifier(
     receiver: ArkSelectComponent, value?: ContentModifier<MenuItemConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierMenuItem(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -182,13 +227,18 @@ export function hookSelectContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierMenuItem(receiver.getPeer().peer.ptr, value!, menuItemBuilder)
+        ContentModifierHelper.contentModifierMenuItem(ptr, value!, menuItemBuilder)
     }
 }
 
 // @memo
 export function hookSliderContentModifier(
     receiver: ArkSliderComponent, value?: ContentModifier<SliderConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierSlider(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -198,13 +248,18 @@ export function hookSliderContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierSlider(receiver.getPeer().peer.ptr, value!, sliderBuilder)
+        ContentModifierHelper.contentModifierSlider(ptr, value!, sliderBuilder)
     }
 }
 
 // @memo
 export function hookTextClockContentModifier(
     receiver: ArkTextClockComponent, value?: ContentModifier<TextClockConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierTextClock(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -214,13 +269,18 @@ export function hookTextClockContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierTextClock(receiver.getPeer().peer.ptr, value!, textClockBuilder)
+        ContentModifierHelper.contentModifierTextClock(ptr, value!, textClockBuilder)
     }
 }
 
 // @memo
 export function hookTextTimerContentModifier(
     receiver: ArkTextTimerComponent, value?: ContentModifier<TextTimerConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierTextTimer(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -230,13 +290,18 @@ export function hookTextTimerContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierTextTimer(receiver.getPeer().peer.ptr, value!, textTimerBuilder)
+        ContentModifierHelper.contentModifierTextTimer(ptr, value!, textTimerBuilder)
     }
 }
 
 // @memo
 export function hookToggleContentModifier(
     receiver: ArkToggleComponent, value?: ContentModifier<ToggleConfiguration>) {
+    const ptr = receiver.getPeer().peer.ptr
+    if (!value) {
+        ContentModifierHelper.resetContentModifierToggle(ptr)
+        return
+    }
     const wrappedBuilder = value?.applyContent()
     if (!wrappedBuilder) {
         return
@@ -246,6 +311,6 @@ export function hookToggleContentModifier(
             memoWrapper(wrappedBuilder!.builder, config))
     }
     if (value) {
-        ContentModifierHelper.contentModifierToggle(receiver.getPeer().peer.ptr, value!, toggleBuilder)
+        ContentModifierHelper.contentModifierToggle(ptr, value!, toggleBuilder)
     }
 }

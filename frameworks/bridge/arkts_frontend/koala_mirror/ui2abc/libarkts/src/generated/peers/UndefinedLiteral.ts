@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class UndefinedLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 51)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createUndefinedLiteral(): UndefinedLiteral {
-        const result: UndefinedLiteral = new UndefinedLiteral(global.generatedEs2panda._CreateUndefinedLiteral(global.context))
+        const result: UndefinedLiteral = new UndefinedLiteral(global.generatedEs2panda._CreateUndefinedLiteral(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateUndefinedLiteral(original?: UndefinedLiteral): UndefinedLiteral {
-        const result: UndefinedLiteral = new UndefinedLiteral(global.generatedEs2panda._UpdateUndefinedLiteral(global.context, passNode(original)))
+        const result: UndefinedLiteral = new UndefinedLiteral(global.generatedEs2panda._UpdateUndefinedLiteral(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isUndefinedLiteral(node: object | undefined): node is UndefinedL
     return node instanceof UndefinedLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL, (peer: KNativePointer) => new UndefinedLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL, (peer: KNativePointer) => new UndefinedLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_UNDEFINED_LITERAL))
 }

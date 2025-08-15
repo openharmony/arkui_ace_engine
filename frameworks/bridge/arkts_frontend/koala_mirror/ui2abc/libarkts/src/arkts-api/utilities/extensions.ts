@@ -15,6 +15,7 @@
 
 import { KInt, KNativePointer } from "@koalaui/interop"
 import type {
+    ClassDefinition,
     ETSModule,
     Expression,
     MethodDefinition,
@@ -26,7 +27,8 @@ import type {
 import { ExternalSource } from "../peers/ExternalSource"
 import { Es2pandaModuleFlag } from "../../generated/Es2pandaEnums"
 import { global } from "../static/global"
-import { acceptNativeObjectArrayResult } from "./private"
+import { acceptNativeObjectArrayResult, passNodeArray } from "./private"
+import type { AstNode } from "../peers/AstNode"
 
 export function extension_ETSModuleGetNamespaceFlag(this: ETSModule): Es2pandaModuleFlag {
     return (this.isETSScript ? Es2pandaModuleFlag.MODULE_FLAG_ETSSCRIPT : 0)
@@ -46,10 +48,7 @@ export function extension_MethodDefinitionSetChildrenParentPtr(this: MethodDefin
 
 export function extension_MethodDefinitionOnUpdate(this: MethodDefinition, original: MethodDefinition): void {
     this.setChildrenParentPtr()
-    // Improve: Update modifiers only for specific AST nodes in the generated factory code
-    this.modifierFlags = original.modifierFlags
-    global.generatedEs2panda._AstNodeSetOriginalNode(global.context, this.peer, original.originalPeer)
-    global.generatedEs2panda._AstNodeSetParent(global.context, this.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))
+    global.es2panda._AstNodeOnUpdate(global.context, this.peer, original.peer)
     const originalBase = original.baseOverloadMethod
     if (originalBase) {
         this.setBaseOverloadMethod(originalBase)
@@ -108,4 +107,14 @@ export function extension_SourcePositionToString(this: SourcePosition): string {
 // Improve: weird API
 export function extension_NumberLiteralValue(this: NumberLiteral): number {
     return +this.dumpSrc()
+}
+
+// Improve: weird API
+export function extension_ScriptFunctionSetParams(this: ScriptFunction, params: readonly Expression[]): void {
+    global.es2panda._ScriptFunctionSetParams(global.context, this.peer, passNodeArray(params), params.length)
+}
+
+// Improve: weird API
+export function extension_ClassDefinitionSetBody(this: ClassDefinition, body: readonly AstNode[]): void {
+    global.es2panda._ClassDefinitionSetBody(global.context, this.peer, passNodeArray(body), body.length)
 }

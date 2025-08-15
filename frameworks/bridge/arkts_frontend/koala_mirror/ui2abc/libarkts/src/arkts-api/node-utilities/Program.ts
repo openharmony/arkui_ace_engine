@@ -14,19 +14,19 @@
  */
 
 import { Program } from "../../generated"
-import { trace } from "../../tracer"
+import { traceGlobal } from "../../tracer"
 
 export function dumpProgramInfo(program: Program) {
-    trace(() => `Program info:`)
-    trace(() => `\tAbsoluteName:          ${program.absoluteName}`)
-    trace(() => `\tFileName:              ${program.fileName}`)
-    trace(() => `\tFileNameWithExtension: ${program.fileNameWithExtension}`)
-    trace(() => `\tModuleName:            ${program.moduleName}`)
-    trace(() => `\tModulePrefix:          ${program.modulePrefix}`)
-    trace(() => `\tRelativeFilePath:      ${program.relativeFilePath}`)
-    trace(() => `\tResolvedFilePath:      ${program.resolvedFilePath}`)
-    trace(() => `\tSourceFileFolder:      ${program.sourceFileFolder}`)
-    trace(() => `\tSourceFilePath:        ${program.sourceFilePath}`)
+    traceGlobal(() => `Program info:`)
+    traceGlobal(() => `\tAbsoluteName:          ${program.absoluteName}`)
+    traceGlobal(() => `\tFileName:              ${program.fileName}`)
+    traceGlobal(() => `\tFileNameWithExtension: ${program.fileNameWithExtension}`)
+    traceGlobal(() => `\tModuleName:            ${program.moduleName}`)
+    traceGlobal(() => `\tModulePrefix:          ${program.modulePrefix}`)
+    traceGlobal(() => `\tRelativeFilePath:      ${program.relativeFilePath}`)
+    traceGlobal(() => `\tResolvedFilePath:      ${program.resolvedFilePath}`)
+    traceGlobal(() => `\tSourceFileFolder:      ${program.sourceFileFolder}`)
+    traceGlobal(() => `\tSourceFilePath:        ${program.sourceFilePath}`)
 }
 
 export function dumpProgramSrcFormatted(program: Program, recursive: boolean, withLines: boolean = true) {

@@ -20,7 +20,6 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { extractors } from "#handwritten"
 export class ComponentContentInternal {
     public static fromPtr(ptr: KPointer): ComponentContent {
         return new ComponentContent(ptr)

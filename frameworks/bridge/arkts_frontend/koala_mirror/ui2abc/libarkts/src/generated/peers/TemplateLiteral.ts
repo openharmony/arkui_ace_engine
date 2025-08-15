@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TemplateElement } from "./TemplateElement"
 
 export class TemplateLiteral extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 145)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTemplateLiteral(quasis: readonly TemplateElement[], expressions: readonly Expression[], multilineString: string): TemplateLiteral {
-        const result: TemplateLiteral = new TemplateLiteral(global.generatedEs2panda._CreateTemplateLiteral(global.context, passNodeArray(quasis), quasis.length, passNodeArray(expressions), expressions.length, multilineString))
+        const result: TemplateLiteral = new TemplateLiteral(global.generatedEs2panda._CreateTemplateLiteral(global.context, passNodeArray(quasis), quasis.length, passNodeArray(expressions), expressions.length, multilineString), Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateTemplateLiteral(original: TemplateLiteral | undefined, quasis: readonly TemplateElement[], expressions: readonly Expression[], multilineString: string): TemplateLiteral {
-        const result: TemplateLiteral = new TemplateLiteral(global.generatedEs2panda._UpdateTemplateLiteral(global.context, passNode(original), passNodeArray(quasis), quasis.length, passNodeArray(expressions), expressions.length, multilineString))
+        const result: TemplateLiteral = new TemplateLiteral(global.generatedEs2panda._UpdateTemplateLiteral(global.context, passNode(original), passNodeArray(quasis), quasis.length, passNodeArray(expressions), expressions.length, multilineString), Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isTemplateLiteral(node: object | undefined): node is TemplateLit
     return node instanceof TemplateLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL, (peer: KNativePointer) => new TemplateLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL, (peer: KNativePointer) => new TemplateLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_LITERAL))
 }

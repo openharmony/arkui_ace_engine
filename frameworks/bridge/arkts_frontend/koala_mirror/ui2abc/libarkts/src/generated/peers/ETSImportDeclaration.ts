@@ -40,17 +40,16 @@ import { ImportDeclaration } from "./ImportDeclaration"
 import { StringLiteral } from "./StringLiteral"
 
 export class ETSImportDeclaration extends ImportDeclaration {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 81)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSImportDeclaration(importPath: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ETSImportDeclaration {
-        const result: ETSImportDeclaration = new ETSImportDeclaration(global.generatedEs2panda._CreateETSImportDeclaration(global.context, passNode(importPath), passNodeArray(specifiers), specifiers.length, importKinds))
+        const result: ETSImportDeclaration = new ETSImportDeclaration(global.generatedEs2panda._CreateETSImportDeclaration(global.context, passNode(importPath), passNodeArray(specifiers), specifiers.length, importKinds), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSImportDeclaration(original: ETSImportDeclaration | undefined, importPath: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ETSImportDeclaration {
-        const result: ETSImportDeclaration = new ETSImportDeclaration(global.generatedEs2panda._UpdateETSImportDeclaration(global.context, passNode(original), passNode(importPath), passNodeArray(specifiers), specifiers.length, importKinds))
+        const result: ETSImportDeclaration = new ETSImportDeclaration(global.generatedEs2panda._UpdateETSImportDeclaration(global.context, passNode(original), passNode(importPath), passNodeArray(specifiers), specifiers.length, importKinds), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -88,5 +87,5 @@ export function isETSImportDeclaration(node: object | undefined): node is ETSImp
     return node instanceof ETSImportDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION, (peer: KNativePointer) => new ETSImportDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION, (peer: KNativePointer) => new ETSImportDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION))
 }

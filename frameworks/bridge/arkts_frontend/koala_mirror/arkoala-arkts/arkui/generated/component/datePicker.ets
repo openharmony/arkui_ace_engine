@@ -24,7 +24,7 @@ import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTe
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -216,25 +216,25 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public lunar(value: boolean | undefined): this {
+    lunar(value: boolean | undefined): this {
         return this
     }
-    public disappearTextStyle(value: PickerTextStyle | undefined): this {
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public textStyle(value: PickerTextStyle | undefined): this {
+    textStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public selectedTextStyle(value: PickerTextStyle | undefined): this {
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public onDateChange(value: ((value0: Date) => void) | undefined): this {
+    onDateChange(value: ((value0: Date) => void) | undefined): this {
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

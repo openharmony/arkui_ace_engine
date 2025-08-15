@@ -30,7 +30,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CopyOptions, TextAlign } from "./enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -736,20 +736,12 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSearchButtonAttribute(value: ResourceStr | undefined, option?: SearchButtonOptions): void {
+    setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((0).toChar())
-                const valueTmpValueForIdx0  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((1).toChar())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            }
+            thisSerializer.writeString(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -981,7 +973,7 @@ export interface SearchAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
-    searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
+    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
     }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
@@ -1040,145 +1032,145 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
+    searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
         return this
     }
-    public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
         return this
     }
-    public textIndent(value: Dimension | undefined): this {
+    textIndent(value: Dimension | undefined): this {
         return this
     }
-    public onEditChange(value: ((value0: boolean) => void) | undefined): this {
+    onEditChange(value: ((value0: boolean) => void) | undefined): this {
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public caretStyle(value: CaretStyle | undefined): this {
+    caretStyle(value: CaretStyle | undefined): this {
         return this
     }
-    public placeholderColor(value: ResourceColor | undefined): this {
+    placeholderColor(value: ResourceColor | undefined): this {
         return this
     }
-    public placeholderFont(value: Font | undefined): this {
+    placeholderFont(value: Font | undefined): this {
         return this
     }
-    public textFont(value: Font | undefined): this {
+    textFont(value: Font | undefined): this {
         return this
     }
-    public enterKeyType(value: EnterKeyType | undefined): this {
+    enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    public onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
+    onSubmit(value: ((value0: string) => void) | SearchSubmitCallback | undefined): this {
         return this
     }
-    public onChange(value: EditableTextOnChangeCallback | undefined): this {
+    onChange(value: EditableTextOnChangeCallback | undefined): this {
         return this
     }
-    public onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
+    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
         return this
     }
-    public onContentScroll(value: OnContentScrollCallback | undefined): this {
+    onContentScroll(value: OnContentScrollCallback | undefined): this {
         return this
     }
-    public onCopy(value: ((value0: string) => void) | undefined): this {
+    onCopy(value: ((value0: string) => void) | undefined): this {
         return this
     }
-    public onCut(value: ((value0: string) => void) | undefined): this {
+    onCut(value: ((value0: string) => void) | undefined): this {
         return this
     }
-    public onPaste(value: OnPasteCallback | undefined): this {
+    onPaste(value: OnPasteCallback | undefined): this {
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
+    copyOption(value: CopyOptions | undefined): this {
         return this
     }
-    public maxLength(value: number | undefined): this {
+    maxLength(value: number | undefined): this {
         return this
     }
-    public textAlign(value: TextAlign | undefined): this {
+    textAlign(value: TextAlign | undefined): this {
         return this
     }
-    public enableKeyboardOnFocus(value: boolean | undefined): this {
+    enableKeyboardOnFocus(value: boolean | undefined): this {
         return this
     }
-    public selectionMenuHidden(value: boolean | undefined): this {
+    selectionMenuHidden(value: boolean | undefined): this {
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public decoration(value: TextDecorationOptions | undefined): this {
+    decoration(value: TextDecorationOptions | undefined): this {
         return this
     }
-    public letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: number | string | Resource | undefined): this {
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: number | string | Resource | undefined): this {
         return this
     }
-    public type(value: SearchType | undefined): this {
+    type(value: SearchType | undefined): this {
         return this
     }
-    public fontFeature(value: string | undefined): this {
+    fontFeature(value: string | undefined): this {
         return this
     }
-    public onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
+    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
         return this
     }
-    public onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
+    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
         return this
     }
-    public onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
+    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
         return this
     }
-    public onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
+    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
         return this
     }
-    public enablePreviewText(value: boolean | undefined): this {
+    enablePreviewText(value: boolean | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
+    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
         return this
     }
-    public halfLeading(value: boolean | undefined): this {
+    halfLeading(value: boolean | undefined): this {
         return this
     }
-    public stopBackPress(value: boolean | undefined): this {
+    stopBackPress(value: boolean | undefined): this {
         return this
     }
-    public onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
+    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
         return this
     }
-    public keyboardAppearance(value: KeyboardAppearance | undefined): this {
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
-    public searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
+    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         return this
     }
-    public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
+    inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1550,9 +1542,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
+    public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         if (this.checkPriority("searchButton")) {
-            const value_casted = value as (ResourceStr | undefined)
+            const value_casted = value as (string | undefined)
             const option_casted = option as (SearchButtonOptions | undefined)
             this.getPeer()?.setSearchButtonAttribute(value_casted, option_casted)
             return this

@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSAsExpression extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 140)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSAsExpression(expression: Expression | undefined, typeAnnotation: TypeNode | undefined, isConst: boolean): TSAsExpression {
-        const result: TSAsExpression = new TSAsExpression(global.generatedEs2panda._CreateTSAsExpression(global.context, passNode(expression), passNode(typeAnnotation), isConst))
+        const result: TSAsExpression = new TSAsExpression(global.generatedEs2panda._CreateTSAsExpression(global.context, passNode(expression), passNode(typeAnnotation), isConst), Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSAsExpression(original: TSAsExpression | undefined, expression: Expression | undefined, typeAnnotation: TypeNode | undefined, isConst: boolean): TSAsExpression {
-        const result: TSAsExpression = new TSAsExpression(global.generatedEs2panda._UpdateTSAsExpression(global.context, passNode(original), passNode(expression), passNode(typeAnnotation), isConst))
+        const result: TSAsExpression = new TSAsExpression(global.generatedEs2panda._UpdateTSAsExpression(global.context, passNode(original), passNode(expression), passNode(typeAnnotation), isConst), Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -82,5 +81,5 @@ export function isTSAsExpression(node: object | undefined): node is TSAsExpressi
     return node instanceof TSAsExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION, (peer: KNativePointer) => new TSAsExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION, (peer: KNativePointer) => new TSAsExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_AS_EXPRESSION))
 }

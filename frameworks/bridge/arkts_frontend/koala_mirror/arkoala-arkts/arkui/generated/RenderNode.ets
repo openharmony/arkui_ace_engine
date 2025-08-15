@@ -24,7 +24,6 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
 export interface RenderNode {
     backgroundColor: number
     clipToFrame: boolean

@@ -25,7 +25,7 @@ import { Resource_serializer } from "./../framework/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ResourceStr, ConstraintSizeOptions } from "./units"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
-import { ContentModifier, AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
 import { DataPanelConfiguration } from "./dataPanel"
@@ -1188,13 +1188,13 @@ export class RestrictedWorker implements MaterializedBase {
     }
     private on_serialize(Type: string, listener: WorkerEventListener): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        WorkerEventListener_serializer.write(thisSerializer, listener)
+        thisSerializer.holdAndWriteCallback(listener)
         ArkUIGeneratedNativeModule._RestrictedWorker_on(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private once_serialize(Type: string, listener: WorkerEventListener): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        WorkerEventListener_serializer.write(thisSerializer, listener)
+        thisSerializer.holdAndWriteCallback(listener)
         ArkUIGeneratedNativeModule._RestrictedWorker_once(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1203,7 +1203,7 @@ export class RestrictedWorker implements MaterializedBase {
         if (listener !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const listenerTmpValue  = listener!
-            WorkerEventListener_serializer.write(thisSerializer, listenerTmpValue)
+            thisSerializer.holdAndWriteCallback(listenerTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1215,7 +1215,7 @@ export class RestrictedWorker implements MaterializedBase {
     }
     private addEventListener_serialize(Type: string, listener: WorkerEventListener): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        WorkerEventListener_serializer.write(thisSerializer, listener)
+        thisSerializer.holdAndWriteCallback(listener)
         ArkUIGeneratedNativeModule._RestrictedWorker_addEventListener(this.peer!.ptr, Type, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1231,7 +1231,7 @@ export class RestrictedWorker implements MaterializedBase {
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const callback_TmpValue  = callback_!
-            WorkerEventListener_serializer.write(thisSerializer, callback_TmpValue)
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1274,7 +1274,7 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 buffer_BufArgsSerializer.writeNumber(code);
-                InteropNativeModule._CallCallback(-2095497263, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2095497263, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -1309,7 +1309,7 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 ErrorEvent_serializer.write(buffer_BufArgsSerializer, ev);
-                InteropNativeModule._CallCallback(-1213708823, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1213708823, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -1344,7 +1344,7 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -1379,7 +1379,7 @@ export class RestrictedWorker implements MaterializedBase {
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 MessageEvents_serializer.write(buffer_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1614214490, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -1605,6 +1605,18 @@ export class ArkComponentRootPeer extends PeerNode {
         return _peer
     }
 }
+export class ArkCustomBuilderRootPeer extends PeerNode {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component?: ComponentBase, flags: int32 = 0): ArkCustomBuilderRootPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._CustomBuilderRoot_construct(peerId, flags)
+        const _peer  = new ArkCustomBuilderRootPeer(_peerPtr, peerId, 'CustomBuilderRoot', flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+}
 export class ArkCustomLayoutRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -1774,7 +1786,7 @@ export interface ErrorEvent extends Event {
 export interface MessageEvents extends Event {
     readonly data: object;
 }
-export type WorkerEventListener = (event: Event) => Promise<void>;
+export type WorkerEventListener = (event: Event) => void;
 export interface PostMessageOptions {
     transfer?: Array<Object>;
 }
@@ -1843,6 +1855,16 @@ export class ArkComponentRootStyle implements ComponentRoot {
         throw new Error("Not implemented")
     }
 }
+export interface CustomBuilderRoot {
+    attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
+}
+export class ArkCustomBuilderRootStyle implements CustomBuilderRoot {
+    public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
+        throw new Error("Not implemented")
+    }
+}
 export type Callback_onMeasureSize_SizeResult = (selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions) => SizeResult;
 export type Callback_onPlaceChildren_Void = (selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions) => void;
 export interface CustomLayoutRoot {
@@ -1859,10 +1881,10 @@ export interface CustomLayoutRoot {
 export class ArkCustomLayoutRootStyle implements CustomLayoutRoot {
     subscribeOnMeasureSize_value?: Callback_onMeasureSize_SizeResult
     subscribeOnPlaceChildren_value?: Callback_onPlaceChildren_Void
-    public subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
         return this
     }
-    public subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
@@ -1889,6 +1911,18 @@ export class ArkComponentRootComponent extends ComponentBase implements Componen
         return (this.peer as ArkComponentRootPeer)
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+export class ArkCustomBuilderRootComponent extends ComponentBase implements CustomBuilderRoot {
+    getPeer(): ArkCustomBuilderRootPeer {
+        return (this.peer as ArkCustomBuilderRootPeer)
+    }
+    public attributeModifier(value: AttributeModifier<CustomBuilderRoot> | undefined): this {
         return this
     }
     public applyAttributesFinish(): void {
@@ -2059,13 +2093,6 @@ export class TranslateResult_serializer {
         return value
     }
 }
-export class WorkerEventListener_serializer {
-    public static write(buffer: SerializerBase, value: WorkerEventListener): void {
-    }
-    public static read(buffer: DeserializerBase): WorkerEventListener {
-        throw new Error("Interface with functions is not supported")
-    }
-}
 export class BuilderNodeOptions_serializer {
     public static write(buffer: SerializerBase, value: BuilderNodeOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -2193,7 +2220,7 @@ export class DoubleAnimationParam_serializer {
                 onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCall);
                 onProgressTmpBuf_BufArgsSerializer.writePointer(onProgressTmpBuf_BufCallSync);
                 onProgressTmpBuf_BufArgsSerializer.writeFloat32(value);
-                InteropNativeModule._CallCallback(1264236374, onProgressTmpBuf_BufArgsSerializer.asBuffer(), onProgressTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1264236374, onProgressTmpBuf_BufArgsSerializer.asBuffer(), onProgressTmpBuf_BufArgsSerializer.length());
                 onProgressTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2210,7 +2237,7 @@ export class DoubleAnimationParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-733525640, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -733525640, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }

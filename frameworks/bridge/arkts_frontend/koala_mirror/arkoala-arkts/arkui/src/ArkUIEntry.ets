@@ -15,24 +15,20 @@
 import { memo } from "@koalaui/runtime/annotations"
 import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
 import { errorAsString, int32, int64, scheduleCoroutine } from "@koalaui/common"
-import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemCallback } from "@koalaui/interop"
+import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, checkEvents } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "#generated"
 import { UserView, UserApplicationControl } from "./UserView"
 import { ClickEvent, ClickEventInternal } from "#generated"
-import { checkEvents, setCustomEventsChecker } from "./Events"
-import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "#handwritten"
 import { Routed, TestComponentPeer } from "#handwritten"
 import { AppStorage } from "./Storage"
-import { deserializeAndCallCallback } from "#generated/peers/CallbackDeserializeCall"
+import { registerArkuiApiHandler } from "#generated/peers/CallbackDeserializeCall"
 import { NativeLog } from "./NativeLog"
 import { taskpool } from "escompat"
 import { EntryPoint } from "./UserView"
-
-setCustomEventsChecker(checkArkoalaCallbacks)
 
 enum EventType {
     Click = 0,
@@ -150,10 +146,8 @@ function dumpTree(node: IncrementalNode, indent: int32 = 0) {
 }
 
 function registerSyncCallbackProcessor() {
-    wrapSystemCallback(1, (buffer: KSerializerBuffer, length: int32) => {
-        deserializeAndCallCallback(new DeserializerBase(buffer, length))
-        return 0
-    })
+    wrapSystemApiHandlerCallback()
+    registerArkuiApiHandler()
 }
 
 class UserEmulatedEvent {

@@ -21,15 +21,34 @@ import { initInterop, InteropNativeModule } from "../../InteropNativeModule"
 import { Context } from "../peers/Context"
 import { Profiler } from "./profiler"
 import { ArkTsConfig } from "../../generated"
+import { Config } from '../peers/Config';
+
+export class UpdateTracker {
+    stack: boolean[] = []
+
+    push() {
+        this.stack.push(false)
+    }
+
+    update() {
+        this.stack[this.stack.length - 1] = true
+    }
+
+    check() {
+        return this.stack.pop()
+    }
+}
 
 export class global {
     public static filePath: string = "./plugins/input/main.ets"
 
     public static arktsconfig?: ArkTsConfig
+    public static configObj?: Config;
 
     private static _config?: KNativePointer
     public static set config(config: KNativePointer) {
         global._config = config
+        global.configObj = new Config(global._config);
     }
     public static get config(): KNativePointer {
         return global._config ?? throwError('Global.config not initialized')
@@ -39,6 +58,7 @@ export class global {
     }
     public static resetConfig(): void {
         global._config = undefined
+        global.configObj = undefined;
     }
 
     // Improve: rename to contextPeer
@@ -47,7 +67,7 @@ export class global {
     }
 
     // Improve: rename to context when the pointer valued one is eliminated
-    public static compilerContext: Context
+    public static compilerContext: Context | undefined
     public static isContextGenerateAbcForExternalSourceFiles: boolean = false
 
     private static _es2panda: Es2pandaNativeModule | undefined = undefined
@@ -77,4 +97,11 @@ export class global {
 
     // Check node type values during node creation
     public static validatePeerTypes = false
+
+    public static clearContext(): void {
+        global.compilerContext = undefined
+    }
+
+    // Keep track of update info to optimize performance
+    public static updateTracker: UpdateTracker = new UpdateTracker()
 }

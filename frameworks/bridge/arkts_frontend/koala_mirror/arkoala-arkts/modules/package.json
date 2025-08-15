@@ -7,11 +7,11 @@
     },
     "scripts": {
         "clean": "rimraf ./build ./global.resource/build ./ohos/build ./ohos.multimedia.image/build",
-        "link:modules": "mkdir -p build/bootPandaFiles && ../../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/modules.abc -- ./global.resource/build/src/resource.abc ./ohos/build/src/font.abc ./ohos.multimedia.image/build/src/@ohos.multimedia.image.abc",
+        "link:modules": "mkdir -p build/bootPandaFiles && ../../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/modules.abc -- ./global.resource/build/src/resource.abc ./ohos/build/src/font.abc ./ohos/build/src/multimedia.image.abc",
         "build:resource": "../../incremental/tools/panda/arkts/arktsc --arktsconfig ./global.resource/arktsconfig.json",
         "build:ohos": "../../incremental/tools/panda/arkts/arktsc --arktsconfig ./ohos/arktsconfig.json",
         "build:image": "../../incremental/tools/panda/arkts/arktsc --arktsconfig ./ohos.multimedia.image/arktsconfig.json",
-        "build:modules": "npm run build:resource && npm run build:ohos && npm run build:image && npm run link:modules"
+        "build:modules": "npm run build:resource && npm run build:ohos && npm run link:modules"
     }
 }
 

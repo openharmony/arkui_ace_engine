@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class AwaitExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 4)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createAwaitExpression(argument?: Expression): AwaitExpression {
-        const result: AwaitExpression = new AwaitExpression(global.generatedEs2panda._CreateAwaitExpression(global.context, passNode(argument)))
+        const result: AwaitExpression = new AwaitExpression(global.generatedEs2panda._CreateAwaitExpression(global.context, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateAwaitExpression(original?: AwaitExpression, argument?: Expression): AwaitExpression {
-        const result: AwaitExpression = new AwaitExpression(global.generatedEs2panda._UpdateAwaitExpression(global.context, passNode(original), passNode(argument)))
+        const result: AwaitExpression = new AwaitExpression(global.generatedEs2panda._UpdateAwaitExpression(global.context, passNode(original), passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isAwaitExpression(node: object | undefined): node is AwaitExpres
     return node instanceof AwaitExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION, (peer: KNativePointer) => new AwaitExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION, (peer: KNativePointer) => new AwaitExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_AWAIT_EXPRESSION))
 }

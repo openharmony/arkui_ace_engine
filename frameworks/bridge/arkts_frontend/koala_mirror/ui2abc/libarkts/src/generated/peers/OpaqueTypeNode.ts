@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class OpaqueTypeNode extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 156)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1OpaqueTypeNode(): OpaqueTypeNode {
-        const result: OpaqueTypeNode = new OpaqueTypeNode(global.generatedEs2panda._CreateOpaqueTypeNode1(global.context))
+        const result: OpaqueTypeNode = new OpaqueTypeNode(global.generatedEs2panda._CreateOpaqueTypeNode1(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE)
         result.setChildrenParentPtr()
         return result
     }
     static update1OpaqueTypeNode(original?: OpaqueTypeNode): OpaqueTypeNode {
-        const result: OpaqueTypeNode = new OpaqueTypeNode(global.generatedEs2panda._UpdateOpaqueTypeNode1(global.context, passNode(original)))
+        const result: OpaqueTypeNode = new OpaqueTypeNode(global.generatedEs2panda._UpdateOpaqueTypeNode1(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isOpaqueTypeNode(node: object | undefined): node is OpaqueTypeNo
     return node instanceof OpaqueTypeNode
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE, (peer: KNativePointer) => new OpaqueTypeNode(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE, (peer: KNativePointer) => new OpaqueTypeNode(peer, Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE))
 }

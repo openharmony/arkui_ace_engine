@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkListItemPeer, SwipeActionOptions, ListItemAttribute } from "./component/listItem"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class ListItemModifier extends CommonMethodModifier implements ListItemAttribute,AttributeModifier<ListItemAttribute> {
     _instanceId: number = -1;

@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class TSModuleDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 125)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSModuleDeclaration(name: Expression | undefined, body: Statement | undefined, declare: boolean, _global: boolean): TSModuleDeclaration {
-        const result: TSModuleDeclaration = new TSModuleDeclaration(global.generatedEs2panda._CreateTSModuleDeclaration(global.context, passNode(name), passNode(body), declare, _global))
+        const result: TSModuleDeclaration = new TSModuleDeclaration(global.generatedEs2panda._CreateTSModuleDeclaration(global.context, passNode(name), passNode(body), declare, _global), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSModuleDeclaration(original: TSModuleDeclaration | undefined, name: Expression | undefined, body: Statement | undefined, declare: boolean, _global: boolean): TSModuleDeclaration {
-        const result: TSModuleDeclaration = new TSModuleDeclaration(global.generatedEs2panda._UpdateTSModuleDeclaration(global.context, passNode(original), passNode(name), passNode(body), declare, _global))
+        const result: TSModuleDeclaration = new TSModuleDeclaration(global.generatedEs2panda._UpdateTSModuleDeclaration(global.context, passNode(original), passNode(name), passNode(body), declare, _global), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isTSModuleDeclaration(node: object | undefined): node is TSModul
     return node instanceof TSModuleDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION, (peer: KNativePointer) => new TSModuleDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION, (peer: KNativePointer) => new TSModuleDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_DECLARATION))
 }

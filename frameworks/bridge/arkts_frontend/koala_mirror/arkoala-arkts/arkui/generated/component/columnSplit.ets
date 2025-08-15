@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -89,10 +89,10 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
     resizeable_value?: boolean | undefined
     divider_value?: ColumnSplitDividerStyle | undefined
     attributeModifier_value?: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined
-    public resizeable(value: boolean | undefined): this {
+    resizeable(value: boolean | undefined): this {
         return this
     }
-    public divider(value: ColumnSplitDividerStyle | undefined): this {
+    divider(value: ColumnSplitDividerStyle | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {

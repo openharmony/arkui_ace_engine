@@ -20,7 +20,9 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkUIExtensionComponentPeer, UIExtensionProxy, UIExtensionComponentAttribute } from "./component/uiExtensionComponent"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, TerminationInfo } from "./component/common"
+import { RecordData } from "./component/pluginComponent"
 import { ErrorCallback, BusinessError } from "./framework/ohos.base"
 export class UIExtensionComponentModifier extends CommonMethodModifier implements UIExtensionComponentAttribute,AttributeModifier<UIExtensionComponentAttribute> {
     _instanceId: number = -1;
@@ -36,7 +38,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
     _onRemoteReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onRemoteReady_0_0value?: ((value0: UIExtensionProxy) => void) | undefined
     _onReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReceive_0_0value?: ((value0: Map<string, Object>) => void) | undefined
+    _onReceive_0_0value?: ((value0: Map<string, RecordData>) => void) | undefined
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: ErrorCallback | undefined
     _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -67,7 +69,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         {
             switch (this._onReceive_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnReceiveAttribute((this._onReceive_0_0value as ((value0: Map<string, Object>) => void) | undefined));
+                    peer.setOnReceiveAttribute((this._onReceive_0_0value as ((value0: Map<string, RecordData>) => void) | undefined));
                     this._onReceive_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -77,7 +79,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
                 }
                 default: {
                     this._onReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnReceiveAttribute((undefined as ((value0: Map<string, Object>) => void) | undefined));
+                    peer.setOnReceiveAttribute((undefined as ((value0: Map<string, RecordData>) => void) | undefined));
                 }
             }
         }
@@ -160,7 +162,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
                     break;
                 }
                 default: {
-                    this.onReceive((undefined as ((value0: Map<string, Object>) => void) | undefined));
+                    this.onReceive((undefined as ((value0: Map<string, RecordData>) => void) | undefined));
                 }
             }
         }
@@ -215,7 +217,7 @@ export class UIExtensionComponentModifier extends CommonMethodModifier implement
         }
         return this
     }
-    onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this {
+    onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
         if (((this._onReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onReceive_0_flag = AttributeUpdaterFlag.UPDATE

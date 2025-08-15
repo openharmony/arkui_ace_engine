@@ -23,7 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
-import { ContentModifier, AttributeModifier, hookToggleContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookToggleContentModifier, AttributeUpdater } from "#handwritten"
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
@@ -180,19 +180,19 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
     switchPointColor_value?: ResourceColor | undefined
     switchStyle_value?: SwitchStyle | undefined
     attributeModifier_value?: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onChange(value: ((value0: boolean) => void) | undefined): this {
+    onChange(value: ((value0: boolean) => void) | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
+    selectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public switchPointColor(value: ResourceColor | undefined): this {
+    switchPointColor(value: ResourceColor | undefined): this {
         return this
     }
-    public switchStyle(value: SwitchStyle | undefined): this {
+    switchStyle(value: SwitchStyle | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -307,7 +307,7 @@ export class ToggleConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
             triggerChangeTmpBufBufArgsSerializer.writeBoolean(value0);
-            InteropNativeModule._CallCallback(313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }

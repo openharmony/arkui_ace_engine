@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -82,7 +82,7 @@ export interface ScrollBarAttribute extends CommonMethod {
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined
-    public enableNestedScroll(value: boolean | undefined): this {
+    enableNestedScroll(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {

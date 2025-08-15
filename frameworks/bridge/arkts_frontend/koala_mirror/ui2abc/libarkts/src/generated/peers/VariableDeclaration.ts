@@ -33,19 +33,17 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotationUsage } from "./AnnotationUsage"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Es2pandaVariableDeclarationKind } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 import { VariableDeclarator } from "./VariableDeclarator"
 
 export class VariableDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 152)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createVariableDeclaration(kind: Es2pandaVariableDeclarationKind, declarators: readonly VariableDeclarator[], annotations?: readonly AnnotationUsage[]): VariableDeclaration {
-        const result: VariableDeclaration = new VariableDeclaration(global.generatedEs2panda._CreateVariableDeclaration(global.context, kind, passNodeArray(declarators), declarators.length))
+        const result: VariableDeclaration = new VariableDeclaration(global.generatedEs2panda._CreateVariableDeclaration(global.context, kind, passNodeArray(declarators), declarators.length), Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -54,7 +52,7 @@ export class VariableDeclaration extends Statement {
         return result
     }
     static updateVariableDeclaration(original: VariableDeclaration | undefined, kind: Es2pandaVariableDeclarationKind, declarators: readonly VariableDeclarator[], annotations?: readonly AnnotationUsage[]): VariableDeclaration {
-        const result: VariableDeclaration = new VariableDeclaration(global.generatedEs2panda._UpdateVariableDeclaration(global.context, passNode(original), kind, passNodeArray(declarators), declarators.length))
+        const result: VariableDeclaration = new VariableDeclaration(global.generatedEs2panda._UpdateVariableDeclaration(global.context, passNode(original), kind, passNodeArray(declarators), declarators.length), Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -70,12 +68,6 @@ export class VariableDeclaration extends Statement {
     }
     get kind(): Es2pandaVariableDeclarationKind {
         return global.generatedEs2panda._VariableDeclarationKindConst(global.context, this.peer)
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._VariableDeclarationDecorators(global.context, this.peer))
-    }
-    get decoratorsForUpdate(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._VariableDeclarationDecoratorsForUpdate(global.context, this.peer))
     }
     /** @deprecated */
     emplaceAnnotations(source?: AnnotationUsage): this {
@@ -119,5 +111,5 @@ export function isVariableDeclaration(node: object | undefined): node is Variabl
     return node instanceof VariableDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION, (peer: KNativePointer) => new VariableDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION, (peer: KNativePointer) => new VariableDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION))
 }

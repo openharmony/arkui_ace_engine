@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkBaseSpanPeer, TextBackgroundStyle, BaseSpan } from "./component/span"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { LengthMetrics } from "./Graphics"
 export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,AttributeModifier<BaseSpan> {

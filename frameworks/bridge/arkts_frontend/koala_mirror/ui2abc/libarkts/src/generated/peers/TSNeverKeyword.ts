@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSNeverKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 101)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSNeverKeyword(): TSNeverKeyword {
-        const result: TSNeverKeyword = new TSNeverKeyword(global.generatedEs2panda._CreateTSNeverKeyword(global.context))
+        const result: TSNeverKeyword = new TSNeverKeyword(global.generatedEs2panda._CreateTSNeverKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSNeverKeyword(original?: TSNeverKeyword): TSNeverKeyword {
-        const result: TSNeverKeyword = new TSNeverKeyword(global.generatedEs2panda._UpdateTSNeverKeyword(global.context, passNode(original)))
+        const result: TSNeverKeyword = new TSNeverKeyword(global.generatedEs2panda._UpdateTSNeverKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSNeverKeyword(node: object | undefined): node is TSNeverKeywo
     return node instanceof TSNeverKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD, (peer: KNativePointer) => new TSNeverKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD, (peer: KNativePointer) => new TSNeverKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_NEVER_KEYWORD))
 }

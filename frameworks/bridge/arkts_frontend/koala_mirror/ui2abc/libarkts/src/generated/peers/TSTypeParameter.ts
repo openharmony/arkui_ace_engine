@@ -40,22 +40,21 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeParameter extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 120)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1TSTypeParameter(name: Identifier | undefined, constraint: TypeNode | undefined, defaultType: TypeNode | undefined, flags: Es2pandaModifierFlags): TSTypeParameter {
-        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._CreateTSTypeParameter1(global.context, passNode(name), passNode(constraint), passNode(defaultType), flags))
+        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._CreateTSTypeParameter1(global.context, passNode(name), passNode(constraint), passNode(defaultType), flags), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeParameter(original?: TSTypeParameter, name?: Identifier, constraint?: TypeNode, defaultType?: TypeNode): TSTypeParameter {
-        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._UpdateTSTypeParameter(global.context, passNode(original), passNode(name), passNode(constraint), passNode(defaultType)))
+        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._UpdateTSTypeParameter(global.context, passNode(original), passNode(name), passNode(constraint), passNode(defaultType)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER)
         result.setChildrenParentPtr()
         return result
     }
     static update1TSTypeParameter(original: TSTypeParameter | undefined, name: Identifier | undefined, constraint: TypeNode | undefined, defaultType: TypeNode | undefined, flags: Es2pandaModifierFlags): TSTypeParameter {
-        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._UpdateTSTypeParameter1(global.context, passNode(original), passNode(name), passNode(constraint), passNode(defaultType), flags))
+        const result: TSTypeParameter = new TSTypeParameter(global.generatedEs2panda._UpdateTSTypeParameter1(global.context, passNode(original), passNode(name), passNode(constraint), passNode(defaultType), flags), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER)
         result.setChildrenParentPtr()
         return result
     }
@@ -120,5 +119,5 @@ export function isTSTypeParameter(node: object | undefined): node is TSTypeParam
     return node instanceof TSTypeParameter
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER, (peer: KNativePointer) => new TSTypeParameter(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER, (peer: KNativePointer) => new TSTypeParameter(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER))
 }

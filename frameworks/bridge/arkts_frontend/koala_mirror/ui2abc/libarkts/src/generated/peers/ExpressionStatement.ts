@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class ExpressionStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 30)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createExpressionStatement(expr?: Expression): ExpressionStatement {
-        const result: ExpressionStatement = new ExpressionStatement(global.generatedEs2panda._CreateExpressionStatement(global.context, passNode(expr)))
+        const result: ExpressionStatement = new ExpressionStatement(global.generatedEs2panda._CreateExpressionStatement(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateExpressionStatement(original?: ExpressionStatement, expr?: Expression): ExpressionStatement {
-        const result: ExpressionStatement = new ExpressionStatement(global.generatedEs2panda._UpdateExpressionStatement(global.context, passNode(original), passNode(expr)))
+        const result: ExpressionStatement = new ExpressionStatement(global.generatedEs2panda._UpdateExpressionStatement(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -65,5 +64,5 @@ export function isExpressionStatement(node: object | undefined): node is Express
     return node instanceof ExpressionStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT, (peer: KNativePointer) => new ExpressionStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT, (peer: KNativePointer) => new ExpressionStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_EXPRESSION_STATEMENT))
 }

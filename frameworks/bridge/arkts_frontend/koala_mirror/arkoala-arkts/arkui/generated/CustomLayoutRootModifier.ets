@@ -19,6 +19,7 @@
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCustomLayoutRootPeer, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, CustomLayoutRoot } from "./component/idlize"
+import { int32 } from "@koalaui/common"
 import { GeometryInfo, Measurable, Layoutable } from "./component/common"
 import { ConstraintSizeOptions } from "./component/units"
 export class CustomLayoutRootModifier implements CustomLayoutRoot,AttributeModifier<CustomLayoutRoot> {

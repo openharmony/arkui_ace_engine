@@ -29,6 +29,10 @@ export class NodeCache {
         return node as T
     }
 
+    static get<T extends AstNode>(pointer: KNativePointer): T | undefined {
+        return NodeCache.cache.get(pointer) as T | undefined
+    }
+
     public static addToCache(pointer: KNativePointer, node: AstNode) {
         NodeCache.cache.set(pointer, node)
     }

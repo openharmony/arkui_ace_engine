@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkGridRowPeer, GridRowAttribute } from "./component/gridRow"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ItemAlign } from "./component/enums"
 export class GridRowModifier extends CommonMethodModifier implements GridRowAttribute,AttributeModifier<GridRowAttribute> {

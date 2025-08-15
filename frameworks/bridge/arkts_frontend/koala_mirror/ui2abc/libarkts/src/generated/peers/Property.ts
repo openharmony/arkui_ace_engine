@@ -38,22 +38,21 @@ import { Expression } from "./Expression"
 import { ValidationInfo } from "./ValidationInfo"
 
 export class Property extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 56)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1Property(kind: Es2pandaPropertyKind, key: Expression | undefined, value: Expression | undefined, isMethod: boolean, isComputed: boolean): Property {
-        const result: Property = new Property(global.generatedEs2panda._CreateProperty1(global.context, kind, passNode(key), passNode(value), isMethod, isComputed))
+        const result: Property = new Property(global.generatedEs2panda._CreateProperty1(global.context, kind, passNode(key), passNode(value), isMethod, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY)
         result.setChildrenParentPtr()
         return result
     }
     static updateProperty(original?: Property, key?: Expression, value?: Expression): Property {
-        const result: Property = new Property(global.generatedEs2panda._UpdateProperty(global.context, passNode(original), passNode(key), passNode(value)))
+        const result: Property = new Property(global.generatedEs2panda._UpdateProperty(global.context, passNode(original), passNode(key), passNode(value)), Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY)
         result.setChildrenParentPtr()
         return result
     }
     static update1Property(original: Property | undefined, kind: Es2pandaPropertyKind, key: Expression | undefined, value: Expression | undefined, isMethod: boolean, isComputed: boolean): Property {
-        const result: Property = new Property(global.generatedEs2panda._UpdateProperty1(global.context, passNode(original), kind, passNode(key), passNode(value), isMethod, isComputed))
+        const result: Property = new Property(global.generatedEs2panda._UpdateProperty1(global.context, passNode(original), kind, passNode(key), passNode(value), isMethod, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY)
         result.setChildrenParentPtr()
         return result
     }
@@ -90,5 +89,5 @@ export function isProperty(node: object | undefined): node is Property {
     return node instanceof Property
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY, (peer: KNativePointer) => new Property(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY, (peer: KNativePointer) => new Property(peer, Es2pandaAstNodeType.AST_NODE_TYPE_PROPERTY))
 }

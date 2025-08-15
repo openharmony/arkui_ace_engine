@@ -17,9 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
-import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, Orientation, NavDestinationAttribute, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./component/navDestination"
+import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, Orientation, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { ResourceStr } from "./component/units"
 import { Resource } from "global.resource"

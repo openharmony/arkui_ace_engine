@@ -116,3 +116,6 @@ export class SrcDumper extends ArktsObject {
     }
     protected readonly brandSrcDumper: undefined
 }
+export function isSrcDumper(node: object | undefined): node is SrcDumper {
+    return node instanceof SrcDumper
+}

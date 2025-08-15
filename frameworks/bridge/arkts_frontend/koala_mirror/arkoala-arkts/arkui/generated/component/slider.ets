@@ -27,7 +27,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
 import { Color, CrownSensitivity, Axis } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookSliderContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookSliderContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -610,67 +610,67 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined
-    public blockColor(value: ResourceColor | undefined): this {
+    blockColor(value: ResourceColor | undefined): this {
         return this
     }
-    public trackColor(value: ResourceColor | LinearGradient | undefined): this {
+    trackColor(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | LinearGradient | undefined): this {
+    selectedColor(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
-    public showSteps(value: boolean | undefined): this {
+    showSteps(value: boolean | undefined): this {
         return this
     }
-    public trackThickness(value: Length | undefined): this {
+    trackThickness(value: Length | undefined): this {
         return this
     }
-    public onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
         return this
     }
-    public blockBorderColor(value: ResourceColor | undefined): this {
+    blockBorderColor(value: ResourceColor | undefined): this {
         return this
     }
-    public blockBorderWidth(value: Length | undefined): this {
+    blockBorderWidth(value: Length | undefined): this {
         return this
     }
-    public stepColor(value: ResourceColor | undefined): this {
+    stepColor(value: ResourceColor | undefined): this {
         return this
     }
-    public trackBorderRadius(value: Length | undefined): this {
+    trackBorderRadius(value: Length | undefined): this {
         return this
     }
-    public selectedBorderRadius(value: Dimension | undefined): this {
+    selectedBorderRadius(value: Dimension | undefined): this {
         return this
     }
-    public blockSize(value: SizeOptions | undefined): this {
+    blockSize(value: SizeOptions | undefined): this {
         return this
     }
-    public blockStyle(value: SliderBlockStyle | undefined): this {
+    blockStyle(value: SliderBlockStyle | undefined): this {
         return this
     }
-    public stepSize(value: Length | undefined): this {
+    stepSize(value: Length | undefined): this {
         return this
     }
-    public sliderInteractionMode(value: SliderInteraction | undefined): this {
+    sliderInteractionMode(value: SliderInteraction | undefined): this {
         return this
     }
-    public minResponsiveDistance(value: number | undefined): this {
+    minResponsiveDistance(value: number | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
         return this
     }
-    public slideRange(value: SlideRange | undefined): this {
+    slideRange(value: SlideRange | undefined): this {
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public showTips(value: boolean | undefined, content?: ResourceStr): this {
+    showTips(value: boolean | undefined, content?: ResourceStr): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -959,7 +959,7 @@ export class SliderConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
             triggerChangeTmpBufBufArgsSerializer.writeNumber(value);
             triggerChangeTmpBufBufArgsSerializer.writeInt32(TypeChecker.SliderChangeMode_ToNumeric(mode));
-            InteropNativeModule._CallCallback(711649376, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 711649376, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }

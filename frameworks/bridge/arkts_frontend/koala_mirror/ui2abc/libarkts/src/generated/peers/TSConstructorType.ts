@@ -39,17 +39,16 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 
 export class TSConstructorType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 128)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSConstructorType(signature: FunctionSignature | undefined, abstract: boolean): TSConstructorType {
-        const result: TSConstructorType = new TSConstructorType(global.generatedEs2panda._CreateTSConstructorType(global.context, passNode(signature), abstract))
+        const result: TSConstructorType = new TSConstructorType(global.generatedEs2panda._CreateTSConstructorType(global.context, passNode(signature), abstract), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSConstructorType(original: TSConstructorType | undefined, signature: FunctionSignature | undefined, abstract: boolean): TSConstructorType {
-        const result: TSConstructorType = new TSConstructorType(global.generatedEs2panda._UpdateTSConstructorType(global.context, passNode(original), passNode(signature), abstract))
+        const result: TSConstructorType = new TSConstructorType(global.generatedEs2panda._UpdateTSConstructorType(global.context, passNode(original), passNode(signature), abstract), Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -71,5 +70,5 @@ export function isTSConstructorType(node: object | undefined): node is TSConstru
     return node instanceof TSConstructorType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE, (peer: KNativePointer) => new TSConstructorType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE, (peer: KNativePointer) => new TSConstructorType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_CONSTRUCTOR_TYPE))
 }

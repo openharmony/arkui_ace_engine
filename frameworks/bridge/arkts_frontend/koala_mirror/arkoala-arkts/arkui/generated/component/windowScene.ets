@@ -74,7 +74,7 @@ export interface WindowSceneAttribute extends CommonMethod {
 }
 export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowSceneAttribute {
     attributeModifier_value?: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined
-    public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
+    attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {

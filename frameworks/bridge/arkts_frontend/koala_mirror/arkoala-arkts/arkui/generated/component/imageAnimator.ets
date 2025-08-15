@@ -23,7 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, FillMode } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, extractors, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -275,43 +275,43 @@ export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements Image
     onCancel_value?: (() => void) | undefined
     onFinish_value?: (() => void) | undefined
     attributeModifier_value?: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined
-    public images(value: Array<ImageFrameInfo> | undefined): this {
+    images(value: Array<ImageFrameInfo> | undefined): this {
         return this
     }
-    public state(value: AnimationStatus | undefined): this {
+    state(value: AnimationStatus | undefined): this {
         return this
     }
-    public duration(value: number | undefined): this {
+    duration(value: number | undefined): this {
         return this
     }
-    public reverse(value: boolean | undefined): this {
+    reverse(value: boolean | undefined): this {
         return this
     }
-    public fixedSize(value: boolean | undefined): this {
+    fixedSize(value: boolean | undefined): this {
         return this
     }
-    public fillMode(value: FillMode | undefined): this {
+    fillMode(value: FillMode | undefined): this {
         return this
     }
-    public iterations(value: number | undefined): this {
+    iterations(value: number | undefined): this {
         return this
     }
-    public monitorInvisibleArea(value: boolean | undefined): this {
+    monitorInvisibleArea(value: boolean | undefined): this {
         return this
     }
-    public onStart(value: (() => void) | undefined): this {
+    onStart(value: (() => void) | undefined): this {
         return this
     }
-    public onPause(value: (() => void) | undefined): this {
+    onPause(value: (() => void) | undefined): this {
         return this
     }
-    public onRepeat(value: (() => void) | undefined): this {
+    onRepeat(value: (() => void) | undefined): this {
         return this
     }
-    public onCancel(value: (() => void) | undefined): this {
+    onCancel(value: (() => void) | undefined): this {
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
+    onFinish(value: (() => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

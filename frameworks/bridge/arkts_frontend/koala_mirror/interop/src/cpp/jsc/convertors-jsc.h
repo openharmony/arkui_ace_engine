@@ -65,6 +65,7 @@ int32_t getInt32(JSContextRef context, JSValueRef value);
 uint32_t getUInt32(JSContextRef context, JSValueRef value);
 KNativePointer getPointer(JSContextRef context, JSValueRef value);
 KFloat getFloat(JSContextRef context, JSValueRef value);
+KDouble getDouble(JSContextRef context, JSValueRef value);
 KStringPtr getString(JSContextRef context, JSValueRef value);
 KBoolean getBoolean(JSContextRef context, JSValueRef value);
 KStringPtr getString(JSContextRef context, JSValueRef value);
@@ -100,6 +101,12 @@ template <>
 inline KFloat getArgument<KFloat>(JSContextRef context, size_t argumentCount, const JSValueRef arguments[], int index) {
   ASSERT(index < argumentCount);
   return getFloat(context, arguments[index]);
+}
+
+template<>
+inline KDouble getArgument<KDouble>(JSContextRef context, size_t argumentCount, const JSValueRef arguments[], int index) {
+  ASSERT(index < argumentCount);
+  return getDouble(context, arguments[index]);
 }
 
 template <>
@@ -160,6 +167,7 @@ JSValueRef makeInt32(JSContextRef context, int32_t value);
 JSValueRef makeUInt32(JSContextRef context, uint32_t value);
 JSValueRef makePointer(JSContextRef context, KNativePointer value);
 JSValueRef makeFloat(JSContextRef context, KFloat value);
+JSValueRef makeDouble(JSContextRef context, KDouble value);
 JSValueRef makeBoolean(JSContextRef context, KBoolean value);
 JSValueRef makeVoid(JSContextRef context);
 
@@ -184,6 +192,11 @@ inline JSValueRef makeResult<KNativePointer>(JSContextRef context, KNativePointe
 template <>
 inline JSValueRef makeResult<KFloat>(JSContextRef context, KFloat value) {
   return makeFloat(context, value);
+}
+
+template <>
+inline JSValueRef makeResult<KDouble>(JSContextRef context, KDouble value) {
+  return makeDouble(context, value);
 }
 
 template <>

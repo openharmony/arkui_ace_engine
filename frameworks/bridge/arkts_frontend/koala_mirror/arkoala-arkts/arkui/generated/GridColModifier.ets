@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkGridColPeer, GridColColumnOption, GridColAttribute } from "./component/gridCol"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class GridColModifier extends CommonMethodModifier implements GridColAttribute,AttributeModifier<GridColAttribute> {
     _instanceId: number = -1;

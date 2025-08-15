@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class SuperExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 85)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createSuperExpression(): SuperExpression {
-        const result: SuperExpression = new SuperExpression(global.generatedEs2panda._CreateSuperExpression(global.context))
+        const result: SuperExpression = new SuperExpression(global.generatedEs2panda._CreateSuperExpression(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateSuperExpression(original?: SuperExpression): SuperExpression {
-        const result: SuperExpression = new SuperExpression(global.generatedEs2panda._UpdateSuperExpression(global.context, passNode(original)))
+        const result: SuperExpression = new SuperExpression(global.generatedEs2panda._UpdateSuperExpression(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isSuperExpression(node: object | undefined): node is SuperExpres
     return node instanceof SuperExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION, (peer: KNativePointer) => new SuperExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION, (peer: KNativePointer) => new SuperExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_SUPER_EXPRESSION))
 }

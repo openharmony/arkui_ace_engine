@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkGridItemPeer, GridItemAttribute } from "./component/gridItem"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class GridItemModifier extends CommonMethodModifier implements GridItemAttribute,AttributeModifier<GridItemAttribute> {
     _instanceId: number = -1;

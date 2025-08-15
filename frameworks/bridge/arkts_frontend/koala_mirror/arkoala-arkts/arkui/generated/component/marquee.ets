@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { ResourceColor, Length } from "./units"
 import { Color, FontWeight, MarqueeUpdateStrategy } from "./enums"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -256,31 +256,31 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     onBounce_value?: (() => void) | undefined
     onFinish_value?: (() => void) | undefined
     attributeModifier_value?: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: Length | undefined): this {
+    fontSize(value: Length | undefined): this {
         return this
     }
-    public allowScale(value: boolean | undefined): this {
+    allowScale(value: boolean | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
+    fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    public marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
+    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
         return this
     }
-    public onStart(value: (() => void) | undefined): this {
+    onStart(value: (() => void) | undefined): this {
         return this
     }
-    public onBounce(value: (() => void) | undefined): this {
+    onBounce(value: (() => void) | undefined): this {
         return this
     }
-    public onFinish(value: (() => void) | undefined): this {
+    onFinish(value: (() => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {

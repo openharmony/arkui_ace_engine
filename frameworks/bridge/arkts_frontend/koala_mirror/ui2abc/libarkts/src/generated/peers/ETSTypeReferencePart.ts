@@ -39,22 +39,21 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 
 export class ETSTypeReferencePart extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 75)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSTypeReferencePart(name?: Expression, typeParams?: TSTypeParameterInstantiation, prev?: ETSTypeReferencePart): ETSTypeReferencePart {
-        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._CreateETSTypeReferencePart(global.context, passNode(name), passNode(typeParams), passNode(prev)))
+        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._CreateETSTypeReferencePart(global.context, passNode(name), passNode(typeParams), passNode(prev)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSTypeReferencePart(original?: ETSTypeReferencePart, name?: Expression, typeParams?: TSTypeParameterInstantiation, prev?: ETSTypeReferencePart): ETSTypeReferencePart {
-        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._UpdateETSTypeReferencePart(global.context, passNode(original), passNode(name), passNode(typeParams), passNode(prev)))
+        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._UpdateETSTypeReferencePart(global.context, passNode(original), passNode(name), passNode(typeParams), passNode(prev)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART)
         result.setChildrenParentPtr()
         return result
     }
     static update1ETSTypeReferencePart(original?: ETSTypeReferencePart, name?: Expression): ETSTypeReferencePart {
-        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._UpdateETSTypeReferencePart1(global.context, passNode(original), passNode(name)))
+        const result: ETSTypeReferencePart = new ETSTypeReferencePart(global.generatedEs2panda._UpdateETSTypeReferencePart1(global.context, passNode(original), passNode(name)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART)
         result.setChildrenParentPtr()
         return result
     }
@@ -76,5 +75,5 @@ export function isETSTypeReferencePart(node: object | undefined): node is ETSTyp
     return node instanceof ETSTypeReferencePart
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART, (peer: KNativePointer) => new ETSTypeReferencePart(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART, (peer: KNativePointer) => new ETSTypeReferencePart(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART))
 }

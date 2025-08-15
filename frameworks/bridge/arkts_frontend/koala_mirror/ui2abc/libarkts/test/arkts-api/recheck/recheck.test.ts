@@ -51,6 +51,8 @@ function createConfig(file: string) {
         '--output',
         `${DIR}/build/abc/${file}/main.abc`
     ]).peer
+
+    arkts.initVisitsTable()
 }
 
 function createContext(file: string) {
@@ -68,7 +70,7 @@ function proceedToChecked() {
 }
 
 function applyTransformOnState(transform?: arkts.ProgramTransformer, state: arkts.Es2pandaContextState = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
-    arkts.runTransformer(arkts.arktsGlobal.compilerContext.program, state, transform, new arkts.PluginContextImpl(), {})
+    arkts.runTransformer(arkts.arktsGlobal.compilerContext!.program, state, transform, new arkts.PluginContextImpl(), {})
 }
 
 function recheck() {

@@ -38,17 +38,16 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class TSImportEqualsDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 126)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSImportEqualsDeclaration(id: Identifier | undefined, moduleReference: Expression | undefined, isExport: boolean): TSImportEqualsDeclaration {
-        const result: TSImportEqualsDeclaration = new TSImportEqualsDeclaration(global.generatedEs2panda._CreateTSImportEqualsDeclaration(global.context, passNode(id), passNode(moduleReference), isExport))
+        const result: TSImportEqualsDeclaration = new TSImportEqualsDeclaration(global.generatedEs2panda._CreateTSImportEqualsDeclaration(global.context, passNode(id), passNode(moduleReference), isExport), Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSImportEqualsDeclaration(original: TSImportEqualsDeclaration | undefined, id: Identifier | undefined, moduleReference: Expression | undefined, isExport: boolean): TSImportEqualsDeclaration {
-        const result: TSImportEqualsDeclaration = new TSImportEqualsDeclaration(global.generatedEs2panda._UpdateTSImportEqualsDeclaration(global.context, passNode(original), passNode(id), passNode(moduleReference), isExport))
+        const result: TSImportEqualsDeclaration = new TSImportEqualsDeclaration(global.generatedEs2panda._UpdateTSImportEqualsDeclaration(global.context, passNode(original), passNode(id), passNode(moduleReference), isExport), Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -67,5 +66,5 @@ export function isTSImportEqualsDeclaration(node: object | undefined): node is T
     return node instanceof TSImportEqualsDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION, (peer: KNativePointer) => new TSImportEqualsDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION, (peer: KNativePointer) => new TSImportEqualsDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_EQUALS_DECLARATION))
 }

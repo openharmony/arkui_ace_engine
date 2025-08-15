@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkPluginComponentPeer, PluginErrorCallback, PluginErrorData, PluginComponentAttribute } from "./component/pluginComponent"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class PluginComponentModifier extends CommonMethodModifier implements PluginComponentAttribute,AttributeModifier<PluginComponentAttribute> {

@@ -21,6 +21,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkMediaCachedImagePeer, MediaCachedImageAttribute } from "./component/mediaCachedImage"
+import { int32 } from "@koalaui/common"
 import { ImageAttribute } from "./component/image"
 import { CommonMethod } from "./component/common"
 export class MediaCachedImageModifier extends ImageModifier implements MediaCachedImageAttribute,AttributeModifier<MediaCachedImageAttribute> {

@@ -38,17 +38,16 @@ import { Statement } from "./Statement"
 import { StringLiteral } from "./StringLiteral"
 
 export class ImportDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 39)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createImportDeclaration(source: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ImportDeclaration {
-        const result: ImportDeclaration = new ImportDeclaration(global.generatedEs2panda._CreateImportDeclaration(global.context, passNode(source), passNodeArray(specifiers), specifiers.length, importKinds))
+        const result: ImportDeclaration = new ImportDeclaration(global.generatedEs2panda._CreateImportDeclaration(global.context, passNode(source), passNodeArray(specifiers), specifiers.length, importKinds), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateImportDeclaration(original: ImportDeclaration | undefined, source: StringLiteral | undefined, specifiers: readonly AstNode[], importKinds: Es2pandaImportKinds): ImportDeclaration {
-        const result: ImportDeclaration = new ImportDeclaration(global.generatedEs2panda._UpdateImportDeclaration(global.context, passNode(original), passNode(source), passNodeArray(specifiers), specifiers.length, importKinds))
+        const result: ImportDeclaration = new ImportDeclaration(global.generatedEs2panda._UpdateImportDeclaration(global.context, passNode(original), passNode(source), passNodeArray(specifiers), specifiers.length, importKinds), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -85,5 +84,5 @@ export function isImportDeclaration(node: object | undefined): node is ImportDec
     return node instanceof ImportDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION, (peer: KNativePointer) => new ImportDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION, (peer: KNativePointer) => new ImportDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DECLARATION))
 }

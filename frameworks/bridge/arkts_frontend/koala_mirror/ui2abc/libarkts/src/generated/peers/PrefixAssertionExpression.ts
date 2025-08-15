@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class PrefixAssertionExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 55)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createPrefixAssertionExpression(expr?: Expression, type?: TypeNode): PrefixAssertionExpression {
-        const result: PrefixAssertionExpression = new PrefixAssertionExpression(global.generatedEs2panda._CreatePrefixAssertionExpression(global.context, passNode(expr), passNode(type)))
+        const result: PrefixAssertionExpression = new PrefixAssertionExpression(global.generatedEs2panda._CreatePrefixAssertionExpression(global.context, passNode(expr), passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updatePrefixAssertionExpression(original?: PrefixAssertionExpression, expr?: Expression, type?: TypeNode): PrefixAssertionExpression {
-        const result: PrefixAssertionExpression = new PrefixAssertionExpression(global.generatedEs2panda._UpdatePrefixAssertionExpression(global.context, passNode(original), passNode(expr), passNode(type)))
+        const result: PrefixAssertionExpression = new PrefixAssertionExpression(global.generatedEs2panda._UpdatePrefixAssertionExpression(global.context, passNode(original), passNode(expr), passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -63,5 +62,5 @@ export function isPrefixAssertionExpression(node: object | undefined): node is P
     return node instanceof PrefixAssertionExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION, (peer: KNativePointer) => new PrefixAssertionExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION, (peer: KNativePointer) => new PrefixAssertionExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_PREFIX_ASSERTION_EXPRESSION))
 }

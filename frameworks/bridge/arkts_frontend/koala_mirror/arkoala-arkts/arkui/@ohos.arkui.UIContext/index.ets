@@ -17,5 +17,5 @@
  * @kit ArkUI
  */
 
-export * from '../sdk/generated/ohos.arkui.UIContext';
+export * from '../sdk/framework/ohos.arkui.UIContext';
 

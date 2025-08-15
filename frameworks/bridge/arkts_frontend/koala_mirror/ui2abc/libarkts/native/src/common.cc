@@ -191,11 +191,6 @@ es2panda_Impl *GetImplSlow()
     return es2pandaImplementation;
 }
 
-es2panda_ContextState intToState(KInt state)
-{
-    return es2panda_ContextState(state);
-}
-
 string getString(KStringPtr ptr)
 {
     return ptr.data();
@@ -273,6 +268,30 @@ KInt impl_IdentifierIdentifierFlags(KNativePointer contextPtr, KNativePointer no
 }
 KOALA_INTEROP_2(IdentifierIdentifierFlags, KInt, KNativePointer, KNativePointer)
 
+void impl_ScriptFunctionSetParams(KNativePointer context, KNativePointer receiver, KNativePointerArray paramsList, KUInt paramsListLength) {
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    const auto _paramsList = reinterpret_cast<es2panda_AstNode**>(paramsList);
+    const auto _paramsListLength = static_cast<KUInt>(paramsListLength);
+    GetImpl()->ScriptFunctionClearParams(_context, _receiver);
+    for (size_t i = 0; i < _paramsListLength; i++) {
+        GetImpl()->ScriptFunctionEmplaceParams(_context, _receiver, _paramsList[i]);
+    }
+}
+KOALA_INTEROP_V4(ScriptFunctionSetParams, KNativePointer, KNativePointer, KNativePointerArray, KUInt)
+
+void impl_ClassDefinitionSetBody(KNativePointer context, KNativePointer receiver, KNativePointerArray body, KUInt bodyLength) {
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    const auto _body = reinterpret_cast<es2panda_AstNode**>(body);
+    const auto _bodyLength = static_cast<KUInt>(bodyLength);
+    GetImpl()->ClassDefinitionClearBody(_context, _receiver);
+    for (size_t i = 0; i < _bodyLength; i++) {
+        GetImpl()->ClassDefinitionEmplaceBody(_context, _receiver, _body[i]);
+    }
+}
+KOALA_INTEROP_V4(ClassDefinitionSetBody, KNativePointer, KNativePointer, KNativePointerArray, KUInt)
+
 /*
 Improve: NOT FROM API (shouldn't be there)
 -----------------------------------------------------------------------------------------------------------------------------
@@ -304,15 +323,37 @@ KNativePointer impl_AstNodeUpdateAll(KNativePointer contextPtr, KNativePointer p
 }
 KOALA_INTEROP_2(AstNodeUpdateAll, KNativePointer, KNativePointer, KNativePointer)
 
-KNativePointer impl_AstNodeSetChildrenParentPtr(KNativePointer contextPtr, KNativePointer nodePtr) {
+void impl_AstNodeSetChildrenParentPtr(KNativePointer contextPtr, KNativePointer nodePtr) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
     cachedParentNode = node;
 
     GetImpl()->AstNodeIterateConst(context, node, changeParent);
-    return node;
 }
-KOALA_INTEROP_2(AstNodeSetChildrenParentPtr, KNativePointer, KNativePointer, KNativePointer)
+KOALA_INTEROP_V2(AstNodeSetChildrenParentPtr, KNativePointer, KNativePointer)
+
+void impl_AstNodeOnUpdate(KNativePointer context, KNativePointer newNode, KNativePointer replacedNode) {
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _newNode = reinterpret_cast<es2panda_AstNode*>(newNode);
+    auto _replacedNode = reinterpret_cast<es2panda_AstNode*>(replacedNode);
+
+    // Assign original
+    auto _original = GetImpl()->AstNodeOriginalNodeConst(_context, _replacedNode);
+    if (!_original) {
+        _original = _replacedNode;
+    }
+    GetImpl()->AstNodeSetOriginalNode(_context, _newNode, _original);
+
+    // Assign new node parent
+    auto _parent = GetImpl()->AstNodeParent(_context, _replacedNode);
+    if (_parent) {
+        GetImpl()->AstNodeSetParent(_context, _newNode, _parent);
+    }
+
+    // Redirect children parent pointer to this node
+    impl_AstNodeSetChildrenParentPtr(context, newNode);
+}
+KOALA_INTEROP_V3(AstNodeOnUpdate, KNativePointer, KNativePointer, KNativePointer)
 
 std::vector<void*> cachedChildren;
 

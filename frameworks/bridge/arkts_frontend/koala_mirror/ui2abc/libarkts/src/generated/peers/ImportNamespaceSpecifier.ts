@@ -37,17 +37,16 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class ImportNamespaceSpecifier extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 42)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createImportNamespaceSpecifier(local?: Identifier): ImportNamespaceSpecifier {
-        const result: ImportNamespaceSpecifier = new ImportNamespaceSpecifier(global.generatedEs2panda._CreateImportNamespaceSpecifier(global.context, passNode(local)))
+        const result: ImportNamespaceSpecifier = new ImportNamespaceSpecifier(global.generatedEs2panda._CreateImportNamespaceSpecifier(global.context, passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static updateImportNamespaceSpecifier(original?: ImportNamespaceSpecifier, local?: Identifier): ImportNamespaceSpecifier {
-        const result: ImportNamespaceSpecifier = new ImportNamespaceSpecifier(global.generatedEs2panda._UpdateImportNamespaceSpecifier(global.context, passNode(original), passNode(local)))
+        const result: ImportNamespaceSpecifier = new ImportNamespaceSpecifier(global.generatedEs2panda._UpdateImportNamespaceSpecifier(global.context, passNode(original), passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isImportNamespaceSpecifier(node: object | undefined): node is Im
     return node instanceof ImportNamespaceSpecifier
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER, (peer: KNativePointer) => new ImportNamespaceSpecifier(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER, (peer: KNativePointer) => new ImportNamespaceSpecifier(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_NAMESPACE_SPECIFIER))
 }

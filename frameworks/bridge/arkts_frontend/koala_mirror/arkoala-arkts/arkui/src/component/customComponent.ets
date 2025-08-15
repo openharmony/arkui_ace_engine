@@ -13,15 +13,35 @@
  * limitations under the License.
  */
 
-import { AnimateParam, ArkComponentRootPeer, ArkColumnPeer, PageTransitionOptions, LayoutChild, ConstraintSizeOptions, GeometryInfo, Layoutable, Measurable, SizeResult, PageLifeCycle, LayoutCallback } from "#generated"
+import { AnimateParam, ArkComponentRootPeer, ArkCustomLayoutRootPeer, ArkColumnPeer, PageTransitionOptions, LayoutChild, ConstraintSizeOptions, GeometryInfo, Layoutable, Measurable, SizeResult } from "#generated"
 import { memo } from "@koalaui/runtime/annotations"
 import { rememberDisposable, remember, rememberMutableState, mutableState, MutableState, NodeAttach, RunEffect } from "@koalaui/runtime"
 import { addPartialUpdate } from '../ArkUIEntry'
 import { CurrentRouterTransitionState, RouterTransitionVisibility } from "../Router";
-import { PeerNode } from "../PeerNode";
+import { PeerNode, RootPeerType } from "../PeerNode";
 import { PageTransitionEnter, PageTransitionExit } from "../ArkPageTransition"
 import { ExtendableComponent } from './extendableComponent'
 import { UIContext } from '../framework/ohos.arkui.UIContext'
+import { ArkUIAniCustomNodeModule } from "../ani/arkts/ArkUIAniCustomNodeModule"
+import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
+import { ArkCustomComponent } from "../ArkCustomComponent"
+import { KPointer } from "@koalaui/interop"
+import { int32 } from "@koalaui/common"
+
+export interface LayoutCallback {
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
+    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
+        return {width: 0, height: 0} as SizeResult
+    }
+}
+
+export interface PageLifeCycle {
+    onPageShow(): void {}
+    onPageHide(): void {}
+    onBackPress(): boolean { return false }
+    pageTransition(): void {}
+    onNewParam(param: Object | undefined): void {}
+}
 
 export interface UICommonBase {
     @memo
@@ -113,7 +133,21 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
         @memo content: (() => void) | undefined
     ): void {
         NodeAttach<PeerNode>(
-            (): PeerNode => ArkComponentRootPeer.create(),
+            (): PeerNode => {
+                if (this.isCustomLayoutComponent()) {
+                    let peer = ArkCustomLayoutRootPeer.create(undefined)
+                    peer.setSubscribeOnMeasureSizeAttribute((selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+                        constraint: ConstraintSizeOptions): SizeResult => {
+                        return this.onMeasureSize(selfLayoutInfo, children, constraint)
+                    })
+                    peer.setSubscribeOnPlaceChildrenAttribute((selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
+                        constraint: ConstraintSizeOptions) => {
+                        this.onPlaceChildren(selfLayoutInfo, children, constraint)
+                    })
+                    return peer;
+                }
+                return ArkComponentRootPeer.create()
+            },
             (node: PeerNode): void => {
                 const ready = remember<MutableState<boolean>>(
                     (): MutableState<boolean> => {
@@ -228,7 +262,7 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
 
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        throw new Error("Unexpected use of base class method")
+        return { width: 0, height: 0 }
     }
 
     onPageShow(): void {}
@@ -252,3 +286,29 @@ export interface IPropertySubscriber { }
 export interface ISinglePropertyChangeSubscriber { }
 
 export interface CustomComponentV2 {}
+
+export class ArkCustomComponentRootPeer extends PeerNode {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags, RootPeerType)
+    }  
+    public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
+        const peerId  = PeerNode.nextId();
+        if (component.isCustomLayout) {
+            const _peerPtr = ArkUIAniCustomNodeModule._CustomNode_Construct(peerId, component);
+            if (!_peerPtr) {
+                throw new Error("create CustomComponent fail"); 
+            }
+            const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
+            component.setPeer(_peer);
+            return _peer;
+        } else {
+            const _peerPtr = ArkUIAniModule._CustomNode_Construct(peerId, component);
+            if (!_peerPtr) {
+                throw new Error("create CustomComponent fail"); 
+            }
+            const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags);
+            component.setPeer(_peer);
+            return _peer;
+        }
+    }
+}

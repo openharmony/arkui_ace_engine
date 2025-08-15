@@ -142,16 +142,16 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
     strokeWidth_value?: number | string | undefined
     lineCap_value?: LineCapStyle | undefined
     attributeModifier_value?: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public vertical(value: boolean | undefined): this {
+    vertical(value: boolean | undefined): this {
         return this
     }
-    public color(value: ResourceColor | undefined): this {
+    color(value: ResourceColor | undefined): this {
         return this
     }
-    public strokeWidth(value: number | string | undefined): this {
+    strokeWidth(value: number | string | undefined): this {
         return this
     }
-    public lineCap(value: LineCapStyle | undefined): this {
+    lineCap(value: LineCapStyle | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

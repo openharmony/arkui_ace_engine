@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkShapePeer, ViewportRect, ShapeAttribute } from "./component/shape"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ResourceColor, Length } from "./component/units"
 import { Color, LineCapStyle, LineJoinStyle } from "./component/enums"
@@ -42,7 +43,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fill_0_0value?: ResourceColor | undefined
     _strokeDashOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeDashOffset_0_0value?: Length | undefined
+    _strokeDashOffset_0_0value?: double | string | undefined
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
     _strokeLineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -50,19 +51,19 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     _strokeLineJoin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeLineJoin_0_0value?: LineJoinStyle | undefined
     _strokeMiterLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeMiterLimit_0_0value?: Length | undefined
+    _strokeMiterLimit_0_0value?: double | string | undefined
     _strokeOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeOpacity_0_0value?: number | string | Resource | undefined
+    _strokeOpacity_0_0value?: double | string | Resource | undefined
     _fillOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fillOpacity_0_0value?: number | string | Resource | undefined
+    _fillOpacity_0_0value?: double | string | Resource | undefined
     _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeWidth_0_0value?: Length | undefined
+    _strokeWidth_0_0value?: double | string | undefined
     _antiAlias_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _antiAlias_0_0value?: boolean | undefined
     _mesh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mesh_0_0value?: Array<number> | undefined
-    _mesh_0_1value?: number | undefined
-    _mesh_0_2value?: number | undefined
+    _mesh_0_0value?: Array<double> | undefined
+    _mesh_0_1value?: int32 | undefined
+    _mesh_0_2value?: int32 | undefined
     applyModifierPatch(peer: ArkShapePeer): void {
         super.applyModifierPatch(peer)
         if (this._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -123,7 +124,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._strokeDashOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeDashOffsetAttribute((this._strokeDashOffset_0_0value as Length | undefined));
+                    peer.setStrokeDashOffsetAttribute((this._strokeDashOffset_0_0value as double | string | undefined));
                     this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -133,7 +134,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._strokeDashOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeDashOffsetAttribute((undefined as Length | undefined));
+                    peer.setStrokeDashOffsetAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -195,7 +196,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._strokeMiterLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeMiterLimitAttribute((this._strokeMiterLimit_0_0value as Length | undefined));
+                    peer.setStrokeMiterLimitAttribute((this._strokeMiterLimit_0_0value as double | string | undefined));
                     this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -205,7 +206,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeMiterLimitAttribute((undefined as Length | undefined));
+                    peer.setStrokeMiterLimitAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -213,7 +214,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._strokeOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeOpacityAttribute((this._strokeOpacity_0_0value as number | string | Resource | undefined));
+                    peer.setStrokeOpacityAttribute((this._strokeOpacity_0_0value as double | string | Resource | undefined));
                     this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -223,7 +224,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._strokeOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeOpacityAttribute((undefined as number | string | Resource | undefined));
+                    peer.setStrokeOpacityAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -231,7 +232,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._fillOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFillOpacityAttribute((this._fillOpacity_0_0value as number | string | Resource | undefined));
+                    peer.setFillOpacityAttribute((this._fillOpacity_0_0value as double | string | Resource | undefined));
                     this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -241,7 +242,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._fillOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFillOpacityAttribute((undefined as number | string | Resource | undefined));
+                    peer.setFillOpacityAttribute((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -249,7 +250,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._strokeWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as Length | undefined));
+                    peer.setStrokeWidthAttribute((this._strokeWidth_0_0value as double | string | undefined));
                     this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -259,7 +260,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setStrokeWidthAttribute((undefined as Length | undefined));
+                    peer.setStrokeWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
@@ -285,7 +286,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             switch (this._mesh_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setMeshAttribute((this._mesh_0_0value as Array<number> | undefined), (this._mesh_0_1value as number | undefined), (this._mesh_0_2value as number | undefined));
+                    peer.setMeshAttribute((this._mesh_0_0value as Array<double> | undefined), (this._mesh_0_1value as int32 | undefined), (this._mesh_0_2value as int32 | undefined));
                     this._mesh_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -295,7 +296,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
                 default: {
                     this._mesh_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setMeshAttribute((undefined as Array<number> | undefined), (undefined as number | undefined), (undefined as number | undefined));
+                    peer.setMeshAttribute((undefined as Array<double> | undefined), (undefined as int32 | undefined), (undefined as int32 | undefined));
                 }
             }
         }
@@ -350,7 +351,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.strokeDashOffset((undefined as Length | undefined));
+                    this.strokeDashOffset((undefined as double | string | undefined));
                 }
             }
         }
@@ -402,7 +403,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.strokeMiterLimit((undefined as Length | undefined));
+                    this.strokeMiterLimit((undefined as double | string | undefined));
                 }
             }
         }
@@ -415,7 +416,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.strokeOpacity((undefined as number | string | Resource | undefined));
+                    this.strokeOpacity((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -428,7 +429,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.fillOpacity((undefined as number | string | Resource | undefined));
+                    this.fillOpacity((undefined as double | string | Resource | undefined));
                 }
             }
         }
@@ -441,7 +442,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.strokeWidth((undefined as Length | undefined));
+                    this.strokeWidth((undefined as double | string | undefined));
                 }
             }
         }
@@ -467,7 +468,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     break;
                 }
                 default: {
-                    this.mesh((undefined as Array<number> | undefined), (undefined as number | undefined), (undefined as number | undefined));
+                    this.mesh((undefined as Array<double> | undefined), (undefined as int32 | undefined), (undefined as int32 | undefined));
                 }
             }
         }
@@ -505,8 +506,8 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    strokeDashOffset(value: Length | undefined): this {
-        if (((this._strokeDashOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+    strokeDashOffset(value: double | string | undefined): this {
+        if (((this._strokeDashOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeDashOffset_0_0value) !== (value)))
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
@@ -549,8 +550,8 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    strokeMiterLimit(value: Length | undefined): this {
-        if (((this._strokeMiterLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+    strokeMiterLimit(value: double | string | undefined): this {
+        if (((this._strokeMiterLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeMiterLimit_0_0value) !== (value)))
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
@@ -560,7 +561,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    strokeOpacity(value: number | string | Resource | undefined): this {
+    strokeOpacity(value: double | string | Resource | undefined): this {
         if (((this._strokeOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
@@ -571,7 +572,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    fillOpacity(value: number | string | Resource | undefined): this {
+    fillOpacity(value: double | string | Resource | undefined): this {
         if (((this._fillOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
@@ -582,8 +583,8 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    strokeWidth(value: Length | undefined): this {
-        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+    strokeWidth(value: double | string | undefined): this {
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeWidth_0_0value) !== (value)))
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
@@ -604,7 +605,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    mesh(value: Array<double> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         if (((this._mesh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mesh_0_0value) !== (value)) || ((this._mesh_0_1value) !== (column)) || ((this._mesh_0_2value) !== (row)))
         {
             this._mesh_0_flag = AttributeUpdaterFlag.UPDATE

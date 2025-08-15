@@ -16,7 +16,9 @@
 import { observableProxy } from "@koalaui/common"
 import { MutableState, GlobalStateManager } from "@koalaui/runtime"
 import { AbstractProperty, SubscribedAbstractProperty } from "./ArkState"
-
+import { EnvironmentBackend } from "./stateManagement.ets"
+import { ColorMode, LayoutDirection } from "#handwritten"
+import { int32, float32 } from "@koalaui/common"
 
 ///// ArkUI ///// see common_ts_ets_api.d.ts /////
 
@@ -263,7 +265,7 @@ export class AppStorage {
  * @crossplatform
  * @since 10
  */
-interface EnvPropsOptions {
+export interface EnvPropsOptions {
     /**
      * Property name
      *
@@ -276,20 +278,40 @@ interface EnvPropsOptions {
     /**
      * DefaultValue is the default value if cannot get the environment property value
      *
-     * @type { number | string | boolean }
+     * @type { number | string | boolean | ColorMode | LayoutDirection }
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @crossplatform
      * @since 10
      */
-    defaultValue: number | string | boolean;
+    defaultValue: number | string | boolean | ColorMode | LayoutDirection;
 }
 
+type EnvPropsValueType = number | string | boolean | ColorMode | LayoutDirection
 
 /**
  * Defines the Environment interface.
  * @since 7
  */
 export class Environment {
+    private static instance: Environment | undefined = undefined
+    private props = new Map<string, boolean>()
+    private propMap = new Map<string, () => (EnvPropsValueType | undefined)>([
+        ['accessibilityEnabled', getEnvAccessibility],
+        ['layoutDirection', getEnvLayoutDirection],
+        ['languageCode', getEnvLanguageCode],
+        ['colorMode', getEnvColorMode],
+        ['fontScale', getEnvFontScale],
+        ['fontWeightScale', getEnvFontWeightScale],
+    ])
+
+    private static getInstance(): Environment {
+        let env = Environment.instance
+        if (!env) {
+            Environment.instance = env = new Environment()
+        }
+        return env
+    }
+
     /**
      * Called when a property value is checked.
      * @since 7
@@ -303,7 +325,11 @@ export class Environment {
      * @since 10
      */
     static envProp<T>(key: string, value: T): boolean {
-        throw new Error("Environment.EnvProp is not implemented")
+        if (!Environment.getInstance().propMap.has(key)) {
+            // invalid key
+            return false
+        }
+        return Environment.getInstance().envPropInternal<T>(key, value)
     }
 
     /**
@@ -327,7 +353,59 @@ export class Environment {
      * @since 10
      */
     static keys(): Array<string> {
-        throw new Error("Environment.Keys is not implemented")
+        return Array.from(Environment.getInstance().props.keys())
+    }
+
+    /**
+     * Called when settings are changed by user outside the application.
+     * Re-reads environment settings and updates them in AppStorage.
+     */
+    static updateProps(): void {
+        const env = Environment.getInstance()
+        for (const key of env.props.keys()) {
+            env.updateInternal(key)
+        }
+    }
+
+    private envPropInternal<T>(key: string, defaultValue: T): boolean {
+        if (AppStorage.has(key)) {
+            return this.updateInternal<T>(key)
+        }
+
+        const getter = this.propMap.get(key)
+        if (!getter) return false
+
+        let value: Any = getter()
+        if (value === undefined || value === '') {
+            value = defaultValue as Any
+        }
+
+        const prop = AppStorage.setAndRef<T>(key, value as T)
+        if (!prop) return false
+
+        this.props.set(key, false)
+        AppStorage.link<T>(key)?.subscribe((): void => {
+            this.props.set(key, true)
+        })
+        return true
+    }
+
+    private updateInternal<T>(key: string): boolean {
+        const modified = this.props.get(key) ?? true
+        if (modified) return false
+
+        const getter = this.propMap.get(key)
+        if (!getter) return false
+
+        let value: Any = getter()
+        if (value === undefined || value === '') {
+            return false
+        }
+
+        AppStorage.setOrCreate<T>(key, value as T)
+        // reset property after being notified about new value
+        this.props.set(key, false)
+        return true
     }
 }
 
@@ -726,7 +804,8 @@ class StorageMap {
     }
 
     setAndProp<T>(key: string, value: T): SubscribedAbstractProperty<T> {
-        return new StorageProp<T>(this, key, value)
+        const entry = this.entry<T>(key)
+        return new StorageProp<T>(this, key, entry ? entry.get() : value)
     }
 
     delete(key: string): boolean {
@@ -820,4 +899,39 @@ class StorageProp<T> implements SubscribedAbstractProperty<T> {
 
 function notify(listener: () => void) {
     listener()
+}
+
+function getEnvAccessibility(): boolean {
+    return EnvironmentBackend.isAccessibilityEnabled()
+}
+
+function getEnvLanguageCode(): string {
+    return EnvironmentBackend.getLanguageCode()
+}
+
+function getEnvLayoutDirection(): LayoutDirection | undefined {
+    const result = EnvironmentBackend.getLayoutDirection()
+    if (result !== undefined && result !== '') {
+        switch (result) {
+            case "LTR": return LayoutDirection.LTR
+            case "RTL": return LayoutDirection.RTL
+            default: return LayoutDirection.AUTO
+        }
+    }
+    return undefined
+}
+
+function getEnvColorMode(): ColorMode | undefined {
+    const result = EnvironmentBackend.getColorMode()
+    return result < 0 ? undefined : (result > 0 ? ColorMode.DARK : ColorMode.LIGHT)
+}
+
+function getEnvFontScale(): number | undefined {
+    const result = EnvironmentBackend.getFontScale()
+    return result > 0 ? (Math.round(result * 100) / 100) : undefined
+}
+
+function getEnvFontWeightScale(): number | undefined {
+    const result = EnvironmentBackend.getFontWeightScale()
+    return result > 0 ? (Math.round(result * 100) / 100) : undefined
 }

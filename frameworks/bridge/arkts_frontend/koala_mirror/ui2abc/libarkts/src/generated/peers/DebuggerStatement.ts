@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class DebuggerStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 21)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createDebuggerStatement(): DebuggerStatement {
-        const result: DebuggerStatement = new DebuggerStatement(global.generatedEs2panda._CreateDebuggerStatement(global.context))
+        const result: DebuggerStatement = new DebuggerStatement(global.generatedEs2panda._CreateDebuggerStatement(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateDebuggerStatement(original?: DebuggerStatement): DebuggerStatement {
-        const result: DebuggerStatement = new DebuggerStatement(global.generatedEs2panda._UpdateDebuggerStatement(global.context, passNode(original)))
+        const result: DebuggerStatement = new DebuggerStatement(global.generatedEs2panda._UpdateDebuggerStatement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isDebuggerStatement(node: object | undefined): node is DebuggerS
     return node instanceof DebuggerStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT, (peer: KNativePointer) => new DebuggerStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT, (peer: KNativePointer) => new DebuggerStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_DEBUGGER_STATEMENT))
 }

@@ -43,16 +43,16 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 import { extension_ScriptFunctionGetPreferredReturnTypePointer } from "./../../reexport-for-generated"
 import { extension_ScriptFunctionGetSignaturePointer } from "./../../reexport-for-generated"
+import { extension_ScriptFunctionSetParams } from "./../../reexport-for-generated"
 import { extension_ScriptFunctionSetPreferredReturnTypePointer } from "./../../reexport-for-generated"
 import { extension_ScriptFunctionSetSignaturePointer } from "./../../reexport-for-generated"
 
 export class ScriptFunction extends AstNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 60)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createScriptFunction(databody: AstNode | undefined, datasignature: FunctionSignature | undefined, datafuncFlags: number, dataflags: number, ident?: Identifier, annotations?: readonly AnnotationUsage[]): ScriptFunction {
-        const result: ScriptFunction = new ScriptFunction(global.generatedEs2panda._CreateScriptFunction(global.context, passNode(databody), passNode(datasignature), datafuncFlags, dataflags))
+        const result: ScriptFunction = new ScriptFunction(global.generatedEs2panda._CreateScriptFunction(global.context, passNode(databody), passNode(datasignature), datafuncFlags, dataflags), Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION)
         if (ident)
         {
             result.setIdent(ident)
@@ -65,7 +65,7 @@ export class ScriptFunction extends AstNode {
         return result
     }
     static updateScriptFunction(original: ScriptFunction | undefined, databody: AstNode | undefined, datasignature: FunctionSignature | undefined, datafuncFlags: number, dataflags: number, ident?: Identifier, annotations?: readonly AnnotationUsage[]): ScriptFunction {
-        const result: ScriptFunction = new ScriptFunction(global.generatedEs2panda._UpdateScriptFunction(global.context, passNode(original), passNode(databody), passNode(datasignature), datafuncFlags, dataflags))
+        const result: ScriptFunction = new ScriptFunction(global.generatedEs2panda._UpdateScriptFunction(global.context, passNode(original), passNode(databody), passNode(datasignature), datafuncFlags, dataflags), Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION)
         if (ident)
         {
             result.setIdent(ident)
@@ -296,11 +296,12 @@ export class ScriptFunction extends AstNode {
     setSignaturePointer = extension_ScriptFunctionSetSignaturePointer
     getPreferredReturnTypePointer = extension_ScriptFunctionGetPreferredReturnTypePointer
     setPreferredReturnTypePointer = extension_ScriptFunctionSetPreferredReturnTypePointer
+    setParams = extension_ScriptFunctionSetParams
     protected readonly brandScriptFunction: undefined
 }
 export function isScriptFunction(node: object | undefined): node is ScriptFunction {
     return node instanceof ScriptFunction
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION, (peer: KNativePointer) => new ScriptFunction(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION, (peer: KNativePointer) => new ScriptFunction(peer, Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION))
 }

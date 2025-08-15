@@ -29,7 +29,7 @@ import { Resource } from "global.resource"
 import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
 import { ScrollState } from "./list"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -407,40 +407,40 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
     attributeModifier_value?: AttributeModifier<WaterFlowAttribute> | AttributeModifier<CommonMethod> | undefined
-    public columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | undefined): this {
         return this
     }
-    public itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
+    itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
         return this
     }
-    public rowsTemplate(value: string | undefined): this {
+    rowsTemplate(value: string | undefined): this {
         return this
     }
-    public columnsGap(value: Length | undefined): this {
+    columnsGap(value: Length | undefined): this {
         return this
     }
-    public rowsGap(value: Length | undefined): this {
+    rowsGap(value: Length | undefined): this {
         return this
     }
-    public layoutDirection(value: FlexDirection | undefined): this {
+    layoutDirection(value: FlexDirection | undefined): this {
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    cachedCount(value: number | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
-    public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         return this
     }
-    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
         return this
     }
-    public onDidScroll(value: OnScrollCallback | undefined): this {
+    onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
-    public cachedCount(count: number | undefined, show: boolean | undefined): this {
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -653,7 +653,7 @@ export class WaterFlowOptions_serializer {
                 footerTmpBuf_BufArgsSerializer.writeInt32(footerTmpBuf_BufResource.resourceId);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCall);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, footerTmpBuf_BufArgsSerializer.asBuffer(), footerTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, footerTmpBuf_BufArgsSerializer.asBuffer(), footerTmpBuf_BufArgsSerializer.length());
                 footerTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -803,7 +803,7 @@ export class SectionOptions_serializer {
                 onGetItemMainSizeByIndexTmpBuf_BufContinuationValue = value;
             }
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetItemMainSizeByIndexTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallback(-2076995110, onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2076995110, onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.asBuffer(), onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.length());
                 onGetItemMainSizeByIndexTmpBuf_BufArgsSerializer.release();
                 return (onGetItemMainSizeByIndexTmpBuf_BufContinuationValue as number);
             }

@@ -22,11 +22,11 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkStepperItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -107,14 +107,13 @@ export class ArkStepperItemStyle extends ArkCommonMethodStyle implements Stepper
     prevLabel_value?: string | undefined
     nextLabel_value?: string | undefined
     status_value?: ItemState | undefined
-    attributeModifier_value?: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    public prevLabel(value: string | undefined): this {
+    prevLabel(value: string | undefined): this {
         return this
     }
-    public nextLabel(value: string | undefined): this {
+    nextLabel(value: string | undefined): this {
         return this
     }
-    public status(value: ItemState | undefined): this {
+    status(value: ItemState | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {

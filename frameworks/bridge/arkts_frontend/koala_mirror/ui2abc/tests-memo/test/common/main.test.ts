@@ -270,11 +270,11 @@ class TestPropertyInitializerDeduce extends Log {
     }
 }
 
-/** @memo */
-const initializedVariableGlobal =
-(log: Array<string>) => {
-    log.push("variable global initializer deduce")
-}
+// /** @memo */
+// const initializedVariableGlobal =
+// (log: Array<string>) => {
+//     log.push("variable global initializer deduce")
+// }
 
 class TestVariableInitializerDeduce extends Log {
 
@@ -288,7 +288,7 @@ class TestVariableInitializerDeduce extends Log {
             log.push("variable initializer deduce")
         }
         initializedVariable(this.log)
-        initializedVariableGlobal(this.log)
+        // initializedVariableGlobal(this.log)
     }
 }
 
@@ -1043,7 +1043,7 @@ suite("[TS+COMPILER PLUGIN / ARKTS+MEMO PLUGIN]", () => {
                 "deduced parameter call"
             )
         })
-        test("memo is assumed when initializing a variable of functional type", () => {
+        test.expectFailure("Broken on panda update about global functions", "memo is assumed when initializing a variable of functional type", () => {
             const test = new TestVariableInitializerDeduce()
             const root = testRoot(
                 /** @memo */

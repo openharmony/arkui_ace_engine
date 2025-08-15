@@ -15,12 +15,12 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { checkSDK, arktsGlobal as global, findStdlib, DumpingHooks, listPrograms } from "@koalaui/libarkts"
+import { checkSDK, arktsGlobal as global, findStdlib, DumpingHooks, listPrograms, initVisitsTable } from "@koalaui/libarkts"
 import { PluginEntry, PluginInitializer, CompilationOptions, Program } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { throwError } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { Tracer, trace, Options, Config, Context, proceedToState, dumpProgramInfo, dumpArkTsConfigInfo } from "@koalaui/libarkts"
+import { Tracer, traceGlobal, Options, Config, Context, proceedToState, dumpProgramInfo, dumpArkTsConfigInfo } from "@koalaui/libarkts"
 
 interface CommandLineOptions {
     files: string[]
@@ -111,20 +111,15 @@ function dumpMemoryProfilerInfo(str: string) {
 }
 
 function dumpCompilationInfo(simultaneous: boolean) {
-    if (global.arktsconfig) {
-        dumpArkTsConfigInfo(global.arktsconfig)
-    } else {
-        console.log("No arktsconfig")
-    }
-    trace(() => {
-        const programs = listPrograms(global.compilerContext.program)
+    traceGlobal(() => {
+        const programs = listPrograms(global.compilerContext!.program)
         if (simultaneous) {
             const programsForCodegeneration = programs.filter(it => it.isGenAbcForExternal)
-            trace(() => `Programs for codegeneration        : ${programsForCodegeneration.length}`)
-            trace(() => `External programs passed to plugins: ${programs.length - programsForCodegeneration.length - 1}`)
+            traceGlobal(() => `Programs for codegeneration        : ${programsForCodegeneration.length}`)
+            traceGlobal(() => `External programs passed to plugins: ${programs.length - programsForCodegeneration.length - 1}`)
         } else {
-            trace(() => `Programs for codegeneration        : 1`)
-            trace(() => `External programs passed to plugins: ${programs.length - 1}`)
+            traceGlobal(() => `Programs for codegeneration        : 1`)
+            traceGlobal(() => `External programs passed to plugins: ${programs.length - 1}`)
         }
     })
 }
@@ -157,6 +152,8 @@ function invoke(
     }
     Tracer.pushContext('es2panda')
 
+    initVisitsTable()
+
     const compilerConfig = Config.create(['_', ...cmd])
     global.config = compilerConfig.peer
     if (!global.configIsInitialized())
@@ -166,12 +163,13 @@ function invoke(
     global.compilerContext = compilerContext
     global.isContextGenerateAbcForExternalSourceFiles = simultaneous
 
+    const options = Options.createOptions(new Config(global.config))
+    global.arktsconfig = options.getArkTsConfig()
+    dumpArkTsConfigInfo(global.arktsconfig)
+
     if (profileMemory) dumpMemoryProfilerInfo('Memory usage before proceed to parsed:')
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
     if (profileMemory) dumpMemoryProfilerInfo('Memory usage after proceed to parsed:')
-
-    const options = Options.createOptions(new Config(global.config))
-    global.arktsconfig = options.getArkTsConfig()
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
         if (profileMemory) dumpMemoryProfilerInfo(`Memory usage before ${plugin.name}-parsed:`)
@@ -205,6 +203,11 @@ function invoke(
 
     compilerContext.destroy()
     compilerConfig.destroy()
+
+    Tracer.popContext()
+    if (trace) {
+        Tracer.stopGlobalTracing()
+    }
 }
 
 function loadPlugin(configDir: string, transform: string) {

@@ -26,7 +26,61 @@
             "es2panda_Config",
             "es2panda_ExternalSource",
             "es2panda_OverloadInfo",
-            "es2panda_GlobalContext"
+            "es2panda_GlobalContext",
+
+            // Duplicates of types in ir namespace
+            // They will be removed in the fututre.
+            'es2panda_Signature',
+            'es2panda_CheckerContext',
+            'es2panda_Type',
+            'es2panda_TypeRelation',
+            'es2panda_GlobalTypesHolder',
+            'es2panda_Variable',
+            'es2panda_Scope',
+            'es2panda_Path',
+            'es2panda_ResolveResult',
+            'es2panda_RecordTable',
+            'es2panda_BoundContext',
+            'es2panda_ImportPathManager',
+            'es2panda_Options',
+            'es2panda_AstNode',
+            'es2panda_Program',
+            'es2panda_ArkTsConfig',
+            'es2panda_FunctionSignature',
+
+            'NodeTransformer',
+            'NodeTraverser',
+            'AstNodeForEachFunction',
+            'ClassBuilder',
+            'ClassInitializerBuilder',
+            'MethodBuilder',
+            'NodePredicate',
+            'PropertyProcessor',
+            'PropertyTraverser',
+
+            'checker.*',
+            'varbinder.*',
+            'parser.*',
+            'util.*',
+            'gen.*',
+            'es2panda.*',
+            'ast_verifier.*',
+
+            'parser.Program!',
+            'es2panda.ArkTsConfig!',
+            // Do not support node type
+            //'varbinder.FunctionDecl!',
+            //'varbinder.InterfaceDecl!',
+            // MemberExpression has checker.ETSFunctionType ExtensionAccessorTypeConst(es2panda_Context context);
+            //'checker.ETSFunctionType!',
+            //'ir.ETSFunctionType',
+
+            'ir.Annotated',
+            'ir.AnnotationAllowed',
+            'ir.Typed',
+            'ir.VectorIterationGuard',
+
+            'VoidPtr',
         ],
         "partial": [
             {
@@ -312,6 +366,19 @@
                     name: "setPreferredReturnTypePointer",
                     definition: "extension_ScriptFunctionSetPreferredReturnTypePointer",
                 },
+                {
+                    name: "setParams",
+                    definition: "extension_ScriptFunctionSetParams",
+                },
+            ]
+        },
+        {
+            interface: "ClassDefinition",
+            methods: [
+                {
+                    name: "setBody",
+                    definition: "extension_ClassDefinitionSetBody",
+                },
             ]
         },
         {
@@ -337,7 +404,7 @@
             ],
         },
         {
-            interface: "SourcePosition",
+            interface: "es2panda_SourcePosition",
             methods: [
                 {
                     name: "getLine",

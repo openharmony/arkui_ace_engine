@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRadioPeer, OnRadioChangeCallback, RadioStyle, RadioConfiguration, RadioAttribute } from "./component/radio"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable } from "./component/common"
 export class RadioModifier extends CommonMethodModifier implements RadioAttribute,AttributeModifier<RadioAttribute> {
     _instanceId: number = -1;

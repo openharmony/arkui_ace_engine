@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TypeofExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 147)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTypeofExpression(argument?: Expression): TypeofExpression {
-        const result: TypeofExpression = new TypeofExpression(global.generatedEs2panda._CreateTypeofExpression(global.context, passNode(argument)))
+        const result: TypeofExpression = new TypeofExpression(global.generatedEs2panda._CreateTypeofExpression(global.context, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTypeofExpression(original?: TypeofExpression, argument?: Expression): TypeofExpression {
-        const result: TypeofExpression = new TypeofExpression(global.generatedEs2panda._UpdateTypeofExpression(global.context, passNode(original), passNode(argument)))
+        const result: TypeofExpression = new TypeofExpression(global.generatedEs2panda._UpdateTypeofExpression(global.context, passNode(original), passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTypeofExpression(node: object | undefined): node is TypeofExpr
     return node instanceof TypeofExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION, (peer: KNativePointer) => new TypeofExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION, (peer: KNativePointer) => new TypeofExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TYPEOF_EXPRESSION))
 }

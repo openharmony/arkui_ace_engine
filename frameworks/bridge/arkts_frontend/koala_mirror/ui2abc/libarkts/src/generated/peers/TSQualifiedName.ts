@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Identifier } from "./Identifier"
 
 export class TSQualifiedName extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 131)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSQualifiedName(left?: Expression, right?: Identifier): TSQualifiedName {
-        const result: TSQualifiedName = new TSQualifiedName(global.generatedEs2panda._CreateTSQualifiedName(global.context, passNode(left), passNode(right)))
+        const result: TSQualifiedName = new TSQualifiedName(global.generatedEs2panda._CreateTSQualifiedName(global.context, passNode(left), passNode(right)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSQualifiedName(original?: TSQualifiedName, left?: Expression, right?: Identifier): TSQualifiedName {
-        const result: TSQualifiedName = new TSQualifiedName(global.generatedEs2panda._UpdateTSQualifiedName(global.context, passNode(original), passNode(left), passNode(right)))
+        const result: TSQualifiedName = new TSQualifiedName(global.generatedEs2panda._UpdateTSQualifiedName(global.context, passNode(original), passNode(left), passNode(right)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isTSQualifiedName(node: object | undefined): node is TSQualified
     return node instanceof TSQualifiedName
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME, (peer: KNativePointer) => new TSQualifiedName(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME, (peer: KNativePointer) => new TSQualifiedName(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_QUALIFIED_NAME))
 }

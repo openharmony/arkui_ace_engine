@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class ImportExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 40)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createImportExpression(source?: Expression): ImportExpression {
-        const result: ImportExpression = new ImportExpression(global.generatedEs2panda._CreateImportExpression(global.context, passNode(source)))
+        const result: ImportExpression = new ImportExpression(global.generatedEs2panda._CreateImportExpression(global.context, passNode(source)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateImportExpression(original?: ImportExpression, source?: Expression): ImportExpression {
-        const result: ImportExpression = new ImportExpression(global.generatedEs2panda._UpdateImportExpression(global.context, passNode(original), passNode(source)))
+        const result: ImportExpression = new ImportExpression(global.generatedEs2panda._UpdateImportExpression(global.context, passNode(original), passNode(source)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isImportExpression(node: object | undefined): node is ImportExpr
     return node instanceof ImportExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION, (peer: KNativePointer) => new ImportExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION, (peer: KNativePointer) => new ImportExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_EXPRESSION))
 }

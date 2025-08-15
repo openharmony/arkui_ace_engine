@@ -27,7 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { Color, FontStyle, FontWeight } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookTextTimerContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookTextTimerContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -319,31 +319,31 @@ export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimer
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
     contentModifier_value?: ContentModifier<TextTimerConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public format(value: string | undefined): this {
+    format(value: string | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: Length | undefined): this {
+    fontSize(value: Length | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
         return this
     }
-    public fontFamily(value: ResourceStr | undefined): this {
+    fontFamily(value: ResourceStr | undefined): this {
         return this
     }
-    public onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -38,37 +38,36 @@ import { Statement } from "./Statement"
 import { StringLiteral } from "./StringLiteral"
 
 export class ExportNamedDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 28)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createExportNamedDeclaration(source: StringLiteral | undefined, specifiers: readonly ExportSpecifier[]): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration(global.context, passNode(source), passNodeArray(specifiers), specifiers.length))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration(global.context, passNode(source), passNodeArray(specifiers), specifiers.length), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateExportNamedDeclaration(original: ExportNamedDeclaration | undefined, source: StringLiteral | undefined, specifiers: readonly ExportSpecifier[]): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration(global.context, passNode(original), passNode(source), passNodeArray(specifiers), specifiers.length))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration(global.context, passNode(original), passNode(source), passNodeArray(specifiers), specifiers.length), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static create1ExportNamedDeclaration(decl: AstNode | undefined, specifiers: readonly ExportSpecifier[]): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration1(global.context, passNode(decl), passNodeArray(specifiers), specifiers.length))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration1(global.context, passNode(decl), passNodeArray(specifiers), specifiers.length), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static update1ExportNamedDeclaration(original: ExportNamedDeclaration | undefined, decl: AstNode | undefined, specifiers: readonly ExportSpecifier[]): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration1(global.context, passNode(original), passNode(decl), passNodeArray(specifiers), specifiers.length))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration1(global.context, passNode(original), passNode(decl), passNodeArray(specifiers), specifiers.length), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static create2ExportNamedDeclaration(decl?: AstNode): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration2(global.context, passNode(decl)))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._CreateExportNamedDeclaration2(global.context, passNode(decl)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static update2ExportNamedDeclaration(original?: ExportNamedDeclaration, decl?: AstNode): ExportNamedDeclaration {
-        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration2(global.context, passNode(original), passNode(decl)))
+        const result: ExportNamedDeclaration = new ExportNamedDeclaration(global.generatedEs2panda._UpdateExportNamedDeclaration2(global.context, passNode(original), passNode(decl)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -92,5 +91,5 @@ export function isExportNamedDeclaration(node: object | undefined): node is Expo
     return node instanceof ExportNamedDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION, (peer: KNativePointer) => new ExportNamedDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION, (peer: KNativePointer) => new ExportNamedDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_NAMED_DECLARATION))
 }

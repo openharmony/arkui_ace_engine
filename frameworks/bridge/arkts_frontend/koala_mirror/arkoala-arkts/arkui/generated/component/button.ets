@@ -26,7 +26,7 @@ import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethod
 import { ResourceColor, Length, ResourceStr, Font, Font_serializer } from "./units"
 import { Color, FontWeight, FontStyle, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookButtonContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookButtonContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -399,46 +399,46 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
     attributeModifier_value?: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined
-    public type(value: ButtonType | undefined): this {
+    type(value: ButtonType | undefined): this {
         return this
     }
-    public stateEffect(value: boolean | undefined): this {
+    stateEffect(value: boolean | undefined): this {
         return this
     }
-    public buttonStyle(value: ButtonStyleMode | undefined): this {
+    buttonStyle(value: ButtonStyleMode | undefined): this {
         return this
     }
-    public controlSize(value: ControlSize | undefined): this {
+    controlSize(value: ControlSize | undefined): this {
         return this
     }
-    public role(value: ButtonRole | undefined): this {
+    role(value: ButtonRole | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: Length | undefined): this {
+    fontSize(value: Length | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
+    fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
         return this
     }
-    public labelStyle(value: ButtonLabelStyle | undefined): this {
+    labelStyle(value: ButtonLabelStyle | undefined): this {
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: number | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -627,7 +627,7 @@ export class ButtonConfiguration_serializer {
             triggerClickTmpBufBufArgsSerializer.writePointer(triggerClickTmpBufBufCallSync);
             triggerClickTmpBufBufArgsSerializer.writeNumber(xPos);
             triggerClickTmpBufBufArgsSerializer.writeNumber(yPos);
-            InteropNativeModule._CallCallback(-1964292933, triggerClickTmpBufBufArgsSerializer.asBuffer(), triggerClickTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1964292933, triggerClickTmpBufBufArgsSerializer.asBuffer(), triggerClickTmpBufBufArgsSerializer.length());
             triggerClickTmpBufBufArgsSerializer.release();
             return;
         }

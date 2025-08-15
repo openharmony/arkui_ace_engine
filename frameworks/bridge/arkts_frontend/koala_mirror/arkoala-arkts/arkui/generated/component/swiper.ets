@@ -28,11 +28,11 @@ import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics, LengthMetrics_serializer } from "./../Graphics"
 export interface SwiperContentTransitionProxy {
@@ -926,95 +926,94 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
-    attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
-    public index(value: number | Bindable<number> | undefined): this {
+    index(value: number | Bindable<number> | undefined): this {
         return this
     }
-    public interval(value: number | undefined): this {
+    interval(value: number | undefined): this {
         return this
     }
-    public indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
+    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
         return this
     }
-    public loop(value: boolean | undefined): this {
+    loop(value: boolean | undefined): this {
         return this
     }
-    public duration(value: number | undefined): this {
+    duration(value: number | undefined): this {
         return this
     }
-    public vertical(value: boolean | undefined): this {
+    vertical(value: boolean | undefined): this {
         return this
     }
-    public itemSpace(value: number | string | undefined): this {
+    itemSpace(value: number | string | undefined): this {
         return this
     }
-    public displayMode(value: SwiperDisplayMode | undefined): this {
+    displayMode(value: SwiperDisplayMode | undefined): this {
         return this
     }
-    public cachedCount(value: number | undefined): this {
+    cachedCount(value: number | undefined): this {
         return this
     }
-    public effectMode(value: EdgeEffect | undefined): this {
+    effectMode(value: EdgeEffect | undefined): this {
         return this
     }
-    public disableSwipe(value: boolean | undefined): this {
+    disableSwipe(value: boolean | undefined): this {
         return this
     }
-    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
+    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
         return this
     }
-    public onChange(value: ((value0: number) => void) | undefined): this {
+    onChange(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onSelected(value: ((value0: number) => void) | undefined): this {
+    onSelected(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onUnselected(value: ((value0: number) => void) | undefined): this {
+    onUnselected(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
+    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         return this
     }
-    public onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
+    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
         return this
     }
-    public onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
+    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
         return this
     }
-    public nestedScroll(value: SwiperNestedScrollMode | undefined): this {
+    nestedScroll(value: SwiperNestedScrollMode | undefined): this {
         return this
     }
-    public customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
+    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
         return this
     }
-    public onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
+    onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
         return this
     }
-    public indicatorInteractive(value: boolean | undefined): this {
+    indicatorInteractive(value: boolean | undefined): this {
         return this
     }
-    public pageFlipMode(value: PageFlipMode | undefined): this {
+    pageFlipMode(value: PageFlipMode | undefined): this {
         return this
     }
-    public onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
+    onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
         return this
     }
-    public autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
+    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
         return this
     }
-    public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
+    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
         return this
     }
-    public cachedCount(count: number | undefined, isShown: boolean | undefined): this {
+    cachedCount(count: number | undefined, isShown: boolean | undefined): this {
         return this
     }
-    public displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         return this
     }
-    public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         return this
     }
-    public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1638,7 +1637,7 @@ export class SwiperContentAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
             SwiperContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, value0);
-            InteropNativeModule._CallCallback(-416053361, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -416053361, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
             transitionTmpBufBufArgsSerializer.release();
             return;
         }

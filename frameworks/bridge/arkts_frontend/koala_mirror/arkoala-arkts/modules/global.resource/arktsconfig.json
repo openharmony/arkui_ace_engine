@@ -4,6 +4,7 @@
         "baseUrl": "./src",
         "outDir": "build",
         "paths": {
+            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"]
         }
     },
     "include": ["./src/*.ets"]

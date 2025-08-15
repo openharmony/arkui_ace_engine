@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkScrollBarPeer, ScrollBarAttribute } from "./component/scrollBar"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class ScrollBarModifier extends CommonMethodModifier implements ScrollBarAttribute,AttributeModifier<ScrollBarAttribute> {
     _instanceId: number = -1;

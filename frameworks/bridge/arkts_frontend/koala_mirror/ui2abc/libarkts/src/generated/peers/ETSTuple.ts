@@ -36,37 +36,36 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSTuple extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 83)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSTuple(): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple(global.context))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSTuple(original?: ETSTuple): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple(global.context, passNode(original)))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
     static create1ETSTuple(size: number): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple1(global.context, size))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple1(global.context, size), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
     static update1ETSTuple(original: ETSTuple | undefined, size: number): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple1(global.context, passNode(original), size))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple1(global.context, passNode(original), size), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
     static create2ETSTuple(typeList: readonly TypeNode[]): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple2(global.context, passNodeArray(typeList), typeList.length))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._CreateETSTuple2(global.context, passNodeArray(typeList), typeList.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
     static update2ETSTuple(original: ETSTuple | undefined, typeList: readonly TypeNode[]): ETSTuple {
-        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple2(global.context, passNode(original), passNodeArray(typeList), typeList.length))
+        const result: ETSTuple = new ETSTuple(global.generatedEs2panda._UpdateETSTuple2(global.context, passNode(original), passNodeArray(typeList), typeList.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)
         result.setChildrenParentPtr()
         return result
     }
@@ -87,5 +86,5 @@ export function isETSTuple(node: object | undefined): node is ETSTuple {
     return node instanceof ETSTuple
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE, (peer: KNativePointer) => new ETSTuple(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE, (peer: KNativePointer) => new ETSTuple(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TUPLE))
 }

@@ -32,7 +32,6 @@ import { Resource } from "global.resource"
 import { Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, Rectangle_serializer, AnimateParam_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
 import { LengthMetrics, LengthMetrics_serializer } from "./../Graphics"
 import { LevelMode, ImmersiveMode, LevelOrder, LevelOrder_serializer } from "./../framework/ohos.promptAction"
-import { extractors } from "#handwritten"
 import { Resource_serializer } from "./../framework/resource"
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {
@@ -68,11 +67,20 @@ export class CustomDialogController implements MaterializedBase {
         this.close_serialize()
         return
     }
+    public getExternalOptions(): CustomDialogControllerExternalOptions {
+        return this.getExternalOptions_serialize()
+    }
     private open_serialize(): void {
         ArkUIGeneratedNativeModule._CustomDialogController_open(this.peer!.ptr)
     }
     private close_serialize(): void {
         ArkUIGeneratedNativeModule._CustomDialogController_close(this.peer!.ptr)
+    }
+    private getExternalOptions_serialize(): CustomDialogControllerExternalOptions {
+        const retval  = ArkUIGeneratedNativeModule._CustomDialogController_getExternalOptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : CustomDialogControllerExternalOptions = CustomDialogControllerExternalOptions_serializer.read(retvalDeserializer)
+        return returnResult
     }
 }
 export interface CustomDialogControllerOptions {
@@ -115,6 +123,9 @@ export interface CustomDialogControllerOptions {
     levelOrder?: LevelOrder;
     focusable?: boolean;
 }
+export interface CustomDialogControllerExternalOptions {
+    customStyle?: boolean;
+}
 export class CustomDialogController_serializer {
     public static write(buffer: SerializerBase, value: CustomDialogController): void {
         let valueSerializer : SerializerBase = buffer
@@ -124,6 +135,30 @@ export class CustomDialogController_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return CustomDialogControllerInternal.fromPtr(ptr)
+    }
+}
+export class CustomDialogControllerExternalOptions_serializer {
+    public static write(buffer: SerializerBase, value: CustomDialogControllerExternalOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForCustomStyle  = value.customStyle
+        if (valueHolderForCustomStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCustomStyleTmpValue  = valueHolderForCustomStyle!
+            valueSerializer.writeBoolean(valueHolderForCustomStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomDialogControllerExternalOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const customStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let customStyleTmpBuf : boolean | undefined
+        if ((customStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            customStyleTmpBuf = valueDeserializer.readBoolean()
+        }
+        const customStyleTmpResult : boolean | undefined = customStyleTmpBuf
+        let value : CustomDialogControllerExternalOptions = ({customStyle: customStyleTmpResult} as CustomDialogControllerExternalOptions)
+        return value
     }
 }
 export class CustomDialogControllerOptions_serializer {
@@ -585,7 +620,7 @@ export class CustomDialogControllerOptions_serializer {
                 builderTmpBufBufUBufArgsSerializer.writeInt32(builderTmpBufBufUBufResource.resourceId);
                 builderTmpBufBufUBufArgsSerializer.writePointer(builderTmpBufBufUBufCall);
                 builderTmpBufBufUBufArgsSerializer.writePointer(builderTmpBufBufUBufCallSync);
-                InteropNativeModule._CallCallback(737226752, builderTmpBufBufUBufArgsSerializer.asBuffer(), builderTmpBufBufUBufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBufBufUBufArgsSerializer.asBuffer(), builderTmpBufBufUBufArgsSerializer.length());
                 builderTmpBufBufUBufArgsSerializer.release();
                 return;
             }
@@ -606,7 +641,7 @@ export class CustomDialogControllerOptions_serializer {
                 cancelTmpBuf_BufArgsSerializer.writeInt32(cancelTmpBuf_BufResource.resourceId);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCall);
                 cancelTmpBuf_BufArgsSerializer.writePointer(cancelTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, cancelTmpBuf_BufArgsSerializer.asBuffer(), cancelTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, cancelTmpBuf_BufArgsSerializer.asBuffer(), cancelTmpBuf_BufArgsSerializer.length());
                 cancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -748,7 +783,7 @@ export class CustomDialogControllerOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCallSync);
                 DismissDialogAction_serializer.write(onWillDismissTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(-2095828093, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2095828093, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -919,7 +954,7 @@ export class CustomDialogControllerOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -936,7 +971,7 @@ export class CustomDialogControllerOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -953,7 +988,7 @@ export class CustomDialogControllerOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -970,7 +1005,7 @@ export class CustomDialogControllerOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }

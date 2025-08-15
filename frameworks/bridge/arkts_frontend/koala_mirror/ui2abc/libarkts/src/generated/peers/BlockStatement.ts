@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class BlockStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 7)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createBlockStatement(statementList: readonly Statement[]): BlockStatement {
-        const result: BlockStatement = new BlockStatement(global.generatedEs2panda._CreateBlockStatement(global.context, passNodeArray(statementList), statementList.length))
+        const result: BlockStatement = new BlockStatement(global.generatedEs2panda._CreateBlockStatement(global.context, passNodeArray(statementList), statementList.length), Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateBlockStatement(original: BlockStatement | undefined, statementList: readonly Statement[]): BlockStatement {
-        const result: BlockStatement = new BlockStatement(global.generatedEs2panda._UpdateBlockStatement(global.context, passNode(original), passNodeArray(statementList), statementList.length))
+        const result: BlockStatement = new BlockStatement(global.generatedEs2panda._UpdateBlockStatement(global.context, passNode(original), passNodeArray(statementList), statementList.length), Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -92,5 +91,5 @@ export function isBlockStatement(node: object | undefined): node is BlockStateme
     return node instanceof BlockStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT, (peer: KNativePointer) => new BlockStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT, (peer: KNativePointer) => new BlockStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT))
 }

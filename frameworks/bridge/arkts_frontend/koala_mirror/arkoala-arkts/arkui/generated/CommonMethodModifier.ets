@@ -16,9 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, GestureModifier } from "#handwritten"
+import { AttributeModifier, GestureModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCommonMethodPeer, LayoutPolicy, DrawModifier, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, MouseEvent, TouchEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { int32 } from "@koalaui/common"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
 import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
@@ -2264,7 +2265,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._alignRules_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRules0Attribute((this._alignRules_0_0value as AlignRuleOption | undefined));
+                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((this._alignRules_0_0value as AlignRuleOption | undefined));
                     this._alignRules_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2274,7 +2275,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._alignRules_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRules0Attribute((undefined as AlignRuleOption | undefined));
+                    peer.setAlignRulesWithAlignRuleOptionTypedValueAttribute((undefined as AlignRuleOption | undefined));
                 }
             }
         }
@@ -2282,7 +2283,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._alignRules_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAlignRules1Attribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((this._alignRules_1_0value as LocalizedAlignRuleOptions | undefined));
                     this._alignRules_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2292,7 +2293,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._alignRules_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAlignRules1Attribute((undefined as LocalizedAlignRuleOptions | undefined));
+                    peer.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute((undefined as LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
@@ -2804,7 +2805,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityGroup_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityGroup0Attribute((this._accessibilityGroup_0_0value as boolean | undefined));
+                    peer.setAccessibilityGroupWithValueAttribute((this._accessibilityGroup_0_0value as boolean | undefined));
                     this._accessibilityGroup_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2814,7 +2815,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityGroup_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityGroup0Attribute((undefined as boolean | undefined));
+                    peer.setAccessibilityGroupWithValueAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -2822,7 +2823,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityText_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityText0Attribute((this._accessibilityText_0_0value as string | undefined));
+                    peer.setAccessibilityTextOfStringTypeAttribute((this._accessibilityText_0_0value as string | undefined));
                     this._accessibilityText_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2832,7 +2833,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityText_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityText0Attribute((undefined as string | undefined));
+                    peer.setAccessibilityTextOfStringTypeAttribute((undefined as string | undefined));
                 }
             }
         }
@@ -2912,7 +2913,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityText_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityText1Attribute((this._accessibilityText_1_0value as Resource | undefined));
+                    peer.setAccessibilityTextOfResourceTypeAttribute((this._accessibilityText_1_0value as Resource | undefined));
                     this._accessibilityText_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2922,7 +2923,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityText_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityText1Attribute((undefined as Resource | undefined));
+                    peer.setAccessibilityTextOfResourceTypeAttribute((undefined as Resource | undefined));
                 }
             }
         }
@@ -2984,7 +2985,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityDescription_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityDescription0Attribute((this._accessibilityDescription_0_0value as string | undefined));
+                    peer.setAccessibilityDescriptionOfStringTypeAttribute((this._accessibilityDescription_0_0value as string | undefined));
                     this._accessibilityDescription_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -2994,7 +2995,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityDescription_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityDescription0Attribute((undefined as string | undefined));
+                    peer.setAccessibilityDescriptionOfStringTypeAttribute((undefined as string | undefined));
                 }
             }
         }
@@ -3002,7 +3003,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityDescription_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityDescription1Attribute((this._accessibilityDescription_1_0value as Resource | undefined));
+                    peer.setAccessibilityDescriptionOfResourceTypeAttribute((this._accessibilityDescription_1_0value as Resource | undefined));
                     this._accessibilityDescription_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -3012,7 +3013,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityDescription_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityDescription1Attribute((undefined as Resource | undefined));
+                    peer.setAccessibilityDescriptionOfResourceTypeAttribute((undefined as Resource | undefined));
                 }
             }
         }
@@ -4010,7 +4011,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         {
             switch (this._accessibilityGroup_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAccessibilityGroup1Attribute((this._accessibilityGroup_1_0value as boolean | undefined), (this._accessibilityGroup_1_1value as AccessibilityOptions | undefined));
+                    peer.setAccessibilityGroupWithConfigAttribute((this._accessibilityGroup_1_0value as boolean | undefined), (this._accessibilityGroup_1_1value as AccessibilityOptions | undefined));
                     this._accessibilityGroup_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -4020,7 +4021,7 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
                 }
                 default: {
                     this._accessibilityGroup_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAccessibilityGroup1Attribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                    peer.setAccessibilityGroupWithConfigAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
                 }
             }
         }
@@ -8806,12 +8807,12 @@ export class CommonMethodModifier implements CommonMethod,AttributeModifier<Comm
         }
         return this
     }
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+    accessibilityGroup(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
         if (((this._accessibilityGroup_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._accessibilityGroup_1_0value) !== (isGroup)) || (true))
         {
             this._accessibilityGroup_1_flag = AttributeUpdaterFlag.UPDATE
             this._accessibilityGroup_1_0value = isGroup
-            this._accessibilityGroup_1_1value = accessibilityOptions
+            this._accessibilityGroup_1_1value = config
         } else
         {
             this._accessibilityGroup_1_flag = AttributeUpdaterFlag.SKIP

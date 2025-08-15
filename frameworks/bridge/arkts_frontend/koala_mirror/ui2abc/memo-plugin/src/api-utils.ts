@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { getDeclResolveGensym, getMemoFunctionKind, MemoFunctionKind } from "./utils"
+import { getMemoFunctionKind, getMemoParameterKind, MemoFunctionKind } from "./utils"
 
 /**
  * Type of node which can be returned by getDecl and correspond to node which can have memo annotation
@@ -46,6 +46,13 @@ export type MemoAnnotatableExpression =
 export type MemoAnnotatableType =
       arkts.ETSFunctionType
     | arkts.ETSUnionType
+
+/**
+ * Type of type node which can correspond to functional memo type
+ */
+export type MemoAllowedType =
+      MemoAnnotatableType
+    | arkts.ETSTypeReference
 
 /**
  * Type of node which can have functional memo annotation
@@ -86,6 +93,10 @@ export function isMemoAnnotatable(node: arkts.AstNode | undefined): node is Memo
     return isMemoAnnotatableExpression(node) || isMemoAnnotatableType(node)
 }
 
+export function isMemoAllowedType(node: arkts.AstNode | undefined): node is MemoAllowedType {
+    return isMemoAnnotatableType(node) || arkts.isETSTypeReference(node)
+}
+
 export function getName(node: Memoizable): string {
     if (arkts.isMethodDefinition(node)) {
         return node.id!.name
@@ -115,31 +126,9 @@ export function isMemo(node: Memoizable) {
         }
     }
     if (arkts.isETSParameterExpression(node)) {
-        const kind = getMemoFunctionKind(node)
+        const kind = getMemoParameterKind(node)
         if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
             return true
-        }
-        if (isMemoAnnotatableType(node.typeAnnotation)) {
-            const kind = getMemoFunctionKind(node.typeAnnotation)
-            if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
-                return true
-            }
-        }
-        if (arkts.isETSTypeReference(node.typeAnnotation)) {
-            const name = node.typeAnnotation.part?.name
-            if (name) {
-                const decl = getDeclResolveGensym(name)
-                if (arkts.isTSTypeAliasDeclaration(decl)) {
-                    const kind = isMemoAnnotatableType(decl.typeAnnotation) && getMemoFunctionKind(decl.typeAnnotation)
-                    if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
-                        return true
-                    }
-                    const kind2 = getMemoFunctionKind(decl)
-                    if (kind2 == MemoFunctionKind.MEMO || kind2 == MemoFunctionKind.INTRINSIC) {
-                        return true
-                    }
-                }
-            }
         }
     }
     if (arkts.isIdentifier(node)) {
@@ -300,9 +289,15 @@ export function getReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
         )
         if (signatureReturnType) {
             if (scriptFunction.id) {
-                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+                arkts.trace(
+                    `Use inferred type of script function`,
+                    () => `Using inferred return type ${signatureReturnType.dumpSrc()} for @memo function ${scriptFunction.id?.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`
+                )
             } else {
-                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+                arkts.trace(
+                    `Use inferred type of script function`,
+                    () => `Using inferred return type ${signatureReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`
+                )
             }
             return signatureReturnType
         }
@@ -313,9 +308,15 @@ export function getReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
     )
     if (preferredReturnType) {
         if (scriptFunction.id) {
-            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            arkts.trace(
+                `Use inferred type of script function`,
+                () => `Using inferred return type ${preferredReturnType.dumpSrc()} for @memo function ${scriptFunction.id?.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`
+            )
         } else {
-            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            arkts.trace(
+                `Use inferred type of script function`,
+                () => `Using inferred return type ${preferredReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`
+            )
         }
         return preferredReturnType
     }

@@ -17,18 +17,21 @@ import { isNullPtr, KInt, KNativePointer, nullptr } from "@koalaui/interop"
 import { global } from "../static/global"
 import { allFlags, unpackNode, unpackNodeArray, unpackNonNullableNode, unpackString } from "../utilities/private"
 import { throwError } from "../../utils"
-import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
+import { Es2pandaAstNodeType, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { ArktsObject } from "./ArktsObject"
 import { SourcePosition } from "../../generated/peers/SourcePosition"
 import { NodeCache } from "../node-cache"
 
 export abstract class AstNode extends ArktsObject {
-    protected constructor(peer: KNativePointer) {
+    public readonly astNodeType: Es2pandaAstNodeType
+
+    protected constructor(peer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
         global.profiler.nodeCreated()
         if (isNullPtr(peer)) {
             throwError(`attempted to create AstNode from nullptr`)
         }
         super(peer)
+        this.astNodeType = astNodeType
         this.setChildrenParentPtr()
         NodeCache.addToCache(peer, this)
     }
@@ -153,9 +156,8 @@ export abstract class AstNode extends ArktsObject {
     public override onUpdate(original: AstNode): void {
         // Improve: Update modifiers only for specific AST nodes in the generated factory code
         this.modifierFlags = original.modifierFlags
-        global.generatedEs2panda._AstNodeSetOriginalNode(global.context, this.peer, original.originalPeer)
-        global.generatedEs2panda._AstNodeSetParent(global.context, this.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))
-        this.setChildrenParentPtr()
+
+        global.es2panda._AstNodeOnUpdate(global.context, this.peer, original.peer)
     }
 
     public get isExport(): boolean {

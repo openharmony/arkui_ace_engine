@@ -30,7 +30,6 @@ import { drawing } from "./ohos.graphics.drawing"
 import { WidthBreakpoint, HeightBreakpoint } from "./../component/enums"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
 export class PromptActionInternal {
     public static fromPtr(ptr: KPointer): PromptAction {
         return new PromptAction(ptr)

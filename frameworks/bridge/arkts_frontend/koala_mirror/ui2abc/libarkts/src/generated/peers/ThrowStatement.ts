@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class ThrowStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 148)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createThrowStatement(argument?: Expression): ThrowStatement {
-        const result: ThrowStatement = new ThrowStatement(global.generatedEs2panda._CreateThrowStatement(global.context, passNode(argument)))
+        const result: ThrowStatement = new ThrowStatement(global.generatedEs2panda._CreateThrowStatement(global.context, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateThrowStatement(original?: ThrowStatement, argument?: Expression): ThrowStatement {
-        const result: ThrowStatement = new ThrowStatement(global.generatedEs2panda._UpdateThrowStatement(global.context, passNode(original), passNode(argument)))
+        const result: ThrowStatement = new ThrowStatement(global.generatedEs2panda._UpdateThrowStatement(global.context, passNode(original), passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isThrowStatement(node: object | undefined): node is ThrowStateme
     return node instanceof ThrowStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT, (peer: KNativePointer) => new ThrowStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT, (peer: KNativePointer) => new ThrowStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_THROW_STATEMENT))
 }

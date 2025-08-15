@@ -25,6 +25,7 @@ export type KLong = long
 export type KUInt = KInt
 export type KBoolean = int
 export type KFloat = float
+export type KDouble = double;
 export type KPointer = long // look once again
 export type pointer = KPointer
 export type KNativePointer = KPointer

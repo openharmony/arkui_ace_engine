@@ -37,32 +37,31 @@ import { Literal } from "./Literal"
 import { extension_NumberLiteralValue } from "./../../reexport-for-generated"
 
 export class NumberLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 52)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createNumberLiteral(value: number): AstNode {
-        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._CreateNumberLiteral(global.context, value))
+        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._CreateNumberLiteral(global.context, value), Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateNumberLiteral(original: AstNode | undefined, value: number): AstNode {
-        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral(global.context, passNode(original), value))
+        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static update1NumberLiteral(original: AstNode | undefined, value: number): AstNode {
-        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral1(global.context, passNode(original), value))
+        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral1(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static update2NumberLiteral(original: AstNode | undefined, value: number): AstNode {
-        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral2(global.context, passNode(original), value))
+        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral2(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static update3NumberLiteral(original: AstNode | undefined, value: number): AstNode {
-        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral3(global.context, passNode(original), value))
+        const result: NumberLiteral = new NumberLiteral(global.generatedEs2panda._UpdateNumberLiteral3(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -76,5 +75,5 @@ export function isNumberLiteral(node: object | undefined): node is NumberLiteral
     return node instanceof NumberLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL, (peer: KNativePointer) => new NumberLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL, (peer: KNativePointer) => new NumberLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL))
 }

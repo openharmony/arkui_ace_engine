@@ -37,17 +37,16 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class UnaryExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 150)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createUnaryExpression(argument: Expression | undefined, unaryOperator: Es2pandaTokenType): UnaryExpression {
-        const result: UnaryExpression = new UnaryExpression(global.generatedEs2panda._CreateUnaryExpression(global.context, passNode(argument), unaryOperator))
+        const result: UnaryExpression = new UnaryExpression(global.generatedEs2panda._CreateUnaryExpression(global.context, passNode(argument), unaryOperator), Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateUnaryExpression(original: UnaryExpression | undefined, argument: Expression | undefined, unaryOperator: Es2pandaTokenType): UnaryExpression {
-        const result: UnaryExpression = new UnaryExpression(global.generatedEs2panda._UpdateUnaryExpression(global.context, passNode(original), passNode(argument), unaryOperator))
+        const result: UnaryExpression = new UnaryExpression(global.generatedEs2panda._UpdateUnaryExpression(global.context, passNode(original), passNode(argument), unaryOperator), Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -68,5 +67,5 @@ export function isUnaryExpression(node: object | undefined): node is UnaryExpres
     return node instanceof UnaryExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION, (peer: KNativePointer) => new UnaryExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION, (peer: KNativePointer) => new UnaryExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_UNARY_EXPRESSION))
 }

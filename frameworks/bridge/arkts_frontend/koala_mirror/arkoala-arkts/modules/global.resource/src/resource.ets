@@ -17,12 +17,14 @@
  * @kit ArkUI
  */
 
+import { int32, int64 } from "@koalaui/compat";
+
 export interface Resource {
 
     bundleName: string;
     moduleName: string;
     id: long;
-    params?: Array<String>;
+    params?: Array<string | int32 | int64 | double | Resource>;
     type?: int;
 }
 

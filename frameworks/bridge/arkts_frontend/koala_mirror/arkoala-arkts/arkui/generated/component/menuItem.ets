@@ -27,7 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { Color } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -254,25 +254,25 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
     labelFont_value?: Font | undefined
     labelFontColor_value?: ResourceColor | undefined
     attributeModifier_value?: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    public selected(value: boolean | Bindable<boolean> | undefined): this {
+    selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this {
+    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this {
         return this
     }
-    public onChange(value: ((selected: boolean) => void) | undefined): this {
+    onChange(value: ((selected: boolean) => void) | undefined): this {
         return this
     }
-    public contentFont(value: Font | undefined): this {
+    contentFont(value: Font | undefined): this {
         return this
     }
-    public contentFontColor(value: ResourceColor | undefined): this {
+    contentFontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public labelFont(value: Font | undefined): this {
+    labelFont(value: Font | undefined): this {
         return this
     }
-    public labelFontColor(value: ResourceColor | undefined): this {
+    labelFontColor(value: ResourceColor | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -553,7 +553,7 @@ export class MenuItemOptions_serializer {
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }

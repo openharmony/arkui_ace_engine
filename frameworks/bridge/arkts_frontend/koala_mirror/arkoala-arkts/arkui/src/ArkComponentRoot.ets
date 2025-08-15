@@ -18,6 +18,7 @@ import { mutableState, MutableState, NodeAttach, rememberDisposable, remember, R
 import { PeerNode } from "./PeerNode";
 import { ArkComponentRootPeer } from "#generated";
 import { ArkCustomComponent } from "./ArkCustomComponent"
+import { ArkCustomComponentRootPeer } from "./component/customComponent"
 import { int32 } from "@koalaui/common"
 import { CurrentRouterTransitionState, RouterTransitionVisibility } from "./Router";
 
@@ -35,7 +36,7 @@ export function ArkComponentRoot(
     content: () => void
 ) {
     NodeAttach<PeerNode>(
-        (): PeerNode => ArkComponentRootPeer.create(),
+        (): PeerNode => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode): void => {
             let state = CurrentRouterTransitionState()
             if (state) {

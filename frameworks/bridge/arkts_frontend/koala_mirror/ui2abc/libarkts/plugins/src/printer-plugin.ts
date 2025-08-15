@@ -38,7 +38,7 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
         parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
             console.log("[printer-plugin] Run parsed state plugin")
             const transform = printerTransformer(parsedJson)
-            const prog = arkts.arktsGlobal.compilerContext.program
+            const prog = arkts.arktsGlobal.compilerContext!.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
@@ -50,7 +50,7 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
         checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
             console.log("[printer-plugin] Run checked state plugin")
             const transform = printerTransformer(checkedJson)
-            const prog = arkts.arktsGlobal.compilerContext.program
+            const prog = arkts.arktsGlobal.compilerContext!.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)

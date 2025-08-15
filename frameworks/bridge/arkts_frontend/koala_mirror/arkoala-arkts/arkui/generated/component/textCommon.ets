@@ -28,7 +28,6 @@ import { Resource } from "global.resource"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
-import { extractors } from "#handwritten"
 export interface LayoutManager {
     getLineCount(): number
     getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity
@@ -539,7 +538,7 @@ export class EditMenuOptions_serializer {
             onCreateMenuTmpBufBufContinuationValue = value;
         }
             onCreateMenuTmpBufBufArgsSerializer.holdAndWriteCallback(onCreateMenuTmpBufBufContinuationCallback);
-            InteropNativeModule._CallCallback(312701677, onCreateMenuTmpBufBufArgsSerializer.asBuffer(), onCreateMenuTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 312701677, onCreateMenuTmpBufBufArgsSerializer.asBuffer(), onCreateMenuTmpBufBufArgsSerializer.length());
             onCreateMenuTmpBufBufArgsSerializer.release();
             return (onCreateMenuTmpBufBufContinuationValue as Array<TextMenuItem>);
         }
@@ -558,7 +557,7 @@ export class EditMenuOptions_serializer {
             onMenuItemClickTmpBufBufContinuationValue = value;
         }
             onMenuItemClickTmpBufBufArgsSerializer.holdAndWriteCallback(onMenuItemClickTmpBufBufContinuationCallback);
-            InteropNativeModule._CallCallback(-1106041422, onMenuItemClickTmpBufBufArgsSerializer.asBuffer(), onMenuItemClickTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1106041422, onMenuItemClickTmpBufBufArgsSerializer.asBuffer(), onMenuItemClickTmpBufBufArgsSerializer.length());
             onMenuItemClickTmpBufBufArgsSerializer.release();
             return (onMenuItemClickTmpBufBufContinuationValue as boolean);
         }
@@ -661,7 +660,7 @@ export class StyledStringChangedListener_serializer {
                 onWillChangeTmpBuf_BufContinuationValue = value;
             }
                 onWillChangeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onWillChangeTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallback(2116745428, onWillChangeTmpBuf_BufArgsSerializer.asBuffer(), onWillChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 2116745428, onWillChangeTmpBuf_BufArgsSerializer.asBuffer(), onWillChangeTmpBuf_BufArgsSerializer.length());
                 onWillChangeTmpBuf_BufArgsSerializer.release();
                 return (onWillChangeTmpBuf_BufContinuationValue as boolean);
             }
@@ -680,7 +679,7 @@ export class StyledStringChangedListener_serializer {
                 onDidChangeTmpBuf_BufArgsSerializer.writePointer(onDidChangeTmpBuf_BufCallSync);
                 TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeBefore);
                 TextRange_serializer.write(onDidChangeTmpBuf_BufArgsSerializer, rangeAfter);
-                InteropNativeModule._CallCallback(1648184341, onDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDidChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1648184341, onDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDidChangeTmpBuf_BufArgsSerializer.length());
                 onDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1159,7 +1158,7 @@ export class TextDataDetectorConfig_serializer {
                 onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCall);
                 onDetectResultUpdateTmpBuf_BufArgsSerializer.writePointer(onDetectResultUpdateTmpBuf_BufCallSync);
                 onDetectResultUpdateTmpBuf_BufArgsSerializer.writeString(value0);
-                InteropNativeModule._CallCallback(814634522, onDetectResultUpdateTmpBuf_BufArgsSerializer.asBuffer(), onDetectResultUpdateTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 814634522, onDetectResultUpdateTmpBuf_BufArgsSerializer.asBuffer(), onDetectResultUpdateTmpBuf_BufArgsSerializer.length());
                 onDetectResultUpdateTmpBuf_BufArgsSerializer.release();
                 return;
             }

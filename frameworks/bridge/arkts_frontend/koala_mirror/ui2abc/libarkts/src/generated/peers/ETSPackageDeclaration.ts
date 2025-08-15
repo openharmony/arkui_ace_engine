@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class ETSPackageDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 72)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSPackageDeclaration(name?: Expression): ETSPackageDeclaration {
-        const result: ETSPackageDeclaration = new ETSPackageDeclaration(global.generatedEs2panda._CreateETSPackageDeclaration(global.context, passNode(name)))
+        const result: ETSPackageDeclaration = new ETSPackageDeclaration(global.generatedEs2panda._CreateETSPackageDeclaration(global.context, passNode(name)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSPackageDeclaration(original?: ETSPackageDeclaration, name?: Expression): ETSPackageDeclaration {
-        const result: ETSPackageDeclaration = new ETSPackageDeclaration(global.generatedEs2panda._UpdateETSPackageDeclaration(global.context, passNode(original), passNode(name)))
+        const result: ETSPackageDeclaration = new ETSPackageDeclaration(global.generatedEs2panda._UpdateETSPackageDeclaration(global.context, passNode(original), passNode(name)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -57,5 +56,5 @@ export function isETSPackageDeclaration(node: object | undefined): node is ETSPa
     return node instanceof ETSPackageDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION, (peer: KNativePointer) => new ETSPackageDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION, (peer: KNativePointer) => new ETSPackageDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PACKAGE_DECLARATION))
 }

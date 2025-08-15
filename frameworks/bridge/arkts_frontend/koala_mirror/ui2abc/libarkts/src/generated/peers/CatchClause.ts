@@ -38,22 +38,21 @@ import { Expression } from "./Expression"
 import { TypedStatement } from "./TypedStatement"
 
 export class CatchClause extends TypedStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 11)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createCatchClause(param?: Expression, body?: BlockStatement): CatchClause {
-        const result: CatchClause = new CatchClause(global.generatedEs2panda._CreateCatchClause(global.context, passNode(param), passNode(body)))
+        const result: CatchClause = new CatchClause(global.generatedEs2panda._CreateCatchClause(global.context, passNode(param), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE)
         result.setChildrenParentPtr()
         return result
     }
     static updateCatchClause(original?: CatchClause, param?: Expression, body?: BlockStatement): CatchClause {
-        const result: CatchClause = new CatchClause(global.generatedEs2panda._UpdateCatchClause(global.context, passNode(original), passNode(param), passNode(body)))
+        const result: CatchClause = new CatchClause(global.generatedEs2panda._UpdateCatchClause(global.context, passNode(original), passNode(param), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE)
         result.setChildrenParentPtr()
         return result
     }
     static update1CatchClause(original?: CatchClause, other?: CatchClause): CatchClause {
-        const result: CatchClause = new CatchClause(global.generatedEs2panda._UpdateCatchClause1(global.context, passNode(original), passNode(other)))
+        const result: CatchClause = new CatchClause(global.generatedEs2panda._UpdateCatchClause1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE)
         result.setChildrenParentPtr()
         return result
     }
@@ -72,5 +71,5 @@ export function isCatchClause(node: object | undefined): node is CatchClause {
     return node instanceof CatchClause
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE, (peer: KNativePointer) => new CatchClause(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE, (peer: KNativePointer) => new CatchClause(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CATCH_CLAUSE))
 }

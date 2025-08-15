@@ -106,6 +106,18 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KDouble> {
+  using InteropType = ani_double;
+  static inline KDouble convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KDouble value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KDouble converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KLong> {
     using InteropType = ani_long;
     static inline KLong convertFrom(ani_env* env, InteropType value) {

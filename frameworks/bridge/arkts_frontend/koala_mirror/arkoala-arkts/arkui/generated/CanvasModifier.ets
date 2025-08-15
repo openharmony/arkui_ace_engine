@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCanvasPeer, CanvasAttribute } from "./component/canvas"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class CanvasModifier extends CommonMethodModifier implements CanvasAttribute,AttributeModifier<CanvasAttribute> {

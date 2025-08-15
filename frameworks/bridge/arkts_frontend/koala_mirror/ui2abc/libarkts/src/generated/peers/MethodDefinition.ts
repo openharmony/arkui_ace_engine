@@ -42,12 +42,11 @@ import { extension_MethodDefinitionOnUpdate } from "./../../reexport-for-generat
 import { extension_MethodDefinitionSetChildrenParentPtr } from "./../../reexport-for-generated"
 
 export class MethodDefinition extends ClassElement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 47)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createMethodDefinition(kind: Es2pandaMethodDefinitionKind, key: Expression | undefined, value: Expression | undefined, modifiers: Es2pandaModifierFlags, isComputed: boolean, overloads?: readonly MethodDefinition[]): MethodDefinition {
-        const result: MethodDefinition = new MethodDefinition(global.generatedEs2panda._CreateMethodDefinition(global.context, kind, passNode(key), passNode(value), modifiers, isComputed))
+        const result: MethodDefinition = new MethodDefinition(global.generatedEs2panda._CreateMethodDefinition(global.context, kind, passNode(key), passNode(value), modifiers, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION)
         if (overloads)
         {
             result.setOverloads(overloads)
@@ -56,7 +55,7 @@ export class MethodDefinition extends ClassElement {
         return result
     }
     static updateMethodDefinition(original: MethodDefinition | undefined, kind: Es2pandaMethodDefinitionKind, key: Expression | undefined, value: Expression | undefined, modifiers: Es2pandaModifierFlags, isComputed: boolean, overloads?: readonly MethodDefinition[]): MethodDefinition {
-        const result: MethodDefinition = new MethodDefinition(global.generatedEs2panda._UpdateMethodDefinition(global.context, passNode(original), kind, passNode(key), passNode(value), modifiers, isComputed))
+        const result: MethodDefinition = new MethodDefinition(global.generatedEs2panda._UpdateMethodDefinition(global.context, passNode(original), kind, passNode(key), passNode(value), modifiers, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION)
         if (overloads)
         {
             result.setOverloads(overloads)
@@ -150,5 +149,5 @@ export function isMethodDefinition(node: object | undefined): node is MethodDefi
     return node instanceof MethodDefinition
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION, (peer: KNativePointer) => new MethodDefinition(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION, (peer: KNativePointer) => new MethodDefinition(peer, Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION))
 }

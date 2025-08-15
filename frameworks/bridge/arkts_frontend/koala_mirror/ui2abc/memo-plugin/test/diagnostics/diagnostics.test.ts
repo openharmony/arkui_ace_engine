@@ -60,7 +60,7 @@ suite("@memo function out of memo context", () => {
     diagnostics(
         "Global memo call",
         "global-memo-call.ets",
-        `Calling @memo function foo from non-@memo context _$init$_`
+        `Calling @memo function foo from non-@memo context <cctor>`
     )
     diagnostics(
         "Memo in handler",

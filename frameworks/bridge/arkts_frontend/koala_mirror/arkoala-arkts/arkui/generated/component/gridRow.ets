@@ -23,7 +23,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ItemAlign } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -137,10 +137,10 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
     alignItems_value?: ItemAlign | undefined
     attributeModifier_value?: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
+    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
         return this
     }
-    public alignItems(value: ItemAlign | undefined): this {
+    alignItems(value: ItemAlign | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {

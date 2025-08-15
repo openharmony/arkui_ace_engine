@@ -35,8 +35,8 @@
                 "ohos.measure",
                 "ohos.multimodalInput",
                 "ohos.promptAction",
-                "ohos.web.webview",
                 "ohos.window",
+                "ohos.web.webview",
                 "idlize.stdlib",
                 "idlize.internal"
             ]

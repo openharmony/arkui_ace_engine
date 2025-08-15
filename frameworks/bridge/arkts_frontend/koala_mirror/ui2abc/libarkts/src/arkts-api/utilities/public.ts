@@ -17,7 +17,7 @@ import { global } from "../static/global"
 import { isNumber, throwError, withWarning } from "../../utils"
 import { KNativePointer, nullptr, KInt} from "@koalaui/interop"
 import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode, passString, unpackString, nodeType } from "./private"
-import { Es2pandaContextState, Es2pandaModifierFlags, Es2pandaMethodDefinitionKind, Es2pandaPrimitiveType, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
+import { Es2pandaContextState, Es2pandaModifierFlags, Es2pandaMethodDefinitionKind, Es2pandaPrimitiveType, Es2pandaScriptFunctionFlags, Es2pandaAstNodeType } from "../../generated/Es2pandaEnums"
 import type { AstNode } from "../peers/AstNode"
 import { SourcePosition } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
@@ -49,7 +49,7 @@ import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
 import { listPrograms } from "../plugins"
 import { factory } from "../factory/nodeFactory"
-import { trace } from "../../tracer"
+import { traceGlobal } from "../../tracer"
 
 /**
  * Improve: Replace or remove with better naming
@@ -66,7 +66,7 @@ export function createETSModuleFromContext(): ETSModule {
         throw new Error(`AST is null for program ${program.toString(16)}`)
 
     }
-    return new ETSModule(ast)
+    return new ETSModule(ast, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE)
 }
 
 /**
@@ -87,7 +87,7 @@ export function createETSModuleFromSource(
     let program = global.generatedEs2panda._ContextProgram(global.compilerContext.peer)
     if (program == nullptr)
         throw new Error(`Program is null for ${source} 0x${global.compilerContext.peer.toString(16)}`)
-    return new ETSModule(global.generatedEs2panda._ProgramAst(global.context, program))
+    return new ETSModule(global.generatedEs2panda._ProgramAst(global.context, program), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE)
 }
 
 export function metaDatabase(fileName: string): string {
@@ -97,7 +97,7 @@ export function metaDatabase(fileName: string): string {
 
 export function checkErrors() {
     if (global.es2panda._ContextState(global.context) === Es2pandaContextState.ES2PANDA_STATE_ERROR) {
-        trace(() => `Terminated due to compilation errors occured`)
+        traceGlobal(() => `Terminated due to compilation errors occured`)
         console.log(unpackString(global.generatedEs2panda._GetAllErrorMessages(global.context)))
         // global.es2panda._DestroyConfig(global.config)
         process.exit(1)
@@ -110,9 +110,9 @@ export function proceedToState(state: Es2pandaContextState): void {
     }
     NodeCache.clear()
     const before = Date.now()
-    trace(() => `Proceeding to state ${Es2pandaContextState[state]}: start`)
+    traceGlobal(() => `Proceeding to state ${Es2pandaContextState[state]}: start`)
     global.es2panda._ProceedToState(global.context, state)
-    trace(() => `Proceeding to state ${Es2pandaContextState[state]}: done`)
+    traceGlobal(() => `Proceeding to state ${Es2pandaContextState[state]}: done`)
     const after = Date.now()
     global.profiler.proceededToState(after-before)
     checkErrors()
@@ -121,24 +121,24 @@ export function proceedToState(state: Es2pandaContextState): void {
 /** @deprecated Use {@link rebindContext} instead */
 export function rebindSubtree(node: AstNode): void {
     NodeCache.clear()
-    trace(() => `Rebind: start`)
+    traceGlobal(() => `Rebind: start`)
     global.es2panda._AstNodeRebind(global.context, node.peer)
-    trace(() => `Rebind: done`)
+    traceGlobal(() => `Rebind: done`)
     checkErrors()
 }
 
 /** @deprecated Use {@link recheckSubtree} instead */
 export function recheckSubtree(node: AstNode): void {
     NodeCache.clear()
-    trace(() => `Recheck: start`)
+    traceGlobal(() => `Recheck: start`)
     global.generatedEs2panda._AstNodeRecheck(global.context, node.peer)
-    trace(() => `Recheck: done`)
+    traceGlobal(() => `Recheck: done`)
     checkErrors()
 }
 
 export function rebindContext(context: KNativePointer = global.context): void {
     NodeCache.clear()
-    trace(() => `Rebind: start`)
+    traceGlobal(() => `Rebind: start`)
     global.es2panda._AstNodeRebind(
         context,
         global.generatedEs2panda._ProgramAst(
@@ -148,13 +148,13 @@ export function rebindContext(context: KNativePointer = global.context): void {
             )
         )
     )
-    trace(() => `Rebind: done`)
+    traceGlobal(() => `Rebind: done`)
     checkErrors()
 }
 
 export function recheckContext(context: KNativePointer = global.context): void {
     NodeCache.clear()
-    trace(() => `Recheck: start`)
+    traceGlobal(() => `Recheck: start`)
     global.generatedEs2panda._AstNodeRecheck(
         context,
         global.generatedEs2panda._ProgramAst(
@@ -164,7 +164,7 @@ export function recheckContext(context: KNativePointer = global.context): void {
             )
         )
     )
-    trace(() => `Recheck: done`)
+    traceGlobal(() => `Recheck: done`)
     checkErrors()
 }
 
@@ -387,4 +387,11 @@ export function originalSourcePositionString(node: AstNode | undefined) {
         return `[${global.filePath}${sourcePosition.toString()}]`
     }
     return `[${program.absoluteName}${sourcePosition.toString()}]`
+}
+
+export function generateStaticDeclarationsFromContext(outputPath: string): KInt {
+    return global.generatedEs2panda._GenerateStaticDeclarationsFromContext(
+        global.context,
+        passString(outputPath)
+    );
 }

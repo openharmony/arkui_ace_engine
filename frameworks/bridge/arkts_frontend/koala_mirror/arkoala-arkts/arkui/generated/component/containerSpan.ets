@@ -66,7 +66,7 @@ export interface ContainerSpanAttribute {
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
     attributeModifier_value?: AttributeModifier<ContainerSpanAttribute> | undefined
-    public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {

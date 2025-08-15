@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSVoidKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 96)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSVoidKeyword(): TSVoidKeyword {
-        const result: TSVoidKeyword = new TSVoidKeyword(global.generatedEs2panda._CreateTSVoidKeyword(global.context))
+        const result: TSVoidKeyword = new TSVoidKeyword(global.generatedEs2panda._CreateTSVoidKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSVoidKeyword(original?: TSVoidKeyword): TSVoidKeyword {
-        const result: TSVoidKeyword = new TSVoidKeyword(global.generatedEs2panda._UpdateTSVoidKeyword(global.context, passNode(original)))
+        const result: TSVoidKeyword = new TSVoidKeyword(global.generatedEs2panda._UpdateTSVoidKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSVoidKeyword(node: object | undefined): node is TSVoidKeyword
     return node instanceof TSVoidKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD, (peer: KNativePointer) => new TSVoidKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD, (peer: KNativePointer) => new TSVoidKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_VOID_KEYWORD))
 }

@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -100,16 +100,16 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
     getPeer(): ArkBadgePeer {
         return (this.peer as ArkBadgePeer)
     }
-    public setBadgeOptions(value: BadgeParamWithNumber): this {
-        if (this.checkPriority("setBadgeOptions")) {
+    public setBadgeOptions0(value: BadgeParamWithNumber): this {
+        if (this.checkPriority("setBadgeOptions0")) {
             const value_casted = value as (BadgeParamWithNumber)
             this.getPeer()?.setBadgeOptions0Attribute(value_casted)
             return this
         }
         return this
     }
-    public setBadgeOptions(value: BadgeParamWithString): this {
-        if (this.checkPriority("setBadgeOptions")) {
+    public setBadgeOptions1(value: BadgeParamWithString): this {
+        if (this.checkPriority("setBadgeOptions1")) {
             const value_casted = value as (BadgeParamWithString)
             this.getPeer()?.setBadgeOptions1Attribute(value_casted)
             return this
@@ -137,7 +137,7 @@ export function Badge(
         return new ArkBadgeComponent()
     })
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer): void => {
-        receiver.setBadgeOptions(value)
+        receiver.setBadgeOptions0(value)
         style?.(receiver)
         content_?.()
         receiver.applyAttributesFinish()
@@ -157,7 +157,7 @@ export function Badge(
         return new ArkBadgeComponent()
     })
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer): void => {
-        receiver.setBadgeOptions(value)
+        receiver.setBadgeOptions1(value)
         style?.(receiver)
         content_?.()
         receiver.applyAttributesFinish()

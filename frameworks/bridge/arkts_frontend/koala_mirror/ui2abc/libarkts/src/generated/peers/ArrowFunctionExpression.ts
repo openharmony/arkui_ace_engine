@@ -39,12 +39,11 @@ import { ScriptFunction } from "./ScriptFunction"
 import { TypeNode } from "./TypeNode"
 
 export class ArrowFunctionExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 0)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createArrowFunctionExpression(func?: ScriptFunction, annotations?: readonly AnnotationUsage[]): ArrowFunctionExpression {
-        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._CreateArrowFunctionExpression(global.context, passNode(func)))
+        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._CreateArrowFunctionExpression(global.context, passNode(func)), Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -53,7 +52,7 @@ export class ArrowFunctionExpression extends Expression {
         return result
     }
     static updateArrowFunctionExpression(original?: ArrowFunctionExpression, func?: ScriptFunction, annotations?: readonly AnnotationUsage[]): ArrowFunctionExpression {
-        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._UpdateArrowFunctionExpression(global.context, passNode(original), passNode(func)))
+        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._UpdateArrowFunctionExpression(global.context, passNode(original), passNode(func)), Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -62,7 +61,7 @@ export class ArrowFunctionExpression extends Expression {
         return result
     }
     static update1ArrowFunctionExpression(original?: ArrowFunctionExpression, other?: ArrowFunctionExpression, annotations?: readonly AnnotationUsage[]): ArrowFunctionExpression {
-        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._UpdateArrowFunctionExpression1(global.context, passNode(original), passNode(other)))
+        const result: ArrowFunctionExpression = new ArrowFunctionExpression(global.generatedEs2panda._UpdateArrowFunctionExpression1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -118,5 +117,5 @@ export function isArrowFunctionExpression(node: object | undefined): node is Arr
     return node instanceof ArrowFunctionExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION, (peer: KNativePointer) => new ArrowFunctionExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION, (peer: KNativePointer) => new ArrowFunctionExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION))
 }

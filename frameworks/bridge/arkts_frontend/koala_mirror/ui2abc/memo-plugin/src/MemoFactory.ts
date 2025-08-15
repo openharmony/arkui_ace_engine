@@ -338,7 +338,10 @@ export class factory {
         if (!preferredTypePointer) {
             return undefined
         }
-        console.log(`Using inferred object type ${arkts.unpackString(arkts.global.es2panda._Checker_TypeToString(arkts.global.context, preferredTypePointer))} for object ${arkts.originalSourcePositionString(node)}`)
+        arkts.trace(
+            `Use inferred type of object`, 
+            () => `Using inferred object type ${arkts.unpackString(arkts.global.es2panda._Checker_TypeToString(arkts.global.context, preferredTypePointer))} for object ${arkts.originalSourcePositionString(node)}`
+        )
         return arkts.factory.createOpaqueTypeNode(arkts.global.es2panda._Checker_TypeClone(arkts.global.context, preferredTypePointer))
     }
     static deduceArrowWrapperType(arrow: arkts.ArrowFunctionExpression): arkts.TypeNode|undefined {

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSAnyKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 93)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSAnyKeyword(): TSAnyKeyword {
-        const result: TSAnyKeyword = new TSAnyKeyword(global.generatedEs2panda._CreateTSAnyKeyword(global.context))
+        const result: TSAnyKeyword = new TSAnyKeyword(global.generatedEs2panda._CreateTSAnyKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSAnyKeyword(original?: TSAnyKeyword): TSAnyKeyword {
-        const result: TSAnyKeyword = new TSAnyKeyword(global.generatedEs2panda._UpdateTSAnyKeyword(global.context, passNode(original)))
+        const result: TSAnyKeyword = new TSAnyKeyword(global.generatedEs2panda._UpdateTSAnyKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSAnyKeyword(node: object | undefined): node is TSAnyKeyword {
     return node instanceof TSAnyKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD, (peer: KNativePointer) => new TSAnyKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD, (peer: KNativePointer) => new TSAnyKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_ANY_KEYWORD))
 }

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class SequenceExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 61)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createSequenceExpression(sequence_arg: readonly Expression[]): SequenceExpression {
-        const result: SequenceExpression = new SequenceExpression(global.generatedEs2panda._CreateSequenceExpression(global.context, passNodeArray(sequence_arg), sequence_arg.length))
+        const result: SequenceExpression = new SequenceExpression(global.generatedEs2panda._CreateSequenceExpression(global.context, passNodeArray(sequence_arg), sequence_arg.length), Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateSequenceExpression(original: SequenceExpression | undefined, sequence_arg: readonly Expression[]): SequenceExpression {
-        const result: SequenceExpression = new SequenceExpression(global.generatedEs2panda._UpdateSequenceExpression(global.context, passNode(original), passNodeArray(sequence_arg), sequence_arg.length))
+        const result: SequenceExpression = new SequenceExpression(global.generatedEs2panda._UpdateSequenceExpression(global.context, passNode(original), passNodeArray(sequence_arg), sequence_arg.length), Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isSequenceExpression(node: object | undefined): node is Sequence
     return node instanceof SequenceExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION, (peer: KNativePointer) => new SequenceExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION, (peer: KNativePointer) => new SequenceExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_SEQUENCE_EXPRESSION))
 }

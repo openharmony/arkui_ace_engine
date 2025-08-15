@@ -18,9 +18,10 @@
 
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
+import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
+import { int32 } from "@koalaui/common"
 import { BaseSpan } from "./component/span"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"

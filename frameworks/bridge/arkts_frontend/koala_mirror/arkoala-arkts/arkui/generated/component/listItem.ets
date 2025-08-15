@@ -22,7 +22,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -169,16 +169,16 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     swipeAction_value?: SwipeActionOptions | undefined
     onSelect_value?: ((isSelected: boolean) => void) | undefined
     attributeModifier_value?: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    public selectable(value: boolean | undefined): this {
+    selectable(value: boolean | undefined): this {
         return this
     }
-    public selected(value: boolean | Bindable<boolean> | undefined): this {
+    selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public swipeAction(value: SwipeActionOptions | undefined): this {
+    swipeAction(value: SwipeActionOptions | undefined): this {
         return this
     }
-    public onSelect(value: ((isSelected: boolean) => void) | undefined): this {
+    onSelect(value: ((isSelected: boolean) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -367,7 +367,7 @@ export class SwipeActionItem_serializer {
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -407,7 +407,7 @@ export class SwipeActionItem_serializer {
                 onActionTmpBuf_BufArgsSerializer.writeInt32(onActionTmpBuf_BufResource.resourceId);
                 onActionTmpBuf_BufArgsSerializer.writePointer(onActionTmpBuf_BufCall);
                 onActionTmpBuf_BufArgsSerializer.writePointer(onActionTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onActionTmpBuf_BufArgsSerializer.asBuffer(), onActionTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onActionTmpBuf_BufArgsSerializer.asBuffer(), onActionTmpBuf_BufArgsSerializer.length());
                 onActionTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -424,7 +424,7 @@ export class SwipeActionItem_serializer {
                 onEnterActionAreaTmpBuf_BufArgsSerializer.writeInt32(onEnterActionAreaTmpBuf_BufResource.resourceId);
                 onEnterActionAreaTmpBuf_BufArgsSerializer.writePointer(onEnterActionAreaTmpBuf_BufCall);
                 onEnterActionAreaTmpBuf_BufArgsSerializer.writePointer(onEnterActionAreaTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onEnterActionAreaTmpBuf_BufArgsSerializer.asBuffer(), onEnterActionAreaTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onEnterActionAreaTmpBuf_BufArgsSerializer.asBuffer(), onEnterActionAreaTmpBuf_BufArgsSerializer.length());
                 onEnterActionAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -441,7 +441,7 @@ export class SwipeActionItem_serializer {
                 onExitActionAreaTmpBuf_BufArgsSerializer.writeInt32(onExitActionAreaTmpBuf_BufResource.resourceId);
                 onExitActionAreaTmpBuf_BufArgsSerializer.writePointer(onExitActionAreaTmpBuf_BufCall);
                 onExitActionAreaTmpBuf_BufArgsSerializer.writePointer(onExitActionAreaTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onExitActionAreaTmpBuf_BufArgsSerializer.asBuffer(), onExitActionAreaTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onExitActionAreaTmpBuf_BufArgsSerializer.asBuffer(), onExitActionAreaTmpBuf_BufArgsSerializer.length());
                 onExitActionAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -459,7 +459,7 @@ export class SwipeActionItem_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCallSync);
                 onStateChangeTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.SwipeActionState_ToNumeric(state));
-                InteropNativeModule._CallCallback(-301561698, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -301561698, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -537,7 +537,7 @@ export class SwipeActionOptions_serializer {
                     startTmpBuf_BufUBufArgsSerializer.writeInt32(startTmpBuf_BufUBufResource.resourceId);
                     startTmpBuf_BufUBufArgsSerializer.writePointer(startTmpBuf_BufUBufCall);
                     startTmpBuf_BufUBufArgsSerializer.writePointer(startTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, startTmpBuf_BufUBufArgsSerializer.asBuffer(), startTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, startTmpBuf_BufUBufArgsSerializer.asBuffer(), startTmpBuf_BufUBufArgsSerializer.length());
                     startTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -563,7 +563,7 @@ export class SwipeActionOptions_serializer {
                     endTmpBuf_BufUBufArgsSerializer.writeInt32(endTmpBuf_BufUBufResource.resourceId);
                     endTmpBuf_BufUBufArgsSerializer.writePointer(endTmpBuf_BufUBufCall);
                     endTmpBuf_BufUBufArgsSerializer.writePointer(endTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, endTmpBuf_BufUBufArgsSerializer.asBuffer(), endTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, endTmpBuf_BufUBufArgsSerializer.asBuffer(), endTmpBuf_BufUBufArgsSerializer.length());
                     endTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -593,7 +593,7 @@ export class SwipeActionOptions_serializer {
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCall);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writePointer(onOffsetChangeTmpBuf_BufCallSync);
                 onOffsetChangeTmpBuf_BufArgsSerializer.writeNumber(offset);
-                InteropNativeModule._CallCallback(36519084, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 36519084, onOffsetChangeTmpBuf_BufArgsSerializer.asBuffer(), onOffsetChangeTmpBuf_BufArgsSerializer.length());
                 onOffsetChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }

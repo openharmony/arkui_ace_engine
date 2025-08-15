@@ -30,7 +30,7 @@ import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
 import { Color, FontStyle, FontWeight, TextCase } from "./enums"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -326,10 +326,10 @@ export interface BaseSpan extends CommonMethod {
 export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
     baselineOffset_value?: LengthMetrics | undefined
-    public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
     }
-    public baselineOffset(value: LengthMetrics | undefined): this {
+    baselineOffset(value: LengthMetrics | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
@@ -387,37 +387,37 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
     attributeModifier_value?: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined
-    public font(value: Font | undefined): this {
+    font(value: Font | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: number | string | Resource | undefined): this {
+    fontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
+    fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    public decoration(value: DecorationStyleInterface | undefined): this {
+    decoration(value: DecorationStyleInterface | undefined): this {
         return this
     }
-    public letterSpacing(value: number | string | undefined): this {
+    letterSpacing(value: number | string | undefined): this {
         return this
     }
-    public textCase(value: TextCase | undefined): this {
+    textCase(value: TextCase | undefined): this {
         return this
     }
-    public lineHeight(value: Length | undefined): this {
+    lineHeight(value: Length | undefined): this {
         return this
     }
-    public textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {

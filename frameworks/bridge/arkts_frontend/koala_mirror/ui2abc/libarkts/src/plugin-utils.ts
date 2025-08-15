@@ -23,8 +23,9 @@ import {
     Program,
     ProgramProvider,
     CompilationOptions,
-    dumpProgramSrcFormatted
+    dumpProgramSrcFormatted,
 } from "./arkts-api"
+import { Tracer } from "./tracer"
 
 export interface RunTransformerHooks {
     onProgramTransformStart?(options: CompilationOptions, program: Program): void
@@ -68,6 +69,8 @@ export class DumpingHooks implements RunTransformerHooks {
 export function runTransformerOnProgram(program: Program, options: CompilationOptions, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
     arktsGlobal.filePath = program.absoluteName
 
+    Tracer.startProgramTracing(program)
+
     // Perform some additional actions before the transformation start
     hooks.onProgramTransformStart?.(options, program)
 
@@ -85,6 +88,8 @@ export function runTransformerOnProgram(program: Program, options: CompilationOp
 
     // Perform some additional actions after the transformation end
     hooks.onProgramTransformEnd?.(options, program)
+
+    Tracer.stopProgramTracing()
 }
 
 export function runTransformer(prog: Program, state: Es2pandaContextState, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {

@@ -33,7 +33,6 @@ import {
 } from "../../reexport-for-generated"
 
 import { CodeGen } from "./CodeGen"
-import { ETSFunctionType } from "./ETSFunctionType"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Es2pandaMemberExpressionKind } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
@@ -41,17 +40,16 @@ import { MaybeOptionalExpression } from "./MaybeOptionalExpression"
 import { VReg } from "./VReg"
 
 export class MemberExpression extends MaybeOptionalExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 45)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createMemberExpression(object_arg: Expression | undefined, property: Expression | undefined, kind: Es2pandaMemberExpressionKind, computed: boolean, optional_arg: boolean): MemberExpression {
-        const result: MemberExpression = new MemberExpression(global.generatedEs2panda._CreateMemberExpression(global.context, passNode(object_arg), passNode(property), kind, computed, optional_arg))
+        const result: MemberExpression = new MemberExpression(global.generatedEs2panda._CreateMemberExpression(global.context, passNode(object_arg), passNode(property), kind, computed, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateMemberExpression(original: MemberExpression | undefined, object_arg: Expression | undefined, property: Expression | undefined, kind: Es2pandaMemberExpressionKind, computed: boolean, optional_arg: boolean): MemberExpression {
-        const result: MemberExpression = new MemberExpression(global.generatedEs2panda._UpdateMemberExpression(global.context, passNode(original), passNode(object_arg), passNode(property), kind, computed, optional_arg))
+        const result: MemberExpression = new MemberExpression(global.generatedEs2panda._UpdateMemberExpression(global.context, passNode(original), passNode(object_arg), passNode(property), kind, computed, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -87,9 +85,6 @@ export class MemberExpression extends MaybeOptionalExpression {
         global.generatedEs2panda._MemberExpressionRemoveMemberKind(global.context, this.peer, kind)
         return this
     }
-    get extensionAccessorType(): ETSFunctionType | undefined {
-        return unpackNode(global.generatedEs2panda._MemberExpressionExtensionAccessorTypeConst(global.context, this.peer))
-    }
     get isIgnoreBox(): boolean {
         return global.generatedEs2panda._MemberExpressionIsIgnoreBoxConst(global.context, this.peer)
     }
@@ -117,5 +112,5 @@ export function isMemberExpression(node: object | undefined): node is MemberExpr
     return node instanceof MemberExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION, (peer: KNativePointer) => new MemberExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION, (peer: KNativePointer) => new MemberExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION))
 }

@@ -33,29 +33,27 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotatedExpression } from "./AnnotatedExpression"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 
 export class ArrayExpression extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 159)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1ArrayExpression(nodeType: Es2pandaAstNodeType, elements: readonly Expression[], trailingComma: boolean): ArrayExpression {
-        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._CreateArrayExpression1(global.context, nodeType, passNodeArray(elements), elements.length, trailingComma))
+        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._CreateArrayExpression1(global.context, nodeType, passNodeArray(elements), elements.length, trailingComma), Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateArrayExpression(original: ArrayExpression | undefined, elements: readonly Expression[]): ArrayExpression {
-        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._UpdateArrayExpression(global.context, passNode(original), passNodeArray(elements), elements.length))
+        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._UpdateArrayExpression(global.context, passNode(original), passNodeArray(elements), elements.length), Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static update1ArrayExpression(original: ArrayExpression | undefined, nodeType: Es2pandaAstNodeType, elements: readonly Expression[], trailingComma: boolean): ArrayExpression {
-        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._UpdateArrayExpression1(global.context, passNode(original), nodeType, passNodeArray(elements), elements.length, trailingComma))
+        const result: ArrayExpression = new ArrayExpression(global.generatedEs2panda._UpdateArrayExpression1(global.context, passNode(original), nodeType, passNodeArray(elements), elements.length, trailingComma), Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -83,9 +81,6 @@ export class ArrayExpression extends AnnotatedExpression {
         global.generatedEs2panda._ArrayExpressionSetOptional(global.context, this.peer, optional_arg)
         return this
     }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ArrayExpressionDecoratorsConst(global.context, this.peer))
-    }
     /** @deprecated */
     clearPreferredType(): this {
         global.generatedEs2panda._ArrayExpressionClearPreferredType(global.context, this.peer)
@@ -111,5 +106,5 @@ export function isArrayExpression(node: object | undefined): node is ArrayExpres
     return node instanceof ArrayExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION, (peer: KNativePointer) => new ArrayExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION, (peer: KNativePointer) => new ArrayExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ARRAY_EXPRESSION))
 }

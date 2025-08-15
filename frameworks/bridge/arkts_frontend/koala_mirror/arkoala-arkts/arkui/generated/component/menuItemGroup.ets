@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -191,7 +191,7 @@ export class MenuItemGroupOptions_serializer {
                     headerTmpBuf_BufUBufArgsSerializer.writeInt32(headerTmpBuf_BufUBufResource.resourceId);
                     headerTmpBuf_BufUBufArgsSerializer.writePointer(headerTmpBuf_BufUBufCall);
                     headerTmpBuf_BufUBufArgsSerializer.writePointer(headerTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, headerTmpBuf_BufUBufArgsSerializer.asBuffer(), headerTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, headerTmpBuf_BufUBufArgsSerializer.asBuffer(), headerTmpBuf_BufUBufArgsSerializer.length());
                     headerTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -226,7 +226,7 @@ export class MenuItemGroupOptions_serializer {
                     footerTmpBuf_BufUBufArgsSerializer.writeInt32(footerTmpBuf_BufUBufResource.resourceId);
                     footerTmpBuf_BufUBufArgsSerializer.writePointer(footerTmpBuf_BufUBufCall);
                     footerTmpBuf_BufUBufArgsSerializer.writePointer(footerTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, footerTmpBuf_BufUBufArgsSerializer.asBuffer(), footerTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, footerTmpBuf_BufUBufArgsSerializer.asBuffer(), footerTmpBuf_BufUBufArgsSerializer.length());
                     footerTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }

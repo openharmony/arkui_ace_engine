@@ -38,22 +38,21 @@ import { Expression } from "./Expression"
 import { TypedStatement } from "./TypedStatement"
 
 export class VariableDeclarator extends TypedStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 153)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1VariableDeclarator(flag: Es2pandaVariableDeclaratorFlag, ident?: Expression, init?: Expression): VariableDeclarator {
-        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._CreateVariableDeclarator1(global.context, flag, passNode(ident), passNode(init)))
+        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._CreateVariableDeclarator1(global.context, flag, passNode(ident), passNode(init)), Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR)
         result.setChildrenParentPtr()
         return result
     }
     static updateVariableDeclarator(original: VariableDeclarator | undefined, flag: Es2pandaVariableDeclaratorFlag, ident?: Expression): VariableDeclarator {
-        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._UpdateVariableDeclarator(global.context, passNode(original), flag, passNode(ident)))
+        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._UpdateVariableDeclarator(global.context, passNode(original), flag, passNode(ident)), Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR)
         result.setChildrenParentPtr()
         return result
     }
     static update1VariableDeclarator(original: VariableDeclarator | undefined, flag: Es2pandaVariableDeclaratorFlag, ident?: Expression, init?: Expression): VariableDeclarator {
-        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._UpdateVariableDeclarator1(global.context, passNode(original), flag, passNode(ident), passNode(init)))
+        const result: VariableDeclarator = new VariableDeclarator(global.generatedEs2panda._UpdateVariableDeclarator1(global.context, passNode(original), flag, passNode(ident), passNode(init)), Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR)
         result.setChildrenParentPtr()
         return result
     }
@@ -77,5 +76,5 @@ export function isVariableDeclarator(node: object | undefined): node is Variable
     return node instanceof VariableDeclarator
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR, (peer: KNativePointer) => new VariableDeclarator(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR, (peer: KNativePointer) => new VariableDeclarator(peer, Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR))
 }

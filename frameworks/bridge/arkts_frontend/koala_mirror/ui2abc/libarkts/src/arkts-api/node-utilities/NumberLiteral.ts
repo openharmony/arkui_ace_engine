@@ -17,6 +17,7 @@ import { global } from "../static/global"
 import { NumberLiteral } from "../../generated"
 import { isSameNativeObject } from "../peers/ArktsObject"
 import { updateNodeByNode } from "../utilities/private"
+import { Es2pandaAstNodeType } from "../../generated/Es2pandaEnums"
 
 export function createNumberLiteral(
     value: number
@@ -25,7 +26,8 @@ export function createNumberLiteral(
         global.es2panda._CreateNumberLiteral(
             global.context,
             value
-        )
+        ),
+        Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL,
     )
 }
 

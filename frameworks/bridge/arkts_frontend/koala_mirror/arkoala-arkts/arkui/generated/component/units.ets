@@ -26,7 +26,6 @@ import { Resource } from "global.resource"
 import { LengthMetrics, LengthMetricsUnit, ColorMetrics, LengthMetrics_serializer } from "./../Graphics"
 import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
 import { OutlineStyle } from "./common"
-import { extractors } from "#handwritten"
 import { Resource_serializer } from "./../framework/resource"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
@@ -210,6 +209,7 @@ export interface BorderOptions {
     style?: EdgeStyles | BorderStyle;
     dashGap?: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
     dashWidth?: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+    showInForeground?: boolean;
 }
 export interface OutlineOptions {
     width?: EdgeOutlineWidths | Dimension;
@@ -238,6 +238,10 @@ export interface DividerStyleOptions {
     startMargin?: LengthMetrics;
     endMargin?: LengthMetrics;
     mode?: DividerMode;
+}
+export interface ScrollBarMargin {
+    start?: LengthMetrics;
+    end?: LengthMetrics;
 }
 export interface ChainWeightOptions {
     horizontal?: number;
@@ -3167,6 +3171,14 @@ export class BorderOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForShowInForeground  = value.showInForeground
+        if (valueHolderForShowInForeground !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShowInForegroundTmpValue  = valueHolderForShowInForeground!
+            valueSerializer.writeBoolean(valueHolderForShowInForegroundTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BorderOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -3305,7 +3317,13 @@ export class BorderOptions_serializer {
             dashWidthTmpBuf = (dashWidthTmpBuf_ as EdgeWidths | LengthMetrics | LocalizedEdgeWidths)
         }
         const dashWidthTmpResult : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined = dashWidthTmpBuf
-        let value : BorderOptions = ({width: widthTmpResult, color: colorTmpResult, radius: radiusTmpResult, style: styleTmpResult, dashGap: dashGapTmpResult, dashWidth: dashWidthTmpResult} as BorderOptions)
+        const showInForegroundTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showInForegroundTmpBuf : boolean | undefined
+        if ((showInForegroundTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            showInForegroundTmpBuf = valueDeserializer.readBoolean()
+        }
+        const showInForegroundTmpResult : boolean | undefined = showInForegroundTmpBuf
+        let value : BorderOptions = ({width: widthTmpResult, color: colorTmpResult, radius: radiusTmpResult, style: styleTmpResult, dashGap: dashGapTmpResult, dashWidth: dashWidthTmpResult, showInForeground: showInForegroundTmpResult} as BorderOptions)
         return value
     }
 }

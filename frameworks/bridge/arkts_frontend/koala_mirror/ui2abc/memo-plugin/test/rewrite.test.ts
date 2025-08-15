@@ -50,7 +50,7 @@ suite("golden tests", () => {
         child_process.execSync("rm -rf ./build/golden", { stdio: "inherit" })
         child_process.execSync("rm -rf ./test/out", { stdio: "inherit" })
         const configPath: string = (process.env.TEST_OTHER == "1") ? "./test/arktsconfig-rewrite-other.json" : "./test/arktsconfig-rewrite.json"
-        child_process.execSync(`npx fast-arktsc --config ${configPath} --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/golden/all.abc && ninja -f ./build/golden/build.ninja -k 1000`, { stdio: "inherit" })
+        child_process.execSync(`npx fast-arktsc --config ${configPath} --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build/golden/all.abc --simultaneous && ninja -f ./build/golden/build.ninja`, { stdio: "inherit" })
         if (process.env.TEST_OTHER == "1") {
             throw new Error()
         }
@@ -128,6 +128,12 @@ suite("golden tests", () => {
 
             test("memo on optional possibly undefined param and its type", () => {
                 testBody("param-usage/on-param-and-type/memo-on-optional-possibly-undefined-param")
+            })
+        })
+
+        suite("union-with-non-memo", () => {
+            test("memo on (Builder | string)", () => {
+                testBody("param-usage/union-with-non-memo/primitive")
             })
         })
     })

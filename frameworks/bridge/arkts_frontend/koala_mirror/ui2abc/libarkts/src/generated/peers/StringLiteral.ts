@@ -36,22 +36,21 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class StringLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 62)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1StringLiteral(str: string): StringLiteral {
-        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._CreateStringLiteral1(global.context, str))
+        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._CreateStringLiteral1(global.context, str), Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateStringLiteral(original?: StringLiteral): StringLiteral {
-        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._UpdateStringLiteral(global.context, passNode(original)))
+        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._UpdateStringLiteral(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static update1StringLiteral(original: StringLiteral | undefined, str: string): StringLiteral {
-        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._UpdateStringLiteral1(global.context, passNode(original), str))
+        const result: StringLiteral = new StringLiteral(global.generatedEs2panda._UpdateStringLiteral1(global.context, passNode(original), str), Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isStringLiteral(node: object | undefined): node is StringLiteral
     return node instanceof StringLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL, (peer: KNativePointer) => new StringLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL, (peer: KNativePointer) => new StringLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_STRING_LITERAL))
 }

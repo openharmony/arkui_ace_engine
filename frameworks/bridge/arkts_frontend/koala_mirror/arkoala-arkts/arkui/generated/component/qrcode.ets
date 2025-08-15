@@ -151,13 +151,13 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     backgroundColor_value?: ResourceColor | undefined
     contentOpacity_value?: number | Resource | undefined
     attributeModifier_value?: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined
-    public color(value: ResourceColor | undefined): this {
+    color(value: ResourceColor | undefined): this {
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public contentOpacity(value: number | Resource | undefined): this {
+    contentOpacity(value: number | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {

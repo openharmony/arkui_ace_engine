@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class Decorator extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 22)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createDecorator(expr?: Expression): Decorator {
-        const result: Decorator = new Decorator(global.generatedEs2panda._CreateDecorator(global.context, passNode(expr)))
+        const result: Decorator = new Decorator(global.generatedEs2panda._CreateDecorator(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR)
         result.setChildrenParentPtr()
         return result
     }
     static updateDecorator(original?: Decorator, expr?: Expression): Decorator {
-        const result: Decorator = new Decorator(global.generatedEs2panda._UpdateDecorator(global.context, passNode(original), passNode(expr)))
+        const result: Decorator = new Decorator(global.generatedEs2panda._UpdateDecorator(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isDecorator(node: object | undefined): node is Decorator {
     return node instanceof Decorator
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR, (peer: KNativePointer) => new Decorator(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR, (peer: KNativePointer) => new Decorator(peer, Es2pandaAstNodeType.AST_NODE_TYPE_DECORATOR))
 }

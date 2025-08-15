@@ -31,7 +31,7 @@ import { PeerNode } from "./../PeerNode"
 import { Color, TextOverflow, FontStyle, FontWeight, CopyOptions, TextAlign, TextContentStyle, BarState, WordBreak, LineBreakStrategy, TextHeightAdaptivePolicy, EllipsisMode } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -389,7 +389,7 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | ResourceStr | undefined): void {
+    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -402,18 +402,10 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(valueTmpValueForIdx1))
-            } else if (valueTmpValue instanceof ResourceStr) {
+            } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toChar())
-                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
-                if (valueTmpValueForIdx2 instanceof string) {
-                    thisSerializer.writeInt8((0).toChar())
-                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
-                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
-                } else if (valueTmpValueForIdx2 instanceof Resource) {
-                    thisSerializer.writeInt8((1).toChar())
-                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
-                }
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1367,7 +1359,7 @@ export interface TextInputAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1551,7 +1543,7 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | ResourceStr | undefined
+    fontWeight_value?: number | FontWeight | string | undefined
     fontFamily_value?: ResourceStr | undefined
     onCopy_value?: ((value0: string) => void) | undefined
     onCut_value?: ((value0: string) => void) | undefined
@@ -1603,217 +1595,217 @@ export class ArkTextInputStyle extends ArkCommonMethodStyle implements TextInput
     onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     attributeModifier_value?: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined
-    public type(value: InputType | undefined): this {
+    type(value: InputType | undefined): this {
         return this
     }
-    public contentType(value: ContentType | undefined): this {
+    contentType(value: ContentType | undefined): this {
         return this
     }
-    public placeholderColor(value: ResourceColor | undefined): this {
+    placeholderColor(value: ResourceColor | undefined): this {
         return this
     }
-    public textOverflow(value: TextOverflow | undefined): this {
+    textOverflow(value: TextOverflow | undefined): this {
         return this
     }
-    public textIndent(value: Dimension | undefined): this {
+    textIndent(value: Dimension | undefined): this {
         return this
     }
-    public placeholderFont(value: Font | undefined): this {
+    placeholderFont(value: Font | undefined): this {
         return this
     }
-    public enterKeyType(value: EnterKeyType | undefined): this {
+    enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    public caretColor(value: ResourceColor | undefined): this {
+    caretColor(value: ResourceColor | undefined): this {
         return this
     }
-    public onEditChange(value: ((value0: boolean) => void) | undefined): this {
+    onEditChange(value: ((value0: boolean) => void) | undefined): this {
         return this
     }
-    public onSubmit(value: OnSubmitCallback | undefined): this {
+    onSubmit(value: OnSubmitCallback | undefined): this {
         return this
     }
-    public onChange(value: EditableTextOnChangeCallback | undefined): this {
+    onChange(value: EditableTextOnChangeCallback | undefined): this {
         return this
     }
-    public onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
+    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
         return this
     }
-    public onContentScroll(value: OnContentScrollCallback | undefined): this {
+    onContentScroll(value: OnContentScrollCallback | undefined): this {
         return this
     }
-    public maxLength(value: number | undefined): this {
+    maxLength(value: number | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public fontSize(value: Length | undefined): this {
+    fontSize(value: Length | undefined): this {
         return this
     }
-    public fontStyle(value: FontStyle | undefined): this {
+    fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         return this
     }
-    public fontFamily(value: ResourceStr | undefined): this {
+    fontFamily(value: ResourceStr | undefined): this {
         return this
     }
-    public onCopy(value: ((value0: string) => void) | undefined): this {
+    onCopy(value: ((value0: string) => void) | undefined): this {
         return this
     }
-    public onCut(value: ((value0: string) => void) | undefined): this {
+    onCut(value: ((value0: string) => void) | undefined): this {
         return this
     }
-    public onPaste(value: OnPasteCallback | undefined): this {
+    onPaste(value: OnPasteCallback | undefined): this {
         return this
     }
-    public copyOption(value: CopyOptions | undefined): this {
+    copyOption(value: CopyOptions | undefined): this {
         return this
     }
-    public showPasswordIcon(value: boolean | undefined): this {
+    showPasswordIcon(value: boolean | undefined): this {
         return this
     }
-    public textAlign(value: TextAlign | undefined): this {
+    textAlign(value: TextAlign | undefined): this {
         return this
     }
-    public style(value: TextInputStyle | TextContentStyle | undefined): this {
+    style(value: TextInputStyle | TextContentStyle | undefined): this {
         return this
     }
-    public caretStyle(value: CaretStyle | undefined): this {
+    caretStyle(value: CaretStyle | undefined): this {
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public caretPosition(value: number | undefined): this {
+    caretPosition(value: number | undefined): this {
         return this
     }
-    public enableKeyboardOnFocus(value: boolean | undefined): this {
+    enableKeyboardOnFocus(value: boolean | undefined): this {
         return this
     }
-    public passwordIcon(value: PasswordIcon | undefined): this {
+    passwordIcon(value: PasswordIcon | undefined): this {
         return this
     }
-    public showError(value: ResourceStr | undefined): this {
+    showError(value: ResourceStr | undefined): this {
         return this
     }
-    public showUnit(value: CustomBuilder | undefined): this {
+    showUnit(value: CustomBuilder | undefined): this {
         return this
     }
-    public showUnderline(value: boolean | undefined): this {
+    showUnderline(value: boolean | undefined): this {
         return this
     }
-    public underlineColor(value: ResourceColor | UnderlineColor | undefined): this {
+    underlineColor(value: ResourceColor | UnderlineColor | undefined): this {
         return this
     }
-    public selectionMenuHidden(value: boolean | undefined): this {
+    selectionMenuHidden(value: boolean | undefined): this {
         return this
     }
-    public barState(value: BarState | undefined): this {
+    barState(value: BarState | undefined): this {
         return this
     }
-    public maxLines(value: number | undefined): this {
+    maxLines(value: number | undefined): this {
         return this
     }
-    public wordBreak(value: WordBreak | undefined): this {
+    wordBreak(value: WordBreak | undefined): this {
         return this
     }
-    public lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this {
         return this
     }
-    public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
+    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
         return this
     }
-    public selectAll(value: boolean | undefined): this {
+    selectAll(value: boolean | undefined): this {
         return this
     }
-    public minFontSize(value: number | string | Resource | undefined): this {
+    minFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public maxFontSize(value: number | string | Resource | undefined): this {
+    maxFontSize(value: number | string | Resource | undefined): this {
         return this
     }
-    public minFontScale(value: number | Resource | undefined): this {
+    minFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public maxFontScale(value: number | Resource | undefined): this {
+    maxFontScale(value: number | Resource | undefined): this {
         return this
     }
-    public heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
         return this
     }
-    public enableAutoFill(value: boolean | undefined): this {
+    enableAutoFill(value: boolean | undefined): this {
         return this
     }
-    public decoration(value: TextDecorationOptions | undefined): this {
+    decoration(value: TextDecorationOptions | undefined): this {
         return this
     }
-    public letterSpacing(value: number | string | Resource | undefined): this {
+    letterSpacing(value: number | string | Resource | undefined): this {
         return this
     }
-    public lineHeight(value: number | string | Resource | undefined): this {
+    lineHeight(value: number | string | Resource | undefined): this {
         return this
     }
-    public passwordRules(value: string | undefined): this {
+    passwordRules(value: string | undefined): this {
         return this
     }
-    public fontFeature(value: string | undefined): this {
+    fontFeature(value: string | undefined): this {
         return this
     }
-    public showPassword(value: boolean | undefined): this {
+    showPassword(value: boolean | undefined): this {
         return this
     }
-    public onSecurityStateChange(value: ((value0: boolean) => void) | undefined): this {
+    onSecurityStateChange(value: ((value0: boolean) => void) | undefined): this {
         return this
     }
-    public onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
+    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
         return this
     }
-    public onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
+    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
         return this
     }
-    public onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
+    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
         return this
     }
-    public onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
+    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
         return this
     }
-    public enablePreviewText(value: boolean | undefined): this {
+    enablePreviewText(value: boolean | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
+    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
         return this
     }
-    public halfLeading(value: boolean | undefined): this {
+    halfLeading(value: boolean | undefined): this {
         return this
     }
-    public ellipsisMode(value: EllipsisMode | undefined): this {
+    ellipsisMode(value: EllipsisMode | undefined): this {
         return this
     }
-    public stopBackPress(value: boolean | undefined): this {
+    stopBackPress(value: boolean | undefined): this {
         return this
     }
-    public onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
+    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
         return this
     }
-    public keyboardAppearance(value: KeyboardAppearance | undefined): this {
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
-    public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
+    inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         return this
     }
-    public showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
+    showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1969,9 +1961,9 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    public fontWeight(value: number | FontWeight | string | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | ResourceStr | undefined)
+            const value_casted = value as (number | FontWeight | string | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }

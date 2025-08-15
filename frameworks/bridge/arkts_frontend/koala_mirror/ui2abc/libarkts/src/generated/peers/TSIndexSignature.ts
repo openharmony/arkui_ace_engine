@@ -39,17 +39,16 @@ import { TypeNode } from "./TypeNode"
 import { TypedAstNode } from "./TypedAstNode"
 
 export class TSIndexSignature extends TypedAstNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 138)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSIndexSignature(param: Expression | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: boolean): TSIndexSignature {
-        const result: TSIndexSignature = new TSIndexSignature(global.generatedEs2panda._CreateTSIndexSignature(global.context, passNode(param), passNode(typeAnnotation), readonly_arg))
+        const result: TSIndexSignature = new TSIndexSignature(global.generatedEs2panda._CreateTSIndexSignature(global.context, passNode(param), passNode(typeAnnotation), readonly_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSIndexSignature(original: TSIndexSignature | undefined, param: Expression | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: boolean): TSIndexSignature {
-        const result: TSIndexSignature = new TSIndexSignature(global.generatedEs2panda._UpdateTSIndexSignature(global.context, passNode(original), passNode(param), passNode(typeAnnotation), readonly_arg))
+        const result: TSIndexSignature = new TSIndexSignature(global.generatedEs2panda._UpdateTSIndexSignature(global.context, passNode(original), passNode(param), passNode(typeAnnotation), readonly_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
@@ -71,5 +70,5 @@ export function isTSIndexSignature(node: object | undefined): node is TSIndexSig
     return node instanceof TSIndexSignature
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE, (peer: KNativePointer) => new TSIndexSignature(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE, (peer: KNativePointer) => new TSIndexSignature(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INDEX_SIGNATURE))
 }

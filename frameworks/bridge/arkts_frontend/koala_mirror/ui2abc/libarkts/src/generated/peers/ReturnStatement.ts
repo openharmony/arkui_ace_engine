@@ -37,22 +37,21 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class ReturnStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 59)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1ReturnStatement(argument?: Expression): ReturnStatement {
-        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._CreateReturnStatement1(global.context, passNode(argument)))
+        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._CreateReturnStatement1(global.context, passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateReturnStatement(original?: ReturnStatement): ReturnStatement {
-        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._UpdateReturnStatement(global.context, passNode(original)))
+        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._UpdateReturnStatement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1ReturnStatement(original?: ReturnStatement, argument?: Expression): ReturnStatement {
-        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._UpdateReturnStatement1(global.context, passNode(original), passNode(argument)))
+        const result: ReturnStatement = new ReturnStatement(global.generatedEs2panda._UpdateReturnStatement1(global.context, passNode(original), passNode(argument)), Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isReturnStatement(node: object | undefined): node is ReturnState
     return node instanceof ReturnStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT, (peer: KNativePointer) => new ReturnStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT, (peer: KNativePointer) => new ReturnStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT))
 }

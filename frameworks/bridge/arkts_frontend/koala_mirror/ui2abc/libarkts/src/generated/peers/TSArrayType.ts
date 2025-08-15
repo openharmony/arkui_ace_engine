@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSArrayType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 104)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSArrayType(elementType?: TypeNode): TSArrayType {
-        const result: TSArrayType = new TSArrayType(global.generatedEs2panda._CreateTSArrayType(global.context, passNode(elementType)))
+        const result: TSArrayType = new TSArrayType(global.generatedEs2panda._CreateTSArrayType(global.context, passNode(elementType)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSArrayType(original?: TSArrayType, elementType?: TypeNode): TSArrayType {
-        const result: TSArrayType = new TSArrayType(global.generatedEs2panda._UpdateTSArrayType(global.context, passNode(original), passNode(elementType)))
+        const result: TSArrayType = new TSArrayType(global.generatedEs2panda._UpdateTSArrayType(global.context, passNode(original), passNode(elementType)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSArrayType(node: object | undefined): node is TSArrayType {
     return node instanceof TSArrayType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE, (peer: KNativePointer) => new TSArrayType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE, (peer: KNativePointer) => new TSArrayType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_ARRAY_TYPE))
 }

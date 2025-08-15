@@ -29,7 +29,7 @@ import { VoidCallback, ResourceColor, ResourceStr, Font, Length, Dimension, Padd
 import { CopyOptions, Color, BarState, ResponseType, FontStyle, FontWeight, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit } from "./enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./textInput"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, extractors, AttributeUpdater } from "#handwritten"
 import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -184,16 +184,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setRichEditorOptions0Attribute(value: RichEditorOptions): void {
+    setRichEditorOptionsAttribute(options: RichEditorOptions | RichEditorStyledStringOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        RichEditorOptions_serializer.write(thisSerializer, value)
-        ArkUIGeneratedNativeModule._RichEditorInterface_setRichEditorOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setRichEditorOptions1Attribute(options: RichEditorStyledStringOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        RichEditorStyledStringOptions_serializer.write(thisSerializer, options)
-        ArkUIGeneratedNativeModule._RichEditorInterface_setRichEditorOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        if (options instanceof RichEditorOptions) {
+            thisSerializer.writeInt8((0).toChar())
+            const optionsForIdx0  = options as RichEditorOptions
+            RichEditorOptions_serializer.write(thisSerializer, optionsForIdx0)
+        } else if (options instanceof RichEditorStyledStringOptions) {
+            thisSerializer.writeInt8((1).toChar())
+            const optionsForIdx1  = options as RichEditorStyledStringOptions
+            RichEditorStyledStringOptions_serializer.write(thisSerializer, optionsForIdx1)
+        }
+        ArkUIGeneratedNativeModule._RichEditorInterface_setRichEditorOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnReadyAttribute(value: VoidCallback | undefined): void {
@@ -1029,103 +1031,103 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onReady(value: VoidCallback | undefined): this {
+    onReady(value: VoidCallback | undefined): this {
         return this
     }
-    public onSelect(value: ((value0: RichEditorSelection) => void) | undefined): this {
+    onSelect(value: ((value0: RichEditorSelection) => void) | undefined): this {
         return this
     }
-    public onSelectionChange(value: ((value0: RichEditorRange) => void) | undefined): this {
+    onSelectionChange(value: ((value0: RichEditorRange) => void) | undefined): this {
         return this
     }
-    public aboutToIMEInput(value: ((value0: RichEditorInsertValue) => boolean) | undefined): this {
+    aboutToIMEInput(value: ((value0: RichEditorInsertValue) => boolean) | undefined): this {
         return this
     }
-    public onIMEInputComplete(value: ((value0: RichEditorTextSpanResult) => void) | undefined): this {
+    onIMEInputComplete(value: ((value0: RichEditorTextSpanResult) => void) | undefined): this {
         return this
     }
-    public onDidIMEInput(value: ((value0: TextRange) => void) | undefined): this {
+    onDidIMEInput(value: ((value0: TextRange) => void) | undefined): this {
         return this
     }
-    public aboutToDelete(value: ((value0: RichEditorDeleteValue) => boolean) | undefined): this {
+    aboutToDelete(value: ((value0: RichEditorDeleteValue) => boolean) | undefined): this {
         return this
     }
-    public onDeleteComplete(value: VoidCallback | undefined): this {
+    onDeleteComplete(value: VoidCallback | undefined): this {
         return this
     }
-    public copyOptions(value: CopyOptions | undefined): this {
+    copyOptions(value: CopyOptions | undefined): this {
         return this
     }
-    public onPaste(value: PasteEventCallback | undefined): this {
+    onPaste(value: PasteEventCallback | undefined): this {
         return this
     }
-    public enableDataDetector(value: boolean | undefined): this {
+    enableDataDetector(value: boolean | undefined): this {
         return this
     }
-    public enablePreviewText(value: boolean | undefined): this {
+    enablePreviewText(value: boolean | undefined): this {
         return this
     }
-    public dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         return this
     }
-    public caretColor(value: ResourceColor | undefined): this {
+    caretColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public onEditingChange(value: ((value0: boolean) => void) | undefined): this {
+    onEditingChange(value: ((value0: boolean) => void) | undefined): this {
         return this
     }
-    public enterKeyType(value: EnterKeyType | undefined): this {
+    enterKeyType(value: EnterKeyType | undefined): this {
         return this
     }
-    public onSubmit(value: SubmitCallback | undefined): this {
+    onSubmit(value: SubmitCallback | undefined): this {
         return this
     }
-    public onWillChange(value: ((value0: RichEditorChangeValue) => boolean) | undefined): this {
+    onWillChange(value: ((value0: RichEditorChangeValue) => boolean) | undefined): this {
         return this
     }
-    public onDidChange(value: OnDidChangeCallback | undefined): this {
+    onDidChange(value: OnDidChangeCallback | undefined): this {
         return this
     }
-    public onCut(value: ((value0: CutEvent) => void) | undefined): this {
+    onCut(value: ((value0: CutEvent) => void) | undefined): this {
         return this
     }
-    public onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
+    onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
         return this
     }
-    public editMenuOptions(value: EditMenuOptions | undefined): this {
+    editMenuOptions(value: EditMenuOptions | undefined): this {
         return this
     }
-    public enableKeyboardOnFocus(value: boolean | undefined): this {
+    enableKeyboardOnFocus(value: boolean | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public barState(value: BarState | undefined): this {
+    barState(value: BarState | undefined): this {
         return this
     }
-    public maxLength(value: number | undefined): this {
+    maxLength(value: number | undefined): this {
         return this
     }
-    public maxLines(value: number | undefined): this {
+    maxLines(value: number | undefined): this {
         return this
     }
-    public keyboardAppearance(value: KeyboardAppearance | undefined): this {
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
-    public stopBackPress(value: boolean | undefined): this {
+    stopBackPress(value: boolean | undefined): this {
         return this
     }
-    public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
+    bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         return this
     }
-    public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         return this
     }
-    public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
+    placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1151,18 +1153,10 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkRichEditorPeer {
         return (this.peer as ArkRichEditorPeer)
     }
-    public setRichEditorOptions(value: RichEditorOptions): this {
+    public setRichEditorOptions(options: RichEditorOptions | RichEditorStyledStringOptions): this {
         if (this.checkPriority("setRichEditorOptions")) {
-            const value_casted = value as (RichEditorOptions)
-            this.getPeer()?.setRichEditorOptions0Attribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public setRichEditorOptions(options: RichEditorStyledStringOptions): this {
-        if (this.checkPriority("setRichEditorOptions")) {
-            const options_casted = options as (RichEditorStyledStringOptions)
-            this.getPeer()?.setRichEditorOptions1Attribute(options_casted)
+            const options_casted = options as (RichEditorOptions | RichEditorStyledStringOptions)
+            this.getPeer()?.setRichEditorOptionsAttribute(options_casted)
             return this
         }
         return this
@@ -1449,27 +1443,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
 export function RichEditor(
     @memo
     style: ((attributes: RichEditorAttribute) => void) | undefined,
-    value: RichEditorOptions,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkRichEditorComponent>((): ArkRichEditorComponent => {
-        return new ArkRichEditorComponent()
-    })
-    NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer): void => {
-        receiver.setRichEditorOptions(value)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
-
-
-@memo
-export function RichEditor(
-    @memo
-    style: ((attributes: RichEditorAttribute) => void) | undefined,
-    options: RichEditorStyledStringOptions,
+    options: RichEditorOptions | RichEditorStyledStringOptions,
     @memo
     content_?: () => void,
 ): void {
@@ -1733,7 +1707,7 @@ export class RichEditorGesture_serializer {
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCall);
                 onClickTmpBuf_BufArgsSerializer.writePointer(onClickTmpBuf_BufCallSync);
                 ClickEvent_serializer.write(onClickTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(1097178637, onClickTmpBuf_BufArgsSerializer.asBuffer(), onClickTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1097178637, onClickTmpBuf_BufArgsSerializer.asBuffer(), onClickTmpBuf_BufArgsSerializer.length());
                 onClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1751,7 +1725,7 @@ export class RichEditorGesture_serializer {
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCall);
                 onLongPressTmpBuf_BufArgsSerializer.writePointer(onLongPressTmpBuf_BufCallSync);
                 GestureEvent_serializer.write(onLongPressTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(-1143194492, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1143194492, onLongPressTmpBuf_BufArgsSerializer.asBuffer(), onLongPressTmpBuf_BufArgsSerializer.length());
                 onLongPressTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1769,7 +1743,7 @@ export class RichEditorGesture_serializer {
                 onDoubleClickTmpBuf_BufArgsSerializer.writePointer(onDoubleClickTmpBuf_BufCall);
                 onDoubleClickTmpBuf_BufArgsSerializer.writePointer(onDoubleClickTmpBuf_BufCallSync);
                 GestureEvent_serializer.write(onDoubleClickTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(-1143194492, onDoubleClickTmpBuf_BufArgsSerializer.asBuffer(), onDoubleClickTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1143194492, onDoubleClickTmpBuf_BufArgsSerializer.asBuffer(), onDoubleClickTmpBuf_BufArgsSerializer.length());
                 onDoubleClickTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1940,7 +1914,7 @@ export class CopyEvent_serializer {
                 preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
                 preventDefaultTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1975,7 +1949,7 @@ export class CutEvent_serializer {
                 preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
                 preventDefaultTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2010,7 +1984,7 @@ export class PasteEvent_serializer {
                 preventDefaultTmpBuf_BufArgsSerializer.writeInt32(preventDefaultTmpBuf_BufResource.resourceId);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCall);
                 preventDefaultTmpBuf_BufArgsSerializer.writePointer(preventDefaultTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, preventDefaultTmpBuf_BufArgsSerializer.asBuffer(), preventDefaultTmpBuf_BufArgsSerializer.length());
                 preventDefaultTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2382,7 +2356,7 @@ export class SelectionMenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
                 onAppearTmpBuf_BufArgsSerializer.writeNumber(start);
                 onAppearTmpBuf_BufArgsSerializer.writeNumber(end);
-                InteropNativeModule._CallCallback(-614475458, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -614475458, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2399,7 +2373,7 @@ export class SelectionMenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2424,7 +2398,7 @@ export class SelectionMenuOptions_serializer {
                 onMenuShowTmpBuf_BufArgsSerializer.writePointer(onMenuShowTmpBuf_BufCallSync);
                 onMenuShowTmpBuf_BufArgsSerializer.writeNumber(start);
                 onMenuShowTmpBuf_BufArgsSerializer.writeNumber(end);
-                InteropNativeModule._CallCallback(810927048, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 810927048, onMenuShowTmpBuf_BufArgsSerializer.asBuffer(), onMenuShowTmpBuf_BufArgsSerializer.length());
                 onMenuShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2443,7 +2417,7 @@ export class SelectionMenuOptions_serializer {
                 onMenuHideTmpBuf_BufArgsSerializer.writePointer(onMenuHideTmpBuf_BufCallSync);
                 onMenuHideTmpBuf_BufArgsSerializer.writeNumber(start);
                 onMenuHideTmpBuf_BufArgsSerializer.writeNumber(end);
-                InteropNativeModule._CallCallback(810927048, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 810927048, onMenuHideTmpBuf_BufArgsSerializer.asBuffer(), onMenuHideTmpBuf_BufArgsSerializer.length());
                 onMenuHideTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -3737,7 +3711,7 @@ export class RichEditorImageSpanOptions_serializer {
                 onHoverTmpBuf_BufArgsSerializer.writePointer(onHoverTmpBuf_BufCallSync);
                 onHoverTmpBuf_BufArgsSerializer.writeBoolean(status);
                 HoverEvent_serializer.write(onHoverTmpBuf_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(-2025767812, onHoverTmpBuf_BufArgsSerializer.asBuffer(), onHoverTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2025767812, onHoverTmpBuf_BufArgsSerializer.asBuffer(), onHoverTmpBuf_BufArgsSerializer.length());
                 onHoverTmpBuf_BufArgsSerializer.release();
                 return;
             }

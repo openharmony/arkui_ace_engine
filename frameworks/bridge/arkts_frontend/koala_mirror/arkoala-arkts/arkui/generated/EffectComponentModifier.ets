@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkEffectComponentPeer, EffectComponentAttribute } from "./component/effectComponent"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class EffectComponentModifier extends CommonMethodModifier implements EffectComponentAttribute,AttributeModifier<EffectComponentAttribute> {
     _instanceId: number = -1;

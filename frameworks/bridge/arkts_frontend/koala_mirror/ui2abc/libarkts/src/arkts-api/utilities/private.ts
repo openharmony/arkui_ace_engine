@@ -25,7 +25,7 @@ import {
 } from "@koalaui/interop"
 import { NativePtrDecoder } from "./nativePtrDecoder"
 import { Es2pandaAstNodeType, Es2pandaModifierFlags, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
-import { classByPeer } from "../class-by-peer"
+import { nodeFrom } from "../class-by-peer"
 import { AstNode } from "../peers/AstNode"
 import { ArktsObject } from "../peers/ArktsObject"
 
@@ -72,14 +72,14 @@ export function unpackNonNullableNode<T extends AstNode>(peer: KNativePointer): 
     if (peer === nullptr) {
         throwError('peer is NULLPTR (maybe you should use unpackNode)')
     }
-    return classByPeer(peer)
+    return nodeFrom(peer)
 }
 
 export function unpackNode<T extends AstNode>(peer: KNativePointer): T | undefined {
     if (peer === nullptr) {
         return undefined
     }
-    return classByPeer<T>(peer)
+    return nodeFrom<T>(peer)
 }
 
 export function passNode(node: ArktsObject | undefined): KNativePointer {

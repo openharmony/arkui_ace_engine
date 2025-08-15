@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Literal } from "./Literal"
 
 export class BooleanLiteral extends Literal {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 8)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createBooleanLiteral(value: boolean): BooleanLiteral {
-        const result: BooleanLiteral = new BooleanLiteral(global.generatedEs2panda._CreateBooleanLiteral(global.context, value))
+        const result: BooleanLiteral = new BooleanLiteral(global.generatedEs2panda._CreateBooleanLiteral(global.context, value), Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateBooleanLiteral(original: BooleanLiteral | undefined, value: boolean): BooleanLiteral {
-        const result: BooleanLiteral = new BooleanLiteral(global.generatedEs2panda._UpdateBooleanLiteral(global.context, passNode(original), value))
+        const result: BooleanLiteral = new BooleanLiteral(global.generatedEs2panda._UpdateBooleanLiteral(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isBooleanLiteral(node: object | undefined): node is BooleanLiter
     return node instanceof BooleanLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL, (peer: KNativePointer) => new BooleanLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL, (peer: KNativePointer) => new BooleanLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BOOLEAN_LITERAL))
 }

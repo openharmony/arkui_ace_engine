@@ -39,6 +39,7 @@ export * from "./arkts-api/peers/ExternalSource"
 export * from "./arkts-api/peers/ImportPathManager"
 export * from "./arkts-api/peers/Options"
 export { global as arktsGlobal } from "./arkts-api/static/global"
+export * from "./arkts-api/static/globalUtils"
 export * as arkts from "./arkts-api"
 
 export * from "./plugin-utils"

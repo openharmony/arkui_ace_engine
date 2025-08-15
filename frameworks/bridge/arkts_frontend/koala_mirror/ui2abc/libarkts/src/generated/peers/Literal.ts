@@ -32,11 +32,12 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class Literal extends Expression {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     get isFolded(): boolean {
         return global.generatedEs2panda._LiteralIsFoldedConst(global.context, this.peer)

@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkScreenPeer, ScreenAttribute } from "./component/screen"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class ScreenModifier extends CommonMethodModifier implements ScreenAttribute,AttributeModifier<ScreenAttribute> {
     _instanceId: number = -1;

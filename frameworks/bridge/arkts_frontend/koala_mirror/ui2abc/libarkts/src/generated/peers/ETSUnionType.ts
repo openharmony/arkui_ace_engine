@@ -37,12 +37,11 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSUnionType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 76)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSUnionType(types: readonly TypeNode[], annotations?: readonly AnnotationUsage[]): ETSUnionType {
-        const result: ETSUnionType = new ETSUnionType(global.generatedEs2panda._CreateETSUnionType(global.context, passNodeArray(types), types.length))
+        const result: ETSUnionType = new ETSUnionType(global.generatedEs2panda._CreateETSUnionType(global.context, passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -51,7 +50,7 @@ export class ETSUnionType extends TypeNode {
         return result
     }
     static updateETSUnionType(original: ETSUnionType | undefined, types: readonly TypeNode[], annotations?: readonly AnnotationUsage[]): ETSUnionType {
-        const result: ETSUnionType = new ETSUnionType(global.generatedEs2panda._UpdateETSUnionType(global.context, passNode(original), passNodeArray(types), types.length))
+        const result: ETSUnionType = new ETSUnionType(global.generatedEs2panda._UpdateETSUnionType(global.context, passNode(original), passNodeArray(types), types.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -73,5 +72,5 @@ export function isETSUnionType(node: object | undefined): node is ETSUnionType {
     return node instanceof ETSUnionType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE, (peer: KNativePointer) => new ETSUnionType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE, (peer: KNativePointer) => new ETSUnionType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNION_TYPE))
 }

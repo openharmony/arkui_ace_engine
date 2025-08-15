@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkTextAreaPeer, TextAreaSubmitCallback, TextAreaType, TextAreaAttribute } from "./component/textArea"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions, InputCounterOptions } from "./component/common"
 import { ResourceColor, Font, Length, ResourceStr, Dimension } from "./component/units"
 import { Color, TextAlign, FontStyle, FontWeight, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode } from "./component/enums"
@@ -57,7 +58,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: number | FontWeight | ResourceStr | undefined
+    _fontWeight_0_0value?: number | FontWeight | string | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: ResourceStr | undefined
     _textOverflow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -313,7 +314,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as number | FontWeight | string | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -323,7 +324,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as number | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((undefined as number | FontWeight | string | undefined));
                 }
             }
         }
@@ -1361,7 +1362,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as number | FontWeight | ResourceStr | undefined));
+                    this.fontWeight((undefined as number | FontWeight | string | undefined));
                 }
             }
         }
@@ -2117,7 +2118,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
         }
         return this
     }
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+    fontWeight(value: number | FontWeight | string | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

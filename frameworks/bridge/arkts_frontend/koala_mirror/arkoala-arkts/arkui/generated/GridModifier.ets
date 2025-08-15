@@ -21,12 +21,13 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute } from "./component/grid"
-import { ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod } from "./component/common"
+import { int32 } from "@koalaui/common"
+import { ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions } from "./component/common"
 import { Length } from "./component/units"
 import { Resource } from "global.resource"
+import { Color, BarState, ScrollSource, EdgeEffect } from "./component/enums"
 import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
-import { ScrollSource } from "./component/enums"
 export class GridModifier extends ScrollableCommonMethodModifier implements GridAttribute,AttributeModifier<GridAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -46,6 +47,12 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
     _columnsGap_0_0value?: Length | undefined
     _rowsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rowsGap_0_0value?: Length | undefined
+    _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarWidth_0_0value?: number | string | undefined
+    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarColor_0_0value?: Color | number | string | undefined
+    _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBar_0_0value?: BarState | undefined
     _onScrollBarUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollBarUpdate_0_0value?: ((index: number,offset: number) => ComputedBarAttribute) | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -76,6 +83,12 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
     _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
     _onItemDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
+    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _nestedScroll_0_0value?: NestedScrollOptions | undefined
+    _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableScrollInteraction_0_0value?: boolean | undefined
+    _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _friction_0_0value?: number | Resource | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: GridItemAlignment | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -87,6 +100,9 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedCount_1_0value?: number | undefined
     _cachedCount_1_1value?: boolean | undefined
+    _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _edgeEffect_0_0value?: EdgeEffect | undefined
+    _edgeEffect_0_1value?: EdgeEffectOptions | undefined
     applyModifierPatch(peer: ArkGridPeer): void {
         super.applyModifierPatch(peer)
         if (this._columnsTemplate_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -158,6 +174,60 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 default: {
                     this._rowsGap_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setRowsGapAttribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._scrollBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as number | string | undefined));
+                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarWidthAttribute((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | number | string | undefined));
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarColorAttribute((undefined as Color | number | string | undefined));
+                }
+            }
+        }
+        if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarAttribute((this._scrollBar_0_0value as BarState | undefined));
+                    this._scrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarAttribute((undefined as BarState | undefined));
                 }
             }
         }
@@ -431,6 +501,60 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 }
             }
         }
+        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as NestedScrollOptions | undefined));
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNestedScrollAttribute((undefined as NestedScrollOptions | undefined));
+                }
+            }
+        }
+        if (this._enableScrollInteraction_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableScrollInteraction_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableScrollInteractionAttribute((this._enableScrollInteraction_0_0value as boolean | undefined));
+                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableScrollInteractionAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._friction_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._friction_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFrictionAttribute((this._friction_0_0value as number | Resource | undefined));
+                    this._friction_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._friction_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFrictionAttribute((undefined as number | Resource | undefined));
+                }
+            }
+        }
         if (this._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._alignItems_0_flag) {
@@ -521,6 +645,24 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 }
             }
         }
+        if (this._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._edgeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions));
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._edgeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: GridModifier): void {
         super.mergeModifier(modifier)
@@ -573,6 +715,45 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 }
                 default: {
                     this.rowsGap((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarWidth_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarWidth(modifier._scrollBarWidth_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarWidth((undefined as number | string | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarColor((undefined as Color | number | string | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBar_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBar(modifier._scrollBar_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBar((undefined as BarState | undefined));
                 }
             }
         }
@@ -771,6 +952,45 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 }
             }
         }
+        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.nestedScroll(modifier._nestedScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.nestedScroll((undefined as NestedScrollOptions | undefined));
+                }
+            }
+        }
+        if (modifier._enableScrollInteraction_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableScrollInteraction_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableScrollInteraction(modifier._enableScrollInteraction_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableScrollInteraction((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._friction_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._friction_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.friction(modifier._friction_0_0value);
+                    break;
+                }
+                default: {
+                    this.friction((undefined as number | Resource | undefined));
+                }
+            }
+        }
         if (modifier._alignItems_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._alignItems_0_flag) {
@@ -836,6 +1056,19 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
                 }
             }
         }
+        if (modifier._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._edgeEffect_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.edgeEffect(modifier._edgeEffect_0_0value, modifier._edgeEffect_0_1value);
+                    break;
+                }
+                default: {
+                    this.edgeEffect((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
+                }
+            }
+        }
     }
     columnsTemplate(value: string | undefined): this {
         if (((this._columnsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnsTemplate_0_0value) !== (value)))
@@ -878,6 +1111,39 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
         } else
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarWidth(value: number | string | undefined): this {
+        if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
+        {
+            this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarWidth_0_0value = value
+        } else
+        {
+            this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarColor(value: Color | number | string | undefined): this {
+        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarColor_0_0value = value
+        } else
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBar(value: BarState | undefined): this {
+        if (((this._scrollBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBar_0_0value = value
+        } else
+        {
+            this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1046,6 +1312,39 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
         }
         return this
     }
+    nestedScroll(value: NestedScrollOptions | undefined): this {
+        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._nestedScroll_0_0value = value
+        } else
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableScrollInteraction(value: boolean | undefined): this {
+        if (((this._enableScrollInteraction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableScrollInteraction_0_0value) !== (value)))
+        {
+            this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableScrollInteraction_0_0value = value
+        } else
+        {
+            this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    friction(value: number | Resource | undefined): this {
+        if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._friction_0_flag = AttributeUpdaterFlag.UPDATE
+            this._friction_0_0value = value
+        } else
+        {
+            this._friction_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     alignItems(value: GridItemAlignment | undefined): this {
         if (((this._alignItems_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1099,6 +1398,18 @@ export class GridModifier extends ScrollableCommonMethodModifier implements Grid
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        if (((this._edgeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+        {
+            this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
+            this._edgeEffect_0_0value = value
+            this._edgeEffect_0_1value = options
+        } else
+        {
+            this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

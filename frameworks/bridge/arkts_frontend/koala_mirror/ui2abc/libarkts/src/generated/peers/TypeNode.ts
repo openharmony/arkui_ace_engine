@@ -33,11 +33,12 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotationUsage } from "./AnnotationUsage"
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TypeNode extends Expression {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     /** @deprecated */
     emplaceAnnotations(source?: AnnotationUsage): this {

@@ -38,17 +38,16 @@ import { Es2pandaModifierFlags } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSWildcardType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 70)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSWildcardType(typeReference: ETSTypeReference | undefined, flags: Es2pandaModifierFlags): ETSWildcardType {
-        const result: ETSWildcardType = new ETSWildcardType(global.generatedEs2panda._CreateETSWildcardType(global.context, passNode(typeReference), flags))
+        const result: ETSWildcardType = new ETSWildcardType(global.generatedEs2panda._CreateETSWildcardType(global.context, passNode(typeReference), flags), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSWildcardType(original: ETSWildcardType | undefined, typeReference: ETSTypeReference | undefined, flags: Es2pandaModifierFlags): ETSWildcardType {
-        const result: ETSWildcardType = new ETSWildcardType(global.generatedEs2panda._UpdateETSWildcardType(global.context, passNode(original), passNode(typeReference), flags))
+        const result: ETSWildcardType = new ETSWildcardType(global.generatedEs2panda._UpdateETSWildcardType(global.context, passNode(original), passNode(typeReference), flags), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -61,5 +60,5 @@ export function isETSWildcardType(node: object | undefined): node is ETSWildcard
     return node instanceof ETSWildcardType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE, (peer: KNativePointer) => new ETSWildcardType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE, (peer: KNativePointer) => new ETSWildcardType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_WILDCARD_TYPE))
 }

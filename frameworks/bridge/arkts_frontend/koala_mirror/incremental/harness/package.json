@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/harness",
-    "version": "1.7.6+devel",
+    "version": "1.7.9+devel",
     "description": "A harness library compatible with OHOS and ArkTS",
     "main": "build/src/index.js",
     "types": "build/src/index.d.ts",
@@ -37,8 +37,8 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.7.6+devel",
-        "@koalaui/compat": "1.7.6+devel"
+        "@koalaui/common": "1.7.9+devel",
+        "@koalaui/compat": "1.7.9+devel"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, CommonConfigurat
 import { ResourceColor, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -250,22 +250,22 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     trackShadow_value?: DataPanelShadowOptions | undefined
     contentModifier_value?: ContentModifier<DataPanelConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined
-    public closeEffect(value: boolean | undefined): this {
+    closeEffect(value: boolean | undefined): this {
         return this
     }
-    public valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
+    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
         return this
     }
-    public trackBackgroundColor(value: ResourceColor | undefined): this {
+    trackBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public strokeWidth(value: Length | undefined): this {
+    strokeWidth(value: Length | undefined): this {
         return this
     }
-    public trackShadow(value: DataPanelShadowOptions | undefined): this {
+    trackShadow(value: DataPanelShadowOptions | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {

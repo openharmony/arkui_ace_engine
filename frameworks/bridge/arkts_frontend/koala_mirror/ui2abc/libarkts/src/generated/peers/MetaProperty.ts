@@ -37,17 +37,16 @@ import { Es2pandaMetaPropertyKind } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class MetaProperty extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 46)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createMetaProperty(kind: Es2pandaMetaPropertyKind): MetaProperty {
-        const result: MetaProperty = new MetaProperty(global.generatedEs2panda._CreateMetaProperty(global.context, kind))
+        const result: MetaProperty = new MetaProperty(global.generatedEs2panda._CreateMetaProperty(global.context, kind), Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateMetaProperty(original: MetaProperty | undefined, kind: Es2pandaMetaPropertyKind): MetaProperty {
-        const result: MetaProperty = new MetaProperty(global.generatedEs2panda._UpdateMetaProperty(global.context, passNode(original), kind))
+        const result: MetaProperty = new MetaProperty(global.generatedEs2panda._UpdateMetaProperty(global.context, passNode(original), kind), Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isMetaProperty(node: object | undefined): node is MetaProperty {
     return node instanceof MetaProperty
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION, (peer: KNativePointer) => new MetaProperty(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION, (peer: KNativePointer) => new MetaProperty(peer, Es2pandaAstNodeType.AST_NODE_TYPE_META_PROPERTY_EXPRESSION))
 }

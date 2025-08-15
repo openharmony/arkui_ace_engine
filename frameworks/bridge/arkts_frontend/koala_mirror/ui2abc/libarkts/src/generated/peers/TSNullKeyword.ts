@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSNullKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 103)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSNullKeyword(): TSNullKeyword {
-        const result: TSNullKeyword = new TSNullKeyword(global.generatedEs2panda._CreateTSNullKeyword(global.context))
+        const result: TSNullKeyword = new TSNullKeyword(global.generatedEs2panda._CreateTSNullKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSNullKeyword(original?: TSNullKeyword): TSNullKeyword {
-        const result: TSNullKeyword = new TSNullKeyword(global.generatedEs2panda._UpdateTSNullKeyword(global.context, passNode(original)))
+        const result: TSNullKeyword = new TSNullKeyword(global.generatedEs2panda._UpdateTSNullKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSNullKeyword(node: object | undefined): node is TSNullKeyword
     return node instanceof TSNullKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD, (peer: KNativePointer) => new TSNullKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD, (peer: KNativePointer) => new TSNullKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_NULL_KEYWORD))
 }

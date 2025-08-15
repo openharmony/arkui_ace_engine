@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkSideBarContainerPeer, ButtonStyle, SideBarPosition, SideBarContainerAttribute } from "./component/sidebar"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, DividerStyle } from "./component/common"
 import { Length, Dimension } from "./component/units"
 import { Resource } from "global.resource"
@@ -43,13 +44,11 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
     _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onChange_0_0value?: ((value: boolean) => void) | undefined
     _sideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sideBarWidth_0_0value?: number | Bindable<number> | undefined
+    _sideBarWidth_0_0value?: Length | Bindable<Length> | undefined
     _minSideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minSideBarWidth_0_0value?: number | undefined
     _maxSideBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxSideBarWidth_0_0value?: number | undefined
-    _sideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sideBarWidth_1_0value?: Length | undefined
     _minSideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minSideBarWidth_1_0value?: Length | undefined
     _maxSideBarWidth_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -140,7 +139,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         {
             switch (this._sideBarWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSideBarWidth0Attribute((this._sideBarWidth_0_0value as number | Bindable<number> | undefined));
+                    peer.setSideBarWidthAttribute((this._sideBarWidth_0_0value as Length | Bindable<Length> | undefined));
                     this._sideBarWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -150,7 +149,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
                 }
                 default: {
                     this._sideBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSideBarWidth0Attribute((undefined as number | Bindable<number> | undefined));
+                    peer.setSideBarWidthAttribute((undefined as Length | Bindable<Length> | undefined));
                 }
             }
         }
@@ -187,24 +186,6 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
                 default: {
                     this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setMaxSideBarWidth0Attribute((undefined as number | undefined));
-                }
-            }
-        }
-        if (this._sideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._sideBarWidth_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSideBarWidth1Attribute((this._sideBarWidth_1_0value as Length | undefined));
-                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._sideBarWidth_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSideBarWidth1Attribute((undefined as Length | undefined));
                 }
             }
         }
@@ -380,7 +361,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
                     break;
                 }
                 default: {
-                    this.sideBarWidth((undefined as number | Bindable<number> | undefined));
+                    this.sideBarWidth((undefined as Length | Bindable<Length> | undefined));
                 }
             }
         }
@@ -407,19 +388,6 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
                 }
                 default: {
                     this.maxSideBarWidth((undefined as number | undefined));
-                }
-            }
-        }
-        if (modifier._sideBarWidth_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._sideBarWidth_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.sideBarWidth(modifier._sideBarWidth_1_0value);
-                    break;
-                }
-                default: {
-                    this.sideBarWidth((undefined as Length | undefined));
                 }
             }
         }
@@ -546,7 +514,7 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         }
         return this
     }
-    sideBarWidth(value: number | Bindable<number> | undefined): this {
+    sideBarWidth(value: Length | Bindable<Length> | undefined): this {
         if (((this._sideBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._sideBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -576,17 +544,6 @@ export class SideBarContainerModifier extends CommonMethodModifier implements Si
         } else
         {
             this._maxSideBarWidth_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    sideBarWidth(value: Length | undefined): this {
-        if (((this._sideBarWidth_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._sideBarWidth_1_flag = AttributeUpdaterFlag.UPDATE
-            this._sideBarWidth_1_0value = value
-        } else
-        {
-            this._sideBarWidth_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

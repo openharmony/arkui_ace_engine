@@ -22,7 +22,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ContentModifier, AttributeModifier, hookRadioContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookRadioContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -135,16 +135,16 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     radioStyle_value?: RadioStyle | undefined
     contentModifier_value?: ContentModifier<RadioConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined
-    public checked(value: boolean | Bindable<boolean> | undefined): this {
+    checked(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public onChange(value: OnRadioChangeCallback | undefined): this {
+    onChange(value: OnRadioChangeCallback | undefined): this {
         return this
     }
-    public radioStyle(value: RadioStyle | undefined): this {
+    radioStyle(value: RadioStyle | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -256,7 +256,7 @@ export class RadioConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
             triggerChangeTmpBufBufArgsSerializer.writeBoolean(value0);
-            InteropNativeModule._CallCallback(313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -309,7 +309,7 @@ export class RadioOptions_serializer {
                 indicatorBuilderTmpBuf_BufArgsSerializer.writeInt32(indicatorBuilderTmpBuf_BufResource.resourceId);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCall);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, indicatorBuilderTmpBuf_BufArgsSerializer.asBuffer(), indicatorBuilderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, indicatorBuilderTmpBuf_BufArgsSerializer.asBuffer(), indicatorBuilderTmpBuf_BufArgsSerializer.length());
                 indicatorBuilderTmpBuf_BufArgsSerializer.release();
                 return;
             }

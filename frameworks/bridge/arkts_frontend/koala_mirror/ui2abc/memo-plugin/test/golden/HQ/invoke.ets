@@ -5,22 +5,10 @@ import { memo as memo } from "@koalaui/runtime/annotations";
 
 function main() {}
 
-@memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
-  const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id__@test/input/HQ/invoke.ets"))), 0);
-  if (__memo_scope.unchanged) {
-    __memo_scope.cached;
-    return;
-  }
-  A.$_invoke(__memo_context, ((__memo_id) + (__hash("id_$_invoke_@test/input/HQ/invoke.ets"))));
-  {
-    __memo_scope.recache();
-    return;
-  }
-});
 
 class A {
   @memo() public static $_invoke(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_$_invoke_@test/input/HQ/invoke.ets"))), 0);
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_$_invoke_invoke.ets"))), 0);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;
       return;

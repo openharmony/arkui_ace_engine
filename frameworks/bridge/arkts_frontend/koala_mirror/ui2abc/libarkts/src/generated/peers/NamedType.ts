@@ -38,17 +38,16 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 
 export class NamedType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 48)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createNamedType(name?: Identifier): NamedType {
-        const result: NamedType = new NamedType(global.generatedEs2panda._CreateNamedType(global.context, passNode(name)))
+        const result: NamedType = new NamedType(global.generatedEs2panda._CreateNamedType(global.context, passNode(name)), Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateNamedType(original?: NamedType, name?: Identifier): NamedType {
-        const result: NamedType = new NamedType(global.generatedEs2panda._UpdateNamedType(global.context, passNode(original), passNode(name)))
+        const result: NamedType = new NamedType(global.generatedEs2panda._UpdateNamedType(global.context, passNode(original), passNode(name)), Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -82,5 +81,5 @@ export function isNamedType(node: object | undefined): node is NamedType {
     return node instanceof NamedType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE, (peer: KNativePointer) => new NamedType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE, (peer: KNativePointer) => new NamedType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_NAMED_TYPE))
 }

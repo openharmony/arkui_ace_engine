@@ -38,17 +38,16 @@ import { LoopStatement } from "./LoopStatement"
 import { Statement } from "./Statement"
 
 export class ForOfStatement extends LoopStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 32)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createForOfStatement(left: AstNode | undefined, right: Expression | undefined, body: Statement | undefined, isAwait: boolean): ForOfStatement {
-        const result: ForOfStatement = new ForOfStatement(global.generatedEs2panda._CreateForOfStatement(global.context, passNode(left), passNode(right), passNode(body), isAwait))
+        const result: ForOfStatement = new ForOfStatement(global.generatedEs2panda._CreateForOfStatement(global.context, passNode(left), passNode(right), passNode(body), isAwait), Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateForOfStatement(original: ForOfStatement | undefined, left: AstNode | undefined, right: Expression | undefined, body: Statement | undefined, isAwait: boolean): ForOfStatement {
-        const result: ForOfStatement = new ForOfStatement(global.generatedEs2panda._UpdateForOfStatement(global.context, passNode(original), passNode(left), passNode(right), passNode(body), isAwait))
+        const result: ForOfStatement = new ForOfStatement(global.generatedEs2panda._UpdateForOfStatement(global.context, passNode(original), passNode(left), passNode(right), passNode(body), isAwait), Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -70,5 +69,5 @@ export function isForOfStatement(node: object | undefined): node is ForOfStateme
     return node instanceof ForOfStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT, (peer: KNativePointer) => new ForOfStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT, (peer: KNativePointer) => new ForOfStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_FOR_OF_STATEMENT))
 }

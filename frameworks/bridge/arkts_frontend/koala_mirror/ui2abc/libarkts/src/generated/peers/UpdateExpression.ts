@@ -37,17 +37,16 @@ import { Es2pandaTokenType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class UpdateExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 151)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createUpdateExpression(argument: Expression | undefined, updateOperator: Es2pandaTokenType, isPrefix: boolean): UpdateExpression {
-        const result: UpdateExpression = new UpdateExpression(global.generatedEs2panda._CreateUpdateExpression(global.context, passNode(argument), updateOperator, isPrefix))
+        const result: UpdateExpression = new UpdateExpression(global.generatedEs2panda._CreateUpdateExpression(global.context, passNode(argument), updateOperator, isPrefix), Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateUpdateExpression(original: UpdateExpression | undefined, argument: Expression | undefined, updateOperator: Es2pandaTokenType, isPrefix: boolean): UpdateExpression {
-        const result: UpdateExpression = new UpdateExpression(global.generatedEs2panda._UpdateUpdateExpression(global.context, passNode(original), passNode(argument), updateOperator, isPrefix))
+        const result: UpdateExpression = new UpdateExpression(global.generatedEs2panda._UpdateUpdateExpression(global.context, passNode(original), passNode(argument), updateOperator, isPrefix), Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isUpdateExpression(node: object | undefined): node is UpdateExpr
     return node instanceof UpdateExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION, (peer: KNativePointer) => new UpdateExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION, (peer: KNativePointer) => new UpdateExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_UPDATE_EXPRESSION))
 }

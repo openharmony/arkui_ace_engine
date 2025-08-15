@@ -36,22 +36,21 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TemplateElement extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 144)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1TemplateElement(raw: string, cooked: string): TemplateElement {
-        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._CreateTemplateElement1(global.context, raw, cooked))
+        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._CreateTemplateElement1(global.context, raw, cooked), Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateTemplateElement(original?: TemplateElement): TemplateElement {
-        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._UpdateTemplateElement(global.context, passNode(original)))
+        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._UpdateTemplateElement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1TemplateElement(original: TemplateElement | undefined, raw: string, cooked: string): TemplateElement {
-        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._UpdateTemplateElement1(global.context, passNode(original), raw, cooked))
+        const result: TemplateElement = new TemplateElement(global.generatedEs2panda._UpdateTemplateElement1(global.context, passNode(original), raw, cooked), Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -67,5 +66,5 @@ export function isTemplateElement(node: object | undefined): node is TemplateEle
     return node instanceof TemplateElement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT, (peer: KNativePointer) => new TemplateElement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT, (peer: KNativePointer) => new TemplateElement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TEMPLATE_ELEMENT))
 }

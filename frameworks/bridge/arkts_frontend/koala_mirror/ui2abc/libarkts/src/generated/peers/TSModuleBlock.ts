@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class TSModuleBlock extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 117)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSModuleBlock(statements: readonly Statement[]): TSModuleBlock {
-        const result: TSModuleBlock = new TSModuleBlock(global.generatedEs2panda._CreateTSModuleBlock(global.context, passNodeArray(statements), statements.length))
+        const result: TSModuleBlock = new TSModuleBlock(global.generatedEs2panda._CreateTSModuleBlock(global.context, passNodeArray(statements), statements.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSModuleBlock(original: TSModuleBlock | undefined, statements: readonly Statement[]): TSModuleBlock {
-        const result: TSModuleBlock = new TSModuleBlock(global.generatedEs2panda._UpdateTSModuleBlock(global.context, passNode(original), passNodeArray(statements), statements.length))
+        const result: TSModuleBlock = new TSModuleBlock(global.generatedEs2panda._UpdateTSModuleBlock(global.context, passNode(original), passNodeArray(statements), statements.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSModuleBlock(node: object | undefined): node is TSModuleBlock
     return node instanceof TSModuleBlock
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK, (peer: KNativePointer) => new TSModuleBlock(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK, (peer: KNativePointer) => new TSModuleBlock(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_MODULE_BLOCK))
 }

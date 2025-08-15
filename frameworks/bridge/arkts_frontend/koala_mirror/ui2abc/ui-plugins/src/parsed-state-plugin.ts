@@ -14,8 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import * as path from "node:path"
-import { ComponentTransformer, ComponentTransformerOptions } from './component-transformer'
+import { ComponentTransformer, ComponentTransformerOptions, ProjectConfig } from './component-transformer'
 import { AnnotationsTransformer } from "./annotation-translator"
 import { CallTransformer } from "./call-transformer"
 import { Importer } from "./utils"
@@ -26,7 +25,8 @@ import { ClassTransformer } from "./class-transformer"
 
 
 export default function parsedTransformer(
-    userPluginOptions?: ComponentTransformerOptions
+    userPluginOptions?: ComponentTransformerOptions,
+    projectConfig?: ProjectConfig
 ): arkts.ProgramTransformer {
     return (program: arkts.Program, compilationOptions: arkts.CompilationOptions, context: arkts.PluginContext) => {
         const importer = new Importer()
@@ -46,7 +46,7 @@ export default function parsedTransformer(
             new ClassTransformer(importer),
             new ComponentTransformer(importer, userPluginOptions),
             new AnnotationsTransformer(),
-            new CallTransformer(importer, userPluginOptions),
+            new CallTransformer(importer, userPluginOptions, projectConfig),
             new ImportsTransformer(importer)
         ]
         const result = transformers.reduce((node: arkts.AstNode, transformer: arkts.AbstractVisitor) => transformer.visitor(node), program.ast)

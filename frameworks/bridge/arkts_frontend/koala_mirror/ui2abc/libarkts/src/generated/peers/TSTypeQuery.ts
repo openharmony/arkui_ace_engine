@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeQuery extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 139)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeQuery(exprName?: Expression): TSTypeQuery {
-        const result: TSTypeQuery = new TSTypeQuery(global.generatedEs2panda._CreateTSTypeQuery(global.context, passNode(exprName)))
+        const result: TSTypeQuery = new TSTypeQuery(global.generatedEs2panda._CreateTSTypeQuery(global.context, passNode(exprName)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeQuery(original?: TSTypeQuery, exprName?: Expression): TSTypeQuery {
-        const result: TSTypeQuery = new TSTypeQuery(global.generatedEs2panda._UpdateTSTypeQuery(global.context, passNode(original), passNode(exprName)))
+        const result: TSTypeQuery = new TSTypeQuery(global.generatedEs2panda._UpdateTSTypeQuery(global.context, passNode(original), passNode(exprName)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSTypeQuery(node: object | undefined): node is TSTypeQuery {
     return node instanceof TSTypeQuery
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY, (peer: KNativePointer) => new TSTypeQuery(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY, (peer: KNativePointer) => new TSTypeQuery(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_QUERY))
 }

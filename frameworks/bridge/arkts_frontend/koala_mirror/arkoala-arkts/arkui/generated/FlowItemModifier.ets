@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkFlowItemPeer, FlowItemAttribute } from "./component/flowItem"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class FlowItemModifier extends CommonMethodModifier implements FlowItemAttribute,AttributeModifier<FlowItemAttribute> {
     _instanceId: number = -1;

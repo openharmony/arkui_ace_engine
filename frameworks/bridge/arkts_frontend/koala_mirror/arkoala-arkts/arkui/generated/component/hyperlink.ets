@@ -111,7 +111,7 @@ export interface HyperlinkAttribute extends CommonMethod {
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined
     attributeModifier_value?: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined
-    public color(value: Color | number | string | Resource | undefined): this {
+    color(value: Color | number | string | Resource | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class ExportDefaultDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 27)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createExportDefaultDeclaration(decl: AstNode | undefined, exportEquals: boolean): ExportDefaultDeclaration {
-        const result: ExportDefaultDeclaration = new ExportDefaultDeclaration(global.generatedEs2panda._CreateExportDefaultDeclaration(global.context, passNode(decl), exportEquals))
+        const result: ExportDefaultDeclaration = new ExportDefaultDeclaration(global.generatedEs2panda._CreateExportDefaultDeclaration(global.context, passNode(decl), exportEquals), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateExportDefaultDeclaration(original: ExportDefaultDeclaration | undefined, decl: AstNode | undefined, exportEquals: boolean): ExportDefaultDeclaration {
-        const result: ExportDefaultDeclaration = new ExportDefaultDeclaration(global.generatedEs2panda._UpdateExportDefaultDeclaration(global.context, passNode(original), passNode(decl), exportEquals))
+        const result: ExportDefaultDeclaration = new ExportDefaultDeclaration(global.generatedEs2panda._UpdateExportDefaultDeclaration(global.context, passNode(original), passNode(decl), exportEquals), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -62,5 +61,5 @@ export function isExportDefaultDeclaration(node: object | undefined): node is Ex
     return node instanceof ExportDefaultDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION, (peer: KNativePointer) => new ExportDefaultDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION, (peer: KNativePointer) => new ExportDefaultDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_DEFAULT_DECLARATION))
 }

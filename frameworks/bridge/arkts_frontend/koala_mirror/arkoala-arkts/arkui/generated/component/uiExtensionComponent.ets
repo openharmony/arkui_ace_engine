@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { RecordData } from "./pluginComponent"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -25,19 +26,19 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ErrorCallback, BusinessError } from "./../framework/ohos.base"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ComponentContent, ComponentContent_serializer } from "./../ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface UIExtensionProxy {
-    send(data: Map<string, Object>): void
-    sendSync(data: Map<string, Object>): Map<string, Object>
-    onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
-    offAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
-    offSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
+    send(data: Map<string, RecordData>): void
+    sendSync(data: Map<string, RecordData>): Map<string, RecordData>
+    onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
+    onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
+    offSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void) | undefined): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
     peer?: Finalizable | undefined = undefined
@@ -60,89 +61,112 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     public static fromPtr(ptr: KPointer): UIExtensionProxyInternal {
         return new UIExtensionProxyInternal(ptr)
     }
-    public send(data: Map<string, Object>): void {
-        const data_casted = data as (Map<string, Object>)
+    public send(data: Map<string, RecordData>): void {
+        const data_casted = data as (Map<string, RecordData>)
         this.send_serialize(data_casted)
         return
     }
-    public sendSync(data: Map<string, Object>): Map<string, Object> {
-        const data_casted = data as (Map<string, Object>)
+    public sendSync(data: Map<string, RecordData>): Map<string, RecordData> {
+        const data_casted = data as (Map<string, RecordData>)
         return this.sendSync_serialize(data_casted)
     }
-    public onAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onAsyncReceiverRegisterAsyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
-        this.onAsyncReceiverRegister_serialize(callback__casted)
+        this.onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public onSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
+    public onSyncReceiverRegisterSyncReceiverRegister(callback_: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void))
-        this.onSyncReceiverRegister_serialize(callback__casted)
+        this.onSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offAsyncReceiverRegisterAsyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
-        this.offAsyncReceiverRegister_serialize(callback__casted)
+        this.offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback__casted)
         return
     }
-    public offSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    public offSyncReceiverRegisterSyncReceiverRegister(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const callback__casted = callback_ as (((value0: UIExtensionProxy) => void) | undefined)
-        this.offSyncReceiverRegister_serialize(callback__casted)
+        this.offSyncReceiverRegisterSyncReceiverRegister_serialize(callback__casted)
         return
     }
-    on(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
+    onAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
         throw new Error("Improve")
     }
-    off(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
+    onSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
         throw new Error("Improve")
     }
-    private send_serialize(data: Map<string, Object>): void {
+    offAsyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
+        throw new Error("Improve")
+    }
+    offSyncReceiverRegister(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
+        throw new Error("Improve")
+    }
+    private send_serialize(data: Map<string, RecordData>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((data.size).toInt())
         for (const pair of data) {
             const dataKeyVar = pair[0]
             const dataValueVar = pair[1]
             thisSerializer.writeString(dataKeyVar)
-            thisSerializer.holdAndWriteObject(dataValueVar)
+            if (dataValueVar !== undefined) {
+                thisSerializer.writeInt8(RuntimeType.OBJECT)
+                const dataValueVarTmpValue  = dataValueVar!
+                thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
+            } else {
+                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+            }
         }
         ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private sendSync_serialize(data: Map<string, Object>): Map<string, Object> {
+    private sendSync_serialize(data: Map<string, RecordData>): Map<string, RecordData> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((data.size).toInt())
         for (const pair of data) {
             const dataKeyVar = pair[0]
             const dataValueVar = pair[1]
             thisSerializer.writeString(dataKeyVar)
-            thisSerializer.holdAndWriteObject(dataValueVar)
+            if (dataValueVar !== undefined) {
+                thisSerializer.writeInt8(RuntimeType.OBJECT)
+                const dataValueVarTmpValue  = dataValueVar!
+                thisSerializer.holdAndWriteObject(dataValueVarTmpValue)
+            } else {
+                thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+            }
         }
         const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferSizeVar : int32 = retvalDeserializer.readInt32()
-        let buffer : Map<string, Object> = new Map<string, Object>()
+        let buffer : Map<string, RecordData> = new Map<string, RecordData>()
         // TODO: TS map resize
         for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
             const bufferKeyVar : string = (retvalDeserializer.readString() as string)
-            const bufferValueVar : Object = (retvalDeserializer.readObject() as object)
+            const bufferValueVarTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
+            let bufferValueVarTempBuf : Object | undefined
+            if ((bufferValueVarTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+                bufferValueVarTempBuf = (retvalDeserializer.readObject() as object)
+            }
+            const bufferValueVar : RecordData = bufferValueVarTempBuf
             buffer.set(bufferKeyVar, bufferValueVar)
         }
-        const returnResult : Map<string, Object> = buffer
+        const returnResult : Map<string, RecordData> = buffer
         return returnResult
     }
-    private onAsyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
+    private onAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegisterAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private onSyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
+    private onSyncReceiverRegisterSyncReceiverRegister_serialize(callback_: ((value0: UIExtensionProxy) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegisterSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offAsyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    private offAsyncReceiverRegisterAsyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -151,10 +175,10 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegisterAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private offSyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
+    private offSyncReceiverRegisterSyncReceiverRegister_serialize(callback_?: ((value0: UIExtensionProxy) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -163,7 +187,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegisterSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -203,7 +227,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._UIExtensionComponentAttribute_setOnRemoteReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnReceiveAttribute(value: ((value0: Map<string, Object>) => void) | undefined): void {
+    setOnReceiveAttribute(value: ((value0: Map<string, RecordData>) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -267,12 +291,12 @@ export interface UIExtensionOptions {
     dpiFollowStrategy?: DpiFollowStrategy;
     windowModeFollowStrategy?: WindowModeFollowStrategy;
 }
-export type ReceiveCallback = ((value0: Map<string, Object>) => void);
+export type ReceiveCallback = ((value0: Map<string, RecordData>) => void);
 export interface UIExtensionComponentAttribute extends CommonMethod {
     onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
         throw new Error("Unimplemented method onRemoteReady")
     }
-    onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this {
+    onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
         throw new Error("Unimplemented method onReceive")
     }
     onError(value: ErrorCallback | undefined): this {
@@ -290,24 +314,24 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
 }
 export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
     onRemoteReady_value?: ((value0: UIExtensionProxy) => void) | undefined
-    onReceive_value?: ((value0: Map<string, Object>) => void) | undefined
+    onReceive_value?: ((value0: Map<string, RecordData>) => void) | undefined
     onError_value?: ErrorCallback | undefined
     onTerminated_value?: ((value0: TerminationInfo) => void) | undefined
     onDrawReady_value?: (() => void) | undefined
     attributeModifier_value?: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
+    onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
         return this
     }
-    public onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this {
+    onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
         return this
     }
-    public onError(value: ErrorCallback | undefined): this {
+    onError(value: ErrorCallback | undefined): this {
         return this
     }
-    public onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
+    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
         return this
     }
-    public onDrawReady(value: (() => void) | undefined): this {
+    onDrawReady(value: (() => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -336,9 +360,9 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    public onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this {
+    public onReceive(value: ((value0: Map<string, RecordData>) => void) | undefined): this {
         if (this.checkPriority("onReceive")) {
-            const value_casted = value as (((value0: Map<string, Object>) => void) | undefined)
+            const value_casted = value as (((value0: Map<string, RecordData>) => void) | undefined)
             this.getPeer()?.setOnReceiveAttribute(value_casted)
             return this
         }

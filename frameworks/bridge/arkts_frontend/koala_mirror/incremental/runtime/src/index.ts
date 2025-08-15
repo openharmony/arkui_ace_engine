@@ -67,7 +67,10 @@ export {
     transition,
 } from "./animation/TimeAnimation"
 
-export { RuntimeProfiler } from "./common/RuntimeProfiler"
+export {
+    RuntimeProfiler,
+    RuntimeTracer,
+} from "./common/RuntimeProfiler"
 
 export {
     memoBind,

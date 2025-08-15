@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethod
 import { ResourceColor, Length, PX, VP, LPX, Font, Font_serializer } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookProgressContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookProgressContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -237,19 +237,19 @@ export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAt
     privacySensitive_value?: boolean | undefined
     contentModifier_value?: ContentModifier<ProgressConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined
-    public value(value: number | undefined): this {
+    value(value: number | undefined): this {
         return this
     }
-    public color(value: ResourceColor | LinearGradient | undefined): this {
+    color(value: ResourceColor | LinearGradient | undefined): this {
         return this
     }
-    public style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
+    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
         return this
     }
-    public privacySensitive(value: boolean | undefined): this {
+    privacySensitive(value: boolean | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {

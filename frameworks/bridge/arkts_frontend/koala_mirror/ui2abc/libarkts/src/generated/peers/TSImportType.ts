@@ -38,17 +38,16 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TypeNode } from "./TypeNode"
 
 export class TSImportType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 114)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSImportType(param: Expression | undefined, typeParams: TSTypeParameterInstantiation | undefined, qualifier: Expression | undefined, isTypeof: boolean): TSImportType {
-        const result: TSImportType = new TSImportType(global.generatedEs2panda._CreateTSImportType(global.context, passNode(param), passNode(typeParams), passNode(qualifier), isTypeof))
+        const result: TSImportType = new TSImportType(global.generatedEs2panda._CreateTSImportType(global.context, passNode(param), passNode(typeParams), passNode(qualifier), isTypeof), Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSImportType(original: TSImportType | undefined, param: Expression | undefined, typeParams: TSTypeParameterInstantiation | undefined, qualifier: Expression | undefined, isTypeof: boolean): TSImportType {
-        const result: TSImportType = new TSImportType(global.generatedEs2panda._UpdateTSImportType(global.context, passNode(original), passNode(param), passNode(typeParams), passNode(qualifier), isTypeof))
+        const result: TSImportType = new TSImportType(global.generatedEs2panda._UpdateTSImportType(global.context, passNode(original), passNode(param), passNode(typeParams), passNode(qualifier), isTypeof), Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -70,5 +69,5 @@ export function isTSImportType(node: object | undefined): node is TSImportType {
     return node instanceof TSImportType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE, (peer: KNativePointer) => new TSImportType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE, (peer: KNativePointer) => new TSImportType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_IMPORT_TYPE))
 }

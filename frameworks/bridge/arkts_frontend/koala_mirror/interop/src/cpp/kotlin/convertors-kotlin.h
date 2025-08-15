@@ -102,6 +102,18 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KDouble> {
+    using InteropType = double;
+    static inline KDouble convertFrom(InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(KDouble value) {
+      return value;
+    }
+    static inline void release(InteropType value, KDouble converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KLong> {
     using InteropType = int64_t;
     static inline KLong convertFrom(InteropType value) {

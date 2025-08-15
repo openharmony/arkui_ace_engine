@@ -6,7 +6,6 @@ import { memo as memo } from "@koalaui/runtime/annotations";
 function main() {}
 
 
-
 class A {
   public x: int;
   
@@ -18,7 +17,7 @@ class A {
 
 class Test {
   @memo() public obj_arg(__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg: A) {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_obj_arg_@test/input/HQ/object-param.ets"))), 2);
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_obj_arg_object-param.ets"))), 2);
     const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_arg = __memo_scope.param(1, arg);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;
@@ -36,14 +35,14 @@ class Test {
 
 class Use {
   @memo() public test(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
-    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test_@test/input/HQ/object-param.ets"))), 1);
+    const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_test_object-param.ets"))), 1);
     const __memo_parameter_this = __memo_scope.param(0, this);
     if (__memo_scope.unchanged) {
       __memo_scope.cached;
       return;
     }
     const test = new Test();
-    test.obj_arg(__memo_context, ((__memo_id) + (__hash("id_obj_arg_@test/input/HQ/object-param.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_obj_arg_@test/input/HQ/object-param.ets"))), ((): A => {
+    test.obj_arg(__memo_context, ((__memo_id) + (__hash("id_obj_arg_object-param.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_obj_arg_object-param.ets"))), ((): A => {
       return {
         x: 1,
         y: 2,

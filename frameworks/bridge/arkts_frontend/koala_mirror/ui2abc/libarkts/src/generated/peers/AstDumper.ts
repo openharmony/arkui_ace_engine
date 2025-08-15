@@ -45,3 +45,6 @@ export class AstDumper extends ArktsObject {
     }
     protected readonly brandAstDumper: undefined
 }
+export function isAstDumper(node: object | undefined): node is AstDumper {
+    return node instanceof AstDumper
+}

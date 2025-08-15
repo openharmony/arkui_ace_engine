@@ -19,6 +19,7 @@
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkComponentRootPeer, ComponentRoot } from "./component/idlize"
+import { int32 } from "@koalaui/common"
 export class ComponentRootModifier implements ComponentRoot,AttributeModifier<ComponentRoot> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

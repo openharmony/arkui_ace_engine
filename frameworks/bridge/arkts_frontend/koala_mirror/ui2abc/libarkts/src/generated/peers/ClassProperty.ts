@@ -40,12 +40,11 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class ClassProperty extends ClassElement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 17)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createClassProperty(key: Expression | undefined, value: Expression | undefined, typeAnnotation: TypeNode | undefined, modifiers: Es2pandaModifierFlags, isComputed: boolean, annotations?: readonly AnnotationUsage[]): ClassProperty {
-        const result: ClassProperty = new ClassProperty(global.generatedEs2panda._CreateClassProperty(global.context, passNode(key), passNode(value), passNode(typeAnnotation), modifiers, isComputed))
+        const result: ClassProperty = new ClassProperty(global.generatedEs2panda._CreateClassProperty(global.context, passNode(key), passNode(value), passNode(typeAnnotation), modifiers, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -54,7 +53,7 @@ export class ClassProperty extends ClassElement {
         return result
     }
     static updateClassProperty(original: ClassProperty | undefined, key: Expression | undefined, value: Expression | undefined, typeAnnotation: TypeNode | undefined, modifiers: Es2pandaModifierFlags, isComputed: boolean, annotations?: readonly AnnotationUsage[]): ClassProperty {
-        const result: ClassProperty = new ClassProperty(global.generatedEs2panda._UpdateClassProperty(global.context, passNode(original), passNode(key), passNode(value), passNode(typeAnnotation), modifiers, isComputed))
+        const result: ClassProperty = new ClassProperty(global.generatedEs2panda._UpdateClassProperty(global.context, passNode(original), passNode(key), passNode(value), passNode(typeAnnotation), modifiers, isComputed), Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -136,5 +135,5 @@ export function isClassProperty(node: object | undefined): node is ClassProperty
     return node instanceof ClassProperty
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY, (peer: KNativePointer) => new ClassProperty(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY, (peer: KNativePointer) => new ClassProperty(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY))
 }

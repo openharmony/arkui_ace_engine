@@ -65,7 +65,8 @@ export class StructCallRewriter extends arkts.AbstractVisitor {
     }
 
     private createObjectLiteralRewrite(expression: arkts.ObjectExpression): arkts.Expression {
-        const rewritten = arkts.factory.createObjectExpression(
+        return arkts.factory.updateObjectExpression(
+            expression,
             expression.properties.map(value => {
                 if (arkts.isProperty(value) && arkts.isIdentifier(value.value)) {
                     return arkts.factory.createProperty(
@@ -84,7 +85,6 @@ export class StructCallRewriter extends arkts.AbstractVisitor {
                 }
             })
         )
-        return rewritten
     }
 
     // Improve: FIX, move to checked phase

@@ -2,7 +2,6 @@
 function main() {}
 
 
-
 class A {
   public no_this(): void {
     this;

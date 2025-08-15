@@ -260,7 +260,6 @@ export type MonitorValueCallback = () => Any;
 export type MonitorCallback = (m: IMonitor) => void;
 export type ComputeCallback<T> = () => T;
 
-
 class StatableHolder<Value> {
     private directValue: Value | undefined = undefined
     private state: MutableState<Value> | undefined = undefined
@@ -561,3 +560,4 @@ export class LocalStoragePropDecoratorProperty<Value> extends LinkDecoratorPrope
         this.linkTo(storage.setAndProp<Value>(storageKey ?? this.info(), value))
     }
 }
+

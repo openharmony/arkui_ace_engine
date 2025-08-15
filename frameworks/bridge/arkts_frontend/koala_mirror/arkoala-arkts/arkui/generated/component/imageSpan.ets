@@ -28,8 +28,8 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
 import { ImageSpanAlignment, ImageFit } from "./enums"
 import { ImageErrorCallback, ImageError } from "./image"
+import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -182,22 +182,22 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     onError_value?: ImageErrorCallback | undefined
     alt_value?: image.PixelMap | undefined
     attributeModifier_value?: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined
-    public verticalAlign(value: ImageSpanAlignment | undefined): this {
+    verticalAlign(value: ImageSpanAlignment | undefined): this {
         return this
     }
-    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
-    public objectFit(value: ImageFit | undefined): this {
+    objectFit(value: ImageFit | undefined): this {
         return this
     }
-    public onComplete(value: ImageCompleteCallback | undefined): this {
+    onComplete(value: ImageCompleteCallback | undefined): this {
         return this
     }
-    public onError(value: ImageErrorCallback | undefined): this {
+    onError(value: ImageErrorCallback | undefined): this {
         return this
     }
-    public alt(value: image.PixelMap | undefined): this {
+    alt(value: image.PixelMap | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {

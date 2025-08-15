@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkWindowScenePeer, WindowSceneAttribute } from "./component/windowScene"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { Position } from "./component/units"
 export class WindowSceneModifier extends CommonMethodModifier implements WindowSceneAttribute,AttributeModifier<WindowSceneAttribute> {

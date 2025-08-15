@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class NewExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 49)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createNewExpression(callee: Expression | undefined, _arguments: readonly Expression[]): NewExpression {
-        const result: NewExpression = new NewExpression(global.generatedEs2panda._CreateNewExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length))
+        const result: NewExpression = new NewExpression(global.generatedEs2panda._CreateNewExpression(global.context, passNode(callee), passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateNewExpression(original: NewExpression | undefined, callee: Expression | undefined, _arguments: readonly Expression[]): NewExpression {
-        const result: NewExpression = new NewExpression(global.generatedEs2panda._UpdateNewExpression(global.context, passNode(original), passNode(callee), passNodeArray(_arguments), _arguments.length))
+        const result: NewExpression = new NewExpression(global.generatedEs2panda._UpdateNewExpression(global.context, passNode(original), passNode(callee), passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -62,5 +61,5 @@ export function isNewExpression(node: object | undefined): node is NewExpression
     return node instanceof NewExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION, (peer: KNativePointer) => new NewExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION, (peer: KNativePointer) => new NewExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_NEW_EXPRESSION))
 }

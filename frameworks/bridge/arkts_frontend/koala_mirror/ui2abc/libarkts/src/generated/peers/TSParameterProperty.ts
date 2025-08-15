@@ -37,17 +37,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TSParameterProperty extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 124)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSParameterProperty(accessibility: Es2pandaAccessibilityOption, parameter: Expression | undefined, readonly_arg: boolean, isStatic: boolean, isExport: boolean): TSParameterProperty {
-        const result: TSParameterProperty = new TSParameterProperty(global.generatedEs2panda._CreateTSParameterProperty(global.context, accessibility, passNode(parameter), readonly_arg, isStatic, isExport))
+        const result: TSParameterProperty = new TSParameterProperty(global.generatedEs2panda._CreateTSParameterProperty(global.context, accessibility, passNode(parameter), readonly_arg, isStatic, isExport), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSParameterProperty(original: TSParameterProperty | undefined, accessibility: Es2pandaAccessibilityOption, parameter: Expression | undefined, readonly_arg: boolean, isStatic: boolean, isExport: boolean): TSParameterProperty {
-        const result: TSParameterProperty = new TSParameterProperty(global.generatedEs2panda._UpdateTSParameterProperty(global.context, passNode(original), accessibility, passNode(parameter), readonly_arg, isStatic, isExport))
+        const result: TSParameterProperty = new TSParameterProperty(global.generatedEs2panda._UpdateTSParameterProperty(global.context, passNode(original), accessibility, passNode(parameter), readonly_arg, isStatic, isExport), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY)
         result.setChildrenParentPtr()
         return result
     }
@@ -72,5 +71,5 @@ export function isTSParameterProperty(node: object | undefined): node is TSParam
     return node instanceof TSParameterProperty
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY, (peer: KNativePointer) => new TSParameterProperty(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY, (peer: KNativePointer) => new TSParameterProperty(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_PARAMETER_PROPERTY))
 }

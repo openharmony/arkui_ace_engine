@@ -37,27 +37,26 @@ import { Es2pandaIntrinsicNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class ETSIntrinsicNode extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 68)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create2ETSIntrinsicNode(type: Es2pandaIntrinsicNodeType, _arguments: readonly Expression[]): ETSIntrinsicNode {
-        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._CreateETSIntrinsicNode2(global.context, type, passNodeArray(_arguments), _arguments.length))
+        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._CreateETSIntrinsicNode2(global.context, type, passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSIntrinsicNode(original?: ETSIntrinsicNode): ETSIntrinsicNode {
-        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode(global.context, passNode(original)))
+        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static update1ETSIntrinsicNode(original?: ETSIntrinsicNode, other?: ETSIntrinsicNode): ETSIntrinsicNode {
-        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode1(global.context, passNode(original), passNode(other)))
+        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static update2ETSIntrinsicNode(original: ETSIntrinsicNode | undefined, type: Es2pandaIntrinsicNodeType, _arguments: readonly Expression[]): ETSIntrinsicNode {
-        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode2(global.context, passNode(original), type, passNodeArray(_arguments), _arguments.length))
+        const result: ETSIntrinsicNode = new ETSIntrinsicNode(global.generatedEs2panda._UpdateETSIntrinsicNode2(global.context, passNode(original), type, passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isETSIntrinsicNode(node: object | undefined): node is ETSIntrins
     return node instanceof ETSIntrinsicNode
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE, (peer: KNativePointer) => new ETSIntrinsicNode(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE, (peer: KNativePointer) => new ETSIntrinsicNode(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_INTRINSIC_NODE_TYPE))
 }

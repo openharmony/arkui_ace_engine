@@ -34,7 +34,6 @@ import {
 
 import { AnnotationUsage } from "./AnnotationUsage"
 import { ClassDeclaration } from "./ClassDeclaration"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Es2pandaModifierFlags } from "./../Es2pandaEnums"
 import { Identifier } from "./Identifier"
@@ -44,12 +43,11 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypedStatement } from "./TypedStatement"
 
 export class TSInterfaceDeclaration extends TypedStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 133)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSInterfaceDeclaration(_extends: readonly TSInterfaceHeritage[], id: AstNode | undefined, typeParams: AstNode | undefined, body: AstNode | undefined, isStatic: boolean, isExternal: boolean, modifierFlags?: Es2pandaModifierFlags): TSInterfaceDeclaration {
-        const result: TSInterfaceDeclaration = new TSInterfaceDeclaration(global.generatedEs2panda._CreateTSInterfaceDeclaration(global.context, passNodeArray(_extends), _extends.length, passNode(id), passNode(typeParams), passNode(body), isStatic, isExternal))
+        const result: TSInterfaceDeclaration = new TSInterfaceDeclaration(global.generatedEs2panda._CreateTSInterfaceDeclaration(global.context, passNodeArray(_extends), _extends.length, passNode(id), passNode(typeParams), passNode(body), isStatic, isExternal), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION)
         if (modifierFlags)
         {
             result.modifierFlags = modifierFlags
@@ -58,7 +56,7 @@ export class TSInterfaceDeclaration extends TypedStatement {
         return result
     }
     static updateTSInterfaceDeclaration(original: TSInterfaceDeclaration | undefined, _extends: readonly TSInterfaceHeritage[], id: AstNode | undefined, typeParams: AstNode | undefined, body: AstNode | undefined, isStatic: boolean, isExternal: boolean, modifierFlags?: Es2pandaModifierFlags): TSInterfaceDeclaration {
-        const result: TSInterfaceDeclaration = new TSInterfaceDeclaration(global.generatedEs2panda._UpdateTSInterfaceDeclaration(global.context, passNode(original), passNodeArray(_extends), _extends.length, passNode(id), passNode(typeParams), passNode(body), isStatic, isExternal))
+        const result: TSInterfaceDeclaration = new TSInterfaceDeclaration(global.generatedEs2panda._UpdateTSInterfaceDeclaration(global.context, passNode(original), passNodeArray(_extends), _extends.length, passNode(id), passNode(typeParams), passNode(body), isStatic, isExternal), Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION)
         if (modifierFlags)
         {
             result.modifierFlags = modifierFlags
@@ -119,27 +117,6 @@ export class TSInterfaceDeclaration extends TypedStatement {
         return this
     }
     /** @deprecated */
-    emplaceDecorators(decorators?: Decorator): this {
-        global.generatedEs2panda._TSInterfaceDeclarationEmplaceDecorators(global.context, this.peer, passNode(decorators))
-        return this
-    }
-    /** @deprecated */
-    clearDecorators(): this {
-        global.generatedEs2panda._TSInterfaceDeclarationClearDecorators(global.context, this.peer)
-        return this
-    }
-    /** @deprecated */
-    setValueDecorators(decorators: Decorator | undefined, index: number): this {
-        global.generatedEs2panda._TSInterfaceDeclarationSetValueDecorators(global.context, this.peer, passNode(decorators), index)
-        return this
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSInterfaceDeclarationDecorators(global.context, this.peer))
-    }
-    get decoratorsForUpdate(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSInterfaceDeclarationDecoratorsForUpdate(global.context, this.peer))
-    }
-    /** @deprecated */
     emplaceAnnotations(source?: AnnotationUsage): this {
         global.generatedEs2panda._TSInterfaceDeclarationEmplaceAnnotations(global.context, this.peer, passNode(source))
         return this
@@ -181,5 +158,5 @@ export function isTSInterfaceDeclaration(node: object | undefined): node is TSIn
     return node instanceof TSInterfaceDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION, (peer: KNativePointer) => new TSInterfaceDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION, (peer: KNativePointer) => new TSInterfaceDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_INTERFACE_DECLARATION))
 }

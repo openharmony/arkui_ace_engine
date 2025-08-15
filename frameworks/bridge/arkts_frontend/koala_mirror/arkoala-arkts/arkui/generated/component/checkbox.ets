@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CheckBoxShape } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookCheckBoxContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookCheckBoxContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -215,25 +215,25 @@ export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAt
     onChange_value?: OnCheckboxChangeCallback | undefined
     contentModifier_value?: ContentModifier<CheckBoxConfiguration> | undefined
     attributeModifier_value?: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined
-    public select(value: boolean | Bindable<boolean> | undefined): this {
+    select(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
+    selectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public shape(value: CheckBoxShape | undefined): this {
+    shape(value: CheckBoxShape | undefined): this {
         return this
     }
-    public unselectedColor(value: ResourceColor | undefined): this {
+    unselectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public mark(value: MarkStyle | undefined): this {
+    mark(value: MarkStyle | undefined): this {
         return this
     }
-    public onChange(value: OnCheckboxChangeCallback | undefined): this {
+    onChange(value: OnCheckboxChangeCallback | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
+    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -364,7 +364,7 @@ export class CheckBoxConfiguration_serializer {
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
             triggerChangeTmpBufBufArgsSerializer.writeBoolean(value0);
-            InteropNativeModule._CallCallback(313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 313269291, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -425,7 +425,7 @@ export class CheckboxOptions_serializer {
                 indicatorBuilderTmpBuf_BufArgsSerializer.writeInt32(indicatorBuilderTmpBuf_BufResource.resourceId);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCall);
                 indicatorBuilderTmpBuf_BufArgsSerializer.writePointer(indicatorBuilderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, indicatorBuilderTmpBuf_BufArgsSerializer.asBuffer(), indicatorBuilderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, indicatorBuilderTmpBuf_BufArgsSerializer.asBuffer(), indicatorBuilderTmpBuf_BufArgsSerializer.length());
                 indicatorBuilderTmpBuf_BufArgsSerializer.release();
                 return;
             }

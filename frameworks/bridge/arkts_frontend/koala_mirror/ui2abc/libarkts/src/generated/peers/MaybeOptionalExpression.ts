@@ -32,11 +32,12 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class MaybeOptionalExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     get isOptional(): boolean {
         return global.generatedEs2panda._MaybeOptionalExpressionIsOptionalConst(global.context, this.peer)

@@ -27,7 +27,7 @@ import { PeerNode } from "./../PeerNode"
 import { Dimension, ResourceStr, ResourceColor, Offset, Font_serializer, Font, Offset_serializer } from "./units"
 import { Resource } from "global.resource"
 import { CrownSensitivity, Color, TextOverflow } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -389,49 +389,49 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     enableHapticFeedback_value?: boolean | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     attributeModifier_value?: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public defaultPickerItemHeight(value: number | string | undefined): this {
+    defaultPickerItemHeight(value: number | string | undefined): this {
         return this
     }
-    public canLoop(value: boolean | undefined): this {
+    canLoop(value: boolean | undefined): this {
         return this
     }
-    public disappearTextStyle(value: PickerTextStyle | undefined): this {
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public textStyle(value: PickerTextStyle | undefined): this {
+    textStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public selectedTextStyle(value: PickerTextStyle | undefined): this {
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public disableTextStyleAnimation(value: boolean | undefined): this {
+    disableTextStyleAnimation(value: boolean | undefined): this {
         return this
     }
-    public defaultTextStyle(value: TextPickerTextStyle | undefined): this {
+    defaultTextStyle(value: TextPickerTextStyle | undefined): this {
         return this
     }
-    public onChange(value: OnTextPickerChangeCallback | undefined): this {
+    onChange(value: OnTextPickerChangeCallback | undefined): this {
         return this
     }
-    public onScrollStop(value: TextPickerScrollStopCallback | undefined): this {
+    onScrollStop(value: TextPickerScrollStopCallback | undefined): this {
         return this
     }
-    public onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this {
+    onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this {
         return this
     }
-    public selectedIndex(value: number | Array<number> | undefined): this {
+    selectedIndex(value: number | Array<number> | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    divider(value: DividerOptions | undefined): this {
         return this
     }
-    public gradientHeight(value: Dimension | undefined): this {
+    gradientHeight(value: Dimension | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1989,7 +1989,7 @@ export class TextPickerDialogOptions_serializer {
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCall);
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCallSync);
                 TextPickerResult_serializer.write(onAcceptTmpBuf_BufArgsSerializer, value);
-                InteropNativeModule._CallCallback(1290504509, onAcceptTmpBuf_BufArgsSerializer.asBuffer(), onAcceptTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1290504509, onAcceptTmpBuf_BufArgsSerializer.asBuffer(), onAcceptTmpBuf_BufArgsSerializer.length());
                 onAcceptTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2006,7 +2006,7 @@ export class TextPickerDialogOptions_serializer {
                 onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onCancelTmpBuf_BufArgsSerializer.asBuffer(), onCancelTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onCancelTmpBuf_BufArgsSerializer.asBuffer(), onCancelTmpBuf_BufArgsSerializer.length());
                 onCancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2024,7 +2024,7 @@ export class TextPickerDialogOptions_serializer {
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCall);
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCallSync);
                 TextPickerResult_serializer.write(onChangeTmpBuf_BufArgsSerializer, value);
-                InteropNativeModule._CallCallback(1290504509, onChangeTmpBuf_BufArgsSerializer.asBuffer(), onChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1290504509, onChangeTmpBuf_BufArgsSerializer.asBuffer(), onChangeTmpBuf_BufArgsSerializer.length());
                 onChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2042,7 +2042,7 @@ export class TextPickerDialogOptions_serializer {
                 onScrollStopTmpBuf_BufArgsSerializer.writePointer(onScrollStopTmpBuf_BufCall);
                 onScrollStopTmpBuf_BufArgsSerializer.writePointer(onScrollStopTmpBuf_BufCallSync);
                 TextPickerResult_serializer.write(onScrollStopTmpBuf_BufArgsSerializer, value);
-                InteropNativeModule._CallCallback(1290504509, onScrollStopTmpBuf_BufArgsSerializer.asBuffer(), onScrollStopTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1290504509, onScrollStopTmpBuf_BufArgsSerializer.asBuffer(), onScrollStopTmpBuf_BufArgsSerializer.length());
                 onScrollStopTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2060,7 +2060,7 @@ export class TextPickerDialogOptions_serializer {
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.writePointer(onEnterSelectedAreaTmpBuf_BufCall);
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.writePointer(onEnterSelectedAreaTmpBuf_BufCallSync);
                 TextPickerResult_serializer.write(onEnterSelectedAreaTmpBuf_BufArgsSerializer, value);
-                InteropNativeModule._CallCallback(1290504509, onEnterSelectedAreaTmpBuf_BufArgsSerializer.asBuffer(), onEnterSelectedAreaTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1290504509, onEnterSelectedAreaTmpBuf_BufArgsSerializer.asBuffer(), onEnterSelectedAreaTmpBuf_BufArgsSerializer.length());
                 onEnterSelectedAreaTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2132,7 +2132,7 @@ export class TextPickerDialogOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2149,7 +2149,7 @@ export class TextPickerDialogOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2166,7 +2166,7 @@ export class TextPickerDialogOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2183,7 +2183,7 @@ export class TextPickerDialogOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }

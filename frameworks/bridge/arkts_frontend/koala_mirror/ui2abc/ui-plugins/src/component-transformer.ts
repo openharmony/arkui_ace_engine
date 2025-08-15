@@ -58,6 +58,42 @@ import {
 } from "./ui-factory"
 import { Es2pandaVariableDeclarationKind } from "@koalaui/libarkts";
 
+export interface DependentModuleConfig {
+    packageName: string;
+    moduleName: string;
+    moduleType: string;
+    modulePath: string;
+    sourceRoots: string[];
+    entryFile: string;
+    language: string;
+    declFilesPath?: string;
+    dependencies?: string[];
+}
+
+export interface ProjectConfig {
+    bundleName: string;
+    moduleName: string;
+    cachePath: string;
+    dependentModuleList: DependentModuleConfig[];
+    appResource: string;
+    rawFileResource: string;
+    buildLoaderJson: string;
+    hspResourcesMap: boolean;
+    compileHar: boolean;
+    byteCodeHar: boolean;
+    uiTransformOptimization: boolean;
+    resetBundleName: boolean;
+    allowEmptyBundleName: boolean;
+    moduleType: string;
+    moduleRootPath: string;
+    aceModuleJsonPath: string;
+    ignoreError: boolean;
+    projectPath: string,
+    projectRootPath: string,
+    integratedHsp: boolean
+    frameworkMode?: string;
+}
+
 export interface ApplicationInfo {
     bundleName: string,
     moduleName: string

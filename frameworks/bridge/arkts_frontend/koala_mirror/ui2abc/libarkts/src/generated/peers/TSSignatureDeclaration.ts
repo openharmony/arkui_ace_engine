@@ -41,17 +41,16 @@ import { TypeNode } from "./TypeNode"
 import { TypedAstNode } from "./TypedAstNode"
 
 export class TSSignatureDeclaration extends TypedAstNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 109)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSSignatureDeclaration(kind: Es2pandaTSSignatureDeclarationKind, signature?: FunctionSignature): TSSignatureDeclaration {
-        const result: TSSignatureDeclaration = new TSSignatureDeclaration(global.generatedEs2panda._CreateTSSignatureDeclaration(global.context, kind, passNode(signature)))
+        const result: TSSignatureDeclaration = new TSSignatureDeclaration(global.generatedEs2panda._CreateTSSignatureDeclaration(global.context, kind, passNode(signature)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSSignatureDeclaration(original: TSSignatureDeclaration | undefined, kind: Es2pandaTSSignatureDeclarationKind, signature?: FunctionSignature): TSSignatureDeclaration {
-        const result: TSSignatureDeclaration = new TSSignatureDeclaration(global.generatedEs2panda._UpdateTSSignatureDeclaration(global.context, passNode(original), kind, passNode(signature)))
+        const result: TSSignatureDeclaration = new TSSignatureDeclaration(global.generatedEs2panda._UpdateTSSignatureDeclaration(global.context, passNode(original), kind, passNode(signature)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -73,5 +72,5 @@ export function isTSSignatureDeclaration(node: object | undefined): node is TSSi
     return node instanceof TSSignatureDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION, (peer: KNativePointer) => new TSSignatureDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION, (peer: KNativePointer) => new TSSignatureDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_SIGNATURE_DECLARATION))
 }

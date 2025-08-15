@@ -26,7 +26,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Color, CheckBoxShape } from "./enums"
 import { Resource } from "global.resource"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -215,22 +215,22 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     onChange_value?: OnCheckboxGroupChangeCallback | undefined
     checkboxShape_value?: CheckBoxShape | undefined
     attributeModifier_value?: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined
-    public selectAll(value: boolean | Bindable<boolean> | undefined): this {
+    selectAll(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
-    public selectedColor(value: ResourceColor | undefined): this {
+    selectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public unselectedColor(value: ResourceColor | undefined): this {
+    unselectedColor(value: ResourceColor | undefined): this {
         return this
     }
-    public mark(value: MarkStyle | undefined): this {
+    mark(value: MarkStyle | undefined): this {
         return this
     }
-    public onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
+    onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
         return this
     }
-    public checkboxShape(value: CheckBoxShape | undefined): this {
+    checkboxShape(value: CheckBoxShape | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {

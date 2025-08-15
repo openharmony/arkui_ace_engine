@@ -25,7 +25,7 @@ import { intl_DateTimeOptions_serializer, intl } from "./../framework/ohos.intl"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -280,37 +280,37 @@ export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePick
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableCascade_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public useMilitaryTime(value: boolean | undefined): this {
+    useMilitaryTime(value: boolean | undefined): this {
         return this
     }
-    public loop(value: boolean | undefined): this {
+    loop(value: boolean | undefined): this {
         return this
     }
-    public disappearTextStyle(value: PickerTextStyle | undefined): this {
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public textStyle(value: PickerTextStyle | undefined): this {
+    textStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public selectedTextStyle(value: PickerTextStyle | undefined): this {
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
+    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
         return this
     }
-    public onChange(value: OnTimePickerChangeCallback | undefined): this {
+    onChange(value: OnTimePickerChangeCallback | undefined): this {
         return this
     }
-    public onEnterSelectedArea(value: ((value0: TimePickerResult) => void) | undefined): this {
+    onEnterSelectedArea(value: ((value0: TimePickerResult) => void) | undefined): this {
         return this
     }
-    public enableHapticFeedback(value: boolean | undefined): this {
+    enableHapticFeedback(value: boolean | undefined): this {
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
     }
-    public enableCascade(value: boolean | undefined): this {
+    enableCascade(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

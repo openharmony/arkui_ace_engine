@@ -33,33 +33,31 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotatedExpression } from "./AnnotatedExpression"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 
 export class Identifier extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 36)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create2Identifier(name: string, typeAnnotation?: TypeNode): Identifier {
-        const result: Identifier = new Identifier(global.generatedEs2panda._CreateIdentifier2(global.context, name, passNode(typeAnnotation)))
+        const result: Identifier = new Identifier(global.generatedEs2panda._CreateIdentifier2(global.context, name, passNode(typeAnnotation)), Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static updateIdentifier(original?: Identifier): Identifier {
-        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier(global.context, passNode(original)))
+        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static update1Identifier(original: Identifier | undefined, name: string): Identifier {
-        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier1(global.context, passNode(original), name))
+        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier1(global.context, passNode(original), name), Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static update2Identifier(original: Identifier | undefined, name: string, typeAnnotation?: TypeNode): Identifier {
-        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier2(global.context, passNode(original), name, passNode(typeAnnotation)))
+        const result: Identifier = new Identifier(global.generatedEs2panda._UpdateIdentifier2(global.context, passNode(original), name, passNode(typeAnnotation)), Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)
         result.setChildrenParentPtr()
         return result
     }
@@ -70,14 +68,6 @@ export class Identifier extends AnnotatedExpression {
     setName(newName: string): this {
         global.generatedEs2panda._IdentifierSetName(global.context, this.peer, newName)
         return this
-    }
-    /** @deprecated */
-    setValueDecorators(source: Decorator | undefined, index: number): this {
-        global.generatedEs2panda._IdentifierSetValueDecorators(global.context, this.peer, passNode(source), index)
-        return this
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._IdentifierDecoratorsConst(global.context, this.peer))
     }
     get isErrorPlaceHolder(): boolean {
         return global.generatedEs2panda._IdentifierIsErrorPlaceHolderConst(global.context, this.peer)
@@ -169,5 +159,5 @@ export function isIdentifier(node: object | undefined): node is Identifier {
     return node instanceof Identifier
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER, (peer: KNativePointer) => new Identifier(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER, (peer: KNativePointer) => new Identifier(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER))
 }

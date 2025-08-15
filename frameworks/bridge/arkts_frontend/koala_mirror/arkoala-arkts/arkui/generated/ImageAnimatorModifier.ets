@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkImageAnimatorPeer, ImageFrameInfo, ImageAnimatorAttribute } from "./component/imageAnimator"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { AnimationStatus, FillMode } from "./component/enums"
 export class ImageAnimatorModifier extends CommonMethodModifier implements ImageAnimatorAttribute,AttributeModifier<ImageAnimatorAttribute> {

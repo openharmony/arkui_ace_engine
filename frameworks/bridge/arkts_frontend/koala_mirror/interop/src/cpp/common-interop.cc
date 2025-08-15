@@ -379,33 +379,51 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
+    if (!array || !data) {
+        INTEROP_FATAL("CopyArray called with incorrect nullptr args (array, data):(%p, %p)", array, data);
+    }
+
     interop_memcpy(data, length, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
-static Callback_Caller_t g_callbackCaller = nullptr;
-void setCallbackCaller(Callback_Caller_t callbackCaller) {
-    g_callbackCaller = callbackCaller;
+static const int API_KIND_MAX = 100;
+static Callback_Caller_t g_callbackCaller[API_KIND_MAX] = { 0 };
+static Callback_Caller_Sync_t g_callbackCallerSync[API_KIND_MAX] = { 0 };
+
+#define CHECK_VALID_API_KIND(apiKind)                                                   \
+    if (apiKind < 0 || apiKind > API_KIND_MAX)                                          \
+        INTEROP_FATAL("Maximum api kind is %d, received %d", API_KIND_MAX, apiKind);
+#define CHECK_HAS_CALLBACK_CALLER(apiKind, callbackCallers)                     \
+    CHECK_VALID_API_KIND(apiKind);                                              \
+    if (callbackCallers[apiKind] == nullptr)                                    \
+        INTEROP_FATAL("Callback caller for api kind %d was not set", apiKind)
+#define CHECK_HAS_NOT_CALLBACK_CALLER(apiKind, callbackCallers)                 \
+    CHECK_VALID_API_KIND(apiKind);                                              \
+    if (callbackCallers[apiKind] != nullptr)                                    \
+        INTEROP_FATAL("Callback caller for api kind %d already was set", apiKind);
+
+void setCallbackCaller(int apiKind, Callback_Caller_t callbackCaller) {
+    CHECK_HAS_NOT_CALLBACK_CALLER(apiKind, g_callbackCaller);
+    g_callbackCaller[apiKind] = callbackCaller;
 }
 
-void impl_CallCallback(KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
-    if (g_callbackCaller) {
-        g_callbackCaller(callbackKind, args, argsSize);
-    }
+void impl_CallCallback(KInt apiKind, KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
+    CHECK_HAS_CALLBACK_CALLER(apiKind, g_callbackCaller);
+    g_callbackCaller[apiKind](callbackKind, args, argsSize);
 }
-KOALA_INTEROP_V3(CallCallback, KInt, KSerializerBuffer, KInt)
+KOALA_INTEROP_V4(CallCallback, KInt, KInt, KSerializerBuffer, KInt)
 
-static Callback_Caller_Sync_t g_callbackCallerSync = nullptr;
-void setCallbackCallerSync(Callback_Caller_Sync_t callbackCallerSync) {
-    g_callbackCallerSync = callbackCallerSync;
+void setCallbackCallerSync(int apiKind, Callback_Caller_Sync_t callbackCallerSync) {
+    CHECK_HAS_NOT_CALLBACK_CALLER(apiKind, g_callbackCallerSync);
+    g_callbackCallerSync[apiKind] = callbackCallerSync;
 }
 
-void impl_CallCallbackSync(KVMContext vmContext, KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
-    if (g_callbackCallerSync) {
-        g_callbackCallerSync(vmContext, callbackKind, args, argsSize);
-    }
+void impl_CallCallbackSync(KVMContext vmContext, KInt apiKind, KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
+    CHECK_HAS_CALLBACK_CALLER(apiKind, g_callbackCallerSync);
+    g_callbackCallerSync[apiKind](vmContext, callbackKind, args, argsSize);
 }
-KOALA_INTEROP_CTX_V3(CallCallbackSync, KInt, KSerializerBuffer, KInt)
+KOALA_INTEROP_CTX_V4(CallCallbackSync, KInt, KInt, KSerializerBuffer, KInt)
 
 void impl_CallCallbackResourceHolder(KNativePointer holder, KInt resourceId) {
     reinterpret_cast<void(*)(KInt)>(holder)(resourceId);

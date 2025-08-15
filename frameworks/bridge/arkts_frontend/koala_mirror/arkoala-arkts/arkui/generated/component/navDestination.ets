@@ -31,9 +31,9 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { Resource } from "global.resource"
+import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { CustomBuilder } from "./builder"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { TitleHeight, Color } from "./enums"
 import { LengthMetrics } from "./../Graphics"
 import { TextModifier } from "./../TextModifier"
@@ -930,104 +930,103 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     onNewParam_value?: ((value0: Object | undefined) => void) | undefined
     preferredOrientation_value?: Orientation | undefined
     enableNavigationIndicator_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined
-    public hideTitleBar(value: boolean | undefined): this {
+    hideTitleBar(value: boolean | undefined): this {
         return this
     }
-    public hideBackButton(value: boolean | undefined): this {
+    hideBackButton(value: boolean | undefined): this {
         return this
     }
-    public onShown(value: (() => void) | undefined): this {
+    onShown(value: (() => void) | undefined): this {
         return this
     }
-    public onHidden(value: (() => void) | undefined): this {
+    onHidden(value: (() => void) | undefined): this {
         return this
     }
-    public onBackPressed(value: (() => boolean) | undefined): this {
+    onBackPressed(value: (() => boolean) | undefined): this {
         return this
     }
-    public onResult(value: ((value0: Object | undefined) => void) | undefined): this {
+    onResult(value: ((value0: Object | undefined) => void) | undefined): this {
         return this
     }
-    public mode(value: NavDestinationMode | undefined): this {
+    mode(value: NavDestinationMode | undefined): this {
         return this
     }
-    public backButtonIcon(value: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined): this {
+    backButtonIcon(value: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined): this {
         return this
     }
-    public menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
+    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
         return this
     }
-    public onReady(value: ((value0: NavDestinationContext) => void) | undefined): this {
+    onReady(value: ((value0: NavDestinationContext) => void) | undefined): this {
         return this
     }
-    public onWillAppear(value: (() => void) | undefined): this {
+    onWillAppear(value: (() => void) | undefined): this {
         return this
     }
-    public onWillDisappear(value: (() => void) | undefined): this {
+    onWillDisappear(value: (() => void) | undefined): this {
         return this
     }
-    public onWillShow(value: (() => void) | undefined): this {
+    onWillShow(value: (() => void) | undefined): this {
         return this
     }
-    public onWillHide(value: (() => void) | undefined): this {
+    onWillHide(value: (() => void) | undefined): this {
         return this
     }
-    public systemBarStyle(value: window.SystemBarStyle | undefined): this {
+    systemBarStyle(value: window.SystemBarStyle | undefined): this {
         return this
     }
-    public recoverable(value: boolean | undefined): this {
+    recoverable(value: boolean | undefined): this {
         return this
     }
-    public systemTransition(value: NavigationSystemTransitionType | undefined): this {
+    systemTransition(value: NavigationSystemTransitionType | undefined): this {
         return this
     }
-    public bindToScrollable(value: Array<Scroller> | undefined): this {
+    bindToScrollable(value: Array<Scroller> | undefined): this {
         return this
     }
-    public bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this {
+    bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this {
         return this
     }
-    public onActive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
+    onActive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
         return this
     }
-    public onInactive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
+    onInactive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
         return this
     }
-    public customTransition(value: NavDestinationTransitionDelegate | undefined): this {
+    customTransition(value: NavDestinationTransitionDelegate | undefined): this {
         return this
     }
-    public onNewParam(value: ((value0: Object | undefined) => void) | undefined): this {
+    onNewParam(value: ((value0: Object | undefined) => void) | undefined): this {
         return this
     }
-    public preferredOrientation(value: Orientation | undefined): this {
+    preferredOrientation(value: Orientation | undefined): this {
         return this
     }
-    public enableNavigationIndicator(value: boolean | undefined): this {
+    enableNavigationIndicator(value: boolean | undefined): this {
         return this
     }
-    public title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this {
+    title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this {
         return this
     }
-    public hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
         return this
     }
-    public backButtonIcon(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+    backButtonIcon(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         return this
     }
-    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
         return this
     }
-    public toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+    toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         return this
     }
-    public hideToolBar(hide: boolean | undefined, animated?: boolean): this {
+    hideToolBar(hide: boolean | undefined, animated?: boolean): this {
         return this
     }
-    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
     }
-    public enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
+    enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1398,7 +1397,7 @@ export class NavDestinationTransition_serializer {
                 onTransitionEndTmpBuf_BufArgsSerializer.writeInt32(onTransitionEndTmpBuf_BufResource.resourceId);
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCall);
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onTransitionEndTmpBuf_BufArgsSerializer.asBuffer(), onTransitionEndTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onTransitionEndTmpBuf_BufArgsSerializer.asBuffer(), onTransitionEndTmpBuf_BufArgsSerializer.length());
                 onTransitionEndTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -1430,7 +1429,7 @@ export class NavDestinationTransition_serializer {
             eventTmpBufBufArgsSerializer.writeInt32(eventTmpBufBufResource.resourceId);
             eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCall);
             eventTmpBufBufArgsSerializer.writePointer(eventTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-1867723152, eventTmpBufBufArgsSerializer.asBuffer(), eventTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1867723152, eventTmpBufBufArgsSerializer.asBuffer(), eventTmpBufBufArgsSerializer.length());
             eventTmpBufBufArgsSerializer.release();
             return;
         }
@@ -1572,7 +1571,7 @@ export class NavDestinationCustomTitle_serializer {
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
             builderTmpBufBufArgsSerializer.release();
             return;
         }

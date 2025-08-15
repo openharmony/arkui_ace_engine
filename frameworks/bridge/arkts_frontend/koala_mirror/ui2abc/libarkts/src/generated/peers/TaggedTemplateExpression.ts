@@ -38,17 +38,16 @@ import { TSTypeParameterInstantiation } from "./TSTypeParameterInstantiation"
 import { TemplateLiteral } from "./TemplateLiteral"
 
 export class TaggedTemplateExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 143)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTaggedTemplateExpression(tag?: Expression, quasi?: TemplateLiteral, typeParams?: TSTypeParameterInstantiation): TaggedTemplateExpression {
-        const result: TaggedTemplateExpression = new TaggedTemplateExpression(global.generatedEs2panda._CreateTaggedTemplateExpression(global.context, passNode(tag), passNode(quasi), passNode(typeParams)))
+        const result: TaggedTemplateExpression = new TaggedTemplateExpression(global.generatedEs2panda._CreateTaggedTemplateExpression(global.context, passNode(tag), passNode(quasi), passNode(typeParams)), Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTaggedTemplateExpression(original?: TaggedTemplateExpression, tag?: Expression, quasi?: TemplateLiteral, typeParams?: TSTypeParameterInstantiation): TaggedTemplateExpression {
-        const result: TaggedTemplateExpression = new TaggedTemplateExpression(global.generatedEs2panda._UpdateTaggedTemplateExpression(global.context, passNode(original), passNode(tag), passNode(quasi), passNode(typeParams)))
+        const result: TaggedTemplateExpression = new TaggedTemplateExpression(global.generatedEs2panda._UpdateTaggedTemplateExpression(global.context, passNode(original), passNode(tag), passNode(quasi), passNode(typeParams)), Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -67,5 +66,5 @@ export function isTaggedTemplateExpression(node: object | undefined): node is Ta
     return node instanceof TaggedTemplateExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION, (peer: KNativePointer) => new TaggedTemplateExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION, (peer: KNativePointer) => new TaggedTemplateExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TAGGED_TEMPLATE_EXPRESSION))
 }

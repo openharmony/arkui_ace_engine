@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSKeyofType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 77)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSKeyofType(type?: TypeNode): ETSKeyofType {
-        const result: ETSKeyofType = new ETSKeyofType(global.generatedEs2panda._CreateETSKeyofType(global.context, passNode(type)))
+        const result: ETSKeyofType = new ETSKeyofType(global.generatedEs2panda._CreateETSKeyofType(global.context, passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSKeyofType(original?: ETSKeyofType, type?: TypeNode): ETSKeyofType {
-        const result: ETSKeyofType = new ETSKeyofType(global.generatedEs2panda._UpdateETSKeyofType(global.context, passNode(original), passNode(type)))
+        const result: ETSKeyofType = new ETSKeyofType(global.generatedEs2panda._UpdateETSKeyofType(global.context, passNode(original), passNode(type)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isETSKeyofType(node: object | undefined): node is ETSKeyofType {
     return node instanceof ETSKeyofType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE, (peer: KNativePointer) => new ETSKeyofType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE, (peer: KNativePointer) => new ETSKeyofType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_KEYOF_TYPE))
 }

@@ -27,7 +27,7 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomTheme, CustomTheme_serializer } from "./../framework/ohos.arkui.theme"
 import { ThemeColorMode } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkWithThemePeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

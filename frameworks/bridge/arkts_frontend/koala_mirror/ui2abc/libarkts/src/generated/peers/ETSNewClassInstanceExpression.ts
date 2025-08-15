@@ -36,22 +36,21 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class ETSNewClassInstanceExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 80)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSNewClassInstanceExpression(typeReference: Expression | undefined, _arguments: readonly Expression[]): ETSNewClassInstanceExpression {
-        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._CreateETSNewClassInstanceExpression(global.context, passNode(typeReference), passNodeArray(_arguments), _arguments.length))
+        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._CreateETSNewClassInstanceExpression(global.context, passNode(typeReference), passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSNewClassInstanceExpression(original: ETSNewClassInstanceExpression | undefined, typeReference: Expression | undefined, _arguments: readonly Expression[]): ETSNewClassInstanceExpression {
-        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._UpdateETSNewClassInstanceExpression(global.context, passNode(original), passNode(typeReference), passNodeArray(_arguments), _arguments.length))
+        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._UpdateETSNewClassInstanceExpression(global.context, passNode(original), passNode(typeReference), passNodeArray(_arguments), _arguments.length), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static update1ETSNewClassInstanceExpression(original?: ETSNewClassInstanceExpression, other?: ETSNewClassInstanceExpression): ETSNewClassInstanceExpression {
-        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._UpdateETSNewClassInstanceExpression1(global.context, passNode(original), passNode(other)))
+        const result: ETSNewClassInstanceExpression = new ETSNewClassInstanceExpression(global.generatedEs2panda._UpdateETSNewClassInstanceExpression1(global.context, passNode(original), passNode(other)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -77,5 +76,5 @@ export function isETSNewClassInstanceExpression(node: object | undefined): node 
     return node instanceof ETSNewClassInstanceExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewClassInstanceExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION, (peer: KNativePointer) => new ETSNewClassInstanceExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NEW_CLASS_INSTANCE_EXPRESSION))
 }

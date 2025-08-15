@@ -24,7 +24,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Visibility } from "./enums"
 import { VoidCallback } from "./units"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -274,37 +274,37 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     onLoad_value?: VoidCallback | undefined
     onUpdate_value?: ((value0: FormCallbackInfo) => void) | undefined
     attributeModifier_value?: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public size(value: FormSize | undefined): this {
+    size(value: FormSize | undefined): this {
         return this
     }
-    public moduleName(value: string | undefined): this {
+    moduleName(value: string | undefined): this {
         return this
     }
-    public dimension(value: FormDimension | undefined): this {
+    dimension(value: FormDimension | undefined): this {
         return this
     }
-    public allowUpdate(value: boolean | undefined): this {
+    allowUpdate(value: boolean | undefined): this {
         return this
     }
-    public visibility(value: Visibility | undefined): this {
+    visibility(value: Visibility | undefined): this {
         return this
     }
-    public onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
         return this
     }
-    public onError(value: ((value0: ErrorInformation) => void) | undefined): this {
+    onError(value: ((value0: ErrorInformation) => void) | undefined): this {
         return this
     }
-    public onRouter(value: ((value0: Object) => void) | undefined): this {
+    onRouter(value: ((value0: Object) => void) | undefined): this {
         return this
     }
-    public onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
         return this
     }
-    public onLoad(value: VoidCallback | undefined): this {
+    onLoad(value: VoidCallback | undefined): this {
         return this
     }
-    public onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+    onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

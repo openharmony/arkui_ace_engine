@@ -42,7 +42,6 @@ public:
 };
 
 struct CallbackBuffer {
-    InteropInt32 kind;
     uint8_t buffer[4096];
     CallbackResourceHolder resourceHolder;
 };
@@ -53,7 +52,7 @@ enum CallbackEventKind {
     Event_ReleaseManagedResource = 2,
 };
 
-extern "C" DLL_EXPORT void enqueueCallback(const CallbackBuffer* event);
+extern "C" DLL_EXPORT void enqueueCallback(int apiKind, const CallbackBuffer* event);
 extern "C" DLL_EXPORT void holdManagedCallbackResource(InteropInt32 resourceId);
 extern "C" DLL_EXPORT void releaseManagedCallbackResource(InteropInt32 resourceId);
 

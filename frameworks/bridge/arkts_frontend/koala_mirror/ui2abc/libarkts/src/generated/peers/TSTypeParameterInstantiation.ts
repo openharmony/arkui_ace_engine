@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeParameterInstantiation extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 122)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeParameterInstantiation(params: readonly TypeNode[]): TSTypeParameterInstantiation {
-        const result: TSTypeParameterInstantiation = new TSTypeParameterInstantiation(global.generatedEs2panda._CreateTSTypeParameterInstantiation(global.context, passNodeArray(params), params.length))
+        const result: TSTypeParameterInstantiation = new TSTypeParameterInstantiation(global.generatedEs2panda._CreateTSTypeParameterInstantiation(global.context, passNodeArray(params), params.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeParameterInstantiation(original: TSTypeParameterInstantiation | undefined, params: readonly TypeNode[]): TSTypeParameterInstantiation {
-        const result: TSTypeParameterInstantiation = new TSTypeParameterInstantiation(global.generatedEs2panda._UpdateTSTypeParameterInstantiation(global.context, passNode(original), passNodeArray(params), params.length))
+        const result: TSTypeParameterInstantiation = new TSTypeParameterInstantiation(global.generatedEs2panda._UpdateTSTypeParameterInstantiation(global.context, passNode(original), passNodeArray(params), params.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSTypeParameterInstantiation(node: object | undefined): node i
     return node instanceof TSTypeParameterInstantiation
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION, (peer: KNativePointer) => new TSTypeParameterInstantiation(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION, (peer: KNativePointer) => new TSTypeParameterInstantiation(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_INSTANTIATION))
 }

@@ -14,19 +14,28 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { ApplicationInfo, ComponentTransformerOptions } from "./component-transformer"
-import { getComponentPackage, Importer } from "./utils"
+import { ApplicationInfo, ComponentTransformerOptions, ProjectConfig } from "./component-transformer"
+import { getResourcePackage, Importer } from "./utils"
+import { Dollars, getResourceParams, initResourceInfo, loadBuildJson, LoaderJson, ModuleType, RESOURCE_TYPE, ResourceInfo, ResourceParameter } from "./resources-utils"
 
 export class CallTransformer extends arkts.AbstractVisitor {
 
     private applicationInfo?: ApplicationInfo
+    private projectConfig?: ProjectConfig
     private classNode?: arkts.ClassDeclaration
     private whiteList = ["$r", "$rawfile"]
 
-    constructor(private imports: Importer, options?: ComponentTransformerOptions) {
+    private resourceInfo: ResourceInfo
+    private aceBuildJson: LoaderJson
+
+    constructor(private imports: Importer, options?: ComponentTransformerOptions, projectConfig?: ProjectConfig) {
         super()
-        this.program = arkts.global.compilerContext.program
+        this.program = arkts.global.compilerContext!.program
         this.applicationInfo = options?.applicationInfo
+        this.projectConfig = projectConfig
+
+        this.aceBuildJson = loadBuildJson(this.projectConfig);
+        this.resourceInfo = initResourceInfo(this.projectConfig, this.aceBuildJson);
     }
 
     isDollarVariableAccess(identifier: arkts.Identifier): boolean {
@@ -51,20 +60,125 @@ export class CallTransformer extends arkts.AbstractVisitor {
         )
     }
 
-    transformDollarCallExpression(callExpr: arkts.CallExpression): arkts.CallExpression {
-        const name = (callExpr.callee as arkts.Identifier).name.replace('$', '_')
-        // add import { _r, _rawfile } from "@ohos.arkui";
-        this.imports.add(name, getComponentPackage())
-        const args = callExpr.arguments.slice()
+    transformDollarCallExpression(node: arkts.CallExpression): arkts.CallExpression {
+
+        if (!arkts.isIdentifier(node.callee) || !this.projectConfig) {
+            return this.updateResourceCallDefault(node) // TODO: rework
+        }
+
+        const resourceKind: Dollars = node.callee.name as Dollars;
+        const transformedKey: string = resourceKind === Dollars.DOLLAR_RESOURCE
+                ? Dollars.TRANSFORM_DOLLAR_RESOURCE
+                : Dollars.TRANSFORM_DOLLAR_RAWFILE;
+
+        // add import { _r, _rawfile } from "arkui.component.resources";
+        this.imports.add(transformedKey, getResourcePackage())
+
+        if (arkts.isStringLiteral(node.arguments[0])) {
+            return this.updateStringLiteralResource(
+                node,
+                this.projectConfig,
+                resourceKind,
+                transformedKey,
+                node.arguments[0]
+            )          
+        } else if (node.arguments && node.arguments.length) {
+            const resourceParams: ResourceParameter = getResourceParams(-1, resourceKind === Dollars.DOLLAR_RAWFILE ? RESOURCE_TYPE.rawfile : -1, Array.from(node.arguments))
+            this.updateResourceCall(
+                node,
+                resourceParams,
+                this.projectConfig,
+                transformedKey
+            )
+        }
+        return node;
+    }
+
+    updateStringLiteralResource(
+        node: arkts.CallExpression,
+        projectConfig: ProjectConfig,
+        resourceKind: Dollars,
+        transformedKey: string,
+        arg: arkts.StringLiteral
+    ): arkts.CallExpression {
+        const resourceData: string[] = arg.str.trim().split('.');
+        const fromOtherModule: boolean = !!resourceData.length && /^\[.*\]$/g.test(resourceData[0]);
+        if (resourceKind === Dollars.DOLLAR_RAWFILE) {
+            let resourceId: number = projectConfig.moduleType === ModuleType.HAR ? -1 : 0;
+            if (resourceData && resourceData[0] && fromOtherModule) {
+                resourceId = -1;
+            }
+
+            const resourceParams: ResourceParameter = getResourceParams(resourceId, RESOURCE_TYPE.rawfile, [node.arguments[0]])
+            return this.updateResourceCall(
+                node,
+                resourceParams,
+                projectConfig,
+                transformedKey
+            )
+        } else {
+            const resourceId: number =
+                projectConfig.moduleType === ModuleType.HAR ||
+                fromOtherModule ||
+                !this.resourceInfo.resourcesList[resourceData[0]]
+                    ? -1
+                    : this.resourceInfo.resourcesList[resourceData[0]].get(resourceData[1])![resourceData[2]];
+
+            const resourceParams: ResourceParameter = getResourceParams(
+                resourceId,
+                RESOURCE_TYPE[resourceData[1].trim()],
+                projectConfig.moduleType === ModuleType.HAR || fromOtherModule
+                    ? Array.from(node.arguments)
+                    : Array.from(node.arguments.slice(1))
+            )
+
+            return this.updateResourceCall(
+                node,
+                resourceParams,
+                projectConfig,
+                transformedKey
+            )
+            
+        }
+    }
+
+    updateResourceCall(
+        node: arkts.CallExpression,
+        resourceParams: ResourceParameter,
+        projectConfig: ProjectConfig,
+        transformedKey: string
+    ): arkts.CallExpression {
+
+        const args = [
+            arkts.factory.createNumberLiteral(resourceParams.id),
+            arkts.factory.createNumberLiteral(resourceParams.type),
+            arkts.factory.createStringLiteral(projectConfig.bundleName ?? ""),
+            arkts.factory.createStringLiteral(projectConfig.moduleName ?? "entry"),
+            ...resourceParams.params,
+        ];
         return arkts.factory.updateCallExpression(
-            callExpr,
+            node,
+            arkts.factory.createIdentifier(transformedKey),
+            args,
+            node.typeParams
+        );  
+    }
+
+    // Use from rri. Maybe remove.
+    updateResourceCallDefault(node: arkts.CallExpression) {
+        const name = (node.callee as arkts.Identifier).name.replace('$', '_')
+        // add import { _r, _rawfile } from "@ohos.arkui";
+        this.imports.add(name, getResourcePackage())
+        const args = node.arguments.slice()
+        return arkts.factory.updateCallExpression(
+            node,
             arkts.factory.createIdentifier(name),
             [
                 arkts.factory.createStringLiteral(this.applicationInfo?.bundleName ?? ""),
                 arkts.factory.createStringLiteral(this.applicationInfo?.moduleName ?? "entry"),
                 ...args,
             ],
-            callExpr.typeParams
+            node.typeParams
         )
     }
 

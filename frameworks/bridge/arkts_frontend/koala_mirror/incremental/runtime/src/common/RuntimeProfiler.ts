@@ -21,8 +21,17 @@ import { float64toInt32, int32 } from "@koalaui/common"
  */
 const DEBUG_WITH_NODE_STATS = false
 
+export interface RuntimeTracer {
+    /** called on enter to the specified section */
+    begin(name: string): void
+    /** called to log the specified message */
+    log(message: string): void
+    /** called on exit from the specified section */
+    end(name: string): void
+}
+
 export class RuntimeProfiler {
-    private static readonly map: Map<int32, Set<Object> > | undefined = DEBUG_WITH_NODE_STATS
+    private static readonly map: Map<int32, Set<Object>> | undefined = DEBUG_WITH_NODE_STATS
         ? new Map<int32, Set<Object>>()
         : undefined
 
@@ -43,6 +52,7 @@ export class RuntimeProfiler {
         if (!set.delete(node)) console.log("node is already disposed")
     }
 
+    public static tracer: RuntimeTracer | undefined = undefined
     public static instance: RuntimeProfiler | undefined = undefined
 
     private invalidations = 0
@@ -131,7 +141,7 @@ export class RuntimeProfiler {
             `layouts: ${this.layouts}`,
             `FPS: ${this.lastFPS}`,
         )
-        RuntimeProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
+        RuntimeProfiler.map?.forEach((set: Set<Object>, kind: int32) => {
             if (set.size > 0) array.push(kind + ":" + set.size)
         })
         return array.join("\n")
@@ -143,7 +153,7 @@ export class RuntimeProfiler {
     node() { this.nodes++ }
     realDraw() { this.realDraws++ }
     cachedDraw() { this.cachedDraws++ }
-    layout() {  this.layouts++ }
+    layout() { this.layouts++ }
     measure() { this.measures++ }
     frame(ms: number) {
         if (ms - this.lastTime <= 1000) {

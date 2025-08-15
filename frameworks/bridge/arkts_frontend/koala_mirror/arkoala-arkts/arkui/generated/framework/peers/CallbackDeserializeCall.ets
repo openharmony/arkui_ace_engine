@@ -34,9 +34,9 @@ import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAler
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, NavDestinationTransitionDelegate } from "./../../component/navDestination"
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
-import { Scene_serializer, ErrorEvent_serializer, MessageEvents_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, Scene, Callback_RangeUpdate, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents } from "./../../component/idlize"
+import { Scene_serializer, ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, Scene, Callback_RangeUpdate, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, WorkerEventListener, Event } from "./../../component/idlize"
 import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
-import { SurfaceRect_serializer, SurfaceRect, OnNativeLoadCallback } from "./../../component/xcomponent"
+import { SurfaceRect_serializer, NativeXComponentPointer, SurfaceRect } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
 import { Resource_serializer } from "./../resource"
 import { TextPickerResult_serializer, TextPickerResult, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback } from "./../../component/textPicker"
@@ -54,7 +54,7 @@ import { CheckboxGroupResult_serializer, OnCheckboxGroupChangeCallback, Checkbox
 import { OnFoldStatusChangeInfo_serializer, HoverEventParam_serializer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../../component/folderStack"
 import { VisibleListContentInfo_serializer, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../../component/list"
 import { SubmitEvent_serializer, EnterKeyType, OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, SubmitEvent, OnTextSelectionChangeCallback } from "./../../component/textInput"
-import { PluginErrorData_serializer, PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
+import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
@@ -62,9 +62,10 @@ import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, 
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration } from "./../../component/textTimer"
 import { ToggleConfiguration_serializer, ToggleConfiguration } from "./../../component/toggle"
+import { registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType } from "@koalaui/interop"
 import { int32, float32, int64 } from "@koalaui/common"
-import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType } from "@koalaui/interop"
 import { CallbackTransformer } from "./../../CallbackTransformer"
+import { extractors } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { PasteButtonOnClickResult } from "./../../component/pasteButton"
 import { SaveButtonOnClickResult } from "./../../component/saveButton"
@@ -77,7 +78,6 @@ import { Resource } from "global.resource"
 import { Context_getGroupDir_Callback } from "./../ohos.app.ability.common"
 import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
-import { OnLazyLoadingFunc, OnTotalCountFunc } from "./../../component/repeat"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
 import { SearchSubmitCallback } from "./../../component/search"
@@ -119,7 +119,7 @@ export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -191,7 +191,7 @@ export function deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisD
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         TouchResult_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(1943507619, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 1943507619, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -216,7 +216,7 @@ export function deserializeAndCallCallback_Boolean(thisDeserializer: Deserialize
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -287,7 +287,7 @@ export function deserializeAndCallCallback_CreateItem(thisDeserializer: Deserial
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -313,7 +313,7 @@ export function deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         CustomSpanMetrics_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(1362306791, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 1362306791, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -351,7 +351,7 @@ export function deserializeAndCallCallback_DeleteValue_Boolean(thisDeserializer:
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -432,7 +432,7 @@ export function deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisD
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -500,7 +500,7 @@ export function deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeInt32(TypeChecker.GestureJudgeResult_ToNumeric(value));
-        InteropNativeModule._CallCallbackSync(-684588584, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -684588584, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -544,7 +544,7 @@ export function deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer:
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -600,7 +600,7 @@ export function deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer: De
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -613,18 +613,23 @@ export function deserializeAndCallCallback_KeyEvent_Void(thisDeserializer: Deser
     let event : KeyEvent = (KeyEvent_serializer.read(thisDeserializer) as KeyEvent)
     _call(event)
 }
-export function deserializeAndCallCallback_Map_String_Object_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_Map_String_RecordData_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Map<string, Object>) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Map<string, RecordData>) => void))
     const value0TmpBufSizeVar : int32 = thisDeserializer.readInt32()
-    let value0TmpBuf : Map<string, Object> = new Map<string, Object>()
+    let value0TmpBuf : Map<string, RecordData> = new Map<string, RecordData>()
     // TODO: TS map resize
     for (let value0TmpBufIVar = 0; value0TmpBufIVar < value0TmpBufSizeVar; value0TmpBufIVar++) {
         const value0TmpBufKeyVar : string = (thisDeserializer.readString() as string)
-        const value0TmpBufValueVar : Object = (thisDeserializer.readObject() as object)
+        const value0TmpBufValueVarTempBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+        let value0TmpBufValueVarTempBuf : Object | undefined
+        if ((value0TmpBufValueVarTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            value0TmpBufValueVarTempBuf = (thisDeserializer.readObject() as object)
+        }
+        const value0TmpBufValueVar : RecordData = value0TmpBufValueVarTempBuf
         value0TmpBuf.set(value0TmpBufKeyVar, value0TmpBufValueVar)
     }
-    let value0 : Map<string, Object> = value0TmpBuf
+    let value0 : Map<string, RecordData> = value0TmpBuf
     _call(value0)
 }
 export function deserializeAndCallCallback_MarqueeState_Void(thisDeserializer: DeserializerBase): void {
@@ -650,6 +655,12 @@ export function deserializeAndCallCallback_NativeEmbedTouchInfo_Void(thisDeseria
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: NativeEmbedTouchInfo) => void))
     let event : NativeEmbedTouchInfo = NativeEmbedTouchInfo_serializer.read(thisDeserializer)
     _call(event)
+}
+export function deserializeAndCallCallback_NativeXComponentPointer_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: NativeXComponentPointer) => void))
+    let value0 : NativeXComponentPointer = thisDeserializer.readInt64()
+    _call(value0)
 }
 export function deserializeAndCallCallback_NavDestinationActiveReason_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -706,7 +717,7 @@ export function deserializeAndCallCallback_Number_Number(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeNumber(value);
-        InteropNativeModule._CallCallbackSync(36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -727,7 +738,7 @@ export function deserializeAndCallCallback_Number_Number_Boolean(thisDeserialize
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -749,7 +760,7 @@ export function deserializeAndCallCallback_Number_Number_Boolean_Boolean(thisDes
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -770,7 +781,7 @@ export function deserializeAndCallCallback_Number_Number_ComputedBarAttribute(th
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         ComputedBarAttribute_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(-1270343661, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -1270343661, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -815,7 +826,7 @@ export function deserializeAndCallCallback_Number_Tuple_Number_Number(thisDeseri
         continuationBufferBufArgsSerializer.writeNumber(value_0);
         const value_1  = value[1];
         continuationBufferBufArgsSerializer.writeNumber(value_1);
-        InteropNativeModule._CallCallbackSync(-607365481, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -607365481, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -842,7 +853,7 @@ export function deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Num
         continuationBufferBufArgsSerializer.writeNumber(value_2);
         const value_3  = value[3];
         continuationBufferBufArgsSerializer.writeNumber(value_3);
-        InteropNativeModule._CallCallbackSync(148489367, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 148489367, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -874,7 +885,7 @@ export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -900,7 +911,7 @@ export function deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeser
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -926,7 +937,7 @@ export function deserializeAndCallCallback_OnConfirmEvent_Boolean(thisDeserializ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -946,7 +957,7 @@ export function deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -966,7 +977,7 @@ export function deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDe
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1022,7 +1033,7 @@ export function deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDe
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1048,7 +1059,7 @@ export function deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceRe
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         WebResourceResponse_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(831645046, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 831645046, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1068,7 +1079,7 @@ export function deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDese
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1095,7 +1106,7 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         SizeResult_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(1318865891, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 1318865891, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1164,7 +1175,7 @@ export function deserializeAndCallCallback_OnPromptEvent_Boolean(thisDeserialize
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1232,7 +1243,7 @@ export function deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisD
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1363,7 +1374,7 @@ export function deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializ
             valueTmpBuf_BufArgsSerializer.writeInt32(valueTmpBuf_BufResource.resourceId);
             valueTmpBuf_BufArgsSerializer.writePointer(valueTmpBuf_BufCall);
             valueTmpBuf_BufArgsSerializer.writePointer(valueTmpBuf_BufCallSync);
-            InteropNativeModule._CallCallback(737226752, valueTmpBuf_BufArgsSerializer.asBuffer(), valueTmpBuf_BufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 737226752, valueTmpBuf_BufArgsSerializer.asBuffer(), valueTmpBuf_BufArgsSerializer.length());
             valueTmpBuf_BufArgsSerializer.release();
             return;
         }
@@ -1559,7 +1570,7 @@ export function deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1579,7 +1590,7 @@ export function deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1599,7 +1610,7 @@ export function deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisDes
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1636,7 +1647,7 @@ export function deserializeAndCallCallback_RotationGesture(thisDeserializer: Des
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         RotationGesture_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(924806076, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 924806076, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1724,7 +1735,7 @@ export function deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisD
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1755,7 +1766,7 @@ export function deserializeAndCallCallback_SwipeGesture(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         SwipeGesture_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(-768726640, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -768726640, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1826,6 +1837,17 @@ export function deserializeAndCallCallback_T_Void_Array_Arkui_Component_Units_Re
     let value0 : Array<ResourceStr> = value0TmpBuf
     _call(value0)
 }
+export function deserializeAndCallCallback_T_Void_Array_Global_Resource_Resource(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Array<Resource>) => void))
+    const value0TmpBufLength : int32 = thisDeserializer.readInt32()
+    let value0TmpBuf : Array<Resource> = new Array<Resource>(value0TmpBufLength)
+    for (let value0TmpBufBufCounterI = 0; value0TmpBufBufCounterI < value0TmpBufLength; value0TmpBufBufCounterI++) {
+        value0TmpBuf[value0TmpBufBufCounterI] = Resource_serializer.read(thisDeserializer)
+    }
+    let value0 : Array<Resource> = value0TmpBuf
+    _call(value0)
+}
 export function deserializeAndCallCallback_T_Void_Array_Number(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Array<number>) => void))
@@ -1835,6 +1857,17 @@ export function deserializeAndCallCallback_T_Void_Array_Number(thisDeserializer:
         value0TmpBuf[value0TmpBufBufCounterI] = (thisDeserializer.readNumber() as number)
     }
     let value0 : Array<number> = value0TmpBuf
+    _call(value0)
+}
+export function deserializeAndCallCallback_T_Void_Array_String(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Array<string>) => void))
+    const value0TmpBufLength : int32 = thisDeserializer.readInt32()
+    let value0TmpBuf : Array<string> = new Array<string>(value0TmpBufLength)
+    for (let value0TmpBufBufCounterI = 0; value0TmpBufBufCounterI < value0TmpBufLength; value0TmpBufBufCounterI++) {
+        value0TmpBuf[value0TmpBufBufCounterI] = (thisDeserializer.readString() as string)
+    }
+    let value0 : Array<string> = value0TmpBuf
     _call(value0)
 }
 export function deserializeAndCallCallback_T_Void_Boolean(thisDeserializer: DeserializerBase): void {
@@ -1916,7 +1949,7 @@ export function deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeInt32(TypeChecker.HitTestMode_ToNumeric(value));
-        InteropNativeModule._CallCallbackSync(-1755111025, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -1755111025, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -1973,7 +2006,7 @@ export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void
             valueTmpBufBufUBufArgsSerializer.writeInt32(valueTmpBufBufUBufResource.resourceId);
             valueTmpBufBufUBufArgsSerializer.writePointer(valueTmpBufBufUBufCall);
             valueTmpBufBufUBufArgsSerializer.writePointer(valueTmpBufBufUBufCallSync);
-            InteropNativeModule._CallCallback(737226752, valueTmpBufBufUBufArgsSerializer.asBuffer(), valueTmpBufBufUBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 737226752, valueTmpBufBufUBufArgsSerializer.asBuffer(), valueTmpBufBufUBufArgsSerializer.length());
             valueTmpBufBufUBufArgsSerializer.release();
             return;
         }
@@ -2027,7 +2060,7 @@ export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2056,7 +2089,7 @@ export function deserializeAndCallContentWillScrollCallback(thisDeserializer: De
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2082,7 +2115,7 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2103,7 +2136,7 @@ export function deserializeAndCallDataPanelModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2148,7 +2181,7 @@ export function deserializeAndCallGaugeModifierBuilder(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2175,7 +2208,7 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeInt32(TypeChecker.GestureJudgeResult_ToNumeric(value));
-        InteropNativeModule._CallCallbackSync(-684588584, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -684588584, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2195,7 +2228,7 @@ export function deserializeAndCallGetItemMainSizeByIndex(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeNumber(value);
-        InteropNativeModule._CallCallbackSync(36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2279,7 +2312,7 @@ export function deserializeAndCallLoadingProgressModifierBuilder(thisDeserialize
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2307,7 +2340,7 @@ export function deserializeAndCallMenuItemModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2339,7 +2372,7 @@ export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: Deser
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2370,7 +2403,7 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(406871767, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 406871767, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2411,7 +2444,7 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
             const valueTmpElement : string = value[valueCounterI];
             continuationBufferBufArgsSerializer.writeString(valueTmpElement);
         }
-        InteropNativeModule._CallCallbackSync(-440782244, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -440782244, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2470,7 +2503,7 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
             const valueTmpElement : TextMenuItem = value[valueCounterI];
             TextMenuItem_serializer.write(continuationBufferBufArgsSerializer, valueTmpElement);
         }
-        InteropNativeModule._CallCallbackSync(528588498, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 528588498, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2553,7 +2586,7 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(859020393, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 859020393, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2565,12 +2598,6 @@ export function deserializeAndCallOnLargestContentfulPaintCallback(thisDeseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnLargestContentfulPaintCallback)
     let largestContentfulPaint : LargestContentfulPaint = LargestContentfulPaint_serializer.read(thisDeserializer)
     _call(largestContentfulPaint)
-}
-export function deserializeAndCallOnLazyLoadingFunc(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as OnLazyLoadingFunc)
-    let index : number = (thisDeserializer.readNumber() as number)
-    _call(index)
 }
 export function deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2593,7 +2620,7 @@ export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2612,17 +2639,6 @@ export function deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisDese
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnNativeEmbedVisibilityChangeCallback)
     let nativeEmbedVisibilityInfo : NativeEmbedVisibilityInfo = NativeEmbedVisibilityInfo_serializer.read(thisDeserializer)
     _call(nativeEmbedVisibilityInfo)
-}
-export function deserializeAndCallOnNativeLoadCallback(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as OnNativeLoadCallback)
-    const eventTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
-    let eventTmpBuf : Object | undefined
-    if ((eventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        eventTmpBuf = (thisDeserializer.readObject() as object)
-    }
-    let event : Object | undefined = eventTmpBuf
-    _call(event)
 }
 export function deserializeAndCallOnNavigationEntryCommittedCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2643,7 +2659,7 @@ export function deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer:
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2713,7 +2729,7 @@ export function deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer: D
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         OnScrollFrameBeginHandlerResult_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(1637092936, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 1637092936, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2798,7 +2814,7 @@ export function deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializ
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBoolean(value0);
-        InteropNativeModule._CallCallbackSync(313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 313269291, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2860,25 +2876,6 @@ export function deserializeAndCallOnTimePickerChangeCallback(thisDeserializer: D
     let result : TimePickerResult = TimePickerResult_serializer.read(thisDeserializer)
     _call(result)
 }
-export function deserializeAndCallOnTotalCountFunc(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as OnTotalCountFunc)
-    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
-    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
-    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
-    let continuationResult : ((value: number) => void) = (value: number):void => {
-        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
-        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
-        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        continuationBufferBufArgsSerializer.writeNumber(value);
-        InteropNativeModule._CallCallbackSync(36519084, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
-        continuationBufferBufArgsSerializer.release();
-        return;
-    }
-    const _callResult  = _call()
-    continuationResult(_callResult)
-}
 export function deserializeAndCallOnViewportFitChangedCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnViewportFitChangedCallback)
@@ -2906,7 +2903,7 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(648568223, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 648568223, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2969,7 +2966,7 @@ export function deserializeAndCallProgressModifierBuilder(thisDeserializer: Dese
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -2990,7 +2987,7 @@ export function deserializeAndCallRadioModifierBuilder(thisDeserializer: Deseria
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3011,7 +3008,7 @@ export function deserializeAndCallRatingModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3048,7 +3045,7 @@ export function deserializeAndCallReuseIdCallback(thisDeserializer: Deserializer
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeString(breakpoints);
-        InteropNativeModule._CallCallbackSync(814634522, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 814634522, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3085,7 +3082,7 @@ export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: D
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(1321949695, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 1321949695, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3129,7 +3126,7 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         GestureRecognizer_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(776202910, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 776202910, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3157,7 +3154,7 @@ export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3184,7 +3181,7 @@ export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer:
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writeBuffer(value);
-        InteropNativeModule._CallCallbackSync(908731311, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 908731311, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3204,7 +3201,7 @@ export function deserializeAndCallStyledStringUnmarshallCallback(thisDeserialize
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         UserDataSpan_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(-1198150682, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -1198150682, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3238,7 +3235,7 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(-143931627, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -143931627, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3271,7 +3268,7 @@ export function deserializeAndCallTextClockModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3377,7 +3374,7 @@ export function deserializeAndCallTextTimerModifierBuilder(thisDeserializer: Des
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3398,7 +3395,7 @@ export function deserializeAndCallToggleModifierBuilder(thisDeserializer: Deseri
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         continuationBufferBufArgsSerializer.writePointer(value);
-        InteropNativeModule._CallCallbackSync(721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, 721562324, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3438,7 +3435,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
             const valueForIdx1  = value as DragItemInfo;
             DragItemInfo_serializer.write(continuationBufferBufArgsSerializer, valueForIdx1);
         }
-        InteropNativeModule._CallCallbackSync(-620935067, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -620935067, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3466,7 +3463,7 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
         } else {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
         }
-        InteropNativeModule._CallCallbackSync(-2035339519, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -2035339519, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
@@ -3504,12 +3501,18 @@ export function deserializeAndCallWebKeyboardCallback(thisDeserializer: Deserial
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
         WebKeyboardOptions_serializer.write(continuationBufferBufArgsSerializer, value);
-        InteropNativeModule._CallCallbackSync(-1376223390, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        InteropNativeModule._CallCallbackSync(10, -1376223390, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
         continuationBufferBufArgsSerializer.release();
         return;
     }
     const _callResult  = _call(keyboardCallbackInfo)
     continuationResult(_callResult)
+}
+export function deserializeAndCallWorkerEventListener(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as WorkerEventListener)
+    let event : Event = Event_serializer.read(thisDeserializer)
+    _call(event)
 }
 export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): void {
     const kind : int32 = thisDeserializer.readInt32()
@@ -3572,11 +3575,12 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_Map_String_Object_Void: return deserializeAndCallCallback_Map_String_Object_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Map_String_RecordData_Void: return deserializeAndCallCallback_Map_String_RecordData_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_MarqueeState_Void: return deserializeAndCallCallback_MarqueeState_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_MouseEvent_Void: return deserializeAndCallCallback_MouseEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NativeEmbedDataInfo_Void: return deserializeAndCallCallback_NativeEmbedDataInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NativeEmbedTouchInfo_Void: return deserializeAndCallCallback_NativeEmbedTouchInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NativeXComponentPointer_Void: return deserializeAndCallCallback_NativeXComponentPointer_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavDestinationActiveReason_Void: return deserializeAndCallCallback_NavDestinationActiveReason_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavDestinationContext_Void: return deserializeAndCallCallback_NavDestinationContext_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_NavDestinationInfo_Void: return deserializeAndCallCallback_NavDestinationInfo_Void(thisDeserializer);
@@ -3681,7 +3685,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_T_Void_Arkui_Component_Units_Length: return deserializeAndCallCallback_T_Void_Arkui_Component_Units_Length(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Arkui_Component_Units_ResourceStr(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Array_Arkui_Component_Units_ResourceStr: return deserializeAndCallCallback_T_Void_Array_Arkui_Component_Units_ResourceStr(thisDeserializer);
+        case CallbackKind.Kind_Callback_T_Void_Array_Global_Resource_Resource: return deserializeAndCallCallback_T_Void_Array_Global_Resource_Resource(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Array_Number: return deserializeAndCallCallback_T_Void_Array_Number(thisDeserializer);
+        case CallbackKind.Kind_Callback_T_Void_Array_String: return deserializeAndCallCallback_T_Void_Array_String(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Boolean: return deserializeAndCallCallback_T_Void_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Date: return deserializeAndCallCallback_T_Void_Date(thisDeserializer);
         case CallbackKind.Kind_Callback_T_Void_Global_Resource_Resource: return deserializeAndCallCallback_T_Void_Global_Resource_Resource(thisDeserializer);
@@ -3747,12 +3753,10 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer);
         case CallbackKind.Kind_OnItemDragStartCallback: return deserializeAndCallOnItemDragStartCallback(thisDeserializer);
         case CallbackKind.Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
-        case CallbackKind.Kind_OnLazyLoadingFunc: return deserializeAndCallOnLazyLoadingFunc(thisDeserializer);
         case CallbackKind.Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
         case CallbackKind.Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisDeserializer);
         case CallbackKind.Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisDeserializer);
-        case CallbackKind.Kind_OnNativeLoadCallback: return deserializeAndCallOnNativeLoadCallback(thisDeserializer);
         case CallbackKind.Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallOnNavigationEntryCommittedCallback(thisDeserializer);
         case CallbackKind.Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer);
         case CallbackKind.Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisDeserializer);
@@ -3778,7 +3782,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
-        case CallbackKind.Kind_OnTotalCountFunc: return deserializeAndCallOnTotalCountFunc(thisDeserializer);
         case CallbackKind.Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisDeserializer);
         case CallbackKind.Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
         case CallbackKind.Kind_PageMapBuilder: return deserializeAndCallPageMapBuilder(thisDeserializer);
@@ -3819,6 +3822,10 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
         case CallbackKind.Kind_VoidCallback: return deserializeAndCallVoidCallback(thisDeserializer);
         case CallbackKind.Kind_WebKeyboardCallback: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
+        case CallbackKind.Kind_WorkerEventListener: return deserializeAndCallWorkerEventListener(thisDeserializer);
     }
-    console.log("Unknown callback kind")
+    throw new Error("Unknown callback kind")
+}
+export function registerArkuiApiHandler(): void {
+    registerApiEventHandler(10, deserializeAndCallCallback)
 }

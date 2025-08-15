@@ -42,12 +42,11 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 
 export class ETSFunctionType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 69)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSFunctionType(signature: FunctionSignature | undefined, funcFlags: Es2pandaScriptFunctionFlags, annotations?: readonly AnnotationUsage[]): ETSFunctionType {
-        const result: ETSFunctionType = new ETSFunctionType(global.generatedEs2panda._CreateETSFunctionType(global.context, passNode(signature), funcFlags))
+        const result: ETSFunctionType = new ETSFunctionType(global.generatedEs2panda._CreateETSFunctionType(global.context, passNode(signature), funcFlags), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -56,7 +55,7 @@ export class ETSFunctionType extends TypeNode {
         return result
     }
     static updateETSFunctionType(original: ETSFunctionType | undefined, signature: FunctionSignature | undefined, funcFlags: Es2pandaScriptFunctionFlags, annotations?: readonly AnnotationUsage[]): ETSFunctionType {
-        const result: ETSFunctionType = new ETSFunctionType(global.generatedEs2panda._UpdateETSFunctionType(global.context, passNode(original), passNode(signature), funcFlags))
+        const result: ETSFunctionType = new ETSFunctionType(global.generatedEs2panda._UpdateETSFunctionType(global.context, passNode(original), passNode(signature), funcFlags), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -93,5 +92,5 @@ export function isETSFunctionType(node: object | undefined): node is ETSFunction
     return node instanceof ETSFunctionType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE, (peer: KNativePointer) => new ETSFunctionType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE, (peer: KNativePointer) => new ETSFunctionType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_FUNCTION_TYPE))
 }

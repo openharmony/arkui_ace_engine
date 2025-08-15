@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkNodeContainerPeer, NodeContainerAttribute } from "./component/nodeContainer"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class NodeContainerModifier extends CommonMethodModifier implements NodeContainerAttribute,AttributeModifier<NodeContainerAttribute> {
     _instanceId: number = -1;

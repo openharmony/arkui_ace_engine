@@ -46,3 +46,6 @@ export class ValidationInfo extends ArktsObject {
     }
     protected readonly brandValidationInfo: undefined
 }
+export function isValidationInfo(node: object | undefined): node is ValidationInfo {
+    return node instanceof ValidationInfo
+}

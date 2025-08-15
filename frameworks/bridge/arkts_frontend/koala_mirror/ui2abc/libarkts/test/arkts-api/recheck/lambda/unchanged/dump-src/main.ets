@@ -1,7 +1,6 @@
 
 function main() {}
 
-
 function foo(): void {
   HasInstantiate.$_instantiate((() => {
     return new HasInstantiate();
@@ -9,8 +8,8 @@ function foo(): void {
 }
 
 function hasTrailing(first?: string, trailing?: (()=> void)): void {
-  ({let gensym%%_942 = trailing;
-  (((gensym%%_942) == (null)) ? undefined : gensym%%_942())});
+  ({let gensym%%_1040 = trailing;
+  (((gensym%%_1040) == (null)) ? undefined : gensym%%_1040())});
 }
 
 function bar(zzz: string): void {

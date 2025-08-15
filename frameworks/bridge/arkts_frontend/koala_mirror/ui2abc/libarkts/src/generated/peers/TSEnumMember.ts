@@ -37,22 +37,21 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class TSEnumMember extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 90)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1TSEnumMember(key: Expression | undefined, init: Expression | undefined, isGenerated: boolean): TSEnumMember {
-        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._CreateTSEnumMember1(global.context, passNode(key), passNode(init), isGenerated))
+        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._CreateTSEnumMember1(global.context, passNode(key), passNode(init), isGenerated), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSEnumMember(original?: TSEnumMember, key?: Expression, init?: Expression): TSEnumMember {
-        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._UpdateTSEnumMember(global.context, passNode(original), passNode(key), passNode(init)))
+        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._UpdateTSEnumMember(global.context, passNode(original), passNode(key), passNode(init)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER)
         result.setChildrenParentPtr()
         return result
     }
     static update1TSEnumMember(original: TSEnumMember | undefined, key: Expression | undefined, init: Expression | undefined, isGenerated: boolean): TSEnumMember {
-        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._UpdateTSEnumMember1(global.context, passNode(original), passNode(key), passNode(init), isGenerated))
+        const result: TSEnumMember = new TSEnumMember(global.generatedEs2panda._UpdateTSEnumMember1(global.context, passNode(original), passNode(key), passNode(init), isGenerated), Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER)
         result.setChildrenParentPtr()
         return result
     }
@@ -74,5 +73,5 @@ export function isTSEnumMember(node: object | undefined): node is TSEnumMember {
     return node instanceof TSEnumMember
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER, (peer: KNativePointer) => new TSEnumMember(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER, (peer: KNativePointer) => new TSEnumMember(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_ENUM_MEMBER))
 }

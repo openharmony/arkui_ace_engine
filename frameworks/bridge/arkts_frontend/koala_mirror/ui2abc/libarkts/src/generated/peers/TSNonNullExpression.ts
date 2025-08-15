@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class TSNonNullExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 102)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSNonNullExpression(expr?: Expression): TSNonNullExpression {
-        const result: TSNonNullExpression = new TSNonNullExpression(global.generatedEs2panda._CreateTSNonNullExpression(global.context, passNode(expr)))
+        const result: TSNonNullExpression = new TSNonNullExpression(global.generatedEs2panda._CreateTSNonNullExpression(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSNonNullExpression(original?: TSNonNullExpression, expr?: Expression): TSNonNullExpression {
-        const result: TSNonNullExpression = new TSNonNullExpression(global.generatedEs2panda._UpdateTSNonNullExpression(global.context, passNode(original), passNode(expr)))
+        const result: TSNonNullExpression = new TSNonNullExpression(global.generatedEs2panda._UpdateTSNonNullExpression(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isTSNonNullExpression(node: object | undefined): node is TSNonNu
     return node instanceof TSNonNullExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION, (peer: KNativePointer) => new TSNonNullExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION, (peer: KNativePointer) => new TSNonNullExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_NON_NULL_EXPRESSION))
 }

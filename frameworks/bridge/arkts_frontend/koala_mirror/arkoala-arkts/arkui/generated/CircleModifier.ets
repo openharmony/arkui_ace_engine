@@ -21,6 +21,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCirclePeer, CircleAttribute } from "./component/circle"
+import { int32 } from "@koalaui/common"
 import { CommonShapeMethod, CommonMethod } from "./component/common"
 export class CircleModifier extends CommonShapeMethodModifier implements CircleAttribute,AttributeModifier<CircleAttribute> {
     _instanceId: number = -1;

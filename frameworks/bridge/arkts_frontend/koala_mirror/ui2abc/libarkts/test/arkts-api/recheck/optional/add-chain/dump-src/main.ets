@@ -1,7 +1,6 @@
 
 function main() {}
 
-
 function someFunc(value: (SomeClass | undefined)): void {
   let x: (SomeClass | undefined) = value;
   let zzz = ({let chaintmp%%_0 = x;

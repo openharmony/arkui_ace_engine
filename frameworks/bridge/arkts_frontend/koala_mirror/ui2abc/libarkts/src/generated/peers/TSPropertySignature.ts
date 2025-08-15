@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSPropertySignature extends AnnotatedAstNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 107)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSPropertySignature(key: Expression | undefined, typeAnnotation: TypeNode | undefined, computed: boolean, optional_arg: boolean, readonly_arg: boolean): TSPropertySignature {
-        const result: TSPropertySignature = new TSPropertySignature(global.generatedEs2panda._CreateTSPropertySignature(global.context, passNode(key), passNode(typeAnnotation), computed, optional_arg, readonly_arg))
+        const result: TSPropertySignature = new TSPropertySignature(global.generatedEs2panda._CreateTSPropertySignature(global.context, passNode(key), passNode(typeAnnotation), computed, optional_arg, readonly_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSPropertySignature(original: TSPropertySignature | undefined, key: Expression | undefined, typeAnnotation: TypeNode | undefined, computed: boolean, optional_arg: boolean, readonly_arg: boolean): TSPropertySignature {
-        const result: TSPropertySignature = new TSPropertySignature(global.generatedEs2panda._UpdateTSPropertySignature(global.context, passNode(original), passNode(key), passNode(typeAnnotation), computed, optional_arg, readonly_arg))
+        const result: TSPropertySignature = new TSPropertySignature(global.generatedEs2panda._UpdateTSPropertySignature(global.context, passNode(original), passNode(key), passNode(typeAnnotation), computed, optional_arg, readonly_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE)
         result.setChildrenParentPtr()
         return result
     }
@@ -78,5 +77,5 @@ export function isTSPropertySignature(node: object | undefined): node is TSPrope
     return node instanceof TSPropertySignature
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE, (peer: KNativePointer) => new TSPropertySignature(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE, (peer: KNativePointer) => new TSPropertySignature(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_PROPERTY_SIGNATURE))
 }

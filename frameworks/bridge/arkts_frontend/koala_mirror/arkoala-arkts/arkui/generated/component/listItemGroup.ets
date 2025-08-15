@@ -23,7 +23,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -106,10 +106,10 @@ export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListI
     divider_value?: ListDividerOptions | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
     attributeModifier_value?: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined
-    public divider(value: ListDividerOptions | undefined): this {
+    divider(value: ListDividerOptions | undefined): this {
         return this
     }
-    public childrenMainSize(value: ChildrenMainSize | undefined): this {
+    childrenMainSize(value: ChildrenMainSize | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -246,7 +246,7 @@ export class ListItemGroupOptions_serializer {
                 headerTmpBuf_BufArgsSerializer.writeInt32(headerTmpBuf_BufResource.resourceId);
                 headerTmpBuf_BufArgsSerializer.writePointer(headerTmpBuf_BufCall);
                 headerTmpBuf_BufArgsSerializer.writePointer(headerTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, headerTmpBuf_BufArgsSerializer.asBuffer(), headerTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, headerTmpBuf_BufArgsSerializer.asBuffer(), headerTmpBuf_BufArgsSerializer.length());
                 headerTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -269,7 +269,7 @@ export class ListItemGroupOptions_serializer {
                 footerTmpBuf_BufArgsSerializer.writeInt32(footerTmpBuf_BufResource.resourceId);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCall);
                 footerTmpBuf_BufArgsSerializer.writePointer(footerTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, footerTmpBuf_BufArgsSerializer.asBuffer(), footerTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, footerTmpBuf_BufArgsSerializer.asBuffer(), footerTmpBuf_BufArgsSerializer.length());
                 footerTmpBuf_BufArgsSerializer.release();
                 return;
             }

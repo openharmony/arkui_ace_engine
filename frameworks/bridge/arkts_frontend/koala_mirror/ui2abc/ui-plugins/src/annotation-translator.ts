@@ -22,7 +22,7 @@ export class AnnotationsTransformer extends arkts.AbstractVisitor {
 
     constructor(options?: arkts.VisitorOptions) {
         super(options)
-        this.program = arkts.global.compilerContext.program
+        this.program = arkts.global.compilerContext!.program
     }
 
 

@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -172,22 +172,22 @@ export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttr
     onOffsetChange_value?: ((value0: number) => void) | undefined
     pullDownRatio_value?: number | undefined
     attributeModifier_value?: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
+    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
         return this
     }
-    public onRefreshing(value: (() => void) | undefined): this {
+    onRefreshing(value: (() => void) | undefined): this {
         return this
     }
-    public refreshOffset(value: number | undefined): this {
+    refreshOffset(value: number | undefined): this {
         return this
     }
-    public pullToRefresh(value: boolean | undefined): this {
+    pullToRefresh(value: boolean | undefined): this {
         return this
     }
-    public onOffsetChange(value: ((value0: number) => void) | undefined): this {
+    onOffsetChange(value: ((value0: number) => void) | undefined): this {
         return this
     }
-    public pullDownRatio(value: number | undefined): this {
+    pullDownRatio(value: number | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -367,7 +367,7 @@ export class RefreshOptions_serializer {
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }

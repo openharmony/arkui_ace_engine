@@ -34,7 +34,6 @@ import {
 
 import { AnnotatedStatement } from "./AnnotatedStatement"
 import { AnnotationUsage } from "./AnnotationUsage"
-import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Es2pandaModifierFlags } from "./../Es2pandaEnums"
 import { Identifier } from "./Identifier"
@@ -42,12 +41,11 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeAliasDeclaration extends AnnotatedStatement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 129)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeAliasDeclaration(id?: Identifier, typeParams?: TSTypeParameterDeclaration, typeAnnotation?: TypeNode, annotations?: readonly AnnotationUsage[], modifierFlags?: Es2pandaModifierFlags): TSTypeAliasDeclaration {
-        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._CreateTSTypeAliasDeclaration(global.context, passNode(id), passNode(typeParams), passNode(typeAnnotation)))
+        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._CreateTSTypeAliasDeclaration(global.context, passNode(id), passNode(typeParams), passNode(typeAnnotation)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -60,7 +58,7 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
         return result
     }
     static updateTSTypeAliasDeclaration(original?: TSTypeAliasDeclaration, id?: Identifier, typeParams?: TSTypeParameterDeclaration, typeAnnotation?: TypeNode, annotations?: readonly AnnotationUsage[], modifierFlags?: Es2pandaModifierFlags): TSTypeAliasDeclaration {
-        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._UpdateTSTypeAliasDeclaration(global.context, passNode(original), passNode(id), passNode(typeParams), passNode(typeAnnotation)))
+        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._UpdateTSTypeAliasDeclaration(global.context, passNode(original), passNode(id), passNode(typeParams), passNode(typeAnnotation)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -73,7 +71,7 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
         return result
     }
     static update1TSTypeAliasDeclaration(original?: TSTypeAliasDeclaration, id?: Identifier, annotations?: readonly AnnotationUsage[], modifierFlags?: Es2pandaModifierFlags): TSTypeAliasDeclaration {
-        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._UpdateTSTypeAliasDeclaration1(global.context, passNode(original), passNode(id)))
+        const result: TSTypeAliasDeclaration = new TSTypeAliasDeclaration(global.generatedEs2panda._UpdateTSTypeAliasDeclaration1(global.context, passNode(original), passNode(id)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION)
         if (annotations)
         {
             result.setAnnotations(annotations)
@@ -90,9 +88,6 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
     }
     get typeParams(): TSTypeParameterDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeAliasDeclarationTypeParamsConst(global.context, this.peer))
-    }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationDecoratorsConst(global.context, this.peer))
     }
     /** @deprecated */
     setTypeParameters(typeParams?: TSTypeParameterDeclaration): this {
@@ -130,24 +125,6 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
         global.generatedEs2panda._TSTypeAliasDeclarationClearTypeParamterTypes(global.context, this.peer)
         return this
     }
-    /** @deprecated */
-    emplaceDecorators(decorators?: Decorator): this {
-        global.generatedEs2panda._TSTypeAliasDeclarationEmplaceDecorators(global.context, this.peer, passNode(decorators))
-        return this
-    }
-    /** @deprecated */
-    clearDecorators(): this {
-        global.generatedEs2panda._TSTypeAliasDeclarationClearDecorators(global.context, this.peer)
-        return this
-    }
-    /** @deprecated */
-    setValueDecorators(decorators: Decorator | undefined, index: number): this {
-        global.generatedEs2panda._TSTypeAliasDeclarationSetValueDecorators(global.context, this.peer, passNode(decorators), index)
-        return this
-    }
-    get decoratorsForUpdate(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationDecoratorsForUpdate(global.context, this.peer))
-    }
     get typeAnnotation(): TypeNode {
         return unpackNonNullableNode(global.generatedEs2panda._TSTypeAliasDeclarationTypeAnnotationConst(global.context, this.peer))
     }
@@ -162,5 +139,5 @@ export function isTSTypeAliasDeclaration(node: object | undefined): node is TSTy
     return node instanceof TSTypeAliasDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION, (peer: KNativePointer) => new TSTypeAliasDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION, (peer: KNativePointer) => new TSTypeAliasDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ALIAS_DECLARATION))
 }

@@ -87,6 +87,14 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KDouble> {
+    using InteropType = double;
+    static KDouble convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(InteropFloat64 value) { return value; }
+    static void release(InteropType value, KDouble converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KNativePointer> {
     using InteropType = void *;
     static KNativePointer convertFrom(InteropType value) {

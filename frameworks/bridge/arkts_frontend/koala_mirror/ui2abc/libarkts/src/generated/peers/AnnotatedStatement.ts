@@ -32,11 +32,12 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class AnnotatedStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     protected readonly brandAnnotatedStatement: undefined
 }

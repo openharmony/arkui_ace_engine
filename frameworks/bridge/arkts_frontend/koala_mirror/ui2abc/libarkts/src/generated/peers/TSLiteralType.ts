@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSLiteralType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 111)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSLiteralType(literal?: Expression): TSLiteralType {
-        const result: TSLiteralType = new TSLiteralType(global.generatedEs2panda._CreateTSLiteralType(global.context, passNode(literal)))
+        const result: TSLiteralType = new TSLiteralType(global.generatedEs2panda._CreateTSLiteralType(global.context, passNode(literal)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSLiteralType(original?: TSLiteralType, literal?: Expression): TSLiteralType {
-        const result: TSLiteralType = new TSLiteralType(global.generatedEs2panda._UpdateTSLiteralType(global.context, passNode(original), passNode(literal)))
+        const result: TSLiteralType = new TSLiteralType(global.generatedEs2panda._UpdateTSLiteralType(global.context, passNode(original), passNode(literal)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isTSLiteralType(node: object | undefined): node is TSLiteralType
     return node instanceof TSLiteralType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE, (peer: KNativePointer) => new TSLiteralType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE, (peer: KNativePointer) => new TSLiteralType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_LITERAL_TYPE))
 }

@@ -23,12 +23,15 @@ import { AnimateParam_serializer, AnimateParam, FinishCallbackType, ExpectedFram
 import { ComponentInfo_serializer, ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./../component/idlize"
 import { uiEffect_BrightnessBlenderParam_serializer, uiEffect_BrightnessBlender_serializer, uiEffect } from "./ohos.graphics.uiEffect"
 import { text_FontDescriptor_serializer, text } from "./ohos.graphics.text"
+import { componentSnapshot_SnapshotOptions_serializer, componentSnapshot } from "./ohos.arkui.componentSnapshot"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { BorderStyle, PlayMode } from "./../component/enums"
 import { curves } from "./ohos.curves"
 import { Size } from "./../Graphics"
 import { pointer } from "./ohos.multimodalInput.pointer"
+import { extractors } from "#handwritten"
+import { image } from "@ohos.multimedia.image"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -180,12 +183,12 @@ export class GlobalScope {
         const returnResult : ComponentInfo = ComponentInfo_serializer.read(retvalDeserializer)
         return returnResult
     }
-    public static Profiler_registerVsyncCallback(callback_: ((info: string) => void)): void {
-        const callback__casted = callback_ as (((info: string) => void))
+    public static Profiler_registerVsyncCallback(callback_: ((value0: string) => void)): void {
+        const callback__casted = callback_ as (((value0: string) => void))
         GlobalScope.Profiler_registerVsyncCallback_serialize(callback__casted)
         return
     }
-    static Profiler_registerVsyncCallback_serialize(callback_: ((info: string) => void)): void {
+    static Profiler_registerVsyncCallback_serialize(callback_: ((value0: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         ArkUIGeneratedNativeModule._GlobalScope_Profiler_registerVsyncCallback(thisSerializer.asBuffer(), thisSerializer.length())
@@ -419,6 +422,25 @@ export class GlobalScope {
     static curves_interpolatingSpring_serialize(velocity: number, mass: number, stiffness: number, damping: number): curves.ICurve {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_curves_interpolatingSpring(velocity, mass, stiffness, damping)
         const obj : curves.ICurve = curves.ICurveInternal.fromPtr(retval)
+        return obj
+    }
+    public static componentSnapshot_getSync(id: string, options: componentSnapshot.SnapshotOptions | undefined): image.PixelMap {
+        const id_casted = id as (string)
+        const options_casted = options as (componentSnapshot.SnapshotOptions | undefined)
+        return GlobalScope.componentSnapshot_getSync_serialize(id_casted, options_casted)
+    }
+    static componentSnapshot_getSync_serialize(id: string, options: componentSnapshot.SnapshotOptions | undefined): image.PixelMap {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            componentSnapshot_SnapshotOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_componentSnapshot_getSync(id, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
         return obj
     }
 }

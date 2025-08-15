@@ -24,7 +24,6 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { SourceTool } from "./common"
-import { extractors } from "#handwritten"
 export interface GestureGroupInterface {
     onCancel(event: (() => void)): GestureGroupInterface
 }

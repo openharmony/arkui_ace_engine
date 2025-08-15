@@ -26,7 +26,6 @@ import {
     refEqual,
     trackableProperties,
     uint32,
-    Utils,
 } from "@koalaui/common"
 import { Dependency, ScopeToStates, StateToScopes } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
@@ -943,7 +942,7 @@ export /* Improve:HQ private as public*/ class StateManagerImpl implements State
         context.parentManager = this
         context.contextData = this.contextData
         const task = () => {
-            Utils.traceBegin(`Do parallel task`);
+            RuntimeProfiler.tracer?.begin("parallel task")
             const old = StateManagerLocal.get()
             StateManagerLocal.set(context)
             builder(context);
@@ -952,7 +951,7 @@ export /* Improve:HQ private as public*/ class StateManagerImpl implements State
             if (complete) {
                 complete();
             }
-            Utils.traceEnd();
+            RuntimeProfiler.tracer?.end("parallel task")
             return undefined
         }
         launchJob(task).then(() => { }).catch((err: Error) => {
@@ -964,7 +963,7 @@ export /* Improve:HQ private as public*/ class StateManagerImpl implements State
 
     merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
         const mainContext = main as StateManagerImpl
-        Utils.traceBegin(`merge`)
+        RuntimeProfiler.tracer?.begin("merge")
         mainContext.childManager.push(this)
         const current = rootScope as ScopeImpl<Value>
         const scope = main!.scopeEx<void>(0, 1, () => {
@@ -973,16 +972,16 @@ export /* Improve:HQ private as public*/ class StateManagerImpl implements State
         compute()
         if (scope.unchanged) {
             scope.cached
-            Utils.traceEnd()
+            RuntimeProfiler.tracer?.end("merge")
             return
         }
         current.cascadeParent = scope
         scope.recache()
-        Utils.traceEnd()
+        RuntimeProfiler.tracer?.end("merge")
     }
 
     terminate<Value>(rootScope: ComputableState<Value>): void {
-        Utils.traceBegin(`sub manager terminate`)
+        RuntimeProfiler.tracer?.begin("sub manager terminate")
         const root = rootScope as ScopeImpl<Value>
         const cascadeScope = root.cascadeParent as ScopeImpl<void>
         cascadeScope.node = undefined
@@ -990,7 +989,7 @@ export /* Improve:HQ private as public*/ class StateManagerImpl implements State
         root.dispose();
         this.parentManager?.removeChild(this);
         this.parentManager = undefined;
-        Utils.traceEnd()
+        RuntimeProfiler.tracer?.end("sub manager terminate")
     }
 }
 

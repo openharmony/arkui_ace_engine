@@ -64,6 +64,7 @@ napi_value makeUInt32(napi_env env, uint32_t value);
 napi_value makeInt64(napi_env env, int64_t value);
 napi_value makeUInt64(napi_env env, uint64_t value);
 napi_value makeFloat32(napi_env env, float value);
+napi_value makeFloat64(napi_env env, double value);
 napi_value makePointer(napi_env env, void* value);
 napi_value makeVoid(napi_env env);
 
@@ -294,6 +295,11 @@ inline napi_typedarray_type getNapiType<float>() {
 }
 
 template <>
+inline napi_typedarray_type getNapiType<double>() {
+  return napi_float64_array;
+}
+
+template <>
 inline napi_typedarray_type getNapiType<int8_t>() {
   return napi_int8_array;
 }
@@ -398,6 +404,10 @@ inline int32_t* getInt32Elements(const CallbackInfo& info, int index) {
 
 inline float* getFloat32Elements(const CallbackInfo& info, int index) {
   return getTypedElements<float>(info, index);
+}
+
+inline double* getFloat64Elements(const CallbackInfo& info, int index) {
+  return getTypedElements<double>(info, index);
 }
 
 inline KNativePointer* getPointerElements(const CallbackInfo& info, int index) {
@@ -598,6 +608,11 @@ inline napi_value makeResult<KULong>(const CallbackInfo& info, uint64_t value) {
 template <>
 inline napi_value makeResult<float>(const CallbackInfo& info, float value) {
   return makeFloat32(info.Env(), value);
+}
+
+template <>
+inline napi_value makeResult<double>(const CallbackInfo& info, double value) {
+  return makeFloat64(info.Env(), value);
 }
 
 template <>

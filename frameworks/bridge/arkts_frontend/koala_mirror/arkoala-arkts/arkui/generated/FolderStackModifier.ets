@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkFolderStackPeer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam, FolderStackAttribute } from "./component/folderStack"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { Alignment } from "./component/enums"
 export class FolderStackModifier extends CommonMethodModifier implements FolderStackAttribute,AttributeModifier<FolderStackAttribute> {

@@ -28,7 +28,6 @@ import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, Lo
 import { DialogButtonStyle, Color, BorderStyle } from "./enums"
 import { DialogAlignment } from "./alertDialog"
 import { LevelMode, ImmersiveMode, LevelOrder } from "./../framework/ohos.promptAction"
-import { extractors } from "#handwritten"
 export interface DismissDialogAction {
     reason: DismissReason
     dismiss(): void

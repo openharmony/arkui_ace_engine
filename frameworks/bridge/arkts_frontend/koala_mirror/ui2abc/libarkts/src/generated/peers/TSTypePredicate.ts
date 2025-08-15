@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypePredicate extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 123)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypePredicate(parameterName: Expression | undefined, typeAnnotation: TypeNode | undefined, asserts: boolean): TSTypePredicate {
-        const result: TSTypePredicate = new TSTypePredicate(global.generatedEs2panda._CreateTSTypePredicate(global.context, passNode(parameterName), passNode(typeAnnotation), asserts))
+        const result: TSTypePredicate = new TSTypePredicate(global.generatedEs2panda._CreateTSTypePredicate(global.context, passNode(parameterName), passNode(typeAnnotation), asserts), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypePredicate(original: TSTypePredicate | undefined, parameterName: Expression | undefined, typeAnnotation: TypeNode | undefined, asserts: boolean): TSTypePredicate {
-        const result: TSTypePredicate = new TSTypePredicate(global.generatedEs2panda._UpdateTSTypePredicate(global.context, passNode(original), passNode(parameterName), passNode(typeAnnotation), asserts))
+        const result: TSTypePredicate = new TSTypePredicate(global.generatedEs2panda._UpdateTSTypePredicate(global.context, passNode(original), passNode(parameterName), passNode(typeAnnotation), asserts), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isTSTypePredicate(node: object | undefined): node is TSTypePredi
     return node instanceof TSTypePredicate
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE, (peer: KNativePointer) => new TSTypePredicate(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE, (peer: KNativePointer) => new TSTypePredicate(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PREDICATE))
 }

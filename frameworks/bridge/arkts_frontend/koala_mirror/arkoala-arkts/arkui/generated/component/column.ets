@@ -17,13 +17,13 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { PointLightStyle_serializer, ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { HorizontalAlign, FlexAlign } from "./enums"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -86,18 +86,6 @@ export class ArkColumnPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ColumnAttribute_setJustifyContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setPointLightAttribute(value: PointLightStyle | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            PointLightStyle_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._ColumnAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setReverseAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -125,9 +113,6 @@ export interface ColumnAttribute extends CommonMethod {
     justifyContent(value: FlexAlign | undefined): this {
         throw new Error("Unimplemented method justifyContent")
     }
-    pointLight(value: PointLightStyle | undefined): this {
-        throw new Error("Unimplemented method pointLight")
-    }
     reverse(value: boolean | undefined): this {
         throw new Error("Unimplemented method reverse")
     }
@@ -138,19 +123,15 @@ export interface ColumnAttribute extends CommonMethod {
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined
     justifyContent_value?: FlexAlign | undefined
-    pointLight_value?: PointLightStyle | undefined
     reverse_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined
-    public alignItems(value: HorizontalAlign | undefined): this {
+    alignItems(value: HorizontalAlign | undefined): this {
         return this
     }
-    public justifyContent(value: FlexAlign | undefined): this {
+    justifyContent(value: FlexAlign | undefined): this {
         return this
     }
-    public pointLight(value: PointLightStyle | undefined): this {
-        return this
-    }
-    public reverse(value: boolean | undefined): this {
+    reverse(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -182,14 +163,6 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         if (this.checkPriority("justifyContent")) {
             const value_casted = value as (FlexAlign | undefined)
             this.getPeer()?.setJustifyContentAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public pointLight(value: PointLightStyle | undefined): this {
-        if (this.checkPriority("pointLight")) {
-            const value_casted = value as (PointLightStyle | undefined)
-            this.getPeer()?.setPointLightAttribute(value_casted)
             return this
         }
         return this

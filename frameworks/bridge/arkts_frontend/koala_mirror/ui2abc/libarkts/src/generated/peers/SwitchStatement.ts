@@ -38,17 +38,16 @@ import { Statement } from "./Statement"
 import { SwitchCaseStatement } from "./SwitchCaseStatement"
 
 export class SwitchStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 88)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createSwitchStatement(discriminant: Expression | undefined, cases: readonly SwitchCaseStatement[]): SwitchStatement {
-        const result: SwitchStatement = new SwitchStatement(global.generatedEs2panda._CreateSwitchStatement(global.context, passNode(discriminant), passNodeArray(cases), cases.length))
+        const result: SwitchStatement = new SwitchStatement(global.generatedEs2panda._CreateSwitchStatement(global.context, passNode(discriminant), passNodeArray(cases), cases.length), Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateSwitchStatement(original: SwitchStatement | undefined, discriminant: Expression | undefined, cases: readonly SwitchCaseStatement[]): SwitchStatement {
-        const result: SwitchStatement = new SwitchStatement(global.generatedEs2panda._UpdateSwitchStatement(global.context, passNode(original), passNode(discriminant), passNodeArray(cases), cases.length))
+        const result: SwitchStatement = new SwitchStatement(global.generatedEs2panda._UpdateSwitchStatement(global.context, passNode(original), passNode(discriminant), passNodeArray(cases), cases.length), Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isSwitchStatement(node: object | undefined): node is SwitchState
     return node instanceof SwitchStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT, (peer: KNativePointer) => new SwitchStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT, (peer: KNativePointer) => new SwitchStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_SWITCH_STATEMENT))
 }

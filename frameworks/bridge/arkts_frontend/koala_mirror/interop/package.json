@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/interop",
-    "version": "1.7.6+devel",
+    "version": "1.7.9+devel",
     "description": "",
     "workspaces": [
         "../incremental/build-common",
@@ -97,7 +97,7 @@
     "keywords": [],
     "dependencies": {
         "@types/node": "^18.0.0",
-        "@koalaui/common": "1.7.6+devel"
+        "@koalaui/common": "1.7.9+devel"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

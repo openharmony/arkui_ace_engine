@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkEmbeddedComponentPeer, EmbeddedComponentAttribute } from "./component/embeddedComponent"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, TerminationInfo } from "./component/common"
 import { ErrorCallback, BusinessError } from "./framework/ohos.base"
 export class EmbeddedComponentModifier extends CommonMethodModifier implements EmbeddedComponentAttribute,AttributeModifier<EmbeddedComponentAttribute> {

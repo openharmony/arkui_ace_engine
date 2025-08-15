@@ -36,22 +36,21 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 
 export class EmptyStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 25)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1EmptyStatement(isBrokenStatement: boolean): EmptyStatement {
-        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._CreateEmptyStatement1(global.context, isBrokenStatement))
+        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._CreateEmptyStatement1(global.context, isBrokenStatement), Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateEmptyStatement(original?: EmptyStatement): EmptyStatement {
-        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement(global.context, passNode(original)))
+        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1EmptyStatement(original: EmptyStatement | undefined, isBrokenStatement: boolean): EmptyStatement {
-        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement1(global.context, passNode(original), isBrokenStatement))
+        const result: EmptyStatement = new EmptyStatement(global.generatedEs2panda._UpdateEmptyStatement1(global.context, passNode(original), isBrokenStatement), Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isEmptyStatement(node: object | undefined): node is EmptyStateme
     return node instanceof EmptyStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT, (peer: KNativePointer) => new EmptyStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT, (peer: KNativePointer) => new EmptyStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_EMPTY_STATEMENT))
 }

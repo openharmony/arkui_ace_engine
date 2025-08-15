@@ -24,7 +24,7 @@ import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTe
 import { Offset_serializer, Offset, Length, VoidCallback, ResourceColor } from "./units"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -186,16 +186,16 @@ export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements Cale
     onChange_value?: ((value0: Date) => void) | undefined
     markToday_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public textStyle(value: PickerTextStyle | undefined): this {
+    textStyle(value: PickerTextStyle | undefined): this {
         return this
     }
-    public onChange(value: ((value0: Date) => void) | undefined): this {
+    onChange(value: ((value0: Date) => void) | undefined): this {
         return this
     }
-    public markToday(value: boolean | undefined): this {
+    markToday(value: boolean | undefined): this {
         return this
     }
-    public edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
+    edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -686,7 +686,7 @@ export class CalendarDialogOptions_serializer {
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCall);
                 onAcceptTmpBuf_BufArgsSerializer.writePointer(onAcceptTmpBuf_BufCallSync);
                 onAcceptTmpBuf_BufArgsSerializer.writeInt64(value0.getTime().toLong());
-                InteropNativeModule._CallCallback(1405382363, onAcceptTmpBuf_BufArgsSerializer.asBuffer(), onAcceptTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1405382363, onAcceptTmpBuf_BufArgsSerializer.asBuffer(), onAcceptTmpBuf_BufArgsSerializer.length());
                 onAcceptTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -703,7 +703,7 @@ export class CalendarDialogOptions_serializer {
                 onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
                 onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onCancelTmpBuf_BufArgsSerializer.asBuffer(), onCancelTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onCancelTmpBuf_BufArgsSerializer.asBuffer(), onCancelTmpBuf_BufArgsSerializer.length());
                 onCancelTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -721,7 +721,7 @@ export class CalendarDialogOptions_serializer {
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCall);
                 onChangeTmpBuf_BufArgsSerializer.writePointer(onChangeTmpBuf_BufCallSync);
                 onChangeTmpBuf_BufArgsSerializer.writeInt64(value0.getTime().toLong());
-                InteropNativeModule._CallCallback(1405382363, onChangeTmpBuf_BufArgsSerializer.asBuffer(), onChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1405382363, onChangeTmpBuf_BufArgsSerializer.asBuffer(), onChangeTmpBuf_BufArgsSerializer.length());
                 onChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -787,7 +787,7 @@ export class CalendarDialogOptions_serializer {
                 onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
                 onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
                 onDidAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -804,7 +804,7 @@ export class CalendarDialogOptions_serializer {
                 onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
                 onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
                 onDidDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -821,7 +821,7 @@ export class CalendarDialogOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -838,7 +838,7 @@ export class CalendarDialogOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }

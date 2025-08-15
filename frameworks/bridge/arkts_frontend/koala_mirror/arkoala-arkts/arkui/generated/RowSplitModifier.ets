@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkRowSplitPeer, RowSplitAttribute } from "./component/rowSplit"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 export class RowSplitModifier extends CommonMethodModifier implements RowSplitAttribute,AttributeModifier<RowSplitAttribute> {
     _instanceId: number = -1;

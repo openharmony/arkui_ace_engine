@@ -39,17 +39,16 @@ import { Expression } from "./Expression"
 import { VReg } from "./VReg"
 
 export class BinaryExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 6)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createBinaryExpression(left: Expression | undefined, right: Expression | undefined, operatorType: Es2pandaTokenType): BinaryExpression {
-        const result: BinaryExpression = new BinaryExpression(global.generatedEs2panda._CreateBinaryExpression(global.context, passNode(left), passNode(right), operatorType))
+        const result: BinaryExpression = new BinaryExpression(global.generatedEs2panda._CreateBinaryExpression(global.context, passNode(left), passNode(right), operatorType), Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateBinaryExpression(original: BinaryExpression | undefined, left: Expression | undefined, right: Expression | undefined, operatorType: Es2pandaTokenType): BinaryExpression {
-        const result: BinaryExpression = new BinaryExpression(global.generatedEs2panda._UpdateBinaryExpression(global.context, passNode(original), passNode(left), passNode(right), operatorType))
+        const result: BinaryExpression = new BinaryExpression(global.generatedEs2panda._UpdateBinaryExpression(global.context, passNode(original), passNode(left), passNode(right), operatorType), Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -108,5 +107,5 @@ export function isBinaryExpression(node: object | undefined): node is BinaryExpr
     return node instanceof BinaryExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION, (peer: KNativePointer) => new BinaryExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION, (peer: KNativePointer) => new BinaryExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BINARY_EXPRESSION))
 }

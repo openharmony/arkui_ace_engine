@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSUndefinedType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 65)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSUndefinedType(): ETSUndefinedType {
-        const result: ETSUndefinedType = new ETSUndefinedType(global.generatedEs2panda._CreateETSUndefinedType(global.context))
+        const result: ETSUndefinedType = new ETSUndefinedType(global.generatedEs2panda._CreateETSUndefinedType(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSUndefinedType(original?: ETSUndefinedType): ETSUndefinedType {
-        const result: ETSUndefinedType = new ETSUndefinedType(global.generatedEs2panda._UpdateETSUndefinedType(global.context, passNode(original)))
+        const result: ETSUndefinedType = new ETSUndefinedType(global.generatedEs2panda._UpdateETSUndefinedType(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isETSUndefinedType(node: object | undefined): node is ETSUndefin
     return node instanceof ETSUndefinedType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE, (peer: KNativePointer) => new ETSUndefinedType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE, (peer: KNativePointer) => new ETSUndefinedType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_UNDEFINED_TYPE))
 }

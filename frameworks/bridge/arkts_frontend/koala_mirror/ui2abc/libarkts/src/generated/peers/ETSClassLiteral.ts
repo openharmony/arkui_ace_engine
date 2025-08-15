@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class ETSClassLiteral extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 73)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSClassLiteral(expr?: TypeNode): ETSClassLiteral {
-        const result: ETSClassLiteral = new ETSClassLiteral(global.generatedEs2panda._CreateETSClassLiteral(global.context, passNode(expr)))
+        const result: ETSClassLiteral = new ETSClassLiteral(global.generatedEs2panda._CreateETSClassLiteral(global.context, passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSClassLiteral(original?: ETSClassLiteral, expr?: TypeNode): ETSClassLiteral {
-        const result: ETSClassLiteral = new ETSClassLiteral(global.generatedEs2panda._UpdateETSClassLiteral(global.context, passNode(original), passNode(expr)))
+        const result: ETSClassLiteral = new ETSClassLiteral(global.generatedEs2panda._UpdateETSClassLiteral(global.context, passNode(original), passNode(expr)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isETSClassLiteral(node: object | undefined): node is ETSClassLit
     return node instanceof ETSClassLiteral
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL, (peer: KNativePointer) => new ETSClassLiteral(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL, (peer: KNativePointer) => new ETSClassLiteral(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_CLASS_LITERAL))
 }

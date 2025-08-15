@@ -27,11 +27,14 @@ import {
 } from "#generated"
 import { Theme } from "#generated/ohos.arkui.theme"
 import { UIContext } from "./ohos.arkui.UIContext"
+import { PeerNode } from "./PeerNode"
 
 /**
  * This is basically the CustomComponent, which doesn't extend CommonAttribute
  */
 export interface ArkCustomComponent {
+    setPeer(peer: PeerNode): void
+    getPeer(): PeerNode | undefined
     @memo
     build(): void;
     aboutToAppear/* ? */(): void;
@@ -56,9 +59,12 @@ export interface ArkCustomComponent {
     queryNavigationInfo(): NavigationInfo | undefined;
     queryRouterPageInfo(): RouterPageInfo | undefined;
     onDidBuild/* ? */(): void;
+    readonly isCustomLayout: boolean;
 }
 
 export class ArkCustomComponentImpl implements ArkCustomComponent {
+    setPeer(peer: PeerNode): void { }
+    getPeer(): PeerNode | undefined { return undefined }
     @memo
     build(): void {
     }
@@ -113,4 +119,5 @@ export class ArkCustomComponentImpl implements ArkCustomComponent {
     }
     onDidBuild(): void {
     }
+    isCustomLayout: boolean = false;
 }

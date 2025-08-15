@@ -22,11 +22,11 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Number_serializer } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkStepperPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -141,20 +141,19 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     onChange_value?: ((prevIndex: number,index: number) => void) | undefined
     onNext_value?: ((prevIndex: number,index: number) => void) | undefined
     onPrevious_value?: ((prevIndex: number,index: number) => void) | undefined
-    attributeModifier_value?: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onFinish(value: (() => void) | undefined): this {
+    onFinish(value: (() => void) | undefined): this {
         return this
     }
-    public onSkip(value: (() => void) | undefined): this {
+    onSkip(value: (() => void) | undefined): this {
         return this
     }
-    public onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
     }
-    public onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
     }
-    public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {

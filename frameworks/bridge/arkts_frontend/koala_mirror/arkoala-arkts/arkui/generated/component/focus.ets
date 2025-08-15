@@ -21,7 +21,6 @@ import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, Des
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { LengthMetrics, ColorMetrics, LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
-import { extractors } from "#handwritten"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export interface FocusBoxStyle {

@@ -115,16 +115,16 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
     enableDec_value?: boolean | undefined
     enableInc_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onInc(value: VoidCallback | undefined): this {
+    onInc(value: VoidCallback | undefined): this {
         return this
     }
-    public onDec(value: VoidCallback | undefined): this {
+    onDec(value: VoidCallback | undefined): this {
         return this
     }
-    public enableDec(value: boolean | undefined): this {
+    enableDec(value: boolean | undefined): this {
         return this
     }
-    public enableInc(value: boolean | undefined): this {
+    enableInc(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {

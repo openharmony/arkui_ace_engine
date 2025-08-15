@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCounterPeer, CounterAttribute } from "./component/counter"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
 export class CounterModifier extends CommonMethodModifier implements CounterAttribute,AttributeModifier<CounterAttribute> {

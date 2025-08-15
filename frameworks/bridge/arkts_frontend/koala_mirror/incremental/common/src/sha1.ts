@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CustomTextDecoder, float64toInt32 } from "@koalaui/compat"
+import { CustomTextDecoder, float64toInt32, int64to32 } from "@koalaui/compat"
 import { int32 } from "@koalaui/compat"
 
 const K = [
@@ -158,7 +158,7 @@ export class SHA1Hash {
             let index = start
 
             while (offset < length && index < inputBytes) {
-                let code = text.charCodeAt(offset++).toInt() | 0
+                let code = float64toInt32(text.charCodeAt(offset++)) | 0
                 if (code < 0x80) {
                     // ASCII characters
                     _byte[index++] = code
@@ -180,7 +180,7 @@ export class SHA1Hash {
                     _byte[index++] = 0x80 | (code & 0x3F)
                     surrogate = 0
                 } else {
-                    surrogate = code
+                    surrogate = int64to32(code)
                 }
             }
 

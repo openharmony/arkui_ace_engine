@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSBooleanKeyword extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 95)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSBooleanKeyword(): TSBooleanKeyword {
-        const result: TSBooleanKeyword = new TSBooleanKeyword(global.generatedEs2panda._CreateTSBooleanKeyword(global.context))
+        const result: TSBooleanKeyword = new TSBooleanKeyword(global.generatedEs2panda._CreateTSBooleanKeyword(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSBooleanKeyword(original?: TSBooleanKeyword): TSBooleanKeyword {
-        const result: TSBooleanKeyword = new TSBooleanKeyword(global.generatedEs2panda._UpdateTSBooleanKeyword(global.context, passNode(original)))
+        const result: TSBooleanKeyword = new TSBooleanKeyword(global.generatedEs2panda._UpdateTSBooleanKeyword(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isTSBooleanKeyword(node: object | undefined): node is TSBooleanK
     return node instanceof TSBooleanKeyword
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD, (peer: KNativePointer) => new TSBooleanKeyword(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD, (peer: KNativePointer) => new TSBooleanKeyword(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_BOOLEAN_KEYWORD))
 }

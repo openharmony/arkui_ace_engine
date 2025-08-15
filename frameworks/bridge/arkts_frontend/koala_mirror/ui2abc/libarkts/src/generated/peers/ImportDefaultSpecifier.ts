@@ -37,17 +37,16 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class ImportDefaultSpecifier extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 41)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createImportDefaultSpecifier(local?: Identifier): ImportDefaultSpecifier {
-        const result: ImportDefaultSpecifier = new ImportDefaultSpecifier(global.generatedEs2panda._CreateImportDefaultSpecifier(global.context, passNode(local)))
+        const result: ImportDefaultSpecifier = new ImportDefaultSpecifier(global.generatedEs2panda._CreateImportDefaultSpecifier(global.context, passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
     static updateImportDefaultSpecifier(original?: ImportDefaultSpecifier, local?: Identifier): ImportDefaultSpecifier {
-        const result: ImportDefaultSpecifier = new ImportDefaultSpecifier(global.generatedEs2panda._UpdateImportDefaultSpecifier(global.context, passNode(original), passNode(local)))
+        const result: ImportDefaultSpecifier = new ImportDefaultSpecifier(global.generatedEs2panda._UpdateImportDefaultSpecifier(global.context, passNode(original), passNode(local)), Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isImportDefaultSpecifier(node: object | undefined): node is Impo
     return node instanceof ImportDefaultSpecifier
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER, (peer: KNativePointer) => new ImportDefaultSpecifier(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER, (peer: KNativePointer) => new ImportDefaultSpecifier(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_DEFAULT_SPECIFIER))
 }

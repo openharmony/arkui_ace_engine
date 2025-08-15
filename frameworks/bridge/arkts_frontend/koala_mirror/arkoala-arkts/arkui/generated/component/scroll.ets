@@ -28,7 +28,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ScrollState, ScrollSnapAlign } from "./list"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -587,55 +587,55 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
     enablePaging_value?: boolean | undefined
     initialOffset_value?: OffsetOptions | undefined
     attributeModifier_value?: AttributeModifier<ScrollAttribute> | AttributeModifier<CommonMethod> | undefined
-    public scrollable(value: ScrollDirection | undefined): this {
+    scrollable(value: ScrollDirection | undefined): this {
         return this
     }
-    public onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
+    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
         return this
     }
-    public onDidScroll(value: ScrollOnScrollCallback | undefined): this {
+    onDidScroll(value: ScrollOnScrollCallback | undefined): this {
         return this
     }
-    public onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
+    onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
         return this
     }
-    public onScrollStart(value: VoidCallback | undefined): this {
+    onScrollStart(value: VoidCallback | undefined): this {
         return this
     }
-    public onScrollStop(value: VoidCallback | undefined): this {
+    onScrollStop(value: VoidCallback | undefined): this {
         return this
     }
-    public scrollBar(value: BarState | undefined): this {
+    scrollBar(value: BarState | undefined): this {
         return this
     }
-    public scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | number | string | undefined): this {
         return this
     }
-    public scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: number | string | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
-    public nestedScroll(value: NestedScrollOptions | undefined): this {
+    nestedScroll(value: NestedScrollOptions | undefined): this {
         return this
     }
-    public enableScrollInteraction(value: boolean | undefined): this {
+    enableScrollInteraction(value: boolean | undefined): this {
         return this
     }
-    public friction(value: number | Resource | undefined): this {
+    friction(value: number | Resource | undefined): this {
         return this
     }
-    public scrollSnap(value: ScrollSnapOptions | undefined): this {
+    scrollSnap(value: ScrollSnapOptions | undefined): this {
         return this
     }
-    public enablePaging(value: boolean | undefined): this {
+    enablePaging(value: boolean | undefined): this {
         return this
     }
-    public initialOffset(value: OffsetOptions | undefined): this {
+    initialOffset(value: OffsetOptions | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {

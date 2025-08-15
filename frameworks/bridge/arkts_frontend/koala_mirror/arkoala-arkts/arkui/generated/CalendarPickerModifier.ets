@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkCalendarPickerPeer, CalendarPickerAttribute, CalendarAlign } from "./component/calendarPicker"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, PickerTextStyle } from "./component/common"
 import { Offset } from "./component/units"
 export class CalendarPickerModifier extends CommonMethodModifier implements CalendarPickerAttribute,AttributeModifier<CalendarPickerAttribute> {

@@ -37,22 +37,21 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class ContinueStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 20)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1ContinueStatement(ident?: Identifier): ContinueStatement {
-        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._CreateContinueStatement1(global.context, passNode(ident)))
+        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._CreateContinueStatement1(global.context, passNode(ident)), Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateContinueStatement(original?: ContinueStatement): ContinueStatement {
-        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._UpdateContinueStatement(global.context, passNode(original)))
+        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._UpdateContinueStatement(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static update1ContinueStatement(original?: ContinueStatement, ident?: Identifier): ContinueStatement {
-        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._UpdateContinueStatement1(global.context, passNode(original), passNode(ident)))
+        const result: ContinueStatement = new ContinueStatement(global.generatedEs2panda._UpdateContinueStatement1(global.context, passNode(original), passNode(ident)), Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -76,5 +75,5 @@ export function isContinueStatement(node: object | undefined): node is ContinueS
     return node instanceof ContinueStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT, (peer: KNativePointer) => new ContinueStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT, (peer: KNativePointer) => new ContinueStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CONTINUE_STATEMENT))
 }

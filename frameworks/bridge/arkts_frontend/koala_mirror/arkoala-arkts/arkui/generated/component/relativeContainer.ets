@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { AttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -125,10 +125,10 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
     guideLine_value?: Array<GuideLineStyle> | undefined
     barrier_value?: Array<BarrierStyle> | undefined
     attributeModifier_value?: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined
-    public guideLine(value: Array<GuideLineStyle> | undefined): this {
+    guideLine(value: Array<GuideLineStyle> | undefined): this {
         return this
     }
-    public barrier(value: Array<BarrierStyle> | undefined): this {
+    barrier(value: Array<BarrierStyle> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {

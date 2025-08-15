@@ -16,9 +16,10 @@
 import { KNativePointer } from "@koalaui/interop"
 import { global } from "../static/global"
 import { OpaqueTypeNode } from "../../generated"
+import { Es2pandaAstNodeType } from "../../generated/Es2pandaEnums"
 
 export function createOpaqueTypeNode(
     typePointer: KNativePointer
 ): OpaqueTypeNode {
-    return new OpaqueTypeNode(global.es2panda._Checker_CreateOpaqueTypeNode(global.context, typePointer))
+    return new OpaqueTypeNode(global.es2panda._Checker_CreateOpaqueTypeNode(global.context, typePointer), Es2pandaAstNodeType.AST_NODE_TYPE_OPAQUE_TYPE_NODE)
 }

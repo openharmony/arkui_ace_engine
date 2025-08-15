@@ -42,10 +42,17 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setEmbeddedComponentOptionsAttribute(loader: Want, type: EmbeddedType): void {
+    setEmbeddedComponentOptionsAttribute(loader: Want, type?: EmbeddedType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         Want_serializer.write(thisSerializer, loader)
-        ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.EmbeddedType_ToNumeric(type))
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue  = (type as EmbeddedType)
+            thisSerializer.writeInt32(TypeChecker.EmbeddedType_ToNumeric(typeTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._EmbeddedComponentInterface_setEmbeddedComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnTerminatedAttribute(value: ((value0: TerminationInfo) => void) | undefined): void {
@@ -88,10 +95,10 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
     onTerminated_value?: ((value0: TerminationInfo) => void) | undefined
     onError_value?: ErrorCallback | undefined
     attributeModifier_value?: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
+    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
         return this
     }
-    public onError(value: ErrorCallback | undefined): this {
+    onError(value: ErrorCallback | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -103,10 +110,10 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
     getPeer(): ArkEmbeddedComponentPeer {
         return (this.peer as ArkEmbeddedComponentPeer)
     }
-    public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
+    public setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType): this {
         if (this.checkPriority("setEmbeddedComponentOptions")) {
             const loader_casted = loader as (Want)
-            const type_casted = type as (EmbeddedType)
+            const type_casted = type as (EmbeddedType | undefined)
             this.getPeer()?.setEmbeddedComponentOptionsAttribute(loader_casted, type_casted)
             return this
         }
@@ -141,7 +148,7 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
 export function EmbeddedComponent(
     @memo
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    loader: Want, type: EmbeddedType,
+    loader: Want, type?: EmbeddedType,
     @memo
     content_?: () => void,
 ): void {

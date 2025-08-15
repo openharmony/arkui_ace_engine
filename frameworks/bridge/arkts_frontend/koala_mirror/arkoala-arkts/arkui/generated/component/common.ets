@@ -22,7 +22,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { unifiedDataChannel_Summary_serializer, unifiedDataChannel } from "./../framework/ohos.data.unifiedDataChannel"
 import { DrawContext, DrawContextInternal, LengthMetrics_serializer, LengthMetrics } from "./../Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TransitionType, TextDecorationType, TextDecorationStyle, PlayMode, HorizontalAlign, VerticalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TransitionType, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "./../framework/ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
@@ -40,7 +40,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CustomBuilder } from "./builder"
 import { uniformTypeDescriptor } from "./../framework/ohos.data.uniformTypeDescriptor"
-import { GestureModifier, hookId, hookStateStyleImpl, hookGestureModifier, CustomStyles, ContentModifier, AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
+import { GestureModifier, extractors, hookId, hookStateStyleImpl, hookGestureModifier, CustomStyles, ContentModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { curves, curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier, SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
@@ -429,7 +429,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
                 buffer_BufContinuationValue = value;
             }
                 buffer_BufArgsSerializer.holdAndWriteCallback(buffer_BufContinuationCallback);
-                InteropNativeModule._CallCallback(-1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
@@ -873,7 +873,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
                 buffer_BufContinuationValue = value;
             }
                 buffer_BufArgsSerializer.holdAndWriteCallback(buffer_BufContinuationCallback);
-                InteropNativeModule._CallCallback(-1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
@@ -1259,7 +1259,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
                 buffer_BufContinuationValue = value;
             }
                 buffer_BufArgsSerializer.holdAndWriteCallback(buffer_BufContinuationCallback);
-                InteropNativeModule._CallCallback(-1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1026503952, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return (buffer_BufContinuationValue as boolean);
             }
@@ -4048,7 +4048,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setEnabled(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignRules0Attribute(value: AlignRuleOption | undefined): void {
+    setAlignRulesWithAlignRuleOptionTypedValueAttribute(value: AlignRuleOption | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4057,10 +4057,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRules0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithAlignRuleOptionTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAlignRules1Attribute(value: LocalizedAlignRuleOptions | undefined): void {
+    setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value: LocalizedAlignRuleOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4069,7 +4069,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAlignRules1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAlignRulesWithLocalizedAlignRuleOptionsTypedValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAspectRatioAttribute(value: number | undefined): void {
@@ -4464,7 +4464,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setPixelStretchEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityGroup0Attribute(value: boolean | undefined): void {
+    setAccessibilityGroupWithValueAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4473,10 +4473,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityGroup0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityGroupWithValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityText0Attribute(value: string | undefined): void {
+    setAccessibilityTextOfStringTypeAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4485,7 +4485,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityText0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityTextOfStringType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityNextFocusIdAttribute(value: string | undefined): void {
@@ -4536,7 +4536,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityScrollTriggerable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityText1Attribute(value: Resource | undefined): void {
+    setAccessibilityTextOfResourceTypeAttribute(value: Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4545,7 +4545,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityText1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityTextOfResourceType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityRoleAttribute(value: AccessibilityRoleType | undefined): void {
@@ -4584,7 +4584,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityTextHint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityDescription0Attribute(value: string | undefined): void {
+    setAccessibilityDescriptionOfStringTypeAttribute(value: string | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4593,10 +4593,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityDescription0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityDescriptionOfStringType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityDescription1Attribute(value: Resource | undefined): void {
+    setAccessibilityDescriptionOfResourceTypeAttribute(value: Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -4605,7 +4605,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityDescription1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityDescriptionOfResourceType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setAccessibilityLevelAttribute(value: string | undefined): void {
@@ -5822,7 +5822,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setKeyboardShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAccessibilityGroup1Attribute(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): void {
+    setAccessibilityGroupWithConfigAttribute(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isGroup !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5831,14 +5831,14 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        if (accessibilityOptions !== undefined) {
+        if (config !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const accessibilityOptionsTmpValue  = accessibilityOptions!
-            AccessibilityOptions_serializer.write(thisSerializer, accessibilityOptionsTmpValue)
+            const configTmpValue  = config!
+            AccessibilityOptions_serializer.write(thisSerializer, configTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityGroup1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityGroupWithConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnGestureRecognizerJudgeBegin1Attribute(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): void {
@@ -6608,9 +6608,13 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface AlignRuleParam<T = void> {
+export interface VerticalAlignParam {
     anchor: string;
-    align: T;
+    align: VerticalAlign;
+}
+export interface HorizontalAlignParam {
+    anchor: string;
+    align: HorizontalAlign;
 }
 export interface AlignRuleOption {
     _stub: int32;
@@ -7596,10 +7600,10 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {
         throw new Error("Unimplemented method enabled")
     }
-    alignRules(value: AlignRuleOption | undefined): this {
+    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
         throw new Error("Unimplemented method alignRules")
     }
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
         throw new Error("Unimplemented method alignRules")
     }
     aspectRatio(value: number | undefined): this {
@@ -7689,10 +7693,10 @@ export interface CommonMethod {
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         throw new Error("Unimplemented method pixelStretchEffect")
     }
-    accessibilityGroup(value: boolean | undefined): this {
+    accessibilityGroupWithValue(value: boolean | undefined): this {
         throw new Error("Unimplemented method accessibilityGroup")
     }
-    accessibilityText(value: string | undefined): this {
+    accessibilityTextOfStringType(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityText")
     }
     accessibilityNextFocusId(value: string | undefined): this {
@@ -7707,7 +7711,7 @@ export interface CommonMethod {
     accessibilityScrollTriggerable(value: boolean | undefined): this {
         throw new Error("Unimplemented method accessibilityScrollTriggerable")
     }
-    accessibilityText(value: Resource | undefined): this {
+    accessibilityTextOfResourceType(value: Resource | undefined): this {
         throw new Error("Unimplemented method accessibilityText")
     }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
@@ -7719,10 +7723,10 @@ export interface CommonMethod {
     accessibilityTextHint(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityTextHint")
     }
-    accessibilityDescription(value: string | undefined): this {
+    accessibilityDescriptionOfStringType(value: string | undefined): this {
         throw new Error("Unimplemented method accessibilityDescription")
     }
-    accessibilityDescription(value: Resource | undefined): this {
+    accessibilityDescriptionOfResourceType(value: Resource | undefined): this {
         throw new Error("Unimplemented method accessibilityDescription")
     }
     accessibilityLevel(value: string | undefined): this {
@@ -7899,12 +7903,16 @@ export interface CommonMethod {
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         throw new Error("Unimplemented method keyboardShortcut")
     }
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+    accessibilityGroupWithConfig(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
         throw new Error("Unimplemented method accessibilityGroup")
     }
     onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
         throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
     }
+    overload alignRules { alignRulesWithAlignRuleOptionTypedValue, alignRulesWithLocalizedAlignRuleOptionsTypedValue }
+    overload accessibilityGroup { accessibilityGroupWithValue, accessibilityGroupWithConfig }
+    overload accessibilityText { accessibilityTextOfStringType, accessibilityTextOfResourceType }
+    overload accessibilityDescription { accessibilityDescriptionOfStringType, accessibilityDescriptionOfResourceType }
     attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -8065,607 +8073,607 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
-    public width(value: Length | LayoutPolicy | undefined): this {
+    width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
-    public height(value: Length | LayoutPolicy | undefined): this {
+    height(value: Length | LayoutPolicy | undefined): this {
         return this
     }
-    public drawModifier(value: DrawModifier | undefined): this {
+    drawModifier(value: DrawModifier | undefined): this {
         return this
     }
-    public responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         return this
     }
-    public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         return this
     }
-    public size(value: SizeOptions | undefined): this {
+    size(value: SizeOptions | undefined): this {
         return this
     }
-    public constraintSize(value: ConstraintSizeOptions | undefined): this {
+    constraintSize(value: ConstraintSizeOptions | undefined): this {
         return this
     }
-    public hitTestBehavior(value: HitTestMode | undefined): this {
+    hitTestBehavior(value: HitTestMode | undefined): this {
         return this
     }
-    public onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
+    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
         return this
     }
-    public layoutWeight(value: number | string | undefined): this {
+    layoutWeight(value: number | string | undefined): this {
         return this
     }
-    public chainWeight(value: ChainWeightOptions | undefined): this {
+    chainWeight(value: ChainWeightOptions | undefined): this {
         return this
     }
-    public padding(value: Padding | Length | LocalizedPadding | undefined): this {
+    padding(value: Padding | Length | LocalizedPadding | undefined): this {
         return this
     }
-    public safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
         return this
     }
-    public margin(value: Padding | Length | LocalizedPadding | undefined): this {
+    margin(value: Padding | Length | LocalizedPadding | undefined): this {
         return this
     }
-    public backgroundColor(value: ResourceColor | undefined): this {
+    backgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public pixelRound(value: PixelRoundPolicy | undefined): this {
+    pixelRound(value: PixelRoundPolicy | undefined): this {
         return this
     }
-    public backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
+    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
         return this
     }
-    public backgroundImagePosition(value: Position | Alignment | undefined): this {
+    backgroundImagePosition(value: Position | Alignment | undefined): this {
         return this
     }
-    public backgroundEffect(value: BackgroundEffectOptions | undefined): this {
+    backgroundEffect(value: BackgroundEffectOptions | undefined): this {
         return this
     }
-    public backgroundImageResizable(value: ResizableOptions | undefined): this {
+    backgroundImageResizable(value: ResizableOptions | undefined): this {
         return this
     }
-    public foregroundEffect(value: ForegroundEffectOptions | undefined): this {
+    foregroundEffect(value: ForegroundEffectOptions | undefined): this {
         return this
     }
-    public visualEffect(value: uiEffect.VisualEffect | undefined): this {
+    visualEffect(value: uiEffect.VisualEffect | undefined): this {
         return this
     }
-    public backgroundFilter(value: uiEffect.Filter | undefined): this {
+    backgroundFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
-    public foregroundFilter(value: uiEffect.Filter | undefined): this {
+    foregroundFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
-    public compositingFilter(value: uiEffect.Filter | undefined): this {
+    compositingFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
-    public opacity(value: number | Resource | undefined): this {
+    opacity(value: number | Resource | undefined): this {
         return this
     }
-    public border(value: BorderOptions | undefined): this {
+    border(value: BorderOptions | undefined): this {
         return this
     }
-    public borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
         return this
     }
-    public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
+    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
         return this
     }
-    public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         return this
     }
-    public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
         return this
     }
-    public borderImage(value: BorderImageOption | undefined): this {
+    borderImage(value: BorderImageOption | undefined): this {
         return this
     }
-    public outline(value: OutlineOptions | undefined): this {
+    outline(value: OutlineOptions | undefined): this {
         return this
     }
-    public outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
+    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
         return this
     }
-    public outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
+    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
         return this
     }
-    public outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         return this
     }
-    public outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
+    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
         return this
     }
-    public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
+    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         return this
     }
-    public onClick(value: ((event: ClickEvent) => void) | undefined): this {
+    onClick(value: ((event: ClickEvent) => void) | undefined): this {
         return this
     }
-    public onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
+    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
         return this
     }
-    public onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this {
+    onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this {
         return this
     }
-    public onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+    onAccessibilityHover(value: AccessibilityCallback | undefined): this {
         return this
     }
-    public hoverEffect(value: HoverEffect | undefined): this {
+    hoverEffect(value: HoverEffect | undefined): this {
         return this
     }
-    public onMouse(value: ((event: MouseEvent) => void) | undefined): this {
+    onMouse(value: ((event: MouseEvent) => void) | undefined): this {
         return this
     }
-    public onTouch(value: ((event: TouchEvent) => void) | undefined): this {
+    onTouch(value: ((event: TouchEvent) => void) | undefined): this {
         return this
     }
-    public onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
         return this
     }
-    public onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
+    onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
         return this
     }
-    public onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this {
+    onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this {
         return this
     }
-    public onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this {
+    onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this {
         return this
     }
-    public onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this {
+    onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this {
         return this
     }
-    public onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this {
+    onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this {
         return this
     }
-    public focusable(value: boolean | undefined): this {
+    focusable(value: boolean | undefined): this {
         return this
     }
-    public nextFocus(value: FocusMovement | undefined): this {
+    nextFocus(value: FocusMovement | undefined): this {
         return this
     }
-    public tabStop(value: boolean | undefined): this {
+    tabStop(value: boolean | undefined): this {
         return this
     }
-    public onFocus(value: (() => void) | undefined): this {
+    onFocus(value: (() => void) | undefined): this {
         return this
     }
-    public onBlur(value: (() => void) | undefined): this {
+    onBlur(value: (() => void) | undefined): this {
         return this
     }
-    public tabIndex(value: number | undefined): this {
+    tabIndex(value: number | undefined): this {
         return this
     }
-    public defaultFocus(value: boolean | undefined): this {
+    defaultFocus(value: boolean | undefined): this {
         return this
     }
-    public groupDefaultFocus(value: boolean | undefined): this {
+    groupDefaultFocus(value: boolean | undefined): this {
         return this
     }
-    public focusOnTouch(value: boolean | undefined): this {
+    focusOnTouch(value: boolean | undefined): this {
         return this
     }
-    public focusBox(value: FocusBoxStyle | undefined): this {
+    focusBox(value: FocusBoxStyle | undefined): this {
         return this
     }
-    public animation(value: AnimateParam | undefined): this {
+    animation(value: AnimateParam | undefined): this {
         return this
     }
-    public transition(value: TransitionEffect | undefined): this {
+    transition(value: TransitionEffect | undefined): this {
         return this
     }
-    public motionBlur(value: MotionBlurOptions | undefined): this {
+    motionBlur(value: MotionBlurOptions | undefined): this {
         return this
     }
-    public brightness(value: number | undefined): this {
+    brightness(value: number | undefined): this {
         return this
     }
-    public contrast(value: number | undefined): this {
+    contrast(value: number | undefined): this {
         return this
     }
-    public grayscale(value: number | undefined): this {
+    grayscale(value: number | undefined): this {
         return this
     }
-    public colorBlend(value: Color | string | Resource | undefined): this {
+    colorBlend(value: Color | string | Resource | undefined): this {
         return this
     }
-    public saturate(value: number | undefined): this {
+    saturate(value: number | undefined): this {
         return this
     }
-    public sepia(value: number | undefined): this {
+    sepia(value: number | undefined): this {
         return this
     }
-    public invert(value: number | InvertOptions | undefined): this {
+    invert(value: number | InvertOptions | undefined): this {
         return this
     }
-    public hueRotate(value: number | string | undefined): this {
+    hueRotate(value: number | string | undefined): this {
         return this
     }
-    public useShadowBatching(value: boolean | undefined): this {
+    useShadowBatching(value: boolean | undefined): this {
         return this
     }
-    public useEffect(value: boolean | undefined): this {
+    useEffect(value: boolean | undefined): this {
         return this
     }
-    public renderGroup(value: boolean | undefined): this {
+    renderGroup(value: boolean | undefined): this {
         return this
     }
-    public freeze(value: boolean | undefined): this {
+    freeze(value: boolean | undefined): this {
         return this
     }
-    public translate(value: TranslateOptions | undefined): this {
+    translate(value: TranslateOptions | undefined): this {
         return this
     }
-    public scale(value: ScaleOptions | undefined): this {
+    scale(value: ScaleOptions | undefined): this {
         return this
     }
-    public rotate(value: RotateOptions | undefined): this {
+    rotate(value: RotateOptions | undefined): this {
         return this
     }
-    public transform(value: Object | undefined): this {
+    transform(value: Object | undefined): this {
         return this
     }
-    public onAppear(value: (() => void) | undefined): this {
+    onAppear(value: (() => void) | undefined): this {
         return this
     }
-    public onDisAppear(value: (() => void) | undefined): this {
+    onDisAppear(value: (() => void) | undefined): this {
         return this
     }
-    public onAttach(value: VoidCallback | undefined): this {
+    onAttach(value: VoidCallback | undefined): this {
         return this
     }
-    public onDetach(value: VoidCallback | undefined): this {
+    onDetach(value: VoidCallback | undefined): this {
         return this
     }
-    public onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
+    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
         return this
     }
-    public visibility(value: Visibility | undefined): this {
+    visibility(value: Visibility | undefined): this {
         return this
     }
-    public flexGrow(value: number | undefined): this {
+    flexGrow(value: number | undefined): this {
         return this
     }
-    public flexShrink(value: number | undefined): this {
+    flexShrink(value: number | undefined): this {
         return this
     }
-    public flexBasis(value: number | string | undefined): this {
+    flexBasis(value: number | string | undefined): this {
         return this
     }
-    public alignSelf(value: ItemAlign | undefined): this {
+    alignSelf(value: ItemAlign | undefined): this {
         return this
     }
-    public displayPriority(value: number | undefined): this {
+    displayPriority(value: number | undefined): this {
         return this
     }
-    public zIndex(value: number | undefined): this {
+    zIndex(value: number | undefined): this {
         return this
     }
-    public direction(value: Direction | undefined): this {
+    direction(value: Direction | undefined): this {
         return this
     }
-    public align(value: Alignment | undefined): this {
+    align(value: Alignment | undefined): this {
         return this
     }
-    public position(value: Position | Edges | LocalizedEdges | undefined): this {
+    position(value: Position | Edges | LocalizedEdges | undefined): this {
         return this
     }
-    public markAnchor(value: Position | LocalizedPosition | undefined): this {
+    markAnchor(value: Position | LocalizedPosition | undefined): this {
         return this
     }
-    public offset(value: Position | Edges | LocalizedEdges | undefined): this {
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {
         return this
     }
-    public enabled(value: boolean | undefined): this {
+    enabled(value: boolean | undefined): this {
         return this
     }
-    public alignRules(value: AlignRuleOption | undefined): this {
+    alignRules(value: AlignRuleOption | undefined): this {
         return this
     }
-    public alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
         return this
     }
-    public aspectRatio(value: number | undefined): this {
+    aspectRatio(value: number | undefined): this {
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    clickEffect(value: ClickEffect | undefined): this {
         return this
     }
-    public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         return this
     }
-    public onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | undefined): this {
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | undefined): this {
         return this
     }
-    public draggable(value: boolean | undefined): this {
+    draggable(value: boolean | undefined): this {
         return this
     }
-    public dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this {
+    dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this {
         return this
     }
-    public onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this {
+    onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this {
         return this
     }
-    public linearGradient(value: LinearGradientOptions | undefined): this {
+    linearGradient(value: LinearGradientOptions | undefined): this {
         return this
     }
-    public sweepGradient(value: SweepGradientOptions | undefined): this {
+    sweepGradient(value: SweepGradientOptions | undefined): this {
         return this
     }
-    public radialGradient(value: RadialGradientOptions | undefined): this {
+    radialGradient(value: RadialGradientOptions | undefined): this {
         return this
     }
-    public motionPath(value: MotionPathOptions | undefined): this {
+    motionPath(value: MotionPathOptions | undefined): this {
         return this
     }
-    public shadow(value: ShadowOptions | ShadowStyle | undefined): this {
+    shadow(value: ShadowOptions | ShadowStyle | undefined): this {
         return this
     }
-    public clip(value: boolean | undefined): this {
+    clip(value: boolean | undefined): this {
         return this
     }
-    public clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
         return this
     }
-    public mask(value: ProgressMask | undefined): this {
+    mask(value: ProgressMask | undefined): this {
         return this
     }
-    public maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
         return this
     }
-    public key(value: string | undefined): this {
+    key(value: string | undefined): this {
         return this
     }
-    public id(value: string | undefined): this {
+    id(value: string | undefined): this {
         return this
     }
-    public geometryTransition(value: string | undefined): this {
+    geometryTransition(value: string | undefined): this {
         return this
     }
-    public stateStyles(value: StateStyles | undefined): this {
+    stateStyles(value: StateStyles | undefined): this {
         return this
     }
-    public restoreId(value: number | undefined): this {
+    restoreId(value: number | undefined): this {
         return this
     }
-    public sphericalEffect(value: number | undefined): this {
+    sphericalEffect(value: number | undefined): this {
         return this
     }
-    public lightUpEffect(value: number | undefined): this {
+    lightUpEffect(value: number | undefined): this {
         return this
     }
-    public pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
+    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         return this
     }
-    public accessibilityGroup(value: boolean | undefined): this {
+    accessibilityGroup(value: boolean | undefined): this {
         return this
     }
-    public accessibilityText(value: string | undefined): this {
+    accessibilityText(value: string | undefined): this {
         return this
     }
-    public accessibilityNextFocusId(value: string | undefined): this {
+    accessibilityNextFocusId(value: string | undefined): this {
         return this
     }
-    public accessibilityDefaultFocus(value: boolean | undefined): this {
+    accessibilityDefaultFocus(value: boolean | undefined): this {
         return this
     }
-    public accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
+    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
         return this
     }
-    public accessibilityScrollTriggerable(value: boolean | undefined): this {
+    accessibilityScrollTriggerable(value: boolean | undefined): this {
         return this
     }
-    public accessibilityText(value: Resource | undefined): this {
+    accessibilityText(value: Resource | undefined): this {
         return this
     }
-    public accessibilityRole(value: AccessibilityRoleType | undefined): this {
+    accessibilityRole(value: AccessibilityRoleType | undefined): this {
         return this
     }
-    public onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
         return this
     }
-    public accessibilityTextHint(value: string | undefined): this {
+    accessibilityTextHint(value: string | undefined): this {
         return this
     }
-    public accessibilityDescription(value: string | undefined): this {
+    accessibilityDescription(value: string | undefined): this {
         return this
     }
-    public accessibilityDescription(value: Resource | undefined): this {
+    accessibilityDescription(value: Resource | undefined): this {
         return this
     }
-    public accessibilityLevel(value: string | undefined): this {
+    accessibilityLevel(value: string | undefined): this {
         return this
     }
-    public accessibilityVirtualNode(value: CustomBuilder | undefined): this {
+    accessibilityVirtualNode(value: CustomBuilder | undefined): this {
         return this
     }
-    public accessibilityChecked(value: boolean | undefined): this {
+    accessibilityChecked(value: boolean | undefined): this {
         return this
     }
-    public accessibilitySelected(value: boolean | undefined): this {
+    accessibilitySelected(value: boolean | undefined): this {
         return this
     }
-    public obscured(value: Array<ObscuredReasons> | undefined): this {
+    obscured(value: Array<ObscuredReasons> | undefined): this {
         return this
     }
-    public reuseId(value: string | undefined): this {
+    reuseId(value: string | undefined): this {
         return this
     }
-    public reuse(value: ReuseOptions | undefined): this {
+    reuse(value: ReuseOptions | undefined): this {
         return this
     }
-    public renderFit(value: RenderFit | undefined): this {
+    renderFit(value: RenderFit | undefined): this {
         return this
     }
-    public gestureModifier(value: GestureModifier | undefined): this {
+    gestureModifier(value: GestureModifier | undefined): this {
         return this
     }
-    public backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
+    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
         return this
     }
-    public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
+    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
         return this
     }
-    public onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this {
+    onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this {
         return this
     }
-    public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
+    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
         return this
     }
-    public monopolizeEvents(value: boolean | undefined): this {
+    monopolizeEvents(value: boolean | undefined): this {
         return this
     }
-    public onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this {
+    onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this {
         return this
     }
-    public onSizeChange(value: SizeChangeCallback | undefined): this {
+    onSizeChange(value: SizeChangeCallback | undefined): this {
         return this
     }
-    public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
+    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string, value: CustomProperty): this {
+    customProperty(name: string, value: CustomProperty): this {
         return this
     }
-    public expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
         return this
     }
-    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    public backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    public onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
         return this
     }
-    public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
+    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
         return this
     }
-    public focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
+    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
         return this
     }
-    public transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
+    transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
         return this
     }
-    public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
         return this
     }
-    public systemBarEffect(): this {
+    systemBarEffect(): this {
         return this
     }
-    public useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
+    useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
         return this
     }
-    public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
+    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         return this
     }
-    public chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
         return this
     }
-    public onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+    onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         return this
     }
-    public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
+    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         return this
     }
-    public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
         return this
     }
-    public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
+    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         return this
     }
-    public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
+    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         return this
     }
-    public advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
         return this
     }
-    public geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
+    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
         return this
     }
-    public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
+    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
         return this
     }
-    public bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
+    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
         return this
     }
-    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
-    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
-    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    public bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
         return this
     }
-    public bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
         return this
     }
-    public bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+    bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
         return this
     }
-    public onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
         return this
     }
-    public onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
         return this
     }
-    public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         return this
     }
-    public accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+    accessibilityGroup(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
         return this
     }
-    public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
@@ -8735,37 +8743,37 @@ export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements C
     strokeWidth_value?: Length | undefined
     antiAlias_value?: boolean | undefined
     strokeDashArray_value?: Array<Length> | undefined
-    public stroke(value: ResourceColor | undefined): this {
+    stroke(value: ResourceColor | undefined): this {
         return this
     }
-    public fill(value: ResourceColor | undefined): this {
+    fill(value: ResourceColor | undefined): this {
         return this
     }
-    public strokeDashOffset(value: number | string | undefined): this {
+    strokeDashOffset(value: number | string | undefined): this {
         return this
     }
-    public strokeLineCap(value: LineCapStyle | undefined): this {
+    strokeLineCap(value: LineCapStyle | undefined): this {
         return this
     }
-    public strokeLineJoin(value: LineJoinStyle | undefined): this {
+    strokeLineJoin(value: LineJoinStyle | undefined): this {
         return this
     }
-    public strokeMiterLimit(value: number | string | undefined): this {
+    strokeMiterLimit(value: number | string | undefined): this {
         return this
     }
-    public strokeOpacity(value: number | string | Resource | undefined): this {
+    strokeOpacity(value: number | string | Resource | undefined): this {
         return this
     }
-    public fillOpacity(value: number | string | Resource | undefined): this {
+    fillOpacity(value: number | string | Resource | undefined): this {
         return this
     }
-    public strokeWidth(value: Length | undefined): this {
+    strokeWidth(value: Length | undefined): this {
         return this
     }
-    public antiAlias(value: boolean | undefined): this {
+    antiAlias(value: boolean | undefined): this {
         return this
     }
-    public strokeDashArray(value: Array<Length> | undefined): this {
+    strokeDashArray(value: Array<Length> | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -8883,52 +8891,52 @@ export interface ScrollableCommonMethod extends CommonMethod {
     }
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
-    public scrollBar(value: BarState | undefined): this {
+    scrollBar(value: BarState | undefined): this {
         return this
     }
-    public scrollBarColor(value: Color | number | string | undefined): this {
+    scrollBarColor(value: Color | number | string | undefined): this {
         return this
     }
-    public scrollBarWidth(value: number | string | undefined): this {
+    scrollBarWidth(value: number | string | undefined): this {
         return this
     }
-    public nestedScroll(value: NestedScrollOptions | undefined): this {
+    nestedScroll(value: NestedScrollOptions | undefined): this {
         return this
     }
-    public enableScrollInteraction(value: boolean | undefined): this {
+    enableScrollInteraction(value: boolean | undefined): this {
         return this
     }
-    public friction(value: number | Resource | undefined): this {
+    friction(value: number | Resource | undefined): this {
         return this
     }
-    public onReachStart(value: (() => void) | undefined): this {
+    onReachStart(value: (() => void) | undefined): this {
         return this
     }
-    public onReachEnd(value: (() => void) | undefined): this {
+    onReachEnd(value: (() => void) | undefined): this {
         return this
     }
-    public onScrollStart(value: (() => void) | undefined): this {
+    onScrollStart(value: (() => void) | undefined): this {
         return this
     }
-    public onScrollStop(value: (() => void) | undefined): this {
+    onScrollStop(value: (() => void) | undefined): this {
         return this
     }
-    public flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: number | undefined): this {
         return this
     }
-    public clipContent(value: ContentClipMode | RectShape | undefined): this {
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
         return this
     }
-    public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         return this
     }
-    public backToTop(value: boolean | undefined): this {
+    backToTop(value: boolean | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -9013,7 +9021,7 @@ export interface DateRange {
     end?: Date;
 }
 export interface TerminationInfo {
-    code: number;
+    code: int32;
     want?: Want;
 }
 export type DateTimeOptions = intl.DateTimeOptions;
@@ -9021,6 +9029,8 @@ export interface Bindable<T = void> {
     readonly value: T;
     readonly onChange: ((value0: T) => void);
 }
+export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>;
+export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -9809,18 +9819,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public alignRules(value: AlignRuleOption | undefined): this {
-        if (this.checkPriority("alignRules")) {
+    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        if (this.checkPriority("alignRulesWithAlignRuleOptionTypedValue")) {
             const value_casted = value as (AlignRuleOption | undefined)
-            this.getPeer()?.setAlignRules0Attribute(value_casted)
+            this.getPeer()?.setAlignRulesWithAlignRuleOptionTypedValueAttribute(value_casted)
             return this
         }
         return this
     }
-    public alignRules(value: LocalizedAlignRuleOptions | undefined): this {
-        if (this.checkPriority("alignRules")) {
+    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        if (this.checkPriority("alignRulesWithLocalizedAlignRuleOptionsTypedValue")) {
             const value_casted = value as (LocalizedAlignRuleOptions | undefined)
-            this.getPeer()?.setAlignRules1Attribute(value_casted)
+            this.getPeer()?.setAlignRulesWithLocalizedAlignRuleOptionsTypedValueAttribute(value_casted)
             return this
         }
         return this
@@ -10056,18 +10066,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public accessibilityGroup(value: boolean | undefined): this {
-        if (this.checkPriority("accessibilityGroup")) {
+    public accessibilityGroupWithValue(value: boolean | undefined): this {
+        if (this.checkPriority("accessibilityGroupWithValue")) {
             const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setAccessibilityGroup0Attribute(value_casted)
+            this.getPeer()?.setAccessibilityGroupWithValueAttribute(value_casted)
             return this
         }
         return this
     }
-    public accessibilityText(value: string | undefined): this {
-        if (this.checkPriority("accessibilityText")) {
+    public accessibilityTextOfStringType(value: string | undefined): this {
+        if (this.checkPriority("accessibilityTextOfStringType")) {
             const value_casted = value as (string | undefined)
-            this.getPeer()?.setAccessibilityText0Attribute(value_casted)
+            this.getPeer()?.setAccessibilityTextOfStringTypeAttribute(value_casted)
             return this
         }
         return this
@@ -10104,10 +10114,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public accessibilityText(value: Resource | undefined): this {
-        if (this.checkPriority("accessibilityText")) {
+    public accessibilityTextOfResourceType(value: Resource | undefined): this {
+        if (this.checkPriority("accessibilityTextOfResourceType")) {
             const value_casted = value as (Resource | undefined)
-            this.getPeer()?.setAccessibilityText1Attribute(value_casted)
+            this.getPeer()?.setAccessibilityTextOfResourceTypeAttribute(value_casted)
             return this
         }
         return this
@@ -10136,18 +10146,18 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public accessibilityDescription(value: string | undefined): this {
-        if (this.checkPriority("accessibilityDescription")) {
+    public accessibilityDescriptionOfStringType(value: string | undefined): this {
+        if (this.checkPriority("accessibilityDescriptionOfStringType")) {
             const value_casted = value as (string | undefined)
-            this.getPeer()?.setAccessibilityDescription0Attribute(value_casted)
+            this.getPeer()?.setAccessibilityDescriptionOfStringTypeAttribute(value_casted)
             return this
         }
         return this
     }
-    public accessibilityDescription(value: Resource | undefined): this {
-        if (this.checkPriority("accessibilityDescription")) {
+    public accessibilityDescriptionOfResourceType(value: Resource | undefined): this {
+        if (this.checkPriority("accessibilityDescriptionOfResourceType")) {
             const value_casted = value as (Resource | undefined)
-            this.getPeer()?.setAccessibilityDescription1Attribute(value_casted)
+            this.getPeer()?.setAccessibilityDescriptionOfResourceTypeAttribute(value_casted)
             return this
         }
         return this
@@ -10665,11 +10675,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
-        if (this.checkPriority("accessibilityGroup")) {
+    public accessibilityGroupWithConfig(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
+        if (this.checkPriority("accessibilityGroupWithConfig")) {
             const isGroup_casted = isGroup as (boolean | undefined)
-            const accessibilityOptions_casted = accessibilityOptions as (AccessibilityOptions | undefined)
-            this.getPeer()?.setAccessibilityGroup1Attribute(isGroup_casted, accessibilityOptions_casted)
+            const config_casted = config as (AccessibilityOptions | undefined)
+            this.getPeer()?.setAccessibilityGroupWithConfigAttribute(isGroup_casted, config_casted)
             return this
         }
         return this
@@ -11297,7 +11307,7 @@ export class Bindable_Array_Arkui_Component_Units_ResourceStr_serializer {
                     Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0TmpElementForIdx1);
                 }
             }
-            InteropNativeModule._CallCallback(354105852, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 354105852, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11338,7 +11348,7 @@ export class Bindable_Array_Number_serializer {
                 const value0TmpElement : number = value0[value0CounterI];
                 onChangeTmpBufBufArgsSerializer.writeNumber(value0TmpElement);
             }
-            InteropNativeModule._CallCallback(1442979681, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 1442979681, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11366,7 +11376,7 @@ export class Bindable_Boolean_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             onChangeTmpBufBufArgsSerializer.writeBoolean(value0);
-            InteropNativeModule._CallCallback(217914240, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 217914240, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11394,7 +11404,7 @@ export class Bindable_Date_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             onChangeTmpBufBufArgsSerializer.writeInt64(value0.getTime().toLong());
-            InteropNativeModule._CallCallback(1108733360, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 1108733360, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11422,7 +11432,7 @@ export class Bindable_Number_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             onChangeTmpBufBufArgsSerializer.writeNumber(value0);
-            InteropNativeModule._CallCallback(1090440167, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 1090440167, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11450,7 +11460,7 @@ export class Bindable_String_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             onChangeTmpBufBufArgsSerializer.writeString(value0);
-            InteropNativeModule._CallCallback(1477958353, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 1477958353, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11561,7 +11571,7 @@ export class CrownEvent_serializer {
             stopPropagationTmpBufBufArgsSerializer.writeInt32(stopPropagationTmpBufBufResource.resourceId);
             stopPropagationTmpBufBufArgsSerializer.writePointer(stopPropagationTmpBufBufCall);
             stopPropagationTmpBufBufArgsSerializer.writePointer(stopPropagationTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-1867723152, stopPropagationTmpBufBufArgsSerializer.asBuffer(), stopPropagationTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1867723152, stopPropagationTmpBufBufArgsSerializer.asBuffer(), stopPropagationTmpBufBufArgsSerializer.length());
             stopPropagationTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11625,7 +11635,7 @@ export class DismissContentCoverAction_serializer {
             dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
             dismissTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11663,7 +11673,7 @@ export class DismissSheetAction_serializer {
             dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
             dismissTmpBufBufArgsSerializer.release();
             return;
         }
@@ -11810,7 +11820,7 @@ export class DragItemInfo_serializer {
                 builderTmpBuf_BufArgsSerializer.writeInt32(builderTmpBuf_BufResource.resourceId);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCall);
                 builderTmpBuf_BufArgsSerializer.writePointer(builderTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBuf_BufArgsSerializer.asBuffer(), builderTmpBuf_BufArgsSerializer.length());
                 builderTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -12553,7 +12563,7 @@ export class PopupButton_serializer {
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-2038961969, actionTmpBufBufArgsSerializer.asBuffer(), actionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -2038961969, actionTmpBufBufArgsSerializer.asBuffer(), actionTmpBufBufArgsSerializer.length());
             actionTmpBufBufArgsSerializer.release();
             return;
         }
@@ -12915,7 +12925,7 @@ export class SheetDismiss_serializer {
             dismissTmpBufBufArgsSerializer.writeInt32(dismissTmpBufBufResource.resourceId);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCall);
             dismissTmpBufBufArgsSerializer.writePointer(dismissTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -2038961969, dismissTmpBufBufArgsSerializer.asBuffer(), dismissTmpBufBufArgsSerializer.length());
             dismissTmpBufBufArgsSerializer.release();
             return;
         }
@@ -12939,7 +12949,7 @@ export class SpringBackAction_serializer {
             springBackTmpBufBufArgsSerializer.writeInt32(springBackTmpBufBufResource.resourceId);
             springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCall);
             springBackTmpBufBufArgsSerializer.writePointer(springBackTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -2038961969, springBackTmpBufBufArgsSerializer.asBuffer(), springBackTmpBufBufArgsSerializer.length());
             springBackTmpBufBufArgsSerializer.release();
             return;
         }
@@ -13413,7 +13423,7 @@ export class AnimateParam_serializer {
                 onFinishTmpBuf_BufArgsSerializer.writeInt32(onFinishTmpBuf_BufResource.resourceId);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCall);
                 onFinishTmpBuf_BufArgsSerializer.writePointer(onFinishTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onFinishTmpBuf_BufArgsSerializer.asBuffer(), onFinishTmpBuf_BufArgsSerializer.length());
                 onFinishTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -13772,7 +13782,7 @@ export class Bindable_Arkui_Component_Units_ResourceStr_serializer {
                 const value0ForIdx1  = value0 as Resource;
                 Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0ForIdx1);
             }
-            InteropNativeModule._CallCallback(487399354, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 487399354, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -13800,7 +13810,7 @@ export class Bindable_Global_Resource_Resource_serializer {
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
             onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
             Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0);
-            InteropNativeModule._CallCallback(-941798353, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -941798353, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -13924,7 +13934,7 @@ export class ContentCoverOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -13941,7 +13951,7 @@ export class ContentCoverOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -13958,7 +13968,7 @@ export class ContentCoverOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -13975,7 +13985,7 @@ export class ContentCoverOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -13999,7 +14009,7 @@ export class ContentCoverOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCallSync);
                 DismissContentCoverAction_serializer.write(onWillDismissTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(-1283506641, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1283506641, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -14606,7 +14616,7 @@ export class MenuElement_serializer {
             actionTmpBufBufArgsSerializer.writeInt32(actionTmpBufBufResource.resourceId);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCall);
             actionTmpBufBufArgsSerializer.writePointer(actionTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(-1867723152, actionTmpBufBufArgsSerializer.asBuffer(), actionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1867723152, actionTmpBufBufArgsSerializer.asBuffer(), actionTmpBufBufArgsSerializer.length());
             actionTmpBufBufArgsSerializer.release();
             return;
         }
@@ -14724,7 +14734,7 @@ export class ReuseOptions_serializer {
                 reuseIdTmpBuf_BufContinuationValue = value;
             }
                 reuseIdTmpBuf_BufArgsSerializer.holdAndWriteCallback(reuseIdTmpBuf_BufContinuationCallback);
-                InteropNativeModule._CallCallback(1110529154, reuseIdTmpBuf_BufArgsSerializer.asBuffer(), reuseIdTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1110529154, reuseIdTmpBuf_BufArgsSerializer.asBuffer(), reuseIdTmpBuf_BufArgsSerializer.length());
                 reuseIdTmpBuf_BufArgsSerializer.release();
                 return (reuseIdTmpBuf_BufContinuationValue as string);
             }
@@ -15079,7 +15089,7 @@ export class TerminationInfo_serializer {
     public static write(buffer: SerializerBase, value: TerminationInfo): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForCode  = value.code
-        valueSerializer.writeNumber(valueHolderForCode)
+        valueSerializer.writeInt32(valueHolderForCode)
         const valueHolderForWant  = value.want
         if (valueHolderForWant !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -15091,7 +15101,7 @@ export class TerminationInfo_serializer {
     }
     public static read(buffer: DeserializerBase): TerminationInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const codeTmpResult : number = (valueDeserializer.readNumber() as number)
+        const codeTmpResult : int32 = valueDeserializer.readInt32()
         const wantTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let wantTmpBuf : Want | undefined
         if ((wantTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -15227,7 +15237,7 @@ export class Bindable_Arkui_Component_Units_Length_serializer {
                 const value0ForIdx2  = value0 as Resource;
                 Resource_serializer.write(onChangeTmpBufBufArgsSerializer, value0ForIdx2);
             }
-            InteropNativeModule._CallCallback(46299833, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 46299833, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
             onChangeTmpBufBufArgsSerializer.release();
             return;
         }
@@ -16907,7 +16917,7 @@ export class ContextMenuOptions_serializer {
                     previewTmpBuf_BufUBufArgsSerializer.writeInt32(previewTmpBuf_BufUBufResource.resourceId);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCall);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, previewTmpBuf_BufUBufArgsSerializer.asBuffer(), previewTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufUBufArgsSerializer.asBuffer(), previewTmpBuf_BufUBufArgsSerializer.length());
                     previewTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -16984,7 +16994,7 @@ export class ContextMenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -17001,7 +17011,7 @@ export class ContextMenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -17018,7 +17028,7 @@ export class ContextMenuOptions_serializer {
                 aboutToAppearTmpBuf_BufArgsSerializer.writeInt32(aboutToAppearTmpBuf_BufResource.resourceId);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCall);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, aboutToAppearTmpBuf_BufArgsSerializer.asBuffer(), aboutToAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, aboutToAppearTmpBuf_BufArgsSerializer.asBuffer(), aboutToAppearTmpBuf_BufArgsSerializer.length());
                 aboutToAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -17035,7 +17045,7 @@ export class ContextMenuOptions_serializer {
                 aboutToDisappearTmpBuf_BufArgsSerializer.writeInt32(aboutToDisappearTmpBuf_BufResource.resourceId);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCall);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, aboutToDisappearTmpBuf_BufArgsSerializer.asBuffer(), aboutToDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, aboutToDisappearTmpBuf_BufArgsSerializer.asBuffer(), aboutToDisappearTmpBuf_BufArgsSerializer.length());
                 aboutToDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -17478,7 +17488,7 @@ export class CustomPopupOptions_serializer {
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
             builderTmpBufBufArgsSerializer.release();
             return;
         }
@@ -17531,7 +17541,7 @@ export class CustomPopupOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCallSync);
                 PopupStateChangeParam_serializer.write(onStateChangeTmpBuf_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(-1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -17722,7 +17732,7 @@ export class CustomPopupOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCallSync);
                     DismissPopupAction_serializer.write(onWillDismissTmpBuf_BufUBufArgsSerializer, value0);
-                    InteropNativeModule._CallCallback(-2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, -2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -18224,7 +18234,7 @@ export class MenuOptions_serializer {
                     previewTmpBuf_BufUBufArgsSerializer.writeInt32(previewTmpBuf_BufUBufResource.resourceId);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCall);
                     previewTmpBuf_BufUBufArgsSerializer.writePointer(previewTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, previewTmpBuf_BufUBufArgsSerializer.asBuffer(), previewTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufUBufArgsSerializer.asBuffer(), previewTmpBuf_BufUBufArgsSerializer.length());
                     previewTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -18301,7 +18311,7 @@ export class MenuOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -18318,7 +18328,7 @@ export class MenuOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -18335,7 +18345,7 @@ export class MenuOptions_serializer {
                 aboutToAppearTmpBuf_BufArgsSerializer.writeInt32(aboutToAppearTmpBuf_BufResource.resourceId);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCall);
                 aboutToAppearTmpBuf_BufArgsSerializer.writePointer(aboutToAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, aboutToAppearTmpBuf_BufArgsSerializer.asBuffer(), aboutToAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, aboutToAppearTmpBuf_BufArgsSerializer.asBuffer(), aboutToAppearTmpBuf_BufArgsSerializer.length());
                 aboutToAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -18352,7 +18362,7 @@ export class MenuOptions_serializer {
                 aboutToDisappearTmpBuf_BufArgsSerializer.writeInt32(aboutToDisappearTmpBuf_BufResource.resourceId);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCall);
                 aboutToDisappearTmpBuf_BufArgsSerializer.writePointer(aboutToDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, aboutToDisappearTmpBuf_BufArgsSerializer.asBuffer(), aboutToDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, aboutToDisappearTmpBuf_BufArgsSerializer.asBuffer(), aboutToDisappearTmpBuf_BufArgsSerializer.length());
                 aboutToDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -19250,7 +19260,7 @@ export class PopupCommonOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCallSync);
                 PopupStateChangeParam_serializer.write(onStateChangeTmpBuf_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(-1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -19441,7 +19451,7 @@ export class PopupCommonOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCallSync);
                     DismissPopupAction_serializer.write(onWillDismissTmpBuf_BufUBufArgsSerializer, value0);
-                    InteropNativeModule._CallCallback(-2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, -2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -20139,7 +20149,7 @@ export class SheetOptions_serializer {
                 onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
                 onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
                 onAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20156,7 +20166,7 @@ export class SheetOptions_serializer {
                 onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
                 onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
                 onDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20173,7 +20183,7 @@ export class SheetOptions_serializer {
                 onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
                 onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
                 onWillAppearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20190,7 +20200,7 @@ export class SheetOptions_serializer {
                 onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
                 onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
                 onWillDisappearTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20369,7 +20379,7 @@ export class SheetOptions_serializer {
                     titleTmpBuf_BufUBufArgsSerializer.writeInt32(titleTmpBuf_BufUBufResource.resourceId);
                     titleTmpBuf_BufUBufArgsSerializer.writePointer(titleTmpBuf_BufUBufCall);
                     titleTmpBuf_BufUBufArgsSerializer.writePointer(titleTmpBuf_BufUBufCallSync);
-                    InteropNativeModule._CallCallback(737226752, titleTmpBuf_BufUBufArgsSerializer.asBuffer(), titleTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, 737226752, titleTmpBuf_BufUBufArgsSerializer.asBuffer(), titleTmpBuf_BufUBufArgsSerializer.length());
                     titleTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }
@@ -20391,7 +20401,7 @@ export class SheetOptions_serializer {
                 shouldDismissTmpBuf_BufArgsSerializer.writePointer(shouldDismissTmpBuf_BufCall);
                 shouldDismissTmpBuf_BufArgsSerializer.writePointer(shouldDismissTmpBuf_BufCallSync);
                 SheetDismiss_serializer.write(shouldDismissTmpBuf_BufArgsSerializer, sheetDismiss);
-                InteropNativeModule._CallCallback(22609082, shouldDismissTmpBuf_BufArgsSerializer.asBuffer(), shouldDismissTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 22609082, shouldDismissTmpBuf_BufArgsSerializer.asBuffer(), shouldDismissTmpBuf_BufArgsSerializer.length());
                 shouldDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20409,7 +20419,7 @@ export class SheetOptions_serializer {
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCall);
                 onWillDismissTmpBuf_BufArgsSerializer.writePointer(onWillDismissTmpBuf_BufCallSync);
                 DismissSheetAction_serializer.write(onWillDismissTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(889549796, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 889549796, onWillDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufArgsSerializer.length());
                 onWillDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20427,7 +20437,7 @@ export class SheetOptions_serializer {
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.writePointer(onWillSpringBackWhenDismissTmpBuf_BufCall);
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.writePointer(onWillSpringBackWhenDismissTmpBuf_BufCallSync);
                 SpringBackAction_serializer.write(onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(1536231691, onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1536231691, onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.asBuffer(), onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.length());
                 onWillSpringBackWhenDismissTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20556,7 +20566,7 @@ export class SheetOptions_serializer {
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCall);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writePointer(onHeightDidChangeTmpBuf_BufCallSync);
                 onHeightDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallback(36519084, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 36519084, onHeightDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onHeightDidChangeTmpBuf_BufArgsSerializer.length());
                 onHeightDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20586,7 +20596,7 @@ export class SheetOptions_serializer {
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCall);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writePointer(onDetentsDidChangeTmpBuf_BufCallSync);
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallback(36519084, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 36519084, onDetentsDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onDetentsDidChangeTmpBuf_BufArgsSerializer.length());
                 onDetentsDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20604,7 +20614,7 @@ export class SheetOptions_serializer {
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCall);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writePointer(onWidthDidChangeTmpBuf_BufCallSync);
                 onWidthDidChangeTmpBuf_BufArgsSerializer.writeNumber(value0);
-                InteropNativeModule._CallCallback(36519084, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 36519084, onWidthDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onWidthDidChangeTmpBuf_BufArgsSerializer.length());
                 onWidthDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -20622,7 +20632,7 @@ export class SheetOptions_serializer {
                 onTypeDidChangeTmpBuf_BufArgsSerializer.writePointer(onTypeDidChangeTmpBuf_BufCall);
                 onTypeDidChangeTmpBuf_BufArgsSerializer.writePointer(onTypeDidChangeTmpBuf_BufCallSync);
                 onTypeDidChangeTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.SheetType_ToNumeric(value0));
-                InteropNativeModule._CallCallback(-224451112, onTypeDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onTypeDidChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -224451112, onTypeDidChangeTmpBuf_BufArgsSerializer.asBuffer(), onTypeDidChangeTmpBuf_BufArgsSerializer.length());
                 onTypeDidChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -21135,7 +21145,7 @@ export class PopupOptions_serializer {
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCall);
                 onStateChangeTmpBuf_BufArgsSerializer.writePointer(onStateChangeTmpBuf_BufCallSync);
                 PopupStateChangeParam_serializer.write(onStateChangeTmpBuf_BufArgsSerializer, event);
-                InteropNativeModule._CallCallback(-1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1444325632, onStateChangeTmpBuf_BufArgsSerializer.asBuffer(), onStateChangeTmpBuf_BufArgsSerializer.length());
                 onStateChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -21357,7 +21367,7 @@ export class PopupOptions_serializer {
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCall);
                     onWillDismissTmpBuf_BufUBufArgsSerializer.writePointer(onWillDismissTmpBuf_BufUBufCallSync);
                     DismissPopupAction_serializer.write(onWillDismissTmpBuf_BufUBufArgsSerializer, value0);
-                    InteropNativeModule._CallCallback(-2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
+                    InteropNativeModule._CallCallbackSync(10, -2004166751, onWillDismissTmpBuf_BufUBufArgsSerializer.asBuffer(), onWillDismissTmpBuf_BufUBufArgsSerializer.length());
                     onWillDismissTmpBuf_BufUBufArgsSerializer.release();
                     return;
                 }

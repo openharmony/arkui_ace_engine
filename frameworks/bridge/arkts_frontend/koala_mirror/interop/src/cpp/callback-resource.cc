@@ -18,14 +18,16 @@
 #include "common-interop.h"
 #include "interop-types.h"
 #include "callback-resource.h"
+#include "SerializerBase.h"
+#include "interop-utils.h"
 #include <deque>
 #include <unordered_map>
 #include <atomic>
-#include "interop-utils.h"
+#include <utility>
 
 static bool needReleaseFront = false;
 static std::deque<CallbackEventKind> callbackEventsQueue;
-static std::deque<CallbackBuffer> callbackCallSubqueue;
+static std::deque<std::pair<int, CallbackBuffer>> callbackCallSubqueue;
 static std::deque<InteropInt32> callbackResourceSubqueue;
 
 static std::atomic<KVMDeferred*> currentDeferred(nullptr);
@@ -63,9 +65,9 @@ void impl_UnblockCallbackWait(KNativePointer waitContext) {
 }
 KOALA_INTEROP_V1(UnblockCallbackWait, KNativePointer)
 
-void enqueueCallback(const CallbackBuffer* event) {
+void enqueueCallback(int apiKind, const CallbackBuffer* event) {
     callbackEventsQueue.push_back(Event_CallCallback);
-    callbackCallSubqueue.push_back(*event);
+    callbackCallSubqueue.push_back({ apiKind, *event });
     notifyWaiter();
 }
 
@@ -88,7 +90,7 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
         switch (callbackEventsQueue.front())
         {
             case Event_CallCallback:
-                callbackCallSubqueue.front().resourceHolder.release();
+                callbackCallSubqueue.front().second.resourceHolder.release();
                 callbackCallSubqueue.pop_front();
                 break;
             case Event_HoldManagedResource:
@@ -104,19 +106,23 @@ KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
     if (callbackEventsQueue.empty()) {
         return 0;
     }
+
+    SerializerBase serializer(result, size);
     const CallbackEventKind frontEventKind = callbackEventsQueue.front();
-    interop_memcpy(result, size, &frontEventKind, sizeof(int32_t));
+    serializer.writeInt32(frontEventKind);
 
     switch (frontEventKind)
     {
         case Event_CallCallback: {
-            interop_memcpy(result + 4, size - 4, callbackCallSubqueue.front().buffer, sizeof(CallbackBuffer::buffer));
+            std::pair<int, CallbackBuffer> &callback = callbackCallSubqueue.front();
+            serializer.writeInt32(callback.first);
+            interop_memcpy(result + serializer.length(), size - serializer.length(), callback.second.buffer, sizeof(CallbackBuffer::buffer));
             break;
         }
         case Event_HoldManagedResource:
         case Event_ReleaseManagedResource: {
             const InteropInt32 resourceId = callbackResourceSubqueue.front();
-            interop_memcpy(result + 4, size - 4, &resourceId, sizeof(InteropInt32));
+            interop_memcpy(result + serializer.length(), size - serializer.length(), &resourceId, sizeof(InteropInt32));
             break;
         }
         default:

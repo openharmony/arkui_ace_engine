@@ -82,10 +82,10 @@ export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAt
     onStart_value?: (() => void) | undefined
     onComplete_value?: (() => void) | undefined
     attributeModifier_value?: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined
-    public onStart(value: (() => void) | undefined): this {
+    onStart(value: (() => void) | undefined): this {
         return this
     }
-    public onComplete(value: (() => void) | undefined): this {
+    onComplete(value: (() => void) | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {

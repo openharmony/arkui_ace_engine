@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class BlockExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 157)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createBlockExpression(statements: readonly Statement[]): BlockExpression {
-        const result: BlockExpression = new BlockExpression(global.generatedEs2panda._CreateBlockExpression(global.context, passNodeArray(statements), statements.length))
+        const result: BlockExpression = new BlockExpression(global.generatedEs2panda._CreateBlockExpression(global.context, passNodeArray(statements), statements.length), Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateBlockExpression(original: BlockExpression | undefined, statements: readonly Statement[]): BlockExpression {
-        const result: BlockExpression = new BlockExpression(global.generatedEs2panda._UpdateBlockExpression(global.context, passNode(original), passNodeArray(statements), statements.length))
+        const result: BlockExpression = new BlockExpression(global.generatedEs2panda._UpdateBlockExpression(global.context, passNode(original), passNodeArray(statements), statements.length), Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -70,5 +69,5 @@ export function isBlockExpression(node: object | undefined): node is BlockExpres
     return node instanceof BlockExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION, (peer: KNativePointer) => new BlockExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION, (peer: KNativePointer) => new BlockExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_EXPRESSION))
 }

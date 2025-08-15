@@ -38,22 +38,21 @@ import { Identifier } from "./Identifier"
 import { ScriptFunction } from "./ScriptFunction"
 
 export class FunctionExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 35)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static create1FunctionExpression(namedExpr?: Identifier, func?: ScriptFunction): FunctionExpression {
-        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._CreateFunctionExpression1(global.context, passNode(namedExpr), passNode(func)))
+        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._CreateFunctionExpression1(global.context, passNode(namedExpr), passNode(func)), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateFunctionExpression(original?: FunctionExpression, func?: ScriptFunction): FunctionExpression {
-        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._UpdateFunctionExpression(global.context, passNode(original), passNode(func)))
+        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._UpdateFunctionExpression(global.context, passNode(original), passNode(func)), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static update1FunctionExpression(original?: FunctionExpression, namedExpr?: Identifier, func?: ScriptFunction): FunctionExpression {
-        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._UpdateFunctionExpression1(global.context, passNode(original), passNode(namedExpr), passNode(func)))
+        const result: FunctionExpression = new FunctionExpression(global.generatedEs2panda._UpdateFunctionExpression1(global.context, passNode(original), passNode(namedExpr), passNode(func)), Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -72,5 +71,5 @@ export function isFunctionExpression(node: object | undefined): node is Function
     return node instanceof FunctionExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION, (peer: KNativePointer) => new FunctionExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION, (peer: KNativePointer) => new FunctionExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION))
 }

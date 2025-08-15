@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSNullType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 64)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSNullType(): ETSNullType {
-        const result: ETSNullType = new ETSNullType(global.generatedEs2panda._CreateETSNullType(global.context))
+        const result: ETSNullType = new ETSNullType(global.generatedEs2panda._CreateETSNullType(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSNullType(original?: ETSNullType): ETSNullType {
-        const result: ETSNullType = new ETSNullType(global.generatedEs2panda._UpdateETSNullType(global.context, passNode(original)))
+        const result: ETSNullType = new ETSNullType(global.generatedEs2panda._UpdateETSNullType(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isETSNullType(node: object | undefined): node is ETSNullType {
     return node instanceof ETSNullType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE, (peer: KNativePointer) => new ETSNullType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE, (peer: KNativePointer) => new ETSNullType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_NULL_TYPE))
 }

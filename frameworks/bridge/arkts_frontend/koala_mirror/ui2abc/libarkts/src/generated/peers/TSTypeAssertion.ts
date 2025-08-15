@@ -38,17 +38,16 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 
 export class TSTypeAssertion extends AnnotatedExpression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 142)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTypeAssertion(typeAnnotation?: TypeNode, expression?: Expression): TSTypeAssertion {
-        const result: TSTypeAssertion = new TSTypeAssertion(global.generatedEs2panda._CreateTSTypeAssertion(global.context, passNode(typeAnnotation), passNode(expression)))
+        const result: TSTypeAssertion = new TSTypeAssertion(global.generatedEs2panda._CreateTSTypeAssertion(global.context, passNode(typeAnnotation), passNode(expression)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTypeAssertion(original?: TSTypeAssertion, typeAnnotation?: TypeNode, expression?: Expression): TSTypeAssertion {
-        const result: TSTypeAssertion = new TSTypeAssertion(global.generatedEs2panda._UpdateTSTypeAssertion(global.context, passNode(original), passNode(typeAnnotation), passNode(expression)))
+        const result: TSTypeAssertion = new TSTypeAssertion(global.generatedEs2panda._UpdateTSTypeAssertion(global.context, passNode(original), passNode(typeAnnotation), passNode(expression)), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION)
         result.setChildrenParentPtr()
         return result
     }
@@ -69,5 +68,5 @@ export function isTSTypeAssertion(node: object | undefined): node is TSTypeAsser
     return node instanceof TSTypeAssertion
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION, (peer: KNativePointer) => new TSTypeAssertion(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION, (peer: KNativePointer) => new TSTypeAssertion(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_ASSERTION))
 }

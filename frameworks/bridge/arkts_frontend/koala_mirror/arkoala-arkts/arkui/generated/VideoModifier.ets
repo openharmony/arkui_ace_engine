@@ -20,11 +20,11 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkVideoPeer, FullscreenInfo, PreparedInfo, PlaybackInfo, VideoAttribute } from "./component/video"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { ImageFit } from "./component/enums"
 import { VoidCallback } from "./component/units"
 import { ImageAnalyzerConfig } from "./component/imageCommon"
-import { ColorMetrics } from "./Graphics"
 export class VideoModifier extends CommonMethodModifier implements VideoAttribute,AttributeModifier<VideoAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
@@ -65,13 +65,11 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onError_0_0value?: (() => void) | undefined
     _onStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onStop_0_0value?: (() => void) | undefined
+    _onStop_0_0value?: VoidCallback | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableAnalyzer_0_0value?: boolean | undefined
     _analyzerConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _analyzerConfig_0_0value?: ImageAnalyzerConfig | undefined
-    _surfaceBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableShortcutKey_0_0value?: boolean | undefined
     applyModifierPatch(peer: ArkVideoPeer): void {
@@ -332,7 +330,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             switch (this._onStop_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnStopAttribute((this._onStop_0_0value as (() => void) | undefined));
+                    peer.setOnStopAttribute((this._onStop_0_0value as VoidCallback | undefined));
                     this._onStop_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -342,7 +340,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
                 default: {
                     this._onStop_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnStopAttribute((undefined as (() => void) | undefined));
+                    peer.setOnStopAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -379,24 +377,6 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 default: {
                     this._analyzerConfig_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setAnalyzerConfigAttribute((undefined as ImageAnalyzerConfig | undefined));
-                }
-            }
-        }
-        if (this._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._surfaceBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSurfaceBackgroundColorAttribute((this._surfaceBackgroundColor_0_0value as ColorMetrics | undefined));
-                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSurfaceBackgroundColorAttribute((undefined as ColorMetrics | undefined));
                 }
             }
         }
@@ -612,7 +592,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                     break;
                 }
                 default: {
-                    this.onStop((undefined as (() => void) | undefined));
+                    this.onStop((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -639,19 +619,6 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
                 }
                 default: {
                     this.analyzerConfig((undefined as ImageAnalyzerConfig | undefined));
-                }
-            }
-        }
-        if (modifier._surfaceBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._surfaceBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.surfaceBackgroundColor(modifier._surfaceBackgroundColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.surfaceBackgroundColor((undefined as ColorMetrics | undefined));
                 }
             }
         }
@@ -823,7 +790,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         }
         return this
     }
-    onStop(value: (() => void) | undefined): this {
+    onStop(value: VoidCallback | undefined): this {
         if (((this._onStop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onStop_0_flag = AttributeUpdaterFlag.UPDATE
@@ -853,17 +820,6 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         } else
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
-        if (((this._surfaceBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._surfaceBackgroundColor_0_0value = value
-        } else
-        {
-            this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

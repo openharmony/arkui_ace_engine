@@ -20,7 +20,8 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkStackPeer, StackAttribute } from "./component/stack"
-import { CommonMethod, PointLightStyle } from "./component/common"
+import { int32 } from "@koalaui/common"
+import { CommonMethod } from "./component/common"
 import { Alignment } from "./component/enums"
 export class StackModifier extends CommonMethodModifier implements StackAttribute,AttributeModifier<StackAttribute> {
     _instanceId: number = -1;
@@ -35,8 +36,6 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
     applySelectedAttribute(instance: StackAttribute): void { }
     _alignContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignContent_0_0value?: Alignment | undefined
-    _pointLight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pointLight_0_0value?: PointLightStyle | undefined
     applyModifierPatch(peer: ArkStackPeer): void {
         super.applyModifierPatch(peer)
         if (this._alignContent_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -57,24 +56,6 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
                 }
             }
         }
-        if (this._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._pointLight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPointLightAttribute((this._pointLight_0_0value as PointLightStyle | undefined));
-                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._pointLight_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._pointLight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPointLightAttribute((undefined as PointLightStyle | undefined));
-                }
-            }
-        }
     }
     mergeModifier(modifier: StackModifier): void {
         super.mergeModifier(modifier)
@@ -91,19 +72,6 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
                 }
             }
         }
-        if (modifier._pointLight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._pointLight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.pointLight(modifier._pointLight_0_0value);
-                    break;
-                }
-                default: {
-                    this.pointLight((undefined as PointLightStyle | undefined));
-                }
-            }
-        }
     }
     alignContent(value: Alignment | undefined): this {
         if (((this._alignContent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -113,17 +81,6 @@ export class StackModifier extends CommonMethodModifier implements StackAttribut
         } else
         {
             this._alignContent_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    pointLight(value: PointLightStyle | undefined): this {
-        if (((this._pointLight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._pointLight_0_0value = value
-        } else
-        {
-            this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

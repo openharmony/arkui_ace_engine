@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class YieldExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 155)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createYieldExpression(argument: Expression | undefined, isDelegate: boolean): YieldExpression {
-        const result: YieldExpression = new YieldExpression(global.generatedEs2panda._CreateYieldExpression(global.context, passNode(argument), isDelegate))
+        const result: YieldExpression = new YieldExpression(global.generatedEs2panda._CreateYieldExpression(global.context, passNode(argument), isDelegate), Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateYieldExpression(original: YieldExpression | undefined, argument: Expression | undefined, isDelegate: boolean): YieldExpression {
-        const result: YieldExpression = new YieldExpression(global.generatedEs2panda._UpdateYieldExpression(global.context, passNode(original), passNode(argument), isDelegate))
+        const result: YieldExpression = new YieldExpression(global.generatedEs2panda._UpdateYieldExpression(global.context, passNode(original), passNode(argument), isDelegate), Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -62,5 +61,5 @@ export function isYieldExpression(node: object | undefined): node is YieldExpres
     return node instanceof YieldExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION, (peer: KNativePointer) => new YieldExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION, (peer: KNativePointer) => new YieldExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_YIELD_EXPRESSION))
 }

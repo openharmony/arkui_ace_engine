@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkIndicatorComponentPeer, IndicatorComponentAttribute } from "./component/indicatorcomponent"
+import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { DotIndicator, DigitIndicator } from "./component/swiper"
 export class IndicatorComponentModifier extends CommonMethodModifier implements IndicatorComponentAttribute,AttributeModifier<IndicatorComponentAttribute> {

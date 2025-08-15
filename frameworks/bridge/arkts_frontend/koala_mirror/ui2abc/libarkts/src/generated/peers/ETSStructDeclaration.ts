@@ -37,17 +37,16 @@ import { ClassDefinition } from "./ClassDefinition"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 
 export class ETSStructDeclaration extends ClassDeclaration {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 86)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSStructDeclaration(def?: ClassDefinition): ETSStructDeclaration {
-        const result: ETSStructDeclaration = new ETSStructDeclaration(global.generatedEs2panda._CreateETSStructDeclaration(global.context, passNode(def)))
+        const result: ETSStructDeclaration = new ETSStructDeclaration(global.generatedEs2panda._CreateETSStructDeclaration(global.context, passNode(def)), Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSStructDeclaration(original?: ETSStructDeclaration, def?: ClassDefinition): ETSStructDeclaration {
-        const result: ETSStructDeclaration = new ETSStructDeclaration(global.generatedEs2panda._UpdateETSStructDeclaration(global.context, passNode(original), passNode(def)))
+        const result: ETSStructDeclaration = new ETSStructDeclaration(global.generatedEs2panda._UpdateETSStructDeclaration(global.context, passNode(original), passNode(def)), Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -57,5 +56,5 @@ export function isETSStructDeclaration(node: object | undefined): node is ETSStr
     return node instanceof ETSStructDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION, (peer: KNativePointer) => new ETSStructDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION, (peer: KNativePointer) => new ETSStructDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION))
 }

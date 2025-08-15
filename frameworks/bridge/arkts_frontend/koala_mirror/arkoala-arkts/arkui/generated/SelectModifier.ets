@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier, ContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkSelectPeer, OnSelectCallback, ArrowPosition, MenuItemConfiguration, AvoidanceMode, MenuOutlineOptions, SelectAttribute, MenuAlignType } from "./component/select"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, Bindable, BlurStyle } from "./component/common"
 import { Resource } from "global.resource"
 import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset } from "./component/units"
@@ -91,6 +92,8 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _avoidance_0_0value?: AvoidanceMode | undefined
     _menuOutline_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuOutline_0_0value?: MenuOutlineOptions | undefined
+    _backgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _backgroundColor_0_0value?: ResourceColor | undefined
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
@@ -564,6 +567,24 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | undefined));
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._backgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
         if (this._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._menuAlign_0_flag) {
@@ -923,6 +944,19 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._backgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._backgroundColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.backgroundColor(modifier._backgroundColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.backgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
         if (modifier._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._menuAlign_0_flag) {
@@ -1220,6 +1254,17 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._menuOutline_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    backgroundColor(value: ResourceColor | undefined): this {
+        if (((this._backgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._backgroundColor_0_0value = value
+        } else
+        {
+            this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

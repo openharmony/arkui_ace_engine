@@ -19,7 +19,6 @@
 import { Resource } from "global.resource"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { extractors } from "#handwritten"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 export class Resource_serializer {
@@ -37,8 +36,28 @@ export class Resource_serializer {
             const valueHolderForParamsTmpValue  = valueHolderForParams!
             valueSerializer.writeInt32((valueHolderForParamsTmpValue.length).toInt())
             for (let valueHolderForParamsTmpValueCounterI = 0; valueHolderForParamsTmpValueCounterI < valueHolderForParamsTmpValue.length; valueHolderForParamsTmpValueCounterI++) {
-                const valueHolderForParamsTmpValueTmpElement : string = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
-                valueSerializer.writeString(valueHolderForParamsTmpValueTmpElement)
+                const valueHolderForParamsTmpValueTmpElement : string | int32 | int64 | double | Resource = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
+                if (valueHolderForParamsTmpValueTmpElement instanceof string) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const valueHolderForParamsTmpValueTmpElementForIdx0  = valueHolderForParamsTmpValueTmpElement as string
+                    valueSerializer.writeString(valueHolderForParamsTmpValueTmpElementForIdx0)
+                } else if (valueHolderForParamsTmpValueTmpElement instanceof int32) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const valueHolderForParamsTmpValueTmpElementForIdx1  = valueHolderForParamsTmpValueTmpElement as int32
+                    valueSerializer.writeInt32(valueHolderForParamsTmpValueTmpElementForIdx1)
+                } else if (valueHolderForParamsTmpValueTmpElement instanceof int64) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const valueHolderForParamsTmpValueTmpElementForIdx2  = valueHolderForParamsTmpValueTmpElement as int64
+                    valueSerializer.writeInt64(valueHolderForParamsTmpValueTmpElementForIdx2)
+                } else if (valueHolderForParamsTmpValueTmpElement instanceof double) {
+                    valueSerializer.writeInt8((3).toChar())
+                    const valueHolderForParamsTmpValueTmpElementForIdx3  = valueHolderForParamsTmpValueTmpElement as double
+                    valueSerializer.writeFloat64(valueHolderForParamsTmpValueTmpElementForIdx3)
+                } else if (valueHolderForParamsTmpValueTmpElement instanceof Resource) {
+                    valueSerializer.writeInt8((4).toChar())
+                    const valueHolderForParamsTmpValueTmpElementForIdx4  = valueHolderForParamsTmpValueTmpElement as Resource
+                    Resource_serializer.write(valueSerializer, valueHolderForParamsTmpValueTmpElementForIdx4)
+                }
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -58,16 +77,31 @@ export class Resource_serializer {
         const moduleNameTmpResult : string = (valueDeserializer.readString() as string)
         const idTmpResult : int64 = valueDeserializer.readInt64()
         const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paramsTmpBuf : Array<string> | undefined
+        let paramsTmpBuf : Array<string | int32 | int64 | double | Resource> | undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const paramsTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let paramsTmpBuf_ : Array<string> = new Array<string>(paramsTmpBuf_Length)
+            let paramsTmpBuf_ : Array<string | int32 | int64 | double | Resource> = new Array<string | int32 | int64 | double | Resource>(paramsTmpBuf_Length)
             for (let paramsTmpBuf_BufCounterI = 0; paramsTmpBuf_BufCounterI < paramsTmpBuf_Length; paramsTmpBuf_BufCounterI++) {
-                paramsTmpBuf_[paramsTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
+                const paramsTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let paramsTmpBuf_TempBuf : string | int32 | int64 | double | Resource | undefined
+                if (paramsTmpBuf_TempBufUnionSelector == (0).toChar()) {
+                    paramsTmpBuf_TempBuf = (valueDeserializer.readString() as string)
+                } else if (paramsTmpBuf_TempBufUnionSelector == (1).toChar()) {
+                    paramsTmpBuf_TempBuf = valueDeserializer.readInt32()
+                } else if (paramsTmpBuf_TempBufUnionSelector == (2).toChar()) {
+                    paramsTmpBuf_TempBuf = valueDeserializer.readInt64()
+                } else if (paramsTmpBuf_TempBufUnionSelector == (3).toChar()) {
+                    paramsTmpBuf_TempBuf = valueDeserializer.readFloat64()
+                } else if (paramsTmpBuf_TempBufUnionSelector == (4).toChar()) {
+                    paramsTmpBuf_TempBuf = Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error("One of the branches for paramsTmpBuf_TempBuf has to be chosen through deserialisation.")
+                }
+                paramsTmpBuf_[paramsTmpBuf_BufCounterI] = (paramsTmpBuf_TempBuf as string | int32 | int64 | double | Resource)
             }
             paramsTmpBuf = paramsTmpBuf_
         }
-        const paramsTmpResult : Array<string> | undefined = paramsTmpBuf
+        const paramsTmpResult : Array<string | int32 | int64 | double | Resource> | undefined = paramsTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : int32 | undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

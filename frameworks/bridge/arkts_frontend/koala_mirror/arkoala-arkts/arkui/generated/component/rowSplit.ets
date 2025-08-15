@@ -66,7 +66,7 @@ export interface RowSplitAttribute extends CommonMethod {
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined
-    public resizeable(value: boolean | undefined): this {
+    resizeable(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {

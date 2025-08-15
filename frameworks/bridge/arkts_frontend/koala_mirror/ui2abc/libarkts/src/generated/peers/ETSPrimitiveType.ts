@@ -37,17 +37,16 @@ import { Es2pandaPrimitiveType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSPrimitiveType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 71)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSPrimitiveType(type: Es2pandaPrimitiveType): ETSPrimitiveType {
-        const result: ETSPrimitiveType = new ETSPrimitiveType(global.generatedEs2panda._CreateETSPrimitiveType(global.context, type))
+        const result: ETSPrimitiveType = new ETSPrimitiveType(global.generatedEs2panda._CreateETSPrimitiveType(global.context, type), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSPrimitiveType(original: ETSPrimitiveType | undefined, type: Es2pandaPrimitiveType): ETSPrimitiveType {
-        const result: ETSPrimitiveType = new ETSPrimitiveType(global.generatedEs2panda._UpdateETSPrimitiveType(global.context, passNode(original), type))
+        const result: ETSPrimitiveType = new ETSPrimitiveType(global.generatedEs2panda._UpdateETSPrimitiveType(global.context, passNode(original), type), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -60,5 +59,5 @@ export function isETSPrimitiveType(node: object | undefined): node is ETSPrimiti
     return node instanceof ETSPrimitiveType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE, (peer: KNativePointer) => new ETSPrimitiveType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE, (peer: KNativePointer) => new ETSPrimitiveType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PRIMITIVE_TYPE))
 }

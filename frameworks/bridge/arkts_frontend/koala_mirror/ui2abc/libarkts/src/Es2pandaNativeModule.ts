@@ -93,6 +93,9 @@ export class Es2pandaNativeModule {
     _AstNodeSetChildrenParentPtr(context: KPtr, node: KPtr): void {
         throw new Error("Not implemented")
     }
+    _AstNodeOnUpdate(context: KPtr, newNode: KPtr, replacedNode: KPtr): void {
+        throw new Error("Not implemented")
+    }
     _AstNodeUpdateAll(context: KPtr, node: KPtr): void {
         throw new Error("Not implemented")
     }
@@ -168,6 +171,12 @@ export class Es2pandaNativeModule {
     _Checker_TypeNodeGetType(context: KNativePointer, node: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
     }
+    _ScriptFunctionSetParams(context: KNativePointer, receiver: KNativePointer, paramsList: BigUint64Array, paramsListLength: KUInt): void {
+        throw new Error("Not implemented")
+    }
+    _ClassDefinitionSetBody(context: KNativePointer, receiver: KNativePointer, body: BigUint64Array, bodyLength: KUInt): void {
+        throw new Error("Not implemented")
+    }
 
     // From koala-wrapper
     _ClassVariableDeclaration(context: KNativePointer, classInstance: KNativePointer): KNativePointer {
@@ -208,6 +217,14 @@ export class Es2pandaNativeModule {
         throw new Error("Not implemented")
     }
     _CreateContextGenerateAbcForExternalSourceFiles(config: KPtr, fileCount: KInt, filenames: string[]): KPtr {
+        throw new Error('Not implemented');
+    }
+
+    _GetCompilationMode(config: KNativePointer): KInt {
+        throw new Error('Not implemented');
+    }
+
+    _CreateTypeNodeFromTsType(context: KNativePointer, classInstance: KNativePointer): KNativePointer {
         throw new Error('Not implemented');
     }
 }

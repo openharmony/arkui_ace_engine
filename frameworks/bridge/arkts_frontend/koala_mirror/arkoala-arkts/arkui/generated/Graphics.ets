@@ -29,7 +29,6 @@ import { common2D_Rect_serializer, common2D } from "./framework/ohos.graphics.co
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GlobalScope } from "./framework/GlobalScope"
-import { extractors } from "#handwritten"
 export class ColorMetricsInternal {
     public static fromPtr(ptr: KPointer): ColorMetrics {
         return new ColorMetrics(ptr)

@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class ConditionalExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 19)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createConditionalExpression(test?: Expression, consequent?: Expression, alternate?: Expression): ConditionalExpression {
-        const result: ConditionalExpression = new ConditionalExpression(global.generatedEs2panda._CreateConditionalExpression(global.context, passNode(test), passNode(consequent), passNode(alternate)))
+        const result: ConditionalExpression = new ConditionalExpression(global.generatedEs2panda._CreateConditionalExpression(global.context, passNode(test), passNode(consequent), passNode(alternate)), Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateConditionalExpression(original?: ConditionalExpression, test?: Expression, consequent?: Expression, alternate?: Expression): ConditionalExpression {
-        const result: ConditionalExpression = new ConditionalExpression(global.generatedEs2panda._UpdateConditionalExpression(global.context, passNode(original), passNode(test), passNode(consequent), passNode(alternate)))
+        const result: ConditionalExpression = new ConditionalExpression(global.generatedEs2panda._UpdateConditionalExpression(global.context, passNode(original), passNode(test), passNode(consequent), passNode(alternate)), Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -80,5 +79,5 @@ export function isConditionalExpression(node: object | undefined): node is Condi
     return node instanceof ConditionalExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION, (peer: KNativePointer) => new ConditionalExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION, (peer: KNativePointer) => new ConditionalExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CONDITIONAL_EXPRESSION))
 }

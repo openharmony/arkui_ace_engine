@@ -37,17 +37,16 @@ import { Identifier } from "./Identifier"
 import { Statement } from "./Statement"
 
 export class LabelledStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 44)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createLabelledStatement(ident?: Identifier, body?: Statement): LabelledStatement {
-        const result: LabelledStatement = new LabelledStatement(global.generatedEs2panda._CreateLabelledStatement(global.context, passNode(ident), passNode(body)))
+        const result: LabelledStatement = new LabelledStatement(global.generatedEs2panda._CreateLabelledStatement(global.context, passNode(ident), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateLabelledStatement(original?: LabelledStatement, ident?: Identifier, body?: Statement): LabelledStatement {
-        const result: LabelledStatement = new LabelledStatement(global.generatedEs2panda._UpdateLabelledStatement(global.context, passNode(original), passNode(ident), passNode(body)))
+        const result: LabelledStatement = new LabelledStatement(global.generatedEs2panda._UpdateLabelledStatement(global.context, passNode(original), passNode(ident), passNode(body)), Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -66,5 +65,5 @@ export function isLabelledStatement(node: object | undefined): node is LabelledS
     return node instanceof LabelledStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT, (peer: KNativePointer) => new LabelledStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT, (peer: KNativePointer) => new LabelledStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_LABELLED_STATEMENT))
 }

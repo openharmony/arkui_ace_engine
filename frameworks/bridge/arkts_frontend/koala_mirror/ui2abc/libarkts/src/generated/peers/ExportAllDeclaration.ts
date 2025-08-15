@@ -38,17 +38,16 @@ import { Statement } from "./Statement"
 import { StringLiteral } from "./StringLiteral"
 
 export class ExportAllDeclaration extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 26)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createExportAllDeclaration(source?: StringLiteral, exported?: Identifier): ExportAllDeclaration {
-        const result: ExportAllDeclaration = new ExportAllDeclaration(global.generatedEs2panda._CreateExportAllDeclaration(global.context, passNode(source), passNode(exported)))
+        const result: ExportAllDeclaration = new ExportAllDeclaration(global.generatedEs2panda._CreateExportAllDeclaration(global.context, passNode(source), passNode(exported)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
     static updateExportAllDeclaration(original?: ExportAllDeclaration, source?: StringLiteral, exported?: Identifier): ExportAllDeclaration {
-        const result: ExportAllDeclaration = new ExportAllDeclaration(global.generatedEs2panda._UpdateExportAllDeclaration(global.context, passNode(original), passNode(source), passNode(exported)))
+        const result: ExportAllDeclaration = new ExportAllDeclaration(global.generatedEs2panda._UpdateExportAllDeclaration(global.context, passNode(original), passNode(source), passNode(exported)), Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION)
         result.setChildrenParentPtr()
         return result
     }
@@ -64,5 +63,5 @@ export function isExportAllDeclaration(node: object | undefined): node is Export
     return node instanceof ExportAllDeclaration
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION, (peer: KNativePointer) => new ExportAllDeclaration(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION, (peer: KNativePointer) => new ExportAllDeclaration(peer, Es2pandaAstNodeType.AST_NODE_TYPE_EXPORT_ALL_DECLARATION))
 }

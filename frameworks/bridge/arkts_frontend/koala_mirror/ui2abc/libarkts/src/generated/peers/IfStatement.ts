@@ -37,17 +37,16 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 
 export class IfStatement extends Statement {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 38)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createIfStatement(test?: Expression, consequent?: Statement, alternate?: Statement): IfStatement {
-        const result: IfStatement = new IfStatement(global.generatedEs2panda._CreateIfStatement(global.context, passNode(test), passNode(consequent), passNode(alternate)))
+        const result: IfStatement = new IfStatement(global.generatedEs2panda._CreateIfStatement(global.context, passNode(test), passNode(consequent), passNode(alternate)), Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
     static updateIfStatement(original?: IfStatement, test?: Expression, consequent?: Statement, alternate?: Statement): IfStatement {
-        const result: IfStatement = new IfStatement(global.generatedEs2panda._UpdateIfStatement(global.context, passNode(original), passNode(test), passNode(consequent), passNode(alternate)))
+        const result: IfStatement = new IfStatement(global.generatedEs2panda._UpdateIfStatement(global.context, passNode(original), passNode(test), passNode(consequent), passNode(alternate)), Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT)
         result.setChildrenParentPtr()
         return result
     }
@@ -76,5 +75,5 @@ export function isIfStatement(node: object | undefined): node is IfStatement {
     return node instanceof IfStatement
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT, (peer: KNativePointer) => new IfStatement(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT, (peer: KNativePointer) => new IfStatement(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT))
 }

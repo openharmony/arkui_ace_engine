@@ -2,7 +2,6 @@
 function main() {}
 
 
-
 interface I {
   set prop(prop: boolean)
   

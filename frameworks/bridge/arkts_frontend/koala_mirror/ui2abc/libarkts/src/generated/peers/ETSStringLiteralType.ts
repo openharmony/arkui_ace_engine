@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class ETSStringLiteralType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 67)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createETSStringLiteralType(value: string): ETSStringLiteralType {
-        const result: ETSStringLiteralType = new ETSStringLiteralType(global.generatedEs2panda._CreateETSStringLiteralType(global.context, value))
+        const result: ETSStringLiteralType = new ETSStringLiteralType(global.generatedEs2panda._CreateETSStringLiteralType(global.context, value), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateETSStringLiteralType(original: ETSStringLiteralType | undefined, value: string): ETSStringLiteralType {
-        const result: ETSStringLiteralType = new ETSStringLiteralType(global.generatedEs2panda._UpdateETSStringLiteralType(global.context, passNode(original), value))
+        const result: ETSStringLiteralType = new ETSStringLiteralType(global.generatedEs2panda._UpdateETSStringLiteralType(global.context, passNode(original), value), Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isETSStringLiteralType(node: object | undefined): node is ETSStr
     return node instanceof ETSStringLiteralType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE, (peer: KNativePointer) => new ETSStringLiteralType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE, (peer: KNativePointer) => new ETSStringLiteralType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_STRING_LITERAL_TYPE))
 }

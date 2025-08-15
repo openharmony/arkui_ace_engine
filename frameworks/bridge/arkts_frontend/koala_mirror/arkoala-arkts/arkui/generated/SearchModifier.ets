@@ -20,6 +20,7 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkSearchPeer, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchSubmitCallback, SearchType, SearchAttribute, SearchButtonOptions } from "./component/search"
+import { int32 } from "@koalaui/common"
 import { CommonMethod, TextDecorationOptions } from "./component/common"
 import { ResourceColor, Dimension, Font, ResourceStr } from "./component/units"
 import { Color, CopyOptions, TextAlign } from "./component/enums"
@@ -129,7 +130,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _searchButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _searchButton_0_0value?: ResourceStr | undefined
+    _searchButton_0_0value?: string | undefined
     _searchButton_0_1value?: SearchButtonOptions | undefined
     _inputFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _inputFilter_0_0value?: ResourceStr | undefined
@@ -935,7 +936,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             switch (this._searchButton_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSearchButtonAttribute((this._searchButton_0_0value as ResourceStr | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined));
+                    peer.setSearchButtonAttribute((this._searchButton_0_0value as string | undefined), (this._searchButton_0_1value as SearchButtonOptions | undefined));
                     this._searchButton_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -945,7 +946,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
                 default: {
                     this._searchButton_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSearchButtonAttribute((undefined as ResourceStr | undefined), (undefined as SearchButtonOptions | undefined | undefined));
+                    peer.setSearchButtonAttribute((undefined as string | undefined), (undefined as SearchButtonOptions | undefined | undefined));
                 }
             }
         }
@@ -1569,7 +1570,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                     break;
                 }
                 default: {
-                    this.searchButton((undefined as ResourceStr | undefined), (undefined as SearchButtonOptions | undefined | undefined));
+                    this.searchButton((undefined as string | undefined), (undefined as SearchButtonOptions | undefined | undefined));
                 }
             }
         }
@@ -2084,8 +2085,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         }
         return this
     }
-    searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
-        if (((this._searchButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
+    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+        if (((this._searchButton_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._searchButton_0_0value) !== (value)) || (true))
         {
             this._searchButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._searchButton_0_0value = value

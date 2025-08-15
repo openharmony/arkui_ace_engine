@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 
 export class ThisExpression extends Expression {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 146)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createThisExpression(): ThisExpression {
-        const result: ThisExpression = new ThisExpression(global.generatedEs2panda._CreateThisExpression(global.context))
+        const result: ThisExpression = new ThisExpression(global.generatedEs2panda._CreateThisExpression(global.context), Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
     static updateThisExpression(original?: ThisExpression): ThisExpression {
-        const result: ThisExpression = new ThisExpression(global.generatedEs2panda._UpdateThisExpression(global.context, passNode(original)))
+        const result: ThisExpression = new ThisExpression(global.generatedEs2panda._UpdateThisExpression(global.context, passNode(original)), Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION)
         result.setChildrenParentPtr()
         return result
     }
@@ -56,5 +55,5 @@ export function isThisExpression(node: object | undefined): node is ThisExpressi
     return node instanceof ThisExpression
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION, (peer: KNativePointer) => new ThisExpression(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION, (peer: KNativePointer) => new ThisExpression(peer, Es2pandaAstNodeType.AST_NODE_TYPE_THIS_EXPRESSION))
 }

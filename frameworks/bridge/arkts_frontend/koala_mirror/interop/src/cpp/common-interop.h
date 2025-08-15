@@ -48,8 +48,8 @@
 
 typedef void (*Callback_Caller_t)(KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
 typedef void (*Callback_Caller_Sync_t)(KVMContext vmContext, KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
-extern "C" DLL_EXPORT void setCallbackCaller(Callback_Caller_t caller);
-extern "C" DLL_EXPORT void setCallbackCallerSync(Callback_Caller_Sync_t callerSync);
+extern "C" DLL_EXPORT void setCallbackCaller(int apiKind, Callback_Caller_t caller);
+extern "C" DLL_EXPORT void setCallbackCallerSync(int apiKind, Callback_Caller_Sync_t callerSync);
 
 extern "C" DLL_EXPORT KVMDeferred* CreateDeferred(KVMContext context, KVMObjectHandle* promise);
 extern "C" DLL_EXPORT const InteropAsyncWorker* GetAsyncWorker();

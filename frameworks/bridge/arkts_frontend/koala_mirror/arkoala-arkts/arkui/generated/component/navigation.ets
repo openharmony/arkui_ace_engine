@@ -29,9 +29,9 @@ import { window_SystemBarStyle_serializer, window } from "./../framework/ohos.wi
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Resource } from "global.resource"
+import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
 import { image } from "@ohos.multimedia.image"
 import { CustomBuilder, PageMapBuilder } from "./builder"
-import { AttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { TitleHeight, Color } from "./enums"
 import { LengthMetrics, LengthMetrics_serializer } from "./../Graphics"
 import { TextModifier, TextModifier_serializer } from "./../TextModifier"
@@ -210,7 +210,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
                 buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallback(-2038961969, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -2038961969, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -245,7 +245,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 buffer_BufArgsSerializer.writeNumber(progress);
-                InteropNativeModule._CallCallback(-448105339, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -448105339, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -431,7 +431,7 @@ export class NavPathInfo implements MaterializedBase {
                 buffer_BufArgsSerializer.writePointer(buffer_BufCall);
                 buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
                 PopInfo_serializer.write(buffer_BufArgsSerializer, value0);
-                InteropNativeModule._CallCallback(624053870, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 624053870, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
                 buffer_BufArgsSerializer.release();
                 return;
             }
@@ -1125,11 +1125,17 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setNavigationOptions0Attribute(): void {
-        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions0(this.peer.ptr)
-    }
-    setNavigationOptions1Attribute(pathInfos: NavPathStack): void {
-        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions1(this.peer.ptr, toPeerPtr(pathInfos))
+    setNavigationOptionsAttribute(pathInfos?: NavPathStack): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (pathInfos !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const pathInfosTmpValue  = pathInfos!
+            NavPathStack_serializer.write(thisSerializer, pathInfosTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     setNavBarWidthAttribute(value: Length | Bindable<Length> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -1924,92 +1930,91 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
     enableModeChangeAnimation_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined
-    public navBarWidth(value: Length | Bindable<Length> | undefined): this {
+    navBarWidth(value: Length | Bindable<Length> | undefined): this {
         return this
     }
-    public navBarPosition(value: NavBarPosition | undefined): this {
+    navBarPosition(value: NavBarPosition | undefined): this {
         return this
     }
-    public navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
+    navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
         return this
     }
-    public minContentWidth(value: Dimension | undefined): this {
+    minContentWidth(value: Dimension | undefined): this {
         return this
     }
-    public mode(value: NavigationMode | undefined): this {
+    mode(value: NavigationMode | undefined): this {
         return this
     }
-    public backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
+    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
         return this
     }
-    public hideNavBar(value: boolean | undefined): this {
+    hideNavBar(value: boolean | undefined): this {
         return this
     }
-    public hideTitleBar(value: boolean | undefined): this {
+    hideTitleBar(value: boolean | undefined): this {
         return this
     }
-    public hideBackButton(value: boolean | undefined): this {
+    hideBackButton(value: boolean | undefined): this {
         return this
     }
-    public titleMode(value: NavigationTitleMode | undefined): this {
+    titleMode(value: NavigationTitleMode | undefined): this {
         return this
     }
-    public menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
+    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
         return this
     }
-    public hideToolBar(value: boolean | undefined): this {
+    hideToolBar(value: boolean | undefined): this {
         return this
     }
-    public enableToolBarAdaptation(value: boolean | undefined): this {
+    enableToolBarAdaptation(value: boolean | undefined): this {
         return this
     }
-    public onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
+    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
         return this
     }
-    public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
+    onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
         return this
     }
-    public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
+    onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
         return this
     }
-    public navDestination(value: PageMapBuilder | undefined): this {
+    navDestination(value: PageMapBuilder | undefined): this {
         return this
     }
-    public customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
+    customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
         return this
     }
-    public systemBarStyle(value: window.SystemBarStyle | undefined): this {
+    systemBarStyle(value: window.SystemBarStyle | undefined): this {
         return this
     }
-    public recoverable(value: boolean | undefined): this {
+    recoverable(value: boolean | undefined): this {
         return this
     }
-    public enableDragBar(value: boolean | undefined): this {
+    enableDragBar(value: boolean | undefined): this {
         return this
     }
-    public enableModeChangeAnimation(value: boolean | undefined): this {
+    enableModeChangeAnimation(value: boolean | undefined): this {
         return this
     }
-    public backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+    backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
         return this
     }
-    public title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
         return this
     }
-    public hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
         return this
     }
-    public menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
         return this
     }
-    public toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+    toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
         return this
     }
-    public hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this {
+    hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this {
         return this
     }
-    public ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -2035,17 +2040,10 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkNavigationPeer {
         return (this.peer as ArkNavigationPeer)
     }
-    public setNavigationOptions(): this {
+    public setNavigationOptions(pathInfos?: NavPathStack): this {
         if (this.checkPriority("setNavigationOptions")) {
-            this.getPeer()?.setNavigationOptions0Attribute()
-            return this
-        }
-        return this
-    }
-    public setNavigationOptions(pathInfos: NavPathStack): this {
-        if (this.checkPriority("setNavigationOptions")) {
-            const pathInfos_casted = pathInfos as (NavPathStack)
-            this.getPeer()?.setNavigationOptions1Attribute(pathInfos_casted)
+            const pathInfos_casted = pathInfos as (NavPathStack | undefined)
+            this.getPeer()?.setNavigationOptionsAttribute(pathInfos_casted)
             return this
         }
         return this
@@ -2302,27 +2300,7 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
 export function Navigation(
     @memo
     style: ((attributes: NavigationAttribute) => void) | undefined,
-    
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkNavigationComponent>((): ArkNavigationComponent => {
-        return new ArkNavigationComponent()
-    })
-    NodeAttach<ArkNavigationPeer>((): ArkNavigationPeer => ArkNavigationPeer.create(receiver), (_: ArkNavigationPeer): void => {
-        receiver.setNavigationOptions()
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
-
-
-@memo
-export function Navigation(
-    @memo
-    style: ((attributes: NavigationAttribute) => void) | undefined,
-    pathInfos: NavPathStack,
+    pathInfos?: NavPathStack,
     @memo
     content_?: () => void,
 ): void {
@@ -2461,7 +2439,7 @@ export class NavigationAnimatedTransition_serializer {
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCall);
                 onTransitionEndTmpBuf_BufArgsSerializer.writePointer(onTransitionEndTmpBuf_BufCallSync);
                 onTransitionEndTmpBuf_BufArgsSerializer.writeBoolean(isVisible);
-                InteropNativeModule._CallCallback(313269291, onTransitionEndTmpBuf_BufArgsSerializer.asBuffer(), onTransitionEndTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 313269291, onTransitionEndTmpBuf_BufArgsSerializer.asBuffer(), onTransitionEndTmpBuf_BufArgsSerializer.length());
                 onTransitionEndTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2488,7 +2466,7 @@ export class NavigationAnimatedTransition_serializer {
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
             NavigationTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, transitionProxy);
-            InteropNativeModule._CallCallback(-1375731066, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, -1375731066, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
@@ -2557,7 +2535,7 @@ export class NavigationInterception_serializer {
                 }
                 willShowTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
                 willShowTmpBuf_BufArgsSerializer.writeBoolean(isAnimated);
-                InteropNativeModule._CallCallback(1852781814, willShowTmpBuf_BufArgsSerializer.asBuffer(), willShowTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1852781814, willShowTmpBuf_BufArgsSerializer.asBuffer(), willShowTmpBuf_BufArgsSerializer.length());
                 willShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2594,7 +2572,7 @@ export class NavigationInterception_serializer {
                 }
                 didShowTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationOperation_ToNumeric(operation));
                 didShowTmpBuf_BufArgsSerializer.writeBoolean(isAnimated);
-                InteropNativeModule._CallCallback(1852781814, didShowTmpBuf_BufArgsSerializer.asBuffer(), didShowTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1852781814, didShowTmpBuf_BufArgsSerializer.asBuffer(), didShowTmpBuf_BufArgsSerializer.length());
                 didShowTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2612,7 +2590,7 @@ export class NavigationInterception_serializer {
                 modeChangeTmpBuf_BufArgsSerializer.writePointer(modeChangeTmpBuf_BufCall);
                 modeChangeTmpBuf_BufArgsSerializer.writePointer(modeChangeTmpBuf_BufCallSync);
                 modeChangeTmpBuf_BufArgsSerializer.writeInt32(TypeChecker.NavigationMode_ToNumeric(mode));
-                InteropNativeModule._CallCallback(1502213270, modeChangeTmpBuf_BufArgsSerializer.asBuffer(), modeChangeTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, 1502213270, modeChangeTmpBuf_BufArgsSerializer.asBuffer(), modeChangeTmpBuf_BufArgsSerializer.length());
                 modeChangeTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2841,7 +2819,7 @@ export class NavigationMenuItem_serializer {
                 actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
                 actionTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -2984,7 +2962,7 @@ export class ToolbarItem_serializer {
                 actionTmpBuf_BufArgsSerializer.writeInt32(actionTmpBuf_BufResource.resourceId);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCall);
                 actionTmpBuf_BufArgsSerializer.writePointer(actionTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallback(-1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
+                InteropNativeModule._CallCallbackSync(10, -1867723152, actionTmpBuf_BufArgsSerializer.asBuffer(), actionTmpBuf_BufArgsSerializer.length());
                 actionTmpBuf_BufArgsSerializer.release();
                 return;
             }
@@ -3111,7 +3089,7 @@ export class NavigationCustomTitle_serializer {
             builderTmpBufBufArgsSerializer.writeInt32(builderTmpBufBufResource.resourceId);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCall);
             builderTmpBufBufArgsSerializer.writePointer(builderTmpBufBufCallSync);
-            InteropNativeModule._CallCallback(737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
+            InteropNativeModule._CallCallbackSync(10, 737226752, builderTmpBufBufArgsSerializer.asBuffer(), builderTmpBufBufArgsSerializer.length());
             builderTmpBufBufArgsSerializer.release();
             return;
         }

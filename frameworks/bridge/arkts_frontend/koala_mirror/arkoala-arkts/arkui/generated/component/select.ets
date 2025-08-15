@@ -30,7 +30,7 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Resource } from "global.resource"
 import { Color, OptionWidthMode } from "./enums"
 import { ControlSize } from "./button"
-import { ContentModifier, AttributeModifier, hookSelectContentModifier, AttributeUpdater, extractors } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookSelectContentModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -545,6 +545,34 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setMenuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setBackgroundColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toChar())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(valueTmpValueForIdx0))
+            } else if (valueTmpValue instanceof number) {
+                thisSerializer.writeInt8((1).toChar())
+                const valueTmpValueForIdx1  = valueTmpValue as number
+                thisSerializer.writeNumber(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toChar())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toChar())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMenuAlignAttribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (alignType !== undefined) {
@@ -670,6 +698,7 @@ export interface SelectAttribute extends CommonMethod {
     menuOutline(value: MenuOutlineOptions | undefined): this {
         throw new Error("Unimplemented method menuOutline")
     }
+    backgroundColor(value: ResourceColor | undefined): this
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
     }
@@ -706,88 +735,92 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
     attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
-    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+    backgroundColor_value?: ResourceColor | undefined
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         return this
     }
-    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         return this
     }
-    public font(value: Font | undefined): this {
+    font(value: Font | undefined): this {
         return this
     }
-    public fontColor(value: ResourceColor | undefined): this {
+    fontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedOptionBgColor(value: ResourceColor | undefined): this {
+    selectedOptionBgColor(value: ResourceColor | undefined): this {
         return this
     }
-    public selectedOptionFont(value: Font | undefined): this {
+    selectedOptionFont(value: Font | undefined): this {
         return this
     }
-    public selectedOptionFontColor(value: ResourceColor | undefined): this {
+    selectedOptionFontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public optionBgColor(value: ResourceColor | undefined): this {
+    optionBgColor(value: ResourceColor | undefined): this {
         return this
     }
-    public optionFont(value: Font | undefined): this {
+    optionFont(value: Font | undefined): this {
         return this
     }
-    public optionFontColor(value: ResourceColor | undefined): this {
+    optionFontColor(value: ResourceColor | undefined): this {
         return this
     }
-    public onSelect(value: OnSelectCallback | undefined): this {
+    onSelect(value: OnSelectCallback | undefined): this {
         return this
     }
-    public space(value: Length | undefined): this {
+    space(value: Length | undefined): this {
         return this
     }
-    public arrowPosition(value: ArrowPosition | undefined): this {
+    arrowPosition(value: ArrowPosition | undefined): this {
         return this
     }
-    public optionWidth(value: Dimension | OptionWidthMode | undefined): this {
+    optionWidth(value: Dimension | OptionWidthMode | undefined): this {
         return this
     }
-    public optionHeight(value: Dimension | undefined): this {
+    optionHeight(value: Dimension | undefined): this {
         return this
     }
-    public menuBackgroundColor(value: ResourceColor | undefined): this {
+    menuBackgroundColor(value: ResourceColor | undefined): this {
         return this
     }
-    public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
+    menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
         return this
     }
-    public controlSize(value: ControlSize | undefined): this {
+    controlSize(value: ControlSize | undefined): this {
         return this
     }
-    public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    divider(value: DividerOptions | undefined): this {
         return this
     }
-    public textModifier(value: TextModifier | undefined): this {
+    textModifier(value: TextModifier | undefined): this {
         return this
     }
-    public arrowModifier(value: SymbolGlyphModifier | undefined): this {
+    arrowModifier(value: SymbolGlyphModifier | undefined): this {
         return this
     }
-    public optionTextModifier(value: TextModifier | undefined): this {
+    optionTextModifier(value: TextModifier | undefined): this {
         return this
     }
-    public selectedOptionTextModifier(value: TextModifier | undefined): this {
+    selectedOptionTextModifier(value: TextModifier | undefined): this {
         return this
     }
-    public dividerStyle(value: DividerStyleOptions | undefined): this {
+    dividerStyle(value: DividerStyleOptions | undefined): this {
         return this
     }
-    public avoidance(value: AvoidanceMode | undefined): this {
+    avoidance(value: AvoidanceMode | undefined): this {
         return this
     }
-    public menuOutline(value: MenuOutlineOptions | undefined): this {
+    menuOutline(value: MenuOutlineOptions | undefined): this {
         return this
     }
-    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
+    backgroundColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1028,6 +1061,14 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         }
         return this
     }
+    public backgroundColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("backgroundColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.setBackgroundColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         if (this.checkPriority("menuAlign")) {
             const alignType_casted = alignType as (MenuAlignType | undefined)
@@ -1148,7 +1189,8 @@ export class MenuItemConfiguration_serializer {
         const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
         const selectedTmpResult : boolean = valueDeserializer.readBoolean()
         const indexTmpResult : number = (valueDeserializer.readNumber() as number)
-        throw new Error("Interface with functions is not supported")
+        let value : MenuItemConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult, selected: selectedTmpResult, index: indexTmpResult} as MenuItemConfiguration)
+        return value
     }
 }
 export class SelectOption_serializer {

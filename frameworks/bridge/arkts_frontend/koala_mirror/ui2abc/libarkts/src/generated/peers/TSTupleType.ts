@@ -36,17 +36,16 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { TypeNode } from "./TypeNode"
 
 export class TSTupleType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 136)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSTupleType(elementTypes: readonly TypeNode[]): TSTupleType {
-        const result: TSTupleType = new TSTupleType(global.generatedEs2panda._CreateTSTupleType(global.context, passNodeArray(elementTypes), elementTypes.length))
+        const result: TSTupleType = new TSTupleType(global.generatedEs2panda._CreateTSTupleType(global.context, passNodeArray(elementTypes), elementTypes.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSTupleType(original: TSTupleType | undefined, elementTypes: readonly TypeNode[]): TSTupleType {
-        const result: TSTupleType = new TSTupleType(global.generatedEs2panda._UpdateTSTupleType(global.context, passNode(original), passNodeArray(elementTypes), elementTypes.length))
+        const result: TSTupleType = new TSTupleType(global.generatedEs2panda._UpdateTSTupleType(global.context, passNode(original), passNodeArray(elementTypes), elementTypes.length), Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -59,5 +58,5 @@ export function isTSTupleType(node: object | undefined): node is TSTupleType {
     return node instanceof TSTupleType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE, (peer: KNativePointer) => new TSTupleType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE, (peer: KNativePointer) => new TSTupleType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TUPLE_TYPE))
 }

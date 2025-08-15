@@ -38,17 +38,16 @@ import { TSTypeParameter } from "./TSTypeParameter"
 import { TypeNode } from "./TypeNode"
 
 export class TSMappedType extends TypeNode {
-    constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 116)
-        super(pointer)
+    constructor(pointer: KNativePointer, astNodeType: Es2pandaAstNodeType) {
+        super(pointer, astNodeType)
     }
     static createTSMappedType(typeParameter: TSTypeParameter | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: Es2pandaMappedOption, optional_arg: Es2pandaMappedOption): TSMappedType {
-        const result: TSMappedType = new TSMappedType(global.generatedEs2panda._CreateTSMappedType(global.context, passNode(typeParameter), passNode(typeAnnotation), readonly_arg, optional_arg))
+        const result: TSMappedType = new TSMappedType(global.generatedEs2panda._CreateTSMappedType(global.context, passNode(typeParameter), passNode(typeAnnotation), readonly_arg, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
     static updateTSMappedType(original: TSMappedType | undefined, typeParameter: TSTypeParameter | undefined, typeAnnotation: TypeNode | undefined, readonly_arg: Es2pandaMappedOption, optional_arg: Es2pandaMappedOption): TSMappedType {
-        const result: TSMappedType = new TSMappedType(global.generatedEs2panda._UpdateTSMappedType(global.context, passNode(original), passNode(typeParameter), passNode(typeAnnotation), readonly_arg, optional_arg))
+        const result: TSMappedType = new TSMappedType(global.generatedEs2panda._UpdateTSMappedType(global.context, passNode(original), passNode(typeParameter), passNode(typeAnnotation), readonly_arg, optional_arg), Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE)
         result.setChildrenParentPtr()
         return result
     }
@@ -70,5 +69,5 @@ export function isTSMappedType(node: object | undefined): node is TSMappedType {
     return node instanceof TSMappedType
 }
 if (!nodeByType.has(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE)) {
-    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE, (peer: KNativePointer) => new TSMappedType(peer))
+    nodeByType.set(Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE, (peer: KNativePointer) => new TSMappedType(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_MAPPED_TYPE))
 }
