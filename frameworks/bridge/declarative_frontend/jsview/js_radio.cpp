@@ -93,7 +93,8 @@ void JSRadio::Create(const JSCallbackInfo& info)
 void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
     std::function<void()>& customBuilderFunc, JSRef<JSVal>& builderObject)
 {
-    if (indicator.value() == static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
+    if (indicator.value_or(static_cast<int32_t>(RadioIndicatorType::TICK)) ==
+        static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
         if (builderObject->IsFunction()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
             CHECK_NULL_VOID(builderFunc);

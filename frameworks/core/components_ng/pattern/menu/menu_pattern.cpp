@@ -2488,7 +2488,7 @@ float MenuPattern::GetSelectMenuWidth()
     if (IsWidthModifiedBySelect()) {
         auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
         auto selectmodifiedwidth = menuLayoutProperty->GetSelectMenuModifiedWidth();
-        finalWidth = selectmodifiedwidth.value();
+        finalWidth = selectmodifiedwidth.value_or(0.0f);
     } else {
         finalWidth = defaultWidth;
     }

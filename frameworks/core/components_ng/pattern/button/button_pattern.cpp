@@ -1225,6 +1225,7 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
