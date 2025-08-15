@@ -50,6 +50,7 @@ ace_unittest("window_scene_test") {
     "cJSON:cjson",
     "c_utils:utils",
     "ffrt:libffrt",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
