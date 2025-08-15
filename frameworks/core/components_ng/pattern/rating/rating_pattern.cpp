@@ -969,6 +969,19 @@ void RatingPattern::OnModifyDone()
     if (IsNeedFocusStyle()) {
         LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     }
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->InitEvent();
+        }
+    };
+    pipeline->AddBuildFinishCallBack();
+}
+
+void RatingPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
