@@ -2144,6 +2144,11 @@ void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
         moveCaretState_.isMoveCaret = GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx());
         if (moveCaretState_.isMoveCaret) {
             moveCaretState_.touchFingerId = info.GetFingerId();
+            contentScroller_.scrollingCallback = [weak = WeakClaim(this)](const Offset& localOffset) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->UpdateMagnifierWithFloatingCaretPos();
+            };
         }
     }
     if (SelectOverlayIsOn() && moveCaretState_.isMoveCaret) {
@@ -2204,8 +2209,8 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         selectController_->UpdateCaretInfoByOffset(
             !contentScroller_.isScrolling ? Offset(touchCaretX, touchCaretY) : touchOffset,
             !contentScroller_.isScrolling, true);
-        if (magnifierController_ && HasText()) {
-            SetMagnifierLocalOffsetToFloatingCaretPos();
+        if (!contentScroller_.isScrolling) {
+            UpdateMagnifierWithFloatingCaretPos();
         }
     }
 
@@ -2234,6 +2239,13 @@ void TextFieldPattern::SetMagnifierLocalOffsetToFloatingCaretPos()
         magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
     }
     floatCaretState_.lastFloatingCursorY = floatCaretRectCenter.GetY();
+}
+
+void TextFieldPattern::UpdateMagnifierWithFloatingCaretPos()
+{
+    if (magnifierController_ && HasText()) {
+        SetMagnifierLocalOffsetToFloatingCaretPos();
+    }
 }
 
 void TextFieldPattern::InitDragEvent()
@@ -9862,9 +9874,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
     if (magnifierController_ && HasText() && (longPressFingerNum_ == 1)) {
-        contentScroller_.updateMagniferEpsilon = 0.0f - contentScroller_.updateMagniferEpsilon;
-        magnifierController_->SetLocalOffset(
-            { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
@@ -9893,27 +9903,37 @@ void TextFieldPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locati
     if (IsContentRectNonPositive()) {
         return;
     }
+    auto needRender = false;
     do {
         if (!isScrolling) {
             auto localLocation = locationInfo.GetLocalLocation();
             if (LessNotEqual(localLocation.GetX(), contentRect_.Left()) ||
                 LessNotEqual(localLocation.GetY(), contentRect_.Top())) {
                 selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
+                needRender = true;
                 break;
             } else if (GreatNotEqual(localLocation.GetX(), contentRect_.Right()) ||
                        GreatNotEqual(localLocation.GetY(), contentRect_.Bottom())) {
                 selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
+                needRender = true;
                 break;
             }
         }
         if (Positive(contentScroller_.stepOffset)) {
             selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
+            needRender = true;
         } else if (Negative(contentScroller_.stepOffset)) {
             selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
+            needRender = true;
         }
     } while (false);
     if (HasFocus()) {
         ProcessOverlay({ .animation = true });
+    }
+    if (needRender) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 

@@ -515,17 +515,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             UpdateFirstHandleOffset();
         }
     }
-    if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        if (IsSingleHandle()) {
-            pattern->SetMagnifierLocalOffsetToFloatingCaretPos();
-        } else {
-            auto magnifierLocalOffset = OffsetF(localOffset.GetX(), localOffset.GetY());
-            if (IsOverlayMode()) {
-                GetLocalPointWithTransform(magnifierLocalOffset);
-            }
-            pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
-        }
-    }
+    UpdateMagnifier(OffsetF(localOffset.GetX(), localOffset.GetY()), false);
     pattern->PlayScrollBarAppearAnimation();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -660,6 +650,13 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
         }
     }
     pattern->StopContentScroll();
+    if (IsSingleHandle()) {
+        pattern->AddContentScrollingCallback([weak = WeakClaim(this)](const Offset& offset) {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->UpdateMagnifier(OffsetF(), true);
+        });
+    }
 }
 
 void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, bool isEnd)
@@ -748,5 +745,25 @@ void TextFieldSelectOverlay::BeforeOnPrepareMenu()
     // If the onPrepareMenu property exists, the onTextSelectionChange event needs to be triggered first to ensure the
     // application side can obtain the latest selected area.
     selectController->FireSelectEvent();
+}
+
+void TextFieldSelectOverlay::UpdateMagnifier(const OffsetF& offset, bool updateOnScroll)
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetMagnifierController() || !SelectOverlayIsOn()) {
+        return;
+    }
+    if (IsSingleHandle()) {
+        if (updateOnScroll || !pattern->GetContentScrollerIsScrolling()) {
+            pattern->SetMagnifierLocalOffsetToFloatingCaretPos();
+        }
+        return;
+    }
+    auto magnifierLocalOffset = offset;
+    if (IsOverlayMode()) {
+        GetLocalPointWithTransform(magnifierLocalOffset);
+    }
+    pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
 }
 } // namespace OHOS::Ace::NG

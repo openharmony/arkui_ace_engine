@@ -108,6 +108,7 @@ private:
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
     void CloseMagnifier();
     void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
+    void UpdateMagnifier(const OffsetF& offset, bool updateOnScroll);
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };
