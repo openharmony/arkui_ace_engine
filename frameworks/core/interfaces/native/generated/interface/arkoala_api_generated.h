@@ -971,16 +971,6 @@ typedef struct Array_FingerInfo Array_FingerInfo;
 typedef struct Opt_Array_FingerInfo Opt_Array_FingerInfo;
 typedef struct Array_Float64 Array_Float64;
 typedef struct Opt_Array_Float64 Opt_Array_Float64;
-typedef struct Array_font_UIFontAdjustInfo Array_font_UIFontAdjustInfo;
-typedef struct Opt_Array_font_UIFontAdjustInfo Opt_Array_font_UIFontAdjustInfo;
-typedef struct Array_font_UIFontAliasInfo Array_font_UIFontAliasInfo;
-typedef struct Opt_Array_font_UIFontAliasInfo Opt_Array_font_UIFontAliasInfo;
-typedef struct Array_font_UIFontFallbackGroupInfo Array_font_UIFontFallbackGroupInfo;
-typedef struct Opt_Array_font_UIFontFallbackGroupInfo Opt_Array_font_UIFontFallbackGroupInfo;
-typedef struct Array_font_UIFontFallbackInfo Array_font_UIFontFallbackInfo;
-typedef struct Opt_Array_font_UIFontFallbackInfo Opt_Array_font_UIFontFallbackInfo;
-typedef struct Array_font_UIFontGenericInfo Array_font_UIFontGenericInfo;
-typedef struct Opt_Array_font_UIFontGenericInfo Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
 typedef struct Array_GestureRecognizer Array_GestureRecognizer;
@@ -1943,18 +1933,6 @@ typedef struct Ark_FocusMovement Ark_FocusMovement;
 typedef struct Opt_FocusMovement Opt_FocusMovement;
 typedef struct Ark_FolderStackOptions Ark_FolderStackOptions;
 typedef struct Opt_FolderStackOptions Opt_FolderStackOptions;
-typedef struct Ark_font_UIFontAdjustInfo Ark_font_UIFontAdjustInfo;
-typedef struct Opt_font_UIFontAdjustInfo Opt_font_UIFontAdjustInfo;
-typedef struct Ark_font_UIFontAliasInfo Ark_font_UIFontAliasInfo;
-typedef struct Opt_font_UIFontAliasInfo Opt_font_UIFontAliasInfo;
-typedef struct Ark_font_UIFontConfig Ark_font_UIFontConfig;
-typedef struct Opt_font_UIFontConfig Opt_font_UIFontConfig;
-typedef struct Ark_font_UIFontFallbackGroupInfo Ark_font_UIFontFallbackGroupInfo;
-typedef struct Opt_font_UIFontFallbackGroupInfo Opt_font_UIFontFallbackGroupInfo;
-typedef struct Ark_font_UIFontFallbackInfo Ark_font_UIFontFallbackInfo;
-typedef struct Opt_font_UIFontFallbackInfo Opt_font_UIFontFallbackInfo;
-typedef struct Ark_font_UIFontGenericInfo Ark_font_UIFontGenericInfo;
-typedef struct Opt_font_UIFontGenericInfo Opt_font_UIFontGenericInfo;
 typedef struct Ark_FontInfo Ark_FontInfo;
 typedef struct Opt_FontInfo Opt_FontInfo;
 typedef struct Ark_FontSettingOptions Ark_FontSettingOptions;
@@ -8895,51 +8873,6 @@ typedef struct Opt_Array_Float64 {
     Ark_Tag tag;
     Array_Float64 value;
 } Opt_Array_Float64;
-typedef struct Array_font_UIFontAdjustInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontAdjustInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontAdjustInfo;
-typedef struct Opt_Array_font_UIFontAdjustInfo {
-    Ark_Tag tag;
-    Array_font_UIFontAdjustInfo value;
-} Opt_Array_font_UIFontAdjustInfo;
-typedef struct Array_font_UIFontAliasInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontAliasInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontAliasInfo;
-typedef struct Opt_Array_font_UIFontAliasInfo {
-    Ark_Tag tag;
-    Array_font_UIFontAliasInfo value;
-} Opt_Array_font_UIFontAliasInfo;
-typedef struct Array_font_UIFontFallbackGroupInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontFallbackGroupInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontFallbackGroupInfo;
-typedef struct Opt_Array_font_UIFontFallbackGroupInfo {
-    Ark_Tag tag;
-    Array_font_UIFontFallbackGroupInfo value;
-} Opt_Array_font_UIFontFallbackGroupInfo;
-typedef struct Array_font_UIFontFallbackInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontFallbackInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontFallbackInfo;
-typedef struct Opt_Array_font_UIFontFallbackInfo {
-    Ark_Tag tag;
-    Array_font_UIFontFallbackInfo value;
-} Opt_Array_font_UIFontFallbackInfo;
-typedef struct Array_font_UIFontGenericInfo {
-    /* kind: ContainerType */
-    Ark_font_UIFontGenericInfo* array;
-    Ark_Int32 length;
-} Array_font_UIFontGenericInfo;
-typedef struct Opt_Array_font_UIFontGenericInfo {
-    Ark_Tag tag;
-    Array_font_UIFontGenericInfo value;
-} Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop {
     /* kind: ContainerType */
     Ark_FractionStop* array;
@@ -13540,62 +13473,6 @@ typedef struct Opt_FolderStackOptions {
     Ark_Tag tag;
     Ark_FolderStackOptions value;
 } Opt_FolderStackOptions;
-typedef struct Ark_font_UIFontAdjustInfo {
-    /* kind: Interface */
-    Ark_Number weight;
-    Ark_Number to;
-} Ark_font_UIFontAdjustInfo;
-typedef struct Opt_font_UIFontAdjustInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontAdjustInfo value;
-} Opt_font_UIFontAdjustInfo;
-typedef struct Ark_font_UIFontAliasInfo {
-    /* kind: Interface */
-    Ark_String name;
-    Ark_Number weight;
-} Ark_font_UIFontAliasInfo;
-typedef struct Opt_font_UIFontAliasInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontAliasInfo value;
-} Opt_font_UIFontAliasInfo;
-typedef struct Ark_font_UIFontConfig {
-    /* kind: Interface */
-    Array_String fontDir;
-    Array_font_UIFontGenericInfo generic;
-    Array_font_UIFontFallbackGroupInfo fallbackGroups;
-} Ark_font_UIFontConfig;
-typedef struct Opt_font_UIFontConfig {
-    Ark_Tag tag;
-    Ark_font_UIFontConfig value;
-} Opt_font_UIFontConfig;
-typedef struct Ark_font_UIFontFallbackGroupInfo {
-    /* kind: Interface */
-    Ark_String fontSetName;
-    Array_font_UIFontFallbackInfo fallback;
-} Ark_font_UIFontFallbackGroupInfo;
-typedef struct Opt_font_UIFontFallbackGroupInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontFallbackGroupInfo value;
-} Opt_font_UIFontFallbackGroupInfo;
-typedef struct Ark_font_UIFontFallbackInfo {
-    /* kind: Interface */
-    Ark_String language;
-    Ark_String family;
-} Ark_font_UIFontFallbackInfo;
-typedef struct Opt_font_UIFontFallbackInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontFallbackInfo value;
-} Opt_font_UIFontFallbackInfo;
-typedef struct Ark_font_UIFontGenericInfo {
-    /* kind: Interface */
-    Ark_String family;
-    Array_font_UIFontAliasInfo alias;
-    Array_font_UIFontAdjustInfo adjust;
-} Ark_font_UIFontGenericInfo;
-typedef struct Opt_font_UIFontGenericInfo {
-    Ark_Tag tag;
-    Ark_font_UIFontGenericInfo value;
-} Opt_font_UIFontGenericInfo;
 typedef struct Ark_FontInfo {
     /* kind: Interface */
     Ark_String path;
@@ -28544,7 +28421,6 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_Edges (*edgeColors)(const Ark_Number* all);
     Ark_Edges (*edgeWidths)(const Ark_Number* all);
     Ark_Boolean (*focusControl_requestFocus)(const Ark_String* value);
-    Ark_font_UIFontConfig (*font_getUIFontConfig)();
     Ark_ComponentInfo (*getRectangleById)(const Ark_String* id);
     void (*postCardAction)(const Ark_Object* component,
                            const Ark_Object* action);
