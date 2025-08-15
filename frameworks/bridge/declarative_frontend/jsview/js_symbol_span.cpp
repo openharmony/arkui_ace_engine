@@ -60,25 +60,15 @@ void JSSymbolSpan::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
 
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
-        bool ret = ParseJsDimensionFpNG(info[0], fontSize, resObj, false);
-        if (resObj) {
-            RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
-        } else {
-            if (!ret || fontSize.IsNegative()) {
-                fontSize = theme->GetTextStyle().GetFontSize();
-            }
-            SymbolSpanModel::GetInstance()->SetFontSize(fontSize);
-            UnregisterSpanResource("fontSize");
-        }
-        return;
-    }
-
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+    RefPtr<ResourceObject> resObj;
+    UnregisterSpanResource("fontSize");
+    if (!ParseJsDimensionFpNG(info[0], fontSize, resObj, false)) {
         fontSize = theme->GetTextStyle().GetFontSize();
         SymbolSpanModel::GetInstance()->SetFontSize(fontSize);
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterSpanResource<CalcDimension>("fontSize", resObj, fontSize);
     }
     if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
@@ -96,6 +86,7 @@ void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)
 {
     std::vector<Color> symbolColor;
     if (SystemProperties::ConfigChangePerform()) {
+        UnregisterSpanResource("symbolColor");
         std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
         bool ret = ParseJsSymbolColor(info[0], symbolColor, true, resObjArr);
         if (!resObjArr.empty()) {
@@ -104,12 +95,10 @@ void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)
             CHECK_NULL_VOID(spanNode);
             spanNode->RegisterSymbolFontColorResource("symbolColor",
                 symbolColor, resObjArr);
-            return;
         }
         if (ret) {
             SymbolSpanModel::GetInstance()->SetFontColor(symbolColor);
         }
-        UnregisterSpanResource("symbolColor");
         return;
     }
     if (!ParseJsSymbolColor(info[0], symbolColor)) {

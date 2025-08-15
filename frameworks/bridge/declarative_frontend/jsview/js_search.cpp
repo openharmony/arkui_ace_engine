@@ -270,16 +270,18 @@ void JSSearch::Create(const JSCallbackInfo& info)
         ParseSearchValueObject(info, changeEventVal);
     }
     if (SystemProperties::ConfigChangePerform()) {
-        UnregisterResource("placeholder");
-        if (placeholderObject && placeholderResult) {
+        if (placeholderResult && placeholderObject) {
             RegisterResource<std::u16string>("placeholder", placeholderObject, placeholder);
+        } else {
+            UnregisterResource("placeholder");
         }
     }
 
     if (SystemProperties::ConfigChangePerform()) {
-        UnregisterResource("text");
-        if (textObject && textResult) {
+        if (textResult && textObject) {
             RegisterResource<std::u16string>("text", textObject, text);
+        } else {
+            UnregisterResource("text");
         }
     }
 }
@@ -363,16 +365,15 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     
     auto fontColorProp = param->GetProperty("fontColor");
     RefPtr<ResourceObject> colorObject;
+    UnregisterResource("searchButtonFontColor");
     if (fontColorProp->IsUndefined() || fontColorProp->IsNull() ||
         !ParseJsColor(fontColorProp, fontColor, colorObject)) {
         SearchModel::GetInstance()->ResetSearchButtonFontColor();
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     }
-    if (SystemProperties::ConfigChangePerform() && fontSizeObject) {
+    if (SystemProperties::ConfigChangePerform() && colorObject) {
         RegisterResource<Color>("searchButtonFontColor", colorObject, fontColor);
-    } else {
-        UnregisterResource("searchButtonFontColor");
     }
 
     auto autoDisable = param->GetProperty("autoDisable");
@@ -697,7 +698,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
             SearchModel::GetInstance()->ResetCaretColor();
             return;
         }
-        if (SystemProperties::ConfigChangePerform() && widthObject) {
+        if (SystemProperties::ConfigChangePerform() && colorObject) {
             RegisterResource<Color>("caretColor", colorObject, caretColor);
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
@@ -1417,6 +1418,7 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 void JSSearch::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    UnregisterResource("decorationColor");
     if (!tmpInfo->IsObject()) {
         SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
@@ -1438,13 +1440,9 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     }
     Color result = theme->GetTextStyle().GetTextDecorationColor();
     RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
-    if (ret && SystemProperties::ConfigChangePerform()) {
-        if (resourceObject) {
-            RegisterResource<Color>("decorationColor", resourceObject, result);
-        } else {
-            UnregisterResource("decorationColor");
-        }
+    ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
+    if (SystemProperties::ConfigChangePerform() && resourceObject) {
+        RegisterResource<Color>("decorationColor", resourceObject, result);
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
