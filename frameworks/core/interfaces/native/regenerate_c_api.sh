@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,11 +20,11 @@ OHOS_DIR_ARG=$5
 
 OHOS_DIR=$(realpath ${OHOS_DIR_ARG:=../../../../../../..})
 
-if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
+if [[ ! -d "$IDLIZE_PATH" && "x$IDLIZE_VER" == "x" ]]; then
     echo "Please define IDLIZE_PATH environment that points to idlize source directory."
     echo "Or define IDLIZE_VER environment that points to version in repository."
-    lv=`npm view @idlizer/arkgen dist-tags.latest`
-    nv=`npm view @idlizer/arkgen dist-tags.next`
+    lv=$(npm view @idlizer/arkgen dist-tags.latest)
+    nv=$(npm view @idlizer/arkgen dist-tags.next)
     echo "Latest version: ${lv} Next version: ${nv}"
     exit 1
 fi
@@ -34,7 +34,7 @@ TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
 INT_INF="${TMP_DIR}/interface"
 DTS_DIR=${DTS_DIR_ARG:=${INT_INF}/api/@internal/component/ets,${INT_INF}/api/global}
 BASE_DIR="${INT_INF}/api,${INT_INF}/kits,${INT_INF}/arkts"
-if [[ ! -d $IDLIZE_PATH ]]; then
+if [[ ! -d "$IDLIZE_PATH" ]]; then
 #    PREPROCESSOR="npx @idlizer/dtsgen@$IDLIZE_VER --run-preprocessor"
     GENERATOR=${GENERATOR_ARG:=npx --yes @idlizer/arkgen@$IDLIZE_VER --dts2peer}
 else
