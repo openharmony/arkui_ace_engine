@@ -30,6 +30,7 @@ group("advanced_ui_component_static") {
       "exceptionprompt:exceptionPrompt",
       "tabtitlebar:tabTitleBar",
       "composetitlebar:composeTitleBar",
+      "multinavigation:multiNavigation",
     ]
   }
 }
