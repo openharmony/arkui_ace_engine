@@ -2,7 +2,8 @@
     "DeletedPackages": [
         "global.rawFileDescriptor",
         "arkui.component.repeat",
-        "arkui.component.interop"
+        "arkui.component.interop",
+        "arkui.component.customComponent"
     ],
     "DeletedDeclarations": [
         "double",

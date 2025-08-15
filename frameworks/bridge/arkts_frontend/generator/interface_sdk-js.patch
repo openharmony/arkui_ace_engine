@@ -1,272 +1,42 @@
-diff --git a/api/@internal/component/ets/column.d.ts b/api/@internal/component/ets/column.d.ts
-index 96457a9ee..593121204 100644
---- a/api/@internal/component/ets/column.d.ts
-+++ b/api/@internal/component/ets/column.d.ts
-@@ -84,7 +84,7 @@ interface ColumnOptions {
-    * @since arkts {'1.1':'11','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  space?: string | number;
-+  space?: SpaceType;
+diff --git a/api/@ohos.base.static.d.ets b/api/@ohos.base.static.d.ets
+index 3e22da2fd..8e8496ec5 100644
+--- a/api/@ohos.base.static.d.ets
++++ b/api/@ohos.base.static.d.ets
+@@ -111,5 +111,5 @@
+   * };
+   * this.context.startAbility(want);
+   */
+- export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
++ export type RecordData = undefined | null | Object;
+
+\ No newline at end of file
+diff --git a/api/arkui/component/column.static.d.ets b/api/arkui/component/column.static.d.ets
+index f671d77ca..38dbf54a1 100644
+--- a/api/arkui/component/column.static.d.ets
++++ b/api/arkui/component/column.static.d.ets
+@@ -44,7 +44,7 @@ export interface ColumnOptions {
+      * @syscap SystemCapability.ArkUI.ArkUI.Full
+      * @since 20
+      */
+-    space?: string | number;
++    space?: SpaceType;
  }
- 
  /**
-@@ -110,7 +110,7 @@ interface ColumnOptionsV2 {
-    * @since arkts {'1.1':'18','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  space?: SpaceType;
-+  doNotUseMe: boolean;
+  * Column constructor options.
+@@ -61,7 +61,7 @@ export interface ColumnOptionsV2 {
+      * @syscap SystemCapability.ArkUI.ArkUI.Full
+      * @since 20
+      */
+-    space?: SpaceType;
++    doNotUseMe: boolean;
  }
- 
- /**
-@@ -207,19 +207,6 @@ interface ColumnInterface {
-    * @since arkts {'1.1':'18','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  (options?: ColumnOptions): ColumnAttribute;
--  /**
--   * Set the options.
--   *
--   * @param { ColumnOptions | ColumnOptionsV2 } [options] - column options
--   * @returns { ColumnAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @form
--   * @atomicservice
--   * @since arkts {'1.1':'18','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
-   (options?: ColumnOptions | ColumnOptionsV2): ColumnAttribute;
- }
- 
-diff --git a/api/@internal/component/ets/relative_container.d.ts b/api/@internal/component/ets/relative_container.d.ts
-index 1caa3043b..82659bec9 100644
---- a/api/@internal/component/ets/relative_container.d.ts
-+++ b/api/@internal/component/ets/relative_container.d.ts
-@@ -436,7 +436,7 @@ declare class RelativeContainerAttribute extends CommonMethod<RelativeContainerA
-    * @since arkts {'1.1':'12','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  barrier(barrierStyle: Array<LocalizedBarrierStyle>): RelativeContainerAttribute;
-+  // barrier(barrierStyle: Array<LocalizedBarrierStyle>): RelativeContainerAttribute;
- }
- 
- /**
-diff --git a/api/@internal/component/ets/row.d.ts b/api/@internal/component/ets/row.d.ts
-index b3981964e..0cfac7965 100644
---- a/api/@internal/component/ets/row.d.ts
-+++ b/api/@internal/component/ets/row.d.ts
-@@ -109,7 +109,7 @@ interface RowOptionsV2 {
-    * @since arkts {'1.1':'18','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  space?: SpaceType;
-+  doNotUseMe: boolean;
- }
- 
- /**
-@@ -148,58 +148,6 @@ interface RowOptionsV2 {
-  * @arkts 1.1&1.2
-  */
- interface RowInterface {
--  /**
--   * Called when the layout is set in the horizontal direction.
--   *
--   * @param { object } value
--   * @returns { RowAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @since 7
--   */
--  /**
--   * Called when the layout is set in the horizontal direction.
--   *
--   * @param { object } value
--   * @returns { RowAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @form
--   * @since 9
--   */
--  /**
--   * Called when the layout is set in the horizontal direction.
--   *
--   * @param { object } value
--   * @returns { RowAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @form
--   * @since 10
--   */
--  /**
--   * Called when the layout is set in the horizontal direction.
--   *
--   * @param { object } value
--   * @returns { RowAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @form
--   * @atomicservice
--   * @since 11
--   */
--  /**
--   * Called when the layout is set in the horizontal direction.
--   *
--   * Anonymous Object Rectification
--   * @param { ?RowOptions } options - row options
--   * @returns { RowAttribute }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @form
--   * @atomicservice
--   * @since arkts {'1.1':'18','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
--  (options?: RowOptions): RowAttribute;
-   /**
-    * Called when the layout is set in the horizontal direction.
-    *
-diff --git a/api/@internal/component/ets/sidebar.d.ts b/api/@internal/component/ets/sidebar.d.ts
-index d60a3cd14..17e68d541 100644
---- a/api/@internal/component/ets/sidebar.d.ts
-+++ b/api/@internal/component/ets/sidebar.d.ts
-@@ -21,7 +21,7 @@
- /*** if arkts 1.2 */
- import { Resource } from '../../global/resource'
- import { Length, ResourceColor, Dimension } from './units'
--import { CommonMethod, PixelMap, Bindable } from './common'
-+import { CommonMethod, PixelMap, Bindable, DividerStyle } from './common'
- /*** endif */
- 
- /**
-@@ -554,110 +554,6 @@ interface SideBarContainerInterface {
-   (type?: SideBarContainerType): SideBarContainerAttribute;
- }
- 
--/**
-- * Provides an interface for the style of a divider including stroke width, color, start margin
-- * and end margin
-- *
-- * @interface DividerStyle
-- * @syscap SystemCapability.ArkUI.ArkUI.Full
-- * @crossplatform
-- * @since 10
-- */
--/**
-- * Provides an interface for the style of a divider including stroke width, color, start margin
-- * and end margin
-- *
-- * @interface DividerStyle
-- * @syscap SystemCapability.ArkUI.ArkUI.Full
-- * @crossplatform
-- * @atomicservice
-- * @since arkts {'1.1':'11','1.2':'20'}
-- * @arkts 1.1&1.2
-- */
--interface DividerStyle {
--  /**
--   * Define the stroke width of the divider
--   *
--   * @type { Length }
--   * @default 1vp
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @since 10
--   */
--  /**
--   * Define the stroke width of the divider
--   *
--   * @type { Length }
--   * @default 1vp
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @atomicservice
--   * @since arkts {'1.1':'11','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
--  strokeWidth: Length;
--
--  /**
--   * Define the color of the divider
--   *
--   * @type { ?ResourceColor }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @since 10
--   */
--  /**
--   * Define the color of the divider
--   *
--   * @type { ?ResourceColor }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @atomicservice
--   * @since arkts {'1.1':'11','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
--  color?: ResourceColor;
--
--  /**
--   * Define the start margin of the divider
--   *
--   * @type { ?Length }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @since 10
--   */
--  /**
--   * Define the start margin of the divider
--   *
--   * @type { ?Length }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @atomicservice
--   * @since arkts {'1.1':'11','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
--  startMargin?: Length;
--
--  /**
--   * Define the end margin of the divider
--   *
--   * @type { ?Length }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @since 10
--   */
--  /**
--   * Define the end margin of the divider
--   *
--   * @type { ?Length }
--   * @syscap SystemCapability.ArkUI.ArkUI.Full
--   * @crossplatform
--   * @atomicservice
--   * @since arkts {'1.1':'11','1.2':'20'}
--   * @arkts 1.1&1.2
--   */
--  endMargin?: Length;
--}
--
- /**
-  * The attribute function of sidebar
-  *
-diff --git a/api/@internal/component/ets/toggle.d.ts b/api/@internal/component/ets/toggle.d.ts
-index 4f1a07f30..73b56ec38 100644
---- a/api/@internal/component/ets/toggle.d.ts
-+++ b/api/@internal/component/ets/toggle.d.ts
-@@ -255,7 +255,7 @@ declare interface ToggleConfiguration extends CommonConfiguration<ToggleConfigur
-    * @since arkts {'1.1':'12','1.2':'20'}
-    * @arkts 1.1&1.2
-    */
--  enabled: boolean;
-+  toggleEnabled: boolean;
- 
-   /**
-    * Trigger toggle select change
+ export declare interface ColumnAttribute extends CommonMethod {
+     /**
 diff --git a/api/arkui/component/common.static.d.ets b/api/arkui/component/common.static.d.ets
-index 31b466c06..e0668cde1 100644
+index 86edca87f..e7c3e1365 100644
 --- a/api/arkui/component/common.static.d.ets
 +++ b/api/arkui/component/common.static.d.ets
-@@ -7317,13 +7317,13 @@ export declare interface SheetOptions extends BindOptions {
+@@ -7356,13 +7356,13 @@ export declare interface SheetOptions extends BindOptions {
      /**
       * Defines sheet detents
       *
@@ -282,7 +52,7 @@ index 31b466c06..e0668cde1 100644
      /**
       * Background blur of the sheet. By default, there is no background blur.
       *
-@@ -7709,7 +7709,7 @@ export declare interface SheetOptions extends BindOptions {
+@@ -7748,7 +7748,7 @@ export declare interface SheetOptions extends BindOptions {
   * @atomicservice
   * @since 20
   */
@@ -291,7 +61,7 @@ index 31b466c06..e0668cde1 100644
  /**
   * Component State Styles.
   *
-@@ -10331,13 +10331,13 @@ export declare interface BackgroundOptions {
+@@ -10368,13 +10368,13 @@ export declare interface BackgroundOptions {
  /**
   * Defines the value of the custom property..
   *
@@ -307,7 +77,7 @@ index 31b466c06..e0668cde1 100644
  export declare interface CommonMethod {
      /**
       * Sets the width of the component or its horizontal layout policy. By default, the
-@@ -11076,7 +11076,7 @@ export declare interface CommonMethod {
+@@ -11113,7 +11113,7 @@ export declare interface CommonMethod {
       * @atomicservice
       * @since 20
       */
@@ -316,61 +86,180 @@ index 31b466c06..e0668cde1 100644
      /**
       * Digital crown input.
       *
-@@ -15346,4 +15346,4 @@ export declare function $$<T>(value: T): Bindable<T>;
+@@ -15396,4 +15396,4 @@ export declare function $$<T>(value: T): Bindable<T>;
   * @syscap SystemCapability.ArkUI.ArkUI.Full
   * @since 20
   */
 -export declare function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T;
 +export declare function applyStyles<T extends CommonMethod>(self: T, customStyles: CustomStyles): T;
-diff --git a/api/arkui/component/customComponent.d.ets b/api/arkui/component/customComponent.d.ets
-index cfd065cf4..64f7e4cc2 100644
---- a/api/arkui/component/customComponent.d.ets
-+++ b/api/arkui/component/customComponent.d.ets
-@@ -168,7 +168,7 @@ export declare abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_O
-      * @since 20
-      */
-     @ComponentBuilder
--    static $_instantiate(
-+    static $_instantiate<T, T_Options>(
-         factory: () => T,
-         initializers?: T_Options,
-         @Builder content?: () => void
-@@ -229,7 +229,7 @@ export declare abstract class CustomComponent<T extends CustomComponent<T, T_Opt
-      * @since 20
-      */
-     @ComponentBuilder
--    static $_instantiate(
-+    static $_instantiate<T, T_Options>(
-         factory: () => T,
-         initializers?: T_Options,
-         reuseId?: string,
-@@ -271,7 +271,7 @@ export declare abstract class CustomComponentV2<T extends CustomComponentV2<T, T
-      * @since 20
-      */
-     @ComponentBuilder
--    static $_instantiate(
-+    static $_instantiate<T, T_Options>(
-         factory: () => T,
-         initializers?: T_Options,
-         reuseId?: string,
-diff --git a/api/global/resource.d.ts b/api/global/resource.d.ts
-index 21a5ebe31..23a71edb9 100644
---- a/api/global/resource.d.ts
-+++ b/api/global/resource.d.ts
-@@ -96,14 +96,14 @@ export interface Resource {
-   /**
-    * Set params.
-    *
--   * @type { ?Array<Object | undefined> }
-+   * @type { ?Array<String> }
-    * @syscap SystemCapability.Global.ResourceManager
-    * @crossplatform
-    * @atomicservice
-    * @since 20
-    * @arkts 1.2
-    */
--  params?: Array<Object | undefined>;
-+  params?: Array<String>;
+diff --git a/api/arkui/component/lazyForEach.static.d.ets b/api/arkui/component/lazyForEach.static.d.ets
+index 9b39b0399..b286afd01 100644
+--- a/api/arkui/component/lazyForEach.static.d.ets
++++ b/api/arkui/component/lazyForEach.static.d.ets
+@@ -19,6 +19,7 @@
+  */
  
-   /**
-    * Set params.
+ import { Builder } from './builder';
++import { ItemGeneratorFunc, KeyGeneratorFunc } from './forEach';
+ import { ComponentBuilder } from './../stateManagement/runtime';
+ 
+ /**
+@@ -472,30 +473,6 @@ export interface IDataSource<T> {
+  */
+ export interface LazyForEachAttribute {}
+ 
+-/**
+- * Define item generator function.
+- *
+- * @typedef { function } ItemGeneratorFunc<T>
+- * @param { T } item - item in an array
+- * @param { number } index - index corresponding to an array item.
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @since 20
+- */
+-@Builder
+-declare type ItemGeneratorFunc<T> = (item: T, index: number) => void;
+-
+-/**
+- * Define key generator function.
+- *
+- * @typedef { function } KeyGeneratorFunc<T>
+- * @param { T } item - item in an array
+- * @param { number } index - index corresponding to an array item.
+- * @returns {string} Character string generated based on item and index
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @since 20
+- */
+-declare type KeyGeneratorFunc<T> = (item: T, index: number) => string;
+-
+ /**
+  * Enter the value to obtain the LazyForEach.
+  *
+diff --git a/api/arkui/component/pluginComponent.static.d.ets b/api/arkui/component/pluginComponent.static.d.ets
+index a9a9ed0b5..729c7b262 100644
+--- a/api/arkui/component/pluginComponent.static.d.ets
++++ b/api/arkui/component/pluginComponent.static.d.ets
+@@ -58,7 +58,7 @@ export interface PluginComponentTemplate {
+  * @systemapi
+  * @since 20
+  */
+-export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
++export type RecordData = undefined | null | Object;
+ 
+ /**
+  * Define options used to construct a plugin component.
+diff --git a/api/arkui/component/relativeContainer.static.d.ets b/api/arkui/component/relativeContainer.static.d.ets
+index 6dfb46e9a..3df0fd5de 100644
+--- a/api/arkui/component/relativeContainer.static.d.ets
++++ b/api/arkui/component/relativeContainer.static.d.ets
+@@ -246,7 +246,7 @@ export declare interface RelativeContainerAttribute extends CommonMethod {
+      * @syscap SystemCapability.ArkUI.ArkUI.Full
+      * @since 20
+      */
+-    default barrier(barrierStyle: Array<LocalizedBarrierStyle> | undefined): this;
++    //default barrier(barrierStyle: Array<LocalizedBarrierStyle> | undefined): this;
+     /**
+      * Set the attribute modifier
+      *
+diff --git a/api/arkui/component/sidebar.static.d.ets b/api/arkui/component/sidebar.static.d.ets
+index 9cd26d0a5..24154755b 100644
+--- a/api/arkui/component/sidebar.static.d.ets
++++ b/api/arkui/component/sidebar.static.d.ets
+@@ -22,7 +22,7 @@
+ 
+ import { Resource } from '../../global/resource';
+ import { Length, ResourceColor, Dimension } from './units';
+-import { CommonMethod, PixelMap, Bindable } from './common';
++import { CommonMethod, PixelMap, Bindable, DividerStyle } from './common';
+ import { memo, ComponentBuilder } from './../stateManagement/runtime';
+ 
+ /**
+@@ -179,53 +179,6 @@ export declare interface ButtonStyle {
+   icons?: ButtonIconOptions;
+ }
+ 
+-/**
+- * Provides an interface for the style of a divider including stroke width, color, start margin
+- * and end margin
+- *
+- * @interface DividerStyle
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @since 20
+- */
+-export interface DividerStyle {
+-  /**
+-   * Define the stroke width of the divider
+-   *
+-   * @type { Length }
+-   * @default 1vp
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 20
+-   */
+-  strokeWidth: Length;
+-
+-  /**
+-   * Define the color of the divider
+-   *
+-   * @type { ?ResourceColor }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 20
+-   */
+-  color?: ResourceColor;
+-
+-  /**
+-   * Define the start margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 20
+-   */
+-  startMargin?: Length;
+-
+-  /**
+-   * Define the end margin of the divider
+-   *
+-   * @type { ?Length }
+-   * @syscap SystemCapability.ArkUI.ArkUI.Full
+-   * @since 20
+-   */
+-  endMargin?: Length;
+-}
+-
+ /**
+  * The attribute function of sidebar
+  *
+diff --git a/api/arkui/component/toggle.static.d.ets b/api/arkui/component/toggle.static.d.ets
+index 9f018f7b8..26ab266d8 100644
+--- a/api/arkui/component/toggle.static.d.ets
++++ b/api/arkui/component/toggle.static.d.ets
+@@ -118,7 +118,7 @@ export declare interface ToggleConfiguration extends CommonConfiguration<ToggleC
+      * @syscap SystemCapability.ArkUI.ArkUI.Full
+      * @since 20
+      */
+-    enabled: boolean;
++    toggleEnabled: boolean;
+     /**
+      * Trigger toggle select change
+      *
+diff --git a/api/arkui/component/uiExtensionComponent.static.d.ets b/api/arkui/component/uiExtensionComponent.static.d.ets
+index 6a71e3246..bf5c00604 100644
+--- a/api/arkui/component/uiExtensionComponent.static.d.ets
++++ b/api/arkui/component/uiExtensionComponent.static.d.ets
+@@ -23,16 +23,7 @@ import { CommonMethod, TerminationInfo } from './common';
+ import { ComponentContent } from '../ComponentContent';
+ import { memo, ComponentBuilder } from './../stateManagement/runtime';
+ import { AttributeModifier, CommonMethod } from './common';
+-
+-/**
+- * Defines RecordData.
+- * 
+- * @typedef { undefined | null | Object | Record<string, RecordData> | Array<RecordData> } RecordData
+- * @syscap SystemCapability.ArkUI.ArkUI.Full
+- * @systemapi
+- * @since 20
+- */
+-export type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
++import { RecordData } from './pluginComponent';
+ 
+ /**
+  * Enumeration of different types of DpiFollowStrategy.

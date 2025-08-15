@@ -157,6 +157,7 @@
     "rootComponents": [
         "Root",
         "ComponentRoot",
+        "CustomBuilderRoot",
         "CommonMethod",
         "SecurityComponentMethod",
         "CommonTransition",
@@ -169,7 +170,8 @@
         "TimePickerDialog",
         "AlertDialog",
         "CanvasPattern",
-        "WithThemeAttribute"
+        "WithThemeAttribute",
+        "ToolBarItemAttribute"
     ],
     "parameterized": [
         "Indicator",
@@ -187,17 +189,10 @@
         "DigitIndicator"
     ],
     "components": {
-        "custom": [
-            "BaseCustomDialog",
-            "BaseCustomComponent",
-            "CustomComponent",
-            "CustomComponentV2"
-        ],
         "customNodeTypes": [
             "CustomNode"
         ],
         "handWritten": [
-            "BaseCustomDialog",
             "LocalStorage",
             "SyncedPropertyOneWay",
             "SubscribedAbstractProperty",
