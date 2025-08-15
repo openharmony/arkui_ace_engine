@@ -160,8 +160,6 @@ void ImageModelNG::ResetImage(FrameNode* frameNode)
     sourceInfo.SetIsFromReset(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    RefPtr<FrameNode> refNode = AceType::Claim(frameNode);
-    SetFrameNodeDraggable(refNode, false);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedLoadAlt(false);
