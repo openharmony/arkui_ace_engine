@@ -1567,6 +1567,7 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto context = titleButton->GetContextRefPtr();
     AnimationUtils::Animate(option, [weak = WeakPtr<FrameNode>(titleButton), color]() {
         auto titleButton = weak.Upgrade();
         auto buttonTitleNode = AceType::DynamicCast<FrameNode>(titleButton);
@@ -1574,7 +1575,7 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
         auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
         buttonTitleRenderContext->UpdateBackgroundColor(color);
         buttonTitleNode->MarkDirtyNode();
-    });
+    }, nullptr, nullptr, context);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(

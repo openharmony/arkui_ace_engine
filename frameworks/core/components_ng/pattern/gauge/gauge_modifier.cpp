@@ -75,7 +75,9 @@ void GaugeModifier::UpdateValue()
     option.SetDelay(ANIMATION_DELAY);
     option.SetCurve(curve);
     option.SetIteration(ANIMATION_TIMES);
-    AnimationUtils::Animate(option, [&]() { value_->Set(end_); });
+    auto host = pattern->GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
+    AnimationUtils::Animate(option, [&]() { value_->Set(end_); }, nullptr, nullptr, context);
 }
 
 void GaugeModifier::InitProperty()

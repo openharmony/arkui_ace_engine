@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -40,7 +41,8 @@ class ProgressModifier : public ContentModifier {
 public:
     explicit ProgressModifier(
         const WeakPtr<FrameNode>& host,
-        const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {});
+        const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {},
+        const WeakPtr<Pattern>& pattern = nullptr);
     ~ProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
 
@@ -191,6 +193,7 @@ private:
     bool dateUpdated_ = false;
     Dimension ringProgressLeftPadding_ = 0.0_vp;
     WeakPtr<FrameNode> host_;
+    WeakPtr<Pattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

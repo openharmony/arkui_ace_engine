@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -112,7 +113,7 @@ void PatternLockModifier::AttachProperties()
     AttachProperty(enableForeground_);
 }
 
-PatternLockModifier::PatternLockModifier()
+PatternLockModifier::PatternLockModifier(const WeakPtr<Pattern>& pattern) : pattern_(pattern)
 {
     CreateProperties();
     AttachProperties();
@@ -640,7 +641,11 @@ void PatternLockModifier::StartChallengeResultAnimate()
         AnimationOption option = AnimationOption();
         option.SetDuration(CONNECT_ANIMATION_DURATION_FIRST);
         option.SetCurve(Curves::SHARP);
-        AnimationUtils::Animate(option, [&]() { pointAnimateColor_->Set(LinearColor(correctColor_->Get())); });
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
+        AnimationUtils::Animate(
+            option, [&]() { pointAnimateColor_->Set(LinearColor(correctColor_->Get())); }, nullptr, nullptr, context);
     } else if (challengeResult_.value() == NG::PatternLockChallengeResult::WRONG) {
         pointAnimateColor_->Set(LinearColor(wrongColor_->Get()));
         auto pathColor = pathColor_->Get();
@@ -731,8 +736,11 @@ void PatternLockModifier::SetBackgroundCircleRadius(int32_t index)
             auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
                 BACKGROUND_RADIUS_SPRING_RESPONSE, BACKGROUND_RADIUS_SPRING_DAMPING);
             option.SetCurve(curve);
+            auto pattern = pattern_.Upgrade();
+            auto host = pattern? pattern->GetHost(): nullptr;
+            auto context = host? host->GetContextRefPtr(): nullptr;
             AnimationUtils::Animate(option,
-                [&]() { backgroundCircleRadius_.at(index)->Set(backgroundCircleRadius); });
+                [&]() { backgroundCircleRadius_.at(index)->Set(backgroundCircleRadius); }, nullptr, nullptr, context);
         } else {
             backgroundCircleRadius_.at(index)->Set(backgroundCircleRadius);
         }
@@ -763,8 +771,12 @@ void PatternLockModifier::SetActiveCircleRadius(int32_t index)
         AnimationOption option = AnimationOption();
         option.SetDuration(ACTIVE_RADIUS_ANIMATION_DURATION);
         option.SetCurve(Curves::FRICTION);
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
         AnimationUtils::Animate(
-            option, [&]() { activeCircleRadius_.at(index)->Set(circleRadius_->Get() * scaleActiveCircleRadius_); });
+            option, [&]() { activeCircleRadius_.at(index)->Set(circleRadius_->Get() * scaleActiveCircleRadius_); },
+            nullptr, nullptr, context);
     }
 }
 
@@ -784,8 +796,12 @@ void PatternLockModifier::SetLightRingCircleRadius(int32_t index)
         AnimationOption option = AnimationOption();
         option.SetDuration(LIGHT_RING_RADIUS_ANIMATION_DURATION);
         option.SetCurve(Curves::LINEAR);
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
         AnimationUtils::Animate(
-            option, [&]() { lightRingRadius_.at(index)->Set(circleRadius * scaleLightRingRadiusEnd_); });
+            option, [&]() { lightRingRadius_.at(index)->Set(circleRadius * scaleLightRingRadiusEnd_); },
+            nullptr, nullptr, context);
     }
 }
 
@@ -805,14 +821,19 @@ void PatternLockModifier::SetLightRingAlphaF(int32_t index)
         AnimationOption optionFirst = AnimationOption();
         optionFirst.SetDuration(LIGHT_RING_ALPHAF_ANIMATION_DURATION_FIRST);
         optionFirst.SetCurve(Curves::SHARP);
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
         optionFirst.SetOnFinishEvent([=] {
             AnimationOption optionSecond = AnimationOption();
             optionSecond.SetDuration(LIGHT_RING_ALPHAF_ANIMATION_DURATION_SECOND);
             optionSecond.SetCurve(Curves::SHARP);
-            AnimationUtils::Animate(optionSecond, [=]() { singleLightRingAlphaF->Set(LIGHT_RING_ALPHAF_START); });
+            AnimationUtils::Animate(optionSecond, [=]() { singleLightRingAlphaF->Set(LIGHT_RING_ALPHAF_START); },
+                nullptr, nullptr, context);
         });
         AnimationUtils::Animate(
-            optionFirst, [&]() { singleLightRingAlphaF->Set(LIGHT_RING_ALPHAF_END); }, optionFirst.GetOnFinishEvent());
+            optionFirst, [&]() { singleLightRingAlphaF->Set(LIGHT_RING_ALPHAF_END); }, optionFirst.GetOnFinishEvent(),
+            nullptr, context);
     }
 }
 
@@ -837,7 +858,10 @@ void PatternLockModifier::SetConnectedLineTailPoint(int32_t x, int32_t y)
         auto curve =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(CONNECTED_LINE_SPRING_RESPONSE, CONNECTED_LINE_SPRING_DAMPING);
         option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { connectedLineTailPoint_->Set(lastPoint); });
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
+        AnimationUtils::Animate(option, [&]() { connectedLineTailPoint_->Set(lastPoint); }, nullptr, nullptr, context);
     } else {
         connectedLineTailPoint_->Set(lastPoint);
     }
@@ -862,7 +886,10 @@ void PatternLockModifier::SetCanceledLineTailPoint()
     auto curve =
         AceType::MakeRefPtr<ResponsiveSpringMotion>(CANCELED_LINE_SPRING_RESPONSE, CANCELED_LINE_SPRING_DAMPING);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [&]() { canceledLineTailPoint_->Set(pointEnd); });
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto context = host? host->GetContextRefPtr(): nullptr;
+    AnimationUtils::Animate(option, [&]() { canceledLineTailPoint_->Set(pointEnd); }, nullptr, nullptr, context);
 }
 
 OffsetF PatternLockModifier::GetCanceledLineTailPoint() const
