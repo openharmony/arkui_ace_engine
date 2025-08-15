@@ -304,7 +304,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotColor, TestSize.Level1
     static const std::string PROP_NAME("indicator");
     static const std::string DEFAULT_VALUE(THEME_SWIPER_INDICATOR_COLOR.ToString());
     static const std::string EXPECTED_RESOURCE_COLOR =
-        Color::BLACK.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
+        Color::BLACK.ToString(); // Color::BLACK is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
@@ -524,7 +524,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
     static const std::string PROP_NAME("indicator");
     static const std::string DEFAULT_VALUE(Color::TRANSPARENT.ToString());
     static const std::string EXPECTED_RESOURCE_COLOR =
-        Color::BLACK.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
+        Color::BLACK.ToString(); // Color::BLACK is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
@@ -758,7 +758,7 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string EXPECTED_RESOURCE_COLOR =
-        Color::BLACK.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
+        Color::BLACK.ToString(); // Color::BLACK is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
