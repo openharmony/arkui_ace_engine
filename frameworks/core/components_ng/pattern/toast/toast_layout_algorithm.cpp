@@ -82,6 +82,12 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         toastProperty->ResetToastOffset();
     }
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(text);
+    auto padding = toastProperty->CreatePaddingAndBorder();
+    OffsetF textOffset = padding.Offset();
+    auto geometryNode = text->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameOffset(textOffset);
     text->Layout();
 }
 
