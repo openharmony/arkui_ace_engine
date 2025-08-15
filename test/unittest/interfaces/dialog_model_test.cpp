@@ -726,7 +726,7 @@ HWTEST_F(DialogModelTest, DialogModelTest047, TestSize.Level1)
     ArkUI_LengthMetricUnit unit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
     float distance = 1.0f;
     int32_t ret = SetKeyboardAvoidDistance(nativeDialogHandle, distance, unit);
-    ASSERT_NE(ret, 1);
+    ASSERT_NE(ret, 1); // success
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }
