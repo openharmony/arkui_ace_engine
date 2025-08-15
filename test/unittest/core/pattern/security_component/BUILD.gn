@@ -53,6 +53,7 @@ ohos_unittest("security_component_test_ng") {
       "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "input:libmmi-client",
+      "hilog:libhilog",
       "napi:ace_napi",
       "window_manager:scene_session",
     ]
