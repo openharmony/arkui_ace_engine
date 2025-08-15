@@ -3383,3 +3383,6 @@ frameworks/core/interfaces/native/generated/ @arkui-idlize
 [Koala mirror]
 frameworks/bridge/arkts_frontend/koala_mirror/ @huaweimaxuchu
 test/unittest/capi/ @huaweimaxuchu
+
+[window scene]
+test/unittest/core/pattern/window_scene/ @window_scene
