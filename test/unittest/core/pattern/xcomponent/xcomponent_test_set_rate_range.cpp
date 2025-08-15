@@ -92,18 +92,17 @@ HWTEST_F(XComponentTestSetRateRange, HandleSetExpectedRateRangeEventTest, TestSi
 {
 #ifdef ENABLE_ROSEN_BACKEND
     auto frameNode = CreateXComponentNode();
-    ASSERT_TRUE(frameNode);
+    ASSERT_NE(frameNode, nullptr);
     ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
+    ASSERT_NE(pattern, nullptr);
 
     pattern->nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
     EXPECT_NE(pattern->nativeXComponentImpl_, nullptr);
     pattern->nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(pattern->nativeXComponentImpl_));
     EXPECT_NE(pattern->nativeXComponent_, nullptr);
     EXPECT_NE(pattern->displaySync_, nullptr);
-    OH_NativeXComponent_ExpectedRateRange* rateRange =
-        (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
+    OH_NativeXComponent_ExpectedRateRange* rateRange = new OH_NativeXComponent_ExpectedRateRange();
     rateRange->min = 10;
     rateRange->max = 60;
     rateRange->expected = 30;
@@ -126,12 +125,12 @@ HWTEST_F(XComponentTestSetRateRange, HandleSetExpectedRateRangeEventTest, TestSi
     pattern->OnAttachToMainTree();
 
     auto extFrameNode = CreateXComponentNode();
-    ASSERT_TRUE(extFrameNode);
+    ASSERT_NE(extFrameNode, nullptr);
     auto extPattern = extFrameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(extPattern);
+    ASSERT_NE(extPattern, nullptr);
     extPattern->displaySync_->lastFrameRateRange_.reset();
     extPattern->OnDetachFromMainTree();
-    free(rateRange);
+    delete rateRange;
 #endif
 }
 
@@ -145,15 +144,14 @@ HWTEST_F(XComponentTestSetRateRange, SetExpectedRateRangeTest, TestSize.Level1)
 #ifdef ENABLE_ROSEN_BACKEND
     int32_t invalidRate = -1;
     auto frameNode = CreateXComponentNode();
-    ASSERT_TRUE(frameNode);
+    ASSERT_NE(frameNode, nullptr);
     ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPatternV2>();
-    ASSERT_TRUE(pattern);
+    ASSERT_NE(pattern, nullptr);
     auto code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
     ASSERT_EQ(code, CODE_NO_ERROR);
 
-    OH_NativeXComponent_ExpectedRateRange* rateRange =
-        (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
+    OH_NativeXComponent_ExpectedRateRange* rateRange = new OH_NativeXComponent_ExpectedRateRange();
     rateRange->min = 10;
     rateRange->max = 60;
     rateRange->expected = 30;
@@ -176,6 +174,7 @@ HWTEST_F(XComponentTestSetRateRange, SetExpectedRateRangeTest, TestSize.Level1)
     EXPECT_FALSE(pattern->displaySync_->lastFrameRateRange_->IsZero());
     pattern->OnAttachToMainTree();
     code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, invalidRate);
+    delete rateRange;
 #endif
 }
 
@@ -187,10 +186,10 @@ HWTEST_F(XComponentTestSetRateRange, SetExpectedRateRangeTest, TestSize.Level1)
 HWTEST_F(XComponentTestSetRateRange, HandleOnFrameEventTest, TestSize.Level0)
 {
     auto frameNode = CreateXComponentNode();
-    ASSERT_TRUE(frameNode);
+    ASSERT_NE(frameNode, nullptr);
     ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<XComponentPatternV2>();
-    ASSERT_TRUE(pattern);
+    ASSERT_NE(pattern, nullptr);
     auto code = XComponentModelNG::SetExpectedRateRange(AceType::RawPtr(frameNode), MIN_RATE, MAX_RATE, EXPECTED_RATE);
     ASSERT_EQ(code, CODE_NO_ERROR);
 
@@ -199,17 +198,17 @@ HWTEST_F(XComponentTestSetRateRange, HandleOnFrameEventTest, TestSize.Level0)
     pattern->nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(pattern->nativeXComponentImpl_));
     EXPECT_NE(pattern->nativeXComponent_, nullptr);
     EXPECT_NE(pattern->displaySync_, nullptr);
-    OH_NativeXComponent_ExpectedRateRange* rateRange =
-        (OH_NativeXComponent_ExpectedRateRange*)malloc(sizeof(OH_NativeXComponent_ExpectedRateRange));
+    OH_NativeXComponent_ExpectedRateRange* rateRange = new OH_NativeXComponent_ExpectedRateRange();
     rateRange->min = 10;
     rateRange->max = 60;
     rateRange->expected = 30;
     pattern->nativeXComponentImpl_->SetRateRange(rateRange);
     EXPECT_NE(pattern->nativeXComponentImpl_->GetRateRange(), nullptr);
     pattern->HandleOnFrameEvent();
-    EXPECT_TRUE(pattern->GetHost());
+    EXPECT_NE(pattern->GetHost(), nullptr);
     pattern->frameNode_.Reset();
     pattern->HandleOnFrameEvent();
-    EXPECT_FALSE(pattern->GetHost());
+    EXPECT_EQ(pattern->GetHost(), nullptr);
+    delete rateRange;
 }
 } // namespace OHOS::Ace::NG
