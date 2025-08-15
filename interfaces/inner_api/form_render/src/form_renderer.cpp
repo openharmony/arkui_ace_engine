@@ -27,8 +27,6 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char TRANSPARENT_COLOR[] = "#00FFFFFF";
 constexpr int32_t DOUBLE = 2;
-constexpr int32_t RSSURFACENODE_PROPERTIES_WIDTH_INDEX = 2;
-constexpr int32_t RSSURFACENODE_PROPERTIES_HEIGHT_INDEX = 3;
 } // namespace
 
 using EventHandler = OHOS::AppExecFwk::EventHandler;
@@ -114,6 +112,7 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
 
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("rsSurfaceNode is nullptr.");
         return;
     }
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
@@ -287,11 +286,6 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         HILOG_ERROR("uiContent_ is null");
         return;
     }
-    auto rsSurfaceNode = uiContent_->GetFormRootNode();
-    if (rsSurfaceNode == nullptr) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
     if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_)) {
@@ -302,9 +296,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        HILOG_INFO("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f",
-            rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
-            rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
+        HILOG_INFO("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f", width, height);
         if (!eventHandler) {
             HILOG_ERROR("eventHandler is null");
             return;
@@ -359,6 +351,8 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
     }
     if (ret == ERR_OK) {
         FormRenderEventReport::StopTimer(formJsInfo.formId);
+    } else {
+        HILOG_ERROR("Form OnSurfaceCreate failed, code:%{public}d", ret);
     }
 }
 
@@ -390,6 +384,8 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
     if (ret == ERR_OK) {
         FormRenderEventReport::StopTimer(formJsInfo.formId);
+    } else {
+        HILOG_ERROR("Form OnSurfaceReuse failed, code:%{public}d", ret);
     }
 }
 
@@ -457,7 +453,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
         if (checkFlag) {
             formRendererDelegate_ = renderRemoteObj;
         } else {
-            HILOG_ERROR("EventHandle - SetRenderDelegate error  checkFlag is false");
+            HILOG_ERROR("EventHandle - SetRenderDelegate error checkFlag is false");
         }
     }
 
@@ -536,11 +532,6 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f.",
         width_, height_, borderWidth_);
     SetAllowUpdate(allowUpdate_);
-    auto rsSurfaceNode = uiContent_->GetFormRootNode();
-    if (rsSurfaceNode == nullptr) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
     float width = width_ - borderWidth_ * DOUBLE;
     float height = height_ - borderWidth_ * DOUBLE;
     if (!NearEqual(width, uiContent_->GetFormWidth()) || !NearEqual(height, uiContent_->GetFormHeight())
@@ -549,9 +540,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         uiContent_->SetFormHeight(height);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
-        HILOG_INFO("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f",
-            rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
-            rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
+        HILOG_INFO("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f", width, height);
     }
     auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (backgroundColor_ != backgroundColor) {

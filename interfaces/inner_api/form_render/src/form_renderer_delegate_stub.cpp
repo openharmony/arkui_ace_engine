@@ -14,8 +14,10 @@
  */
 #include "form_renderer_delegate_stub.h"
 
-#include "form_renderer_hilog.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "appexecfwk_errors.h"
+#include "form_mgr_errors.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -80,7 +82,7 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     {
         std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
@@ -90,13 +92,13 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
@@ -118,20 +120,20 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel& data, Mess
     }
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode:%{public}s is nullptr", std::to_string(id).c_str());
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_FORM_SURFACE_NODE_NOT_FOUND;
     }
 
     HILOG_INFO("Stub reuse surfaceNode:%{public}s", std::to_string(id).c_str());
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);

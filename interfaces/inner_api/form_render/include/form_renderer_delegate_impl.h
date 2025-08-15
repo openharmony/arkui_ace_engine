@@ -68,7 +68,7 @@ public:
 
     int32_t OnUpdateFormDone(const int64_t formId) override;
 
-    void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+    void SetSurfaceCreateEventHandler(std::function<int32_t(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
@@ -79,7 +79,7 @@ public:
     void SetCheckManagerDelegate(std::function<void(bool&)>&& listener);
     void SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener);
 private:
-    std::function<void(
+    std::function<int32_t(
         const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
         surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;

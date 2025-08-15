@@ -14,6 +14,7 @@
  */
 #include "form_renderer_delegate_impl.h"
 
+#include "form_mgr_errors.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
@@ -24,20 +25,19 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(const std::shared_ptr<Rosen::R
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceNode) {
         HILOG_ERROR("surface is invalid");
-        return ERR_NULL_OBJECT;
+        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
     int64_t formId = formJsInfo.formId;
     if (formId < 0) {
         HILOG_ERROR("%{public}s error, the passed form id can't be negative.", __func__);
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 
     if (!surfaceCreateEventHandler_) {
         HILOG_ERROR("surfaceCreateEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
-    surfaceCreateEventHandler_(surfaceNode, formJsInfo, want);
-    return ERR_OK;
+    return surfaceCreateEventHandler_(surfaceNode, formJsInfo, want);
 }
 
 int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
@@ -134,7 +134,7 @@ int32_t FormRendererDelegateImpl::OnUpdateFormDone(const int64_t formId)
 }
 
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
-    std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
+    std::function<int32_t(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
 {
     surfaceCreateEventHandler_ = std::move(listener);

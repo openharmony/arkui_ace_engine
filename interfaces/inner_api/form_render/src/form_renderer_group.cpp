@@ -151,9 +151,10 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
         formRenderer_->RunFormPage(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
     } else { // initState_ == FormRendererInitState::INITIALIZED
-        HILOG_INFO("AttachForm compId is %{public}s, formRequests size is %{public}s, \
-            formJsInfo.formData.size is %{public}zu",
+        HILOG_INFO("AttachForm compId: %{public}s, currentCompId_: %{public}s, formRequests size is %{public}s, "
+                   "formJsInfo.formData.size is %{public}zu",
             compId.c_str(),
+            currentCompId_.c_str(),
             std::to_string(formRequests_.size()).c_str(),
             formJsInfo.formData.size());
         formRenderer_->AttachForm(want, formJsInfo);
