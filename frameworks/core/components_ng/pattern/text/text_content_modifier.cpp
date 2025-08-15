@@ -1030,6 +1030,7 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isR
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
     if (oldTextDecoration == type) {
+        UpdateTextDecorationColorAlpha();
         return;
     }
 
@@ -1040,8 +1041,12 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isR
     } else {
         textDecoration_ = std::nullopt;
     }
-    CHECK_NULL_VOID(textDecorationColorAlpha_);
+    UpdateTextDecorationColorAlpha();
+}
 
+void TextContentModifier::UpdateTextDecorationColorAlpha()
+{
+    CHECK_NULL_VOID(textDecorationColorAlpha_);
     if (textDecoration_.has_value() && textDecoration_.value() == TextDecoration::NONE) {
         textDecorationColorAlpha_->Set(0.0f);
     } else if (textDecorationColor_.has_value()) {

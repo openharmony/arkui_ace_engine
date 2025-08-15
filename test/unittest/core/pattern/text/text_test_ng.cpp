@@ -2817,6 +2817,11 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
     EXPECT_EQ(textStyle.GetFontSize().Value(), textContentModifier.fontSizeFloat_->Get());
+
+    textContentModifier.SetTextDecorationColor(Color::ColorFromString("#55FFFFFF"), false);
+    textContentModifier.textDecoration_ = TextDecoration::LINE_THROUGH;
+    textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(textContentModifier.textDecorationColorAlpha_->Get(), 85.0f);
 }
 
 /**
