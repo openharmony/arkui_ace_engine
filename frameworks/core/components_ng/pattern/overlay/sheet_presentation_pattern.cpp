@@ -1107,10 +1107,12 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
     StopModifySheetTransition();
-    AnimationUtils::Animate(
-        option,
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
     SetBottomStyleHotAreaInSubwindow();
 }
 
@@ -2193,6 +2195,9 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
     AnimationOption optionPosition;
     optionPosition.SetDuration(SHEET_ENTRY_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionPosition,
         [weak = WeakClaim(this)]() {
@@ -2202,7 +2207,7 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformTranslate({ 0.0f, Dimension(pattern->sheetOffsetY_), 0.0f });
         },
-        nullptr);
+        nullptr, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()> finish)
@@ -2210,6 +2215,9 @@ void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()>
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(SHEET_ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -2219,7 +2227,7 @@ void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()>
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
         },
-        finish);
+        finish, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartOffsetExitingAnimation()
@@ -2227,6 +2235,9 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
     AnimationOption optionPosition;
     optionPosition.SetDuration(SHEET_EXIT_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionPosition,
         [weak = WeakClaim(this)]() {
@@ -2237,7 +2248,7 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
             renderContext->UpdateTransformTranslate(
                 { 0.0f, Dimension(pattern->sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
         },
-        nullptr);
+        nullptr, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> finish)
@@ -2245,6 +2256,9 @@ void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> 
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(SHEET_EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -2254,7 +2268,7 @@ void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> 
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
         },
-        finish);
+        finish, nullptr, pipeline);
 }
 
 RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()
@@ -2315,19 +2329,16 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     isAnimationProcess_ = true;
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
+    auto pipeline = host->GetContextRefPtr();
     if (isTransitionIn) {
         HandleDragEndAccessibilityEvent();
-        animation_ = AnimationUtils::StartAnimation(
-            option,
-            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
-            option.GetOnFinishEvent());
+        animation_ = AnimationUtils::StartAnimation(option,
+            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset), option.GetOnFinishEvent(), nullptr, pipeline);
         SetBottomStyleHotAreaInSubwindow();
     } else {
         StopModifySheetTransition();
-        animation_ = AnimationUtils::StartAnimation(
-            option,
-            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
-            option.GetOnFinishEvent());
+        animation_ = AnimationUtils::StartAnimation(option,
+            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset), option.GetOnFinishEvent(), nullptr, pipeline);
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CleanSheet(host, GetSheetKey());

@@ -5305,6 +5305,7 @@ void OverlayManager::PlayDefaultModalIn(
             modal->AddToOcclusionMap(false);
         });
     }
+    auto pipeline = modalNode->GetContextRefPtr();
     AnimationUtils::Animate(
         option,
         [context]() {
@@ -5312,7 +5313,7 @@ void OverlayManager::PlayDefaultModalIn(
                 context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
 }
 
 void OverlayManager::PlayDefaultModalOut(
@@ -5323,6 +5324,7 @@ void OverlayManager::PlayDefaultModalOut(
     auto lastModalContext = lastModalNode->GetRenderContext();
     CHECK_NULL_VOID(lastModalContext);
     lastModalContext->UpdateOpacity(1.0);
+    auto pipeline = modalNode->GetContextRefPtr();
 
     option.SetOnFinishEvent(
         [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), overlayWeak = WeakClaim(this)] {
@@ -5352,7 +5354,7 @@ void OverlayManager::PlayDefaultModalOut(
                 context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
 }
 
 void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn)
@@ -6333,6 +6335,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode,
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto backgroundColor = sheetPattern->GetMaskBackgroundColor();
+    auto pipeline = sheetNode->GetContextRefPtr();
     if (isTransitionIn) {
         context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
         AnimationUtils::Animate(
@@ -6340,7 +6343,8 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode,
             [context, backgroundColor]() {
                 CHECK_NULL_VOID(context);
                 context->UpdateBackgroundColor(backgroundColor);
-            });
+            },
+            nullptr, nullptr, pipeline);
     } else {
         auto iter = sheetMaskClickEventMap_.find(maskNode->GetId());
         if (iter != sheetMaskClickEventMap_.end()) {
@@ -6356,7 +6360,8 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode,
             [context, backgroundColor]() {
                 CHECK_NULL_VOID(context);
                 context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
-            });
+            },
+            nullptr, nullptr, pipeline);
     }
 }
 

@@ -600,7 +600,9 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
     }
     property->Set(sheetPattern->GetStartProp());
     sheetPattern->SetBottomStyleHotAreaInSubwindow();
-    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(option,
+    auto pipeline = host->GetContextRefPtr();
+    std::shared_ptr<AnimationUtils::Animation> animation = AnimationUtils::StartAnimation(
+        option,
         [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext, offset]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
@@ -608,7 +610,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
                 ref->GetProperty()->Set(ref->GetHeight() + ref->GetSheetHeightUp());
             }
         },
-        finishCallback);
+        finishCallback, nullptr, pipeline);
     sheetPattern->SetAnimation(animation);
 }
 
