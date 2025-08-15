@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -1389,5 +1390,826 @@ HWTEST_F(IndexerPatternTestNg, CalcBubbleListSizeTest002, TestSize.Level1)
 
     EXPECT_EQ(result.Width(), expectedWidth);
     EXPECT_EQ(result.Height(), expectedHeight);
+}
+
+/**
+ * @tc.name: CalcBubbleListSizeTest003
+ * @tc.desc: CalcBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CalcBubbleListSizeTest003, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t popupSize = 8;
+    int32_t maxItemsSize = 5;
+    pattern->autoCollapse_ = false;
+
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto expectedWidth = CalcLength(bubbleSize);
+    auto expectedHeight = CalcLength(Dimension(BUBBLE_LIST_MAX_SIZE, DimensionUnit::VP).ConvertToPx());
+
+    auto result = pattern->CalcBubbleListSize(popupSize, maxItemsSize);
+
+    EXPECT_EQ(result.Width(), expectedWidth);
+    EXPECT_EQ(result.Height(), expectedHeight);
+}
+
+/**
+ * @tc.name: CalcBubbleListSizeTest004
+ * @tc.desc: CalcBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CalcBubbleListSizeTest004, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t popupSize = 5;
+    int32_t maxItemsSize = 5;
+    pattern->autoCollapse_ = false;
+
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto bubbleHeight = Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto bubbleDivider = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto expectedWidth = CalcLength(bubbleSize);
+    auto expectedHeight = CalcLength((bubbleHeight + bubbleDivider) * popupSize - bubbleDivider);
+
+    auto result = pattern->CalcBubbleListSize(popupSize, maxItemsSize);
+
+    EXPECT_EQ(result.Width(), expectedWidth);
+    EXPECT_EQ(result.Height(), expectedHeight);
+}
+
+/**
+ * @tc.name: CalcBubbleListSizeTest005
+ * @tc.desc: CalcBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CalcBubbleListSizeTest005, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t popupSize = 0;
+    int32_t maxItemsSize = 5;
+    pattern->autoCollapse_ = false;
+
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto bubbleHeight = Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto bubbleDivider = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto expectedWidth = CalcLength(bubbleSize);
+    auto expectedHeight = CalcLength((bubbleHeight + bubbleDivider) * popupSize - bubbleDivider);
+
+    auto result = pattern->CalcBubbleListSize(popupSize, maxItemsSize);
+
+    EXPECT_EQ(result.Width(), expectedWidth);
+    EXPECT_EQ(result.Height(), expectedHeight);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest001
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->childPressIndex_ = 2;
+    pattern->selected_ = 3;
+    pattern->autoCollapse_ = true;
+    pattern->currentListData_ = { "A", "B", "C", "D", "E" };
+    pattern->lastPopupIndex_ = -1;
+    pattern->lastPopupSize_ = 0;
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    pattern->popupNode_->AddChild(stackNode);
+    stackNode->AddChild(listNode);
+
+    auto expectedSize = CalcSize(CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx()),
+        CalcLength(Dimension(BUBBLE_COLLAPSE_LIST_MAX_SIZE, DimensionUnit::VP).ConvertToPx()));
+
+    pattern->CalcBubbleListSize(6, INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE);
+    pattern->UpdateBubbleListSize();
+
+    MeasureProperty measureProperty;
+    EXPECT_EQ(pattern->lastPopupIndex_, 2);
+    EXPECT_EQ(pattern->lastPopupSize_, INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE);
+    EXPECT_EQ(measureProperty.selfIdealSize, expectedSize);
+    EXPECT_EQ(measureProperty.selfIdealSize.has_value(), true);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest002
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest002, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->childPressIndex_ = -1;
+    pattern->selected_ = 3;
+    pattern->autoCollapse_ = false;
+    pattern->currentListData_ = { "A", "B", "C", "D", "E" };
+    pattern->lastPopupIndex_ = 2;
+    pattern->lastPopupSize_ = 4;
+
+    auto childNode = indexNode->GetChildAtIndex(0);
+    ASSERT_NE(childNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    pattern->popupNode_->AddChild(childNode);
+    childNode->AddChild(listNode);
+
+    pattern->UpdateBubbleListSize();
+
+    EXPECT_EQ(pattern->lastPopupIndex_, 3);
+    EXPECT_EQ(pattern->lastPopupSize_, 5);
+
+    MeasureProperty measureProperty;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto expectedSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 5));
+    EXPECT_EQ(measureProperty.selfIdealSize, expectedSize);
+    EXPECT_EQ(measureProperty.selfIdealSize.has_value(), true);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest003
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest003, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->childPressIndex_ = -1;
+    pattern->selected_ = 3;
+    pattern->autoCollapse_ = false;
+    pattern->currentListData_ = { "A", "B", "C", "D" };
+    pattern->lastPopupIndex_ = 3;
+    pattern->lastPopupSize_ = 4;
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN);
+    auto childNode = indexNode->GetChildAtIndex(0);
+    ASSERT_NE(childNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    pattern->popupNode_->AddChild(childNode);
+    childNode->AddChild(listNode);
+
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(listLayoutProperty, nullptr);
+
+    pattern->CreateBubbleListView();
+    pattern->UpdateBubbleListSize();
+
+    EXPECT_EQ(pattern->lastPopupIndex_, 3);
+    EXPECT_EQ(pattern->lastPopupSize_, 4);
+
+    MeasureProperty measureProperty;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto expectedSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * 4));
+
+    EXPECT_EQ(measureProperty.selfIdealSize, expectedSize);
+    EXPECT_EQ(measureProperty.selfIdealSize.has_value(), true);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest004
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest004, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->popupNode_ = nullptr;
+    pattern->UpdateBubbleListSize();
+
+    EXPECT_EQ(pattern->lastPopupIndex_, -1);
+    EXPECT_EQ(pattern->lastPopupSize_, 0);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest005
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest005, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->currentListData_ = { "A", "B", "C" };
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->UpdateBubbleListSize();
+
+    EXPECT_EQ(pattern->lastPopupIndex_, -1);
+    EXPECT_EQ(pattern->lastPopupSize_, 0);
+}
+
+/**
+ * @tc.name: UpdateBubbleListSizeTest006
+ * @tc.desc: UpdateBubbleListSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListSizeTest006, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->childPressIndex_ = -1;
+    pattern->selected_ = 0;
+    pattern->autoCollapse_ = true;
+    pattern->currentListData_.clear();
+    pattern->lastPopupIndex_ = -1;
+    pattern->lastPopupSize_ = 0;
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    pattern->popupNode_->AddChild(stackNode);
+    stackNode->AddChild(listNode);
+
+    auto expectedSize = CalcSize(CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx()),
+        CalcLength(Dimension(BUBBLE_ITEM_SIZE, DimensionUnit::VP).ConvertToPx()));
+
+    pattern->CalcBubbleListSize(1, INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE);
+    pattern->UpdateBubbleListSize();
+
+    MeasureProperty measureProperty;
+    EXPECT_EQ(pattern->lastPopupIndex_, 0);
+    EXPECT_EQ(pattern->lastPopupSize_, 1);
+    EXPECT_EQ(measureProperty.selfIdealSize, expectedSize);
+    EXPECT_EQ(measureProperty.selfIdealSize.has_value(), true);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest001
+ * @tc.desc: CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->popupNode_->AddChild(stackNode);
+    pattern->autoCollapse_ = true;
+    pattern->currentListData_ = { "A", "B", "C" };
+
+    int32_t clickListenerCount = 0;
+    pattern->AddListItemClickListener(indexNode, clickListenerCount);
+
+    pattern->CreateBubbleListView();
+    EXPECT_EQ(stackNode->GetChildren().size(), 1);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+    EXPECT_NE(listNode->GetPattern<ListPattern>(), nullptr);
+    EXPECT_EQ(listNode->GetChildren().size(), 4);
+
+    auto firstItem = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
+    ASSERT_NE(firstItem, nullptr);
+    EXPECT_EQ(firstItem->GetTag(), V2::LIST_ITEM_ETS_TAG);
+    EXPECT_EQ(firstItem->GetChildren().size(), 1);
+    auto letterNode = AceType::DynamicCast<FrameNode>(firstItem->GetFirstChild());
+    ASSERT_NE(letterNode, nullptr);
+    EXPECT_EQ(letterNode->GetTag(), V2::TEXT_ETS_TAG);
+
+    for (uint32_t i = 1; i <= 3; i++) {
+        auto listItem = AceType::DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        ASSERT_NE(listItem, nullptr);
+        EXPECT_EQ(listItem->GetTag(), V2::LIST_ITEM_ETS_TAG);
+        EXPECT_EQ(listItem->GetChildren().size(), 1);
+        auto textNode = AceType::DynamicCast<FrameNode>(listItem->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+        EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
+    }
+    EXPECT_EQ(clickListenerCount, 3);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest002
+ * @tc.desc: CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest002, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto child = indexNode->GetChildAtIndex(-1);
+    ASSERT_NE(child, nullptr);
+    pattern->popupNode_->AddChild(child);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+    child->AddChild(listNode);
+
+    auto listItemNode =
+        FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    ASSERT_NE(listItemNode, nullptr);
+    listNode->AddChild(listItemNode);
+
+    int32_t clickListenerCount = 0;
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN);
+    pattern->autoCollapse_ = false;
+    pattern->currentListData_.clear();
+    pattern->AddListItemClickListener(indexNode, clickListenerCount);
+    pattern->CreateBubbleListView();
+
+    EXPECT_EQ(listNode->GetChildren().size(), 0);
+    EXPECT_EQ(clickListenerCount, 0);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest003
+ * @tc.desc: Test CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest003, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->popupNode_ = nullptr;
+    EXPECT_EQ(pattern->popupNode_, nullptr);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest004
+ * @tc.desc: CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest004, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto lastChild = indexNode->GetChildAtIndex(-1);
+    pattern->popupNode_->AddChild(lastChild);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN);
+    pattern->CreateBubbleListView();
+    EXPECT_EQ(lastChild, nullptr);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest005
+ * @tc.desc: CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest005, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->currentListData_ = { "X" };
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->CreateBubbleListView();
+    int32_t childSize = pattern->popupNode_->GetChildren().size();
+    EXPECT_EQ(childSize, 0);
+}
+
+/**
+ * @tc.name: CreateBubbleListViewTest006
+ * @tc.desc: CreateBubbleListView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, CreateBubbleListViewTest006, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto stackNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    pattern->popupNode_->AddChild(stackNode);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+    stackNode->AddChild(listNode);
+
+    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    pattern->autoCollapse_ = false;
+    pattern->currentListData_ = { "Item1", "Item2" };
+
+    int32_t clickListenerCount = 0;
+    pattern->AddListItemClickListener(stackNode, clickListenerCount);
+    pattern->CreateBubbleListView();
+    EXPECT_EQ(stackNode->GetChildren().size(), 1);
+    EXPECT_EQ(listNode->GetChildren().size(), 2);
+
+    for (uint32_t i = 0; i < 2; i++) {
+        auto listItem = AceType::DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        ASSERT_NE(listItem, nullptr);
+        EXPECT_EQ(listItem->GetTag(), V2::LIST_ITEM_ETS_TAG);
+        EXPECT_EQ(listItem->GetChildren().size(), 1);
+        auto textNode = AceType::DynamicCast<FrameNode>(listItem->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+        EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
+    }
+    EXPECT_EQ(clickListenerCount, 2);
+}
+
+/**
+ * @tc.name: UpdatePopupListGradientViewTest001
+ * @tc.desc: UpdatePopupListGradientView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdatePopupListGradientViewTest001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto childNode = indexNode->GetChildAtIndex(0);
+    ASSERT_NE(childNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    childNode->AddChild(listNode);
+    pattern->popupNode_->AddChild(childNode);
+
+    listPattern->startIndex_ = 0;
+    listPattern->isStackFromEnd_ = false;
+
+    pattern->UpdatePopupListGradientView(5, 10);
+    EXPECT_EQ(listPattern->IsAtTop(), true);
+}
+
+/**
+ * @tc.name: UpdatePopupListGradientViewTest002
+ * @tc.desc: UpdatePopupListGradientView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdatePopupListGradientViewTest002, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto childNode = indexNode->GetChildAtIndex(0);
+    ASSERT_NE(childNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+
+    childNode->AddChild(listNode);
+    pattern->popupNode_->AddChild(childNode);
+
+    listPattern->endIndex_ = 0;
+    listPattern->endMainPos_ = 0.0f;
+    listPattern->currentDelta_ = 0.0f;
+    listPattern->contentMainSize_ = 0.0f;
+    listPattern->contentEndOffset_ = 0.0f;
+    listPattern->maxListItemIndex_ = 0;
+    listPattern->isStackFromEnd_ = true;
+
+    pattern->UpdatePopupListGradientView(5, 10);
+    EXPECT_EQ(listPattern->IsAtBottom(), true);
+}
+
+/**
+ * @tc.name: UpdatePopupListGradientViewTest003
+ * @tc.desc: UpdatePopupListGradientView
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdatePopupListGradientViewTest003, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto childNode = indexNode->GetChildAtIndex(0);
+    ASSERT_NE(childNode, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    childNode->AddChild(listNode);
+    pattern->popupNode_->AddChild(childNode);
+
+    auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+    ASSERT_NE(listEventHub, nullptr);
+
+    int32_t count = 0;
+    auto callback = [&count](Dimension, ScrollState) { count++; };
+    listEventHub->SetOnScroll(callback);
+    pattern->UpdatePopupListGradientView(15, 10);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: UpdateBubbleListItemTest001
+ * @tc.desc: UpdateBubbleListItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListItemTest001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto indexTheme = pipeline->GetTheme<IndexerTheme>();
+    ;
+    ASSERT_NE(indexTheme, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    for (int i = 0; i < 3; i++) {
+        auto listItemNode =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        listNode->AddChild(listItemNode);
+    }
+    indexTheme->popupTextStyle_.SetFontSize(Dimension(20));
+    pattern->autoCollapse_ = false;
+    pattern->UpdateBubbleListItem(listNode, indexTheme);
+
+    auto defaultFontSizeValue = Dimension(0);
+    for (int i = 0; i < 3; i++) {
+        auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        ASSERT_NE(listItemNode, nullptr);
+
+        auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+        ASSERT_NE(listItemProperty, nullptr);
+
+        auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textLayoutProperty, nullptr);
+
+        auto fontSizeValue = textLayoutProperty->GetFontSizeValue(defaultFontSizeValue);
+        EXPECT_TRUE(textLayoutProperty->HasFontSize());
+        EXPECT_EQ(fontSizeValue, Dimension(20));
+    }
+}
+
+/**
+ * @tc.name: UpdateBubbleListItemTest002
+ * @tc.desc: UpdateBubbleListItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListItemTest002, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto indexTheme = pipeline->GetTheme<IndexerTheme>();
+    ;
+    ASSERT_NE(indexTheme, nullptr);
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+
+    for (int i = 0; i < 3; i++) {
+        auto listItemNode =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        listNode->AddChild(listItemNode);
+    }
+    indexTheme->popupTextStyle_.SetFontWeight(FontWeight::BOLD);
+    pattern->autoCollapse_ = false;
+    pattern->UpdateBubbleListItem(listNode, indexTheme);
+
+    auto defaultFontWeightValue = FontWeight::W100;
+    for (int i = 0; i < 3; i++) {
+        auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        ASSERT_NE(listItemNode, nullptr);
+
+        auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+        ASSERT_NE(listItemProperty, nullptr);
+
+        auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textLayoutProperty, nullptr);
+
+        auto fontWeightValue = textLayoutProperty->GetFontWeightValue(defaultFontWeightValue);
+        EXPECT_TRUE(textLayoutProperty->HasFontWeight());
+        EXPECT_EQ(fontWeightValue, FontWeight::BOLD);
+    }
+}
+
+/**
+ * @tc.name: UpdateBubbleListItemTest003
+ * @tc.desc: UpdateBubbleListItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, UpdateBubbleListItemTest003, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(element);
+
+    auto indexNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(indexNode, nullptr);
+
+    auto pattern = indexNode->GetPattern<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto indexTheme = pipeline->GetTheme<IndexerTheme>();
+    ;
+    ASSERT_NE(indexTheme, nullptr);
+
+    pattern->currentListData_ = { "One", "Two", "Three", "Four" };
+    pattern->popupClickedIndex_ = 0;
+
+    indexTheme->popupSelectedTextColor_ = Color::GREEN;
+    indexTheme->popupUnselectedTextColor_ = Color::GRAY;
+
+    auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
+    ASSERT_NE(listNode, nullptr);
+    for (int i = 0; i < 4; i++) {
+        auto listItemNode =
+            FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        ASSERT_NE(listItemNode, nullptr);
+        auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+        listItemNode->AddChild(textNode);
+        listNode->AddChild(listItemNode);
+    }
+    pattern->UpdateBubbleListItem(listNode, indexTheme);
+    auto defaultValue = Color::BLACK;
+    for (int i = 0; i < 4; i++) {
+        auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        ASSERT_NE(listItemNode, nullptr);
+        auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        ASSERT_NE(textNode, nullptr);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textLayoutProperty, nullptr);
+        if (i == 0) {
+            EXPECT_EQ(textLayoutProperty->GetTextColorValue(defaultValue), Color::GREEN);
+        } else {
+            EXPECT_EQ(textLayoutProperty->GetTextColorValue(defaultValue), Color::GRAY);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
