@@ -659,6 +659,8 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
         color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
+    // Fix the svg collision bug with the foreground color placeholder 0x00000001.
+    ViewAbstractModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
 }
 
 void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
