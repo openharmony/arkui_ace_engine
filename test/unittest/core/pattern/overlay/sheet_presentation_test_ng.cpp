@@ -1544,7 +1544,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-
+    ASSERT_NE(sheetNode, nullptr);
     auto renderContext = sheetNode->GetRenderContext();
 
     /**

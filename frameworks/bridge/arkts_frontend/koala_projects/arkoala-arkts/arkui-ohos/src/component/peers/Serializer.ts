@@ -21,7 +21,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode, PopupButton } from "./../common"
+import { SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents, AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode, PopupButton } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
@@ -22225,55 +22225,126 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_detents_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_detents_type)) {
             const value_detents_value  = value_detents!
-            const value_detents_value_0  = value_detents_value[0]
-            let value_detents_value_0_type : int32 = RuntimeType.UNDEFINED
-            value_detents_value_0_type = runtimeType(value_detents_value_0)
-            if (TypeChecker.isSheetSize(value_detents_value_0)) {
+            let value_detents_value_type : int32 = RuntimeType.UNDEFINED
+            value_detents_value_type = runtimeType(value_detents_value)
+            if ((RuntimeType.OBJECT == value_detents_value_type) && (value_detents instanceof SingleLengthDetent)) {
                 valueSerializer.writeInt8(0 as int32)
-                const value_detents_value_0_0  = value_detents_value_0 as SheetSize
-                valueSerializer.writeInt32(TypeChecker.SheetSize_ToNumeric(value_detents_value_0_0))
+                const value_detents_value_0  = value_detents_value as SingleLengthDetent
+                const value_detents_value_0_0  = value_detents_value_0[0]
+                let value_detents_value_0_0_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_0_0_type = runtimeType(value_detents_value_0_0)
+                if (TypeChecker.isSheetSize(value_detents_value_0_0)) {
+                    valueSerializer.writeInt8(0 as int32)
+                    const value_detents_value_0_0_0  = value_detents_value_0_0 as SheetSize
+                    valueSerializer.writeInt32(value_detents_value_0_0_0.valueOf())
+                }
+                else if ((RuntimeType.STRING == value_detents_value_0_0_type) || (RuntimeType.NUMBER == value_detents_value_0_0_type) || (RuntimeType.OBJECT == value_detents_value_0_0_type)) {
+                    valueSerializer.writeInt8(1 as int32)
+                    const value_detents_value_0_0_1  = value_detents_value_0_0 as Length
+                    let value_detents_value_0_0_1_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_0_0_1_type = runtimeType(value_detents_value_0_0_1)
+                    valueSerializer.writeLength(value_detents_value_0_0_1)
+                }
             }
-            else if (((RuntimeType.NUMBER) == (value_detents_value_0_type)) || ((RuntimeType.STRING) == (value_detents_value_0_type)) || (((RuntimeType.OBJECT) == (value_detents_value_0_type)) && (TypeChecker.isResource(value_detents_value_0, false, false, false, false, false)))) {
+            else if ((RuntimeType.OBJECT == value_detents_value_type)  && (value_detents instanceof DoubleLengthDetents) ) {
                 valueSerializer.writeInt8(1 as int32)
-                const value_detents_value_0_1  = value_detents_value_0 as Length
-                valueSerializer.writeLength(value_detents_value_0_1)
-            }
-            const value_detents_value_1  = value_detents_value[1]
-            let value_detents_value_1_type : int32 = RuntimeType.UNDEFINED
-            value_detents_value_1_type = runtimeType(value_detents_value_1)
-            valueSerializer.writeInt8(value_detents_value_1_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_detents_value_1_type)) {
-                const value_detents_value_1_value  = value_detents_value_1!
-                let value_detents_value_1_value_type : int32 = RuntimeType.UNDEFINED
-                value_detents_value_1_value_type = runtimeType(value_detents_value_1_value)
-                if (TypeChecker.isSheetSize(value_detents_value_1_value)) {
+                const value_detents_value_1  = value_detents_value as DoubleLengthDetents
+                const value_detents_value_1_0  = value_detents_value_1[0]
+                let value_detents_value_1_0_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_1_0_type = runtimeType(value_detents_value_1_0)
+                if (TypeChecker.isSheetSize(value_detents_value_1_0)) {
                     valueSerializer.writeInt8(0 as int32)
-                    const value_detents_value_1_value_0  = value_detents_value_1_value as SheetSize
-                    valueSerializer.writeInt32(TypeChecker.SheetSize_ToNumeric(value_detents_value_1_value_0))
+                    const value_detents_value_1_0_0  = value_detents_value_1_0 as SheetSize
+                    valueSerializer.writeInt32(value_detents_value_1_0_0.valueOf())
                 }
-                else if (((RuntimeType.NUMBER) == (value_detents_value_1_value_type)) || ((RuntimeType.STRING) == (value_detents_value_1_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_1_value_type)) && (TypeChecker.isResource(value_detents_value_1_value, false, false, false, false, false)))) {
+                else if ((RuntimeType.STRING == value_detents_value_1_0_type) || (RuntimeType.NUMBER == value_detents_value_1_0_type) || (RuntimeType.OBJECT == value_detents_value_1_0_type)) {
                     valueSerializer.writeInt8(1 as int32)
-                    const value_detents_value_1_value_1  = value_detents_value_1_value as Length
-                    valueSerializer.writeLength(value_detents_value_1_value_1)
+                    const value_detents_value_1_0_1  = value_detents_value_1_0 as Length
+                    let value_detents_value_1_0_1_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_1_0_1_type = runtimeType(value_detents_value_1_0_1)
+                    valueSerializer.writeLength(value_detents_value_1_0_1)
+                }
+                const value_detents_value_1_1  = value_detents_value_1[1]
+                let value_detents_value_1_1_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_1_1_type = runtimeType(value_detents_value_1_1)
+                valueSerializer.writeInt8((value_detents_value_1_1_type).toChar())
+                if ((RuntimeType.UNDEFINED) != (value_detents_value_1_1_type)) {
+                    const value_detents_value_1_1_value  = value_detents_value_1_1!
+                    let value_detents_value_1_1_value_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_1_1_value_type = runtimeType(value_detents_value_1_1_value)
+                    if (TypeChecker.isSheetSize(value_detents_value_1_1_value)) {
+                        valueSerializer.writeInt8(0 as int32)
+                        const value_detents_value_1_1_value_0  = value_detents_value_1_1_value as SheetSize
+                        valueSerializer.writeInt32(value_detents_value_1_1_value_0.valueOf())
+                    }
+                    else if ((RuntimeType.STRING == value_detents_value_1_1_value_type) || (RuntimeType.NUMBER == value_detents_value_1_1_value_type) || (RuntimeType.OBJECT == value_detents_value_1_1_value_type)) {
+                        valueSerializer.writeInt8(1 as int32)
+                        const value_detents_value_1_1_value_1  = value_detents_value_1_1_value as Length
+                        let value_detents_value_1_1_value_1_type : int32 = RuntimeType.UNDEFINED
+                        value_detents_value_1_1_value_1_type = runtimeType(value_detents_value_1_1_value_1)
+                        valueSerializer.writeLength(value_detents_value_1_1_value_1)
+                    }
                 }
             }
-            const value_detents_value_2  = value_detents_value[2]
-            let value_detents_value_2_type : int32 = RuntimeType.UNDEFINED
-            value_detents_value_2_type = runtimeType(value_detents_value_2)
-            valueSerializer.writeInt8(value_detents_value_2_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_detents_value_2_type)) {
-                const value_detents_value_2_value  = value_detents_value_2!
-                let value_detents_value_2_value_type : int32 = RuntimeType.UNDEFINED
-                value_detents_value_2_value_type = runtimeType(value_detents_value_2_value)
-                if (TypeChecker.isSheetSize(value_detents_value_2_value)) {
+            else if ((RuntimeType.OBJECT == value_detents_value_type) && (value_detents instanceof TripleLengthDetents)) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_detents_value_2  = value_detents_value as TripleLengthDetents
+                const value_detents_value_2_0  = value_detents_value_2[0]
+                let value_detents_value_2_0_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_2_0_type = runtimeType(value_detents_value_2_0)
+                if (TypeChecker.isSheetSize(value_detents_value_2_0)) {
                     valueSerializer.writeInt8(0 as int32)
-                    const value_detents_value_2_value_0  = value_detents_value_2_value as SheetSize
-                    valueSerializer.writeInt32(TypeChecker.SheetSize_ToNumeric(value_detents_value_2_value_0))
+                    const value_detents_value_2_0_0  = value_detents_value_2_0 as SheetSize
+                    valueSerializer.writeInt32(value_detents_value_2_0_0.valueOf())
                 }
-                else if (((RuntimeType.NUMBER) == (value_detents_value_2_value_type)) || ((RuntimeType.STRING) == (value_detents_value_2_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_2_value_type)) && (TypeChecker.isResource(value_detents_value_2_value, false, false, false, false, false)))) {
+                else if ((RuntimeType.STRING == value_detents_value_2_0_type) || (RuntimeType.NUMBER == value_detents_value_2_0_type) || (RuntimeType.OBJECT == value_detents_value_2_0_type)) {
                     valueSerializer.writeInt8(1 as int32)
-                    const value_detents_value_2_value_1  = value_detents_value_2_value as Length
-                    valueSerializer.writeLength(value_detents_value_2_value_1)
+                    const value_detents_value_2_0_1  = value_detents_value_2_0 as Length
+                    let value_detents_value_2_0_1_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_2_0_1_type = runtimeType(value_detents_value_2_0_1)
+                    valueSerializer.writeLength(value_detents_value_2_0_1)
+                }
+                const value_detents_value_2_1  = value_detents_value_2[1]
+                let value_detents_value_2_1_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_2_1_type = runtimeType(value_detents_value_2_1)
+                valueSerializer.writeInt8((value_detents_value_2_1_type).toChar())
+                if ((RuntimeType.UNDEFINED) != (value_detents_value_2_1_type)) {
+                    const value_detents_value_2_1_value  = value_detents_value_2_1!
+                    let value_detents_value_2_1_value_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_2_1_value_type = runtimeType(value_detents_value_2_1_value)
+                    if (TypeChecker.isSheetSize(value_detents_value_2_1_value)) {
+                        valueSerializer.writeInt8(0 as int32)
+                        const value_detents_value_2_1_value_0  = value_detents_value_2_1_value as SheetSize
+                        valueSerializer.writeInt32(value_detents_value_2_1_value_0.valueOf())
+                    }
+                    else if ((RuntimeType.STRING == value_detents_value_2_1_value_type) || (RuntimeType.NUMBER == value_detents_value_2_1_value_type) || (RuntimeType.OBJECT == value_detents_value_2_1_value_type)) {
+                        valueSerializer.writeInt8(1 as int32)
+                        const value_detents_value_2_1_value_1  = value_detents_value_2_1_value as Length
+                        let value_detents_value_2_1_value_1_type : int32 = RuntimeType.UNDEFINED
+                        value_detents_value_2_1_value_1_type = runtimeType(value_detents_value_2_1_value_1)
+                        valueSerializer.writeLength(value_detents_value_2_1_value_1)
+                    }
+                }
+                const value_detents_value_2_2  = value_detents_value_2[2]
+                let value_detents_value_2_2_type : int32 = RuntimeType.UNDEFINED
+                value_detents_value_2_2_type = runtimeType(value_detents_value_2_2)
+                valueSerializer.writeInt8((value_detents_value_2_2_type).toChar())
+                if ((RuntimeType.UNDEFINED) != (value_detents_value_2_2_type)) {
+                    const value_detents_value_2_2_value  = value_detents_value_2_2!
+                    let value_detents_value_2_2_value_type : int32 = RuntimeType.UNDEFINED
+                    value_detents_value_2_2_value_type = runtimeType(value_detents_value_2_2_value)
+                    if (TypeChecker.isSheetSize(value_detents_value_2_2_value)) {
+                        valueSerializer.writeInt8(0 as int32)
+                        const value_detents_value_2_2_value_0  = value_detents_value_2_2_value as SheetSize
+                        valueSerializer.writeInt32(value_detents_value_2_2_value_0.valueOf())
+                    }
+                    else if ((RuntimeType.STRING == value_detents_value_2_2_value_type) || (RuntimeType.NUMBER == value_detents_value_2_2_value_type) || (RuntimeType.OBJECT == value_detents_value_2_2_value_type)) {
+                        valueSerializer.writeInt8(1 as int32)
+                        const value_detents_value_2_2_value_1  = value_detents_value_2_2_value as Length
+                        let value_detents_value_2_2_value_1_type : int32 = RuntimeType.UNDEFINED
+                        value_detents_value_2_2_value_1_type = runtimeType(value_detents_value_2_2_value_1)
+                        valueSerializer.writeLength(value_detents_value_2_2_value_1)
+                    }
                 }
             }
         }
