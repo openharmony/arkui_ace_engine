@@ -1053,14 +1053,11 @@ void EventManager::CleanHoverStatusForDragBegin()
     TAG_LOGD(AceLogTag::ACE_DRAG, "Clean mouse status for drag begin.");
     MouseEvent falsifyEvent = lastMouseEvent_;
     TouchTestResult testResult;
-    for (const auto& iter : mouseTestResults_) {
-        falsifyEvent.id = iter.first;
-        falsifyEvent.action = MouseAction::CANCEL;
-        UpdateHoverNode(falsifyEvent, testResult);
-        DispatchMouseEventNG(falsifyEvent);
-        DispatchMouseHoverEventNG(falsifyEvent);
-        DispatchMouseHoverAnimationNG(falsifyEvent);
-    }
+    falsifyEvent.action = MouseAction::CANCEL;
+    UpdateHoverNode(falsifyEvent, testResult);
+    DispatchMouseEventNG(falsifyEvent);
+    DispatchMouseHoverEventNG(falsifyEvent);
+    DispatchMouseHoverAnimationNG(falsifyEvent);
     mouseTestResults_.clear();
     pressMouseTestResultsMap_[{ lastMouseEvent_.id, lastMouseEvent_.button }].clear();
 }
