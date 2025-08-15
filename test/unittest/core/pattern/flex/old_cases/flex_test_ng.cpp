@@ -57,7 +57,6 @@ const float RK356_HEIGHT = 1136.0f;
 const float ZERO = 0.0f;
 
 const float SMALL_ITEM_WIDTH = 150.0f;
-const float SMALL_ITEM_HEIGHT_BIG = 120.f;
 const float SMALL_ITEM_HEIGHT = 60.0f;
 
 const float BIG_ITEM_WIDTH = 180.0f;
@@ -1359,9 +1358,7 @@ HWTEST_F(FlexTestNg, FlexRowLayoutTest008, TestSize.Level1)
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
-        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT_BIG))
-            << "actual: " + childSize.ToString() +
-                   ", expect: " + SizeF(TWENTY_PERCENT_WIDTH, SMALL_ITEM_HEIGHT_BIG).ToString();
+        EXPECT_EQ(childSize, SizeF(TWENTY_PERCENT_WIDTH, ROW_HEIGHT));
         EXPECT_EQ(childOffset, OffsetF(i * (TWENTY_PERCENT_WIDTH + horizontalRemaining / 2), 0.0f));
     }
 }

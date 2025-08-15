@@ -1738,7 +1738,7 @@ void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrap
     auto childWrapper = idNodeMap_[nodeName].layoutWrapper;
     const auto& childLayoutProperty = childWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
-    auto alignRules = childLayoutProperty->GetFlexItemProperty()->GetAlignRulesValue(AlignRulesItem());
+    auto alignRules = childLayoutProperty->GetFlexItemProperty()->GetAlignRulesValue();
     float offsetX = 0.0f;
     bool offsetXCalculated = false;
     float offsetY = 0.0f;

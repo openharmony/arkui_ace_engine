@@ -148,7 +148,7 @@ public:
     {
         return localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
     }
-
+    
     RefPtr<GeometryTransition> GetGeometryTransition() const;
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
@@ -454,15 +454,14 @@ public:
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+    void CheckLocalizedAlignment(const TextDirection& direction);
     void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
     void CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction);
-    void CheckLocalizedAlignment(const TextDirection& direction);
     bool DecideMirror();
 
     virtual void OnPropertyChangeMeasure() {}
 
     std::string LayoutInfoToString();
-
     std::string GetAlignmentStringFromLocalized(TextDirection layoutDirection, std::string localizedAlignment);
 
 protected:

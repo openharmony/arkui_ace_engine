@@ -117,7 +117,7 @@ WidthBreakpoint GetCalcWidthBreakpoint(
 WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
     const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline, bool userDefine)
 {
-    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0);
+    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0); // GridRow Default
     auto configBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
     if (userDefine) {  // cust has value
         finalBreakpoints = custlayoutBreakpoints;

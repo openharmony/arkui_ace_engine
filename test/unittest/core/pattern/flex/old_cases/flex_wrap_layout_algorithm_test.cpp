@@ -79,7 +79,6 @@ RefPtr<LayoutWrapperNode> WrapLayoutAlgorithmTest::CreateLayoutWrapper()
     layoutWrapper->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
     layoutWrapper->layoutProperty_ = AceType::MakeRefPtr<FlexLayoutProperty>();
     layoutWrapper->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-    layoutWrapper->layoutProperty_->safeAreaPadding_ = std::make_unique<PaddingProperty>();
     layoutWrapper->layoutProperty_->padding_ = std::make_unique<PaddingProperty>();
     layoutWrapper->layoutProperty_->margin_ = std::make_unique<MarginProperty>();
 
