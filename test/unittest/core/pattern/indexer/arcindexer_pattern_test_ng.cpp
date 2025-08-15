@@ -1559,7 +1559,9 @@ HWTEST_F(ArcindexerPatternTestNg, OnTouchUp001, TestSize.Level1)
  */
 HWTEST_F(ArcindexerPatternTestNg, ArcExpandedAnimation001, TestSize.Level1)
 {
-    auto arcIndexerPattern = AceType::MakeRefPtr<ArcIndexerPattern>();
+    auto node = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<ArcIndexerPattern>(), true);
+    auto arcIndexerPattern = node->GetPattern<ArcIndexerPattern>();
+    ASSERT_NE(arcIndexerPattern, nullptr);
     arcIndexerPattern->itemCount_ = 3;
     arcIndexerPattern->childPressIndex_ = 1;
     arcIndexerPattern->startAngle_ = 10.0F;
