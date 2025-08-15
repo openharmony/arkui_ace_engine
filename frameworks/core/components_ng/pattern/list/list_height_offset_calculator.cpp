@@ -34,6 +34,7 @@ ListHeightOffsetCalculator::ListHeightOffsetCalculator(const ListLayoutAlgorithm
                 groupHeaderHeight_ = pos.second.groupInfo.value().headerSize;
                 groupFooterHeight_ = pos.second.groupInfo.value().footerSize;
                 groupSpaceWidth_ = pos.second.groupInfo.value().spaceWidth;
+                hasGroup_ = true;
                 lanes = 1;
                 break;
             }
@@ -143,6 +144,25 @@ int32_t ListHeightOffsetCalculator::GetPosMapEndIndex()
     return posMap_ ? posMap_->GetEndIndexAndPos().first : -1;
 }
 
+bool ListHeightOffsetCalculator::CalculateRangeWithPosMap(int start, int end)
+{
+    auto prevHeight = estimateHeight_;
+    ListPositionInfo posMapStart = posMap_ ? posMap_->GetPositionInfo(start) : ListPositionInfo { -1.0f, -1.0f };
+    ListPositionInfo posMapEnd = posMap_ ? posMap_->GetPositionInfo(end) : ListPositionInfo { -1.0f, -1.0f };
+    if (posMapStart.mainPos < 0.0f || posMapEnd.mainPos < 0.0f || posMapStart.mainSize < 0.0f ||
+        posMapEnd.mainSize < 0.0f || posMapStart.isGroup || posMapEnd.isGroup) {
+        return false;
+    }
+    estimateHeight_ += posMapEnd.mainPos - posMapStart.mainPos + posMapEnd.mainSize + (start == 0 ? 0.0f : spaceWidth_);
+    auto rowCount = posMapStart.isGroup ? (end - start + 1) : (end - start + 1) / lanes_;
+    auto totalSpaceWidth = (start == 0 ? spaceWidth_ * (rowCount - 1) : spaceWidth_ * rowCount);
+    totalItemHeight_ += posMapStart.isGroup ? (estimateHeight_ - prevHeight - totalSpaceWidth)
+                                            : (estimateHeight_ - prevHeight - totalSpaceWidth) * lanes_;
+    totalItemCount_ += end - start + 1;
+    currentIndex_ = end + 1;
+    return true;
+}
+
 void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
 {
     auto repeatV2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
@@ -159,10 +179,17 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
     int32_t lazyStartIndex = currentIndex_;
     int32_t lazyEndIndex = currentIndex_ + count;
     bool hasGroup = false;
+
     while (currentIndex_ < lazyEndIndex) {
         if (currentIndex_ < startIndex_) {
-            CalculatePosMapNode();
+            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, startIndex_ - 1)) {
+                CalculatePosMapNode();
+            }
         } else if (currentIndex_ <= endIndex_) {
+            if (!hasGroup_) {
+                CalculatePosMapNode();
+                continue;
+            }
             auto child = node->GetFrameChildByIndex(currentIndex_ - lazyStartIndex, false);
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (!frameNode) {
@@ -176,8 +203,10 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
                 totalItemCount_++;
                 hasGroup = true;
             }
-        } else if (currentIndex_ < GetPosMapEndIndex()) {
-            CalculatePosMapNode();
+        } else if (currentIndex_ <= GetPosMapEndIndex()) {
+            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, GetPosMapEndIndex())) {
+                CalculatePosMapNode();
+            }
         } else if (currentIndex_ < lazyEndIndex) {
             int32_t lanes = hasGroup ? 1 : lanes_;
             int32_t remain = lazyEndIndex - currentIndex_;
