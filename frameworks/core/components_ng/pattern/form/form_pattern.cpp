@@ -1051,8 +1051,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
     RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    int32_t dimension = cardInfo_.dimension;
-    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, invalid dimensionHeight!");
         return;
@@ -1146,7 +1145,8 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
         return;
     }
 
-    int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
+    int32_t dimension = cardInfo_.dimension;
+    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadFormSkeleton failed, invalid dimensionHeight!");
         return;
