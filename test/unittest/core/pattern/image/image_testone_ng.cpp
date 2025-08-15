@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1715,6 +1715,53 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
     EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
 }
 
+void ImageModelNGTest001_MixedProperties04(ImageModelNG &image)
+{
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    ImageModelNG::SetMatchTextDirection(frameNode, true);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(frameNode), true);
+    ImageModelNG::SetMatchTextDirection(frameNode, false);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(frameNode), false);
+    EXPECT_EQ(ImageModelNG::GetMatchTextDirection(nullptr), false);
+
+    image.SetCopyOption(CopyOptions::Distributed);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(frameNode), CopyOptions::Distributed);
+    ImageModelNG::SetCopyOption(frameNode, CopyOptions::InApp);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(frameNode), CopyOptions::InApp);
+    EXPECT_EQ(ImageModelNG::GetCopyOption(nullptr), CopyOptions::None);
+    ImageModelNG::EnableAnalyzer(frameNode, true);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(frameNode), true);
+    ImageModelNG::EnableAnalyzer(frameNode, false);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(frameNode), false);
+    EXPECT_EQ(ImageModelNG::GetEnableAnalyzer(nullptr), false);
+
+    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::HIGH);
+    EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(frameNode), DynamicRangeMode::HIGH);
+    EXPECT_EQ(ImageModelNG::GetDynamicRangeMode(nullptr), DynamicRangeMode::STANDARD);
+
+    ImageModelNG::SetHdrBrightness(frameNode, 0.8f); // 0.8 means brightness of the picture
+    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(frameNode), 0.8f); // 0.8 means brightness of the picture
+    EXPECT_FLOAT_EQ(ImageModelNG::GetHdrBrightness(nullptr), 1.0f); // 1.0 means default brightness of the picture
+
+    ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::RIGHT);
+    EXPECT_EQ(ImageModelNG::GetOrientation(frameNode), ImageRotateOrientation::RIGHT);
+    EXPECT_EQ(ImageModelNG::GetOrientation(nullptr), ImageRotateOrientation::UP);
+
+    auto pairSize = std::make_pair(Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT));
+    ImageModelNG::SetImageSourceSize(frameNode, pairSize);
+    auto resultSourceSize = ImageModelNG::GetImageSourceSize(frameNode);
+    EXPECT_FLOAT_EQ(resultSourceSize.first.ConvertToPx(),
+        static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()));
+    EXPECT_FLOAT_EQ(resultSourceSize.second.ConvertToPx(),
+        static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx()));
+
+    Matrix4 matrix4DefaultValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    Matrix4 matrix4Value = Matrix4(1.0f, 1.0f, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    ImageModelNG::SetImageMatrix(frameNode, matrix4Value);
+    EXPECT_EQ(ImageModelNG::GetImageMatrix(frameNode), matrix4Value);
+    EXPECT_EQ(ImageModelNG::GetImageMatrix(nullptr), matrix4DefaultValue);
+}
+
 /**
  * @tc.name: ImageModelNGTest001
  * @tc.desc: Test Image related method calls.
@@ -1736,6 +1783,7 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level0)
     ImageModelNGTest001_MixedProperties01(image);
     ImageModelNGTest001_MixedProperties02(image);
     ImageModelNGTest001_MixedProperties03(image);
+    ImageModelNGTest001_MixedProperties04(image);
     frameNode->MarkModifyDone();
 }
 

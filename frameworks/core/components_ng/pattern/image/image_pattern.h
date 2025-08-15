@@ -171,6 +171,11 @@ public:
         copyOption_ = value;
     }
 
+    CopyOptions GetCopyOption()
+    {
+        return copyOption_;
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
@@ -236,6 +241,7 @@ public:
         return WeakClaim(AceType::RawPtr(altLoadingCtx_));
     }
     void EnableAnalyzer(bool value);
+    bool IsEnableAnalyzer() const;
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 

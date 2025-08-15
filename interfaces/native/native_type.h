@@ -1386,6 +1386,45 @@ typedef enum {
     ARKUI_IMAGE_INTERPOLATION_HIGH,
 } ArkUI_ImageInterpolation;
 
+/**
+ * @brief Enumerates the image dynamic range mode.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** high dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_HIGH = 0,
+    /** constraint dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_CONSTRAINT,
+    /** standard dynamic range mode. */
+    ARKUI_DYNAMIC_RANGE_MODE_STANDARD,
+} ArkUI_DynamicRangeMode;
+
+/**
+ * @brief Enumerates the image rotate orientation.
+ *
+ * @since 21
+ */
+typedef enum {
+    /** Use EXIF metadata for display orientation, with support for rotation and mirroring. */
+    ARKUI_ORIENTATION_AUTO = 0,
+    /** Display original pixel data without transformation. */
+    ARKUI_ORIENTATION_UP,
+    /** Display the image after rotating it 90 degrees clockwise. */
+    ARKUI_ORIENTATION_RIGHT,
+    /** Display the image after rotating it 180 degrees clockwise. */
+    ARKUI_ORIENTATION_DOWN,
+    /** Display the image after rotating it 270 degrees clockwise. */
+    ARKUI_ORIENTATION_LEFT,
+    /** Display the image after flipping it horizontally. */
+    ARKUI_ORIENTATION_UP_MIRRORED,
+    /** Display the image after flipping it horizontally and then rotating it 90 degrees clockwise. */
+    ARKUI_ORIENTATION_RIGHT_MIRRORED,
+    /** Display the image after flipping it vertically. */
+    ARKUI_ORIENTATION_DOWN_MIRRORED,
+    /** Display the image after flipping it horizontally and then rotating it 270 degrees clockwise. */
+    ARKUI_ORIENTATION_LEFT_MIRRORED,
+} ArkUI_ImageRotateOrientation;
 
 /**
  * @brief Enumerates the blend modes.

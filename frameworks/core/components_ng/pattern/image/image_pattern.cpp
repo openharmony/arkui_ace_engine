@@ -2205,6 +2205,11 @@ void ImagePattern::EnableAnalyzer(bool value)
     RegisterVisibleAreaChange(true);
 }
 
+bool ImagePattern::IsEnableAnalyzer() const
+{
+    return isEnableAnalyzer_;
+}
+
 // As an example
 void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
 {
