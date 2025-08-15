@@ -796,6 +796,13 @@ HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmLayout002, TestSize.Leve
 
     toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::DEFAULT);
     toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    auto context = toastNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    ASSERT_NE(toastTheme, nullptr);
+    toastTheme->toastDoubleBorderEnable_ = true;
+    toastLayoutAlgorithm.Layout(layoutWrapper);
 }
 
 /**
