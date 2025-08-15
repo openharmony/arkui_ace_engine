@@ -975,7 +975,7 @@ void RatingPattern::OnModifyDone()
             pattern->InitEvent();
         }
     };
-    pipeline->AddBuildFinishCallBack();
+    pipeline->AddBuildFinishCallBack(callback);
 }
 
 void RatingPattern::InitEvent()

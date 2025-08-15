@@ -371,6 +371,7 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest008, TestSize.Lev
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     ASSERT_NE(ratingPattern, nullptr);
 
     /**
@@ -714,6 +715,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
@@ -2013,6 +2015,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     /**
      * @tc.steps: step2. Create image canvas.
      */
@@ -2089,6 +2092,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest017, TestSize.Level1)
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     /**
      * @tc.steps: step2. Create image canvas.
      */
@@ -2145,6 +2149,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest018, TestSize.Level1)
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     /**
      * @tc.steps: step2. Create image canvas.
      */
@@ -2201,6 +2206,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->isNeedFocusStyle_ = true;
     ratingPattern->OnModifyDone();
+    ratingPattern->InitEvent();
     /**
      * @tc.steps: step2. Create image canvas.
      */
