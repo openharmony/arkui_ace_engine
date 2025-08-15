@@ -395,14 +395,10 @@ export struct PopupComponent {
 
   private getMessagePadding(): LocalizedPadding {
     let padding: LocalizedPadding
-    if (this.title.text !== '' && this.title.text !== void (0)) {
-      padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) }
-    } else {
       padding = {
         start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
         end: LengthMetrics.vp(this.theme.closeButton.margin.end.value)
       }
-    }
     return padding
   }
 
@@ -505,7 +501,7 @@ export struct PopupComponent {
     let bottom =
       LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
     let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
-    let end = this.theme.windows.padding.end;
+    let end = this.theme.button.padding.end;
     let resolvedMaxWidth = this.toVp(this.maxWidth);
     if (resolvedMaxWidth === 0) {
       start = LengthMetrics.vp(0);

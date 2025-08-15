@@ -552,15 +552,10 @@ export class d1 extends ViewPU {
     }
     getMessagePadding() {
         let padding;
-        if (this.title.text !== '' && this.title.text !== void (0)) {
-            padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) };
-        }
-        else {
             padding = {
                 start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
                 end: LengthMetrics.vp(this.theme.i2.margin.end.value)
             };
-        }
         return padding;
     }
     getMessageMaxWeight() {
@@ -649,7 +644,7 @@ export class d1 extends ViewPU {
         let top = this.theme.h2.padding.top;
         let bottom = LengthMetrics.vp(this.theme.h2.padding.bottom.value - (this.theme.button.e2.bottom.value / 2));
         let start = LengthMetrics.vp(this.theme.h2.padding.start.value - (this.theme.button.margin.end.value / 2));
-        let end = this.theme.h2.padding.end;
+        let end = this.theme.button.padding.end;
         let z1 = this.toVp(this.maxWidth);
         if (z1 === 0) {
             start = LengthMetrics.vp(0);
