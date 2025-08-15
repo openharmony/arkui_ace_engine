@@ -43,8 +43,8 @@ constexpr int16_t P1INDEX = 0;
 constexpr int16_t P2INDEX = 1;
 constexpr int16_t P3INDEX = 2;
 constexpr int16_t P4INDEX = 3;
-constexpr double TOP_ARROW_LEFT_OFFSET = 3.0;
-constexpr double TOP_ARROW_RIGHT_OFFSET = 4.5;
+constexpr double THREE = 3.0;
+constexpr double FOUR_POINT_FIVE = 4.5;
 
 static RefPtr<PopupTheme> GetPopupTheme(PaintWrapper* paintWrapper)
 {
@@ -717,12 +717,12 @@ void BubblePaintMethod::BuildTopDoubleBorderPath(RSPath& path, float radius, con
             borderOffset = GetBorderOffset(popupTheme);
             path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P1INDEX][0] + borderOffset / HALF,
                 childOffsetY + borderOffset);
-            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P2INDEX][0] + borderOffset / TOP_ARROW_LEFT_OFFSET,
+            path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P2INDEX][0] + borderOffset / THREE,
                 childOffsetY + arrowOffsetsFromClip_[P2INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx());
             path.ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f,
                 RSPathDirection::CW_DIRECTION, arrowTopOffset + arrowOffsetsFromClip_[P3INDEX][0],
                 childOffsetY + arrowOffsetsFromClip_[P3INDEX][1] - BUBBLE_ARROW_HEIGHT.ConvertToPx()
-                + borderOffset / TOP_ARROW_RIGHT_OFFSET);
+                + borderOffset / FOUR_POINT_FIVE);
             path.LineTo(arrowTopOffset + arrowOffsetsFromClip_[P4INDEX][0],
                 childOffsetY + borderOffset);
             break;

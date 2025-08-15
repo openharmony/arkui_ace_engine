@@ -137,28 +137,6 @@ const std::vector<Placement> FOLLOW_CURSOR_TIPS = { Placement::BOTTOM_LEFT, Plac
     Placement::BOTTOM_RIGHT, Placement::TOP_RIGHT, Placement::BOTTOM, Placement::TOP, Placement::RIGHT_TOP,
     Placement::LEFT_TOP, Placement::NONE };
 
-static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
-{
-    RefPtr<PipelineContext> pipeline;
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, nullptr);
-    pipeline = hostNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, nullptr);
-    return popupTheme;
-}
-
-double ConvertToPxByLayoutWrapper(const Dimension& dimension, LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, dimension.ConvertToPx());
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, dimension.ConvertToPx());
-    auto pipelineContext = DialogManager::GetMainPipelineContext(hostNode);
-    CHECK_NULL_RETURN(pipelineContext, dimension.ConvertToPx());
-    return pipelineContext->NormalizeToPx(dimension);
-}
-
 void GetEndP2P4(const Dimension& radius)
 {
     auto h1 = BUBBLE_ARROW_HEIGHT.ConvertToPx() - radius.ConvertToPx();
@@ -188,6 +166,28 @@ void GetP2(const Dimension& radius)
     DEFAULT_P2_WIDTH = Dimension(w1 - side1 * std::cos(beta));
 }
 
+static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
+{
+    RefPtr<PipelineContext> pipeline;
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    return popupTheme;
+}
+
+double ConvertToPxByLayoutWrapper(const Dimension& dimension, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, dimension.ConvertToPx());
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, dimension.ConvertToPx());
+    auto pipelineContext = DialogManager::GetMainPipelineContext(hostNode);
+    CHECK_NULL_RETURN(pipelineContext, dimension.ConvertToPx());
+    return pipelineContext->NormalizeToPx(dimension);
+}
+
 void calculateArrowPoint(Dimension height, Dimension width, LayoutWrapper* layoutWrapper)
 {
     // When the popup or tips show in subwindow, layout algorithm's pipeline will run at main window then subwindow.
@@ -198,7 +198,7 @@ void calculateArrowPoint(Dimension height, Dimension width, LayoutWrapper* layou
     BUBBLE_ARROW_HEIGHT = height;
     BUBBLE_ARROW_WIDTH_F = ConvertToPxByLayoutWrapper(width, layoutWrapper);
     BUBBLE_ARROW_HEIGHT_F = ConvertToPxByLayoutWrapper(height, layoutWrapper);
-    
+
     GetEndP2P4(ARROW_RADIUS);
     GetP2(ARROW_RADIUS);
 
@@ -250,9 +250,9 @@ void calculateArrowPoint(Dimension height, Dimension width, LayoutWrapper* layou
     ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = p1x;
 }
 
-void ResetTipsMaxLines(const RefPtr<LayoutWrapper>& childWrapper, bool isTips)
+void ResetTipsMaxLines(const RefPtr<LayoutWrapper>& childWrapper, bool followCursor)
 {
-    if (!isTips) {
+    if (!followCursor) {
         return;
     }
     auto children = childWrapper->GetAllChildrenWithBuild();
@@ -345,8 +345,8 @@ void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool 
     if (container->IsSubContainer()) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
-        CHECK_NULL_VOID(container);
     }
+    CHECK_NULL_VOID(container);
     CHECK_EQUAL_VOID(expandDisplay_, false);
     Rect availableRect;
     // In superFoldDisplayDevice, the rect is the full screen's available rect when the displayId is 0.
@@ -1005,7 +1005,8 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, boo
     }
     auto childWrapper = children.front();
     CHECK_NULL_VOID(childWrapper);
-    auto childMaxSize = GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetHostNode());
+    auto childMaxSize =
+        GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetHostNode());
 
     auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
     CHECK_NULL_VOID(columnNode);
@@ -2353,7 +2354,6 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         pipelineContext = DialogManager::GetMainPipelineContext(host);
     }
     CHECK_NULL_VOID(pipelineContext);
-
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s, "
         "followTransformOfTarget_: %{public}d",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str(), followTransformOfTarget_);

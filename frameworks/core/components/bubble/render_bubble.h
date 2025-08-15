@@ -18,6 +18,7 @@
 #endif
 
 #include "base/geometry/dimension.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/slider/render_slider.h"

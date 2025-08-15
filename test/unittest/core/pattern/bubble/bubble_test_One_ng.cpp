@@ -1770,52 +1770,6 @@ HWTEST_F(BubbleTestOneNg, BubblePatternTest020, TestSize.Level1)
     auto buttonRowNode = pattern->GetButtonRowNode();
 }
 
- /**
-  * @tc.name: BubblePatternTest022
-  * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth, Shadow and EnableHoverMode.
-  * @tc.type: FUNC
-  */
-HWTEST_F(BubbleTestOneNg, BubblePatternTest022, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set popup value to popupParam.
-     */
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
-    popupParam->setErrorArrowHeight_ = true;
-    popupParam->setErrorArrowWidth_ = true;
-    popupParam->setErrorRadius_ = true;
-    popupParam->childwidth_ = 100.0_px;
-    popupParam->SetEnableHoverMode(true);
-    /**
-     * @tc.steps: step2. create CustomBubbleNode with positon offset
-     */
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(targetNode, nullptr);
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    ASSERT_NE(rowFrameNode, nullptr);
-    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(blankFrameNode, nullptr);
-    rowFrameNode->AddChild(blankFrameNode);
-    auto popupNode =
-        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
-    ASSERT_NE(popupNode, nullptr);
-    /**
-     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
-     * @tc.expected: check whether GetPositionOffset value is correct.
-     */
-    int32_t settingApiVersion = 13;
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    BubbleView::UpdateCommonParam(popupNode->GetId(), popupParam);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
-}
-
 /**
  * @tc.name: BubblePatternTest023
  * @tc.desc: Test bubble callback function

@@ -846,6 +846,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #endif
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
@@ -872,6 +873,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
         }
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, false)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
