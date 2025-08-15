@@ -241,6 +241,7 @@ HWTEST_F(FlexModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
         "Default value for attribute 'pointLight.lightSource.position'";
 }
 
+#ifdef WRONG_SDK // PointLight
 /*
  * @tc.name: setPointLightTestPointLightLightSourcePositionXValidValues
  * @tc.desc:
@@ -721,4 +722,5 @@ HWTEST_F(FlexModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSi
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
+#endif // PointLight
 } // namespace OHOS::Ace::NG

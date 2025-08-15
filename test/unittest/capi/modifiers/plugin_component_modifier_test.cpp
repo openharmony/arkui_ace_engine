@@ -111,8 +111,9 @@ HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestOptionsTempla
     Ark_PluginComponentOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.template_.source = std::get<1>(testFixtureStringValidValues[0]);
-    initValueOptions.template_.bundleName = std::get<1>(testFixtureStringValidValues[0]);
+    initValueOptions.template_.source = Converter::ArkValue<Opt_String>(std::get<1>(testFixtureStringValidValues[0]));
+    initValueOptions.template_.bundleName =
+        Converter::ArkValue<Opt_String>(std::get<1>(testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Ark_String& value) {
@@ -120,7 +121,7 @@ HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestOptionsTempla
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        inputValueOptions.template_.source = value;
+        inputValueOptions.template_.source = Converter::ArkValue<Opt_String>(value);
         modifier_->setPluginComponentOptions(node, &inputValueOptions);
         auto jsonValue = GetJsonValue(node);
         auto resultTemplate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
@@ -146,8 +147,9 @@ HWTEST_F(
     Ark_PluginComponentOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.template_.source = std::get<1>(testFixtureStringValidValues[0]);
-    initValueOptions.template_.bundleName = std::get<1>(testFixtureStringValidValues[0]);
+    initValueOptions.template_.source = Converter::ArkValue<Opt_String>(std::get<1>(testFixtureStringValidValues[0]));
+    initValueOptions.template_.bundleName =
+        Converter::ArkValue<Opt_String>(std::get<1>(testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Ark_String& value) {
@@ -155,7 +157,7 @@ HWTEST_F(
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
-        inputValueOptions.template_.bundleName = value;
+        inputValueOptions.template_.bundleName = Converter::ArkValue<Opt_String>(value);
         modifier_->setPluginComponentOptions(node, &inputValueOptions);
         auto jsonValue = GetJsonValue(node);
         auto resultTemplate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEMPLATE_NAME);

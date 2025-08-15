@@ -163,14 +163,14 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityGroupTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityGroup0, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityGroupWithValue, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Boolean>(true), "true"},
         {Converter::ArkValue<Opt_Boolean>(false), "false"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityGroup0(node_, &inputValue);
+        modifier_->setAccessibilityGroupWithValue(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GROUP_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -194,16 +194,16 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText0TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfStringTypeTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityText0, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityTextOfStringType, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
         {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityText0(node_, &inputValue);
+        modifier_->setAccessibilityTextOfStringType(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -215,9 +215,9 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText0TestValidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText1TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfResourceTypeTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityText1, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityTextOfResourceType, nullptr);
     using OneTestStep = std::tuple<Ark_Resource, std::string>;
     std::string inputVal1 {"test string 1"}, inputVal2 {"test string 2"};
     static const std::vector<OneTestStep> testPlan = {
@@ -227,7 +227,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityText1TestValidValue
     Opt_Resource optInputValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         optInputValue = Converter::ArkValue<Opt_Resource>(inputValue);
-        modifier_->setAccessibilityText1(node_, &optInputValue);
+        modifier_->setAccessibilityTextOfResourceType(node_, &optInputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -288,14 +288,14 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityDescription0, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityDescriptionOfStringType, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
         {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityDescription0(node_, &inputValue);
+        modifier_->setAccessibilityDescriptionOfStringType(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DESCRIPTION_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -309,11 +309,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestVal
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityDescriptionOfResourceType, nullptr);
     auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ResourceType::STRING);
     auto src = Converter::ArkValue<Opt_Resource>(CreateResource(resName));
 
-    modifier_->setAccessibilityDescription1(node_, &src);
+    modifier_->setAccessibilityDescriptionOfResourceType(node_, &src);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
     EXPECT_EQ(strResult, ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST);
 }

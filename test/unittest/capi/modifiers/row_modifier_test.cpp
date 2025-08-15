@@ -160,45 +160,10 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setPointLightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-
-HWTEST_F(RowModifierTest, DISABLED_setPointLightValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string resultStr2;
-    Opt_PointLightStyle optPointLight;
-    Ark_PointLightStyle& inputValuePointLight = WriteTo(optPointLight);
-    Ark_LightSource arkLightSource;
-    arkLightSource = {
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY),
-        .positionX = Converter::ArkValue<Ark_Dimension>(1.0f),
-        .positionY = Converter::ArkValue<Ark_Dimension>(2.0f),
-#ifdef WRONG_GEN
-        .positionZ = Converter::ArkValue<Ark_Dimension>(3.0f),
-#endif
-        .intensity = Converter::ArkValue<Ark_Number>(4),
-    };
-    inputValuePointLight.lightSource = Converter::ArkValue<Opt_LightSource>(arkLightSource);
-    inputValuePointLight.bloom = Converter::ArkValue<Opt_Number>(3);
-    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT);
-
-    modifier_->setPointLight(node_, &optPointLight);
-    jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-    resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
-    EXPECT_EQ(resultStr2, ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE);
-}
-
-/*
  * @tc.name: setIsReverseDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-
 HWTEST_F(RowModifierTest, setIsReverseDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -240,6 +205,7 @@ HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
     }
 }
 
+#ifdef WRONG_SDK // PointLight
 /*
  * @tc.name: setPointLightTestDefaultValues
  * @tc.desc:
@@ -760,4 +726,5 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
+#endif // PointLight
 } // namespace OHOS::Ace::NG

@@ -44,6 +44,7 @@ public:
     }
 };
 
+#ifdef WRONG_SDK // PointLight
 /*
  * @tc.name: setPointLightTestDefaultValues
  * @tc.desc:
@@ -563,5 +564,6 @@ HWTEST_F(StackModifierTest, setPointLightTestPointLightBloomInvalidValues, TestS
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Number>());
 }
+#endif // PointLight
 
 } // namespace OHOS::Ace::NG

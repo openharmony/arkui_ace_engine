@@ -190,8 +190,8 @@ struct StyleOptionsKeeper {
         for (const auto& span : SPAN_TYPE_TEST_VALUES) {
             auto& item = testArrayStyles.emplace_back(
                 Ark_StyleOptions {
-                    .start = Converter::ArkValue<Opt_Number>(span.first),
-                    .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
+                    .start = Converter::ArkValue<Opt_Int32>(span.first),
+                    .length = Converter::ArkValue<Opt_Int32>(TEST_LENGTH),
                     .styledKey = Converter::ArkValue<Ark_StyledStringKey>(span.second)
             });
 
