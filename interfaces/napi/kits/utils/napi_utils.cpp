@@ -529,22 +529,21 @@ napi_valuetype GetValueType(napi_env env, napi_value value)
 
 std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value)
 {
-    static constexpr size_t maxLength = 2048;
     if (GetValueType(env, value) != napi_string) {
         return std::nullopt;
     }
 
     size_t paramLen = 0;
     napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &paramLen);
-    if (paramLen == 0 || paramLen > maxLength || status != napi_ok) {
+    if (paramLen == 0 || status != napi_ok) {
         return std::nullopt;
     }
-    char params[maxLength] = { 0 };
-    status = napi_get_value_string_utf8(env, value, params, paramLen + 1, &paramLen);
+    std::unique_ptr<char[]> params = std::make_unique<char[]>(paramLen + 1);
+    status = napi_get_value_string_utf8(env, value, params.get(), paramLen + 1, &paramLen);
     if (status != napi_ok) {
         return std::nullopt;
     }
-    return params;
+    return std::optional<std::string>(params.get());
 }
 
 bool GetIntProperty(napi_env env, napi_value value, const std::string& key, int32_t& result)
