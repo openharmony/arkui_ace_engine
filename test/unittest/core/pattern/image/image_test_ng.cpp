@@ -898,10 +898,30 @@ HWTEST_F(ImageTestNg, ImageCreator005, TestSize.Level0)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(frameNode, nullptr);
 
-    ImageModelNG::ResetImage(&(*frameNode));
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
 
     auto draggable = frameNode->IsDraggable();
-    EXPECT_EQ(draggable, true);
+    EXPECT_FALSE(draggable);
+}
+
+/**
+ * @tc.name: ImageCreator006
+ * @tc.desc: Verify that CreateFrameNode reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageCreator006, TestSize.Level0)
+{
+    auto nodeId = int32_t(1);
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME, false);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
+
+    auto draggable = frameNode->IsDraggable();
+    EXPECT_TRUE(draggable);
 }
 
 /**
