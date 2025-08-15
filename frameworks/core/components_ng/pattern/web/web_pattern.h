@@ -909,6 +909,7 @@ private:
     bool StopPip(int delegateId, int childId, int frameRoutingId);
     bool PlayPip(int delegateId, int childId, int frameRoutingId);
     bool PausePip(int delegateId, int childId, int frameRoutingId);
+    bool PageClosePip(int delegateId, int childId, int frameRoutingId);
     void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
     RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
     void ShowPreviewMenu(WebElementType type);
