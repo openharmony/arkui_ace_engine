@@ -18,6 +18,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -106,39 +107,45 @@ void RadioModifier::InitializeParam()
     sizeHover_ = radioTheme->GetSizeHoverBg();
 }
 
-void RadioModifier::UpdateAnimatableProperty()
+void RadioModifier::UpdateAnimatableProperty(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     switch (touchHoverType_) {
         case TouchHoverAnimationType::HOVER:
-            SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+            SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION, host);
             break;
         case TouchHoverAnimationType::PRESS_TO_HOVER:
-            SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+            SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP, host);
             break;
         case TouchHoverAnimationType::NONE:
-            SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+            SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION, host);
             break;
         case TouchHoverAnimationType::HOVER_TO_PRESS:
-            SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+            SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP, host);
             break;
         case TouchHoverAnimationType::PRESS:
-            SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+            SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION, host);
             break;
         default:
             break;
     }
 }
-void RadioModifier::UpdateTotalScaleOnAnimatable(
-    bool isCheck, const AnimationOption& delayOption, const AnimationOption& halfDurationOption)
+void RadioModifier::UpdateTotalScaleOnAnimatable(bool isCheck, const AnimationOption& delayOption,
+    const AnimationOption& halfDurationOption, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     totalScale_->Set(DEFAULT_TOTAL_SCALE);
-    AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE_VER_TWELVE); });
+    AnimationUtils::Animate(
+        halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE_VER_TWELVE); }, nullptr, nullptr,
+        host->GetContextRefPtr());
     totalScale_->Set(DEFAULT_SHRINK_SCALE_VER_TWELVE);
-    AnimationUtils::Animate(delayOption, [&]() { totalScale_->Set(DEFAULT_TOTAL_SCALE); });
+    AnimationUtils::Animate(
+        delayOption, [&]() { totalScale_->Set(DEFAULT_TOTAL_SCALE); }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
+void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     AnimationOption delayOption;
     delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION / 2);
     delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / 2);
@@ -150,18 +157,24 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
 
     if (isOnAnimationFlag_->Get()) {
         pointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
+        AnimationUtils::Animate(
+            delayOption, [&]() { pointScale_->Set(DEFAULT_POINT_SCALE); }, nullptr, nullptr, host->GetContextRefPtr());
         ringPointScale_->Set(1);
-        AnimationUtils::Animate(halfDurationOption, [&]() { ringPointScale_->Set(0); });
+        AnimationUtils::Animate(
+            halfDurationOption, [&]() { ringPointScale_->Set(0); }, nullptr, nullptr, host->GetContextRefPtr());
     } else {
         pointScale_->Set(DEFAULT_POINT_SCALE);
-        AnimationUtils::Animate(halfDurationOption, [&]() { pointScale_->Set(0); });
+        AnimationUtils::Animate(
+            halfDurationOption, [&]() { pointScale_->Set(0); }, nullptr, nullptr, host->GetContextRefPtr());
         ringPointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { ringPointScale_->Set(1); });
+        AnimationUtils::Animate(
+            delayOption, [&]() { ringPointScale_->Set(1); }, nullptr, nullptr, host->GetContextRefPtr());
     }
 
     totalScale_->Set(DEFAULT_TOTAL_SCALE);
-    AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
+    AnimationUtils::Animate(
+        halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); }, nullptr, nullptr,
+        host->GetContextRefPtr());
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
     AnimationUtils::Animate(
         delayOption, [&]() { totalScale_->Set(1); },
@@ -174,11 +187,12 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
             if (context) {
                 context->RequestFrame();
             }
-        });
+        }, nullptr, host->GetContextRefPtr());
 }
 
-void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
+void RadioModifier::UpdateIndicatorAnimation(bool isCheck, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption halfDurationOption;
@@ -195,7 +209,7 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
                 opacityScale_->Set(1);
                 borderOpacityScale_->Set(0);
             },
-            nullptr);
+            nullptr, nullptr, host->GetContextRefPtr());
     } else {
         AnimationUtils::Animate(
             halfDurationOption,
@@ -203,18 +217,21 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
                 opacityScale_->Set(0);
                 borderOpacityScale_->Set(1);
             },
-            nullptr);
+            nullptr, nullptr, host->GetContextRefPtr());
     }
-    UpdateTotalScaleOnAnimatable(isCheck, delayOption, halfDurationOption);
+    UpdateTotalScaleOnAnimatable(isCheck, delayOption, halfDurationOption, host);
 }
 
-void RadioModifier::SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+void RadioModifier::SetBoardColor(
+    LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     if (animateTouchHoverColor_) {
         AnimationOption option = AnimationOption();
-        option.SetDuration(duratuion);
+        option.SetDuration(duration);
         option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        AnimationUtils::Animate(
+            option, [&]() { animateTouchHoverColor_->Set(color); }, nullptr, nullptr, host->GetContextRefPtr());
     }
 }
 
@@ -424,7 +441,7 @@ void RadioModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, c
     canvas.DetachBrush();
 }
 
-void RadioPaintMethod::UpdateUIStatus(bool checked)
+void RadioPaintMethod::UpdateUIStatus(bool checked, const RefPtr<FrameNode>& host)
 {
     if (checked != radioModifier_->GetIsCheck()) {
         if (!enabled_ && !checked && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -434,9 +451,9 @@ void RadioPaintMethod::UpdateUIStatus(bool checked)
         }
         if (!isFirstCreated_) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                radioModifier_->UpdateIndicatorAnimation(checked);
+                radioModifier_->UpdateIndicatorAnimation(checked, host);
             } else {
-                radioModifier_->UpdateIsOnAnimatableProperty(checked);
+                radioModifier_->UpdateIsOnAnimatableProperty(checked, host);
             }
         }
     } else if (!checked && isFirstCreated_) {
@@ -455,8 +472,11 @@ void RadioPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));
@@ -476,11 +496,11 @@ void RadioPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     radioModifier_->SetTotalScale(totalScale_);
     radioModifier_->SetPointScale(pointScale_);
     radioModifier_->SetRingPointScale(ringPointScale_);
-    UpdateUIStatus(checked);
+    UpdateUIStatus(checked, host);
     radioModifier_->SetShowHoverEffect(showHoverEffect_);
     radioModifier_->SetIsCheck(checked);
     radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
-    radioModifier_->UpdateAnimatableProperty();
+    radioModifier_->UpdateAnimatableProperty(host);
     auto horizontalPadding = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
     auto verticalPadding = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
     float boundsRectOriginX = offset.GetX() - horizontalPadding;

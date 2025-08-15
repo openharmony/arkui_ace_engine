@@ -513,7 +513,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
 
 void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
 {
-    CreateWithLabel(para.label.value());
+    CreateWithLabel(para.label.value_or(""));
     SetTypeAndStateEffect(para.type, para.stateEffect);
     SetButtonStyle(para.buttonStyleMode);
     SetControlSize(para.controlSize);

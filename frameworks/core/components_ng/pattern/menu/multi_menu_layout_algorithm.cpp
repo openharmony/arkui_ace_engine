@@ -49,7 +49,7 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         }
         childLayoutProperty->UpdateUserDefinedIdealSize(
             { CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(0.0, DimensionUnit::AUTO) });
-        constrainMinWidth.percentReference.SetWidth(constrainMinWidth.selfIdealSize.Width().value());
+        constrainMinWidth.percentReference.SetWidth(constrainMinWidth.selfIdealSize.Width().value_or(0.0f));
         auto row = child->GetChildByIndex(0);
         CHECK_NULL_VOID(row);
         auto layoutProperty = row->GetLayoutProperty();
@@ -400,7 +400,7 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper, Layo
     CHECK_NULL_VOID(pattern);
 
     float contentHeight = 0.0f;
-    float contentWidth = childConstraint.selfIdealSize.Width().value();
+    float contentWidth = childConstraint.selfIdealSize.Width().value_or(0.0f);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (!child) {
             TAG_LOGW(AceLogTag::ACE_MENU, "child is null in MultiMenu");

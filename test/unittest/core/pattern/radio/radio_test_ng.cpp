@@ -874,31 +874,33 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest004, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
 {
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->hoverColor_ = Color::RED;
     radioModifier->clickEffectColor_ = Color::BLUE;
     radioModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     radioModifier->animateTouchHoverColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
     radioModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
     radioModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 
     /**
      * @tc.cases: case. cover branch default touchHoverType_.
      */
     radioModifier->touchHoverType_ = INVALID_TOUCH_HOVER_ANIMARION_TYPE;
-    radioModifier->UpdateAnimatableProperty();
+    radioModifier->UpdateAnimatableProperty(frameNode);
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
@@ -909,13 +911,15 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPaintMethodTest006, TestSize.Level1)
 {
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->isOnAnimationFlag_->Set(true);
-    radioModifier->UpdateIsOnAnimatableProperty(true);
+    radioModifier->UpdateIsOnAnimatableProperty(true, frameNode);
     EXPECT_EQ(radioModifier->pointScale_->Get(), 0.5);
     EXPECT_EQ(radioModifier->ringPointScale_->Get(), 0);
     radioModifier->isOnAnimationFlag_->Set(false);
-    radioModifier->UpdateIsOnAnimatableProperty(true);
+    radioModifier->UpdateIsOnAnimatableProperty(true, frameNode);
     EXPECT_EQ(radioModifier->pointScale_->Get(), 0);
     EXPECT_EQ(radioModifier->ringPointScale_->Get(), 1);
 }
@@ -927,13 +931,15 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest006, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPaintMethodTest007, TestSize.Level1)
 {
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
     auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
-    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    PaintWrapper paintWrapper(frameNode->GetRenderContext(), geometryNode, radioPaintProperty);
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     RadioPaintMethod radioPaintMethod(radioModifier);
 
@@ -1024,16 +1030,18 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
 {
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->isOnAnimationFlag_->Set(true);
-    radioModifier->UpdateIndicatorAnimation(true);
+    radioModifier->UpdateIndicatorAnimation(true, frameNode);
     EXPECT_EQ(radioModifier->opacityScale_->Get(), 1);
     EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 0);
     radioModifier->isOnAnimationFlag_->Set(false);
-    radioModifier->UpdateIndicatorAnimation(false);
+    radioModifier->UpdateIndicatorAnimation(false, frameNode);
     EXPECT_EQ(radioModifier->opacityScale_->Get(), 0);
     EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 1);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);

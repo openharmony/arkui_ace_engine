@@ -48,9 +48,10 @@ public:
         PaintSwitch(canvas, offset_->Get(), size_->Get());
     }
 
-    void UpdateAnimatableProperty()
+    void UpdateAnimatableProperty(const RefPtr<FrameNode>& host)
     {
-        SetSwitchBoardColor();
+        CHECK_NULL_VOID(host);
+        SetSwitchBoardColor(host);
         if (!actualSize_.IsPositive()) {
             return;
         }
@@ -69,7 +70,7 @@ public:
             AnimationUtils::Animate(colorOption, [&]() {
                 animatableBoardColor_->Set(isSelect_->Get() ?
                     LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            });
+            }, nullptr, nullptr, host->GetContextRefPtr());
         }
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);
@@ -91,42 +92,46 @@ public:
                     actualSize_.Width() - actualTrackRadius_);
             }
         }
-        AnimationUtils::Animate(pointOption, [&]() { pointOffset_->Set(newPointOffset); });
+        AnimationUtils::Animate(
+            pointOption, [&]() { pointOffset_->Set(newPointOffset); }, nullptr, nullptr, host->GetContextRefPtr());
     }
 
-    void SetSwitchBoardColor()
+    void SetSwitchBoardColor(const RefPtr<FrameNode>& host)
     {
         switch (touchHoverType_) {
             case TouchHoverAnimationType::HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION, host);
                 break;
             case TouchHoverAnimationType::PRESS_TO_HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP, host);
                 break;
             case TouchHoverAnimationType::NONE:
-                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION, host);
                 break;
             case TouchHoverAnimationType::HOVER_TO_PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP, host);
                 break;
             case TouchHoverAnimationType::PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION, host);
                 break;
             case TouchHoverAnimationType::FOCUS:
-                SetBoardColor(LinearColor(focusColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(focusColor_), hoverDuration_, Curves::FRICTION, host);
                 break;
             default:
                 break;
         }
     }
 
-    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    void SetBoardColor(
+        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<FrameNode>& host)
     {
+        CHECK_NULL_VOID(host);
         if (animateTouchHoverColor_) {
             AnimationOption option = AnimationOption();
-            option.SetDuration(duratuion);
+            option.SetDuration(duration);
             option.SetCurve(curve);
-            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+            AnimationUtils::Animate(
+                option, [&]() { animateTouchHoverColor_->Set(color); }, nullptr, nullptr, host->GetContextRefPtr());
         }
     }
 

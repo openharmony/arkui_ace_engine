@@ -37,7 +37,7 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColorSetByUser, bool);
 
     void ToJsonValue(
-        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const;
+        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode>& host) const;
 };
 
 struct SwitchAnimationStyle {

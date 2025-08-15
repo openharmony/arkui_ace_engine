@@ -44,7 +44,9 @@ public:
         auto ratingPattern = DynamicCast<RatingPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(ratingPattern);
         CHECK_NULL_VOID(ratingModifier_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = ratingPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);
@@ -57,10 +59,11 @@ public:
             constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
             ratingModifier_->SetDrawScore(isfocus_ ? focusRatingScore_ : paintProperty->GetRatingScoreValue(0.f));
             ratingModifier_->SetStepSize(paintProperty->GetStepSize().value_or(ratingTheme->GetStepSize()));
-            ratingModifier_->SetTouchStar(paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER));
+            ratingModifier_->SetTouchStar(
+                paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER), host);
         }
         ratingModifier_->SetReverse(reverse_);
-        ratingModifier_->SetHoverState(ratingPattern->GetRatingState());
+        ratingModifier_->SetHoverState(ratingPattern->GetRatingState(), host);
     }
 
     void UpdateFocusState(bool isfocus, double focusRatingScore)

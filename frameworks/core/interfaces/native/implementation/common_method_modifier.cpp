@@ -491,55 +491,6 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     }
 };
 
-auto g_bindSheetParams = [](SheetStyle& sheetStyle, const Ark_SheetOptions& sheetOptions) {
-    sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::EMBEDDED);
-    std::vector<SheetHeight> detents;
-    auto detentsOpt = OptConvert<Ark_Type_SheetOptions_detents>(sheetOptions.detents);
-    if (detentsOpt) {
-        auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
-        if (value0) {
-            detents.emplace_back(value0.value());
-        }
-        auto value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
-        if (value1) {
-            detents.emplace_back(value1.value());
-        }
-        auto value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
-        if (value2) {
-            detents.emplace_back(value2.value());
-        }
-    }
-    sheetStyle.detents = detents;
-    sheetStyle.backgroundBlurStyle = OptConvert<BlurStyleOption>(sheetOptions.blurStyle);
-    sheetStyle.showCloseIcon = OptConvert<bool>(sheetOptions.showClose);
-    sheetStyle.interactive = OptConvert<bool>(sheetOptions.enableOutsideInteractive);
-    sheetStyle.showDragBar = OptConvert<bool>(sheetOptions.dragBar);
-    sheetStyle.sheetType = OptConvert<SheetType>(sheetOptions.preferType);
-    sheetStyle.scrollSizeMode = OptConvert<ScrollSizeMode>(sheetOptions.scrollSizeMode);
-    sheetStyle.sheetKeyboardAvoidMode = OptConvert<SheetKeyboardAvoidMode>(sheetOptions.keyboardAvoidMode);
-    sheetStyle.backgroundColor = OptConvert<Color>(sheetOptions.backgroundColor);
-    sheetStyle.maskColor = OptConvert<Color>(sheetOptions.maskColor);
-    sheetStyle.borderWidth = OptConvert<BorderWidthProperty>(sheetOptions.borderWidth);
-    sheetStyle.borderColor = OptConvert<BorderColorProperty>(sheetOptions.borderColor);
-    sheetStyle.borderStyle = OptConvert<BorderStyleProperty>(sheetOptions.borderStyle);
-    sheetStyle.shadow = OptConvert<Shadow>(sheetOptions.shadow);
-    sheetStyle.enableHoverMode = OptConvert<bool>(sheetOptions.enableHoverMode);
-    sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
-    sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
-    Validator::ValidateNonNegative(sheetStyle.width);
-    auto height = OptConvert<SheetHeight>(sheetOptions.height);
-    if (height) {
-        sheetStyle.sheetHeight = height.value();
-    }
-    auto offsetVal = OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(sheetOptions.offset);
-    if (offsetVal) {
-        OffsetF sheetOffset;
-        sheetOffset.SetX(offsetVal.value().first->ConvertToPx());
-        sheetOffset.SetY(offsetVal.value().second->ConvertToPx());
-        sheetStyle.bottomOffset = sheetOffset;
-    }
-};
-
 namespace Validator {
 void ValidateNonNegative(std::optional<InvertVariant>& value)
 {

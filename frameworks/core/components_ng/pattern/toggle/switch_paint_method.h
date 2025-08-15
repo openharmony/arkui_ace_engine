@@ -164,7 +164,9 @@ public:
             actualTrackRadius = size.Width() / 2.0; // 2.0f is used to calculate half of the width.
         }
         switchModifier_->SetActualTrackRadius(actualTrackRadius);
-        switchModifier_->UpdateAnimatableProperty();
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        switchModifier_->UpdateAnimatableProperty(renderContext->GetHost());
         UpdateBoundsRect(paintWrapper, pointRadius, actualTrackRadius);
         paintWrapper->FlushContentModifier();
     }

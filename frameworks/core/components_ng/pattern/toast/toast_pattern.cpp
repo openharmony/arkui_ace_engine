@@ -151,7 +151,7 @@ void ToastPattern::FoldStatusChangedAnimation()
     AnimationUtils::Animate(option, [host, context]() {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         context->FlushUITasks();
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)

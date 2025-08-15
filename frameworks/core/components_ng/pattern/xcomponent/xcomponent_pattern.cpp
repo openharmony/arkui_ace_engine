@@ -287,7 +287,8 @@ void XComponentPattern::OnAttachToMainTree()
         if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
             TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
                 "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
-            displaySync_->AddToPipelineOnContainer();
+            WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+            displaySync_->AddToPipeline(pipelineContext);
             needRecoverDisplaySync_ = false;
         }
     }
@@ -1477,7 +1478,13 @@ void XComponentPattern::HandleOnFrameEvent()
     });
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
         displaySync_->GetId());
-    displaySync_->AddToPipelineOnContainer();
+    auto host = GetHost();
+    if (host) {
+        WeakPtr<PipelineBase> pipelineContext = host->GetContextRefPtr();
+        displaySync_->AddToPipeline(pipelineContext);
+    } else {
+        displaySync_->AddToPipelineOnContainer();
+    }
 }
 
 void XComponentPattern::HandleUnregisterOnFrameEvent()

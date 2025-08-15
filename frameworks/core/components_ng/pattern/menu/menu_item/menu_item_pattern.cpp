@@ -710,7 +710,7 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
                 renderContext->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
                 renderContext->UpdateOpacity(MENU_ANIMATION_MAX_OPACITY);
             },
-            animationOption.GetOnFinishEvent());
+            animationOption.GetOnFinishEvent(), nullptr, subMenu->GetContextRefPtr());
     }
 }
 
@@ -1002,7 +1002,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         auto expandableNode = expandableNodeWk.Upgrade();
         CHECK_NULL_VOID(expandableNode);
         pattern->SetShowEmbeddedMenuParams(expandableNode);
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
@@ -1092,7 +1092,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         pipeline->FlushUITasks();
 
         menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void MenuItemPattern::MenuRemoveChild(const RefPtr<FrameNode>& expandableNode, bool isOutFocus)
@@ -1816,6 +1816,8 @@ bool MenuItemPattern::IsInHoverRegions(double x, double y)
 
 void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto theme = GetCurrentSelectTheme();
     CHECK_NULL_VOID(theme);
     AnimationOption option;
@@ -1843,7 +1845,7 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
             CHECK_NULL_VOID(renderContext);
             renderContext->BlendBgColor(pattern->GetBgBlendColor());
         }
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
@@ -2915,7 +2917,7 @@ float MenuItemPattern::GetSelectOptionWidth()
         auto optionPatintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
         auto selectmodifiedwidth = optionPatintProperty->GetSelectModifiedWidth();
-        finalWidth = selectmodifiedwidth.value();
+        finalWidth = selectmodifiedwidth.value_or(0.0f);
     } else {
         finalWidth = defaultWidth;
     }
@@ -2950,7 +2952,7 @@ std::string MenuItemPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue(u""));
 }
 
 std::string MenuItemPattern::InspectorGetFont()
