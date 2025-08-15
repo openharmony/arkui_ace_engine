@@ -4795,7 +4795,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->OnFlushReloadFinish();
-            });
+            }, nullptr, Claim(this));
     }
     auto stage = stageManager_->GetStageNode();
     CHECK_NULL_VOID(stage);
@@ -5512,7 +5512,7 @@ void PipelineContext::AnimateOnSafeAreaUpdate()
         CHECK_NULL_VOID(self);
         self->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
         self->FlushUITasks();
-    });
+    }, nullptr, nullptr, Claim(this));
 }
 
 void PipelineContext::HandleSubwindow(bool isShow)
@@ -5644,7 +5644,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
-    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
 void PipelineContext::CloseFrontendAnimation()
@@ -5664,7 +5664,7 @@ void PipelineContext::CloseFrontendAnimation()
     if (!pendingFrontendAnimation_.empty()) {
         pendingFrontendAnimation_.pop();
     }
-    AnimationUtils::CloseImplicitAnimation();
+    AnimationUtils::CloseImplicitAnimation(Claim(this));
 }
 
 bool PipelineContext::IsDragging() const
@@ -6173,7 +6173,7 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
             CHECK_NULL_VOID(pipeline);
             ContainerScope scope(instanceId);
             pipeline->OnFlushReloadFinish();
-        });
+        }, nullptr, Claim(this));
     CHECK_NULL_VOID(stageManager_);
     auto stage = stageManager_->GetStageNode();
     CHECK_NULL_VOID(stage);

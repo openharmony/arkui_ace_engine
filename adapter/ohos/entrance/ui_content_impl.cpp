@@ -3940,7 +3940,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 pipelineContext->OnSurfaceChanged(
                     config.Width(), config.Height(), static_cast<WindowSizeChangeReason>(reason), rsTransaction);
                 pipelineContext->FlushUITasks(true);
-            });
+            }, nullptr, nullptr, pipelineContext);
         } else {
             Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason), rsTransaction);

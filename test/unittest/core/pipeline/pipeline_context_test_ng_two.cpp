@@ -2647,5 +2647,21 @@ HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolationTest001, TestSize
     context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
     EXPECT_EQ(context_->historyPointsById_.size(), 1);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg500
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg500, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+}
 } // namespace NG
 } // namespace OHOS::Ace
