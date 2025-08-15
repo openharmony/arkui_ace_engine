@@ -113,6 +113,11 @@ public:
     void UnregisterComponentChangeEventCallback();
 
     /**
+     * @description: unregister the web unfocus event callback last register
+     */
+    void UnregisterWebUnfocusEventCallback();
+
+    /**
      * @description: report whole inspectorTree for SA
      */
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
