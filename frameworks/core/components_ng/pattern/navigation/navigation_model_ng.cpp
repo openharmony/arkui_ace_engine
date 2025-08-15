@@ -305,7 +305,7 @@ bool NavigationModelNG::CreateForceSplitPlaceHolderIfNeeded(const RefPtr<Navigat
     CHECK_NULL_RETURN(context, false);
     auto manager = context->GetNavigationManager();
     CHECK_NULL_RETURN(manager, false);
-    if (!manager->IsForceSplitSupported()) {
+    if (!manager->IsForceSplitSupported() || manager->IsPlaceholderDisabled()) {
         return true;
     }
     if (navigationGroupNode->GetForceSplitPlaceHolderNode()) {

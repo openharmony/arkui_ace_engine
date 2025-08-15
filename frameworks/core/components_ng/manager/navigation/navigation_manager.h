@@ -282,7 +282,24 @@ public:
     {
         return forceSplitNavigationDepth_;
     }
+    void SetPlaceholderDisabled(bool disable)
+    {
+        disablePlaceholder_ = disable;
+    }
+    bool IsPlaceholderDisabled() const
+    {
+        return disablePlaceholder_;
+    }
+    void SetDividerDisabled(bool disable)
+    {
+        disableDivider_ = disable;
+    }
+    bool IsDividerDisabled() const
+    {
+        return disableDivider_;
+    }
     //-------force split end-------
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -342,6 +359,8 @@ private:
     std::pair<bool, int32_t> existForceSplitNav_ = DEFAULT_EXIST_FORCESPLIT_NAV_VALUE;
     std::optional<std::string> forceSplitNavigationId_;
     std::optional<int32_t> forceSplitNavigationDepth_;
+    bool disablePlaceholder_ = false;
+    bool disableDivider_ = false;
     //-------force split end-------
 };
 } // namespace OHOS::Ace::NG
