@@ -4596,6 +4596,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::UpdateConfiguration));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "fireArkUIObjectLifecycleCallback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::FireArkUIObjectLifecycleCallback));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "applyAttributesFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ApplyAttributesFinish));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 

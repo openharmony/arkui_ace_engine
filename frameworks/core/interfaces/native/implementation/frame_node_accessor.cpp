@@ -428,6 +428,12 @@ Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
     static std::string nodeType = peerNode->GetTag();
     return Converter::ArkValue<Ark_String>(nodeType);
 }
+void ApplyAttributesFinishImpl(Ark_FrameNode peer)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {

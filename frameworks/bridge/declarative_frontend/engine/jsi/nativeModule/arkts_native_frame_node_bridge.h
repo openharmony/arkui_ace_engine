@@ -147,6 +147,7 @@ public:
     static ArkUINativeModuleValue GetInteractionEventBindingInfo(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue UpdateConfiguration(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue FireArkUIObjectLifecycleCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ApplyAttributesFinish(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG

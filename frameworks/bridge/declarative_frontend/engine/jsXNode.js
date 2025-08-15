@@ -1500,6 +1500,12 @@ class FrameNode extends Disposable {
         getUINativeModule().frameNode.removeSupportedStates(this.getNodePtr(), uiStates);
         __JSScopeUtil__.restoreInstanceId();
     }
+    invalidateAttributes() {
+        if (this.nodePtr_ === undefined || this.nodePtr_ === null) {
+            return;
+        }
+        getUINativeModule().frameNode.applyAttributesFinish(this.nodePtr_);
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {

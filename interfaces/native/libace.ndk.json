@@ -1552,6 +1552,10 @@
         "name": "OH_ArkUI_NodeUtils_MoveTo"
     },
     {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_InvalidateAttributes"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_SetCrossLanguageOption"
     },
