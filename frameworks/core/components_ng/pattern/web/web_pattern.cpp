@@ -6312,7 +6312,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         }
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         CloseSelectOverlay();
-        if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle() && !IS_CALLING_FROM_M114()) {
+        if (IS_CALLING_FROM_M114() || (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle())) {
             SelectCancel();
         }
         DestroyAnalyzerOverlay();
