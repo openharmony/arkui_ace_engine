@@ -99,10 +99,10 @@ Ark_SurfaceRect GetXComponentSurfaceRectImpl(Ark_XComponentController peer)
     float height = 0.0f;
     peerImpl->controller->GetSurfaceOffset(offsetX, offsetY);
     peerImpl->controller->GetSurfaceSize(width, height);
-    rect.offsetX = Converter::ArkValue<Opt_Number>(offsetX);
-    rect.offsetY = Converter::ArkValue<Opt_Number>(offsetY);
-    rect.surfaceWidth = Converter::ArkValue<Ark_Number>(width);
-    rect.surfaceHeight = Converter::ArkValue<Ark_Number>(height);
+    rect.offsetX = Converter::ArkValue<Opt_Float64>(offsetX);
+    rect.offsetY = Converter::ArkValue<Opt_Float64>(offsetY);
+    rect.surfaceWidth = Converter::ArkValue<Ark_Float64>(width);
+    rect.surfaceHeight = Converter::ArkValue<Ark_Float64>(height);
 #endif //XCOMPONENT_SUPPORTED
     return rect;
 }

@@ -74,10 +74,10 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
         (const std::string& surfaceId, const RectF& rect) {
         auto arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId);
         Ark_SurfaceRect arkSurfaceRect;
-        arkSurfaceRect.offsetX = Converter::ArkValue<Opt_Number>(rect.Left());
-        arkSurfaceRect.offsetY = Converter::ArkValue<Opt_Number>(rect.Top());
-        arkSurfaceRect.surfaceWidth = Converter::ArkValue<Ark_Number>(rect.Width());
-        arkSurfaceRect.surfaceHeight = Converter::ArkValue<Ark_Number>(rect.Height());
+        arkSurfaceRect.offsetX = Converter::ArkValue<Opt_Float64>(rect.Left());
+        arkSurfaceRect.offsetY = Converter::ArkValue<Opt_Float64>(rect.Top());
+        arkSurfaceRect.surfaceWidth = Converter::ArkValue<Ark_Float64>(rect.Width());
+        arkSurfaceRect.surfaceHeight = Converter::ArkValue<Ark_Float64>(rect.Height());
         arkCallback.InvokeSync(arkSurfaceId, arkSurfaceRect);
     };
 }

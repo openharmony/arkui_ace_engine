@@ -111,9 +111,7 @@ void SetOnLoadImpl(Ark_NativePointer node,
     }
     auto onLoad =
         [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
-            Opt_Object loadedObj;
-            loadedObj.tag = InteropTag::INTEROP_TAG_UNDEFINED;
-            arkCallback.InvokeSync(loadedObj);
+            arkCallback.InvokeSync();
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
     XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));

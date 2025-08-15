@@ -92,8 +92,7 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
     ViewAbstractModelStatic::SetMinWidth(frameNode, EMBEDDED_COMPONENT_MIN_WIDTH);
     ViewAbstractModelStatic::SetMinHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
-    auto typeOpt = Converter::OptConvert<SessionType>(type);
-    auto sessionType = typeOpt ? typeOpt.value() : DEFAULT_EMBEDDED_SESSION_TYPE;
+    auto sessionType = Converter::OptConvertPtr<SessionType>(type).value_or(DEFAULT_EMBEDDED_SESSION_TYPE);
     UIExtensionModelNG::UpdateEmbeddedFrameNode(frameNode, CreateWant(loader), sessionType);
 #endif
 }
@@ -138,7 +137,7 @@ void SetOnTerminatedImpl(Ark_NativePointer node,
             arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
 
             Ark_TerminationInfo terminatedInfo;
-            terminatedInfo.code = Converter::ArkValue<Ark_Number>(code);
+            terminatedInfo.code = Converter::ArkValue<Ark_Int32>(code);
             terminatedInfo.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(terminatedInfo);
         };

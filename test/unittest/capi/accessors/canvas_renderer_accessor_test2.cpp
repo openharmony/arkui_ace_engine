@@ -134,12 +134,12 @@ std::vector<std::tuple<Ark_String, Color, bool>> STYLE_STRING_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>(""), Color(), false },
     { Converter::ArkValue<Ark_String>("invalid color"), Color(), false },
 };
-std::vector<std::tuple<Ark_Number, Color>> STYLE_NUMBER_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Number>(0xff0000ff), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_Number>(0x00000000), Color(0xff000000) },
-    { Converter::ArkValue<Ark_Number>(0x80ffffff), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_Number>(0xffffffff), Color(0xffffffff) },
-    { Converter::ArkValue<Ark_Number>(0x11111111), Color(0x11111111) },
+std::vector<std::tuple<Ark_Int32, Color>> STYLE_NUMBER_TEST_PLAN = {
+    { Converter::ArkValue<Ark_Int32>(0xff0000ff), Color(0xff0000ff) },
+    { Converter::ArkValue<Ark_Int32>(0x00000000), Color(0xff000000) },
+    { Converter::ArkValue<Ark_Int32>(0x80ffffff), Color(0x80ffffff) },
+    { Converter::ArkValue<Ark_Int32>(0xffffffff), Color(0xffffffff) },
+    { Converter::ArkValue<Ark_Int32>(0x11111111), Color(0x11111111) },
 };
 class MockPixelMap : public PixelMap {
 public:
@@ -1440,13 +1440,13 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleStringTest, TestSize.Level1)
             bool targetFlag = false;
             EXPECT_CALL(*renderingModel_, SetFillColor(_, _))
                 .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setFillStyle(peer_, &style);
             EXPECT_EQ(target, expected);
             EXPECT_TRUE(targetFlag);
         } else {
             EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).Times(0);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setFillStyle(peer_, &style);
         }
     }
@@ -1464,7 +1464,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleNumberTest, TestSize.Level1)
         Ace::Color target;
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_Number>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_Int32>(actual);
         accessor_->setFillStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
@@ -1485,7 +1485,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleGradientTest, TestSize.Level1)
     std::shared_ptr<Ace::Gradient> target;
     EXPECT_CALL(*renderingModel_, SetFillGradient(_)).WillOnce(DoAll(SaveArg<0>(&target)));
     auto style =
-        Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
+        Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
     accessor_->setFillStyle(peer_, &style);
 
     EXPECT_EQ(target.get(), gradient.get());
@@ -1522,7 +1522,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternStrTest, TestSize.Level
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setFillStyle(peer_, &style);
 
@@ -1570,7 +1570,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternWHTest, TestSize.Level1
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setFillStyle(peer_, &style);
 
@@ -1602,13 +1602,13 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleStringTest, TestSize.Level1)
             bool targetFlag = false;
             EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
                 .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setStrokeStyle(peer_, &style);
             EXPECT_EQ(target, expected);
             EXPECT_TRUE(targetFlag);
         } else {
             EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _)).Times(0);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_String>(actual);
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_String>(actual);
             accessor_->setStrokeStyle(peer_, &style);
         }
     }
@@ -1627,7 +1627,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleNumberTest, TestSize.Level1)
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetStrokeColor(_, _))
             .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_Number>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_Int32>(actual);
         accessor_->setStrokeStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_FALSE(targetFlag);
@@ -1648,7 +1648,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleGradientTest, TestSize.Level
     std::shared_ptr<Ace::Gradient> target;
     EXPECT_CALL(*renderingModel_, SetStrokeGradient(_)).WillOnce(DoAll(SaveArg<0>(&target)));
     auto style =
-        Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
+        Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(arkGradient);
     accessor_->setStrokeStyle(peer_, &style);
     EXPECT_EQ(target.get(), gradient.get());
 }
@@ -1684,7 +1684,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternStrTest, TestSize.Lev
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setStrokeStyle(peer_, &style);
 
@@ -1732,7 +1732,7 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternWHTest, TestSize.Leve
             bitmap->SetHeight(actualH);
             auto repetition = std::make_optional<std::string>(actualRpt);
             peer->CreatePattern(arkBitmap, arkPattern, repetition);
-            auto style = Converter::ArkUnion<Ark_Union_String_Number_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            auto style = Converter::ArkUnion<Ark_Union_String_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 arkPattern);
             accessor_->setStrokeStyle(peer_, &style);
 
