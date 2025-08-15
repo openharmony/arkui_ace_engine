@@ -43,9 +43,9 @@ public:
         std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler);
     ~FormRenderer();
 
-    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    int32_t AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void PreInitAddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
-    void RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    int32_t RunFormPage(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ReloadForm(const std::string& url);
     void Destroy();
@@ -53,15 +53,15 @@ public:
     void SetAllowUpdate(bool allowUpdate);
     bool IsAllowUpdate();
 
-    void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent);
-    void OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    int32_t OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent);
+    int32_t OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnSurfaceDetach();
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height, float borderWidth = 0.0);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-    void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    int32_t AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
@@ -77,6 +77,7 @@ private:
     void PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RemoveFormDeathRecipient();
+    std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
 
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;

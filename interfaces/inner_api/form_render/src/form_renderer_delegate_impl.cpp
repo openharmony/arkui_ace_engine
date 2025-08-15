@@ -57,7 +57,7 @@ int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::st
     HILOG_INFO("OnError code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     if (!errorEventHandler_) {
         HILOG_ERROR("errorEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
 
     errorEventHandler_(code, msg);
@@ -80,7 +80,7 @@ int32_t FormRendererDelegateImpl::OnSurfaceDetach(uint64_t surfaceId)
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceDetachEventHandler_) {
         HILOG_ERROR("surfaceDetachEventHandler_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
     surfaceDetachEventHandler_();
     return ERR_OK;
@@ -112,7 +112,7 @@ int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
 {
     if (!checkManagerDelegate_) {
         HILOG_ERROR("checkManagerDelegate_ is null");
-        return ERR_INVALID_DATA;
+        return ERR_APPEXECFWK_FORM_COMMON_CODE;
     }
     checkManagerDelegate_(checkFlag);
     return ERR_OK;

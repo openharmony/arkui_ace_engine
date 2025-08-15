@@ -99,7 +99,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceDetach(uint64_t surfaceId)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     data.WriteUint64(surfaceId);
     HILOG_INFO("Proxy detach surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
@@ -121,7 +121,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceRelease(uint64_t surfaceId)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     data.WriteUint64(surfaceId);
     HILOG_INFO("Proxy release surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
@@ -168,17 +168,17 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     if (!data.WriteString(code)) {
         HILOG_ERROR("%{public}s, write code error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     if (!data.WriteString(msg)) {
         HILOG_ERROR("%{public}s, write msg error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     MessageParcel reply;

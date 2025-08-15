@@ -441,7 +441,7 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -566,7 +566,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
                                            const AAFwk::Want &want) -> int32_t {
         auto formManagerDelegate = weak.Upgrade();
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "SurfaceCreateEventHandle - formManagerDelegate is null");
             return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
         }
         return formManagerDelegate->OnSurfaceCreate(formInfo, surfaceNode, want);
@@ -575,19 +575,23 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        TAG_LOGI(AceLogTag::ACE_FORM, "ActionEventHandle - AddActionEventHandle");
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "ActionEventHandle - formManagerDelegate is null");
             return;
         }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
-    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
+    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& code, const std::string& msg) -> int32_t {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "ErrorEventHandle - formManagerDelegate is null");
+            return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
+        }
         formManagerDelegate->OnFormError(code, msg);
+        return ERR_OK;
     };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 
@@ -622,7 +626,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
         auto formManagerDelegate = weak.Upgrade();
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "CheckManagerDelegateEventHandle - formManagerDelegate is null");
             checkFlag = false;
         }
     };
@@ -631,7 +635,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     auto &&onUpdateFormDoneEventHandler = [weak = WeakClaim(this)](const int64_t formId) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        TAG_LOGD(AceLogTag::ACE_FORM, "EventHandle - onUpdateFormDoneEventHandler, formId:%{public}" PRId64, formId);
+        TAG_LOGD(AceLogTag::ACE_FORM, "UpdateFormEventHandle - formId:%{public}" PRId64, formId);
         formManagerDelegate->OnFormUpdateDone(formId);
     };
     renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
