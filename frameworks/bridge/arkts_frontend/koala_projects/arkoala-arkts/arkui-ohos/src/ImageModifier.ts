@@ -96,6 +96,9 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     applyModifierPatch(peer: ArkImagePeer): void {
         super.applyModifierPatch(peer)
     }
+    mergeModifier(modifier: ImageModifier): void {
+        super.mergeModifier(modifier)
+    }
     alt(value: string | Resource | PixelMap | undefined): this {
         if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true)) {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE

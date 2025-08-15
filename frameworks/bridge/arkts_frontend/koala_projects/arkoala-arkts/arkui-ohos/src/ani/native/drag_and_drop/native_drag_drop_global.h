@@ -15,10 +15,10 @@
 
 #ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL
 #define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL
+#include <string>
 
 #include "ani.h"
-
-#include <string>
+#include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::Ani {
 void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -41,5 +41,21 @@ void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array_ref array, [[maybe_unused]] ani_int length);
 void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dragInfo);
+void DragSetDragPreviewOptions([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object value, [[maybe_unused]] ani_object options);
+
+//utils
+ani_object CreateImagePeer(ani_env* env, void* ptr);
+ani_object CreateImageModifier(ani_env* env);
+void SetPropertyValueByName(ani_env* env, ani_object obj, std::string name, bool& target);
+bool ParsePreviewOptionMode(ani_env* env, ArkUIDragPreviewOption& previewOptions,
+    ani_object dragPreviewMode, bool& isAuto);
+bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
+bool ParseDragPreviewModifier(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
+bool ParseNumberBadge(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
+bool ParseSizeChangeEffect(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
+void ParseDragPreviewOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions, ani_object value);
+void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOptions,
+    ani_object options);
 } // namespace OHOS::Ace::Ani
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_DRAG_AND_DROP_NATIVE_DRAG_DROP_GLOBAL

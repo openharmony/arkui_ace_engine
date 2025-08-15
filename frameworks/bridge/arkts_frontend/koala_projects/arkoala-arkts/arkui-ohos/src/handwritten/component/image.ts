@@ -179,3 +179,11 @@ function hookSetColorFilter(component: ArkImageComponent, value: ColorFilter | d
     ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(component.getPeer().getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
     thisSerializer.release()
 }
+
+export class ImageUtils {
+    public static createImagePeerFromPtr(peerPtr: KPointer) :ArkImagePeer {
+        const peerId = PeerNode.nextId()
+        const _peer = new ArkImagePeer(peerPtr, peerId, "Image", 0)
+        return _peer
+    }
+}
