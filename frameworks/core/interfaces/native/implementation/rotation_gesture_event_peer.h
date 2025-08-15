@@ -17,7 +17,8 @@
 
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct RotationGestureEventPeer : public OHOS::Ace::NG::GeneratedModifier::BaseGestureEventPeerImpl {
+struct RotationGestureEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::RotationGestureEvent> {
 protected:
     RotationGestureEventPeer() = default;
     ~RotationGestureEventPeer() override = default;
