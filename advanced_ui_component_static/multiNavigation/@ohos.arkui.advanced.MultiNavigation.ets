@@ -15,7 +15,7 @@
 
 import deviceInfo from '@ohos.deviceInfo';
 import { Entry, Text, BuilderParam, LaunchMode, Builder,PopInfo,NavigationInterception,Callback,Component, NavPathStack, TouchType, Navigation,NavPathInfo, NavDestination, NavigationMode, NavigationOptions, AttributeModifier, NavigationAttribute, Percentage} from "@ohos.arkui.component"  // TextAttribute should be insert by ui-plugins
-import { State, MutableState, stateOf, observableProxy, Observed, ObjectLink, Link  } from "@ohos.arkui.stateManagement" // should be insert by ui-plugins
+import { State, MutableState, stateOf, observableProxy, Observed, ObjectLink, Link } from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
 import hilog from '@ohos.hilog'
 import mediaquery from '@ohos.mediaquery';
 import display from '@ohos.display';
@@ -317,13 +317,13 @@ export struct SubNavigation {
       hilog.debug(0x0000, 'MultiNavigation', 'subNavigation NavDestination onBackPressed');
       if (this.multiStack && this.secondaryStack.size() === 1) {
         console.log('subNavigation NavDestination onBackPressed multiStack.pop');
-        this.multiStack.pop(new Object(), true);
+        this.multiStack.pop({}, true);
         return true;
       }
       return false;
     })
     .hideTitleBar(true, true)
-    .title("navDestination1", {})
+    .title('navDestination1', {})
   }
 }
 
@@ -435,7 +435,7 @@ class SubNavigationStack {
         slaveIndexes.push(value - 1);
       });
       this.secondaryStack.removeByIndexes(slaveIndexes);
-      let tempArr:Array<MultiNavPolicyInfo> = []
+      let tempArr: MultiNavPolicyInfo[] = []
       this.secondaryStack.policyInfoList.forEach((value, index) => {
         if (value && !slaveIndexes.includes(index)) {
           tempArr.push(value)
@@ -523,13 +523,15 @@ class SubNavigationStack {
   private replacePrimary(info: MultiNavPolicyInfo, animated?: boolean): void {
     this.primaryStack.policyInfoList.pop();
     this.primaryStack.policyInfoList.push(info)
-    return this.primaryStack.replacePath(info.navInfo as NavPathInfo, {launchMode:LaunchMode.STANDARD,animated: animated} as NavigationOptions);
+    return this.primaryStack.replacePath(info.navInfo as NavPathInfo,
+      {launchMode:LaunchMode.STANDARD,animated: animated} as NavigationOptions);
   }
 
   private replaceSecond(info: MultiNavPolicyInfo, animated?: boolean): void {
     this.secondaryStack.policyInfoList.pop();
     this.secondaryStack.policyInfoList.push(info)
-    return this.secondaryStack.replacePath(info.navInfo as NavPathInfo, {launchMode:LaunchMode.STANDARD,animated: animated} as NavigationOptions);
+    return this.secondaryStack.replacePath(info.navInfo as NavPathInfo, 
+      {launchMode:LaunchMode.STANDARD,animated: animated} as NavigationOptions);
   }
 
   private popPrimary(animated?: boolean): NavPathInfo | undefined {
@@ -839,7 +841,8 @@ export class MultiNavPathStack extends NavPathStack {
     this.pushPath(info, animated, policy);
   }
 
-  pushPathByName(name: string, param: Object, onPop?: Callback<PopInfo>, animated?: boolean, policy?: SplitPolicy): void {
+  pushPathByName(name: string, param: Object, onPop?: Callback<PopInfo>,
+    animated?: boolean, policy?: SplitPolicy): void {
     animated = typeof animated === 'undefined' ? true : animated
     let info: NavPathInfo = new NavPathInfo(name,param)
     if (onPop !== undefined) {
@@ -1167,13 +1170,13 @@ export class MultiNavPathStack extends NavPathStack {
           this.subStackList[i]?.secondaryStack.clear();
           this.subStackList[i].secondaryStack.policyInfoList.splice(0);
           this.totalStack.splice(index + 1);
-          this.clearTrashStack(i + 1, new Object(), animated);
+          this.clearTrashStack(i + 1, {}, animated);
           break;
         } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
-          this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, new Object(), true);
+          this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
           this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
           this.totalStack.splice(index + 1);
-          this.clearTrashStack(i + 1, new Object(), animated);
+          this.clearTrashStack(i + 1, {}, animated);
         }
         removeIndex += secondaryStackSize[i];
       }
@@ -1209,7 +1212,7 @@ export class MultiNavPathStack extends NavPathStack {
           this.clearTrashStack(i + 1, result, animated);
           break;
         } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
-          this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, new Object(), true);
+          this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
           this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
           this.totalStack.splice(index + 1);
           this.clearTrashStack(i + 1, result, animated);
@@ -1255,14 +1258,14 @@ export class MultiNavPathStack extends NavPathStack {
         this.subStackList[i]?.secondaryStack.clear();
         this.subStackList[i].secondaryStack.policyInfoList.splice(0);
         this.totalStack.splice(index + 1);
-        this.clearTrashStack(i + 1, new Object(), animated);
+        this.clearTrashStack(i + 1, {}, animated);
         console.log('MultiNavPathStack popToIndex totalStack=' + this.totalStack.length);
         break;
       } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
-        this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, new Object(), true);
+        this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
         this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
         this.totalStack.splice(index + 1);
-        this.clearTrashStack(i + 1, new Object(), animated);
+        this.clearTrashStack(i + 1, {}, animated);
       }
       removeIndex += secondaryStackSize[i];
     }
@@ -1299,7 +1302,7 @@ export class MultiNavPathStack extends NavPathStack {
         console.log('MultiNavPathStack popToIndex totalStack=' + this.totalStack.length);
         break;
       } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
-        this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, new Object(), true);
+        this.subStackList[i].secondaryStack.popToIndex(index - removeIndex, {}, true);
         this.subStackList[i].secondaryStack.policyInfoList.splice(index - removeIndex + 1);
         this.totalStack.splice(index + 1);
         this.clearTrashStack(i + 1, result, animated);
@@ -1320,7 +1323,7 @@ export class MultiNavPathStack extends NavPathStack {
 
   private clearTrashStack(index: number, result?: Object, animated?: boolean): void {
     animated = typeof animated === 'undefined' ? true : animated
-    result = typeof result === 'undefined' ? new Object() : result
+    result = typeof result === 'undefined' ? {} : result
     console.log('MultiNavPathStack popToIndex clearTrashStack' + index);
     for (let i = index; i < this.subStackList.length; i++) {
       console.log('MultiNavPathStack popToIndex subStackList' + index);
@@ -1403,7 +1406,7 @@ export class MultiNavPathStack extends NavPathStack {
       for (let i = 1; i < subStackLength; i++) {
         this.subStackList[i].clear(animated);
       }
-      this.outerStack.popToIndex(0, new Object(), animated);
+      this.outerStack.popToIndex(0, {}, animated);
       this.subStackList.splice(1);
       if (this.placeHolderPolicyInfo !== undefined) {
         if (this.subStackList[0].getSecondaryInfoList().length > 1 &&
@@ -1452,8 +1455,8 @@ export class MultiNavPathStack extends NavPathStack {
     return result;
   }
 
-  getParamByName(name: string): Array<Object | null | undefined> {
-    let result: Array<Object | null | undefined> = [];
+  getParamByName(name: string): (Object | null | undefined)[] {
+    let result: (Object | null | undefined)[] = [];
     this.totalStack.forEach((value) => {
       if (value.navInfo !== undefined && value.navInfo!.name == name) {
         result.push(value!.navInfo!.param);
@@ -1694,7 +1697,7 @@ class MultiNavPolicyInfo {
 
 export class MyNavPathStack extends NavPathStack {
   operates:NavPathStackOperate[] = [];
-  type = 'NavPathStack';
+  type:string = 'NavPathStack';
   policyInfoList: MultiNavPolicyInfo[] = [];
 
   registerStackOperateCallback(operate: NavPathStackOperate) {
@@ -1713,14 +1716,14 @@ export class MyNavPathStack extends NavPathStack {
 
   popInner(animated?: boolean): NavPathInfo | undefined {
     console.log('MyNavPathStack pop from inner:');
-    return super.pop(new Object(), animated);
+    return super.pop({}, animated);
   }
 
   pop(animated?: boolean): NavPathInfo | undefined {
     console.log('MyNavPathStack pop from system:');
     animated = typeof animated === 'undefined' ? true : animated
     let ret: NavPathInfo | undefined = undefined;
-    ret = super.pop(new Object(), animated);
+    ret = super.pop({}, animated);
     this.policyInfoList.pop();
     this.operates.forEach((item) => {
       item.onSystemPop();
