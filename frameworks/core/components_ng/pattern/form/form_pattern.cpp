@@ -65,8 +65,12 @@ constexpr int32_t DOUBLE = 2;
 constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 constexpr double TIME_LIMIT_FONT_SIZE_BASE = 14.0;
+#ifdef ARKUI_WEARABLE
+constexpr double FORBIDDEN_ICON_STYLE = 64.0;
+#else
 constexpr double FORBIDDEN_ICON_STYLE = 32.0;
 constexpr double FORBIDDEN_ICON_STYLE_1_2 = 24.0;
+#endif
 constexpr double TIBETAN_TIME_LIMIT_FONT_SIZE_BASE = 9.0;
 constexpr double ONE_DIMENSION_TIME_LIMIT_FONT_SIZE_BASE = 14.0;
 constexpr float MAX_FONT_SCALE = 1.3f;
@@ -1047,19 +1051,22 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE);
     RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    int32_t dimension = cardInfo_.dimension;
-    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, invalid dimensionHeight!");
         return;
     }
 
     RefPtr<FrameNode> rootNode = nullptr;
+#ifdef ARKUI_WEARABLE
+    rootNode =  CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+#else
     if (cardInfo_.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2)) {
         rootNode = CreateRowNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     } else {
         rootNode = CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     }
+#endif
     CHECK_NULL_VOID(rootNode);
     auto renderContext = rootNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1284,9 +1291,14 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenImageNode(InternalResource::Resour
     auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateSvgFillColor(newColor);
+#ifdef ARKUI_WEARABLE
+    CalcSize idealSize = { CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::PX),
+        CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::PX) };
+#else
     double iconSize = isRowStyle ? FORBIDDEN_ICON_STYLE_1_2 : FORBIDDEN_ICON_STYLE;
     CalcSize idealSize = { CalcLength(iconSize, DimensionUnit::VP),
         CalcLength(iconSize, DimensionUnit::VP) };
+#endif
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_RETURN(externalContext, nullptr);
@@ -1394,7 +1406,9 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode(FormChildNodeType formChildNodeT
         layoutProperty->UpdateSpace(space);
 
         columnNode->AddChild(CreateIconNode(false));
+#ifndef ARKUI_WEARABLE
         columnNode->AddChild(CreateTextNode(false));
+#endif
     } else {
         layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
     }
@@ -2145,9 +2159,13 @@ double FormPattern::GetTimeLimitFontSize()
 
 bool FormPattern::IsMaskEnableForm(const RequestFormInfo& info)
 {
+#ifdef ARKUI_WEARABLE
+    return false;
+#else
     return info.shape == FORM_SHAPE_CIRCLE || info.renderingMode ==
         static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) ||
         info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1);
+#endif
 }
 
 void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity)
