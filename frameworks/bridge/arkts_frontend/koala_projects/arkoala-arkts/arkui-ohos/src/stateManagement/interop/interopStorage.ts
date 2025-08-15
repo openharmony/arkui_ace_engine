@@ -16,7 +16,7 @@
 import { DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { LocalStorage } from '../storage/localStorage';
 import { StorageBase } from '../storage/storageBase';
-import { SubscribedAbstractProperty, IStorageProperties } from '../storage/storageProperty';
+import { SubscribedAbstractProperty } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType } from '../decorator';
@@ -44,7 +44,7 @@ export class InteropStorageBase extends StorageBase {
     // the Lazy key/value info of Storage in ArkTS1.1
     protected interopStorage_ = new Map<string, InteropStorageValue>();
 
-    protected totalKeys_ = new Map<string, string>();
+    protected totalKeys_ = new Set<string>();
 
     private proxy?: ESValue;
 
@@ -124,9 +124,8 @@ export class InteropStorageBase extends StorageBase {
         const getSize = (): number => {
             return this.getStaticSize();
         };
-        const getKeys = (): Set<String> => {
-            const keys: Set<String> = this.keySet;
-            return keys;
+        const getKeys = (): IterableIterator<String> => {
+            return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
         const setGetValueFunc = (event: (value: string) => ESValue): void => {
@@ -160,7 +159,7 @@ export class InteropStorageBase extends StorageBase {
 
     // return ArkTS1.1 ObservedPropertyPU object.
     public getStoragePropertyForDynamic(value: string): Any {
-        const storage = super.__getStoragePropUnsafe<NullishType>(value);
+        const storage = super.__getStoragePropUnsafe<Any>(value);
         if (storage === undefined) {
             return undefined;
         }
@@ -169,14 +168,14 @@ export class InteropStorageBase extends StorageBase {
             StateMgmtConsole.log('fail to find createStateVariable');
             return undefined;
         }
-        const state = storage! as StorageProperty<NullishType>;
+        const state = storage! as StorageProperty<Any>;
         if (state.getProxy() === undefined) {
-            const setSource = (value: NullishType): void => {
+            const setSource = (value: Any): void => {
                 state.set(value);
             };
             const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
-            const setProxyValue = (value: NullishType): void => {
+            const setProxyValue = (value: Any): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             };
             state.setProxyValue = setProxyValue;
@@ -190,8 +189,7 @@ export class InteropStorageBase extends StorageBase {
     }
 
     public has(key: string): boolean {
-        const value = super.__getStoragePropUnsafe<NullishType>(key);
-        if (value !== undefined) {
+        if (super.has(key)) {
             return true;
         }
         // check value in ArkTS1.1
@@ -207,13 +205,24 @@ export class InteropStorageBase extends StorageBase {
      */
     public keys(): IterableIterator<string> {
         this.totalKeys_.clear();
-        this.interopStorage_.forEach((value: InteropStorageValue, key: string) => {
-            this.totalKeys_.set(key, key);
-        });
-        this.keySet.forEach((value: string) => {
-            this.totalKeys_.set(value, value);
-        });
+        for (const key of this.interopStorage_.keys()) {
+            this.totalKeys_.add(key);
+        }
+        for (const key of super.keys()) {
+            this.totalKeys_.add(key);
+        }
         return this.totalKeys_.keys();
+    }
+
+    /**
+     * Provide names of all properties in LocalStorage
+     *
+     * @returns { Set<string> } return (unordered) Set of keys
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    protected getStaticKeys(): IterableIterator<string> {
+        return super.keys();
     }
 
     /**
@@ -231,17 +240,15 @@ export class InteropStorageBase extends StorageBase {
     /**
      * Returns value of given property
      * return undefined if no property with this name
-     * or if expected ttype can not be assigned from type configured
      * for this property in storage.
      *
      * @param { string } propName - property name
-     * @param {Type} ttype - data type
      * @returns { T | undefined } property value if found or undefined
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public get<T>(key: string, ttype: Type): T | undefined {
-        let value = super.get<T>(key, ttype);
+    public get<T>(key: string): T | undefined {
+        let value = super.get<T>(key);
         if (value !== undefined) {
             return value as T;
         }
@@ -260,17 +267,15 @@ export class InteropStorageBase extends StorageBase {
 
     /**
      *  Create an SubscribedAbstractProperty if property with given name already exists in storage
-     * and if given ttype equals the type configured for this property in storage.
      *
      * @param { string } propName LocalStorage property name
-     * @param {Type} ttype - data type
      * @returns { SubscribedAbstractProperty<T> | undefined } SubscribedAbstractProperty object if aforementioned conditions are
      * satisfied.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(key: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        let value = super.ref<T>(key, ttype);
+    public ref<T>(key: string): SubscribedAbstractProperty<T> | undefined {
+        let value = super.ref<T>(key);
         if (value !== undefined) {
             return value;
         }
@@ -284,7 +289,7 @@ export class InteropStorageBase extends StorageBase {
             interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
         }
         const state = interopValue.value as StorageProperty<T>;
-        const reference = state.mkRef(key, ttype);
+        const reference = state.mkRef(key);
         state.registerWatchToSource(reference);
         return reference;
     }
@@ -319,9 +324,7 @@ export class InteropStorageBase extends StorageBase {
 
     /**
      * case A: if property with given names does not exists in storage, yet:
-     * if given value can be assigned to given ttype, then
      * - create new property
-     * - configure its type to be given ttype
      * - set its initial value to given value
      * otherwise do nothing, return false
      *
@@ -330,21 +333,19 @@ export class InteropStorageBase extends StorageBase {
      *
      * @param propName
      * @param newValue
-     * @param ttype
      * @returns true on 1) create new property and newtValue can be assigned to stated type, or
      * 2) update existing property and newValue can be assigned to type configured for this
      * property in storage.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setOrCreate<T>(key: string, newValue: T, ttype: Type): boolean {
-        const expectedTtypeOpt = super.getType(key);
-        if (expectedTtypeOpt === undefined) {
+    public setOrCreate<T>(key: string, newValue: T): boolean {
+        if (!super.has(key)) {
             // Check ArkTS1.1
             let interopValue = this.interopStorage_.get(key);
             if (interopValue === undefined) {
-                // create new entry, remember permissible ttype
-                return super.createAndSet(key, ttype, newValue);
+                // create new entry
+                return super.createAndSet(key, newValue);
             }
             if (!interopValue.value) {
                 // initialize interop value by ArkTS1.1
@@ -360,7 +361,6 @@ export class InteropStorageBase extends StorageBase {
      * case A: if property with given name does not exists in storage, yet:
      * if given defaultValue is assignable to given type, then
      * - create new property with given name in storage
-     * - configure its type to be the given ttype
      * - create a SubscribedAbstractProperty that refers to this storage property
      *   and return it
      * otherwise create no new property in storage, and return undefined.
@@ -375,23 +375,21 @@ export class InteropStorageBase extends StorageBase {
      * @param { string } propName LocalStorage property name
      * @param { T } defaultValue If property does not exist in LocalStorage,
      *        create it with given default value.
-     * @param {Type} ttype - data type
      * @returns { SubscribedAbstractProperty<T> } SubscribedAbstractProperty object or undefined as defined above
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        const ttypeOpt = super.getType(key);
-        if (ttypeOpt === undefined) {
+    public setAndRef<T>(key: string, defaultValue: T): SubscribedAbstractProperty<T> | undefined {
+        if (!super.has(key)) {
             // search ArkTS1.1 Storage.
             let interopValue = this.interopStorage_.get(key);
             if (interopValue === undefined) {
-                // create new entry, remember permissible ttype, set with defaultValue
-                if (!super.createAndSet<T>(key, ttype, defaultValue)) {
+                // create new entry, set with defaultValue
+                if (!super.createAndSet<T>(key, defaultValue)) {
                     // creation failed
                     return undefined;
                 }
-                const link = super.ref<T>(key, ttype);
+                const link = super.ref<T>(key);
                 return link;
             }
             if (!interopValue.value) {
@@ -399,11 +397,11 @@ export class InteropStorageBase extends StorageBase {
                 interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
             }
             const state = interopValue.value as StorageProperty<T>;
-            const reference = state.mkRef(key, ttype);
+            const reference = state.mkRef(key);
             state.registerWatchToSource(reference);
             return reference;
         }
-        const link = super.ref<T>(key, ttype);
+        const link = super.ref<T>(key);
         // TODO finalization reg link
         return link;
     }
@@ -466,7 +464,6 @@ export class InteropStorageBase extends StorageBase {
      * @param key
      * @param varName
      * @param defaultValue
-     * @param ttype
      * @param watchFunc
      * @returns
      */
@@ -475,13 +472,12 @@ export class InteropStorageBase extends StorageBase {
         key: string,
         varName: string,
         defaultValue: T,
-        ttype: Type,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
         let interopValue = this.interopStorage_.get(key);
         if (interopValue === undefined) {
             // Use ArkTS1.2
-            return super.makeStorageLink<T>(owner, key, varName, defaultValue, ttype, watchFunc);
+            return super.makeStorageLink<T>(owner, key, varName, defaultValue, watchFunc);
         }
         // Use ArkTS1.1
         if (!interopValue.value) {
@@ -560,9 +556,8 @@ export class InteropAppStorageBase extends InteropStorageBase {
         const getSize = (): number => {
             return this.getStaticSize();
         };
-        const getKeys = (): Set<String> => {
-            const keys: Set<String> = this.keySet;
-            return keys;
+        const getKeys = (): IterableIterator<string> => {
+            return this.getStaticKeys();
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
         const setGetValueFunc = (event: (value: string) => ESValue): void => {
