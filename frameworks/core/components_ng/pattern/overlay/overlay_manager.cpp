@@ -223,7 +223,7 @@ void UpdateHoverImagePreviewOpacityAnimation(const RefPtr<MenuTheme>& menuTheme,
         option, [previewRenderContext]() {
             CHECK_NULL_VOID(previewRenderContext);
             previewRenderContext->UpdateOpacity(0.0);
-        });
+        }, nullptr, nullptr, previewChild->GetContextRefPtr());
 }
 
 void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
@@ -285,6 +285,9 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
 void StopHoverImageDelayAnimation(
     const RefPtr<MenuWrapperPattern>& menuWrapperPattern, const NG::OffsetF& previewOriginOffset)
 {
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
     // stop delay animation for preview position
     AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0), [menuWrapperPattern, previewOriginOffset]() {
         auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
@@ -293,7 +296,7 @@ void StopHoverImageDelayAnimation(
         CHECK_NULL_VOID(flexContext);
         flexContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewOriginOffset.GetX()), Dimension(previewOriginOffset.GetY())));
-    });
+    }, nullptr, nullptr, flexNode->GetContextRefPtr());
 }
 
 AnimationOption GetHoverImageAnimationOption(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
@@ -437,7 +440,7 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
         if (scaleAfter != 1.0f) {
             menuRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
         }
-    });
+    }, nullptr, nullptr, menuChild->GetContextRefPtr());
 }
 
 void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>& dragPreviewContext,
@@ -479,7 +482,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
 
             CHECK_NULL_VOID(dragPreviewContext);
             dragPreviewContext->UpdateTransformTranslate({ offset.GetX(), offset.GetY(), 0.0f });
-        });
+        }, nullptr, nullptr, previewChild->GetContextRefPtr());
 }
 
 void UpdateContextMenuSwitchDragPreviewBefore(const RefPtr<FrameNode>& menu)
@@ -555,7 +558,7 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
             CHECK_NULL_VOID(dragPreviewContext);
             dragPreviewContext->UpdateOpacity(1.0);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, previewChild->GetContextRefPtr());
 }
 
 void ShowContextMenuDisappearAnimation(
@@ -592,7 +595,7 @@ void ShowContextMenuDisappearAnimation(
         CHECK_NULL_VOID(menuRenderContext);
         menuRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-    });
+    }, nullptr, nullptr, menuChild->GetContextRefPtr());
 
     auto disappearDuration = menuTheme->GetDisappearDuration();
     auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
@@ -600,7 +603,7 @@ void ShowContextMenuDisappearAnimation(
     AnimationUtils::Animate(scaleOption, [menuRenderContext, menuAnimationScale]() {
         CHECK_NULL_VOID(menuRenderContext);
         menuRenderContext->UpdateTransformScale({ menuAnimationScale, menuAnimationScale });
-    });
+    }, nullptr, nullptr, menuChild->GetContextRefPtr());
 
     option.SetDuration(disappearDuration);
     option.SetCurve(Curves::FRICTION);
@@ -610,7 +613,7 @@ void ShowContextMenuDisappearAnimation(
             CHECK_NULL_VOID(menuRenderContext);
             menuRenderContext->UpdateOpacity(0.0);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, menuChild->GetContextRefPtr());
 }
 
 void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
@@ -641,7 +644,7 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
                 menuRenderContext->UpdateOpacity(0.0f);
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, menuNode->GetContextRefPtr());
 }
 
 static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>& weakPtr)
@@ -1678,7 +1681,7 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
                         VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
                 }
             },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, menuWrapper->GetContextRefPtr());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
@@ -1831,7 +1834,7 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
                 ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, toastNode->GetContextRefPtr());
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
     toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
@@ -1901,7 +1904,7 @@ void OverlayManager::PopToast(int32_t toastId)
                 ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, toastUnderPop->GetContextRefPtr());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
     if (transactionProxy != nullptr) {
@@ -7093,7 +7096,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
             imageContext->UpdateBackShadow(shadow.value());
             imageContext->UpdateBorderRadius(targetBorderRadius);
         }
-    });
+    }, nullptr, nullptr, imageNode->GetContextRefPtr());
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -7141,7 +7144,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
                 imageContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
             }
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, imageNode->GetContextRefPtr());
     isOnAnimation_ = true;
 }
 
@@ -8414,7 +8417,7 @@ void OverlayManager::ExecuteFilterAnimation(
                 filterRenderContext->UpdateBackgroundColor(maskColor);
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, columnNode->GetContextRefPtr());
 }
 
 bool OverlayManager::RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper)

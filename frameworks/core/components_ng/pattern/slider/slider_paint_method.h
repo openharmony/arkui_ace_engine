@@ -57,7 +57,7 @@ public:
 
 private:
     void UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintProperty);
-    void SetAttrParameters();
+    void SetAttrParameters(const RefPtr<FrameNode>& host);
     RefPtr<SliderContentModifier> sliderContentModifier_;
     SliderContentModifier::Parameters parameters_;
 

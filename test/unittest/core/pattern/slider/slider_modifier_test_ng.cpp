@@ -231,15 +231,15 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
      * @tc.steps: step2. set sliderContentModifier attribute and call onDraw function.
      */
     SetSliderContentModifier(sliderContentModifier);
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set direction FREE
     sliderContentModifier.SetDirection(Axis::FREE);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set animatorStatus default
     sliderContentModifier.SetAnimatorStatus(SliderStatus::DEFAULT);
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetCircleCenter(POINTF_CENTER);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
+    sliderContentModifier.SetCircleCenter(POINTF_CENTER, frameNode);
     // set Axis HORIZONTAL
     sliderContentModifier.SetDirection(Axis::HORIZONTAL);
     // set BlockStyleType DEFAULT
@@ -814,12 +814,16 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest014, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest015, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
     ASSERT_NE(sliderContentModifier.selectEnd_, nullptr);
 
     sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
-    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
+    sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END, frameNode);
     EXPECT_EQ(sliderContentModifier.selectEnd_->Get(), POINTF_END - PointF());
 }
 
@@ -830,6 +834,10 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest015, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest016, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
     ASSERT_NE(sliderContentModifier.blockCenterX_, nullptr);
@@ -838,17 +846,17 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest016, TestSize.Level1)
     sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
 
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_HEIGHT);
 
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::NONE));
-    sliderContentModifier.SetCircleCenter(PointF(FRAME_WIDTH, FRAME_WIDTH));
+    sliderContentModifier.SetCircleCenter(PointF(FRAME_WIDTH, FRAME_WIDTH), frameNode);
     EXPECT_EQ(sliderContentModifier.blockCenterX_->Get(), FRAME_WIDTH);
     EXPECT_EQ(sliderContentModifier.blockCenterY_->Get(), FRAME_WIDTH);
 }
@@ -860,6 +868,10 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest016, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set image block property.
      */
@@ -875,7 +887,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
      * @tc.cases: case1. when the block center changes.
      */
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
-    sliderContentModifier.SetCircleCenter(center);
+    sliderContentModifier.SetCircleCenter(center, frameNode);
     Testing::MockCanvas canvas;
     MockCanvasFunction(canvas);
     DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
@@ -896,6 +908,10 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest017, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set property callback.
      */
@@ -917,19 +933,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     /**
@@ -939,19 +955,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation();
+    sliderContentModifier.StopSelectAnimation(frameNode);
     ASSERT_TRUE(set);
 }
 
@@ -962,6 +978,10 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest018, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
 {
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step1. create content modifier and set property callback.
      */
@@ -984,19 +1004,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_START;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_END.GetX());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     /**
@@ -1012,19 +1032,19 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_START;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_END.GetY());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation();
+    sliderContentModifier.StopCircleCenterAnimation(frameNode);
     ASSERT_TRUE(set);
 }
 
@@ -1613,11 +1633,11 @@ HWTEST_F(SliderModifierTestNg, SliderTipModifierTest003, TestSize.Level1)
      */
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
-    sliderTipModifier.SetTipFlag(false);
+    sliderTipModifier.SetTipFlag(false, frameNode);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
-    sliderTipModifier.SetTipFlag(true);
+    sliderTipModifier.SetTipFlag(true, frameNode);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 }
 
@@ -1827,7 +1847,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest031, TestSize.Level1)
      * @tc.steps: step2. set sliderContentModifier attribute and call SetBoardColor function.
      */
     sliderContentModifier.SetIsHovered(false);
-    sliderContentModifier.SetBoardColor();
+    sliderContentModifier.SetBoardColor(frameNode);
     EXPECT_FALSE(sliderContentModifier.mouseHoverFlag_);
 }
 

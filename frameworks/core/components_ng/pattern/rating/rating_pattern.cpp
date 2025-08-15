@@ -697,7 +697,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
     if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
-    ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetIsFocus(isFocus, GetHost());
     ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

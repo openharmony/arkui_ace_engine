@@ -30,6 +30,7 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/token_theme/token_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,23 +51,23 @@ public:
         PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
 
-    void UpdateAnimatableProperty(bool needAnimation)
+    void UpdateAnimatableProperty(bool needAnimation, const RefPtr<PipelineContext>& context = nullptr)
     {
         switch (touchHoverType_) {
             case TouchHoverAnimationType::HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_), hoverDuration_, Curves::FRICTION, context);
                 break;
             case TouchHoverAnimationType::PRESS_TO_HOVER:
-                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(hoverColor_), hoverToTouchDuration_, Curves::SHARP, context);
                 break;
             case TouchHoverAnimationType::NONE:
-                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(hoverColor_.BlendOpacity(0)), hoverDuration_, Curves::FRICTION, context);
                 break;
             case TouchHoverAnimationType::HOVER_TO_PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverToTouchDuration_, Curves::SHARP, context);
                 break;
             case TouchHoverAnimationType::PRESS:
-                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
+                SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION, context);
                 break;
             default:
                 break;
@@ -94,16 +95,17 @@ public:
                 isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
             animatableShadowColor_->Set(
                 isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
-        });
+        }, nullptr, nullptr, context);
     }
 
-    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
+    void SetBoardColor(
+        LinearColor color, int32_t duration, const RefPtr<CubicCurve>& curve, const RefPtr<PipelineContext>& context)
     {
         if (animateTouchHoverColor_) {
             AnimationOption option = AnimationOption();
-            option.SetDuration(duratuion);
+            option.SetDuration(duration);
             option.SetCurve(curve);
-            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+            AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); }, nullptr, nullptr, context);
         }
     }
 

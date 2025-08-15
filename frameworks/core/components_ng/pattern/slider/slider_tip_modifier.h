@@ -73,7 +73,7 @@ public:
         tipColor_ = color;
     }
 
-    void SetTipFlag(bool flag);
+    void SetTipFlag(bool flag, const RefPtr<FrameNode>& host);
 
     void SetContentOffset(const OffsetF& contentOffset)
     {
@@ -132,8 +132,8 @@ private:
     void PaintHorizontalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
     void PaintVerticalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
     void PaintText(DrawingContext& context);
-    void SetBubbleDisplayAnimation();
-    void SetBubbleDisappearAnimation();
+    void SetBubbleDisplayAnimation(const RefPtr<FrameNode>& host);
+    void SetBubbleDisappearAnimation(const RefPtr<FrameNode>& host);
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content);
     bool CreateParagraph(const TextStyle& textStyle, std::string content);

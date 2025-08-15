@@ -142,7 +142,7 @@ void BubblePattern::OnAttachToFrameNode()
             AnimationUtils::Animate(option, [host, context]() {
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 context->FlushUITasks();
-            });
+            }, nullptr, nullptr, host->GetContextRefPtr());
         });
 }
 
@@ -422,12 +422,15 @@ RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 void BubblePattern::Animation(
     RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option = AnimationOption();
     option.SetCurve(curve);
     option.SetDuration(duration);
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(
-        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
+        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); },
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
@@ -531,6 +534,8 @@ void BubblePattern::StartEnteringAnimation(std::function<void()> finish)
 
 void BubblePattern::StartOffsetEnteringAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionPosition;
     optionPosition.SetDuration(ENTRY_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -544,7 +549,7 @@ void BubblePattern::StartOffsetEnteringAnimation()
             renderContext->UpdateOffset(OffsetT<Dimension>());
             renderContext->SyncGeometryProperties(nullptr);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
@@ -553,8 +558,8 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     optionAlpha.SetDuration(ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
     auto host = GetHost();
-    auto popupId = host->GetId();
     CHECK_NULL_VOID(host);
+    auto popupId = host->GetId();
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
@@ -596,7 +601,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             if (finish) {
                 finish();
             }
-        });
+        }, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartExitingAnimation(std::function<void()> finish)
@@ -607,6 +612,8 @@ void BubblePattern::StartExitingAnimation(std::function<void()> finish)
 
 void BubblePattern::StartOffsetExitingAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionPosition;
     optionPosition.SetDuration(EXIT_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
@@ -620,11 +627,13 @@ void BubblePattern::StartOffsetExitingAnimation()
             renderContext->UpdateOffset(pattern->GetInvisibleOffset());
             renderContext->SyncGeometryProperties(nullptr);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -648,7 +657,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
             if (finish) {
                 finish();
             }
-        });
+        }, nullptr, host->GetContextRefPtr());
 }
 
 bool BubblePattern::IsOnShow()
