@@ -23,7 +23,6 @@ import { extractors } from "#handwritten"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer } from "./resource"
-import { Resource } from "global.resource"
 export class FontInfo_serializer {
     public static write(buffer: SerializerBase, value: FontInfo): void {
         let valueSerializer : SerializerBase = buffer

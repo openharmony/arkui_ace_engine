@@ -24,9 +24,9 @@ import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttr
 import { BaseSpan } from "./component/span"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"
-import { drawing } from "./framework/ohos.graphics.drawing"
+import { default as drawing } from "./framework/ohos.graphics.drawing"
 import { ImageErrorCallback, ImageError } from "./component/image"
-import { image } from "@ohos.multimedia.image"
+import { default as image } from "@ohos.multimedia.image"
 import { CommonMethod } from "./component/common"
 export class ImageSpanModifier extends BaseSpanModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;

@@ -21,7 +21,7 @@ import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkTimePickerPeer, OnTimePickerChangeCallback, TimePickerResult, TimePickerAttribute } from "./component/timePicker"
 import { CommonMethod, PickerTextStyle } from "./component/common"
-import { intl } from "./framework/ohos.intl"
+import { default as intl } from "./framework/ohos.intl"
 import { CrownSensitivity } from "./component/enums"
 export class TimePickerModifier extends CommonMethodModifier implements TimePickerAttribute,AttributeModifier<TimePickerAttribute> {
     _instanceId: number = -1;

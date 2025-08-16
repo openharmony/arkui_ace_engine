@@ -448,7 +448,7 @@ KOALA_INTEROP_5(CreateDiagnosticInfo, KNativePointer, KNativePointer, KNativePoi
                 KStringArray, KInt, KNativePointer)
 
 KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr,
-                                         KInt argc, KStringPtr& substitutionCode, KNativePointer range)
+                                         KInt argc, KStringPtr& substitutionCode, KStringPtr& title, KNativePointer range)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _kind = reinterpret_cast<es2panda_DiagnosticKind *>(kind);
@@ -464,9 +464,10 @@ KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer 
         position += strLen;
     }
     const auto _substitutionCode = getStringCopy(substitutionCode);
-    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode, _range);
+    const auto _title = getStringCopy(title);
+    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode, _title, _range);
 }
-KOALA_INTEROP_6(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr, KNativePointer)
+KOALA_INTEROP_7(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr, KStringPtr, KNativePointer)
 
 void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArray argvPtr,
                         KInt argc, KNativePointer pos)

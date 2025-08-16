@@ -299,6 +299,7 @@ export class intl_DateTimeOptions_serializer {
         return value
     }
 }
+export default intl
 export namespace intl {
     export interface DateTimeOptions {
         locale?: string;

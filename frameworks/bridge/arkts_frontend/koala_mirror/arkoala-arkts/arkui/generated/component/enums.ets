@@ -20,7 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { curves } from "./../framework/ohos.curves"
+import { default as curves } from "./../framework/ohos.curves"
 export enum CheckBoxShape {
     CIRCLE = 0,
     ROUNDED_SQUARE = 1

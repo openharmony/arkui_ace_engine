@@ -52,6 +52,7 @@ export class webview_WebviewController_serializer {
         return webview.WebviewControllerInternal.fromPtr(ptr)
     }
 }
+export default webview
 export namespace webview {
     export class WebviewControllerInternal {
         public static fromPtr(ptr: KPointer): webview.WebviewController {

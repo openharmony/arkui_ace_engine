@@ -17,6 +17,8 @@
  * @kit ArkUI
  */
 
+export default image
+
 export namespace image {
 
     export enum ResolutionQuality {

@@ -82,6 +82,7 @@ export class LevelOrder_serializer {
         return LevelOrderInternal.fromPtr(ptr)
     }
 }
+export default promptAction
 export namespace promptAction {
     export interface DialogController {
     }

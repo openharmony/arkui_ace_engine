@@ -31,7 +31,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ResourceColor, Offset, VoidCallback } from "./units"
 import { Resource } from "global.resource"
 import { DialogAlignment } from "./alertDialog"
-import { intl } from "./../framework/ohos.intl"
+import { default as intl } from "./../framework/ohos.intl"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class DatePickerDialogInternal {
     public static fromPtr(ptr: KPointer): DatePickerDialog {

@@ -17,4 +17,8 @@
  * @kit ArkUI
  */
 
+import { default as image } from "./@ohos.multimedia.image"
+
 export * from "./@ohos.multimedia.image"
+
+export default image

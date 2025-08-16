@@ -23,11 +23,11 @@ import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, Navig
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { ResourceStr } from "./component/units"
 import { Resource } from "global.resource"
-import { image } from "@ohos.multimedia.image"
+import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "./SymbolGlyphModifier"
 import { NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions } from "./component/navigation"
 import { CustomBuilder } from "./component/builder"
-import { window } from "./framework/ohos.window"
+import { default as window } from "./framework/ohos.window"
 import { Scroller } from "./component/scroll"
 export class NavDestinationModifier extends CommonMethodModifier implements NavDestinationAttribute,AttributeModifier<NavDestinationAttribute> {
     _instanceId: number = -1;

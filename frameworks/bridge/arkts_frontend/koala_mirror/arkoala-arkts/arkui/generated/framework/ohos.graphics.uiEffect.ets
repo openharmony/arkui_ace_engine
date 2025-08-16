@@ -143,6 +143,7 @@ export class uiEffect_BrightnessBlenderParam_serializer {
         return value
     }
 }
+export default uiEffect
 export namespace uiEffect {
     export interface VisualEffect {
         backgroundColorBlender(blender: BrightnessBlender): VisualEffect

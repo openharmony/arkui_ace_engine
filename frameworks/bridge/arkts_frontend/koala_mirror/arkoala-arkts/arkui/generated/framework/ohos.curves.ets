@@ -35,6 +35,7 @@ export class curves_ICurve_serializer {
         return curves.ICurveInternal.fromPtr(ptr)
     }
 }
+export default curves
 export namespace curves {
     export interface ICurve {
         interpolate(fraction: number): number

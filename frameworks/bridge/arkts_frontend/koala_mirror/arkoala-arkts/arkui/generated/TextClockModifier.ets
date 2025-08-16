@@ -24,7 +24,7 @@ import { CommonMethod, ShadowOptions } from "./component/common"
 import { ResourceStr, ResourceColor, Length } from "./component/units"
 import { Resource } from "global.resource"
 import { Color, FontStyle, FontWeight } from "./component/enums"
-import { intl } from "./framework/ohos.intl"
+import { default as intl } from "./framework/ohos.intl"
 export class TextClockModifier extends CommonMethodModifier implements TextClockAttribute,AttributeModifier<TextClockAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

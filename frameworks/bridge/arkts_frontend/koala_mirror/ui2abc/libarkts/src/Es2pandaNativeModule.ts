@@ -183,7 +183,7 @@ export class Es2pandaNativeModule {
         throw new Error("Not implemented")
     }
     _CreateSuggestionInfo(context: KNativePointer, kind: KNativePointer, args: string[],
-        argc: number, substitutionCode: string, range: KNativePointer): KNativePointer {
+        argc: number, substitutionCode: string, title: string, range: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
     }
     _LogDiagnostic(context: KNativePointer, kind: KNativePointer, argv: string[], argc: number, pos: KNativePointer): void {

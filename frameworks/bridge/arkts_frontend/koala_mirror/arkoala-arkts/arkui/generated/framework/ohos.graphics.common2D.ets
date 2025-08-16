@@ -102,6 +102,7 @@ export class common2D_Rect_serializer {
         return value
     }
 }
+export default common2D
 export namespace common2D {
     export interface Color {
         alpha: number;

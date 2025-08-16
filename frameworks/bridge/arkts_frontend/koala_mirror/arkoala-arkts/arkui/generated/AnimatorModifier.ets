@@ -22,7 +22,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdater"
 import { ArkAnimatorPeer, SpringMotion, FrictionMotion, ScrollMotion, AnimatorAttribute } from "./component/animator"
 import { CommonMethod } from "./component/common"
 import { AnimationStatus, FillMode, PlayMode } from "./component/enums"
-import { curves } from "./framework/ohos.curves"
+import { default as curves } from "./framework/ohos.curves"
 export class AnimatorModifier extends CommonMethodModifier implements AnimatorAttribute,AttributeModifier<AnimatorAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

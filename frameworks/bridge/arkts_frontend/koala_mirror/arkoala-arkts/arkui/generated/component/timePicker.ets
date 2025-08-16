@@ -21,7 +21,7 @@ import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Date_serializer } from "./common"
-import { intl_DateTimeOptions_serializer, intl } from "./../framework/ohos.intl"
+import { intl_DateTimeOptions_serializer, default as intl } from "./../framework/ohos.intl"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CrownSensitivity, Color } from "./enums"

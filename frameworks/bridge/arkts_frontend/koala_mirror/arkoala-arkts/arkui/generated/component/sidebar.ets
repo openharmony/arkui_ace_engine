@@ -30,7 +30,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { image } from "@ohos.multimedia.image"
+import { default as image } from "@ohos.multimedia.image"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {

@@ -21,8 +21,8 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { extractors } from "#handwritten"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { common2D_Color_serializer, common2D, common2D_Rect_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
-import { drawing_FontMetrics_serializer, drawing } from "./ohos.graphics.drawing"
+import { common2D_Color_serializer, default as common2D, common2D_Rect_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
+import { drawing_FontMetrics_serializer, default as drawing } from "./ohos.graphics.drawing"
 import { Resource_serializer } from "./resource"
 import { Resource } from "global.resource"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -1238,6 +1238,7 @@ export class text_RunMetrics_serializer {
         return value
     }
 }
+export default text
 export namespace text {
     export class FontCollectionInternal {
         public static fromPtr(ptr: KPointer): text.FontCollection {

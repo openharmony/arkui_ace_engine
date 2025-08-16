@@ -47,6 +47,7 @@ export class window_SystemBarStyle_serializer {
         return value
     }
 }
+export default window
 export namespace window {
     export enum WindowStatusType {
         UNDEFINED = 0,

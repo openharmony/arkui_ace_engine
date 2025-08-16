@@ -242,6 +242,7 @@ export class uiObserver_NavDestinationSwitchInfo_serializer {
         return value
     }
 }
+export default uiObserver
 export namespace uiObserver {
     export class DensityInfoInternal {
         public static fromPtr(ptr: KPointer): uiObserver.DensityInfo {

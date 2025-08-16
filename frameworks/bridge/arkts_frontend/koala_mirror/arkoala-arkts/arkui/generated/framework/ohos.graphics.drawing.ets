@@ -21,8 +21,8 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { extractors } from "#handwritten"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { common2D_Color_serializer, common2D, common2D_Rect_serializer, common2D_Point3d_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
-import { image } from "@ohos.multimedia.image"
+import { common2D_Color_serializer, default as common2D, common2D_Rect_serializer, common2D_Point3d_serializer, common2D_Point_serializer } from "./ohos.graphics.common2D"
+import { default as image } from "@ohos.multimedia.image"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 export class drawing_Brush_serializer {
@@ -421,6 +421,7 @@ export class drawing_TextBlobRunBuffer_serializer {
         return value
     }
 }
+export default drawing
 export namespace drawing {
     export class BrushInternal {
         public static fromPtr(ptr: KPointer): drawing.Brush {

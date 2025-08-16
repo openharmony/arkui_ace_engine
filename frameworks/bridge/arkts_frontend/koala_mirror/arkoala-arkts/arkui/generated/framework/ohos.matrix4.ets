@@ -21,7 +21,7 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { extractors } from "#handwritten"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { common2D_Point_serializer, common2D } from "./ohos.graphics.common2D"
+import { common2D_Point_serializer, default as common2D } from "./ohos.graphics.common2D"
 import { TranslateOptions_serializer, ScaleOptions_serializer, RotateOptions_serializer, TranslateOptions, ScaleOptions, RotateOptions } from "./../component/common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -112,6 +112,7 @@ export class matrix4_PolyToPolyOptions_serializer {
         return value
     }
 }
+export default matrix4
 export namespace matrix4 {
     export interface Matrix4Transit {
         copy(): Matrix4Transit

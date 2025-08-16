@@ -33,7 +33,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { LengthMetrics, LengthMetrics_serializer } from "./../Graphics"
-import { curves, curves_ICurve_serializer } from "./../framework/ohos.curves"
+import { default as curves, curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {

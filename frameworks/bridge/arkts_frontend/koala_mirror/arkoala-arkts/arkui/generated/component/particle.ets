@@ -23,7 +23,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
 import { Resource } from "global.resource"
 import { ImageFit, Color } from "./enums"
-import { curves } from "./../framework/ohos.curves"
+import { default as curves } from "./../framework/ohos.curves"
 import { Vector2T, LengthMetrics } from "./../Graphics"
 export interface VelocityOptions {
     speed: [ number, number ];

@@ -28,7 +28,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { window } from "./../framework/ohos.window"
+import { default as window } from "./../framework/ohos.window"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

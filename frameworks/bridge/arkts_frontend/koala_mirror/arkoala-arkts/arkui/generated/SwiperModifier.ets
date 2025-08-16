@@ -23,7 +23,7 @@ import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwipe
 import { CommonMethod, Bindable } from "./component/common"
 import { IndicatorComponentController } from "./component/indicatorcomponent"
 import { EdgeEffect, PageFlipMode } from "./component/enums"
-import { curves } from "./framework/ohos.curves"
+import { default as curves } from "./framework/ohos.curves"
 import { Length } from "./component/units"
 import { Resource } from "global.resource"
 export class SwiperModifier extends CommonMethodModifier implements SwiperAttribute,AttributeModifier<SwiperAttribute> {

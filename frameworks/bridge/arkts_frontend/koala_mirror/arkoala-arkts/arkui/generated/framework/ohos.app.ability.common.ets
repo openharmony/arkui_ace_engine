@@ -36,6 +36,7 @@ export class common_Context_serializer {
         return common.ContextInternal.fromPtr(ptr)
     }
 }
+export default common
 export namespace common {
     export class ContextInternal {
         public static fromPtr(ptr: KPointer): common.Context {

@@ -23,10 +23,10 @@ import { ArkNavigationPeer, NavBarPosition, NavigationMode, NavigationTitleMode,
 import { CommonMethod, Bindable, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { Length, Dimension, ResourceStr } from "./component/units"
 import { Resource } from "global.resource"
-import { image } from "@ohos.multimedia.image"
+import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "./SymbolGlyphModifier"
 import { CustomBuilder, PageMapBuilder } from "./component/builder"
-import { window } from "./framework/ohos.window"
+import { default as window } from "./framework/ohos.window"
 export class NavigationModifier extends CommonMethodModifier implements NavigationAttribute,AttributeModifier<NavigationAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {

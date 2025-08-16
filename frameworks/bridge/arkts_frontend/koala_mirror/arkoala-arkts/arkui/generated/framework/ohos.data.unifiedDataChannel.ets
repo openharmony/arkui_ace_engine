@@ -64,6 +64,7 @@ export class unifiedDataChannel_Summary_serializer {
         return value
     }
 }
+export default unifiedDataChannel
 export namespace unifiedDataChannel {
     export class UnifiedDataInternal {
         public static fromPtr(ptr: KPointer): unifiedDataChannel.UnifiedData {
