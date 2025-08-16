@@ -57,26 +57,25 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
-    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
-    if (indexVectOpt) {
-        std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
-        peerImpl->TriggerPreloadItems(indexSet);
-        } else {
-            peerImpl->TriggerPreloadItems({});
-    }
-    };
-    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
-
-    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const int32_t errCode, const std::string errStr) {
         if (errCode == ERROR_CODE_NO_ERROR) {
-            promise.Resolve();
+            promise->Resolve();
         } else {
-            promise.Reject({std::to_string(errCode), errStr});
+            promise->Reject({std::to_string(errCode), errStr});
         }
     };
     peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
+    auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
+    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
+        if (indexVectOpt) {
+            std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+            peerImpl->TriggerPreloadItems(indexSet);
+        } else {
+            peerImpl->TriggerPreloadItems({});
+        }
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 void SetTabBarTranslateImpl(Ark_TabsController peer,
                             const Ark_TranslateOptions* translate)
