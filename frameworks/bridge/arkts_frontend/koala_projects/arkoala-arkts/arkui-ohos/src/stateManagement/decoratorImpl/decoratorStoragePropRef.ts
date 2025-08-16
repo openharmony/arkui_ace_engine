@@ -45,9 +45,10 @@ export class StoragePropRefDecoratedVariable<T>
         storagePropRef: AbstractProperty<T>,
         propName: string,
         varName: string,
+        decoratorName: string,
         watchFunc?: WatchFuncType
     ) {
-        super('@StoragePropRef', owningView, varName, watchFunc);
+        super(decoratorName, owningView, varName, watchFunc);
         this.propName = propName;
         this.backingStorageValue_ = storagePropRef;
         this.backingStorageValue_.onChange(this.onStorageObjChanged);
