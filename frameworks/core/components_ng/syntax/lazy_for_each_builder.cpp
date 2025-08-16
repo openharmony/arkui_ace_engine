@@ -901,6 +901,7 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(true);
                 }
+                cachedItems_[index] = node;
             }
             needBuild = true;
         }
