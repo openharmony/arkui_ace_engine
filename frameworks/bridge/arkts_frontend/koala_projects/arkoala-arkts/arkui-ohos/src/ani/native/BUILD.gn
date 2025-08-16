@@ -60,7 +60,7 @@ ohos_shared_library("arkoala_native_ani") {
     "video/video_module_methods.cpp",
     "rich_editor/rich_editor_module.cpp",
     "stateMgmt/stateMgmt_module.cpp",
-    "water_flow/waterFlowSection_module.cpp",
+    "water_flow/water_flow_module.cpp",
     "list/list_children_main_size_module.cpp",
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
@@ -113,7 +113,7 @@ if (use_linux) {
       "module_linux.cpp",
       "stateMgmt/stateMgmt_module.cpp",
       "utils/ani_utils.cpp",
-      "water_flow/waterFlowSection_module.cpp",
+      "water_flow/water_flow_module.cpp",
       "xcomponent/xcomponent_module_methods.cpp",
     ]
   
