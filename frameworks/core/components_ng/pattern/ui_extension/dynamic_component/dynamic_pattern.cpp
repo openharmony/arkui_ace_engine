@@ -197,7 +197,7 @@ void DynamicPattern::InitializeRender(void* runtime)
     CHECK_NULL_VOID(host);
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
 #if !defined(PREVIEW)
-    DCResultCode code = CheckConstraint();
+    auto code = CheckConstraint();
     if (code != DCResultCode::DC_NO_ERRORS) {
         HandleErrorCallback(code);
         PLATFORM_LOGE("CheckConstraint failed, code: %{public}d.", code);
