@@ -65,6 +65,8 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& op
     }
     dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogInfo.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
+    dialogInfo.effectOption =  Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogInfo.shadow = Converter::OptConvert<Shadow>(options.shadow);
     auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
