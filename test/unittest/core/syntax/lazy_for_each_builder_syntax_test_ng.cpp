@@ -2604,4 +2604,22 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
     EXPECT_TRUE(node->measureAnyWay_);
     EXPECT_TRUE(node->shouldRerender_);
 }
+
+/**
+ * @tc.name: LazyForEachBuilder38
+ * @tc.desc: Test the NotifyColorModeChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder38, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    auto uiNode = AceType::MakeRefPtr<NG::CustomNode>(666, "node");
+    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
+    uiNode->children_ = { childNode };
+    uiNode->SetDarkMode(true);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("0", uiNode);
+    EXPECT_FALSE(childNode->CheckIsDarkMode());
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+    EXPECT_TRUE(childNode->CheckIsDarkMode());
+}
 } // namespace OHOS::Ace::NG

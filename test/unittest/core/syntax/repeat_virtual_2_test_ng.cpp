@@ -755,6 +755,30 @@ HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyColorModeChange002
+ * @tc.desc: Test caches.NotifyColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, NotifyColorModeChange002, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10);
+    repeatNode->caches_.l1Rid4Index_ = {
+        {0, 1}
+    };
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<CustomNode>(2016, "node");
+    RefPtr<UINode> childNode = AceType::MakeRefPtr<CustomNode>(2016, "childNode");
+    uiNode->children_ = { childNode };
+    uiNode->SetDarkMode(true);
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = {
+        { 1, cacheItem }
+    };
+    EXPECT_FALSE(childNode->CheckIsDarkMode());
+    repeatNode->NotifyColorModeChange(1);
+    EXPECT_TRUE(childNode->CheckIsDarkMode());
+}
+
+/**
  * @tc.name: UpdateIsL1001
  * @tc.desc: Test caches.UpdateIsL1
  * @tc.type: FUNC
