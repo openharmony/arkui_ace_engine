@@ -76,9 +76,6 @@ export function runtimeType<T>(value: T): int32 {
     if (value instanceof Function)
         return RuntimeType.FUNCTION
 
-    if (value instanceof Object)
-        return RuntimeType.OBJECT
-
     // slow workaround for enum
     const typeName = typeof value
     if (typeName == "number")
