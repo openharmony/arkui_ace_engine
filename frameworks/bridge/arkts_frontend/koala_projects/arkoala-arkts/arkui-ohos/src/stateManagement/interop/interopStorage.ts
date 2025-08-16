@@ -471,13 +471,14 @@ export class InteropStorageBase extends StorageBase {
         owner: ExtendableComponent,
         key: string,
         varName: string,
+        decoratorName: string,
         defaultValue: T,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
         let interopValue = this.interopStorage_.get(key);
         if (interopValue === undefined) {
             // Use ArkTS1.2
-            return super.makeStorageLink<T>(owner, key, varName, defaultValue, watchFunc);
+            return super.makeStorageLink<T>(owner, key, varName, decoratorName, defaultValue, watchFunc);
         }
         // Use ArkTS1.1
         if (!interopValue.value) {
@@ -485,7 +486,7 @@ export class InteropStorageBase extends StorageBase {
             interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
         }
         const state = interopValue.value as StorageProperty<T>;
-        const link = state.makeStorageLink(owner, key, varName, watchFunc);
+        const link = state.makeStorageLink(owner, key, varName, decoratorName, watchFunc);
         state.registerWatchToSource(link);
         return link;
     }

@@ -21,7 +21,7 @@ import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMoni
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
     public static nextWatchId_ = MonitorFunctionDecorator.MIN_MONITOR_ID;
-
+    public readonly decorator: string;
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
 
@@ -30,6 +30,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         pathLambda.forEach((info: IMonitorPathInfo) => {
             this.values_.push(new MonitorValueInternal(info.path, info.valueCallback, this));
         });
+        this.decorator = '@Monitor';
         this.readInitialMonitorValues();
     }
 
