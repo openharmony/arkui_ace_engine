@@ -133,6 +133,13 @@ void PostBgTask(const TaskExecutor::Task& task, const std::string& name)
 {
     PostTask(task, TaskExecutor::TaskType::BACKGROUND, name);
 }
+
+int64_t GetCurrentTimestamp()
+{
+    auto nowSys = std::chrono::steady_clock::now();
+    auto epoch = nowSys.time_since_epoch();
+    return static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count());
+}
 } // namespace
 
 FormPattern::FormPattern()
@@ -315,7 +322,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
             CHECK_NULL_VOID(form);
             int64_t currentTime = GetCurrentTimestamp();
             if (currentTime - form->snapshotTimestamp_ < delayTime) {
-                TAG_LOGD(AceLogTag::ACE_FORM, "another snapshot task has been posted.");
+                TAG_LOGW(AceLogTag::ACE_FORM, "another snapshot task has been posted.");
                 return;
             }
             form->isStaticFormSnaping_ = false;
