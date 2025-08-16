@@ -867,7 +867,8 @@ void JSViewPartialUpdate::PrebuildComponentsInMultiFrame(int64_t deadline, bool&
 void JSViewPartialUpdate::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
 {
     if (!executedRender_) {
-        if (deadline > 0 && jsViewFunction_->ExecuteIsEnablePrebuildInMultiFrame()) {
+        if (SystemProperties::GetPrebuildInMultiFrameEnabled() &&
+            deadline > 0 && jsViewFunction_->ExecuteIsEnablePrebuildInMultiFrame()) {
             SetPrebuildPhase(PrebuildPhase::BUILD_PREBUILD_CMD, deadline);
         }
         jsViewFunction_->ExecuteRender();
