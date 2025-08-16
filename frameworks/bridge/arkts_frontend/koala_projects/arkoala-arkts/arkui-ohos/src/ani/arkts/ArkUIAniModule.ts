@@ -32,7 +32,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
-
+import { NodeAdapter } from '../../FrameNode'
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -308,4 +308,18 @@ export class ArkUIAniModule {
         onThemeScopeDestroy: () => void
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    
+    //NodeAdapter 
+    native static _NodeAdapter_Construct( nodeAdapter : NodeAdapter): KPointer
+    native static _NodeAdapter_DetachNodeAdapter(ptr : KPointer) : void
+    native static _NodeAdapter_AttachNodeAdapter(ptr : KPointer, node: KPointer) : boolean
+    native static _NodeAdapter_Dispose(ptr : KPointer) : void
+    native static _NodeAdapter_SetTotalNodeCount(ptr : KPointer, count : number) : void
+    native static _NodeAdapter_NotifyItemReloaded(ptr : KPointer) : void
+    native static _NodeAdapter_NotifyItemChanged(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemRemoved(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemInserted(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
+    native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
+
 }

@@ -24,15 +24,14 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 
-
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
     int32_t nodeId_ = -1;
-    static std::map<int32_t, FrameNodePeer> peerMap_;
+    static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
 
-    static FrameNodePeer *Create(Ark_UIContext uiContext)
+    static FrameNodePeer* Create(Ark_UIContext uiContext)
     {
         return new FrameNodePeer;
     }
@@ -41,42 +40,29 @@ struct FrameNodePeer {
     {
         auto it = peerMap_.find(src->GetId());
         if (it != peerMap_.end()) {
-            return &(it->second);
+            return (it->second).get();
         }
-        auto frameNode = new FrameNodePeer;
+        auto frameNode = std::make_shared<FrameNodePeer>();
         if (src->IsArkTsFrameNode()) {
             frameNode->node = src;
         } else {
             frameNode->weakNode = OHOS::Ace::WeakPtr(src);
         }
-        peerMap_.emplace(src->GetId(), *frameNode);
-        return frameNode;
+        peerMap_.emplace(src->GetId(), frameNode);
+        frameNode->nodeId_ = src->GetId();
+        return frameNode.get();
     }
 
     static FrameNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
     {
-        auto it = peerMap_.find(src->GetId());
-        if (it != peerMap_.end()) {
-            return &(it->second);
-        }
-        auto frameNode = new FrameNodePeer;
-        if (src->IsArkTsFrameNode()) {
-            frameNode->node = src;
-        } else {
-            frameNode->weakNode = OHOS::Ace::AceType::WeakClaim(src);
-        }
-        peerMap_.emplace(src->GetId(), *frameNode);
-        return frameNode;
+        return Create(OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(src));
     }
 
     static void Destroy(FrameNodePeer* peer)
     {
-        auto currentNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peer->node);
-        if (currentNode) {
-            auto nodeId = currentNode->GetId();
-            peerMap_.erase(nodeId);
+        if (peer) {
+            peerMap_.erase(peer->nodeId_);
         }
-        delete peer;
     }
 
     static OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> GetFrameNodeByPeer(FrameNodePeer* peer)

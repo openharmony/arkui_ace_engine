@@ -55,6 +55,7 @@ typedef class __ani_fn_object *ani_fn_object;
 typedef class __ani_string* ani_string;
 typedef class __ani_enum_item* ani_enum_item;
 typedef class __ani_error* ani_error;
+typedef class __ani_array_double *ani_array_double;
 typedef struct __ani_resolver *ani_resolver;
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -84,6 +85,21 @@ typedef struct WebviewControllerInfo {
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
 } WebviewControllerInfo;
+
+typedef struct NodeAdapterInfo {
+    std::function<void(ani_double)> onAttachToNode = nullptr;
+    std::function<void(void)> onDetachFromNode = nullptr;
+    std::function<int32_t(ani_double)> onGetId = nullptr;
+    std::function<ani_long(ani_double)> onCreateChild = nullptr;
+    std::function<void(ani_double, ani_double)> onDisposeChild = nullptr;
+    std::function<void(ani_double, ani_double)> onUpdateChild = nullptr;
+} NodeAdapterInfo;
+
+typedef struct AniDoubleArray {
+    ani_double* data;
+    ani_size size;
+} AniDoubleArray;
+
 typedef ani_object (*ArkUIAniArithmeticAddFunction)(ani_env*, ani_object, ani_object);
 typedef ani_object (*ArkUIAniArithmeticMinusFunction)(ani_env*, ani_object, ani_object);
 typedef ani_object (*ArkUIAniArithmeticMultiplyFunction)(ani_env*, ani_object, float);
@@ -615,6 +631,20 @@ struct ArkUIAniSyntaxNodeModifier {
     ani_long (*constructSyntaxNode)(ani_int);
 };
 
+struct ArkUIAniNodeAdapterModifier {
+    ani_long (*nodeAdapterConstruct)(NodeAdapterInfo&& info);
+    void (*nodeAdapterDetachNodeAdapter)(ani_long node);
+    ani_boolean (*nodeAdapterAttachNodeAdapter)(ani_long ptr, ani_long node);
+    void (*nodeAdapterDispose)(ani_long node);
+    void (*nodeAdapterNotifyItemReloaded)(ani_long node);
+    void (*nodeAdapterSetTotalNodeCount)(ani_long node, ani_double count);
+    void (*nodeAdapterNotifyItemChanged)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemRemoved)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemInserted)(ani_long node, ani_double start, ani_double count);
+    void (*nodeAdapterNotifyItemMoved)(ani_long node, ani_double from, ani_double to);
+    AniDoubleArray (*nodeAdapterGetAllItems)(ani_long node);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -644,6 +674,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
     const ArkUIAniTraceModifier* (*getTraceAniModifier)();
     const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
+    const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

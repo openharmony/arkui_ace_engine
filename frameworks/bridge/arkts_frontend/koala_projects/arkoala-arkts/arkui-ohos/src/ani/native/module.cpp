@@ -44,6 +44,7 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
+#include "node_adapter/node_adapter_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -1073,6 +1074,60 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ApplyParentThemeScopeId",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
+        },
+        ani_native_function {
+            "_NodeAdapter_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterConstruct)
+        },
+        ani_native_function {
+            "_NodeAdapter_DetachNodeAdapter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterDetachNodeAdapter)
+        },
+        ani_native_function {
+            "_NodeAdapter_AttachNodeAdapter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterAttachNodeAdapter)
+        },
+        ani_native_function {
+            "_NodeAdapter_Dispose",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterDispose)
+        },
+        ani_native_function {
+            "_NodeAdapter_SetTotalNodeCount",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterSetTotalNodeCount)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemReloaded",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemReloaded)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemChanged",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemChanged)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemRemoved",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemRemoved)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemInserted",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemInserted)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemMoved",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemMoved)
+        },
+        ani_native_function { "_NodeAdapter_GetAllItems",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterGetAllItems)
         },
     };
 

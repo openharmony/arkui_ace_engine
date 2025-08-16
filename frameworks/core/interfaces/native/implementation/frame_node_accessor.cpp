@@ -52,7 +52,8 @@ typedef enum {
     ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
 } ArkUIDirtyFlag;
 }
-std::map<int32_t, FrameNodePeer> FrameNodePeer::peerMap_;
+std::map<int32_t, std::shared_ptr<FrameNodePeer>> FrameNodePeer::peerMap_;
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 Opt_Number GetOptNumberFromDimension(const std::optional<Dimension>& dimension)
@@ -85,12 +86,11 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 
 Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
-    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
-    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
+    auto peer = FrameNodePeer::Create(node);
     return peer;
 }
 
@@ -582,11 +582,9 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 Ark_FrameNode CreateByRawPtrImpl(void* rawPtr)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(rawPtr);
+    frameNode->SetExclusiveEventForChild(true);
+    frameNode->SetIsArkTsFrameNode(true);
     auto peer = FrameNodePeer::Create(frameNode);
-    auto nodeId = frameNode->GetId();
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
-    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
     return peer;
 }
 
