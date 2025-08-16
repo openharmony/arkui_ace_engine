@@ -892,17 +892,6 @@ void JSWebController::ZoomOut(const JSCallbackInfo& args)
     }
 }
 
-<<<<<<< HEAD
-void JSWebController::GetProgress(const JSCallbackInfo& args)
-{
-    if (webController_) {
-        int result = webController_->GetProgress();
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
-    }
-}
-
-=======
->>>>>>> parent of 6e76e9e7903 (新增getProgress接口，获取当前页面加载进度)
 void JSWebController::GetPageHeight(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
