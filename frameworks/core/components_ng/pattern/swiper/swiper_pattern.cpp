@@ -2501,7 +2501,7 @@ void SwiperPattern::StopTranslateAnimation()
                 auto host = swiper->GetHost();
                 CHECK_NULL_VOID(host);
                 host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
-            });
+            }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
         }
 
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
@@ -2513,6 +2513,8 @@ void SwiperPattern::StopSpringAnimationImmediately()
     if (!springAnimationIsRunning_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -2523,7 +2525,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         CHECK_NULL_VOID(host);
         host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
         swiper->FireScrollStateEvent(ScrollState::IDLE);
-    });
+    }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
     OnSpringAnimationFinish();
 }
 
@@ -3971,7 +3973,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     FireSelectedEvent(currentIndex_, nextIndex);
     FireUnselectedEvent(GetLoopIndex(currentIndex_), GetLoopIndex(nextIndex));
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), option);
-    AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationUtils::Animate(
+        option, propertyUpdateCallback, finishCallback, nullptr /* repeatCallback */, host->GetContextRefPtr());
     AnimationCallbackInfo info;
     info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
     info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
@@ -4264,7 +4269,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->indicatorAnimationIsRunning_ = false;
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void SwiperPattern::PlayTranslateAnimation(
@@ -4357,7 +4362,7 @@ void SwiperPattern::PlayTranslateAnimation(
             swiper->targetIndex_.reset();
             swiper->OnTranslateAnimationFinish();
             swiper->FireScrollStateEvent(ScrollState::IDLE);
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
     if (fastCurrentIndex_.has_value()) {
         fastAnimationRunning_ = true;
         unselectedIndex_ = GetLoopIndex(currentIndex_);
@@ -4569,7 +4574,7 @@ void SwiperPattern::PlayFadeAnimation()
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->OnSpringAndFadeAnimationFinish();
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void SwiperPattern::CreateSpringProperty()
@@ -4639,7 +4644,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->OnSpringAnimationFinish();
             swiperPattern->FireScrollStateEvent(ScrollState::IDLE);
-        });
+        }, nullptr /* repeatCallback */, host->GetContextRefPtr());
     OnSpringAnimationStart(static_cast<float>(dragVelocity));
     springAnimationIsRunning_ = true;
 }

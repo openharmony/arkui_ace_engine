@@ -328,8 +328,8 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately004, TestSize.Level1
     preTopNavDestinationNode->SetIsCacheNode(false);
     preTopNavDestinationNode->animationId_ = 1;
     preTopNavDestinationNode->SetTransitionType(PageTransitionType::EXIT_POP);
-    auto webNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto webNode = FrameNode::CreateFrameNode(
+        V2::WEB_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     preTopNavDestinationNode->children_.emplace_back(webNode);
     preTopNavDestinationNode->SetDestroying(false);
 
