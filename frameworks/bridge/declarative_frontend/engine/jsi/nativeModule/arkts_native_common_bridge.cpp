@@ -10644,9 +10644,9 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
     const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
-        "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "target", "timestamp", "source", "pressure",
-        "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState", "axisVertical", "axisHorizontal",
-        "globalDisplayX", "globalDisplayY", "targetDisplayId" };
+        "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "getPinchAxisValue", "target",
+        "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState",
+        "axisVertical", "axisHorizontal", "globalDisplayX", "globalDisplayY", "targetDisplayId" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -10657,6 +10657,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
         panda::FunctionRef::New(vm, Framework::JsPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetHorizontalAxisValue),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetVerticalAxisValue),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetPinchAxisValue),
         FrameNodeBridge::CreateEventTargetObject(vm, info),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
