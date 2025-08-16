@@ -819,6 +819,11 @@ public:
         return debugThreadSafeNodeEnable_;
     }
 
+    static bool GetPrebuildInMultiFrameEnabled()
+    {
+        return prebuildInMultiFrameEnabled_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -924,6 +929,7 @@ private:
     static bool whiteBlockEnabled_;
     static std::string mapSearchPrefix_;
     static bool debugThreadSafeNodeEnable_;
+    static bool prebuildInMultiFrameEnabled_;
 };
 
 } // namespace OHOS::Ace
