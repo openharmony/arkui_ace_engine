@@ -381,7 +381,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::StaticMethod("getTitle", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getWebId", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getDefaultUserAgent", &JSWeb::Mock);
-    JSClass<JSWebController>::StaticMethod("getProgress", &JSWeb::Mock);
     JSClass<JSWebController>::Bind(globalObj);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);

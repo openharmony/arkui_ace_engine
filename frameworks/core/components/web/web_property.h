@@ -561,6 +561,7 @@ public:
         return cookieManager_;
     }
 
+<<<<<<< HEAD
     using GetProgressImpl = std::function<int()>;
     int GetProgress()
     {
@@ -571,6 +572,8 @@ public:
         getProgressImpl_ = getProgressImpl;
     }
 
+=======
+>>>>>>> parent of 6e76e9e7903 (新增getProgress接口，获取当前页面加载进度)
     using GetPageHeightImpl = std::function<int()>;
     int GetPageHeight()
     {
@@ -839,7 +842,6 @@ private:
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
     GetHitTestValueImpl getHitTestValueImpl_;
-    GetProgressImpl getProgressImpl_;
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;

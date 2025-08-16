@@ -1842,11 +1842,14 @@ void WebDelegate::GetHitTestValue(HitTestResult& result)
     }
 }
 
+<<<<<<< HEAD
 int WebDelegate::GetProgress()
 {
     return nweb_ ? nweb_->PageLoadProgress() : 0;
 }
 
+=======
+>>>>>>> parent of 6e76e9e7903 (新增getProgress接口，获取当前页面加载进度)
 int WebDelegate::GetPageHeight()
 {
     if (nweb_) {
@@ -2681,10 +2684,13 @@ void WebDelegate::SetWebCallBack()
                 delegate->GetHitTestValue(result);
             }
         });
+<<<<<<< HEAD
         webController->SetGetProgressImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             return delegate ? delegate->GetProgress() : 0;
         });
+=======
+>>>>>>> parent of 6e76e9e7903 (新增getProgress接口，获取当前页面加载进度)
         webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {

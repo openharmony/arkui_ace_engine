@@ -534,7 +534,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
     JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
     JSClass<JSWebController>::CustomMethod("getUrl", &JSWebController::GetUrl);
-    JSClass<JSWebController>::CustomMethod("getProgress", &JSWebController::GetProgress);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -893,6 +892,7 @@ void JSWebController::ZoomOut(const JSCallbackInfo& args)
     }
 }
 
+<<<<<<< HEAD
 void JSWebController::GetProgress(const JSCallbackInfo& args)
 {
     if (webController_) {
@@ -901,6 +901,8 @@ void JSWebController::GetProgress(const JSCallbackInfo& args)
     }
 }
 
+=======
+>>>>>>> parent of 6e76e9e7903 (新增getProgress接口，获取当前页面加载进度)
 void JSWebController::GetPageHeight(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
