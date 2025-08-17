@@ -162,13 +162,12 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
+        while (!ignoreLayoutSafeAreaBundles_.empty()) {
+            FlushPostponedLayoutTask(forceUseMainThread);
+        }
 #ifndef IS_RELEASE_VERSION
         duration += time;
 #endif
-    }
-
-    while (!ignoreLayoutSafeAreaBundles_.empty()) {
-        FlushPostponedLayoutTask(forceUseMainThread);
     }
 
     FlushSyncGeometryNodeTasks();
@@ -189,6 +188,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
 void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
 {
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     auto ignoreLayoutSafeAreaBundles = std::move(ignoreLayoutSafeAreaBundles_);
     for (auto&& bundle = ignoreLayoutSafeAreaBundles.rbegin(); bundle != ignoreLayoutSafeAreaBundles.rend();
         ++bundle) {

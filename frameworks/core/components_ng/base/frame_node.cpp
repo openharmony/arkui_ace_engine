@@ -4790,6 +4790,7 @@ void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subt
         auto property = child->GetLayoutProperty();
         if (property && property->IsIgnoreOptsValid()) {
             subtreeCollection.emplace_back(child);
+            child->SetDelaySelfLayoutForIgnore();
         } else {
             std::vector<RefPtr<FrameNode>> effectedNodes;
             int recheckCount = 0;
