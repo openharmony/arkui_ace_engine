@@ -156,6 +156,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
     layoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
     node->LayoutOverlay();
     EXPECT_EQ(overlayNode->GetGeometryNode()->GetFrameRect().GetX(), 0);
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    node->LayoutOverlay();
+    EXPECT_EQ(overlayNode->GetGeometryNode()->GetFrameRect().GetX(), 0);
 
     /**
      * @tc.steps: step 4. call GetFrameChildByIndex .

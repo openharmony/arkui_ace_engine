@@ -1897,5 +1897,9 @@ HWTEST_F(ViewAbstractTestNg, SetOverlayNodeTest001, TestSize.Level1)
     layoutProperty->GetOverlayOffset(x, y);
     EXPECT_EQ(x, dimensionValue);
     EXPECT_EQ(y, dimensionValue);
+
+    ViewAbstract::SetOverlayNode(AceType::RawPtr(frameNode), nullptr, options);
+    overlayNodeWithFrameNode = frameNode->GetOverlayNode();
+    EXPECT_EQ(overlayNodeWithFrameNode, nullptr);
 }
 } // namespace OHOS::Ace::NG
