@@ -1857,4 +1857,45 @@ HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
     ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
     EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
 }
+
+/**
+ * @tc.name: SetOverlayNodeTest001
+ * @tc.desc: Test SetOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetOverlayNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create frameNode and overlayNode
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2.Create overlayOptions
+     */
+    NG::OverlayOptions options;
+    const Dimension dimensionValue = Dimension(5);
+    options.x = dimensionValue;
+    options.y = dimensionValue;
+    options.direction = TextDirection::RTL;
+
+    /**
+     * @tc.steps: step3.Execute SetOverlayNode
+     */
+    ViewAbstract::SetOverlayNode(AceType::RawPtr(frameNode), AceType::RawPtr(overlayNode), options);
+    auto overlayNodeWithFrameNode = frameNode->GetOverlayNode();
+    EXPECT_EQ(overlayNode, overlayNodeWithFrameNode);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNodeWithFrameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(direction, TextDirection::RTL);
+    Dimension x;
+    Dimension y;
+    layoutProperty->GetOverlayOffset(x, y);
+    EXPECT_EQ(x, dimensionValue);
+    EXPECT_EQ(y, dimensionValue);
+}
 } // namespace OHOS::Ace::NG

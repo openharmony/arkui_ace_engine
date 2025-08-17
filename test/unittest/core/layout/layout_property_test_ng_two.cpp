@@ -27,6 +27,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components/common/properties/alignment.h"
 
 #undef private
 #undef protected
@@ -46,6 +47,41 @@ constexpr Dimension WIDTH = 1.0_vp;
 constexpr Dimension HEIGHT = 2.0_vp;
 const CalcSize CALC_SIZE = {CalcLength(WIDTH), CalcLength(HEIGHT)};
 } // namespace
+
+struct OverlayOptionsTestCase {
+    Alignment align = Alignment::TOP_LEFT;
+    TextDirection direction = TextDirection::LTR;
+    OffsetF expectedResult = OffsetF();
+};
+
+const std::vector<OverlayOptionsTestCase> OVERLAY_OPTIONS_TEST_CASES = {
+    { Alignment::TOP_LEFT, TextDirection::LTR, OffsetF(0.0f, 0.0f) },
+    { Alignment::TOP_LEFT, TextDirection::RTL, OffsetF(50.0f, 0.0f) },
+
+    { Alignment::TOP_CENTER, TextDirection::LTR, OffsetF(25.0f, 0.0f) },
+    { Alignment::TOP_CENTER, TextDirection::RTL, OffsetF(25.0f, 0.0f) },
+
+    { Alignment::TOP_RIGHT, TextDirection::LTR, OffsetF(50.0f, 0.0f) },
+    { Alignment::TOP_RIGHT, TextDirection::RTL, OffsetF(0.0f, 0.0f) },
+
+    { Alignment::CENTER_LEFT, TextDirection::LTR, OffsetF(0.0f, 25.0f) },
+    { Alignment::CENTER_LEFT, TextDirection::RTL, OffsetF(50.0f, 25.0f) },
+
+    { Alignment::CENTER, TextDirection::LTR, OffsetF(25.0f, 25.0f) },
+    { Alignment::CENTER, TextDirection::RTL, OffsetF(25.0f, 25.0f) },
+
+    { Alignment::CENTER_RIGHT, TextDirection::LTR, OffsetF(50.0f, 25.0f) },
+    { Alignment::CENTER_RIGHT, TextDirection::RTL, OffsetF(0.0f, 25.0f) },
+
+    { Alignment::BOTTOM_LEFT, TextDirection::LTR, OffsetF(0.0f, 50.0f) },
+    { Alignment::BOTTOM_LEFT, TextDirection::RTL, OffsetF(50.0f, 50.0f) },
+
+    { Alignment::BOTTOM_CENTER, TextDirection::LTR, OffsetF(25.0f, 50.0f) },
+    { Alignment::BOTTOM_CENTER, TextDirection::RTL, OffsetF(25.0f, 50.0f) },
+
+    { Alignment::BOTTOM_RIGHT, TextDirection::LTR, OffsetF(50.0f, 50.0f) },
+    { Alignment::BOTTOM_RIGHT, TextDirection::RTL, OffsetF(0.0f, 50.0f) },
+};
 
 class LayoutPropertyTestNgTwo : public testing::Test {
 public:
@@ -1569,5 +1605,25 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckCalcLayoutConstraintTest02, TestSize.Leve
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->preSelfIdealSize,
         CalcSize(CalcLength("calc(40%)"), CalcLength("calc(40%)")))
         << layoutProperty->calcLayoutConstraint_->preSelfIdealSize.value().ToString();
+}
+
+/**
+ * @tc.name: GetAlignPositionWithDirectionTest001
+ * @tc.desc: GetAlignPositionWithDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, GetAlignPositionWithDirectionTest001, TestSize.Level1)
+{
+    const SizeF parentSize(100.0f, 100.0f);
+    const SizeF childSize(50.0f, 50.0f);
+    for (const auto& testCase : OVERLAY_OPTIONS_TEST_CASES) {
+        /**
+        * @tc.steps: step1. call GetAlignPositionWithDirection function.
+        * @tc.expected: step1. offset equals expectedResult.
+        */
+        auto offset = Alignment::GetAlignPositionWithDirection(parentSize, childSize,
+            testCase.align, testCase.direction);
+        EXPECT_EQ(offset, testCase.expectedResult);
+    }
 }
 }

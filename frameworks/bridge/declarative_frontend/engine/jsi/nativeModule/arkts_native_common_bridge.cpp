@@ -3140,8 +3140,10 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     options.push_back(static_cast<ArkUI_Float32>(offsetY.value().Unit()));
     options.push_back(static_cast<ArkUI_Float32>(hasOptions));
     options.push_back(static_cast<ArkUI_Float32>(hasOffset));
+    options.push_back(0);
+    options.push_back(0);
     auto textPtr = (text.has_value()) ? text.value().c_str() : nullptr;
-    GetArkUINodeModifiers()->getCommonModifier()->setOverlay(nativeNode, textPtr, options.data(), options.size());
+    GetArkUINodeModifiers()->getCommonModifier()->setOverlay(nativeNode, textPtr, options.data(), options.size(), nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
