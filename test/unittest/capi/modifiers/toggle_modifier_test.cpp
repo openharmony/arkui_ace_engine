@@ -313,12 +313,11 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestSiz
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> selectedColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
-        Color::BLACK.ToString() },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
+        Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(SELECTED_COLOR_RESOURCE),
-        Color::BLACK.ToString() }
+    { "#FF007DFF", Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(SELECTED_COLOR_RESOURCE), "#FF007DFF" }
 };
 
 /*
@@ -401,11 +400,11 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSwitchPointColorTestDefaultValues, Test
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> switchPointColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
-        Color::BLACK.ToString() },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
+        Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), Color::BLACK.ToString() }
+    { "#FFFFFFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), "#FFFFFFFF" }
 };
 
 /*
@@ -502,7 +501,7 @@ HWTEST_F(ToggleModifierTest, DISABLED_setSwitchStyleTestDefaultValues, TestSize.
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>>
     switchStylePointRadiusValidValues = {
     { "55.50vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(55.5f), "55.50vp" },
-    { "0.00px", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(POINT_RADIUS_RESOURCE), "0.00px" }
+    { "7.00vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(POINT_RADIUS_RESOURCE), "7.00vp" }
 };
 
 /*
@@ -541,11 +540,11 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusValidValues, TestSize.
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> switchStyleUnselectedColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
-        Color::BLACK.ToString() },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
+        Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), Color::BLACK.ToString() }
+    { "#FFFFFFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), "#FFFFFFFF" }
 };
 
 /*
@@ -584,12 +583,11 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestUnselectedColorValidValues, TestS
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> switchStylePointColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Opt_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
-        Color::BLACK.ToString() },
+    { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0.5f),
+        Color::TRANSPARENT.ToString() },
     { "#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { "#FF00FFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Color::BLACK.ToString(), Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE),
-        Color::BLACK.ToString() }
+    { "#FFFFFFFF", Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(POINT_COLOR_RESOURCE), "#FFFFFFFF" }
 };
 
 /*
@@ -628,7 +626,7 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointColorValidValues, TestSize.L
 static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>>
     switchStyleTrackBorderRadiusValidValues = {
     { "55.50vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(55.5f), "55.50vp" },
-    { "0.00px", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(TRACK_BORDER_RADIUS_RESOURCE), "0.00px" }
+    { "7.00vp", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(TRACK_BORDER_RADIUS_RESOURCE), "7.00vp" }
 };
 
 /*
