@@ -69,7 +69,7 @@ ani_ref CreateDouble(ani_env* env, ani_int value)
     ani_method ctor;
     env->Class_FindMethod(cls, "<ctor>", "d:", &ctor);
     ani_object rs;
-    env->Object_New(cls, ctor, &rs, value);
+    env->Object_New(cls, ctor, &rs, static_cast<ani_double>(value));
     return rs;
 }
 
