@@ -46,7 +46,7 @@ using StartAnimationCallback = std::function<void(const TweenOption&, const Twee
 class RenderWeb;
 #endif
 class RenderTextOverlay : public RenderNode {
-    DECLARE_ACE_TYPE(RenderTextOverlay, RenderNode)
+    DECLARE_ACE_TYPE(RenderTextOverlay, RenderNode);
 
 public:
     RenderTextOverlay();
