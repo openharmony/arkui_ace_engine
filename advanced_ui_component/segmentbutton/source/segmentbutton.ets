@@ -25,10 +25,10 @@ const MAX_MAX_FONT_SCALE: number = 2
 const MIN_MAX_FONT_SCALE: number = 1
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
-const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
 // Space character for selected accessibility description - prevents screen readers from announcing
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
+const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -932,7 +932,8 @@ struct SegmentButtonItemArrayComponent {
     .direction(this.options.direction)
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
-    // 当前仅TV场景isSegmentFocusStyleCustomized为true,TV场景需要使用按键内置的focus样式，故隐藏此高级组件自定义的focus样式
+    // Currently, isSegmentFocusStyleCustomized is set to true only on TV. 
+    // Since the TV requires the use of the built-in focus style, the custom focus style is hidden.
     .visibility(!this.isSegmentFocusStyleCustomized && this.focusIndex === index ? Visibility.Visible : Visibility.None)
   }
 
