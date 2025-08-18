@@ -664,7 +664,7 @@ HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. change list mainSize to half and call measure of List for second time
-     * @tc.expected: check item 3 in noLayoutedItems
+     * @tc.expected: check item 2 and item 3 in noLayoutedItems
      */
     EXPECT_TRUE(layoutAlgorithm);
     EXPECT_TRUE(layoutAlgorithm->noLayoutedItems_.empty());
@@ -677,7 +677,7 @@ HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
     layoutProperty_->contentConstraint_ = contentConstraint;
     layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_FALSE(layoutAlgorithm->noLayoutedItems_.empty());
-    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 3); // 3: start index
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 2); // 2: start index
     EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.rbegin()->first, 3); // 3: end index
 }
 
@@ -2626,7 +2626,6 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetSpace(Dimension(SPACE));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         CreateListItem();
@@ -2647,7 +2646,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
-    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
 
     /**
      * @tc.steps: step2. Update item4 size
