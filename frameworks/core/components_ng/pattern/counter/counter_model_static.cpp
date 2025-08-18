@@ -157,7 +157,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateButtonChild(
 {
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(

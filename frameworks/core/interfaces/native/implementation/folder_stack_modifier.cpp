@@ -72,7 +72,7 @@ void OnFolderStateChangeImpl(Ark_NativePointer node,
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
         arkCallback.Invoke(eventInfo);
     };
-    FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(onChange));
+    FolderStackModelNGStatic::SetOnFolderStateChange(frameNode, std::move(onChange));
 }
 void OnHoverStatusChangeImpl(Ark_NativePointer node,
                              const Opt_OnHoverStatusChangeCallback* value)
@@ -89,7 +89,7 @@ void OnHoverStatusChangeImpl(Ark_NativePointer node,
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
         arkCallback.Invoke(eventInfo);
     };
-    FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(onChange));
+    FolderStackModelNGStatic::SetOnHoverStatusChange(frameNode, std::move(onChange));
 }
 void EnableAnimationImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
