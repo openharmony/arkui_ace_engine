@@ -33,9 +33,7 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::u16st
     // Use the minFontSize to layout the paragraph. While using the minFontSize, if the paragraph could be layout in 1
     // line, then increase the font size and try to layout using the maximum available fontsize.
     textStyle.SetFontSize(Dimension(minFontSize));
-    if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-        return false;
-    }
+    CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
     if (IsAdaptExceedLimit(maxSize)) {
         return true;
     }
