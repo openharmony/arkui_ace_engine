@@ -52,7 +52,7 @@ using std::string;
 static std::atomic<uint32_t> mallocCounter{0};
 #endif
 
-#ifdef KOALA_NAPI
+#if defined(KOALA_NAPI) || defined(KOALA_ANI)
 // Callback dispatcher MOVED to convertors-napi.cc.
 // Let's keep platform-specific parts of the code together
 

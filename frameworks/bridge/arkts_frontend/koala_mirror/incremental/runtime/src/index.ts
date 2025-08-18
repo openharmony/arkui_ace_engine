@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export { observableProxy, ObservableClass, ObservableClassV2, TrackableProps } from "@koalaui/compat"
+export { observableProxy, ObservableClass, ClassMetadata, TrackableProperties, trackableProperties } from "@koalaui/compat"
 
 export {
     AnimatedState,
@@ -135,6 +135,7 @@ export {
     mutableState,
     scheduleCallback,
     updateStateManager,
+    globalMutableState,
 } from "./states/GlobalStateManager"
 export {
     ArrayState,
@@ -149,7 +150,8 @@ export {
     State,
     StateContext,
     StateManager,
-    StateManagerImpl,
+    StateManagerImpl, /* Improve:HQ private as public*/
+    StateImpl, /* Improve:HQ private as public */
     ValueTracker,
 } from "./states/State"
 
@@ -170,4 +172,3 @@ export { PrimeNumbers } from "./tree/PrimeNumbers"
 export { ReadonlyTreeNode } from "./tree/ReadonlyTreeNode"
 export { TreeNode } from "./tree/TreeNode"
 export { TreePath } from "./tree/TreePath"
-

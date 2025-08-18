@@ -232,8 +232,8 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
 
     const valueType = Type.of(value)
     if (valueType instanceof ClassType && !(value instanceof BaseEnum)) {
-        const isObservable = isObservableClass(value as Object)
-        if (trackableProperties(value as Object) == undefined && !isObservable) {
+        const isObservable = isObservedV1Class(value as Object)
+        if (!hasTrackableProperties(value as Object) && !isObservable) {
             return value as Value
         }
         if (valueType.hasEmptyConstructor()) {
@@ -1132,43 +1132,124 @@ class ObservableDate extends Date {
     }
 }
 
-function isObservableClass(value: Object): boolean {
-    return value instanceof ObservableClass ? value.isObserved() : false;
+function getClassMetadata<T>(value: T): ClassMetadata | undefined {
+    return value instanceof ObservableClass ? value.getClassMetadata() : undefined
 }
 
-/**
- * Interface for getting the observed properties of a class
- */
-export interface TrackableProps {
-    /**
-     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
-     */
-    trackedProperties(): ReadonlySet<string>
+function isObservedV1Class(value: Object): boolean {
+    return getClassMetadata(value)?.isObservedV1(value) ?? false
 }
 
-export function trackableProperties<T>(value: T): ReadonlySet<string> | undefined  {
-    if (value instanceof TrackableProps) {
-        return value.trackedProperties()
-    }
-    if (value instanceof ObservableClassV2) {
-        return value.tracedProperties()
-    }
-    return undefined
+function hasTrackableProperties(value: Object): boolean {
+    return getClassMetadata(value)?.hasTrackableProperties() ?? false
 }
 
 /**
  * Interface for getting the observability status of a class
  */
 export interface ObservableClass {
-    /**
-     * Indicates whether the class is decorated with `@Observed`.
-     */
-    isObserved(): boolean
+    getClassMetadata(): ClassMetadata | undefined
 }
 
 /**
- * To implement the ObservedV2 decorator
+ * Interface for checking the observed properties of a class
  */
-export interface ObservableClassV2 {
-    tracedProperties(): ReadonlySet<string>
+export interface TrackableProperties {
+    isTrackable(propertyName: string): boolean
+}
+
+/**
+ * If value is a class, then returns a list of trackable properties
+ * @param value
+ */
+export function trackableProperties<T>(value: T): TrackableProperties | undefined {
+    return getClassMetadata(value)
+}
+
+export class ClassMetadata implements TrackableProperties {
+    private readonly parent: ClassMetadata | undefined
+    private readonly markAsObservedV1: boolean
+    private readonly markAsObservedV2: boolean
+    private readonly targetClass: Class
+    private static readonly metadataPropName = "__classMetadata"
+
+    /**
+     * Class property names marked with the @Track or @Trace decorator
+     * @private
+     */
+    private readonly trackableProperties: ReadonlySet<string> | undefined
+
+    /**
+     * Contains fields marked with the @Type decorator.
+     * The key of the map is the property name and the value is the typename of the corresponding field.
+     * @private
+     */
+    private readonly typedProperties: ReadonlyMap<string, string> | undefined
+
+    constructor(parent: ClassMetadata | undefined,
+                markAsObservedV1: boolean,
+                markAsObservedV2: boolean,
+                trackable: string[] | undefined,
+                typed: [string, string][] | undefined) {
+        const target = Class.ofCaller()
+        if (target == undefined) {
+            throw new Error("ClassMetadata must be created in the class context")
+        }
+        this.targetClass = target!
+        this.parent = parent
+        this.markAsObservedV1 = markAsObservedV1
+        this.markAsObservedV2 = markAsObservedV2
+        if (trackable) {
+            this.trackableProperties = new Set<string>(trackable)
+        }
+        if (typed) {
+            this.typedProperties = new Map<string, string>(typed)
+        }
+    }
+
+    isObservedV1(value: Object): boolean {
+        return this.markAsObservedV1 && Class.of(value) == this.targetClass
+    }
+
+    isObservedV2(value: Object): boolean {
+        return this.markAsObservedV2 && Class.of(value) == this.targetClass
+    }
+
+    isTrackable(propertyName: string): boolean {
+        return (this.trackableProperties?.has(propertyName) || this.parent?.isTrackable(propertyName)) ?? false
+    }
+
+    hasTrackableProperties(): boolean {
+        if (this.trackableProperties) {
+            return this.trackableProperties!.size > 0
+        }
+        return this.parent?.hasTrackableProperties() ?? false
+    }
+
+    getTypenameTypeDecorator(propertyName: string): string | undefined {
+        if (this.typedProperties) {
+            return this.typedProperties?.get(propertyName)
+        }
+        if (this.parent) {
+            return this.parent!.getTypenameTypeDecorator(propertyName)
+        }
+        return undefined
+    }
+
+    static findClassMetadata(type: Type): ClassMetadata | undefined {
+        if (type instanceof ClassType) {
+            const fieldsNum = type.getFieldsNum()
+            for (let i = 0; i < fieldsNum; i++) {
+                const field = type.getField(i)
+                if (field.isStatic() && field.getName() == ClassMetadata.metadataPropName) {
+                    const meta = field.getStaticValue()
+                    if (meta != undefined && meta instanceof ClassMetadata) {
+                        return meta
+                    }
+                    break
+                }
+            }
+        }
+        return undefined
+    }
 }

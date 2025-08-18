@@ -32,10 +32,14 @@ import {
     unpackString
 } from "../../reexport-for-generated"
 
+import { ErrorLogger } from "./ErrorLogger"
 
 export class ArkTsConfig extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
+    }
+    static createArkTsConfig(configPath: string, de?: ErrorLogger): ArkTsConfig {
+        return new ArkTsConfig(global.generatedEs2panda._CreateArkTsConfig(global.context, configPath, passNode(de)))
     }
     /** @deprecated */
     resolveAllDependenciesInArkTsConfig(): this {

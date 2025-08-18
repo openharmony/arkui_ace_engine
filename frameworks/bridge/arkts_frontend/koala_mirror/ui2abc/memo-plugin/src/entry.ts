@@ -24,32 +24,38 @@ export function init(parsedJson?: Object, checkedJson?: Object) {
     return {
         name: "memo",
         parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
-            console.log("[memo-plugin] Run parsed state plugin")
+            arkts.Tracer.pushContext('memo-plugin')
+            arkts.trace(() => "Run parsed state plugin", true)
             const transform = parsedTransformer(parsedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
         checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
-            console.log("[memo-plugin] Run checked state plugin")
+            arkts.Tracer.pushContext('memo-plugin')
+            arkts.trace(() => "Run checked state plugin", true)
             const transform = checkedTransformer(checkedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
                 arkts.runTransformer(prog, state, transform, pluginContext, hooks)
                 arkts.recheckSubtree(prog.ast)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
         clean() {
-            console.log("[memo-plugin] Clean")
+            arkts.Tracer.pushContext('memo-plugin')
+            arkts.trace(() => "Clean", true)
+            arkts.Tracer.popContext()
             pluginContext = new arkts.PluginContextImpl()
         }
     }

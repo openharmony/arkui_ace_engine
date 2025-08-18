@@ -34,4 +34,8 @@ export class ExternalSource extends ArktsObject {
             (instance: KNativePointer) => new Program(instance)
         )
     }
+
+    static instantiate(peer: KNativePointer) {
+        return new ExternalSource(peer)
+    }
 }

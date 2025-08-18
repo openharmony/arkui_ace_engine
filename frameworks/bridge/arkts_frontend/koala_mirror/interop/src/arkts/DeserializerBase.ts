@@ -224,12 +224,12 @@ export class DeserializerBase implements Disposable {
         return ResourceHolder.instance().get(resource.resourceId)
     }
 
-    final readBuffer(): NativeBuffer {
+    final readBuffer(): ArrayBuffer {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
         InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
-        return new NativeBuffer(data, length, resource.release)
+        return InteropNativeModule._MaterializeBuffer(data, length, resource.resourceId, resource.hold, resource.release)
     }
 }
 

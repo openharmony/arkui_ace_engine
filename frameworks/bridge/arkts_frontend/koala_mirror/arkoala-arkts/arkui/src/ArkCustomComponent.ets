@@ -24,8 +24,8 @@ import {
     NavigationInfo,
     NavDestinationInfo,
     RouterPageInfo
-} from "./generated"
-import { Theme } from "./generated/ohos.arkui.theme"
+} from "#generated"
+import { Theme } from "#generated/ohos.arkui.theme"
 import { UIContext } from "./ohos.arkui.UIContext"
 
 /**

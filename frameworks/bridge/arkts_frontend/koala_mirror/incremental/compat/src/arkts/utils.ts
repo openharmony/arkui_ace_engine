@@ -35,8 +35,8 @@ export function memoryStats(): string {
     return `used ${GC.getUsedHeapSize()} free ${GC.getFreeHeapSize()}`
 }
 
-export function launchJob(job: () => void): Promise<void> {
-    throw new Error("unsupported yet: return launch job()")
+export function launchJob(task: () => void): Promise<Any> {
+    return taskpool.execute(task)
 }
 
 export class CoroutineLocalValue<T> {

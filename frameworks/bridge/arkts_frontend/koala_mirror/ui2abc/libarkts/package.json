@@ -23,7 +23,7 @@
         "./plugins/build/src/**/*"
     ],
     "config": {
-        "gen_version": "2.1.9-arktscgen-8",
+        "gen_version": "2.1.9-arktscgen-9",
         "panda_sdk_path": "../../incremental/tools/panda/node_modules/@panda/sdk",
         "panda_sdk_version": "next"
     },
@@ -35,7 +35,6 @@
         "@koalaui/harness": "1.7.6+devel",
         "@koalaui/interop": "1.7.6+devel",
         "@koalaui/fast-arktsc": "file:../fast-arktsc",
-        "@idlizer/arktscgen": "2.1.9-arktscgen-8",
         "@types/mocha": "^9.1.0",
         "mocha": "^9.2.2",
         "node-addon-api": "8.0.0",
@@ -79,7 +78,7 @@
         "panda:sdk:install": "cd ../../incremental/tools/panda && echo \"Installing panda sdk $npm_package_config_panda_sdk_version\" && PANDA_SDK_VERSION=$npm_package_config_panda_sdk_version npm run panda:sdk:install",
         "panda:sdk:reinstall": "npm run panda:sdk:clean && npm run panda:sdk:install",
         "regenerate:current": "rimraf -rf src/generated && npm run compile -C ../../../arktscgen && node ../../../arktscgen --panda-sdk-path $npm_package_config_panda_sdk_path --output-dir ../ --options-file ./generator/options.json5 --no-initialize --debug",
-        "regenerate": "rimraf -rf src/generated && arktscgen --panda-sdk-path ${PANDA_SDK_PATH:=$npm_package_config_panda_sdk_path} --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
+        "regenerate": "rimraf -rf src/generated && npx --yes @idlizer/arktscgen@$npm_package_config_gen_version --panda-sdk-path ${PANDA_SDK_PATH:=$npm_package_config_panda_sdk_path} --output-dir ../ --options-file ./generator/options.json5 --no-initialize",
         "reinstall:regenerate": "npm run panda:sdk:reinstall && npm run regenerate && git diff --shortstat"
     }
 }

@@ -1,6 +1,7 @@
 **/node_modules
 build
 build-m3*
+arkoala-arkts/arkui/build-recheck
 dist
 arkoala/tools/peer-generator/arkoala
 **/package-lock.json

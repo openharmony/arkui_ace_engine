@@ -19,9 +19,9 @@ import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { ExtendableComponent } from '../component/extendableComponent';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
-import { mutableState, scheduleCallback, MutableState, GlobalStateManager, ObservableClassV2 } from "@koalaui/runtime"
-import { AppStorage, LocalStorage } from "../Storage"
+import { mutableState, scheduleCallback, MutableState, GlobalStateManager, globalMutableState, ObservableClass, ClassMetadata } from "@koalaui/runtime"
 import { SubscribedAbstractProperty } from "../ArkState"
+import { AppStorage, LocalStorage } from "../Storage"
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -260,37 +260,10 @@ export type MonitorValueCallback = () => Any;
 export type MonitorCallback = (m: IMonitor) => void;
 export type ComputeCallback<T> = () => T;
 
+
 class StatableHolder<Value> {
+    private directValue: Value | undefined = undefined
     private state: MutableState<Value> | undefined = undefined
-    private readonly stateManager = GlobalStateManager.instance
-
-    get value(): Value {
-        return this.state!.value!
-    }
-
-    set value(value: Value) {
-        if (this.state) {
-            this.state!.value = observableProxy<Value>(value)
-        } else {
-            this.state = this.mutableState(value)
-        }
-    }
-
-    dispose() {
-        if (this.state) {
-            this.state!.dispose()
-            this.state = undefined
-        }
-    }
-
-    private mutableState<Value>(value: Value): MutableState<Value> {
-        return this.stateManager.mutableState(observableProxy<Value>(value), true)
-    }
-}
-
-class PlainValueHolder<Value> {
-    private plainValue: Value | undefined = undefined
-    private state: StatableHolder<Value> | undefined = undefined
 
     constructor(value: Value | undefined) {
         if (value != undefined) {
@@ -299,7 +272,7 @@ class PlainValueHolder<Value> {
     }
 
     get value(): Value {
-        return this.state ? this.state!.value! : this.plainValue!
+        return this.state ? this.state!.value! : this.directValue!
     }
 
     set value(value: Value) {
@@ -312,33 +285,37 @@ class PlainValueHolder<Value> {
 
     private setValue(value: Value) {
         if (this.isStatable(value)) {
-            this.setStateValue(value)
-            this.plainValue = undefined
+            this.setStateValue(observableProxy(value))
         } else {
-            this.plainValue = value
-            this.dispose()
+            if (this.state) {
+                throw new Error(`The property is already bound to a mutable state value`)
+            }
+            this.directValue = value
         }
     }
 
     private setStateValue(value: Value) {
         if (!this.state) {
-            this.state = new StatableHolder<Value>()
+            this.state = globalMutableState(value)
         }
         this.state!.value = value
     }
 
     private isStatable(value: Value | undefined): boolean {
-        return value instanceof ObservableClassV2
+        if (value instanceof ObservableClass) {
+            return value.getClassMetadata()?.isObservedV2(value) ?? false
+        }
+        return false
     }
 }
 
 export class PlainStructProperty<Value> implements SubscribedAbstractProperty<Value> {
     private name: string
-    private readonly holder: PlainValueHolder<Value>
+    private readonly holder: StatableHolder<Value>
 
     constructor(name: string, value?: Value) {
         this.name = name
-        this.holder = new PlainValueHolder<Value>(value)
+        this.holder = new StatableHolder<Value>(value)
     }
 
     init(value: Value | undefined): void {
@@ -530,6 +507,22 @@ export class ConsumeDecoratorProperty<Value> extends LinkDecoratorProperty<Value
     }
     init(provideKey?: string): void {
         this.linkTo(GlobalStateManager.instance.valueBy<SubscribedAbstractProperty<Value>>(provideKey ?? this.info()))
+    }
+}
+
+export class ConsumerDecoratorProperty<Value> extends LinkDecoratorProperty<Value> {
+    constructor(name: string, listener?: () => void) {
+        super(name, listener)
+    }
+    init(defaultValue: Value, provideKey?: string): void {
+        const provided = GlobalStateManager.instance.stateBy<Value>(provideKey ?? this.info())
+        if (provided != undefined) {
+            this.linkTo(provided.value)
+        } else {
+            const state = new StateDecoratorProperty<Value>(this.info())
+            state.init(undefined, defaultValue)
+            this.linkTo(state)
+        }
     }
 }
 

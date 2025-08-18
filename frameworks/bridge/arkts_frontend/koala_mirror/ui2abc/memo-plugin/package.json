@@ -23,7 +23,8 @@
         "test:rewrite:other": "TEST_OTHER=1 npm run test:rewrite",
         "test:rewrite:update": "UPDATE_GOLDEN=1 npm run test:rewrite",
         "test:diagnostics": "mocha --config ./mocharc-diagnostics.json",
-        "test:executable": "npm run test:ui2abc --prefix ../tests-memo"
+        "test:executable": "npm run test:ui2abc --prefix ../tests-memo",
+        "test:perf": "mkdir -p perf/build && npm run annotate --prefix ../../incremental/runtime && node ./perf/test_perf.js"
     },
     "dependencies": {
         "@koalaui/harness": "1.7.6+devel",

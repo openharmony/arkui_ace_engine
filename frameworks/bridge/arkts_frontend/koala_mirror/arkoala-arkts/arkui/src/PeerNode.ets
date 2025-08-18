@@ -17,7 +17,7 @@ import { int32, KoalaCallsiteKey } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
-import { ArkRootPeer, StateStylesOps } from "./generated"
+import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
 
 export const PeerNodeType = 11

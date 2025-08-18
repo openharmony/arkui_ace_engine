@@ -66,6 +66,8 @@ export class DumpingHooks implements RunTransformerHooks {
 
 
 export function runTransformerOnProgram(program: Program, options: CompilationOptions, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
+    arktsGlobal.filePath = program.absoluteName
+
     // Perform some additional actions before the transformation start
     hooks.onProgramTransformStart?.(options, program)
 

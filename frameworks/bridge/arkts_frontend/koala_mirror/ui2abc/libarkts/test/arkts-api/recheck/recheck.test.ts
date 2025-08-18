@@ -55,6 +55,7 @@ function createConfig(file: string) {
 
 function createContext(file: string) {
     const code = fs.readFileSync(`${DIR}/${file}/main.ets`, 'utf-8')
+    arkts.arktsGlobal.filePath = `${DIR}/${file}/main.ets`
     arkts.arktsGlobal.compilerContext = arkts.Context.createFromString(code)
 }
 

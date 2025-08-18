@@ -26,7 +26,7 @@ import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../handwritten/component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
