@@ -5655,14 +5655,15 @@ void BindContextMenuBase(Ark_NativePointer node,
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
                               MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
-        auto builder = [node, frameNode, callback]() {
-            auto uiNode = callback.BuildSync(node);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        ViewAbstractModelStatic::BindContextMenuStatic(
-            AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-        ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+        callback.BuildAsync([frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
+            auto builder = [frameNode, uiNode]() {
+                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstractModelStatic::BindContextMenuStatic(
+                AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+            ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+        }, node);        
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);

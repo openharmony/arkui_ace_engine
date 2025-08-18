@@ -8215,7 +8215,9 @@ export interface CommonMethod {
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {return this;}
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {return this;}
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
+    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {return this;}
+    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {return this;}
     bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {return this;}
     bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {return this;}
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
@@ -8939,7 +8941,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         return this
     }
+    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+        return this
+    }
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
+        return this
+    }
+    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
     public bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
@@ -11312,6 +11320,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+        if (this.checkPriority("bindMenu")) {
+            const isShow_type = runtimeType(isShow)
+            const content_type = runtimeType(content)
+            const options_type = runtimeType(options)
+            if ((RuntimeType.BOOLEAN == isShow_type) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
+                const isShow_casted = isShow as (boolean | undefined)
+                const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
+                const options_casted = options as (MenuOptions | undefined)
+                this.getPeer()?.bindMenu1Attribute(isShow_casted, content_casted, options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
@@ -11322,6 +11346,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 const responseType_casted = responseType as (ResponseType | undefined)
                 const options_casted = options as (ContextMenuOptions | undefined)
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {
+        if (this.checkPriority("bindContextMenu")) {
+            const isShown_type = runtimeType(isShown)
+            const content_type = runtimeType(content)
+            const options_type = runtimeType(options)
+            if ((RuntimeType.BOOLEAN == isShown_type) && (RuntimeType.FUNCTION == content_type) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
+                const isShown_casted = isShown as (boolean);
+                const content_casted = content as (CustomBuilder)
+                const options_casted = options as (ContextMenuOptions | undefined)
+                this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
