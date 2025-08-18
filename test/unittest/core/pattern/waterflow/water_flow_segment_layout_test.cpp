@@ -1965,7 +1965,6 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowInitializeWithSectionsTest001, TestSize.
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
 }
 
-
 /**
  * @tc.name: WaterFlowRTLPaddingWithSections001
  * @tc.desc: Test WaterFlow with sections padding in RTL mode

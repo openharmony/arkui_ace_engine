@@ -511,6 +511,7 @@ protected:
     bool isScrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
 
@@ -534,8 +535,6 @@ private:
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
-    bool JudgeCanOverScrollStart();
-    bool JudgeCanOverScrollEnd();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -646,7 +645,6 @@ private:
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 
-    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;

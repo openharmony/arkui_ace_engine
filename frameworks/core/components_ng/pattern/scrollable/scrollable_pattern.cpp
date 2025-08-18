@@ -588,6 +588,9 @@ void ScrollablePattern::AddScrollEvent()
         InitScrollBarClickEvent();
     }
     InitRatio();
+    if (friction_ != -1) {
+        scrollable->SetUnstaticFriction(friction_);
+    }
     if (useDefaultBackToTop_) {
         ResetBackToTop();
     }
@@ -3727,70 +3730,6 @@ void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOf
     }
 }
 
-PositionMode ScrollablePattern::GetPositionMode()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, PositionMode::RIGHT);
-    auto positionMode = PositionMode::RIGHT;
-    if (axis_ == Axis::HORIZONTAL) {
-        positionMode = PositionMode::BOTTOM;
-    } else {
-        auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
-        if (isRtl) {
-            positionMode = PositionMode::LEFT;
-        }
-    }
-    return positionMode;
-}
-
-void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    StopScrollableAndAnimate();
-
-    if (!animator_) {
-        auto context = host->GetContextRefPtr();
-        CHECK_NULL_VOID(context);
-        animator_ = CREATE_ANIMATOR(context);
-        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnAnimateStop();
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
-        });
-    }
-
-    if (!fixedVelocityMotion_) {
-        fixedVelocityMotion_ = AceType::MakeRefPtr<VelocityMotion>([weak = WeakClaim(this)](float offset) -> bool {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, true);
-            if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
-                // Stop scrolling when reach the bottom
-                pattern->fixedVelocityMotion_->Init();
-                return true;
-            } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
-                // Stop scrolling when reach the top
-                pattern->fixedVelocityMotion_->Init();
-                return true;
-            }
-            return false;
-        });
-        fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
-            auto pattern = weakScroll.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_ANIMATION_CONTROLLER);
-        });
-        fixedVelocityMotion_->SetVelocity(velocity);
-    } else {
-        fixedVelocityMotion_->Init();
-        fixedVelocityMotion_->SetVelocity(velocity);
-    }
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
-    animator_->PlayMotion(fixedVelocityMotion_);
-    FireOnScrollStart(false);
-}
-
 void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling)
 {
     auto host = GetHost();
@@ -4091,6 +4030,70 @@ void ScrollablePattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(true, true, scrollType);
     });
+}
+
+void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    StopScrollableAndAnimate();
+
+    if (!animator_) {
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        animator_ = CREATE_ANIMATOR(context);
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAnimateStop();
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+        });
+    }
+
+    if (!fixedVelocityMotion_) {
+        fixedVelocityMotion_ = AceType::MakeRefPtr<VelocityMotion>([weak = WeakClaim(this)](float offset) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, true);
+            if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
+                // Stop scrolling when reach the bottom
+                pattern->fixedVelocityMotion_->Init();
+                return true;
+            } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
+                // Stop scrolling when reach the top
+                pattern->fixedVelocityMotion_->Init();
+                return true;
+            }
+            return false;
+        });
+        fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_ANIMATION_CONTROLLER);
+        });
+        fixedVelocityMotion_->SetVelocity(velocity);
+    } else {
+        fixedVelocityMotion_->Init();
+        fixedVelocityMotion_->SetVelocity(velocity);
+    }
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+    animator_->PlayMotion(fixedVelocityMotion_);
+    FireOnScrollStart(false);
+}
+
+PositionMode ScrollablePattern::GetPositionMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, PositionMode::RIGHT);
+    auto positionMode = PositionMode::RIGHT;
+    if (axis_ == Axis::HORIZONTAL) {
+        positionMode = PositionMode::BOTTOM;
+    } else {
+        auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRtl) {
+            positionMode = PositionMode::LEFT;
+        }
+    }
+    return positionMode;
 }
 
 void ScrollablePattern::GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json)
