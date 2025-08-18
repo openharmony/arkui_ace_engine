@@ -108,15 +108,12 @@ void CorrectMonotonicAxisVelocity(const LeastSquareImpl& axis, double& v, double
 
 double VelocityTracker::UpdateAxisVelocity(LeastSquareImpl& axisRaw)
 {
-    LeastSquareImpl axis = axisRaw;
+    LeastSquareImpl axis;
     if (SystemProperties::IsVelocityWithinTimeWindow()) {
-        auto xTimes = axis.GetXVals();
+        auto xTimes = axisRaw.GetXVals();
         auto timeThreshold = xTimes.back() - VelocityTracker::DURATION_LONGEST_THRESHOLD;
         int32_t cnt = (std::lower_bound(xTimes.begin(), xTimes.end(), timeThreshold) - xTimes.begin());
-        while (cnt) {
-            axis.PopFrontPoint();
-            --cnt;
-        }
+        axis.CloneFromRaw(axisRaw, cnt);
     }
     std::vector<double> param(VelocityTracker::LEAST_SQUARE_PARAM_NUM, 0);
     auto x = axis.GetXVals().back();
