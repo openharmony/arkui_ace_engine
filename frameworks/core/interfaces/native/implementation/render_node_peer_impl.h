@@ -15,42 +15,54 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "base/memory/referenced.h"
 
-struct RenderNodePeer {
+struct RenderNodePeer final {
 public:
-    RenderNodePeer() = default;
-    RenderNodePeer(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src) : node(src) {}
-    ~RenderNodePeer() = default;
-
-    static RenderNodePeer* Create(Ark_UIContext uiContext)
-    {
-        return new RenderNodePeer;
-    }
-
-    static RenderNodePeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
-    {
-        return new RenderNodePeer(src);
-    }
-
-    static RenderNodePeer* Create(OHOS::Ace::NG::FrameNode* src)
-    {
-        return new RenderNodePeer(OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src));
-    }
-
-    static void Destroy(RenderNodePeer* peer)
-    {
-        delete peer;
-    }
-
+    enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
+    LengthMetricsUnit lengthMetricsUnit{ LengthMetricsUnit::DEFAULT };
+    std::optional<uint8_t> shadowAlpha{ std::nullopt };
+    std::string label = "";
+    friend OHOS::Ace::NG::PeerUtils;
     const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& GetFrameNode() const
     {
         return node;
     }
 
-private:
+protected:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
+
+    RenderNodePeer()
+    {
+        auto nodeId = OHOS::Ace::ElementRegister::GetInstance()->MakeUniqueId();
+        node = OHOS::Ace::NG::FrameNode::GetOrCreateFrameNode(
+            OHOS::Ace::V2::RENDER_NODE_ETS_TAG,
+            nodeId,
+            []() { return OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RenderNodePattern>(); });
+        node->SetIsArkTsRenderNode(true);
+    }
+
+    RenderNodePeer(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
+        : node(src)
+    {
+        if (node) {
+            node->SetIsArkTsRenderNode(true);
+        }
+    }
+
+    RenderNodePeer(OHOS::Ace::NG::FrameNode* src)
+        : node(OHOS::Ace::Referenced::Claim<OHOS::Ace::NG::FrameNode>(src))
+    {
+        if (node) {
+            node->SetIsArkTsRenderNode(true);
+        }
+    }
+
+private:
+    ~RenderNodePeer() = default;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_RENDER_NODE_PEER_IMPL_H

@@ -95,7 +95,7 @@ struct FrameNodePeer {
 
     RenderNodePeer* GetRenderNodePeer()
     {
-        return RenderNodePeer::Create(GetFrameNodeByPeer(this));
+        return OHOS::Ace::NG::PeerUtils::CreatePeer<RenderNodePeer>(GetFrameNodeByPeer(this));
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

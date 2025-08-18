@@ -49,14 +49,14 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
 namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer)
 {
-    RenderNodePeer::Destroy(peer);
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* value)
 {
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
     frameNode->SetIsArkTsRenderNode(true);
-    auto renderNodePeer = RenderNodePeer::Create(frameNode);
+    auto renderNodePeer = PeerUtils::CreatePeer<RenderNodePeer>(frameNode);
     return renderNodePeer;
 }
 Ark_NativePointer GetFinalizerImpl()
