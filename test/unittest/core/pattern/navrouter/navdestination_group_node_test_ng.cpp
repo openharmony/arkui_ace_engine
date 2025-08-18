@@ -1684,4 +1684,44 @@ HWTEST_F(NavDestinationGroupNodeTestNg, TitleAnimationElapsedTimeTest003, TestSi
     ASSERT_FALSE(NavigationTitleUtil::SetTitleAnimationElapsedTime(option, AceType::Claim(navDestination)));
     ASSERT_TRUE(navDestination->IsTitleConsumedElapsedTime());
 }
+
+/**
+ * @tc.name: test MeasureContentChild
+ * @tc.desc: branch if (contentLayoutProperty->IsIgnoreOptsValid()) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, MeasureContentChild, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create navDestination node
+     */
+    auto navNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navNode->AddChild(navDestinationContentNode);
+    navNode->SetContentNode(navDestinationContentNode);
+    auto pattern = navNode->GetPattern<NavDestinationPattern>();
+    auto algorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+    auto layoutWrapper = navNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto contentWrapper = navDestinationContentNode->CreateLayoutWrapper();
+    layoutWrapper->AppendChild(contentWrapper);
+    auto layoutProperty = navNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto temp = LayoutConstraintF();
+    temp.selfIdealSize = OptionalSizeF(200.0f, 200.0f);
+    layoutProperty->layoutConstraint_ = temp;
+    layoutProperty->contentConstraint_ = temp;
+    layoutWrapper->layoutProperty_ = layoutProperty;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    navDestinationContentNode->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(temp.selfIdealSize.Height(), 200.0f);
+}
 } // namespace OHOS::Ace::NG

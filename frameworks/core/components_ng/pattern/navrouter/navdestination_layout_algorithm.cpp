@@ -87,7 +87,7 @@ SizeF MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
     const SizeF& size, float titleBarAndToolBarHeight)
 {
-    auto contentNode = hostNode->GetContentNode();
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     CHECK_NULL_RETURN(contentNode, SizeF());
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -99,6 +99,19 @@ SizeF MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     if (constraint.selfIdealSize.Height().has_value()) {
         auto currentHeight = constraint.selfIdealSize.Height().value();
         constraint.selfIdealSize.SetHeight(currentHeight);
+    }
+    auto contentLayoutProperty = contentNode->GetLayoutProperty();
+    if (contentLayoutProperty->IsIgnoreOptsValid()) {
+        IgnoreLayoutSafeAreaOpts& opts = *(contentLayoutProperty->GetIgnoreLayoutSafeAreaOpts());
+        auto navDestinationLayoutPropety =
+            AceType::DynamicCast<NavDestinationLayoutProperty>(hostNode->GetLayoutProperty());
+        auto isVerticalCanExtend =
+            NavigationLayoutUtil::CheckVerticalExtend(navDestinationLayoutPropety, hostNode, opts);
+        bool isHorizontalExtend =
+            (opts.edges & LAYOUT_SAFE_AREA_EDGE_HORIZONTAL) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM);
+        if (isVerticalCanExtend.first || isVerticalCanExtend.second || isHorizontalExtend) {
+            return contentSize;
+        }
     }
     contentWrapper->Measure(constraint);
     return contentWrapper->GetGeometryNode()->GetFrameSize();
@@ -421,8 +434,7 @@ void NavDestinationLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
     if (!isVerticalCanExtend.first && !isVerticalCanExtend.second && !isHorizontalExtend) {
         return;
     }
-    SetNeedPostponeForIgnore();
-    
+
     ExpandEdges sae = hostNode->GetAccumulatedSafeAreaExpand(true, opts);
     if (!isVerticalCanExtend.first) {
         realSize.MinusHeight(titleBarHeight);
@@ -441,6 +453,8 @@ void NavDestinationLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
     bundle.first.emplace_back(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()));
     auto context = hostNode->GetContextWithCheck();
     CHECK_NULL_VOID(context);
+    contentNode->SetDelaySelfLayoutForIgnore();
+    hostNode->SetDelaySelfLayoutForIgnore();
     context->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
 }
 
