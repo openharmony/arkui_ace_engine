@@ -452,12 +452,12 @@ HWTEST_F(TextInputUpdateTestNg, MeasureDecorator001, TestSize.Level1)
 
     /**
      * @tc.step: step2. call AddCounterNode and MeasureDecorator
-     * @tc.expected: counterTextNode_ is created and align properties is correct
+     * @tc.expected: counterTextNode_ is created and align properties is correct.
      */
     pattern_->AddCounterNode();
     auto counter = pattern_->GetCounterDecorator();
+    ASSERT_NE(counter, nullptr);
     counter->MeasureDecorator(Infinity<float>(), u"9/10", false);
-    EXPECT_TRUE(counter);
     auto property = frameNode_->GetLayoutProperty();
     EXPECT_TRUE(property);
     auto layoutDirection = property->GetLayoutDirection();
