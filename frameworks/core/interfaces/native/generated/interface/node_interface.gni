@@ -108,7 +108,6 @@ generated_sources = [
   "implementation/flow_item_modifier.cpp",
   "implementation/focus_axis_event_accessor.cpp",
   "implementation/focus_controller_accessor.cpp",
-  "implementation/folder_stack_modifier.cpp",
   "implementation/form_component_modifier.cpp",
   "implementation/form_link_modifier.cpp",
   "implementation/frame_node_accessor.cpp",
@@ -349,4 +348,9 @@ generated_sources = [
   "implementation/x_component_modifier.cpp",
 
   "utility/converter.cpp",
+]
+
+wearable_sources = 
+[
+    "implementation/folder_stack_modifier.cpp",
 ]

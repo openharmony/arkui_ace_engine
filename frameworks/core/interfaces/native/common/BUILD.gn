@@ -29,6 +29,10 @@ rebased_generated_sources = []
 foreach(src, generated_sources) {
   rebased_generated_sources += [ native_root + "/" + src ]
 }
+rebased_wearable_sources = []
+foreach(src, wearable_sources) {
+  rebased_wearable_sources += [ native_root + "/" + src ]
+}
 rebased_common_sources = []
 foreach(src, common_sources) {
   rebased_common_sources += [ native_root + "/" + src ]
@@ -66,6 +70,9 @@ template("ace_core_interfaces_native") {
     if (include_generated_sources) {
       sources += rebased_generated_sources
       defines += [ "INCLUDE_GENERATED_SOURCES" ]
+    }
+    if (!ace_engine_feature_wearable) {
+      sources += rebased_wearable_sources
     }
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 

@@ -24,6 +24,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
+const int32_t FIRST_CHILD = 0;
 const int32_t SECOND_CHILD = 1;
 const float RK356_WIDTH = 720.0f;
 const float RK356_HEIGHT = 1136.0f;
@@ -98,6 +99,7 @@ HWTEST_F(FlexNewTestNG, Example, TestSize.Level1)
     CreateLayoutTask(frameNode);
 
     // expect: second text offset x = 100.0f
+    EXPECT_EQ(frameNode->GetChildByIndex(FIRST_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 100.0f);
 }
 

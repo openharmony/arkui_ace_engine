@@ -1059,7 +1059,7 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
 }
 
 template<>
-AlignRule Convert(const Ark_HorizontalAlignOptions& src)
+AlignRule Convert(const Ark_HorizontalAlignParam& src)
 {
     AlignRule rule;
     rule.anchor = Convert<std::string>(src.anchor);
@@ -1083,7 +1083,7 @@ AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
 }
 
 template<>
-AlignRule Convert(const Ark_VerticalAlignOptions& src)
+AlignRule Convert(const Ark_VerticalAlignParam& src)
 {
     AlignRule rule;
     rule.anchor = Convert<std::string>(src.anchor);

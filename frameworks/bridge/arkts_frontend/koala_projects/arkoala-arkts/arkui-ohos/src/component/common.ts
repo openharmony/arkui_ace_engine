@@ -7272,21 +7272,21 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface HorizontalAlignOptions {
+export interface HorizontalAlignParam {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface VerticalAlignOptions {
+export interface VerticalAlignParam {
     anchor: string;
     align: VerticalAlign;
 }
 export interface AlignRuleOption {
-    left?: HorizontalAlignOptions;
-    right?: HorizontalAlignOptions;
-    middle?: HorizontalAlignOptions;
-    top?: VerticalAlignOptions;
-    bottom?: VerticalAlignOptions;
-    center?: VerticalAlignOptions;
+    left?: HorizontalAlignParam;
+    right?: HorizontalAlignParam;
+    middle?: HorizontalAlignParam;
+    top?: VerticalAlignParam;
+    bottom?: VerticalAlignParam;
+    center?: VerticalAlignParam;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
@@ -8157,6 +8157,14 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this
     useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
     alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
+    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
+    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
     aspectRatio(value: number | undefined): this
     clickEffect(value: ClickEffect | undefined): this
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
