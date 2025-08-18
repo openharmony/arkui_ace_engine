@@ -798,7 +798,6 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
     auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(menuNode, menuGeometryNode, property);
     ASSERT_NE(layoutWrapper, nullptr);
-
     /**
      * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
      */
@@ -1311,7 +1310,6 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg032, TestSize.Level1)
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
 {
     // create parent menu item
-    MockPipelineContextGetTheme();
     auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
     auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
     // set parent item size
@@ -1339,14 +1337,14 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 100);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 100);
+    EXPECT_FLOAT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
 /**
@@ -2013,6 +2011,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuWeakNode = WeakPtr<FrameNode>(menuNode);
     ASSERT_NE(menuNode, nullptr);
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
