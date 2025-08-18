@@ -24,7 +24,7 @@ constexpr int32_t DISPLAY_COUNT_MIN = 6;
 constexpr int32_t DISPLAY_COUNT_MAX = 9;
 constexpr int32_t NUMBER_ONE = 1;
 class ACE_EXPORT OverlengthDotIndicatorPaintMethod : public DotIndicatorPaintMethod {
-    DECLARE_ACE_TYPE(OverlengthDotIndicatorPaintMethod, DotIndicatorPaintMethod)
+    DECLARE_ACE_TYPE(OverlengthDotIndicatorPaintMethod, DotIndicatorPaintMethod);
 public:
     explicit OverlengthDotIndicatorPaintMethod(const RefPtr<OverlengthDotIndicatorModifier>& dotIndicatorModifier)
         : dotIndicatorModifier_(dotIndicatorModifier)

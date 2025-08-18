@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using PatternLockCompleteEvent = std::function<void(const BaseEventInfo* info)>;
 
 class PatternLockEventHub : public EventHub {
-    DECLARE_ACE_TYPE(PatternLockEventHub, EventHub)
+    DECLARE_ACE_TYPE(PatternLockEventHub, EventHub);
 
 public:
     PatternLockEventHub() = default;

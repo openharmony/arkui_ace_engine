@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class RenderMultimodal : public RenderNode {
-    DECLARE_ACE_TYPE(RenderMultimodal, RenderNode)
+    DECLARE_ACE_TYPE(RenderMultimodal, RenderNode);
 
 public:
     RenderMultimodal();

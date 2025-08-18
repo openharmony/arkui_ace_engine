@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class NavigationStack;
 class NavDestinationPattern;
 class NavPathInfo : public virtual AceType {
-    DECLARE_ACE_TYPE(NavPathInfo, AceType)
+    DECLARE_ACE_TYPE(NavPathInfo, AceType);
 public:
     NavPathInfo() = default;
     explicit NavPathInfo(const std::string& name) : name_(name) {}
@@ -75,7 +75,7 @@ protected:
 };
 
 class NavDestinationContext : public virtual AceType {
-    DECLARE_ACE_TYPE(NavDestinationContext, AceType)
+    DECLARE_ACE_TYPE(NavDestinationContext, AceType);
 public:
     NavDestinationContext() = default;
     virtual ~NavDestinationContext() = default;

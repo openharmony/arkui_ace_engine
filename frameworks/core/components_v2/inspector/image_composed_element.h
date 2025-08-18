@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ImageComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ImageComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ImageComposedElement, InspectorComposedElement);
 
 public:
     explicit ImageComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

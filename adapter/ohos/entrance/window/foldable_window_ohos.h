@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class FoldableWindowOhos : public FoldableWindow {
-    DECLARE_ACE_TYPE(FoldableWindowOhos, FoldableWindow)
+    DECLARE_ACE_TYPE(FoldableWindowOhos, FoldableWindow);
 
 public:
     explicit FoldableWindowOhos(int32_t instanceId);

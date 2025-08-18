@@ -47,7 +47,7 @@ struct SwitchAnimationStyle {
 
 // PaintProperty are used to set paint properties.
 class SwitchPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SwitchPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SwitchPaintProperty, PaintProperty);
 public:
     SwitchPaintProperty() = default;
     ~SwitchPaintProperty() override = default;

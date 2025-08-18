@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const bool)>;
 
 class CheckBoxEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CheckBoxEventHub, EventHub)
+    DECLARE_ACE_TYPE(CheckBoxEventHub, EventHub);
 
 public:
     CheckBoxEventHub() = default;

@@ -62,7 +62,7 @@ enum class VisibleAreaChangeTriggerReason : int32_t {
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class ACE_FORCE_EXPORT EventHub : public virtual AceType {
-    DECLARE_ACE_TYPE(EventHub, AceType)
+    DECLARE_ACE_TYPE(EventHub, AceType);
 
 public:
     EventHub() = default;

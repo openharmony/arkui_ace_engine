@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiInputBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(JsiInputBridge, AceType)
+    DECLARE_ACE_TYPE(JsiInputBridge, AceType);
 
 public:
     void ParseInputOptions(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& valArray);

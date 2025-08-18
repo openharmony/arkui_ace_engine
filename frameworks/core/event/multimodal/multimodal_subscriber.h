@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using MultimodalEventCallback = std::function<void(const AceMultimodalEvent&)>;
 
 class MultimodalSubscriber : public AceType {
-    DECLARE_ACE_TYPE(MultimodalSubscriber, AceType)
+    DECLARE_ACE_TYPE(MultimodalSubscriber, AceType);
 
 public:
     virtual void RegisterCallback(

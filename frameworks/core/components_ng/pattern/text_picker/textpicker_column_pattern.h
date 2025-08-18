@@ -60,7 +60,7 @@ struct TextPickerOptionProperty {
 };
 
 class EventParam : public virtual AceType {
-    DECLARE_ACE_TYPE(EventParam, AceType)
+    DECLARE_ACE_TYPE(EventParam, AceType);
 
 public:
     WeakPtr<FrameNode> instance;

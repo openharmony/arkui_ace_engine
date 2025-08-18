@@ -69,7 +69,7 @@ struct ImagePaintConfig {
 
 // CanvasImage is interface for drawing image.
 class CanvasImage : public virtual AceType {
-    DECLARE_ACE_TYPE(CanvasImage, AceType)
+    DECLARE_ACE_TYPE(CanvasImage, AceType);
 
 public:
     CanvasImage() = default;

@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 
 class RenderTabBar : public RenderNode {
-    DECLARE_ACE_TYPE(RenderTabBar, RenderNode)
+    DECLARE_ACE_TYPE(RenderTabBar, RenderNode);
 
 public:
     ~RenderTabBar() override = default;

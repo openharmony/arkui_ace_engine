@@ -148,14 +148,14 @@ public:
 };
 
 class JSParallelGesture : public JSGesture {
-    DECLARE_ACE_TYPE(JSParallelGesture, JSGesture)
+    DECLARE_ACE_TYPE(JSParallelGesture, JSGesture);
 public:
     static void Create();
     static void JSBind(BindingTarget globalObj);
 };
 
 class JSTimeoutGesture : public JSGesture {
-    DECLARE_ACE_TYPE(JSTimeoutGesture, JSGesture)
+    DECLARE_ACE_TYPE(JSTimeoutGesture, JSGesture);
 public:
     static void Create(const JSCallbackInfo& args);
     static void Pop();

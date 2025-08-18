@@ -29,7 +29,7 @@ constexpr int32_t DEFAULT_HEIGHT = 100;
 } // namespace
 
 class MockMediaPlayer : public MediaPlayer {
-    DECLARE_ACE_TYPE(MockMediaPlayer, MediaPlayer)
+    DECLARE_ACE_TYPE(MockMediaPlayer, MediaPlayer);
 public:
     ~MockMediaPlayer() override = default;
     

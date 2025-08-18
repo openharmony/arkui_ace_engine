@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class ImageSourcePreview : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource)
+    DECLARE_ACE_TYPE(ImageSourcePreview, ImageSource);
 
 public:
     std::string GetProperty(const std::string& key) override;

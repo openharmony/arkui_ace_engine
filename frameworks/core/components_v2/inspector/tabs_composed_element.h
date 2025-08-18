@@ -27,7 +27,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT TabsComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(TabsComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(TabsComposedElement, InspectorComposedElement);
 
 public:
     explicit TabsComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

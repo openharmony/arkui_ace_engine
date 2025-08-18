@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ImageAnimatorComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ImageAnimatorComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ImageAnimatorComposedElement, InspectorComposedElement);
 public:
     explicit ImageAnimatorComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
     ~ImageAnimatorComposedElement() override = default;

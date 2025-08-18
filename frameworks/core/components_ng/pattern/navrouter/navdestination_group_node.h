@@ -34,7 +34,7 @@ class NavigationTransitionProxy;
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
 class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
-    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
+    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase);
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : NavDestinationNodeBase(tag, nodeId, pattern)

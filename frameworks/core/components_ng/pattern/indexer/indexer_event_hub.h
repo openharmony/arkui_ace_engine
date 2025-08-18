@@ -28,7 +28,7 @@ using OnRequestPopupDataEvent = std::function<std::vector<std::string>(int32_t)>
 using OnPopupSelectedEvent = std::function<void(int32_t)>;
 
 class IndexerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(IndexerEventHub, EventHub)
+    DECLARE_ACE_TYPE(IndexerEventHub, EventHub);
 
 public:
     IndexerEventHub() = default;

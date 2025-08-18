@@ -20,7 +20,7 @@
 #include "base/image/pixel_map.h"
 namespace OHOS::Ace {
 class MockImagePacker : public ImagePacker {
-    DECLARE_ACE_TYPE(MockImagePacker, ImagePacker)
+    DECLARE_ACE_TYPE(MockImagePacker, ImagePacker);
 public:
     MOCK_METHOD3(StartPacking, uint32_t(uint8_t*, uint32_t, const PackOption&));
     MOCK_METHOD2(StartPacking, uint32_t(const std::string&, const PackOption&));

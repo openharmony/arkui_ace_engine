@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class DrawingImage : public virtual CanvasImage {
-    DECLARE_ACE_TYPE(DrawingImage, CanvasImage)
+    DECLARE_ACE_TYPE(DrawingImage, CanvasImage);
 public:
     explicit DrawingImage(const std::shared_ptr<RSImage>& image) : image_(image) {}
     DrawingImage() = default;

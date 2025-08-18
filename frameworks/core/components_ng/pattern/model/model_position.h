@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ModelPosition : public virtual AceType {
-    DECLARE_ACE_TYPE(ModelPosition, AceType)
+    DECLARE_ACE_TYPE(ModelPosition, AceType);
 public:
     ModelPosition() = default;
     ~ModelPosition() override = default;

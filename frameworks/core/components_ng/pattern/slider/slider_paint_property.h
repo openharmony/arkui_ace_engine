@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
 class SliderPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SliderPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SliderPaintProperty, PaintProperty);
 public:
     SliderPaintProperty() = default;
     ~SliderPaintProperty() override = default;

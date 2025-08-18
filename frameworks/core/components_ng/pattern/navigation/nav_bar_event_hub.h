@@ -27,7 +27,7 @@ using OnCoordScrollEndAction = std::function<void()>;
 using BeforeCreateLayoutWrapper = std::function<void()>;
 
 class NavBarEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavBarEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavBarEventHub, EventHub);
 public:
     void SetOnCoordScrollStartAction(OnCoordScrollStartAction&& action)
     {

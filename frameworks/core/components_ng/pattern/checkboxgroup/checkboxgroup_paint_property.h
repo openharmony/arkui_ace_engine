@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class CheckBoxGroupPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty);
 
 public:
     CheckBoxGroupPaintProperty() = default;

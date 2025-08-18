@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class RenderSurfaceImpl : public RenderSurface {
-    DECLARE_ACE_TYPE(RenderSurfaceImpl, NG::RenderSurface)
+    DECLARE_ACE_TYPE(RenderSurfaceImpl, NG::RenderSurface);
 public:
     RenderSurfaceImpl() = default;
     ~RenderSurfaceImpl() override;

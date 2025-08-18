@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT DatePickerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(DatePickerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(DatePickerComposedElement, InspectorComposedElement);
 
 public:
     explicit DatePickerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

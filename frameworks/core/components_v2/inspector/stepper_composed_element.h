@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT StepperComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(StepperComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(StepperComposedElement, InspectorComposedElement);
 
 public:
     explicit StepperComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

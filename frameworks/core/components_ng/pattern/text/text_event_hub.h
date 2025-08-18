@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class TextEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TextEventHub, EventHub)
+    DECLARE_ACE_TYPE(TextEventHub, EventHub);
 
 public:
     TextEventHub() = default;

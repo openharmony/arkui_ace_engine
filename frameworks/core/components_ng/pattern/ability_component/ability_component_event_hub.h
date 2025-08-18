@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using ConnectEvent = std::function<void()>;
 using DisConnectEvent = std::function<void()>;
 class AbilityComponentEventHub : public EventHub {
-    DECLARE_ACE_TYPE(AbilityComponentEventHub, EventHub)
+    DECLARE_ACE_TYPE(AbilityComponentEventHub, EventHub);
 
 public:
     AbilityComponentEventHub() = default;

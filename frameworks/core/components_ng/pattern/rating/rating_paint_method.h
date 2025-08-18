@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(RatingPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(RatingPaintMethod, NodePaintMethod);
 public:
     RatingPaintMethod(const WeakPtr<Pattern>& pattern, const RefPtr<RatingModifier>& ratingModifier, int32_t starNum,
         RatingModifier::RatingAnimationType state, bool reverse)

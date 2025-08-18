@@ -64,7 +64,7 @@ struct FocusBoxStyle {
 };
 
 class ACE_EXPORT FocusBox : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusBox, AceType)
+    DECLARE_ACE_TYPE(FocusBox, AceType);
 
 public:
     friend class FocusHub;

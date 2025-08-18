@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT PanelComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(PanelComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(PanelComposedElement, InspectorComposedElement);
 
 public:
     explicit PanelComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

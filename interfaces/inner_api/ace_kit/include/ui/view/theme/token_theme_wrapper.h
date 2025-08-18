@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 class ACE_EXPORT TokenThemeWrapper : virtual public Theme {
-    DECLARE_ACE_TYPE(TokenThemeWrapper, Theme)
+    DECLARE_ACE_TYPE(TokenThemeWrapper, Theme);
 public:
     TokenThemeWrapper() = default;
     virtual ~TokenThemeWrapper() = default;

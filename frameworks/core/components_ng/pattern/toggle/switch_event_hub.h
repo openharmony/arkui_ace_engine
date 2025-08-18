@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const bool)>;
 
 class SwitchEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SwitchEventHub, EventHub)
+    DECLARE_ACE_TYPE(SwitchEventHub, EventHub);
 
 public:
     SwitchEventHub() = default;

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsSwiperFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsSwiperFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsSwiperFunction, JsFunction);
 
 public:
     explicit JsSwiperFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

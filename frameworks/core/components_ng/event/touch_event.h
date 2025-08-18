@@ -35,7 +35,7 @@ struct TouchTestResultInfo {
 class GestureEventHub;
 
 class TouchEventImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(TouchEventImpl, AceType)
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
 public:
     explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
     ~TouchEventImpl() override = default;
@@ -57,7 +57,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
-    DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget)
+    DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget);
 public:
     TouchEventActuator() = default;
     ~TouchEventActuator() override = default;

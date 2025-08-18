@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 // RenderSurface is used for SurfaceNode
 class ACE_FORCE_EXPORT RenderSurface : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::RenderSurface, AceType)
+    DECLARE_ACE_TYPE(NG::RenderSurface, AceType);
 
 public:
     RenderSurface() = default;

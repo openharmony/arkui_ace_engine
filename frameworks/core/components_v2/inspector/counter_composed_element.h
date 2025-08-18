@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT CounterComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(CounterComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(CounterComposedElement, InspectorComposedElement);
 
 public:
     explicit CounterComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class SelectOverlayEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SelectOverlayEventHub, EventHub)
+    DECLARE_ACE_TYPE(SelectOverlayEventHub, EventHub);
 
 public:
     SelectOverlayEventHub() = default;

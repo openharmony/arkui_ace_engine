@@ -45,7 +45,7 @@ class Uri;
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT DataAbilityHelperStandard : public DataAbilityHelper {
-    DECLARE_ACE_TYPE(DataAbilityHelperStandard, DataAbilityHelper)
+    DECLARE_ACE_TYPE(DataAbilityHelperStandard, DataAbilityHelper);
 
 public:
     DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,

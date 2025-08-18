@@ -47,7 +47,7 @@ struct PaintHandleParams {
 };
 
 class SelectOverlayContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier);
 
 public:
     SelectOverlayContentModifier(const WeakPtr<Pattern>& pattern);

@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 class RichEditorParagraph : public TxtParagraph {
-    DECLARE_ACE_TYPE(RichEditorParagraph, TxtParagraph)
+    DECLARE_ACE_TYPE(RichEditorParagraph, TxtParagraph);
 
 public:
     RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)

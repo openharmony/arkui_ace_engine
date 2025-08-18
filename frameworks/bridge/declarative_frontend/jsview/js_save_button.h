@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsSaveButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsSaveButtonClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsSaveButtonClickFunction, JsFunction);
 public:
     explicit JsSaveButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}

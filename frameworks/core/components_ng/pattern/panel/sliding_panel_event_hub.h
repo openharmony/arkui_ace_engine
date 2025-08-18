@@ -31,7 +31,7 @@ using ChangeEvent = std::function<void(const BaseEventInfo*)>;
 using HeightChangeEvent = std::function<void(const float)>;
 
 class SlidingPanelEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SlidingPanelEventHub, EventHub)
+    DECLARE_ACE_TYPE(SlidingPanelEventHub, EventHub);
 
 public:
     SlidingPanelEventHub() = default;

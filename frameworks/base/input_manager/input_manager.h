@@ -41,7 +41,7 @@ enum class KeyboardType : int32_t {
 };
 
 class ACE_EXPORT InputManager : public AceType {
-    DECLARE_ACE_TYPE(InputManager, AceType)
+    DECLARE_ACE_TYPE(InputManager, AceType);
 
 public:
     static bool GetDeviceIds(std::vector<int32_t>& resDeviceIds);

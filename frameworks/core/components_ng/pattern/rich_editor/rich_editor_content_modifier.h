@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class RichEditorContentModifier : public TextContentModifier {
-    DECLARE_ACE_TYPE(RichEditorContentModifier, TextContentModifier)
+    DECLARE_ACE_TYPE(RichEditorContentModifier, TextContentModifier);
 
 public:
     explicit RichEditorContentModifier(const std::optional<TextStyle>& textStyle,

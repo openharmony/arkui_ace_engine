@@ -28,7 +28,7 @@ class InspectorFilter;
 
 // PaintProperty are used to set render properties.
 class PaintProperty : public Property {
-    DECLARE_ACE_TYPE(PaintProperty, Property)
+    DECLARE_ACE_TYPE(PaintProperty, Property);
 
 public:
     PaintProperty() = default;

@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod);
 public:
     DatePickerPaintMethod() = default;
     ~DatePickerPaintMethod() override {}

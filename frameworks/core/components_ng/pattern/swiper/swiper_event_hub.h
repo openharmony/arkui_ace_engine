@@ -42,7 +42,7 @@ using ChangeEventWithPreIndexPtr = std::shared_ptr<ChangeEventWithPreIndex>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
+    DECLARE_ACE_TYPE(SwiperEventHub, EventHub);
 
 public:
     SwiperEventHub() = default;

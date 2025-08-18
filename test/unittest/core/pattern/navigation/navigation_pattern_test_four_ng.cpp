@@ -109,7 +109,7 @@ void NavigationPatternTestFourNg::SetIsPageLevelConfigEnabled(bool value, RefPtr
 }
 
 class MockPageViewportConfig : public PageViewportConfig {
-    DECLARE_ACE_TYPE(MockPageViewportConfig, PageViewportConfig)
+    DECLARE_ACE_TYPE(MockPageViewportConfig, PageViewportConfig);
 public:
     MOCK_METHOD(RefPtr<PageViewportConfig>, Clone, (), (const, override));
 };
