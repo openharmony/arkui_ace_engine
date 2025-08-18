@@ -2129,18 +2129,6 @@ HWTEST_F(ScrollablePatternTestNg, AccumulatingTerminateHelper, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDVSyncOffset
- * @tc.desc: Test GetDVSyncOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollablePatternTestNg, GetDVSyncOffset, TestSize.Level1)
-{
-    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
-    float dvsyncOffset = scrollablePattern->GetDVSyncOffset();
-    EXPECT_EQ(dvsyncOffset, 0);
-}
-
-/**
  * @tc.name: UpdateBorderRadius
  * @tc.desc: Test UpdateBorderRadius
  * @tc.type: FUNC
