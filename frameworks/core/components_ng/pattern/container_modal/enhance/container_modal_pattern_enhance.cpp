@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_manager.h"
-#include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -387,13 +386,15 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     }
 }
 
+void ContainerModalPatternEnhance::AddPointLight() {}
+
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
     MeasureContext textCtx;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    textCtx.textContent = theme->GetWindowScreen(true);
+    textCtx.textContent = theme->GetWindowScreen(false);
 
     textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
     auto textSize = MeasureUtil::MeasureTextSize(textCtx);
