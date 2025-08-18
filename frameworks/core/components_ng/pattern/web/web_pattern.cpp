@@ -38,6 +38,7 @@
 #include "page_node_info.h"
 
 #include "adapter/ohos/capability/html/span_to_html.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
@@ -4343,7 +4344,15 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             WebRequestFocus();
             return;
         }
-        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
+            std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo> stylus_touch_point_info =
+                std::make_shared<NWebStylusTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y,
+                    touchPoint.force, touchPoint.tiltX, touchPoint.tiltY, touchPoint.rollAngle, touchPoint.width,
+                    touchPoint.height, static_cast<OHOS::NWeb::SourceTool>(touchPoint.sourceTool));
+            delegate_->HandleStylusTouchDown(stylus_touch_point_info, fromOverlay);
+        } else {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        }
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
@@ -4380,7 +4389,17 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= webOffset_.GetY();
             DelTouchOverlayInfoByTouchId(touchPoint.id);
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+
+        if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
+            std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo> stylus_touch_point_info =
+                std::make_shared<NWebStylusTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y,
+                    touchPoint.force, touchPoint.tiltX, touchPoint.tiltY, touchPoint.rollAngle, touchPoint.width,
+                    touchPoint.height, static_cast<OHOS::NWeb::SourceTool>(touchPoint.sourceTool));
+            delegate_->HandleStylusTouchUp(stylus_touch_point_info, fromOverlay);
+        } else {
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        }
+
         if (overlayCreating_) {
             if (imageAnalyzerManager_) {
                 imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
@@ -4431,6 +4450,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     });
 
     std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> touch_point_infos;
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>> stylus_touch_point_infos;
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -4441,16 +4461,30 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             ShowMagnifier(touchPoint.x, touchPoint.y);
         }
-        std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
-            std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
-        touch_point_infos.emplace_back(touch_point_info);
+
+        if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
+            std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo> stylus_touch_point_info =
+                std::make_shared<NWebStylusTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y,
+                    touchPoint.force, touchPoint.tiltX, touchPoint.tiltY, touchPoint.rollAngle, touchPoint.width,
+                    touchPoint.height, static_cast<OHOS::NWeb::SourceTool>(touchPoint.sourceTool));
+            stylus_touch_point_infos.emplace_back(stylus_touch_point_info);
+        } else {
+            std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
+                std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
+            touch_point_infos.emplace_back(touch_point_info);
+        }
+
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::MOVE);
         }
     }
 
     if (!overlayCreating_) {
-        delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+        if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
+            delegate_->HandleStylusTouchMove(stylus_touch_point_infos, fromOverlay);
+        } else {
+            delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+        }
     }
 }
 
@@ -4488,6 +4522,13 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
         const Offset& location = point.GetLocalLocation();
         touchInfo.x = static_cast<float>(location.GetX() * viewScale);
         touchInfo.y = static_cast<float>(location.GetY() * viewScale);
+        touchInfo.sourceTool = point.GetSourceTool();
+        touchInfo.force = point.GetForce();
+        touchInfo.tiltX = point.GetTiltX().value_or(0);
+        touchInfo.tiltY = point.GetTiltY().value_or(0);
+        touchInfo.rollAngle = point.GetRollAngle().value_or(0);
+        touchInfo.width = point.GetWidth();
+        touchInfo.height = point.GetHeight();
         touchInfos.emplace_back(touchInfo);
     }
     return true;

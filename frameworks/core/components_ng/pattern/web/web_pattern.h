@@ -1116,6 +1116,13 @@ private:
         float x = -1.0f;
         float y = -1.0f;
         int32_t id = -1;
+        float force = 0.0f;
+        float tiltX = 0.0f;
+        float tiltY = 0.0f;
+        float rollAngle = 0.0f;
+        int32_t width = 0;
+        int32_t height = 0;
+        SourceTool sourceTool = SourceTool::UNKNOWN;
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
