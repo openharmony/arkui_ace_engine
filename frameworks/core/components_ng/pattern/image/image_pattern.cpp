@@ -954,6 +954,7 @@ void ImagePattern::LoadImageDataIfNeed()
                 ContainerScope scope(pattern->GetHostInstanceId());
                 pattern->CreateAnalyzerOverlay();
                 auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             },
             "ArkUIImageUpdateAnalyzerUIConfig");
