@@ -1101,10 +1101,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->backgroundStyle = backgroundStyle;
     }
     sameSpan->urlAddress = urlAddress;
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->onClick = onClick;
-    sameSpan->onLongPress = onLongPress;
-    sameSpan->onTouch = onTouch;
+    CopySpanItemEvents(sameSpan);
     return sameSpan;
 }
 
@@ -1130,6 +1127,14 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
     COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
+}
+
+void SpanItem::CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const
+{
+    spanItem->urlOnRelease = urlOnRelease;
+    spanItem->onClick = onClick;
+    spanItem->onLongPress = onLongPress;
+    spanItem->onTouch = onTouch;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
