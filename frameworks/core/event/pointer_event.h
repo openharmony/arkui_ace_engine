@@ -75,8 +75,8 @@ struct DragPointerEvent final : public PointerEvent {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
-    std::vector<KeyCode> pressedKeyCodes;
     PointerAction action = PointerAction::UNKNOWN;
+    std::vector<KeyCode> pressedKeyCodes;
     std::vector<DragPointerEvent> history;
     int32_t displayId = 0;
     int32_t sourceType = 0;

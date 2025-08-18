@@ -592,9 +592,6 @@ struct KeyEvent final : public NonPointerEvent {
     uint32_t unicode = 0;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
-    std::string msg = "";
-    std::optional<bool> activeMark;
-    int32_t targetDisplayId = 0;
 
     std::string ToString() const
     {
@@ -608,6 +605,9 @@ struct KeyEvent final : public NonPointerEvent {
         ss << "isPreIme = " << isPreIme;
         return ss.str();
     }
+    std::string msg = "";
+    std::optional<bool> activeMark;
+    int32_t targetDisplayId = 0;
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
@@ -624,8 +624,8 @@ public:
         metaKey_ = event.metaKey;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
-        keyMsg_ = event.msg;
         SetPressedKeyCodes(event.pressedCodes);
+        keyMsg_ = event.msg;
         unicode_ = event.unicode;
         numLock_ = event.numLock;
         capsLock_ = event.enableCapsLock;

@@ -131,7 +131,6 @@ private:
         fingerDeadlineTimer_.Cancel();
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
-        useCatchMode_ = true;
         responseRegionBuffer_.clear();
         localMatrix_.clear();
     }
@@ -161,20 +160,23 @@ private:
 
     // number of tap action.
     int32_t tappedCount_ = 0;
+
     // Check whether the touch point num has reached the configured value
     bool equalsToFingers_ = false;
     // the time when gesture recognition is successful
     TimeStamp time_;
     Offset focusPoint_;
     TimeStamp touchDownTime_;
-    int32_t currentTouchPointsNum_ = 0;
-    bool useCatchMode_ = true;
-    std::vector<RectF> responseRegionBuffer_;
 
     ClickCallback onClick_;
     ClickCallback remoteMessage_;
+    bool useCatchMode_ = true;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
+    std::vector<RectF> responseRegionBuffer_;
+
+    int32_t currentTouchPointsNum_ = 0;
+
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 

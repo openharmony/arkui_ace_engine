@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
+ #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_report.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
-
-#include "base/perfmonitor/perf_monitor.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -364,7 +365,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
-
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&

@@ -24,7 +24,7 @@ class InputEventHub;
 class FrameNode;
 
 class InputEvent : public virtual AceType {
-    DECLARE_ACE_TYPE(InputEvent, AceType)
+    DECLARE_ACE_TYPE(InputEvent, AceType);
 public:
     explicit InputEvent(OnMouseEventFunc&& callback) : onMouseCallback_(std::move(callback)) {}
 
@@ -33,7 +33,7 @@ public:
     explicit InputEvent(OnHoverFunc&& callback) : onHoverEventCallback_(std::move(callback)) {}
 
     explicit InputEvent(OnHoverMoveFunc&& callback) : onHoverMoveCallback_(std::move(callback)) {}
-    
+
     explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
 
     explicit InputEvent(OnAccessibilityHoverFunc&& callback) : onAccessibilityHoverFunc_(std::move(callback)) {}
@@ -142,7 +142,7 @@ private:
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
-    DECLARE_ACE_TYPE(InputEventActuator, AceType)
+    DECLARE_ACE_TYPE(InputEventActuator, AceType);
 public:
     explicit InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub);
     ~InputEventActuator() override = default;

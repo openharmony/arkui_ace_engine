@@ -270,7 +270,6 @@ struct MouseEvent final : public PointerEvent {
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         event.passThrough = passThrough;
-        // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             event.postEventNodeId = postEventNodeId;
         }

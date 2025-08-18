@@ -1422,8 +1422,6 @@ HWTEST_F(NativeGestureTest, GestureImplTest0041, TestSize.Level1)
     event3.gestureAsyncEvent.rawPointerEvent = nullptr;
     event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
     OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
-    event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY);
-    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
 
     ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
     recognizer->attachNode = nullptr;

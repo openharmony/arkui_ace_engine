@@ -66,9 +66,8 @@ void RotationRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
-        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+        GetAttachedNode(), false, isPostEventResult_ || touchPoint.passThrough, touchPoint.postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
 }

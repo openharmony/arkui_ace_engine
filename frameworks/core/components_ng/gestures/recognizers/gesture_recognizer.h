@@ -53,7 +53,7 @@ inline std::string TransRefereeState(RefereeState state)
 class FrameNode;
 
 class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
+    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget);
 
 public:
     // IsRealTime is true when using real-time layouts.
@@ -291,8 +291,37 @@ public:
     void AddGestureProcedure(const std::string& procedure) const;
     // for recognizer group
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
-
     void AddGestureProcedure(const AxisEvent& event, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
+    bool IsSystemGesture() const
+    {
+        if (!gestureInfo_) {
+            return false;
+        }
+        return gestureInfo_->IsSystemGesture();
+    }
+
+    GestureTypeName GetRecognizerType() const
+    {
+        if (!gestureInfo_) {
+            return GestureTypeName::UNKNOWN;
+        }
+        return gestureInfo_->GetRecognizerType();
+    }
+
+    void SetRecognizerType(GestureTypeName trueType)
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        gestureInfo_->SetRecognizerType(trueType);
+    }
+
+    virtual void ForceCleanRecognizer() {};
+
+    virtual void ForceCleanRecognizerWithGroup() {
+        ForceCleanRecognizer();
+    };
 
     void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
     {
@@ -326,34 +355,6 @@ public:
         }
     }
 
-    bool IsSystemGesture() const
-    {
-        if (!gestureInfo_) {
-            return false;
-        }
-        return gestureInfo_->IsSystemGesture();
-    }
-
-    GestureTypeName GetRecognizerType() const
-    {
-        if (!gestureInfo_) {
-            return GestureTypeName::UNKNOWN;
-        }
-        return gestureInfo_->GetRecognizerType();
-    }
-
-    void SetRecognizerType(GestureTypeName trueType)
-    {
-        if (!gestureInfo_) {
-            gestureInfo_ = MakeRefPtr<GestureInfo>();
-        }
-        gestureInfo_->SetRecognizerType(trueType);
-    }
-
-    virtual void ForceCleanRecognizer() {};
-    virtual void ForceCleanRecognizerWithGroup() {
-        ForceCleanRecognizer();
-    };
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(const TouchEvent& event);
@@ -368,6 +369,11 @@ public:
         if (gestureInfo_) {
             gestureInfo_->SetUserData(userData);
         }
+    }
+
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
     }
 
     void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
@@ -421,13 +427,8 @@ public:
 
     bool IsInResponseLinkRecognizers();
 
-    virtual bool IsReady()
-    {
-        return refereeState_ == RefereeState::READY;
-    }
-
     bool IsAllowedType(SourceTool type);
-    
+
     std::string GetExtraInfo() const
     {
         return extraInfo_;

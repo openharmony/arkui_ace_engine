@@ -53,9 +53,9 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
-    int32_t operatingHand = 0;
     int32_t width;
     int32_t height;
+    int32_t operatingHand = 0;
 
     void CovertId();
     int32_t GetOriginalReCovertId() const;
@@ -404,18 +404,18 @@ private:
     };
 
 protected:
-    Offset coordinateOffset_;
-    GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
-    Offset subPipelineGlobalOffset_;
-    float viewScale_ = 1.0f;
-    std::string nodeName_ = "NULL";
-    int32_t nodeId_ = -1;
     WeakPtr<NG::FrameNode> node_ = nullptr;
-    Axis direction_ = Axis::NONE;
+    Offset coordinateOffset_;
+    Offset subPipelineGlobalOffset_;
+    GetEventTargetImpl getEventTargetImpl_;
+    std::string nodeName_ = "NULL";
     RefPtr<NG::TargetComponent> targetComponent_;
-    bool isPostEventResult_ = false;
     std::optional<TimeStamp> firstInputTime_;
+    float viewScale_ = 1.0f;
+    int32_t nodeId_ = -1;
+    Axis direction_ = Axis::NONE;
+    bool isPostEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
@@ -467,7 +467,7 @@ private:
 };
 
 class ACE_EXPORT GestureEventResult : public AceType {
-    DECLARE_ACE_TYPE(GestureEventResult, AceType)
+    DECLARE_ACE_TYPE(GestureEventResult, AceType);
 
 public:
     GestureEventResult() = default;

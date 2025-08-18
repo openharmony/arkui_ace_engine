@@ -363,52 +363,6 @@ void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
     onAreaChangedInnerCallbacks_.erase(id);
 }
 
-void EventHub::ClearCustomerOnDragFunc()
-{
-    onDragStart_ = nullptr;
-    customerOnDragEnter_ = nullptr;
-    customerOnDragSpringLoading_ = nullptr;
-    customerOnDragLeave_ = nullptr;
-    customerOnDragMove_ = nullptr;
-    customerOnDrop_ = nullptr;
-    customerOnDragEnd_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragStart()
-{
-    onDragStart_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragEnter()
-{
-    customerOnDragEnter_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragSpringLoading()
-{
-    customerOnDragSpringLoading_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragMove()
-{
-    customerOnDragMove_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragLeave()
-{
-    customerOnDragLeave_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDrop()
-{
-    customerOnDrop_ = nullptr;
-}
-
-void EventHub::ClearCustomerOnDragEnd()
-{
-    customerOnDragEnd_ = nullptr;
-}
-
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);
@@ -460,6 +414,52 @@ bool EventHub::HasImmediatelyVisibleCallback()
 void EventHub::ClearOnAreaChangedInnerCallbacks()
 {
     onAreaChangedInnerCallbacks_.clear();
+}
+
+void EventHub::ClearCustomerOnDragFunc()
+{
+    onDragStart_ = nullptr;
+    customerOnDragEnter_ = nullptr;
+    customerOnDragSpringLoading_ = nullptr;
+    customerOnDragLeave_ = nullptr;
+    customerOnDragMove_ = nullptr;
+    customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragSpringLoading()
+{
+    customerOnDragSpringLoading_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
+    customerOnDragEnd_ = nullptr;
 }
 
 void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)
@@ -1142,35 +1142,37 @@ void EventHub::FireUntriggeredInnerOnAreaChanged(
 
 void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
 {
-    if (ndkDrawCompletedCallback_) {
-        if (!pipeline) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
-            return;
-        }
-        auto executor = pipeline->GetTaskExecutor();
-        if (!executor) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
-            return;
-        }
-        auto cb = ndkDrawCompletedCallback_;
-        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    if (!ndkDrawCompletedCallback_) {
+        return;
     }
+    if (pipeline == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
+        return;
+    }
+    auto executor = pipeline->GetTaskExecutor();
+    if (executor == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
+        return;
+    }
+    auto cb = ndkDrawCompletedCallback_;
+    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
 }
 
-void EventHub::FireLayoutNDKCallback(PipelineContext* pipeline)
+void EventHub::FireLayoutNDKCallback(const PipelineContext* pipeline)
 {
-    if (ndkLayoutCallback_) {
-        if (!pipeline) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
-            return;
-        }
-        auto executor = pipeline->GetTaskExecutor();
-        if (!executor) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
-            return;
-        }
-        auto cb = ndkLayoutCallback_;
-        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    if (!ndkLayoutCallback_) {
+        return;
     }
+    if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
+        return;
+    }
+    auto executor = pipeline->GetTaskExecutor();
+    if (!executor) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
+        return;
+    }
+    auto cb = ndkLayoutCallback_;
+    executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
 }
 } // namespace OHOS::Ace::NG

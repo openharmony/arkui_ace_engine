@@ -21,7 +21,6 @@
 #include "core/components_ng/manager/event/json_report.h"
 
 #include "base/ressched/ressched_report.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 

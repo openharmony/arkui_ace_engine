@@ -36,7 +36,9 @@ constexpr float DEFAULT_SIZE_18 = 18.0f;
 constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+
 constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
+constexpr int EXPECTED_UPDATE_INTERVAL_MIN_VALUE = 100;
 constexpr float DEFAULT_VISIBLE_RATIO_MIN = 0.0f;
 constexpr float DEFAULT_VISIBLE_RATIO_MAX = 1.0f;
 
@@ -148,10 +150,10 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
     if (!event || !info || !event->event) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    info->optionsX = event->event->numberData[0].f32;
-    info->optionsLineTop = event->event->numberData[1].f32;
-    info->optionsLineBottom = event->event->numberData[2].f32;
-    info->optionsBaseLine = event->event->numberData[3].f32;
+    info->optionsX = event->event->numberData[0].f32; // 0: x offset
+    info->optionsLineTop = event->event->numberData[1].f32; // 1: LineTop value
+    info->optionsLineBottom = event->event->numberData[2].f32; // 2: LineBottom value
+    info->optionsBaseLine = event->event->numberData[3].f32; // 3: BaseLine value
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1126,7 +1128,7 @@ const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
 {
     ArkUI_VisibleAreaEventOptions* options = new ArkUI_VisibleAreaEventOptions;
-    options->expectedUpdateInterval = 1000;
+    options->expectedUpdateInterval = EXPECTED_UPDATE_INTERVAL_VALUE;
     return options;
 }
 
@@ -1160,6 +1162,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
     }
     if (value < 0) {
         value = EXPECTED_UPDATE_INTERVAL_VALUE;
+    }
+    if (value > 0 && valuew < EXPECTED_UPDATE_INTERVAL_MIN_VALUE) {
+        value = EXPECTED_UPDATE_INTERVAL_MIN_VALUE;
     }
     option->expectedUpdateInterval = value;
     return ARKUI_ERROR_CODE_NO_ERROR;

@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsGestureFunction : public JsCommonGestureFunction {
-    DECLARE_ACE_TYPE(JsGestureFunction, JsCommonGestureFunction)
+    DECLARE_ACE_TYPE(JsGestureFunction, JsCommonGestureFunction);
 
 public:
     explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)
@@ -36,7 +36,7 @@ private:
     JSRef<JSObject> CreateGestureEvent(const GestureEvent& info);
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
     JSRef<JSArray> CreateFingerListArray(const GestureEvent& info);
-    JSRef<JSArray> CreateFingerInfosArray(const GestureEvent& info);    
+    JSRef<JSArray> CreateFingerInfosArray(const GestureEvent& info);
 };
 
 } // namespace OHOS::Ace::Framework

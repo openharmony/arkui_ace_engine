@@ -345,13 +345,12 @@ bool GestureEventHub::CheckLastInnerRecognizerCollected(GesturePriority priority
         }
         return !IsSystemRecognizerCollected(externalParallelRecognizer_[gestureGroupIndex]) &&
                IsDifferentFrameNodeCollected(externalParallelRecognizer_[gestureGroupIndex], host);
-    } else {
-        if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
-            return false;
-        }
-        return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
-               IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
     }
+    if (static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= gestureGroupIndex) {
+        return false;
+    }
+    return !IsSystemRecognizerCollected(externalExclusiveRecognizer_[gestureGroupIndex]) &&
+            IsDifferentFrameNodeCollected(externalExclusiveRecognizer_[gestureGroupIndex], host);
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -388,7 +387,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         } else {
             responseLinkResult.emplace_back(recognizer);
         }
-
+        recognizer->SetNodeId(host->GetId());
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetCoordinateOffset(offset);
@@ -406,11 +405,13 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto parentRecognizer = recognizer->GetGestureGroup().Upgrade();
         if (priority == GesturePriority::Parallel) {
             checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
+                !IsDifferentFrameNodeCollected(current, host) &&
                 CheckLastInnerRecognizerCollected(priority, parallelIndex);
             ProcessParallelPriorityGesture(
                 offset, touchId, targetComponent, host, current, recognizers, parallelIndex, checkCurrentRecognizer);
         } else {
             checkCurrentRecognizer = overMinRecognizerGroupLoopSize && (recognizer == userRecognizers.front()) &&
+                !IsDifferentFrameNodeCollected(current, host) &&
                 CheckLastInnerRecognizerCollected(priority, exclusiveIndex);
             ProcessExternalExclusiveRecognizer(offset, touchId, targetComponent,
                 host, priority, current, recognizers, exclusiveIndex, checkCurrentRecognizer);
@@ -1037,6 +1038,22 @@ bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
            frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 
+void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+{
+    if (!touchEventActuator_) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+    }
+    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+}
+
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     responseRegion_ = responseRegion;
@@ -1062,22 +1079,6 @@ void GestureEventHub::RemoveLastResponseRect()
     if (responseRegionFunc_) {
         responseRegionFunc_(responseRegion_);
     }
-}
-
-void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
-{
-    if (!touchEventActuator_) {
-        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-    }
-    touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
-}
-
-void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
-{
-    if (!touchEventActuator_) {
-        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
-    }
-    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
 
 void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)

@@ -547,7 +547,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         patternName = frameNode->GetTag();
     }
     info.SetPatternName(patternName.c_str());
-    
+
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
