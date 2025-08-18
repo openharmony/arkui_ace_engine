@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { Driver, ON, Component } from '@kit.TestKit';
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   buttonClick,
   JsonType,
