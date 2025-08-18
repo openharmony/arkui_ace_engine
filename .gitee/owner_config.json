@@ -191,6 +191,10 @@
             "https://gitee.com/forantar",
             "https://gitee.com/huaweimaxuchu",
             "https://gitee.com/fironov-igor"
+        ],
+        "https://gitee.com/window_scene": [
+            "https://gitee.com/shenshensun",
+            "https://gitee.com/GODSLEEPER"
         ]
     },
     "userInfos": {
@@ -690,6 +694,14 @@
         "https://gitee.com/maoruihao": {
             "info": "[逻辑组件 maoruihao]",
             "group": "https://gitee.com/arkuieco3"
+        },
+        "https://gitee.com/shenshensun": {
+            "info": "[窗口管理 sunshenshen]",
+            "group": "https://gitee.com/window_scene"
+        },
+        "https://gitee.com/GODSLEEPER": {
+            "info": "[窗口组件 laiganlu]",
+            "group": "https://gitee.com/window_scene"
         }
     }
 }
