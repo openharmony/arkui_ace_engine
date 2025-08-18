@@ -247,6 +247,9 @@ export class CommonMethodModifier implements CommonMethod {
   _key_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _key_value?: string | undefined
 
+  _id_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+  _id_value?: string | undefined
+
   _customProperty_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _customPropertyMap?: Map<string, CustomProperty>
 
@@ -854,6 +857,15 @@ export class CommonMethodModifier implements CommonMethod {
       this._key_flag = AttributeUpdaterFlag.UPDATE
     } else {
       this._key_flag = AttributeUpdaterFlag.SKIP
+    }
+    return this
+  }
+  public id(value: string | undefined): this {
+    if (this._id_flag === AttributeUpdaterFlag.INITIAL || this._id_value !== value || !Type.of(value).isPrimitive()) {
+      this._id_value = value
+      this._id_flag = AttributeUpdaterFlag.UPDATE
+    } else {
+      this._id_flag = AttributeUpdaterFlag.SKIP
     }
     return this
   }
@@ -2002,6 +2014,23 @@ export class CommonMethodModifier implements CommonMethod {
          }
        }
      }
+     if (this._id_flag !== AttributeUpdaterFlag.INITIAL) {
+       switch (this._id_flag) {
+         case AttributeUpdaterFlag.UPDATE: {
+           peerNode.idAttribute(this._id_value as (string | undefined))
+           this._id_flag = AttributeUpdaterFlag.RESET
+           break
+         }
+         case AttributeUpdaterFlag.SKIP: {
+           this._id_flag = AttributeUpdaterFlag.RESET
+           break
+         }
+         default: {
+           this._id_flag = AttributeUpdaterFlag.INITIAL
+           peerNode.idAttribute(undefined)
+         }
+       }
+     }
      if (this._customProperty_flag !== AttributeUpdaterFlag.INITIAL) {
        switch (this._customProperty_flag) {
          case AttributeUpdaterFlag.UPDATE: {
@@ -2816,6 +2845,18 @@ export class CommonMethodModifier implements CommonMethod {
          }
          default: {
            this.key(undefined)
+         }
+       }
+     }
+     if (value._id_flag !== AttributeUpdaterFlag.INITIAL) {
+       switch (value._id_flag) {
+         case AttributeUpdaterFlag.UPDATE:
+         case AttributeUpdaterFlag.SKIP: {
+           this.id(value._id_value)
+           break
+         }
+         default: {
+           this.id(undefined)
          }
        }
      }
