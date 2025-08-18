@@ -58,7 +58,6 @@ enum class FontWeight {
     MEDIUM,
     REGULAR,
 };
-
 namespace {
 const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W100,
@@ -77,7 +76,6 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,       // FontWeight::MEDIUM
     FontWeight::W400,       // FontWeight::REGULAR
 };
-
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
     int index = static_cast<int>(fontWeight);
@@ -402,6 +400,7 @@ struct TextBackgroundStyle {
 
     std::unordered_map<std::string, ResourceUpdater> textBackgroundStyleResMap_;
 };
+
 enum class TextStyleAttribute {
     RE_CREATE = -1,
     FONT_SIZE = 0,

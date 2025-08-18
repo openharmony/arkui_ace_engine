@@ -168,6 +168,7 @@ public:
     {
         return dragBackgroundColor_;
     }
+
     const Color& GetUrlDisabledColor() const
     {
         return urlDisabledColor_;
@@ -187,7 +188,7 @@ public:
     {
         return urlPressColor_;
     }
-	
+
     MarqueeStartPolicy GetMarqueeStartPolicy() const
     {
         return marqueeStartPolicy_;

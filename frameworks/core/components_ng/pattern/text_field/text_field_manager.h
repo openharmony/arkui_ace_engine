@@ -148,11 +148,6 @@ public:
         prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
     }
 
-    bool HasKeyboard() const override
-    {
-        return imeShow_ || uiExtensionImeShow_;
-    }
-
     void AvoidKeyBoardInNavigation();
 
     void SetNavContentAvoidKeyboardOffset(const RefPtr<FrameNode>& navNode, float avoidKeyboardOffset);
