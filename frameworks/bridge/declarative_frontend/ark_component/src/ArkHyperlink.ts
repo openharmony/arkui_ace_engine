@@ -30,9 +30,6 @@ class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
 }
 
 class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('hyperlinkColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -275,7 +275,7 @@ void HtmlToSpan::InitFont(
         font->strokeColor = ToSpanColor(value);
     } else if (key == "font-superscript") {
         font->superscript = StringToSuperscriptStyle(value);
-    } 
+    }
 }
 
 bool HtmlToSpan::IsFontAttr(const std::string& key)
@@ -403,7 +403,7 @@ void HtmlToSpan::InitDecoration(
         decoration->decorationSytle = StringToTextDecorationStyle(value);
     } else if (key == "text-decoration-color") {
         decoration->color = ToSpanColor(value);
-    } else if (key == "text-decoration-thickness") { // not support
+    } else if (key == "text-decoration-thickness") { // not supported: html has unit while lineThicknessScale is float
     } else if (key == "text-decoration") {
         std::istringstream ss1(value);
         std::string word;
@@ -968,16 +968,16 @@ void HtmlToSpan::AddStyleSpan(const std::string& element, SpanInfo& info)
     std::map<std::string, StyleValue> styles;
     if (element == "strong" || element == "b") {
         InitFont("font-weight", "bold", "font", styles);
+    } else if (element == "sup") {
+        InitFont("font-superscript", "superscript", "font", styles);
+    } else if (element == "sub") {
+        InitFont("font-superscript", "subscript", "font", styles);
     } else if (element == "del" || element == "s") {
         InitDecoration("text-decoration-line", "line-through", "decoration", styles);
     } else if (element == "u") {
         InitDecoration("text-decoration-line", "underline", "decoration", styles);
     } else if (element == "i" || element == "em") {
         InitFont("font-style", "italic", "font", styles);
-    } else if (element == "sup") {
-        InitFont("font-superscript", "superscript", "font", styles);
-    } else if (element == "sub") {
-        InitFont("font-superscript", "subscript", "font", styles);
     }
 
     for (auto [key, value] : styles) {
