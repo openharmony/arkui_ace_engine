@@ -742,7 +742,7 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         ACE_SCOPED_TRACE("drag: handling for custom builder");
-        TAG_LOGI(AceLogTag::ACE_DRAG,"CustomNode exist, get thumbnail.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         StartDragForCustomBuilder(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }

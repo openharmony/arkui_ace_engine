@@ -116,7 +116,7 @@ public:
     {
         distanceThreshold_ = Dimension(
             Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-        if (distanceThreshold.ConvertToPx() <= 0) {
+        if (distanceThreshold_.ConvertToPx() <= 0) {
             distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
         }
     }

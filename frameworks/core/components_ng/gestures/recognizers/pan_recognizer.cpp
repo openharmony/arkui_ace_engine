@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 

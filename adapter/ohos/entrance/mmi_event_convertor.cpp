@@ -647,7 +647,6 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
     touchPoint.height = 0;
     touchPoint.size = 0.0;
     touchPoint.operatingHand = 0;
-
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) {
         axisFakePntEvt.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
