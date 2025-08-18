@@ -562,6 +562,8 @@ public:
 
     static bool GetTransformEnabled();
 
+    static bool GetCompatibleInputTransEnabled();
+
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
     static ScreenShape GetScreenShape()
@@ -870,6 +872,7 @@ private:
     static bool debugEnabled_;
     static std::string configDeviceType_;
     static bool transformEnabled_;
+    static bool compatibleInputTransEnabled_;
     static float scrollCoefficients_;
     static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;

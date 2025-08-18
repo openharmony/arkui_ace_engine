@@ -77,6 +77,7 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_manager.cpp",
       "image_analyzer_mgr.cpp",
       "image_perf_ohos.cpp",
+      "input_compatible_manager.cpp",
       "input_method_manager_ohos.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",

@@ -266,6 +266,11 @@ bool IsMouseTransformEnable()
     return (system::GetParameter("persist.ace.event.transform.enable", "1") == "1");
 }
 
+bool IsCompatibleInputTransEnabled()
+{
+    return (system::GetParameter("persist.ace.event.compatible.enable", "0") == "1");
+}
+
 float ReadScrollCoefficients()
 {
     auto ret = system::GetParameter("persist.ace.scroll.coefficeient", "2.0");
@@ -703,6 +708,7 @@ ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationE
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 std::string SystemProperties::configDeviceType_ = "";
 ACE_WEAK_SYM bool SystemProperties::transformEnabled_ = IsMouseTransformEnable();
+ACE_WEAK_SYM bool SystemProperties::compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
 float SystemProperties::scrollCoefficients_ = ReadScrollCoefficients();
 ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
 ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
@@ -882,6 +888,7 @@ void SystemProperties::InitDeviceInfo(
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
     transformEnabled_ = IsMouseTransformEnable();
+    compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
     debugFlags_ = GetDebugFlags();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     multiInstanceEnabled_ = IsMultiInstanceEnabled();
@@ -1360,6 +1367,11 @@ ACE_WEAK_SYM float SystemProperties::GetScrollCoefficients()
 ACE_WEAK_SYM bool SystemProperties::GetTransformEnabled()
 {
     return transformEnabled_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetCompatibleInputTransEnabled()
+{
+    return compatibleInputTransEnabled_;
 }
 
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()

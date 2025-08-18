@@ -27,6 +27,7 @@ ace_unittest("window_scene_test") {
     "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_rosen_render_context.cpp",
 
     # self
+    "$ace_root/adapter/ohos/osal/input_compatible_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/window_scene_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/input_scene.cpp",

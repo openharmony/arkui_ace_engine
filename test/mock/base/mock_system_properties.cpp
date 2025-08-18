@@ -22,6 +22,8 @@
 namespace OHOS::Ace {
 namespace MockSystemProperties {
 bool g_isSuperFoldDisplayDevice = false;
+bool g_isCompatibleInputTransEnabled = false;
+bool g_isTransformEnabled = false;
 }
 namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
@@ -388,5 +390,20 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 std::string SystemProperties::GetMapSearchPrefix()
 {
     return "";
+}
+
+bool SystemProperties::GetCompatibleInputTransEnabled()
+{
+    return MockSystemProperties::g_isTransformEnabled;
+}
+
+float SystemProperties::GetScrollCoefficients()
+{
+    return 3.0f;
+}
+
+bool SystemProperties::GetTransformEnabled()
+{
+    return MockSystemProperties::g_isCompatibleInputTransEnabled;
 }
 } // namespace OHOS::Ace

@@ -18,6 +18,8 @@
 namespace OHOS::Ace {
 namespace MockSystemProperties {
 extern bool g_isSuperFoldDisplayDevice;
+extern bool g_isCompatibleInputTransEnabled;
+extern bool g_isTransformEnabled;
 }
 // unit test globals
 extern bool g_segmentedWaterflow;
