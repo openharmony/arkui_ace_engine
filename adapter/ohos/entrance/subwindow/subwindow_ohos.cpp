@@ -359,7 +359,14 @@ void SubwindowOhos::InitContainer()
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
         OHOS::Rosen::WMError ret;
-        window_ = OHOS::Rosen::Window::Create(windowName, windowOption, parentWindow->GetContext(), ret);
+        std::shared_ptr<OHOS::Rosen::RSUIContext> rsUIContext;
+        if (parentWindow_) {
+            auto parentUIDirector = parentWindow_->GetRSUIDirector();
+            if (parentUIDirector) {
+                rsUIContext = parentUIDirector->GetRSUIContext();
+            }
+        }
+        window_ = OHOS::Rosen::Window::Create(windowName, windowOption, parentWindow->GetContext(), ret, rsUIContext);
         if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
             SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);

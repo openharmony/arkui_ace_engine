@@ -4008,5 +4008,25 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     result = topNavNode->CallAIFunction("Success", "");
     EXPECT_EQ(result, AI_CALLER_INVALID);
 }
+
+/**
+ * @tc.name: OnDumpInfo001
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo.
+     * @tc.expected: Test that the member window_ is empty.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+}
 } // namespace NG
 } // namespace OHOS::Ace
