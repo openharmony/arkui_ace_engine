@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::Framework {
 class JSFontSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSFontSpan, AceType)
+    DECLARE_ACE_TYPE(JSFontSpan, AceType);
 
 public:
     JSFontSpan() = default;
@@ -45,9 +45,9 @@ public:
     static void ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
     static void GetStrokeColorFallback(const JSRef<JSObject>& obj,
         const RefPtr<TextTheme>& theme, Color& color);
-    static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
     void GetFontFamily(const JSCallbackInfo& info);
@@ -74,7 +74,7 @@ private:
 };
 
 class JSParagraphStyleSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSParagraphStyleSpan, AceType)
+    DECLARE_ACE_TYPE(JSParagraphStyleSpan, AceType);
 
 public:
     JSParagraphStyleSpan() = default;
@@ -121,7 +121,7 @@ private:
 };
 
 class JSDecorationSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSDecorationSpan, AceType)
+    DECLARE_ACE_TYPE(JSDecorationSpan, AceType);
 
 public:
     JSDecorationSpan() = default;
@@ -151,7 +151,7 @@ private:
 };
 
 class JSBaselineOffsetSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSBaselineOffsetSpan, AceType)
+    DECLARE_ACE_TYPE(JSBaselineOffsetSpan, AceType);
 
 public:
     JSBaselineOffsetSpan() = default;
@@ -172,7 +172,7 @@ private:
 };
 
 class JSLetterSpacingSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSLetterSpacingSpan, AceType)
+    DECLARE_ACE_TYPE(JSLetterSpacingSpan, AceType);
 
 public:
     JSLetterSpacingSpan() = default;
@@ -193,7 +193,7 @@ private:
 };
 
 class JSGestureSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSGestureSpan, AceType)
+    DECLARE_ACE_TYPE(JSGestureSpan, AceType);
 
 public:
     JSGestureSpan() = default;
@@ -212,7 +212,7 @@ private:
 };
 
 class JSTextShadowSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSTextShadowSpan, AceType)
+    DECLARE_ACE_TYPE(JSTextShadowSpan, AceType);
 
 public:
     JSTextShadowSpan() = default;
@@ -232,7 +232,7 @@ private:
     RefPtr<TextShadowSpan> textShadowSpan_;
 };
 class JSBackgroundColorSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSBackgroundColorSpan, AceType)
+    DECLARE_ACE_TYPE(JSBackgroundColorSpan, AceType);
 
 public:
     JSBackgroundColorSpan() = default;
@@ -252,7 +252,7 @@ private:
     RefPtr<BackgroundColorSpan> backgroundColorSpan_;
 };
 class JSLineHeightSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSLineHeightSpan, AceType)
+    DECLARE_ACE_TYPE(JSLineHeightSpan, AceType);
 
 public:
     JSLineHeightSpan() = default;
@@ -273,7 +273,7 @@ private:
 };
 
 class JSImageAttachment : public virtual AceType {
-    DECLARE_ACE_TYPE(JSImageAttachment, AceType)
+    DECLARE_ACE_TYPE(JSImageAttachment, AceType);
 
 public:
     JSImageAttachment() = default;
@@ -313,7 +313,7 @@ private:
 };
 
 class JSNativeCustomSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSNativeCustomSpan, AceType)
+    DECLARE_ACE_TYPE(JSNativeCustomSpan, AceType);
 
 public:
     JSNativeCustomSpan() = default;
@@ -330,7 +330,7 @@ private:
 };
 
 class JSCustomSpan : public CustomSpan {
-    DECLARE_ACE_TYPE(JSCustomSpan, CustomSpan)
+    DECLARE_ACE_TYPE(JSCustomSpan, CustomSpan);
 
 public:
     JSCustomSpan() = default;
@@ -357,7 +357,7 @@ private:
 };
 
 class JSExtSpan : public ExtSpan {
-    DECLARE_ACE_TYPE(JSExtSpan, ExtSpan)
+    DECLARE_ACE_TYPE(JSExtSpan, ExtSpan);
 
 public:
     JSExtSpan() = default;
@@ -376,7 +376,7 @@ private:
 };
 
 class JSUrlSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSUrlSpan, AceType)
+    DECLARE_ACE_TYPE(JSUrlSpan, AceType);
 
 public:
     JSUrlSpan() = default;
