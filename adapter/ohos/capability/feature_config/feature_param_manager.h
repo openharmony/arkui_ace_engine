@@ -30,7 +30,7 @@ class FeatureParamManager final : public Singleton<FeatureParamManager> {
 public:
     void Init(const std::string& bundleName);
 
-    // SyncloadParser
+    // SyncLoadParser
     void SetSyncLoadEnableParam(bool enabled, uint32_t deadline);
     bool IsSyncLoadEnabled() const;
     uint32_t GetSyncloadResponseDeadline() const;
@@ -46,14 +46,14 @@ private:
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
     std::shared_ptr<ConfigXMLParserBase> featureParser_;
-    // SyncloadParser
+    // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
     // UINodeGcParamParser
     bool uiNodeGcEnabled_ = false;
 
     friend class ConfigXMLParserBase;
-    friend class SyncloadParser;
+    friend class SyncLoadParser;
 };
 } // namespace OHOS::Ace
 

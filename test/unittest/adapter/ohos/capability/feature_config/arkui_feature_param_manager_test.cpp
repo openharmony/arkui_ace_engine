@@ -30,6 +30,19 @@ public:
     static void TearDownTestCase() {};
     void SetUp() {};
     void TearDown() {};
+
+    const std::string PERF_CONFIG = "PerformanceOptConfig";
+    const std::string BUNDLE_NAME = "bundleName";
+    const std::string FEATURE = "feature";
+    const std::string NAME = "name";
+    const std::string ID = "id";
+    const std::string TEST1_HAP = "test1.hap";
+    const std::string TEST2_HAP = "test2.hap";
+    const std::string UI_NODE_GC_NAME = "UINodeGcParamParser";
+    const std::string SYNC_LOAD_NAME = "SyncLoadParser";
+    const std::string SYNC_LOAD_VALUE = "value";
+    const std::string SYNC_LOAD_VALUE_TIME = "50";
+    const std::string TEST_UNDEFINE = "Undefine";
 };
 
 /**
@@ -39,15 +52,12 @@ public:
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Parse example.hap success
-     * @tc.expected: Create featureParser suc
-     */
-    FeatureParamManager::GetInstance().Init("example.hap");
-    auto& featureParser = OHOS::Ace::FeatureParamManager::GetInstance().featureParser_;
+    FeatureParamManager::GetInstance().Init(TEST1_HAP);
+    auto& featureParser = FeatureParamManager::GetInstance().featureParser_;
     EXPECT_NE(featureParser, nullptr);
-    EXPECT_NE(featureParser->xmlSysDocument_, nullptr);
-    featureParser->Destroy();
+
+    FeatureParamManager::GetInstance().Init(TEST1_HAP);
+    EXPECT_NE(featureParser, nullptr);
 }
 
 /**
@@ -57,29 +67,109 @@ HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, ParseInternalWithBundleNameTest, TestSize.Level1)
 {
-    FeatureParamManager::GetInstance().Init("example.hap");
+    FeatureParamManager::GetInstance().Init(TEST1_HAP);
     auto& featureParser = FeatureParamManager::GetInstance().featureParser_;
-    xmlNode node;
-    auto ret = featureParser->ParseInternalWithBundleName(node, "example.hap");
-    EXPECT_EQ(ret, ParseErrCode::PARSE_XML_NAME_ERROR);
 
-    string nodeName = "PerformanceOptConfig";
-    node.name = reinterpret_cast<const xmlChar*>(nodeName.c_str());
-    xmlNode childNode;
-    childNode.type = xmlElementType::XML_ELEMENT_NODE;
-    string childName = "bundleName";
-    childNode.name = reinterpret_cast<const xmlChar*>(childName.c_str());
-    xmlSetProp(&childNode, (const xmlChar*)("name"), (const xmlChar*)("example.hap"));
-    node.children = &childNode;
+    xmlNode featureNode1 = {
+        .type = xmlElementType::XML_ELEMENT_NODE,
+        .name = reinterpret_cast<const xmlChar*>(FEATURE.c_str()),
+    };
+    xmlSetProp(&featureNode1, (const xmlChar*)(ID.c_str()), (const xmlChar*)(UI_NODE_GC_NAME.c_str()));
 
-    xmlNode childNode1;
-    childNode1.type = xmlElementType::XML_ELEMENT_NODE;
-    string child1Name = "feature";
-    childNode1.name = reinterpret_cast<const xmlChar*>(child1Name.c_str());
-    xmlSetProp(&childNode1, (const xmlChar*)("id"), (const xmlChar*)("UINodeGcParamParser"));
-    childNode.children = &childNode1;
-    ret = featureParser->ParseInternalWithBundleName(node, "example.hap");
+    xmlNode featureNode2 = {
+        .type = xmlElementType::XML_ELEMENT_NODE,
+        .name = reinterpret_cast<const xmlChar*>(FEATURE.c_str()),
+    };
+    xmlSetProp(&featureNode2, (const xmlChar*)(ID.c_str()), (const xmlChar*)(SYNC_LOAD_NAME.c_str()));
+
+    xmlNode featureNode3 = {
+        .type = xmlElementType::XML_ELEMENT_NODE,
+        .name = reinterpret_cast<const xmlChar*>(TEST_UNDEFINE.c_str()),
+    };
+    xmlSetProp(&featureNode3, (const xmlChar*)(ID.c_str()), (const xmlChar*)(TEST_UNDEFINE.c_str()));
+
+    xmlNode bundleNameNode {
+        .type = xmlElementType::XML_ELEMENT_NODE,
+        .name = reinterpret_cast<const xmlChar*>(BUNDLE_NAME.c_str()),
+    };
+
+    xmlSetProp(&bundleNameNode, (const xmlChar*)(NAME.c_str()), (const xmlChar*)(TEST1_HAP.c_str()));
+    xmlNode configNode = {
+        .name = reinterpret_cast<const xmlChar*>(PERF_CONFIG.c_str()),
+    };
+
+    xmlNode rootNode;
+    auto ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_GET_CHILD_FAIL);
+
+    rootNode.children = &configNode;
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_GET_CHILD_FAIL);
+
+    configNode.children = &bundleNameNode;
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
     EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
+    bundleNameNode.children = &featureNode1;
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
+    featureNode1.next = &featureNode2;
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
+    xmlSetProp(&featureNode2, (const xmlChar*)(SYNC_LOAD_VALUE.c_str()),
+        (const xmlChar*)(SYNC_LOAD_VALUE_TIME.c_str()));
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
+    featureNode2.next = &featureNode3;
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
+    bundleNameNode.name = reinterpret_cast<const xmlChar*>(TEST_UNDEFINE.c_str());
+    ret = featureParser->ParseInternalWithBundleName(rootNode, TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_EXEC_SUCCESS);
+
     featureParser->Destroy();
+}
+
+/**
+ * @tc.name: ParsePerformanceConfigXMLWithBundleNameTest
+ * @tc.desc: ParsePerformanceConfigXMLWithBundleName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkUIFeatureParamManagerTest, ParsePerformanceConfigXMLWithBundleNameTest, TestSize.Level1)
+{
+    auto featureParser = std::make_unique<ConfigXMLParserBase>();
+    auto ret = featureParser->ParsePerformanceConfigXMLWithBundleName(TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_SYS_FILE_LOAD_FAIL);
+    auto doc = std::make_shared<xmlDoc>();
+    featureParser->xmlSysDocument_ = doc.get();
+
+    ret = featureParser->ParsePerformanceConfigXMLWithBundleName(TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_GET_ROOT_FAIL);
+
+    xmlNode children;
+    children.type = xmlElementType::XML_ELEMENT_NODE;
+    doc->children = &children;
+    ret = featureParser->ParsePerformanceConfigXMLWithBundleName(TEST1_HAP);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_GET_CHILD_FAIL);
+    featureParser->xmlSysDocument_ = nullptr;
+    featureParser = nullptr;
+}
+
+/**
+ * @tc.name: ParseXmlNodeNameWithIndexTest
+ * @tc.desc: ParseXmlNodeNameWithIndex test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkUIFeatureParamManagerTest, ParseXmlNodeNameWithIndexTest, TestSize.Level1)
+{
+    auto featureParser = std::make_unique<ConfigXMLParserBase>();
+    xmlNode node;
+    auto ret = featureParser->ParseXmlNodeNameWithIndex(node, 4);
+    EXPECT_EQ(ret, ParseErrCode::PARSE_SIZE_ERROR);
+    featureParser = nullptr;
 }
 }
