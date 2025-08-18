@@ -647,6 +647,7 @@ protected:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
+    void SetPositionToRSNodeMultiThread();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f

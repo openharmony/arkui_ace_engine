@@ -181,6 +181,7 @@ build_component_ng("pattern_ng") {
     "grid_container/grid_container_model_ng.cpp",
     "grid_row/grid_row_layout_algorithm.cpp",
     "grid_row/grid_row_layout_pattern.cpp",
+    "grid_row/grid_row_layout_pattern_multi_thread.cpp",
     "grid_row/grid_row_layout_property.cpp",
     "grid_row/grid_row_model_ng.cpp",
     "grid_row/grid_row_model_ng_static.cpp",
