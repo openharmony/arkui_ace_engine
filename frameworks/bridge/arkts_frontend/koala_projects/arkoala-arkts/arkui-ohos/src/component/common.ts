@@ -967,7 +967,7 @@ export interface KeyEvent {
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     unicode?: number | undefined
-    getModifierKeyState(keys: Array<string>): boolean
+    getModifierKeyState?: ((keys: Array<string>) => boolean)
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1035,6 +1035,12 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const unicode_NonNull  = (unicode as number)
         this.setUnicode(unicode_NonNull)
     }
+    get getModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return this.getGetModifierKeyState();
+    }
+    set getModifierKeyState(getModifierKeyState: ((keys: Array<string>) => boolean) | undefined) {
+        // setter is not implemented
+    }
     static ctor_keyevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_ctor()
         return retval
@@ -1046,9 +1052,11 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._KeyEvent_getFinalizer()
     }
-    public getModifierKeyState(keys: Array<string>): boolean {
-        const keys_casted = keys as (Array<string>)
-        return this.getModifierKeyState_serialize(keys_casted)
+    public getGetModifierKeyState(): ((keys: Array<string>) => boolean) {
+        return (keys: Array<string>): boolean => {
+            const keys_casted = keys as (Array<string>)
+            return this.getModifierKeyState_serialize(keys_casted)
+        }
     }
     private getType(): KeyType {
         return this.getType_serialize()
