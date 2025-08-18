@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SwitchComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SwitchComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SwitchComposedElement, InspectorComposedElement);
 
 public:
     explicit SwitchComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -39,7 +39,7 @@ struct CalendarPaintParams {
 };
 
 class CalendarPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CalendarPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CalendarPaintMethod, NodePaintMethod);
 
 public:
     CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay, PickerDate& startDate,

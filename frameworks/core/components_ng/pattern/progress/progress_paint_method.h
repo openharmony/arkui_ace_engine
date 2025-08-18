@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG {
 constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod);
 public:
     explicit ProgressPaintMethod(ProgressType progressType, float strokeWidth,
         const RefPtr<ProgressModifier>& progressModifier, bool isUserInitiatedColor)

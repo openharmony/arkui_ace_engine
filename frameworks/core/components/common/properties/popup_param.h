@@ -69,7 +69,7 @@ enum class TipsAnchorType {
 using StateChangeFunc = std::function<void(const std::string&)>;
 using OnWillDismiss = std::function<void(int32_t)>;
 class PopupParam : public AceType {
-    DECLARE_ACE_TYPE(PopupParam, AceType)
+    DECLARE_ACE_TYPE(PopupParam, AceType);
 
 public:
     PopupParam() = default;

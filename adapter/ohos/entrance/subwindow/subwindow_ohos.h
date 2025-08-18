@@ -48,7 +48,7 @@ class RSUIDirector;
 namespace OHOS::Ace {
 
 class SubwindowOhos : public Subwindow {
-    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow)
+    DECLARE_ACE_TYPE(SubwindowOhos, Subwindow);
 
 public:
     explicit SubwindowOhos(int32_t instanceId);

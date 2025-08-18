@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT EntryPageInfo : public PageInfo {
-    DECLARE_ACE_TYPE(EntryPageInfo, PageInfo)
+    DECLARE_ACE_TYPE(EntryPageInfo, PageInfo);
 public:
     EntryPageInfo(int32_t pageId, const std::string& url, const std::string& path, std::string params,
         bool recoverable = true, bool isCreateByNamedRouter = false)

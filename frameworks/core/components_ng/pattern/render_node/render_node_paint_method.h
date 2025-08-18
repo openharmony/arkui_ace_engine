@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class RenderNodePaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(RenderNodePaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(RenderNodePaintMethod, NodePaintMethod);
 public:
     explicit RenderNodePaintMethod(const RefPtr<RenderNodeModifier>& renderNodeModifier)
         : renderNodeModifier_(renderNodeModifier)

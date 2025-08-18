@@ -51,7 +51,7 @@ using SwipeCallback = std::function<void(const SwipeEventInfo&)>;
 using CatchSwipeCallback = std::function<void(const SwipeEventInfo&)>;
 
 class SwipeRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(SwipeRecognizer, TouchEventTarget)
+    DECLARE_ACE_TYPE(SwipeRecognizer, TouchEventTarget);
 
 public:
     bool HandleEvent(const TouchEvent& point) override;

@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 // Paint is interface for drawing styles.
 class SkiaColorFilter : public ColorFilter {
-    DECLARE_ACE_TYPE(NG::SkiaColorFilter, NG::ColorFilter)
+    DECLARE_ACE_TYPE(NG::SkiaColorFilter, NG::ColorFilter);
 public:
     explicit SkiaColorFilter(const float rowMajor[20]);
     ~SkiaColorFilter() override = default;

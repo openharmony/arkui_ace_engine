@@ -30,7 +30,7 @@ public:
 };
 
 class JSTextInputController final : public virtual AceType {
-    DECLARE_ACE_TYPE(JSTextInputController, AceType)
+    DECLARE_ACE_TYPE(JSTextInputController, AceType);
 
 public:
     JSTextInputController() = default;

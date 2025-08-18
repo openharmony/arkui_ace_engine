@@ -45,7 +45,7 @@ using EndHandleMoveCallback =
 using CopyAllCallback = std::function<void(const std::function<void(const Offset&, const Offset&)>&)>;
 
 class TextOverlayComponent : public SoleChildComponent {
-    DECLARE_ACE_TYPE(TextOverlayComponent, SoleChildComponent)
+    DECLARE_ACE_TYPE(TextOverlayComponent, SoleChildComponent);
 
 public:
     TextOverlayComponent(

@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using VideoEventCallback = std::function<void(const std::string&)>;
 
 class VideoEventHub : public EventHub {
-    DECLARE_ACE_TYPE(VideoEventHub, EventHub)
+    DECLARE_ACE_TYPE(VideoEventHub, EventHub);
 
 public:
     VideoEventHub() = default;

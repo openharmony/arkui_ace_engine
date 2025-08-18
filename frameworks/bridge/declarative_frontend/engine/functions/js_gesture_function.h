@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsGestureFunction : public JsCommonGestureFunction {
-    DECLARE_ACE_TYPE(JsGestureFunction, JsCommonGestureFunction)
+    DECLARE_ACE_TYPE(JsGestureFunction, JsCommonGestureFunction);
 
 public:
     explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)

@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
+    DECLARE_ACE_TYPE(MockRenderContext, RenderContext);
 public:
     ~MockRenderContext() override = default;
 

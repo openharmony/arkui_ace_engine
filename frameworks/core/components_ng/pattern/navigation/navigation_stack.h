@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 using NavPathList = std::vector<std::pair<std::string, RefPtr<UINode>>>;
 class NavDestinationContext;
 class RouteInfo : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::RouteInfo, AceType)
+    DECLARE_ACE_TYPE(NG::RouteInfo, AceType);
 public:
     RouteInfo() = default;
     virtual ~RouteInfo() = default;
@@ -41,7 +41,7 @@ public:
 };
 
 class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::NavigationStack, AceType)
+    DECLARE_ACE_TYPE(NG::NavigationStack, AceType);
 public:
     NavigationStack() = default;
     ~NavigationStack() override = default;

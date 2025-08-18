@@ -32,7 +32,7 @@ namespace Ace {
 namespace Framework {
 
 class ACE_EXPORT CJLazyForEachBuilder : public NG::LazyForEachBuilder, public LazyForEachActuator {
-    DECLARE_ACE_TYPE(CJLazyForEachBuilder, NG::LazyForEachBuilder, LazyForEachActuator)
+    DECLARE_ACE_TYPE(CJLazyForEachBuilder, NG::LazyForEachBuilder, LazyForEachActuator);
 public:
     explicit CJLazyForEachBuilder(sptr<LazyForEachFuncs>&& cjBuilder) : cjBuilder_(cjBuilder) {}
     int32_t OnGetTotalCount() override

@@ -28,7 +28,7 @@ constexpr char EXPOSURE_CONFIG_RATIO[] = "ratio";
 constexpr char EXPOSURE_CONFIG_DURATION[] = "duration";
 
 class ExposureProcessor : public AceType {
-    DECLARE_ACE_TYPE(ExposureProcessor, AceType)
+    DECLARE_ACE_TYPE(ExposureProcessor, AceType);
 
 public:
     ExposureProcessor(const std::string& pageUrl, const std::string& inspectorId);

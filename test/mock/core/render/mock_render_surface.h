@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class MockRenderSurface : public RenderSurface {
-    DECLARE_ACE_TYPE(MockRenderSurface, RenderSurface)
+    DECLARE_ACE_TYPE(MockRenderSurface, RenderSurface);
 public:
     ~MockRenderSurface() override = default;
     MOCK_CONST_METHOD0(IsSurfaceValid, bool());

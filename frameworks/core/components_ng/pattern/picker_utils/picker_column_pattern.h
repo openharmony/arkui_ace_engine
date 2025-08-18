@@ -52,7 +52,7 @@ struct PickerOptionProperty {
 };
 
 class PickerEventParam : public virtual AceType {
-    DECLARE_ACE_TYPE(PickerEventParam, AceType)
+    DECLARE_ACE_TYPE(PickerEventParam, AceType);
 
 public:
     WeakPtr<FrameNode> instance_;

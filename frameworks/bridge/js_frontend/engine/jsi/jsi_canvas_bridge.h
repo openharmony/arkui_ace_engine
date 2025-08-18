@@ -26,7 +26,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiCanvasBridge : public BaseCanvasBridge {
-    DECLARE_ACE_TYPE(JsiCanvasBridge, BaseCanvasBridge)
+    DECLARE_ACE_TYPE(JsiCanvasBridge, BaseCanvasBridge);
 
 public:
     virtual ~JsiCanvasBridge();

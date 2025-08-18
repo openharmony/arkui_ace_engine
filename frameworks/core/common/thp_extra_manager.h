@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class THPExtraManager : public virtual AceType {
-    DECLARE_ACE_TYPE(THPExtraManager, AceType)
+    DECLARE_ACE_TYPE(THPExtraManager, AceType);
 public:
     THPExtraManager() = default;
     virtual ~THPExtraManager() = default;

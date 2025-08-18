@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class HoverStackPattern : public Pattern {
-    DECLARE_ACE_TYPE(HoverStackPattern, Pattern)
+    DECLARE_ACE_TYPE(HoverStackPattern, Pattern);
 public:
     HoverStackPattern() = default;
 

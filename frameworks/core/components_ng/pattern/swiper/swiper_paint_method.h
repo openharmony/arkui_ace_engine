@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class SwiperPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SwiperPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SwiperPaintMethod, NodePaintMethod);
 
 public:
     SwiperPaintMethod(Axis axis, float mainDelta) : axis_(axis), mainDelta_(mainDelta) {};

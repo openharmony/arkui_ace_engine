@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WebPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(WebPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(WebPaintMethod, NodePaintMethod);
 public:
     WebPaintMethod(RefPtr<NG::RenderSurface> surface): renderSuface_(surface) {}
     ~WebPaintMethod() override = default;

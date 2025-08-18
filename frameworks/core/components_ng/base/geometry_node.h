@@ -36,7 +36,7 @@ class InspectorFilter;
 using ExpandEdges = PaddingPropertyF;
 // GeometryNode acts as a physical property of the size and position of the component
 class ACE_FORCE_EXPORT GeometryNode : public AceType {
-    DECLARE_ACE_TYPE(GeometryNode, AceType)
+    DECLARE_ACE_TYPE(GeometryNode, AceType);
 public:
     GeometryNode() = default;
     ~GeometryNode() override = default;

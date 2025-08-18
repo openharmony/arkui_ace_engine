@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class TabBarPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(TabBarPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(TabBarPaintProperty, PaintProperty);
 
 public:
     TabBarPaintProperty() = default;

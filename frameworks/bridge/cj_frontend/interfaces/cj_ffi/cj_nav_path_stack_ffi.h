@@ -192,7 +192,7 @@ private:
 };
 
 class CJNavPathInfoNG : public NG::NavPathInfo {
-    DECLARE_ACE_TYPE(CJNavPathInfoNG, NG::NavPathInfo)
+    DECLARE_ACE_TYPE(CJNavPathInfoNG, NG::NavPathInfo);
 public:
     CJNavPathInfoNG() = default;
     CJNavPathInfoNG(const std::string& name, const std::string& param) : NG::NavPathInfo(name), param_(param) {}

@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class ACE_EXPORT NavBarNode : public NavDestinationNodeBase {
-    DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase)
+    DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase);
 public:
     NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : NavDestinationNodeBase(tag, nodeId, pattern) {}

@@ -44,7 +44,7 @@ inline constexpr uint64_t EXCLUDE_INNER_FLAG_NONE = 0;
 
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
-    DECLARE_ACE_TYPE(StateStyleManager, AceType)
+    DECLARE_ACE_TYPE(StateStyleManager, AceType);
 
 public:
     explicit StateStyleManager(WeakPtr<FrameNode> frameNode);

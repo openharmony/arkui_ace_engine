@@ -32,7 +32,7 @@ struct MockReplace {
 constexpr char UNDEFINED_ID[] = "undefined";
 
 class MockNavPathInfo : public NavPathInfo {
-    DECLARE_ACE_TYPE(MockNavPathInfo, NavPathInfo)
+    DECLARE_ACE_TYPE(MockNavPathInfo, NavPathInfo);
 public:
     MockNavPathInfo() = default;
     explicit MockNavPathInfo(const std::string& name) : NG::NavPathInfo(name) {}

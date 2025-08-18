@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 
 class RenderSceneViewer : public RenderNode {
-    DECLARE_ACE_TYPE(RenderSceneViewer, RenderNode)
+    DECLARE_ACE_TYPE(RenderSceneViewer, RenderNode);
 
 public:
     explicit RenderSceneViewer(uint32_t key);

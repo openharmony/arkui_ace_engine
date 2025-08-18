@@ -57,7 +57,7 @@ struct ScaleParam {
 };
 
 class ACE_EXPORT InspectorNode : public virtual AceType {
-    DECLARE_ACE_TYPE(InspectorNode, AceType)
+    DECLARE_ACE_TYPE(InspectorNode, AceType);
 
 public:
     InspectorNode() = default;

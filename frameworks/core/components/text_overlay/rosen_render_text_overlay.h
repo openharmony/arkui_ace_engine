@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 
 class RosenRenderTextOverlay final : public RenderTextOverlay {
-    DECLARE_ACE_TYPE(RosenRenderTextOverlay, RenderTextOverlay)
+    DECLARE_ACE_TYPE(RosenRenderTextOverlay, RenderTextOverlay);
 
 public:
     RosenRenderTextOverlay() = default;

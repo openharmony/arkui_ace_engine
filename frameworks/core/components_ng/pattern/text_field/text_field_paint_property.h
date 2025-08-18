@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class TextFieldPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty);
 public:
     TextFieldPaintProperty() = default;
     ~TextFieldPaintProperty() override = default;

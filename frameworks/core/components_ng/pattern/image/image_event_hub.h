@@ -27,7 +27,7 @@ using ErrorEvent = std::function<void(const LoadImageFailEvent& info)>;
 using FinishEvent = std::function<void()>;
 
 class ImageEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ImageEventHub, EventHub)
+    DECLARE_ACE_TYPE(ImageEventHub, EventHub);
 
 public:
     ImageEventHub() = default;

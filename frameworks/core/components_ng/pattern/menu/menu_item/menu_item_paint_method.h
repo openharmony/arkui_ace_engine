@@ -38,7 +38,7 @@ struct ItemDividerInfo {
     Color color = Color::TRANSPARENT;
 };
 class ACE_EXPORT MenuItemPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuItemPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(MenuItemPaintMethod, NodePaintMethod);
 public:
     MenuItemPaintMethod(bool isOption = false) : isOption_(isOption) {}
     ~MenuItemPaintMethod() override = default;

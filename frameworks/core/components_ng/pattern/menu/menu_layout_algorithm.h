@@ -74,7 +74,7 @@ struct MenuDumpInfo {
 class MenuLayoutProperty;
 class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
+    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm);
 public:
     MenuLayoutAlgorithm(int32_t id, const std::string& tag,
         const std::optional<OffsetF>& lastPosition = std::nullopt);

@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const bool)>;
 
 class RadioEventHub : public EventHub {
-    DECLARE_ACE_TYPE(RadioEventHub, EventHub)
+    DECLARE_ACE_TYPE(RadioEventHub, EventHub);
 
 public:
     RadioEventHub() = default;

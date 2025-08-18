@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT TextPickerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(TextPickerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(TextPickerComposedElement, InspectorComposedElement);
 
 public:
     explicit TextPickerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

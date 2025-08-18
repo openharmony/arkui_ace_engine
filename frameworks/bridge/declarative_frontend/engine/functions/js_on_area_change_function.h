@@ -27,7 +27,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsOnAreaChangeFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsOnAreaChangeFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsOnAreaChangeFunction, JsFunction);
 
 public:
     explicit JsOnAreaChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}

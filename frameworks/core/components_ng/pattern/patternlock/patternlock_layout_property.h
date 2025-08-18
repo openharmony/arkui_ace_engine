@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class PatternLockLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(PatternLockLayoutProperty, LayoutProperty)
+    DECLARE_ACE_TYPE(PatternLockLayoutProperty, LayoutProperty);
 
 public:
     PatternLockLayoutProperty() = default;

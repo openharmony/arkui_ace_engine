@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 class NativeLazyForEachBuilder : public LazyForEachBuilder {
-    DECLARE_ACE_TYPE(NativeLazyForEachBuilder, LazyForEachBuilder)
+    DECLARE_ACE_TYPE(NativeLazyForEachBuilder, LazyForEachBuilder);
 public:
     // used in ArkTS side.
     void ReleaseChildGroupById(const std::string& id) override {}

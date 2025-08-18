@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT CirclePaintMethod : public ShapePaintMethod {
-    DECLARE_ACE_TYPE(CirclePaintMethod, ShapePaintMethod)
+    DECLARE_ACE_TYPE(CirclePaintMethod, ShapePaintMethod);
 public:
     CirclePaintMethod() = default;
     CirclePaintMethod(

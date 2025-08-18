@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsPanFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsPanFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsPanFunction, JsFunction);
 
 public:
     explicit JsPanFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
