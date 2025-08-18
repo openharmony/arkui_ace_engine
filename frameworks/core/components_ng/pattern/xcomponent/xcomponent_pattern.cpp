@@ -182,7 +182,7 @@ void XComponentPattern::InitSurface()
     std::string res = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-";
     std::string xcId = GetId();
     const int32_t length = std::min(static_cast<int32_t>(xcId.size()), NUM_18);
-    const int32_t startPos = xcId.size() - length;
+    const int32_t startPos = static_cast<int32_t>(xcId.size()) - length;
     renderSurface_->SetBufferUsage(res + xcId.substr(startPos, length));
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();

@@ -275,7 +275,7 @@ void XComponentPatternV2::InitSurface()
     std::string res = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-";
     std::string xcId = GetId();
     const int32_t length = std::min(static_cast<int32_t>(xcId.size()), NUM_18);
-    const int32_t startPos = xcId.size() - length;
+    const int32_t startPos = static_cast<int32_t>(xcId.size()) - length;
     renderSurface_->SetBufferUsage(res + xcId.substr(startPos, length));
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
@@ -294,10 +294,8 @@ void XComponentPatternV2::InitSurface()
     auto width = paintRect_.Width();
     auto height = paintRect_.Height();
     if (!paintRect_.IsEmpty()) {
-        renderSurface_->UpdateSurfaceSizeInUserData(
-            static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-        renderSurface_->SetSurfaceDefaultSize(
-            static_cast<int32_t>(width), static_cast<int32_t>(height));
+        renderSurface_->UpdateSurfaceSizeInUserData(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+        renderSurface_->SetSurfaceDefaultSize(static_cast<int32_t>(width), static_cast<int32_t>(height));
     }
     renderSurface_->RegisterSurface();
     InitNativeWindow(width, height);
