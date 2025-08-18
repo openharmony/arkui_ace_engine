@@ -60,6 +60,8 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    dialogProps.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
+    dialogProps.effectOption = Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
     auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
@@ -89,6 +91,10 @@ CalendarSettingData BuildSettingData(const Ark_CalendarDialogOptions options)
         Converter::Convert<std::vector<std::pair<PickerDate, PickerDate>>>(options.disabledDateRange.value);
     PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
     settingData.dayRadius = Converter::OptConvert<Dimension>(options.hintRadius);
+    auto markToday = Converter::OptConvert<bool>(options.markToday);
+    if (markToday.has_value()) {
+        settingData.markToday = markToday.value();
+    }
     return settingData;
 }
 std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options)
