@@ -1853,7 +1853,6 @@ class NodeAdapterFinalizabel extends Finalizable {
 
     init(ptr: pointer): void {
         this.ptr = ptr
-        if (this.ptr == nullptr) throw new Error("Can't have nullptr ptr ${}")
         const thunk = new NodeAdapterThunk(ptr)
         finalizerRegister(this, thunk)
         this.cleaner = thunk

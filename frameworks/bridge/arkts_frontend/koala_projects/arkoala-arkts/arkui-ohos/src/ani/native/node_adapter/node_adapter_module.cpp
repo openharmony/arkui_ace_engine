@@ -177,7 +177,7 @@ ani_array_double NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_objec
     }
     if (env->Array_New_Double(size, &result) != ANI_OK) {
         delete[] items.data;
-        std::abort();
+        return result;
     }
     if (ANI_OK != env->Array_SetRegion_Double(result, 0, size, items.data)) {
         delete[] items.data;
