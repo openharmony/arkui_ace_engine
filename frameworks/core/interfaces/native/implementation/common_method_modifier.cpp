@@ -163,45 +163,32 @@ Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGesture
     BaseGestureEventPeer* peer = nullptr;
     switch (typeName) {
         case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<TapGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<TapGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<TapGestureEventPeer, TapGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<LongPressGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<LongPressGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<LongPressGestureEventPeer, LongPressGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<PanGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<PanGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<PanGestureEventPeer, PanGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<PinchGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<PinchGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<PinchGestureEventPeer, PinchGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::ROTATION_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<RotationGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<RotationGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<RotationGestureEventPeer, RotationGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::SWIPE_GESTURE: {
-            auto castPeer = PeerUtils::CreatePeer<SwipeGestureEventPeer>();
-            castPeer->SetEventInfo(std::static_pointer_cast<SwipeGestureEvent>(info));
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<SwipeGestureEventPeer, SwipeGestureEvent>(info);
             break;
         }
         default:
-            auto castPeer = PeerUtils::CreatePeer<GeneratedModifier::BaseGestureEventPeerImpl>();
-            castPeer->SetEventInfo(info);
-            peer = castPeer;
+            peer = GeneratedModifier::CreateGestureEventPeer<GeneratedModifier::BaseGestureEventPeerImpl,
+                BaseGestureEvent>(info);
             break;
     }
     CHECK_NULL_RETURN(peer, nullptr);
