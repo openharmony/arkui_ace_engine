@@ -1500,12 +1500,6 @@ void MovingPhotoPattern::PreparedToPlay()
     if (!isVisible_) {
         return;
     }
-    if (isRepeatChangePlayMode_ && historyAutoAndRepeatLevel_ == PlaybackMode::NONE &&
-        autoAndRepeatLevel_ == PlaybackMode::NONE) {
-        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
-        isRepeatChangePlayMode_ = false;
-    }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
         SelectPlaybackMode(historyAutoAndRepeatLevel_);
@@ -1814,7 +1808,6 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
-        isRepeatChangePlayMode_ = true;
         Pause();
         auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
         CHECK_NULL_VOID(movingPhoto);
