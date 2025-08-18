@@ -1594,6 +1594,8 @@ struct CJUINavDestinationModifier {
     void (*resetEnableStatusBar)(ArkUINodeHandle node);
     void (*setEnableNavigationIndicator)(ArkUINodeHandle node, ArkUIOptionalBool enable);
     void (*resetEnableNavigationIndicator)(ArkUINodeHandle node);
+    void (*setNavDestinationBackgroundColorWithColorSpace)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr);
 };
 
 struct CJUITextAreaModifier {

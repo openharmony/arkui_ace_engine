@@ -79,6 +79,22 @@ void ResetNavDestinationBackgroundColor(ArkUINodeHandle node)
     NavDestinationModelNG::SetBackgroundColor(frameNode, backgroundColor, false, nullptr);
 }
 
+void SetNavDestinationBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+    auto backgroundColorResObj = AceType::Claim(bgColor);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    NavDestinationModelNG::SetBackgroundColor(frameNode, backgroundColor, true, backgroundColorResObj);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -788,6 +804,7 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
         .setNavDestinationBackgroundColor = SetNavDestinationBackgroundColor,
         .resetNavDestinationBackgroundColor = ResetNavDestinationBackgroundColor,
+        .setNavDestinationBackgroundColorWithColorSpace = SetNavDestinationBackgroundColorWithColorSpace,
         .setTitle = SetTitle,
         .resetTitle = ResetTitle,
         .setMenus = SetMenus,
@@ -862,6 +879,7 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         .resetEnableStatusBar = ResetEnableStatusBar,
         .setEnableNavigationIndicator = SetEnableNavigationIndicator,
         .resetEnableNavigationIndicator = ResetEnableNavigationIndicator,
+        .setNavDestinationBackgroundColorWithColorSpace = SetNavDestinationBackgroundColorWithColorSpace,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

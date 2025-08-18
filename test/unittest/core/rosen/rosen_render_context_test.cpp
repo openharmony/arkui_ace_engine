@@ -1088,6 +1088,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
     const Color value = Color::RED;
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
     OHOS::Rosen::RSColor rsColor;
