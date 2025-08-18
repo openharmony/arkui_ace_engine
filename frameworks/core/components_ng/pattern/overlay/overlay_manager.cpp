@@ -3012,15 +3012,14 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto node = AceType::DynamicCast<FrameNode>(it->second);
+    CHECK_NULL_VOID(node);
     if (node->GetParent()) {
         auto id = Container::CurrentId();
         SubwindowManager::GetInstance()->ClearMenu();
         SubwindowManager::GetInstance()->ClearMenuNG(id, targetId);
-
-        if (node->GetParent()) {
-            RemoveEventColumn();
-            RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
-        }
+        RemoveEventColumn();
+        CallMenuDisappearOnlyNewLifeCycle(node);
+        RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
     }
     EraseMenuInfo(targetId);
     SetIsMenuShow(false);
@@ -3125,12 +3124,12 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
                 break;
             }
         }
+        CallMenuDisappearOnlyNewLifeCycle(node);
         rootNode->RemoveChild(node);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         SetIsMenuShow(false);
         auto subwindowMgr = SubwindowManager::GetInstance();
         subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId(), SubwindowType::TYPE_MENU);
-        menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
         RemoveMenuFilter(node, false);
         break;
     }
