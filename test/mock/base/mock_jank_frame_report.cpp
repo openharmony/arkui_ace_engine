@@ -78,4 +78,6 @@ void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::strin
                                     const std::string& pageName) {}
 void PerfMonitor::NotifyAppJankStatsBegin() {}
 void PerfMonitor::NotifyAppJankStatsEnd() {}
+void PerfMonitor::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid) {}
 } // namespace OHOS::Ace

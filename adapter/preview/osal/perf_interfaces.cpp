@@ -106,4 +106,8 @@ void PerfInterfaces::SetApplicationInfo()
 {
 }
 
+void PerfInterfaces::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+}
 } // namespace OHOS::Ace

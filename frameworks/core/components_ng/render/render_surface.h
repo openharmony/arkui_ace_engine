@@ -76,6 +76,11 @@ public:
         return "";
     }
 
+    virtual uint64_t GetUniqueIdNum() const
+    {
+        return 0;
+    }
+
     virtual void UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) {}
 
     virtual void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) {}
@@ -141,6 +146,11 @@ public:
     virtual void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
 
     virtual void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
+
+    virtual std::string GetPSurfaceName()
+    {
+        return "";
+    }
 
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);

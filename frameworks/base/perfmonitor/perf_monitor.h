@@ -79,6 +79,8 @@ public:
     void NotifyAppJankStatsBegin();
     void NotifyAppJankStatsEnd();
     void SetApplicationInfo();
+    void ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName, const std::string& componentName,
+        const std::string& bundleName, const int32_t pid);
 private:
     std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
 };
