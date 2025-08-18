@@ -60,7 +60,7 @@ void DataDetectorAdapter::GetAIEntityMenu()
             TAG_LOGI(AceLogTag::ACE_TEXT, "Get AI entity menu from ai_engine");
             DataDetectorMgr::GetInstance().GetAIEntityMenu(dataDetectorAdapter->textDetectResult_);
         },
-        "ArkUITextInitDataDetect", PriorityType::VIP);
+        "ArkUITextInitDataDetect");
 }
 
 bool DataDetectorAdapter::ShowAIEntityMenu(
@@ -312,7 +312,7 @@ void DataDetectorAdapter::PreprocessTextDetect()
     if (textDetectTypes_.empty()) {
         aiDetectFlag_ |= OTHER_DETECT_FINISH;
     }
-    if (hasUrlType_) {
+    if (!hasUrlType_) {
         aiDetectFlag_ |= URL_DETECT_FINISH;
     }
 }
@@ -344,7 +344,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                 dataDetectorAdapter->ParseAIResult(result, startPos);
                 dataDetectorAdapter->MarkDirtyNode();
             },
-            "ArkUITextParseAIResult", PriorityType::IMMEDIATE);
+            "ArkUITextParseAIResult");
     };
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -354,7 +354,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                 info.text.size());
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
-        "ArkUITextInitDataDetect", PriorityType::IMMEDIATE);
+        "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::HandleTextUrlDetect()
@@ -379,7 +379,7 @@ void DataDetectorAdapter::HandleTextUrlDetect()
                 dataDetectorAdapter->HandleUrlResult(urlEntities);
                 dataDetectorAdapter->MarkDirtyNode();
             },
-            "ArkUITextUrlParseResult", PriorityType::IMMEDIATE);
+            "ArkUITextUrlParseResult");
     };
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -388,7 +388,7 @@ void DataDetectorAdapter::HandleTextUrlDetect()
             TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
-        "ArkUITextInitUrlDetect", PriorityType::IMMEDIATE);
+        "ArkUITextInitUrlDetect");
 }
 
 void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
@@ -536,7 +536,8 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
                 auto wAIContent = StringUtils::ToWstring(aiContent);
-                if (isSameDetectText) {
+                if (isSameDetectText || aiContent == UtfUtils::Str16DebugToStr8(wTextForAI.substr(aiSpanMapIt->first,
+                    std::min(static_cast<int32_t>(wAIContent.length()), wTextForAILength - aiSpanMapIt->first)))) {
                     dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
                     hasSame = true;
                 }
