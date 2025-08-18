@@ -5663,7 +5663,7 @@ void BindContextMenuBase(Ark_NativePointer node,
             ViewAbstractModelStatic::BindContextMenuStatic(
                 AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
             ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
-        }, node);        
+            }, node);
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
