@@ -601,7 +601,7 @@ export interface SliderAttribute extends CommonMethod {
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined
     trackColor_value?: ResourceColor | LinearGradient | undefined
-    selectedColor_value?: ResourceColor | undefined
+    selectedColor_value?: ResourceColor | LinearGradient | undefined
     minLabel_value?: string | undefined
     maxLabel_value?: string | undefined
     showSteps_value?: boolean | undefined
@@ -737,18 +737,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     }
     public selectedColor(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("selectedColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.selectedColor1Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | LinearGradient | undefined)
-                this.getPeer()?.selectedColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ResourceColor | LinearGradient | undefined)
+            this.getPeer()?.selectedColor1Attribute(value_casted)
+            return this
         }
         return this
     }
