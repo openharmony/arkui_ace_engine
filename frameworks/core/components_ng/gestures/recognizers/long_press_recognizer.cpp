@@ -395,6 +395,9 @@ void LongPressRecognizer::SendCallbackMsg(
 {
     std::string callbackName = GetCallbackName(callback);
     ACE_SCOPED_TRACE("LongPressRecognizer %s", callbackName.c_str());
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
+    }
     auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
     if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult ||
         (!isOnActionTriggered_ && type != GestureCallbackType::START)) {
