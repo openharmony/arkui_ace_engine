@@ -29,7 +29,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSSpanString : public virtual AceType {
-    DECLARE_ACE_TYPE(JSSpanString, AceType)
+    DECLARE_ACE_TYPE(JSSpanString, AceType);
 
 public:
     JSSpanString() = default;
