@@ -71,6 +71,7 @@ struct _ArkUIDialog {
     OHOS::Ace::HoverModeAreaType hoverModeAreaType;
     ArkUI_Int32 focusable;
     ArkUI_Int32* dialogState;
+    std::vector<void*> historyDialogHandle;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
