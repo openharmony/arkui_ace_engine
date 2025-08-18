@@ -2106,6 +2106,9 @@ template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
+    dst.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+
     if (auto dim = OptConvert<Dimension>(src.width); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
