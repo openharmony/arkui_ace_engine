@@ -1427,6 +1427,41 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnIndexChange003
+ * @tc.desc: OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper
+     */
+    bool isTrigger = false;
+    auto onChangeEvent = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChangeEvent(std::move(onChangeEvent));
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->oldIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->fastAnimationRunning_ = true;
+    pattern_->OnIndexChange(false);
+    EXPECT_TRUE(pattern_->fastAnimationChange_);
+    /**
+     * @tc.steps: step3. Call OnIndexChange
+     * @tc.expected: check fastAnimationChange_
+     */
+    pattern_->fastAnimationChange_ = true;
+    pattern_->fastAnimationRunning_ = false;
+    pattern_->OnIndexChange(false);
+    EXPECT_FALSE(pattern_->fastAnimationChange_);
+}
+
+/**
  * @tc.name: OnScrollStartEnd001
  * @tc.desc: test OnScrollStartRecursive/OnScrollEndRecursive
  * @tc.type: FUNC
