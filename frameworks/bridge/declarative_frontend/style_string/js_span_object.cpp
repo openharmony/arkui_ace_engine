@@ -135,7 +135,7 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
         JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("fontColor"));
         Color color;
         if (!colorObj->IsNull() && !JSViewAbstract::ParseJsColor(colorObj, color)) {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -147,21 +147,30 @@ void JSFontSpan::ParseJsFontColor(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
 {
-    if (obj->HasProperty("fontSize")) {
-        auto context = PipelineBase::GetCurrentContextSafely();
+    if (!obj->HasProperty("fontSize")) {
+        return;
+    }
+    CalcDimension size;
+    bool parseFail = false;
+    auto fontSize = obj->GetProperty("fontSize");
+    if (!fontSize->IsNull() && fontSize->IsObject()) {
+        auto sizeTmp = ParseLengthMetrics(fontSize, false);
+        if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
+            size = sizeTmp;
+        } else {
+            parseFail = true;
+        }
+    } else {
+        parseFail = true;
+    }
+    if (parseFail) {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto theme = context->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        auto fontSize = obj->GetProperty("fontSize");
-        CalcDimension size = theme->GetTextStyle().GetFontSize();
-        if (!fontSize->IsNull() && fontSize->IsObject()) {
-            auto sizeTmp = ParseLengthMetrics(fontSize, false);
-            if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
-                size = sizeTmp;
-            }
-        }
-        font.fontSize = size;
+        size = theme->GetTextStyle().GetFontSize();
     }
+    font.fontSize = size;
 }
 
 void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
@@ -177,7 +186,7 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
         if (weight != "") {
             font.fontWeight = ConvertStrToFontWeight(weight);
         } else {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -194,7 +203,7 @@ void JSFontSpan::ParseJsFontFamily(const JSRef<JSObject>& obj, Font& font)
         if (JSViewAbstract::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamiliesNG = fontFamilies;
         } else {
-            auto context = PipelineBase::GetCurrentContextSafely();
+            auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto theme = context->GetTheme<TextTheme>();
             CHECK_NULL_VOID(theme);
@@ -220,19 +229,30 @@ void JSFontSpan::ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
-    if (obj->HasProperty("strokeWidth")) {
-        auto strokeWidth = obj->GetProperty("strokeWidth");
-        if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
-            auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
-            if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
-                width = strokeWidthTmp;
-            }
+    CalcDimension width;
+    if (!obj->HasProperty("strokeWidth")) {
+        font.strokeWidth = width;
+        return;
+    }
+    auto strokeWidth = obj->GetProperty("strokeWidth");
+    bool parseFail = false;
+    if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
+        auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
+        if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
+            width = strokeWidthTmp;
+        } else {
+            parseFail = true;
         }
+    } else {
+        parseFail = true;
+    }
+
+    if (parseFail) {
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        width = theme->GetTextStyle().GetStrokeWidth();
     }
     font.strokeWidth = width;
 }
@@ -890,7 +910,10 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
     ImageSpanOptions options;
     auto container = Container::CurrentSafely();
     auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(context, options);
+    if (!context) {
+        TAG_LOGW(ACE_TEXT, "StyledString CreateImageOptions Can't Get Context");
+        return options;
+    }
     bool isCard = context->IsFormRender() && container && !container->IsDynamicRender();
 
     std::string imageSrc;
