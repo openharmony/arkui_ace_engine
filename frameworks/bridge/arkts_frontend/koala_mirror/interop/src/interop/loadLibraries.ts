@@ -28,7 +28,7 @@ export function loadNativeLibrary(name: string): Record<string, object> {
     const errors: { candidate: string, command: string, error: any }[] = []
     if (!isHZVM)
         try {
-            candidates.push(eval(`require.resolve("${nameWithoutSuffix}.node")`))
+            candidates.push(eval(`require.resolve(${JSON.stringify((nameWithoutSuffix + ".node"))})`))
         } catch (e) {
             errors.push({ candidate: `${nameWithoutSuffix}.node`, command: `resolve(...)`, error: e })
         }
@@ -38,7 +38,7 @@ export function loadNativeLibrary(name: string): Record<string, object> {
             if (isHZVM)
                 return (globalThis as any).requireNapi(candidate, true)
             else
-                return eval(`let exports = {}; process.dlopen({ exports }, "${candidate}", 2); exports`)
+                return eval(`let exports = {}; process.dlopen({ exports }, ${JSON.stringify(candidate)}, 2); exports`)
         } catch (e) {
             errors.push({ candidate: candidate, command: `dlopen`, error: e })
         }
