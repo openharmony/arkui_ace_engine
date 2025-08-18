@@ -646,7 +646,7 @@ export class ChipComponent extends ViewPU {
     this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
     this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
     this.isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
-    this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
+    this.isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
     this.onClose = undefined;
     this.onClicked = undefined;
     this.__chipNodeInFocus = new ObservedPropertySimplePU(false, this, 'chipNodeInFocus');
@@ -998,7 +998,7 @@ export class ChipComponent extends ViewPU {
     }
   }
   isSetActiveChipBgColor() {
-    if (this.chipNodeActivatedBackgroundColor) {
+    if (!this.chipNodeActivatedBackgroundColor) {
       return false;
     }
     try {
@@ -1012,7 +1012,7 @@ export class ChipComponent extends ViewPU {
     }
   }
   isSetNormalChipBgColor() {
-    if (this.chipNodeBackgroundColor) {
+    if (!this.chipNodeBackgroundColor) {
       return false;
     }
     try {

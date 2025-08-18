@@ -394,7 +394,7 @@ export struct ChipComponent {
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
   private isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
-  private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
+  private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
   public onClose?: VoidCallback;
   public onClicked?: VoidCallback;
   @State chipNodeInFocus: boolean = false;
@@ -445,7 +445,7 @@ export struct ChipComponent {
   }
 
   private isSetActiveChipBgColor(): boolean {
-    if (this.chipNodeActivatedBackgroundColor) {
+    if (!this.chipNodeActivatedBackgroundColor) {
       return false;
     }
     try {
@@ -458,7 +458,7 @@ export struct ChipComponent {
   }
 
   private isSetNormalChipBgColor(): boolean {
-    if (this.chipNodeBackgroundColor) {
+    if (!this.chipNodeBackgroundColor) {
       return false;
     }
     try {
