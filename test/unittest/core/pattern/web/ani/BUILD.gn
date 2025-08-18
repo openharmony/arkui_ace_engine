@@ -648,13 +648,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_controller.cpp",
   ]
 
-  if (ace_engine_enable_circle_feature) {
-    sources += [
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.cpp",
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
-    ]
-  }
-
   sources += [
     "$ace_root/frameworks/core/components_ng/pattern/web/richtext_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/richtext_model_static.cpp",
