@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#include "waterFlowSection_module.h"
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_WATER_FLOW_MODULE
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_WATER_FLOW_MODULE
 
-#include <memory>
-
-#include "common/common_module.h"
-#include "load.h"
-#include "utils/ani_utils.h"
+#include "ani.h"
 
 namespace OHOS::Ace::Ani {
-void SetWaterFlowOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object waterFlowOptions)
-{
-    const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowOptions(env, ptr, waterFlowOptions);
-}
+void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object waterFlowSection);
+void SetWaterFlowFooterContent(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_long footerContent);
 } // namespace OHOS::Ace::Ani
+
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_WATER_FLOW_MODULE

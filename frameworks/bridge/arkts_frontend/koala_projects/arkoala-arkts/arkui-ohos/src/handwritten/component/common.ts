@@ -818,9 +818,7 @@ export class TouchEventTransfer {
                 x: changedTouch.getProperty("x").toNumber(),
                 y: changedTouch.getProperty("y").toNumber(),
                 hand: TypeChecker.InteractionHand_FromNumeric(changedTouch.getProperty("hand").toNumber() as int32),
-                // TODO: need change number to long
                 pressedTime: touchEvent.changedTouches[index].pressedTime,
-                // pressedTime: changedTouch.getProperty("pressedTime").toNumber(),
                 pressure: changedTouch.getProperty("pressure").toNumber(),
                 width: changedTouch.getProperty("width").toNumber(),
                 height: changedTouch.getProperty("height").toNumber(),
@@ -1004,9 +1002,8 @@ export class AxisEventTransfer {
         axisEvent.axisVertical = axisVerticalValue;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
         axisEvent.axisHorizontal = axisHorizontalValue;
-        // TODO: this field doesn't set value in trunk
-        // const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        // axisEvent.targetDisplayId = targetDisplayIdValue;
+        const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
+        axisEvent.targetDisplayId = targetDisplayIdValue;
         const actionValue = esValue.getProperty("action").toNumber();
         axisEvent.action = TypeChecker.AxisAction_FromNumeric(actionValue as int32);
         const displayXValue = esValue.getProperty("displayX").toNumber();

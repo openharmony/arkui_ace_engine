@@ -82,3 +82,5 @@ export { NavDestinationModifier } from './NavDestinationModifier';
 export { NavigationModifier } from './NavigationModifier';
 
 export { SwiperModifier } from './SwiperModifier';
+
+export { RichEditorModifier } from './RichEditorModifier'

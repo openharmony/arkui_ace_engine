@@ -17,8 +17,7 @@
 
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct PanGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::PanGestureEvent> {
+struct PanGestureEventPeer : public OHOS::Ace::NG::GeneratedModifier::BaseGestureEventPeerImpl {
 protected:
     PanGestureEventPeer() = default;
     ~PanGestureEventPeer() override = default;

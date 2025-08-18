@@ -36,17 +36,21 @@ Ark_Boolean GetRepeatImpl(Ark_LongPressGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
     CHECK_NULL_RETURN(peer, errValue);
-    auto event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-    return event->GetRepeat();
+    LongPressGestureEvent* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(event);
+    CHECK_NULL_RETURN(longPressGestureEvent, errValue);
+    return longPressGestureEvent->GetRepeat();
 }
 void SetRepeatImpl(Ark_LongPressGestureEvent peer,
                    Ark_Boolean repeat)
 {
     CHECK_NULL_VOID(peer);
-    auto event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
-    event->SetRepeat(Converter::Convert<bool>(repeat));
+    LongPressGestureEvent* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(event);
+    CHECK_NULL_VOID(longPressGestureEvent);
+    longPressGestureEvent->SetRepeat(Converter::Convert<bool>(repeat));
 }
 } // LongPressGestureEventAccessor
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor()

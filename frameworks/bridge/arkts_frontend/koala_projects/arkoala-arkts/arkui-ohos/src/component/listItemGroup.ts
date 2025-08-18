@@ -60,7 +60,9 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeListDividerOptions({ strokeWidth: 0.0 } as ListDividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeListDividerOptions(value_value)
         }

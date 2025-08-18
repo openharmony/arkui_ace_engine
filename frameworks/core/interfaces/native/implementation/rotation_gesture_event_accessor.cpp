@@ -36,9 +36,11 @@ Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& angle = info->GetAngle();
+    auto* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+    RotationGestureEvent* rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(event);
+    CHECK_NULL_RETURN(rotationGestureEvent, errValue);
+    const auto& angle = rotationGestureEvent->GetAngle();
     return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_RotationGestureEvent peer,
@@ -46,9 +48,11 @@ void SetAngleImpl(Ark_RotationGestureEvent peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(angle);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetAngle(Converter::Convert<float>(*angle));
+    auto* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    RotationGestureEvent* rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(event);
+    CHECK_NULL_VOID(rotationGestureEvent);
+    rotationGestureEvent->SetAngle(Converter::Convert<float>(*angle));
 }
 } // RotationGestureEventAccessor
 const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccessor()

@@ -66,6 +66,8 @@ export class InteropNativeModule {
     @ani.unsafe.Direct
     native static _Malloc(length: int64): KPointer
     @ani.unsafe.Direct
+    native static _GetMallocFinalizer(): KPointer
+    @ani.unsafe.Direct
     native static _Free(data: KPointer): void
     @ani.unsafe.Quick
     native static _CopyArray(data: KPointer, length: int64, args: KUint8ArrayPtr): void

@@ -26637,7 +26637,7 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     void (*startImageAnalyzer)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_CanvasRenderingContext2D peer,
@@ -26670,7 +26670,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
 } GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
 
@@ -26731,6 +26731,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
                           const Array_FingerInfo* fingerList);
+    Ark_GestureControl_GestureType (*getType)(Ark_BaseGestureEvent peer);
 } GENERATED_ArkUIBaseGestureEventAccessor;
 
 typedef struct GENERATED_ArkUITapGestureEventAccessor {

@@ -86,6 +86,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/RefreshModifier.ets",
   "arkui-preprocessed/arkui/RenderNode.ets",
   "arkui-preprocessed/arkui/ReusablePool.ets",
+  "arkui-preprocessed/arkui/RichEditorModifier.ets",
   "arkui-preprocessed/arkui/RowModifier.ets",
   "arkui-preprocessed/arkui/RowSplitModifier.ets",
   "arkui-preprocessed/arkui/ScrollModifier.ets",

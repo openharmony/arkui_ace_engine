@@ -2262,8 +2262,12 @@ HWTEST_F(SelectTestNg, SelectMenuOutline001, TestSize.Level1)
     Dimension outlineWidthVaule = Dimension(10.0f, DimensionUnit::VP);
     Color outlineColorValue = Color::RED;
     MenuParam menuParam;
-    menuParam.outlineWidth->SetBorderWidth(outlineWidthVaule);
-    menuParam.outlineColor->SetColor(outlineColorValue);
+    NG::BorderWidthProperty outlineWidth;
+    NG::BorderColorProperty colorProperty;
+    outlineWidth.SetBorderWidth(outlineWidthVaule);
+    colorProperty.SetColor(outlineColorValue);
+    menuParam.outlineWidth = outlineWidth;
+    menuParam.outlineColor = colorProperty;
     SelectModelNG selectModelInstance;
     /**
      * @tc.steps: step2. Call SetMenuOutline.

@@ -308,10 +308,12 @@ export class Application {
         let preState = uiContextRouter.getPreState();
         ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState, preState);
+        ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
             this.updateStates(this.manager!, rootState, preState);
+            ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;

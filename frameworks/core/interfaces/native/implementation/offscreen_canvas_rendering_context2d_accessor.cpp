@@ -60,7 +60,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Float32* quality)
+                         const Opt_Number* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);

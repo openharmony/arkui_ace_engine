@@ -140,7 +140,15 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({std::to_string(errCode), errStr});
+        }
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
     auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
     auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
         if (indexVectOpt) {
@@ -150,16 +158,7 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
             peerImpl->TriggerPreloadItems({});
         }
     };
-    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
-
-    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
-        if (errCode == ERROR_CODE_NO_ERROR) {
-            promise.Resolve();
-        } else {
-            promise.Reject({std::to_string(errCode), errStr});
-        }
-    };
-    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()

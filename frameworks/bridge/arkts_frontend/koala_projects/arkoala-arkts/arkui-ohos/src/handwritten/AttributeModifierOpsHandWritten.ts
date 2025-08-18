@@ -34,6 +34,7 @@ import { ArkTextInputComponent, TextInputAttribute, ArkTextInputPeer, TextInputO
 import { ArkTextAreaComponent, TextAreaAttribute, ArkTextAreaPeer, TextAreaOptions } from '../component/textArea';
 import { ArkMarqueeComponent, MarqueeAttribute, ArkMarqueePeer, MarqueeOptions } from '../component/marquee';
 import { ArkHyperlinkComponent, HyperlinkAttribute, ArkHyperlinkPeer } from '../component/hyperlink';
+import { ArkRichEditorComponent, RichEditorAttribute, RichEditorOptions, RichEditorStyledStringOptions } from '../component/richEditor';
 import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
 import { CommonModifier } from '../CommonModifier';
 import { ButtonModifier } from "../ButtonModifier";
@@ -56,6 +57,7 @@ import { TextInputModifier } from '../TextInputModifier';
 import { TextAreaModifier } from '../TextAreaModifier';
 import { MarqueeModifier } from '../MarqueeModifier';
 import { HyperlinkModifier } from '../HyperlinkModifier';
+import { RichEditorModifier } from '../RichEditorModifier';
 import { Resource } from 'global.resource';
 import { runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkGridComponent, GridAttribute } from '../component/grid';
@@ -1089,4 +1091,45 @@ export function hookHyperlinkAttributeModifier(component: ArkHyperlinkComponent,
         return initComponent;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<HyperlinkAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookRichEditorAttributeModifier(component: ArkRichEditorComponent,
+    modifier: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): RichEditorModifier => {
+        let isRichEditorModifier: boolean = modifier instanceof RichEditorModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new RichEditorModifier();
+        if (isRichEditorModifier) {
+            let richEditorModifier = modifier as object as RichEditorModifier;
+            initModifier.mergeModifier(richEditorModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length != 1) {
+            throw new Error('parameters length error')
+        }
+        let value_casted: RichEditorOptions | RichEditorStyledStringOptions =
+            params[0] as RichEditorOptions | RichEditorStyledStringOptions;
+        let richEditorComponent: ArkRichEditorComponent = component as ArkRichEditorComponent;
+        richEditorComponent.setRichEditorOptions(value_casted);
+    };
+    let updaterReceiver = (): ArkRichEditorComponent => {
+        let initComponent: ArkRichEditorComponent = new ArkRichEditorComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<RichEditorAttribute>, attributeSet,
+        constructParam, updaterReceiver, component.getPeer());
 }

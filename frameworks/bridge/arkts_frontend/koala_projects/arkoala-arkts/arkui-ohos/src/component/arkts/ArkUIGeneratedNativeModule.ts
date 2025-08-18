@@ -5795,6 +5795,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _BaseGestureEvent_getType(ptr: KPointer): int32
+    @ani.unsafe.Direct
     native static _TapGestureEvent_ctor(): KPointer
     @ani.unsafe.Direct
     native static _TapGestureEvent_getFinalizer(): KPointer

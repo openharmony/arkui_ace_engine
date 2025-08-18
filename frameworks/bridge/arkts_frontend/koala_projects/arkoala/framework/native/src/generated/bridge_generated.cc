@@ -40089,14 +40089,14 @@ Ark_String impl_CanvasRenderingContext2D_toDataURL(Ark_NativePointer thisPtr, KS
         }
         Opt_String type_value = type_value_buf;;
         const auto quality_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Float32 quality_value_buf = {};
+        Opt_Number quality_value_buf = {};
         quality_value_buf.tag = quality_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (quality_value_buf_runtimeType))
         {
-            quality_value_buf.value = thisDeserializer.readFloat32();
+            quality_value_buf.value = thisDeserializer.readNumber();
         }
-        Opt_Float32 quality_value = quality_value_buf;;
-        return GetAccessors()->getCanvasRenderingContext2DAccessor()->toDataURL(self, (const Opt_String*)&type_value, (const Opt_Float32*)&quality_value);
+        Opt_Number quality_value = quality_value_buf;;
+        return GetAccessors()->getCanvasRenderingContext2DAccessor()->toDataURL(self, (const Opt_String*)&type_value, (const Opt_Number*)&quality_value);
 }
 KOALA_INTEROP_3(CanvasRenderingContext2D_toDataURL, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CanvasRenderingContext2D_startImageAnalyzer(KVMContext vmContext, Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -40206,14 +40206,14 @@ Ark_String impl_OffscreenCanvasRenderingContext2D_toDataURL(Ark_NativePointer th
         }
         Opt_String type_value = type_value_buf;;
         const auto quality_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Float32 quality_value_buf = {};
+        Opt_Number quality_value_buf = {};
         quality_value_buf.tag = quality_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (quality_value_buf_runtimeType))
         {
-            quality_value_buf.value = thisDeserializer.readFloat32();
+            quality_value_buf.value = thisDeserializer.readNumber();
         }
-        Opt_Float32 quality_value = quality_value_buf;;
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->toDataURL(self, (const Opt_String*)&type_value, (const Opt_Float32*)&quality_value);
+        Opt_Number quality_value = quality_value_buf;;
+        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->toDataURL(self, (const Opt_String*)&type_value, (const Opt_Number*)&quality_value);
 }
 KOALA_INTEROP_3(OffscreenCanvasRenderingContext2D_toDataURL, KStringPtr, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(Ark_NativePointer thisPtr) {
@@ -40450,6 +40450,11 @@ void impl_BaseGestureEvent_setFingerList(Ark_NativePointer thisPtr, KSerializerB
         GetAccessors()->getBaseGestureEventAccessor()->setFingerList(self, (const Array_FingerInfo*)&fingerList_value);
 }
 KOALA_INTEROP_DIRECT_V3(BaseGestureEvent_setFingerList, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_BaseGestureEvent_getType(Ark_NativePointer thisPtr) {
+        Ark_BaseGestureEvent self = reinterpret_cast<Ark_BaseGestureEvent>(thisPtr);
+        return GetAccessors()->getBaseGestureEventAccessor()->getType(self);
+}
+KOALA_INTEROP_DIRECT_1(BaseGestureEvent_getType, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_TapGestureEvent_ctor() {
         return GetAccessors()->getTapGestureEventAccessor()->ctor();
 }
