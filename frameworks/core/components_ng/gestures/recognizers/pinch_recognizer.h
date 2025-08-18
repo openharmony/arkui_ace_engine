@@ -62,6 +62,7 @@ private:
 
     void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
+    void GetGestureEventInfo(GestureEvent& info);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     Offset ComputePinchCenter();
