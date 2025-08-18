@@ -34,6 +34,8 @@ import {
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil";
 import { DetachedRootEntryImpl, UIContextImpl } from "arkui/handwritten/UIContextImpl";
+import { CustomComponent } from "./customComponent";
+import { setNeedCreate } from "../ArkComponentRoot";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -91,6 +93,44 @@ export function compatibleComponent(
     });
 }
 
+export function compatibleStaticComponent<T extends CustomComponent<T, T_Options>, T_Options>(
+    factory: () => T,
+    options?: T_Options,
+    content?: () => void
+): number {
+    const instantiateImpl = /** @memo */ () => {
+        T._instantiateImpl(undefined, factory, options, undefined, content);
+    };
+
+    let uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+    let manager = uiContext.stateMgr;
+    if (manager === undefined) {
+        manager = GlobalStateManager.instance;
+    }
+
+    const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
+        const frozen = manager.frozen;
+        manager.frozen = true;
+        ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
+        let r = OBSERVE.renderingComponent;
+        OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+        const needCreate = setNeedCreate(true);
+        memoEntry<void>(context, 0, instantiateImpl);
+        setNeedCreate(needCreate);
+        OBSERVE.renderingComponent = r;
+        ArkUIAniModule._Common_Restore_InstanceId();
+        manager.frozen = frozen;
+    });
+
+    const inc = node.value;
+    const peerNode = findPeerNode(inc);
+    if (peerNode === undefined) {
+        node.dispose();
+        return 0;
+    }
+    uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+    return peerNode.getPeerPtr() as number;
+}
 
 function openInterop(): void {
     let global = ESValue.getGlobal();
@@ -101,6 +141,7 @@ function openInterop(): void {
     openInterop.invoke();
     registerCreateWatchFuncCallback();
     registerCreateStaticObservedCallback();
+    registerCompatibleStaticComponentCallback();
 }
 
 function closeInterop(): void {
@@ -239,11 +280,11 @@ export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
 }
 
 export function registerCreateWatchFuncCallback(): void {
-    const createWatchFuncCallback = (callback: WatchFuncType, value: Object): WatchIdType => {
+    const createWatchFuncCallback = (callback: WatchFuncType, value: Object): InteropWatchFunc => {
         const watchFunc = new InteropWatchFunc(callback);
         const watchFuncId = watchFunc.id();
         (value as IObservedObject).addWatchSubscriber(watchFuncId);
-        return watchFuncId;
+        return watchFunc;
     }
     let global = ESValue.getGlobal();
     let registerCallback = global.getProperty('registerCallbackForCreateWatchID');
@@ -258,6 +299,13 @@ export function registerCreateStaticObservedCallback(): void {
     let global = ESValue.getGlobal();
     let registerCallback = global.getProperty('registerCallbackForMakeObserved');
     registerCallback.invoke(makeObservedcallback);
+    return;
+}
+
+export function registerCompatibleStaticComponentCallback(): void {
+    let global = ESValue.getGlobal();
+    let registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
+    registerCallback.invoke(compatibleStaticComponent);
     return;
 }
 

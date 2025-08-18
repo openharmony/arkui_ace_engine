@@ -24,7 +24,7 @@ class InteropExtractorModule {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
             };
             if (typeof InteropExtractorModule.createWatchFunc !== undefined && typeof InteropExtractorModule.createWatchFunc === 'function') {
-                owningProperty.staticWatchId = InteropExtractorModule.createWatchFunc(callback, newValue);
+                owningProperty.staticWatchFunc = InteropExtractorModule.createWatchFunc(callback, newValue);
             }
         }
         return newValue;
@@ -39,4 +39,9 @@ class InteropExtractorModule {
 
     static createWatchFunc?: (watchFuncCallback: WatchFuncType, newValue: Object) => any;
     static makeObserved?: (value: Object) => Object;
+    static compatibleStaticComponent?: (
+        factory: () => Object,
+        options?: Object,
+        content?: () => void
+    ) => number;
 }
