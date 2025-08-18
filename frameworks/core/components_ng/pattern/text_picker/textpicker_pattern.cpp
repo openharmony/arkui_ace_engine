@@ -1770,7 +1770,14 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
     auto parentIdealSize = stackLayoutConstraint->parentIdealSize;
     if (parentIdealSize.Width().has_value()) {
         pickerContentSize.SetWidth(parentIdealSize.Width().value());
+    } else {
+        auto layoutPolicy = pickerLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy->IsWidthMatch()) {
+            float contentWidth = pickerLayoutConstraint->parentIdealSize.Width().value_or(0);
+            pickerContentSize.SetWidth(contentWidth);
+        }
     }
+
     if (parentIdealSize.Height().has_value()) {
         pickerContentSize.SetHeight(parentIdealSize.Height().value());
     }
