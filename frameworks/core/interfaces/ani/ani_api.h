@@ -55,7 +55,6 @@ typedef class __ani_fn_object *ani_fn_object;
 typedef class __ani_string* ani_string;
 typedef class __ani_enum_item* ani_enum_item;
 typedef class __ani_error* ani_error;
-typedef class __ani_array_double *ani_array_double;
 typedef struct __ani_resolver *ani_resolver;
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;

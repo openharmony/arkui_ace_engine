@@ -1840,7 +1840,7 @@ class NodeAdapterThunk extends NativeThunk {
     }
 }
 
-class NodeAdapterFinalizabel extends Finalizable {
+class NodeAdapterFinalizable extends Finalizable {
     ptr: pointer
     finalizer: pointer
     cleaner: NativeThunk | undefined = undefined
@@ -1879,7 +1879,7 @@ export class NodeAdapter implements MaterializedBase {
 
     constructor() {
         const retval = ArkUIAniModule._NodeAdapter_Construct(this);
-        this.peer = new NodeAdapterFinalizabel(retval);
+        this.peer = new NodeAdapterFinalizable(retval);
     }
     getPeer(): Finalizable | undefined {
         return this.peer;

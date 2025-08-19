@@ -95,8 +95,8 @@ ani_boolean NodeAdapterAttachNodeAdapter(ani_long ptr, ani_long node)
 
 void NodeAdapterDispose(ani_long ptr)
 {
-    CHECK_NULL_VOID(ptr);
     auto adapter = reinterpret_cast<UINodeAdapter*>(ptr);
+    CHECK_NULL_VOID(ptr);
     adapter->DecRefCount();
 }
 
