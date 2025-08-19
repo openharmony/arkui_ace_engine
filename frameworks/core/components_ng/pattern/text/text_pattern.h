@@ -1195,6 +1195,7 @@ private:
     void AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData);
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
     bool RegularMatchNumbers(const std::u16string& content);
+    void ResetMouseLeftPressedState();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1208,6 +1209,7 @@ private:
     int32_t clickedSpanPosition_ = -1;
     Offset leftMousePressedOffset_;
     bool isEnableHapticFeedback_ = true;
+    bool mouseUpAndDownPointChange_ = false;
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
