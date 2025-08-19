@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class PatternLockPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty);
 
 public:
     PatternLockPaintProperty() = default;

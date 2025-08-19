@@ -45,7 +45,6 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
-#include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "nweb_helper.h"
@@ -5678,7 +5677,6 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 
 void WebDelegate::AccessibilitySendPageChange()
 {
-    SetPageFinishedState(true);
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostDelayedTask(
         [weak = WeakClaim(this)]() {
@@ -5695,6 +5693,7 @@ void WebDelegate::AccessibilitySendPageChange()
             if (!accessibilityManager->IsScreenReaderEnabled()) {
                 return;
             }
+            delegate->SetPageFinishedState(true);
             if (webNode->IsOnMainTree()) {
                 if (!webPattern->CheckVisible()) {
                     bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);

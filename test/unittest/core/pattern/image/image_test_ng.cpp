@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -898,10 +898,30 @@ HWTEST_F(ImageTestNg, ImageCreator005, TestSize.Level0)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(frameNode, nullptr);
 
-    ImageModelNG::ResetImage(&(*frameNode));
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
 
     auto draggable = frameNode->IsDraggable();
-    EXPECT_EQ(draggable, true);
+    EXPECT_FALSE(draggable);
+}
+
+/**
+ * @tc.name: ImageCreator006
+ * @tc.desc: Verify that CreateFrameNode reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageCreator006, TestSize.Level0)
+{
+    auto nodeId = int32_t(1);
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME, false);
+
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    ImageModelNG::ResetImage(frameNode.GetRawPtr());
+
+    auto draggable = frameNode->IsDraggable();
+    EXPECT_TRUE(draggable);
 }
 
 /**
@@ -1912,6 +1932,66 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level0)
     frameNode->SetDraggable(false);
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->IsDraggable(), false);
+}
+
+/**
+ * @tc.name: TestEnableAnalyzer001
+ * @tc.desc: Test image enableAnalyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestEnableAnalyzer001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), false);
+
+    /**
+     * @tc.steps: step3. set enableAnalyzer
+     */
+    pattern->EnableAnalyzer(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), true);
+    pattern->EnableAnalyzer(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->IsEnableAnalyzer(), false);
+}
+
+/**
+ * @tc.name: TestCopyOptions001
+ * @tc.desc: Test image copyOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestCopyOptions001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::None);
+
+    /**
+     * @tc.steps: step3. set copyOptions
+     */
+    pattern->SetCopyOption(CopyOptions::Local);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::Local);
+    pattern->SetCopyOption(CopyOptions::Distributed);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->GetCopyOption(), CopyOptions::Distributed);
 }
 
 /**

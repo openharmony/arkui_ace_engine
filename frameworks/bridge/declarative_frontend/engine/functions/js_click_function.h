@@ -28,7 +28,7 @@ namespace OHOS::Ace::Framework {
 #define HAND_LEFT 1
 #define HAND_RIGHT 2
 class JsClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsClickFunction, JsFunction);
 
 public:
     explicit JsClickFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
@@ -41,7 +41,7 @@ public:
 };
 
 class JsWeakClickFunction : public JsWeakFunction {
-    DECLARE_ACE_TYPE(JsWeakClickFunction, JsWeakFunction)
+    DECLARE_ACE_TYPE(JsWeakClickFunction, JsWeakFunction);
 
 public:
     explicit JsWeakClickFunction(const JSRef<JSFunc>& jsFunction) : JsWeakFunction(JSRef<JSObject>(), jsFunction) {}

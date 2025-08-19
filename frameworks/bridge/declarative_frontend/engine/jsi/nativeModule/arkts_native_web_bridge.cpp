@@ -295,10 +295,11 @@ ArkUINativeModuleValue WebBridge::SetOnControllerAttached(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                         func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, CALL_ARG_0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnControllerAttached(nativeNode, reinterpret_cast<void*>(&callback));
@@ -440,11 +441,12 @@ ArkUINativeModuleValue WebBridge::SetOnScroll(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(WebOnScrollEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(WebOnScrollEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           WebOnScrollEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
 
         const char* keys[] = { "xOffset", "yOffset" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetX()),
@@ -486,11 +488,12 @@ ArkUINativeModuleValue WebBridge::SetOnOverScroll(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(WebOnOverScrollEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(WebOnOverScrollEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
                                                               WebOnOverScrollEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
 
         const char* keys[] = { "xOffset", "yOffset" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetX()),
@@ -532,10 +535,11 @@ ArkUINativeModuleValue WebBridge::SetOnRequestSelected(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                         func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnRequestSelectedCallBack(
@@ -570,11 +574,12 @@ ArkUINativeModuleValue WebBridge::SetOnScaleChange(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(ScaleChangeEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(ScaleChangeEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           ScaleChangeEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "oldScale", "newScale" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetOnScaleChangeOldScale()),
             panda::NumberRef::New(vm, event.GetOnScaleChangeNewScale()) };
@@ -615,10 +620,11 @@ ArkUINativeModuleValue WebBridge::SetOnContextMenuHide(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                         func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnContextMenuHideCallBack(
@@ -1287,11 +1293,12 @@ ArkUINativeModuleValue WebBridge::SetOnNativeEmbedGestureEvent(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(NativeEmbeadTouchInfo&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(NativeEmbeadTouchInfo&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func)](
                                                                NativeEmbeadTouchInfo& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         auto info = event.GetTouchEventInfo();
         auto touchEventObject = CreateTouchEventInfo(vm, info);
 
@@ -1387,11 +1394,12 @@ ArkUINativeModuleValue WebBridge::SetOnFirstContentfulPaint(ArkUIRuntimeCallInfo
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(FirstContentfulPaintEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(FirstContentfulPaintEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                   func = panda::CopyableGlobal(vm, func)](
                                                                    FirstContentfulPaintEvent& event) -> void {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "navigationStartTick", "firstContentfulPaintMs" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int64_t>(event.GetNavigationStartTick())),
             panda::NumberRef::New(vm, static_cast<int64_t>(event.GetFirstContentfulPaintMs())) };
@@ -1474,10 +1482,11 @@ ArkUINativeModuleValue WebBridge::SetOnFullScreenExit(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                         func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, CALL_ARG_0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnFullScreenExit(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1614,11 +1623,12 @@ ArkUINativeModuleValue WebBridge::SetOnPageEnd(ArkUIRuntimeCallInfo* runtimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadWebPageFinishEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            LoadWebPageFinishEvent& event) {
+    std::function<void(LoadWebPageFinishEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                func = panda::CopyableGlobal(vm, func)](
+                                                                LoadWebPageFinishEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url" };
         Local<JSValueRef> values[] = {
             panda::StringRef::NewFromUtf8(vm, event.GetLoadedUrl().c_str()),
@@ -1659,11 +1669,12 @@ ArkUINativeModuleValue WebBridge::SetOnPageBegin(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadWebPageStartEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            LoadWebPageStartEvent& event) {
+    std::function<void(LoadWebPageStartEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func)](
+                                                               LoadWebPageStartEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url" };
         Local<JSValueRef> values[] = {
             panda::StringRef::NewFromUtf8(vm, event.GetLoadedUrl().c_str()),
@@ -1704,11 +1715,12 @@ ArkUINativeModuleValue WebBridge::SetOnProgressChange(ArkUIRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadWebProgressChangeEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            LoadWebProgressChangeEvent& event) {
+    std::function<void(LoadWebProgressChangeEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                    func = panda::CopyableGlobal(vm, func)](
+                                                                    LoadWebProgressChangeEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "newProgress" };
         Local<JSValueRef> values[] = {
             panda::NumberRef::New(vm, event.GetNewProgress()),
@@ -1749,11 +1761,12 @@ ArkUINativeModuleValue WebBridge::SetOnTitleReceive(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadWebTitleReceiveEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            LoadWebTitleReceiveEvent& event) {
+    std::function<void(LoadWebTitleReceiveEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                  func = panda::CopyableGlobal(vm, func)](
+                                                                  LoadWebTitleReceiveEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "title" };
         Local<JSValueRef> values[] = {
             panda::StringRef::NewFromUtf8(vm, event.GetTitle().c_str()),
@@ -1794,11 +1807,12 @@ ArkUINativeModuleValue WebBridge::SetOnDownloadStart(ArkUIRuntimeCallInfo* runti
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(DownloadStartEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            DownloadStartEvent& event) {
+    std::function<void(DownloadStartEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                            func = panda::CopyableGlobal(vm, func)](
+                                                            DownloadStartEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "userAgent", "contentDisposition", "mimetype", "contentLength" };
         Local<JSValueRef> values[] = {
             panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
@@ -2002,11 +2016,12 @@ ArkUINativeModuleValue WebBridge::SetOnRenderProcessNotResponding(ArkUIRuntimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(RenderProcessNotRespondingEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
-                                                                            RenderProcessNotRespondingEvent& event) {
+    std::function<void(RenderProcessNotRespondingEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                         func = panda::CopyableGlobal(vm, func)](
+                                                                         RenderProcessNotRespondingEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "jsStack", "pid", "reason"};
         Local<JSValueRef> values[] = {
             panda::StringRef::NewFromUtf8(vm, event.GetJsStack().c_str()),
@@ -2049,11 +2064,12 @@ ArkUINativeModuleValue WebBridge::SetOnPageVisible(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(PageVisibleEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(PageVisibleEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           PageVisibleEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->Set(
             vm, panda::StringRef::NewFromUtf8(vm, "url"), panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()));
@@ -2090,11 +2106,12 @@ ArkUINativeModuleValue WebBridge::SetOnRenderExited(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(RenderExitedEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(RenderExitedEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            RenderExitedEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "renderExitReason" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetExitedReason()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
@@ -2162,11 +2179,12 @@ ArkUINativeModuleValue WebBridge::SetOnResourceLoad(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(ResourceLoadEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(ResourceLoadEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            ResourceLoadEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "url"),
             panda::StringRef::NewFromUtf8(vm, event.GetOnResourceLoadUrl().c_str()));
@@ -2205,10 +2223,11 @@ ArkUINativeModuleValue WebBridge::SetOnRefreshAccessedHistory(ArkUIRuntimeCallIn
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(RefreshAccessedHistoryEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](RefreshAccessedHistoryEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](RefreshAccessedHistoryEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             const char* keys[] = { "url", "isRefreshed" };
             Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetVisitedUrl().c_str()),
                 panda::BooleanRef::New(vm, event.IsRefreshed()) };
@@ -2251,10 +2270,11 @@ ArkUINativeModuleValue WebBridge::SetOnNavigationEntryCommitted(ArkUIRuntimeCall
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(NavigationEntryCommittedEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](NavigationEntryCommittedEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](NavigationEntryCommittedEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             const char* keys[] = { "isMainFrame", "isSameDocument", "didReplaceEntry", "navigationType", "url" };
             Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, event.IsMainFrame()),
                 panda::BooleanRef::New(vm, event.IsSameDocument()), panda::BooleanRef::New(vm, event.DidReplaceEntry()),
@@ -2298,11 +2318,12 @@ ArkUINativeModuleValue WebBridge::SetOnSearchResultReceive(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(SearchResultReceiveEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(SearchResultReceiveEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                  func = panda::CopyableGlobal(vm, func)](
                                                                   SearchResultReceiveEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "activeMatchOrdinal", "numberOfMatches", "isDoneCounting" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetActiveMatchOrdinal()),
             panda::NumberRef::New(vm, event.GetNumberOfMatches()),
@@ -2365,11 +2386,12 @@ ArkUINativeModuleValue WebBridge::SetOnTouchIconUrlReceived(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(TouchIconUrlEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(TouchIconUrlEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            TouchIconUrlEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "precomposed" };
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
             panda::BooleanRef::New(vm, event.GetPreComposed()) };
@@ -2411,10 +2433,11 @@ ArkUINativeModuleValue WebBridge::SetOnRenderProcessResponding(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                         func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnRenderProcessRespondingCallBack(
@@ -2447,11 +2470,12 @@ ArkUINativeModuleValue WebBridge::SetOnWindowNew(ArkUIRuntimeCallInfo* runtimeCa
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(WebWindowNewEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(WebWindowNewEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            WebWindowNewEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "isAlert", "isUserTrigger", "targeturl", "handler" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateJSWindowNewHandler(event);
         Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, event.IsAlert()),
@@ -2494,10 +2518,11 @@ ArkUINativeModuleValue WebBridge::SetOnGeolocationShow(ArkUIRuntimeCallInfo* run
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(LoadWebGeolocationShowEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](LoadWebGeolocationShowEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](LoadWebGeolocationShowEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             const char* keys[] = { "origin", "geolocation" };
 
             Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateGeolocationShowHandler(event);
@@ -2539,11 +2564,12 @@ ArkUINativeModuleValue WebBridge::SetOnPermissionRequest(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(WebPermissionRequestEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(WebPermissionRequestEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                   func = panda::CopyableGlobal(vm, func)](
                                                                    WebPermissionRequestEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "request" };
 
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreatePermissionRequestHandler(event);
@@ -2584,10 +2610,11 @@ ArkUINativeModuleValue WebBridge::SetOnScreenCaptureRequest(ArkUIRuntimeCallInfo
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(WebScreenCaptureRequestEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](WebScreenCaptureRequestEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](WebScreenCaptureRequestEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             const char* keys[] = { "handler" };
 
             Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateScreenCaptureHandler(event);
@@ -2627,11 +2654,12 @@ ArkUINativeModuleValue WebBridge::SetOnFullScreenEnter(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(FullScreenEnterEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(FullScreenEnterEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
                                                               FullScreenEnterEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "videoWidth", "videoHeight", "handler" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateFullScreenEnterHandler(event);
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int64_t>(event.GetVideoNaturalWidth())),
@@ -2673,10 +2701,11 @@ ArkUINativeModuleValue WebBridge::SetOnWindowExit(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weak = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         func->Call(vm, func.ToLocal(), nullptr, CALL_ARG_0);
     };
     GetArkUINodeModifiers()->getWebModifier()->setOnWindowExit(nativeNode, reinterpret_cast<void*>(&callback));
@@ -2709,11 +2738,12 @@ ArkUINativeModuleValue WebBridge::SetOnAlert(ArkUIRuntimeCallInfo* runtimeCallIn
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<bool(WebDialogEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebDialogEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                        func = panda::CopyableGlobal(vm, func)](
                                                         WebDialogEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "message", "result" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateCommonDialogResultHandler(event);
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
@@ -2759,11 +2789,12 @@ ArkUINativeModuleValue WebBridge::SetOnConfirm(ArkUIRuntimeCallInfo* runtimeCall
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<bool(WebDialogEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebDialogEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                        func = panda::CopyableGlobal(vm, func)](
                                                         WebDialogEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "message", "result" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateCommonDialogResultHandler(event);
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
@@ -2808,11 +2839,12 @@ ArkUINativeModuleValue WebBridge::SetOnPrompt(ArkUIRuntimeCallInfo* runtimeCallI
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(WebDialogEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebDialogEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                        func = panda::CopyableGlobal(vm, func)](
                                                         WebDialogEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "message", "value", "result" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateCommonDialogResultHandler(event);
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),
@@ -2857,11 +2889,12 @@ ArkUINativeModuleValue WebBridge::SetOnShowFileSelector(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(FileSelectorEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(FileSelectorEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            FileSelectorEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "fileSelector", "result" };
         Framework::JSRef<Framework::JSObject> handlerParamObj = Framework::JSWeb::CreateFileSelectorParamHandler(event);
         Framework::JSRef<Framework::JSObject> handlerresultObj =
@@ -2905,11 +2938,12 @@ ArkUINativeModuleValue WebBridge::SetOnContextMenuShow(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(ContextMenuEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(ContextMenuEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           ContextMenuEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "param", "result" };
         Framework::JSRef<Framework::JSObject> handlerParamObj = Framework::JSWeb::CreateContextMenuParamHandler(event);
         Framework::JSRef<Framework::JSObject> handlerResultObj =
@@ -2954,10 +2988,11 @@ ArkUINativeModuleValue WebBridge::SetOnSafeBrowsingCheckResult(ArkUIRuntimeCallI
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
     std::function<void(SafeBrowsingCheckResultEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](SafeBrowsingCheckResultEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](SafeBrowsingCheckResultEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             auto eventObject = panda::ObjectRef::New(vm);
             eventObject->Set(
                 vm, panda::StringRef::NewFromUtf8(vm, "threatType"), panda::NumberRef::New(vm, event.GetThreatType()));
@@ -3046,11 +3081,12 @@ ArkUINativeModuleValue WebBridge::SetOnInterceptKeyEvent(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<bool(KeyEventInfo&)> onKeyEvent = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(KeyEventInfo&)> onKeyEvent = [vm, weak = AceType::WeakClaim(frameNode),
+                                                        func = panda::CopyableGlobal(vm, func)](
                                                         KeyEventInfo& info) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode", "timestamp",
             "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
             "isScrollLockOn" };
@@ -3107,11 +3143,12 @@ ArkUINativeModuleValue WebBridge::SetOnErrorReceive(ArkUIRuntimeCallInfo* runtim
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(ReceivedErrorEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(ReceivedErrorEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                            func = panda::CopyableGlobal(vm, func)](
                                                             ReceivedErrorEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "request", "error" };
         Framework::JSRef<Framework::JSObject> handlerRequestObj =
             Framework::JSWeb::CreateRequestErrorHandler(event);
@@ -3154,11 +3191,12 @@ ArkUINativeModuleValue WebBridge::SetOnLoadIntercept(ArkUIRuntimeCallInfo* runti
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(LoadInterceptEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(LoadInterceptEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                            func = panda::CopyableGlobal(vm, func)](
                                                             LoadInterceptEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "data" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateLoadInterceptHandler(event);
         Local<JSValueRef> values[] = { handlerObj->GetLocalHandle() };
@@ -3200,11 +3238,12 @@ ArkUINativeModuleValue WebBridge::SetOnHttpErrorReceive(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(ReceivedHttpErrorEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(ReceivedHttpErrorEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                func = panda::CopyableGlobal(vm, func)](
                                                                 ReceivedHttpErrorEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "request", "response" };
         Framework::JSRef<Framework::JSObject> handlerRequestObj =
             Framework::JSWeb::CreateHttpErrorReceiveRequestHandler(event);
@@ -3248,11 +3287,12 @@ ArkUINativeModuleValue WebBridge::SetOnOverrideUrlLoading(ArkUIRuntimeCallInfo* 
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(LoadOverrideEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(LoadOverrideEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                           func = panda::CopyableGlobal(vm, func)](
                                                            LoadOverrideEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateOverrideUrlLoadingHandler(event);
         panda::Local<panda::JSValueRef> params[1] = { handlerObj->GetLocalHandle() };
         auto ret = func->Call(vm, func.ToLocal(), params, CALL_ARG_1);
@@ -3288,11 +3328,12 @@ ArkUINativeModuleValue WebBridge::SetOnHttpAuthRequest(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(WebHttpAuthEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebHttpAuthEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           WebHttpAuthEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "host", "realm", "handler" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateHttpAuthRequestHandler(event);
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetHost().c_str()),
@@ -3335,11 +3376,12 @@ ArkUINativeModuleValue WebBridge::SetOnConsole(ArkUIRuntimeCallInfo* runtimeCall
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(LoadWebConsoleLogEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(LoadWebConsoleLogEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                                func = panda::CopyableGlobal(vm, func)](
                                                                 LoadWebConsoleLogEvent& event) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateConsoleHandler(event);
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "message"), handlerObj->GetLocalHandle());
@@ -3379,11 +3421,12 @@ ArkUINativeModuleValue WebBridge::SetOnSslErrorEvent(ArkUIRuntimeCallInfo* runti
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(WebAllSslErrorEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(WebAllSslErrorEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                             func = panda::CopyableGlobal(vm, func)](
                                                              WebAllSslErrorEvent& event) -> void {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "handler", "error", "url", "originalUrl", "referrer", "isFatalError", "isMainFrame" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateSslErrorEventHandler(event);
         Local<JSValueRef> values[] = { handlerObj->GetLocalHandle(), panda::NumberRef::New(vm, event.GetError()),
@@ -3427,11 +3470,12 @@ ArkUINativeModuleValue WebBridge::SetOnDataResubmitted(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(DataResubmittedEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(DataResubmittedEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
                                                               DataResubmittedEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateDataResubmittedHandler(event);
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "handler"), handlerObj->GetLocalHandle());
@@ -3516,11 +3560,12 @@ ArkUINativeModuleValue WebBridge::SetOnSslErrorEventReceive(ArkUIRuntimeCallInfo
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(WebSslErrorEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebSslErrorEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                          func = panda::CopyableGlobal(vm, func)](
                                                           WebSslErrorEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         auto certChainDataArray = ConvertCertChainDataToArray(vm, event.GetCertChainData());
         const char* keys[] = { "handler", "error", "certChainData" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateSslErrorEventReceiveHandler(event);
@@ -3586,11 +3631,12 @@ ArkUINativeModuleValue WebBridge::SetOnClientAuthenticationRequest(ArkUIRuntimeC
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(WebSslSelectCertEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebSslSelectCertEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                               func = panda::CopyableGlobal(vm, func)](
                                                                WebSslSelectCertEvent& event) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
 
         auto keyTypesArr = panda::ArrayRef::New(vm);
         if (keyTypesArr.IsEmpty() || keyTypesArr->IsNull()) {
@@ -3855,10 +3901,11 @@ ArkUINativeModuleValue WebBridge::SetOnInterceptRequest(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<RefPtr<WebResponse>(OnInterceptRequestEvent&)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](OnInterceptRequestEvent& event) {
+        [vm, weak = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](OnInterceptRequestEvent& event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weak);
             const char* keys[] = { "request" };
             Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateInterceptRequestHandler(event);
             Local<JSValueRef> values[] = { handlerObj->GetLocalHandle() };
@@ -3906,11 +3953,12 @@ ArkUINativeModuleValue WebBridge::SetOnFaviconReceived(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(FaviconReceivedEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(FaviconReceivedEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                              func = panda::CopyableGlobal(vm, func)](
                                                               FaviconReceivedEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "favicon" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateFaviconReceivedHandler(event);
         if (handlerObj.IsEmpty()) {
@@ -3959,11 +4007,12 @@ ArkUINativeModuleValue WebBridge::SetOnBeforeUnload(ArkUIRuntimeCallInfo* runtim
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<bool(WebDialogEvent&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<bool(WebDialogEvent&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                        func = panda::CopyableGlobal(vm, func)](
                                                         WebDialogEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak);
         const char* keys[] = { "url", "message", "result", "isReload" };
         Framework::JSRef<Framework::JSObject> handlerObj = Framework::JSWeb::CreateCommonDialogResultHandler(event);
         Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetUrl().c_str()),

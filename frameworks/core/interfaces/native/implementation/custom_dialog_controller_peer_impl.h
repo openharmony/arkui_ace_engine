@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class CustomDialogControllerPeerImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType)
+    DECLARE_ACE_TYPE(CustomDialogControllerPeerImpl, AceType);
 public:
     CustomDialogControllerPeerImpl() = default;
     ~CustomDialogControllerPeerImpl() override = default;

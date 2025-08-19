@@ -1289,6 +1289,43 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListGroupRepeatCacheCount006
+ * @tc.desc: ListItemGroup is still cache item without measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, true);
+    CreateRepeatVirtualScrollNode(3, [this](int32_t idx) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        CreateRepeatVirtualScrollNode(2, [this](int32_t idx) {
+            CreateListItem();
+            ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+        });
+    });
+    CreateDone();
+
+    FlushUITasks();
+    auto group0Node = GetChildFrameNode(frameNode_, 0);
+    EXPECT_NE(group0Node, nullptr);
+
+    /**
+     * @tc.steps: step2. Scroll -250px, ListItemGroup0 is out of view.
+     * @tc.expected: Item in ListItemGroup4 is still cached.
+     */
+    pattern_->UpdateCurrentOffset(-250, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    auto group0ChildNode = GetChildFrameNode(group0Node, 0);
+    EXPECT_NE(group0ChildNode, nullptr);
+}
+
+/**
  * @tc.name: SetHeaderFooter001
  * @tc.desc: test SetHeader/SetFooter to null, will not has header/footer
  * @tc.type: FUNC

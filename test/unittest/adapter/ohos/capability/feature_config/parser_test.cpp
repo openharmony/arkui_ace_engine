@@ -31,63 +31,26 @@ public:
     void SetUp() {};
     void TearDown() {};
 
-    OHOS::Ace::SyncloadParser syncLoadParser;
+    OHOS::Ace::SyncLoadParser syncLoadParser;
     OHOS::Ace::UINodeGcParamParser uiNodeGcParamParser;
 };
 
 /**
  * @tc.name  : IsValidDigits_ShouldReturnTrue_WhenStringIsValidDigits
  * @tc.number: ParserTest_001
- * @tc.desc  : 测试字符串全部由数字组成时,但是超出预期范围,函数应返回 false
  */
 HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringIsValidDigits, TestSize.Level0)
 {
-    std::string str = "123456";
-    EXPECT_FALSE(syncLoadParser.IsValidDigits(str));
-}
-
-/**
- * @tc.name  : IsValidDigits_ShouldReturnFalse_WhenStringIsNotAllDigits
- * @tc.number: ParserTest_002
- * @tc.desc  : 测试字符串包含非数字字符时,函数应返回 false
- */
-HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnFalse_WhenStringIsNotAllDigits, TestSize.Level0)
-{
-    std::string str = "45a";
-    EXPECT_FALSE(syncLoadParser.IsValidDigits(str));
-}
-
-/**
- * @tc.name  : IsValidDigits_ShouldReturnTrue_WhenStringIsEmpty
- * @tc.number: ParserTest_003
- * @tc.desc  : 测试空字符串时,函数应返回 false
- */
-HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringIsEmpty, TestSize.Level0)
-{
-    std::string str = "";
-    EXPECT_FALSE(syncLoadParser.IsValidDigits(str));
-}
-
-/**
- * @tc.name  : IsValidDigits_ShouldReturnFalse_WhenStringHasOnlyOneDigit
- * @tc.number: ParserTest_004
- * @tc.desc  : 测试字符串只有一个数字时,函数应返回 true
- */
-HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnFalse_WhenStringHasOnlyOneDigit, TestSize.Level0)
-{
-    std::string str = "7";
-    EXPECT_TRUE(syncLoadParser.IsValidDigits(str));
-}
-
-/**
- * @tc.name  : IsValidDigits_ShouldReturnTrue_WhenStringHasMultipleDigits
- * @tc.number: ParserTest_005
- * @tc.desc  : 测试字符串包含多个数字时,在合法范围0-999内,函数应返回 true
- */
-HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringHasMultipleDigits, TestSize.Level0)
-{
-    std::string str = "888";
-    EXPECT_TRUE(syncLoadParser.IsValidDigits(str));
+    // @tc.desc  : 测试字符串全部由数字组成时,但是超出预期范围,函数应返回 false
+    EXPECT_FALSE(syncLoadParser.IsValidDigits("123456"));
+    // @tc.desc  : 测试字符串包含非数字字符时,函数应返回 false
+    EXPECT_FALSE(syncLoadParser.IsValidDigits("45a"));
+    // @tc.desc  : 测试空字符串时,函数应返回 false
+    EXPECT_FALSE(syncLoadParser.IsValidDigits(""));
+    // @tc.desc  : 测试字符串只有一个数字时,函数应返回 true
+    EXPECT_TRUE(syncLoadParser.IsValidDigits("7"));
+    // @tc.desc  : 测试字符串包含多个数字时,在合法范围0-999内,函数应返回 true
+    EXPECT_TRUE(syncLoadParser.IsValidDigits("888"));
 }
 
 /**
@@ -119,7 +82,14 @@ HWTEST_F(ParserTest, ParseFeatureParam, TestSize.Level1)
     xmlNode node;
     auto ret = syncLoadParser.ParseFeatureParam(node);
     EXPECT_EQ(ret, OHOS::Ace::PARSE_TYPE_ERROR);
-    EXPECT_EQ(OHOS::Ace::FeatureParamManager::GetInstance().IsSyncLoadEnabled(), false);
-    uiNodeGcParamParser.ParseFeatureParam(node);
-    EXPECT_EQ(OHOS::Ace::FeatureParamManager::GetInstance().IsUINodeGcEnabled(), false);
+
+    node.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string valueKeyStr = "value";
+    const std::string valueValStr = "50";
+    xmlSetProp(&node, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStr.c_str()));
+    ret = syncLoadParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, OHOS::Ace::PARSE_EXEC_SUCCESS);
+
+    ret = uiNodeGcParamParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, OHOS::Ace::PARSE_EXEC_SUCCESS);
 }

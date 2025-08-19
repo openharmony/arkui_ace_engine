@@ -201,6 +201,7 @@ bool PixelMapImage::StretchImageWithLattice(
         static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
     CHECK_NULL_RETURN((latticeSptrAddr && (*latticeSptrAddr)), false);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -251,6 +252,7 @@ bool PixelMapImage::StretchImageWithSlice(
     RectF centerRect;
     CHECK_NULL_RETURN(ConvertSlice(config, centerRect, pixmap->GetWidth(), pixmap->GetHeight()), false);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
         case ImageInterpolation::LOW:
@@ -340,6 +342,7 @@ void PixelMapImage::DrawToRSCanvas(
         dfxConfig.GetFrameSizeWidth(), dfxConfig.GetFrameSizeHeight(), pixmap->GetWidth(), pixmap->GetHeight());
     const auto& config = GetPaintConfig();
     RSBrush brush;
+    brush.SetAntiAlias(true);
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config, pixmap->IsHdr());
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);

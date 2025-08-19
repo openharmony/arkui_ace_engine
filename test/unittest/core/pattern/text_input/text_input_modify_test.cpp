@@ -1519,7 +1519,7 @@ HWTEST_F(TextFieldModifyTest, CreateFrameNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    auto frameNode1 = TextFieldModelNG::CreateTextInputNode(ID, u"", u"place");
+    auto frameNode1 = TextFieldModelNG::CreateTextInputNode(ID, u"", u"");
     EXPECT_NE(frameNode1, nullptr);
  
     /**

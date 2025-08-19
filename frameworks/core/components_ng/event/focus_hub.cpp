@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/key_event.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1030,6 +1031,13 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep)
 
 bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
 {
+    if (IsHomeOrEndStep(moveStep)) {
+        if (!GetIsFocusGroup() && IsNestingFocusGroup()) {
+            return false;
+        }
+        auto nextNode = GetHeadOrTailChild(!IsFocusStepForward(moveStep), true);
+        return nextNode ? nextNode->RequestFocusImmediatelyInner(FocusReason::FOCUS_TRAVEL) : false;
+    }
     if (focusAlgorithm_.scopeType == ScopeType::PROJECT_AREA) {
         auto lastFocusNode = lastWeakFocusNode_.Upgrade();
         CHECK_NULL_RETURN(lastFocusNode, false);
@@ -2918,18 +2926,54 @@ bool FocusHub::IsLastWeakNodeFocused() const
     return lastFocusNode->IsCurrentFocus();
 }
 
-RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead)
+RefPtr<FocusHub> FocusHub::FindHeadOrTailDescendantFocus(bool isHead, bool isHomeOrEnd)
+{
+    auto curFrameNode = GetFrameNode();
+    auto curFocusHub = curFrameNode->GetFocusHub();
+    bool canChildBeFocused = false;
+    RefPtr<FocusHub> foundNode = nullptr;
+    canChildBeFocused = AnyChildFocusHub(
+        [isHead, isHomeOrEnd, &foundNode](const RefPtr<FocusHub>& node) {
+            auto nextFocusNode = GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL);
+            if (nextFocusNode) {
+                foundNode = nextFocusNode->GetHeadOrTailChild(isHead, isHomeOrEnd);
+                if (foundNode) {
+                    return true;
+                }
+            }
+            foundNode = node->GetHeadOrTailChild(isHead, isHomeOrEnd);
+            return foundNode != nullptr;
+        }, !isHead);
+    if (focusDepend_ == FocusDependence::CHILD) {
+        return foundNode;
+    }
+    if (focusDepend_ == FocusDependence::AUTO) {
+        if (!canChildBeFocused) {
+            return curFocusHub;
+        }
+        return foundNode;
+    }
+    return nullptr;
+}
+
+RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead, bool isHomeOrEnd)
 {
     auto curFrameNode = GetFrameNode();
     auto curFocusHub = curFrameNode->GetFocusHub();
     if (!IsFocusableWholePath()) {
         return nullptr;
     }
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (context && context->GetIsFocusingByTab()) {
+        if (!IsFocusableByTab()) {
+            return nullptr;
+        }
+    }
     // focus moves within current scope
     if (IsCurrentFocus() && !IsAllowedLoop()) {
         return nullptr;
     }
-    if (GetIsFocusGroup() && !IsNestingFocusGroup()) {
+    if (!isHomeOrEnd && GetIsFocusGroup() && !IsNestingFocusGroup()) {
         return curFocusHub;
     }
     if (focusType_ != FocusType::SCOPE || (focusType_ == FocusType::SCOPE && focusDepend_ == FocusDependence::SELF)) {
@@ -2958,30 +3002,6 @@ RefPtr<FocusHub> FocusHub::GetHeadOrTailChild(bool isHead)
             pipeline->FlushUITasks();
         }
     }
-
-    bool canChildBeFocused = false;
-    RefPtr<FocusHub> foundNode = nullptr;
-    canChildBeFocused = AnyChildFocusHub(
-        [isHead, &foundNode](const RefPtr<FocusHub>& node) {
-            auto nextFocusNode = GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL);
-            if (nextFocusNode) {
-                foundNode = nextFocusNode->GetHeadOrTailChild(isHead);
-                if (foundNode) {
-                    return true;
-                }
-            }
-            foundNode = node->GetHeadOrTailChild(isHead);
-            return foundNode != nullptr;
-        }, !isHead);
-    if (focusDepend_ == FocusDependence::CHILD) {
-        return foundNode;
-    }
-    if (focusDepend_ == FocusDependence::AUTO) {
-        if (!canChildBeFocused) {
-            return curFocusHub;
-        }
-        return foundNode;
-    }
-    return nullptr;
+    return FindHeadOrTailDescendantFocus(isHead, isHomeOrEnd);
 }
 } // namespace OHOS::Ace::NG

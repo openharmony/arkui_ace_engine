@@ -174,7 +174,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     // Execute the function.
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId,
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, tokenOut,
         multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
@@ -186,7 +187,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
             return;
         }
         context->PrepareCloseImplicitAnimation();
-        if (multiInstanceEnabled) {
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
             AnimationUtils::CloseImplicitAnimation(context);
         }
     });
@@ -236,7 +238,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             "param is [option:%{public}s]", option.ToString().c_str());
     }
     NG::ScopedViewStackProcessor scopedProcessor;
-    AceEngine::Get().NotifyContainersOrderly([triggerId, &option,
+    auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
+    AceEngine::Get().NotifyContainersOrderly([triggerId, &option, tokenOut,
         multiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled()](const RefPtr<Container>& container) {
         if (!CheckContainer(container)) {
             return;
@@ -248,7 +251,8 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
             return;
         }
         context->PrepareOpenImplicitAnimation();
-        if (multiInstanceEnabled) {
+        auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
+        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
             AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
         }
     });

@@ -1371,6 +1371,10 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
 {
 }
 
+void PipelineBase::ForceUpdateDesignWidthScale(int32_t width)
+{
+}
+
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;

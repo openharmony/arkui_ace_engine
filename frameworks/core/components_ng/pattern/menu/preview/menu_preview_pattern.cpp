@@ -63,14 +63,16 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
     scaleOption.SetOnFinishEvent(
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
-
+    CHECK_NULL_VOID(menuPattern);
+    auto menuNode = menuPattern->GetHost();
+    CHECK_NULL_VOID(menuNode);
     AnimationUtils::Animate(
         scaleOption,
         [context, previewAfterAnimationScale]() {
             CHECK_NULL_VOID(context);
             context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
         },
-        scaleOption.GetOnFinishEvent());
+        scaleOption.GetOnFinishEvent(), nullptr, menuNode->GetContextRefPtr());
 }
 
 void UpdateWhenNonNegative(BorderRadiusPropertyT<Dimension>& result, const BorderRadiusPropertyT<Dimension>& value)
@@ -133,19 +135,24 @@ void MenuPreviewPattern::ShowBorderRadiusAndShadowAnimation(const MenuParam& men
     option.SetDelay(delay);
 
     context->UpdateBorderRadius(context->GetBorderRadius().value_or(BorderRadiusProperty()));
-    pipeline->AddAfterLayoutTask([option, context, borderRadius, shadow, isShowHoverImage = isShowHoverImage_]() {
+    pipeline->AddAfterLayoutTask([option, weakNode = AceType::WeakClaim(AceType::RawPtr(host)), borderRadius, shadow,
+                                     isShowHoverImage = isShowHoverImage_]() {
+        auto host = weakNode.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         AnimationUtils::Animate(
             option,
-            [context, borderRadius, shadow, isShowHoverImage]() mutable {
-                CHECK_NULL_VOID(context && shadow);
+            [renderContext, borderRadius, shadow, isShowHoverImage]() mutable {
+                CHECK_NULL_VOID(renderContext && shadow);
                 auto color = shadow->GetColor();
                 auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
                 shadow->SetColor(newColor);
-                context->UpdateBackShadow(shadow.value());
+                renderContext->UpdateBackShadow(shadow.value());
                 CHECK_NULL_VOID(!isShowHoverImage);
-                context->UpdateBorderRadius(borderRadius);
+                renderContext->UpdateBorderRadius(borderRadius);
             },
-            option.GetOnFinishEvent());
+            option.GetOnFinishEvent(), nullptr, host->GetContextRefPtr());
     });
 }
 

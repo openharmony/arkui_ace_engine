@@ -388,6 +388,9 @@ void TextFieldOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaret
     option.SetDuration(LAND_DURATION);
     option.SetCurve(LAND_CURVE);
     caretLanding_ = true;
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
     AnimationUtils::Animate(
         option,
         [weak = WeakClaim(this), originCaretOffset]() {
@@ -405,7 +408,8 @@ void TextFieldOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaret
             auto textFieldHost = textField->GetHost();
             CHECK_NULL_VOID(textFieldHost);
             textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        });
+        },
+        nullptr, contextPtr);
 }
 
 void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)

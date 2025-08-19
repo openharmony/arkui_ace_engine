@@ -177,7 +177,8 @@ void TabBarPattern::StartShowTabBarImmediately()
         pattern->isTabBarShowing_ = false;
         pattern->tabBarState_ = TabBarState::SHOW;
     };
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(option, propertyCallback, finishCallback, nullptr, pipeline);
     isTabBarShowing_ = true;
 }
 
@@ -233,7 +234,8 @@ void TabBarPattern::StartHideTabBar()
         pattern->isTabBarHiding_ = false;
         pattern->tabBarState_ = TabBarState::HIDE;
     };
-    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(option, propertyCallback, finishCallback, nullptr, pipeline);
     isTabBarHiding_ = true;
 }
 
@@ -257,7 +259,8 @@ void TabBarPattern::StopHideTabBar()
         CHECK_NULL_VOID(pattern);
         pattern->tabBarProperty_->Set(translate);
     };
-    AnimationUtils::Animate(option, propertyCallback);
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(option, propertyCallback, nullptr, nullptr, pipeline);
     isTabBarHiding_ = false;
 }
 
@@ -1771,14 +1774,18 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
     AnimationOption option;
     option.SetDuration(MASK_ANIMATION_DURATION);
     option.SetCurve(curve);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
 
     maskAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
-            unselectedImageSize, originalUnselectedMaskOffset]() {
+            unselectedImageSize, originalUnselectedMaskOffset, pipeline]() {
             AnimationUtils::AddKeyFrame(
-                HALF_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
-                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                HALF_PROGRESS,
+                [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                    unselectedImageSize, originalUnselectedMaskOffset]() {
                     auto tabBar = weak.Upgrade();
                     if (tabBar) {
                         tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
@@ -1786,10 +1793,12 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                         tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
                             NEAR_FULL_OPACITY, INVALID_RATIO, false);
                     }
-                });
+                },
+                pipeline);
             AnimationUtils::AddKeyFrame(
-                FULL_PROGRESS, [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
-                                   unselectedImageSize, originalUnselectedMaskOffset]() {
+                FULL_PROGRESS,
+                [weak, selectedIndex, unselectedIndex, selectedImageSize, originalSelectedMaskOffset,
+                    unselectedImageSize, originalUnselectedMaskOffset]() {
                     auto tabBar = weak.Upgrade();
                     if (tabBar) {
                         tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
@@ -1797,7 +1806,8 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                         tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset,
                             NO_OPACITY, HALF_MASK_RADIUS_RATIO, false);
                     }
-                });
+                },
+                pipeline);
         },
         [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex]() {
             auto tabBar = weak.Upgrade();
@@ -1807,7 +1817,8 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                 MaskAnimationFinish(host, selectedIndex, true);
                 MaskAnimationFinish(host, unselectedIndex, false);
             }
-        });
+        },
+        nullptr, pipeline);
 }
 
 void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex,
@@ -2109,7 +2120,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
             renderContext->ResetBorderRadius();
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-    });
+    }, nullptr, Claim(pipelineContext));
 }
 
 void TabBarPattern::OnTabBarIndexChange(int32_t index)
@@ -2491,7 +2502,9 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
     });
     host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, currentOffset_);
     translateAnimationIsRunning_ = true;
-    translateAnimation_ = AnimationUtils::StartAnimation(option,
+    auto pipeline = host->GetContextRefPtr();
+    translateAnimation_ = AnimationUtils::StartAnimation(
+        option,
         [weakHost = WeakClaim(RawPtr(host)), targetCurrentOffset]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
@@ -2501,7 +2514,8 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
             auto tabBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(tabBarPattern);
             tabBarPattern->translateAnimationIsRunning_ = false;
-        });
+        },
+        nullptr, pipeline);
 }
 
 void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect,
@@ -2524,7 +2538,9 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
 
     host->UpdateAnimatablePropertyFloat(propertyName, indicatorStartPos_);
     indicatorAnimationIsRunning_ = true;
-    tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(option,
+    auto pipeline = host->GetContextRefPtr();
+    tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(
+        option,
         [weakHost = WeakClaim(RawPtr(host)), propertyName, endPos = indicatorEndPos_]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
@@ -2534,7 +2550,8 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
             auto tabBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(tabBarPattern);
             tabBarPattern->indicatorAnimationIsRunning_ = false;
-        });
+        },
+        nullptr, pipeline);
 }
 
 void TabBarPattern::CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName)
@@ -2569,17 +2586,23 @@ void TabBarPattern::CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& ho
 
 void TabBarPattern::StopTranslateAnimation(bool isImmediately)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     if (isImmediately) {
         AnimationOption option;
         option.SetDuration(0);
         option.SetCurve(Curves::LINEAR);
-        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
-        });
+        AnimationUtils::Animate(
+            option,
+            [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
+            },
+            nullptr, nullptr, pipeline);
     } else {
         if (translateAnimation_) {
             AnimationUtils::StopAnimation(translateAnimation_);

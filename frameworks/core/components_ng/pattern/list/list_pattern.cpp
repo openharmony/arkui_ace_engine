@@ -2410,8 +2410,7 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         float height = pos.endPos - pos.startPos;
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
-            bool groupAtEnd = pos.groupInfo.value().atEnd;
-            if (groupAtStart && groupAtEnd) {
+            if (groupAtStart) {
                 posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             } else {
                 posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });

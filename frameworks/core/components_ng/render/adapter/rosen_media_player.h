@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 class RosenMediaPlayer : public MediaPlayer {
-    DECLARE_ACE_TYPE(RosenMediaPlayer, NG::MediaPlayer)
+    DECLARE_ACE_TYPE(RosenMediaPlayer, NG::MediaPlayer);
 public:
     RosenMediaPlayer() = default;
     ~RosenMediaPlayer() override;

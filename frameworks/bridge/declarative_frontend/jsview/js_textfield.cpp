@@ -656,11 +656,8 @@ void JSTextField::SetFontWeight(const JSCallbackInfo& info)
 void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale = 0.0;
-    if (info.Length() < 1) {
-        return;
-    }
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsDouble(info[0], minFontScale, resourceObject)) {
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resourceObject)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -682,12 +679,8 @@ void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
 void JSTextField::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale = 0.0;
-    if (info.Length() < 1) {
-        return;
-    }
-
     RefPtr<ResourceObject> resourceObject;
-    if (!ParseJsDouble(info[0], maxFontScale, resourceObject)) {
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resourceObject)) {
         return;
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
@@ -743,27 +736,21 @@ void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnregisterResource("foregroundColor");
     auto jsValue = info[0];
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(jsValue, strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
-        if (SystemProperties::ConfigChangePerform()) {
-            UnregisterResource("foregroundColor");
-        }
         return;
     }
     Color foregroundColor;
     RefPtr<ResourceObject> resourceObject;
-    auto ret = ParseJsColor(jsValue, foregroundColor, resourceObject);
-    CHECK_NULL_VOID(ret);
+    if (!ParseJsColor(jsValue, foregroundColor, resourceObject)) {
+        return;
+    }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<Color>("foregroundColor", resourceObject, foregroundColor);
-    } else {
-        UnregisterResource("foregroundColor");
-    }
-    if (!ParseJsColor(jsValue, foregroundColor)) {
-        return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     TextFieldModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -1635,17 +1622,12 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
         bool isVisible = false;
         std::u16string errorText;
         RefPtr<ResourceObject> resourceObject;
-        auto ret = ParseJsString(jsValue, errorText, resourceObject);
-        if (ret) {
+        UnregisterResource("errorString");
+        if (ParseJsString(jsValue, errorText, resourceObject)) {
             isVisible = true;
-            if (SystemProperties::ConfigChangePerform() && resourceObject) {
-                RegisterResource<std::u16string>("errorString", resourceObject, errorText);
-            } else {
-                UnregisterResource("errorString");
-            }
         }
-        if (ParseJsString(jsValue, errorText)) {
-            isVisible = true;
+        if (SystemProperties::ConfigChangePerform() && resourceObject) {
+            RegisterResource<std::u16string>("errorString", resourceObject, errorText);
         }
         TextFieldModel::GetInstance()->SetShowError(errorText, isVisible);
     }
@@ -2010,6 +1992,7 @@ void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    UnregisterResource("decorationColor");
     if (!tmpInfo->IsObject()) {
         TextFieldModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
         TextFieldModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
@@ -2031,7 +2014,6 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     }
     Color result = theme->GetTextStyle().GetTextDecorationColor();
     RefPtr<ResourceObject> resourceObject;
-    UnregisterResource("decorationColor");
     ParseJsColor(colorValue, result, Color::BLACK, resourceObject);
     if (resourceObject && SystemProperties::ConfigChangePerform()) {
         RegisterResource<Color>("decorationColor", resourceObject, result);

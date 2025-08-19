@@ -27,7 +27,7 @@ using IndexCallbackEvent = std::function<void(int32_t, int32_t)>;
 using IndexChangeEvent = std::function<void(int32_t)>;
 
 class StepperEventHub : public EventHub {
-    DECLARE_ACE_TYPE(StepperEventHub, EventHub)
+    DECLARE_ACE_TYPE(StepperEventHub, EventHub);
 
 public:
     StepperEventHub() = default;

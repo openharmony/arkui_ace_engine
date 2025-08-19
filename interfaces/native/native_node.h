@@ -2752,6 +2752,114 @@ typedef enum {
      */
     NODE_IMAGE_SYNC_LOAD = 4012,
     /**
+     * @brief Defines the image decoding size attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: width of the image decoding, in px.\n
+     * .value[1].i32: height of the image decoding, in px.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: width of the image decoding, in px.\n
+     * .value[1].i32: height of the image decoding, in px.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_SOURCE_SIZE = 4013,
+    /**
+     * @brief Defines the display tranformation matrix for an image.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0...15].f32: 16 floating-point numbers.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0...15].f32: 16 floating-point numbers.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_IMAGE_MATRIX = 4014,
+    /**
+     * @brief Defines the image follow text direction attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to follows the text direction.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to follows the text direction.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_MATCH_TEXT_DIRECTION = 4015,
+    /**
+     * @brief Defines the image copy attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_NONE</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_COPY_OPTION = 4016,
+    /**
+     * @brief Defines the image AI analysis enable attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable AI analysis for the image.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable AI analysis for the image.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_ENABLE_ANALYZER = 4017,
+    /**
+     * @brief Defines the image dynamic display range attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode}.
+     * The default value is <b>ARKUI_DYNAMIC_RANGE_MODE_STANDARD</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_DYNAMIC_RANGE_MODE = 4018,
+    /**
+     * @brief Defines the image dynamic display brightness attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: hdr brightness. value range [0, 1]\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: hdr brightness. value range [0, 1]\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_HDR_BRIGHTNESS = 4019,
+    /**
+     * @brief Defines the image display direction attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: orientation {@link ArkUI_Orientation}.
+     * The default value is <b>ARKUI_ORIENTATION_UP</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: orientation {@link ArkUI_Orientation.\n
+     *
+     * @since 21
+     */
+    NODE_IMAGE_ORIENTATION = 4020,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -9562,6 +9670,22 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index);
 
 /**
+ * @brief Triggers node updates in the current frame.
+ *
+ * When node attributes are modified after the current frame's build phase (i.e., after
+ * the unified processing of dirty nodes), the node updates will be deferred to the next
+ * frame. This function forces immediate node updates within the current frame to
+ * ensure rendering effects are applied synchronously.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 21
+ */
+int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.
@@ -9661,8 +9785,8 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
  * @param userData Indicates the custom data used in onLayoutCompleted callback function.
  * @param onLayoutCompleted Indicates the function when layout completed is callback.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
@@ -9676,8 +9800,8 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
  * @param userData Indicates the custom data used in onDrawCompleted callback function.
  * @param onDrawCompleted Indicates the function when draw completed is callback.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
@@ -9688,8 +9812,8 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
  *
  * @param node Indicates the target node.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
@@ -9699,8 +9823,8 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  *
  * @param node Indicates the target node.
  * @return error code
-           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
- *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter is incorrect.
  * @since 15
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);

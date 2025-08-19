@@ -309,7 +309,17 @@ void JSSymbol::SetSymbolShadow(const JSCallbackInfo& info)
 void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
 {
     std::vector<SymbolGradient> gradients;
-    if (info.Length() < 1 || !info[0]->IsArray()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        SymbolModel::GetInstance()->SetShaderStyle(gradients);
+        return;
+    }
+    
+    if (!info[0]->IsArray()) {
+        JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(info[0]);
+        SymbolGradient gradient;
+        gradient.isDefined = true;
+        ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
         SymbolModel::GetInstance()->SetShaderStyle(gradients);
         return;
     }
@@ -319,14 +329,14 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
 
     for (size_t i = 0; i < jsArray->Length(); ++i) {
         auto jsValue = jsArray->GetValueAt(i);
+        SymbolGradient gradient;
         if (!jsValue->IsObject()) {
+            gradients.emplace_back(std::move(gradient));
             continue;
         }
         JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsValue);
-        SymbolGradient gradient;
-        if (ParseShaderStyle(jsGradientObj, gradient)) {
-            gradients.emplace_back(std::move(gradient));
-        }
+        ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
     }
 
     SymbolModel::GetInstance()->SetShaderStyle(gradients);

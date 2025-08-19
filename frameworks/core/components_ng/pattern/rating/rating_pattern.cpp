@@ -360,7 +360,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     ratingScore = (ratingScore < 0.0) ? 0.0 : ratingScore;
     const double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
     // step3.2: Determine whether the old and new ratingScores are same or not.
-    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue(0.0);
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
@@ -400,9 +400,9 @@ void RatingPattern::FireChangeEvent()
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     std::stringstream ss;
-    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue(0.0);
     ratingEventHub->FireChangeEvent(ss.str());
-    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
@@ -697,7 +697,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
     if (ratingTheme->GetFocusAndBlurCancleAnimation()) {
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
-    ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetIsFocus(isFocus, GetHost());
     ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -717,7 +717,7 @@ void RatingPattern::OnBlurEvent()
     RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -969,6 +969,19 @@ void RatingPattern::OnModifyDone()
     if (IsNeedFocusStyle()) {
         LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     }
+    auto callback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->InitEvent();
+        }
+    };
+    pipeline->AddBuildFinishCallBack(callback);
+}
+
+void RatingPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();

@@ -22,6 +22,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -75,7 +76,7 @@ class DataPanelModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DataPanelModifier, ContentModifier);
 
 public:
-    DataPanelModifier();
+    DataPanelModifier(const WeakPtr<Pattern>& pattern);
     ~DataPanelModifier() override = default;
     void onDraw(DrawingContext& context) override;
     void UpdateDate();
@@ -210,6 +211,7 @@ private:
     std::vector<RefPtr<AnimatablePropertyVectorColor>> valueColors_;
     RefPtr<AnimatablePropertyColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyFloat> strokeWidth_;
+    WeakPtr<Pattern> pattern_;
 
     // shadow param
     bool isShadowVisible_ = false;

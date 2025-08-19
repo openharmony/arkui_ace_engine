@@ -911,6 +911,7 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
         ++nextIt;
         while (nextIt != itemPosition_.end() &&
             LessNotEqual(it->second.endPos + GetChainOffset(it->first), startMainPos_)) {
+            recycledItemPosition_.emplace(it->first, it->second);
             it = nextIt;
             ++nextIt;
         }
@@ -928,6 +929,7 @@ void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGr
         ++nextIt;
         while (nextIt != itemPosition_.rend() &&
             GreatNotEqual(it->second.startPos + GetChainOffset(it->first), endMainPos_)) {
+            recycledItemPosition_.emplace(it->first, it->second);
             it = nextIt;
             ++nextIt;
         }
@@ -1292,7 +1294,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
@@ -1782,21 +1784,31 @@ void ListLayoutAlgorithm::ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, Pos
         if (!wrapper) {
             ReportGetChildError("ResetLayoutItem", pos.first);
         }
-        pos.second.startPos -= currentOffset_;
-        pos.second.endPos -= currentOffset_;
-        if (pos.second.isGroup) {
-            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
-            if (wrapper && wrapper->GetHostNode() && wrapper->GetHostNode()->GetPattern<ListItemGroupPattern>()) {
-                auto groupPattern = wrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
+        ResetUnLayoutedItem(wrapper, pos.second);
+    }
+}
+
+void ListLayoutAlgorithm::ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info)
+{
+    info.startPos -= currentOffset_;
+    info.endPos -= currentOffset_;
+    if (info.isGroup) {
+        if (layoutWrapper && layoutWrapper->GetHostNode()) {
+            auto host = layoutWrapper->GetHostNode();
+            if (host->HasLayoutAlgorithm()) {
+                info.groupInfo = GetListItemGroupLayoutInfo(layoutWrapper);
+            }
+            if (host->GetPattern<ListItemGroupPattern>()) {
+                auto groupPattern = host->GetPattern<ListItemGroupPattern>();
                 groupPattern->ClearItemPosition();
             }
-        } else {
-            pos.second.groupInfo.reset();
         }
-        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
-        if (wrapperFrameNode) {
-            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
-        }
+    } else {
+        info.groupInfo.reset();
+    }
+    auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(layoutWrapper);
+    if (wrapperFrameNode) {
+        wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
     }
 }
 
@@ -2149,123 +2161,6 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDi
     host->RebuildRenderContextTree();
 }
 
-bool ListLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index,
-    bool forward, float &currPos, float crossSize)
-{
-    auto wrapper = layoutWrapper->GetChildByIndex(index + itemStartIndex_, true);
-    if (!wrapper) {
-        return true;
-    }
-    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (CheckNeedMeasure(wrapper)) {
-        return !isGroup;
-    }
-    auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
-    int32_t id = wrapper->GetHostNode()->GetId();
-    ListItemInfo pos;
-    if (forward) {
-        auto endPos = currPos + GetMainAxisSize(childSize, axis_);
-        pos = { id, currPos, endPos, isGroup };
-        currPos = endPos + spaceWidth_;
-    } else {
-        auto startPos = currPos - GetMainAxisSize(childSize, axis_);
-        pos = { id, startPos, currPos, isGroup };
-        currPos = startPos - spaceWidth_;
-    }
-    auto startIndex = index;
-    LayoutItem(wrapper, index, pos, startIndex, crossSize);
-    SyncGeometry(wrapper);
-    wrapper->SetActive(false);
-    return false;
-}
-
-std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount)
-{
-    std::list<int32_t> predictBuildList;
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    float crossSize = GetCrossAxisSize(size, axis_);
-
-    auto currIndex = itemPosition_.rbegin()->first + 1;
-    auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
-    for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
-        int32_t index = currIndex + i;
-        if (LayoutCachedALine(layoutWrapper, index, true, currPos, crossSize)) {
-            predictBuildList.emplace_back(index);
-        }
-    }
-
-    currIndex = itemPosition_.begin()->first - 1;
-    currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
-    for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
-        int32_t index = currIndex - i;
-        if (LayoutCachedALine(layoutWrapper, index, false, currPos, crossSize)) {
-            predictBuildList.emplace_back(index);
-        }
-    }
-    return predictBuildList;
-}
-
-bool ListLayoutAlgorithm::PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint)
-{
-    CHECK_NULL_RETURN(wrapper, false);
-    wrapper->SetActive(false);
-    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (!isGroup) {
-        auto frameNode = wrapper->GetHostNode();
-        CHECK_NULL_RETURN(frameNode, false);
-        frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-        FrameNode::ProcessOffscreenNode(frameNode);
-        return true;
-    }
-    return false;
-}
-
-void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetPredictLayoutParam()) {
-        pattern->SetPredictLayoutParam(param);
-        return;
-    }
-    pattern->SetPredictLayoutParam(param);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ACE_SCOPED_TRACE("List predict");
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<ListPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->GetPredictLayoutParam().has_value()) {
-            return;
-        }
-        bool needMarkDirty = false;
-        auto param = pattern->GetPredictLayoutParam().value();
-        for (auto it = param.items.begin(); it != param.items.end();) {
-            if (GetSysTimestamp() > deadline) {
-                break;
-            }
-            auto index = !pattern->IsStackFromEnd() ? *it : frameNode->GetTotalChildCount() - *it - 1;
-            auto wrapper = frameNode->GetOrCreateChildByIndex(index + pattern->GetItemStartIndex(), false, true);
-            if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
-                break;
-            }
-            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
-            it = param.items.erase(it);
-        }
-        if (needMarkDirty) {
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        }
-        pattern->SetPredictLayoutParam(std::nullopt);
-        if (!param.items.empty()) {
-            ListLayoutAlgorithm::PostIdleTask(frameNode, param);
-            pattern->SetPredictLayoutParam(param);
-        }
-    });
-}
-
 // return current CachedCount and max CacheCount
 CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
     const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, int32_t index, bool outOfView)
@@ -2283,7 +2178,6 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         wrapper->SetActive(true);
         wrapper->Layout();
         group->SyncItemsToCachedItemPosition();
-        recycledItemPosition_.erase(index);
     }
     bool forward = forwardCache > -1;
     bool backward = backwardCache > -1;
@@ -2294,15 +2188,15 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         backwardCache = backward ? backwardCache : -1;
     }
     res = group->UpdateCachedIndex(outOfView, reCache, forwardCache, backwardCache);
+    ACE_SCOPED_TRACE("GetLayoutGroupCachedCount forward:%d, %d, backward:%d, %d",
+        res.forwardCachedCount, res.forwardCacheMax, res.backwardCachedCount, res.backwardCacheMax);
     if ((group->GetTotalItemCount() == 0 && outOfView) || !group->IsVisible()) {
-        if (groupNode->CheckNeedForceMeasureAndLayout()) {
+        if (CheckNeedMeasure(wrapper)) {
             res = {0, 0, 1, 1};
         } else {
             res = {1, 1, 1, 1};
         }
     }
-    ACE_SCOPED_TRACE("GetLayoutGroupCachedCount forward:%d, %d, backward:%d, %d",
-        res.forwardCachedCount, res.forwardCacheMax, res.backwardCachedCount, res.backwardCacheMax);
     return res;
 }
 

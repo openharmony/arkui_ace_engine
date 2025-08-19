@@ -35,7 +35,7 @@
  *     };
  */
 // Integrate it into class declaration to support 'DynamicCast'.
-#define DECLARE_ACE_TYPE(...) DECLARE_RELATIONSHIP_OF_CLASSES(__VA_ARGS__) \
+#define DECLARE_ACE_TYPE(...); DECLARE_RELATIONSHIP_OF_CLASSES(__VA_ARGS__) \
 friend class Referenced;
 
 namespace OHOS::Ace {

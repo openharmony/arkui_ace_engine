@@ -37,6 +37,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+const int32_t NUM_18 = 18;
 
 inline std::string BoolToString(bool value)
 {
@@ -85,6 +86,7 @@ void XComponentPatternV2::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
+    nodeId_ = std::to_string(host->GetId());
     UpdateTransformHint();
 }
 
@@ -270,7 +272,11 @@ void XComponentPatternV2::InitSurface()
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    std::string res = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-";
+    std::string xcId = GetId();
+    const int32_t length = std::min(static_cast<int32_t>(xcId.size()), NUM_18);
+    const int32_t startPos = static_cast<int32_t>(xcId.size()) - length;
+    renderSurface_->SetBufferUsage(res + xcId.substr(startPos, length));
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         renderSurface_->SetRenderContext(renderContextForSurface_);
@@ -288,10 +294,8 @@ void XComponentPatternV2::InitSurface()
     auto width = paintRect_.Width();
     auto height = paintRect_.Height();
     if (!paintRect_.IsEmpty()) {
-        renderSurface_->UpdateSurfaceSizeInUserData(
-            static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-        renderSurface_->SetSurfaceDefaultSize(
-            static_cast<int32_t>(width), static_cast<int32_t>(height));
+        renderSurface_->UpdateSurfaceSizeInUserData(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+        renderSurface_->SetSurfaceDefaultSize(static_cast<int32_t>(width), static_cast<int32_t>(height));
     }
     renderSurface_->RegisterSurface();
     InitNativeWindow(width, height);

@@ -3285,6 +3285,22 @@ HWTEST_F(FrameNodeTestNg, UpdateIgnoreCountTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestPreMeasure
+ * @tc.desc: Test PreMeasure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TestPreMeasure, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetIgnoreLayoutProcess(true);
+    frameNode->SetHasPreMeasured();
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+    frameNode->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(frameNode->PreMeasure(LayoutConstraintF()), false);
+}
+
+/**
  * @tc.name: FrameNodeSetCustomPropertyMapFlagByKey001
  * @tc.desc: Test SetCustomPropertyMapFlagByKey.
  * @tc.type: FUNC

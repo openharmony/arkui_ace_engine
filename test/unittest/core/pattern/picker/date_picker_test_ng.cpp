@@ -192,7 +192,7 @@ void DatePickerTestNg::CreateDatePickerColumnNode()
  * @tc.desc: Test DatePickerPattern OnAttachToFrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
@@ -251,7 +251,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
  * @tc.desc: Test DatePickerModel SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -273,7 +273,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle001, TestSize.Lev
  * @tc.desc: Test DatePickerModel SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -298,7 +298,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle002, TestSize.Lev
  * @tc.desc: Test DatePickerModel SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -319,7 +319,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Lev
  * @tc.desc: Test DatePickerTestNg SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle004, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle004, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -334,7 +334,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle004, TestSize.Lev
  * @tc.desc: Test DatePickerModel SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -356,7 +356,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle001, TestSize.Level1
  * @tc.desc: Test DatePickerModel SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -381,7 +381,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle002, TestSize.Level1
  * @tc.desc: Test DatePickerModel SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -402,7 +402,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1
  * @tc.desc: Test DatePickerTestNg SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle004, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle004, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.normalTextStyle_.textColor = Color::RED;
@@ -417,7 +417,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle004, TestSize.Level1
  * @tc.desc: Test DatePickerModel SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -439,7 +439,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle001, TestSize.Leve
  * @tc.desc: Test DatePickerModel SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -464,7 +464,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle002, TestSize.Leve
  * @tc.desc: Test DatePickerModel SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
 
@@ -485,7 +485,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Leve
  * @tc.desc: Test DatePickerTestNg SetSeletedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle004, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle004, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.selectedTextStyle_.textColor = Color::RED;
@@ -500,7 +500,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle004, TestSize.Leve
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow001, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.isLunar = true;
@@ -538,7 +538,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow001, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -589,7 +589,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow003, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow003, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -632,7 +632,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow003, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow004, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow004, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -685,7 +685,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow004, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -736,7 +736,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -787,7 +787,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -839,7 +839,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -901,7 +901,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -963,7 +963,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -1025,7 +1025,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
  * @tc.desc: Test GetSelectedObject.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Set DatePickerSettingData with showtime.
@@ -1072,7 +1072,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0012, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0012, TestSize.Level0)
 {
     DatePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
@@ -1119,7 +1119,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0012, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1183,7 +1183,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0014, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0014, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1246,7 +1246,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0014, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0015, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0015, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1309,7 +1309,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0015, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0016, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0016, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1372,7 +1372,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0016, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0017, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0017, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1435,7 +1435,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0017, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0018, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0018, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1498,7 +1498,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0018, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0019, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0019, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1561,7 +1561,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0019, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0020, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0020, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1624,7 +1624,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0020, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0021, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0021, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1687,7 +1687,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0021, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0022, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0022, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1750,7 +1750,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0022, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0023, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0023, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1813,7 +1813,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0023, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0024, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0024, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1876,7 +1876,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0024, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0025, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0025, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1939,7 +1939,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0025, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0026, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0026, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -2002,7 +2002,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0026, TestSize.Level1)
  * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0027, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0027, TestSize.Level0)
 {
     int32_t setApiVersion = 12;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -2065,7 +2065,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0027, TestSize.Level1)
  * @tc.desc: test InitOnCrownEvent callback
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level0)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
     /**
@@ -2096,7 +2096,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest021, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest021, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
@@ -2127,7 +2127,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest021, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern UpdateSelectedTextColor.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
@@ -2163,7 +2163,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern SetSelectedMarkPaint.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest023, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest023, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     ASSERT_NE(theme, nullptr);
@@ -2191,7 +2191,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest023, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern SetSelectedMarkListener.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest024, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest024, TestSize.Level0)
 {
     static const std::string columnName[] = {"year", "month", "day"};
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
@@ -2230,7 +2230,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest024, TestSize.Level1)
  * @tc.desc: test DatePickerColumnPattern HandleCrownBeginEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest025, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest025, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create picker framenode and pattern.
@@ -2271,7 +2271,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest025, TestSize.Level1)
  * @tc.desc: test DatePickerColumnPattern HandleCrownMoveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest026, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest026, TestSize.Level0)
 {
     /**
      * @tc.step: step1. create picker framenode and pattern.
@@ -2315,7 +2315,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest026, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern SetDigitalCrownSensitivity.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest027, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest027, TestSize.Level0)
 {
     DatePickerModelNG::GetInstance()->SetDigitalCrownSensitivity(-1);
     DatePickerModelNG::SetDigitalCrownSensitivity(nullptr, -1);
@@ -2348,7 +2348,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest027, TestSize.Level1)
  * @tc.desc: Test DatePickerColumnPattern UpdateSelectedTextColor.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest029, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest029, TestSize.Level0)
 {
     auto columnPattern = AceType::MakeRefPtr<DatePickerColumnPattern>();
     ASSERT_NE(columnPattern, nullptr);
@@ -2373,7 +2373,7 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest029, TestSize.Level1)
  * @tc.desc: Test DatePicker onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerEventTest001, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerEventTest001, TestSize.Level0)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     DatePickerModel::GetInstance()->CreateDatePicker(theme);

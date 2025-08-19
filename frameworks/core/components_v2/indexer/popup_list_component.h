@@ -28,7 +28,7 @@ inline constexpr double POPUP_BOX_RADIUS_SIZE = 0.0;
 inline constexpr double POPUP_BORDER_RADIUS_SIZE = 12.0;
 
 class ACE_EXPORT PopupListComponent : public ComponentGroup {
-    DECLARE_ACE_TYPE(V2::PopupListComponent, ComponentGroup)
+    DECLARE_ACE_TYPE(V2::PopupListComponent, ComponentGroup);
 
 public:
     PopupListComponent()

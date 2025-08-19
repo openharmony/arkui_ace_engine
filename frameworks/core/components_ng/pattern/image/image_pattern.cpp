@@ -223,19 +223,7 @@ void ImagePattern::TriggerFirstVisibleAreaChange()
         OnVisibleAreaChange(true);
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    RectF frameRect;
-    RectF visibleInnerRect;
-    RectF visibleRect;
-    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    bool visible = GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0);
-    ACE_SCOPED_TRACE("TriggerFirstVisibleAreaChange [%d]-%s", visible, imageDfxConfig_.ToStringWithSrc().c_str());
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "TriggerFirstVisibleAreaChange [%{public}d]-%{public}s", visible,
-            imageDfxConfig_.ToStringWithSrc().c_str());
-    }
-    OnVisibleAreaChange(visible);
+    OnVisibleAreaChange(previousVisibility_);
 }
 
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
@@ -954,6 +942,7 @@ void ImagePattern::LoadImageDataIfNeed()
                 ContainerScope scope(pattern->GetHostInstanceId());
                 pattern->CreateAnalyzerOverlay();
                 auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             },
             "ArkUIImageUpdateAnalyzerUIConfig");
@@ -1502,6 +1491,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
         TAG_LOGI(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d, %{public}s", visible,
             imageDfxConfig_.ToStringWithoutSrc().c_str());
     }
+    previousVisibility_ = visible;
     if (!visible) {
         CloseSelectOverlay();
     }
@@ -2214,6 +2204,11 @@ void ImagePattern::EnableAnalyzer(bool value)
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
     RegisterVisibleAreaChange(true);
+}
+
+bool ImagePattern::IsEnableAnalyzer() const
+{
+    return isEnableAnalyzer_;
 }
 
 // As an example

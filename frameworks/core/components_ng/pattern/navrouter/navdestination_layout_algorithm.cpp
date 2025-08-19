@@ -54,14 +54,15 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
         return 0.0f;
     }
 
-    if (containerModalTitleHeight.has_value()) {
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
+    bool isCustomTitleBarSize = titleBarLayoutProperty->GetIsCustomTitleBarSizeValue(false);
+    if (containerModalTitleHeight.has_value() && !isCustomTitleBarSize) {
         constraint.selfIdealSize.SetHeight(containerModalTitleHeight.value());
         titleBarWrapper->Measure(constraint);
         return containerModalTitleHeight.value();
     }
 
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.0f);
     if (titleBarLayoutProperty->HasTitleHeight()) {
         auto titleHeight = static_cast<float>(
             titleBarLayoutProperty->GetTitleHeightValue().ConvertToPxWithSize(constraint.percentReference.Height()));

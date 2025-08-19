@@ -22,7 +22,7 @@ using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 
 class IndicatorEventHub : public EventHub {
-    DECLARE_ACE_TYPE(IndicatorEventHub, EventHub)
+    DECLARE_ACE_TYPE(IndicatorEventHub, EventHub);
 
 public:
     IndicatorEventHub() = default;

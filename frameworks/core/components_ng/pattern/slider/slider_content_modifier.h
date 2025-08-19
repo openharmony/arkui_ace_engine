@@ -106,7 +106,7 @@ public:
         }
     }
 
-    void SetBoardColor();
+    void SetBoardColor(const RefPtr<FrameNode>& host);
 
     void SetBackgroundSize(const PointF& start, const PointF& end)
     {
@@ -118,9 +118,9 @@ public:
         }
     }
 
-    void SetSelectSize(const PointF& start, const PointF& end);
+    void SetSelectSize(const PointF& start, const PointF& end, const RefPtr<FrameNode>& host);
 
-    void SetCircleCenter(const PointF& center);
+    void SetCircleCenter(const PointF& center, const RefPtr<FrameNode>& host);
 
     void SetStepRatio(float stepRatio)
     {
@@ -363,8 +363,8 @@ private:
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
     void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
     void SetBlockClip(DrawingContext& context);
-    void StopSelectAnimation();
-    void StopCircleCenterAnimation();
+    void StopSelectAnimation(const RefPtr<FrameNode>& host);
+    void StopCircleCenterAnimation(const RefPtr<FrameNode>& host);
     void UpdateSliderEndsPosition();
 
 private:

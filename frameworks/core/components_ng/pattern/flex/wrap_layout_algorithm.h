@@ -122,6 +122,7 @@ private:
     bool isColumnReverse_ = false;
     bool isRightDirection_ = false;
     bool isDialogStretch_ = false;
+    bool isPixelRoundAfterMeasure_ = false;
     float totalMainLength_ = 0.0f;
     float totalCrossLength_ = 0.0f;
     Dimension spacing_;

@@ -112,8 +112,8 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
-  class ShaderStyleModifier extends ModifierWithKey<ShaderStyle> {
-    constructor(value: ShaderStyle) {
+  class ShaderStyleModifier extends ModifierWithKey<Array<ShaderStyle | undefined> | ShaderStyle> {
+    constructor(value: Array<ShaderStyle | undefined> | ShaderStyle) {
       super(value);
     }
     static identity: Symbol = Symbol('symbolGlyphShaderStyle');

@@ -47,8 +47,18 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool ignoreOrient
      * the SetForceSplitEnable interface will be called.
      */
     isForceSplitSupported_ = true;
+    if (isForceSplitEnable_ == isForceSplit && ignoreOrientation_ == ignoreOrientation) {
+        return;
+    }
     isForceSplitEnable_ = isForceSplit;
     ignoreOrientation_ = ignoreOrientation;
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto width = context->GetWindowOriginalWidth();
+    if (width > 0) {
+        UpdateIsInForceSplitMode(width);
+        context->ForceUpdateDesignWidthScale(width);
+    }
 }
  
 void ForceSplitManager::UpdateIsInForceSplitMode(int32_t width)

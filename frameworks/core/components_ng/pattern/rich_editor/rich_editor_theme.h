@@ -20,7 +20,6 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -32,6 +31,8 @@ namespace {
 constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
+constexpr Dimension DEFAULT_PADDING_HORIZONTAL = 16.0_vp;
+constexpr Dimension DEFAULT_PADDING_VERTICAL = 8.0_vp;
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -58,10 +59,8 @@ public:
         void InitThemeDefaults(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
             CHECK_NULL_VOID(theme && themeConstants);
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
+            theme->padding_ = Edge(DEFAULT_PADDING_HORIZONTAL, DEFAULT_PADDING_VERTICAL,
+                DEFAULT_PADDING_HORIZONTAL, DEFAULT_PADDING_VERTICAL);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const

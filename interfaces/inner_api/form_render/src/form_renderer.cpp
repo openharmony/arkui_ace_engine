@@ -349,7 +349,14 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         isRecoverFormToHandleClickEvent);
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     HILOG_INFO("Form OnSurfaceCreate!");
-    int32_t ret = formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
+
+    int32_t ret = ERR_OK;
+    if (formJsInfo.uiSyntax == OHOS::AppExecFwk::FormType::ETS) {
+        OHOS::AppExecFwk::FormJsInfo newFormJsInfo = formJsInfo.CopyFormJsInfoWithoutFormData();
+        ret = formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, newFormJsInfo, newWant);
+    } else {
+        ret = formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
+    }
     if (ret == ERR_OK) {
         FormRenderEventReport::StopTimer(formJsInfo.formId);
     }
@@ -373,7 +380,13 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     HILOG_INFO("Form OnSurfaceReuse.");
-    int32_t ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+    int32_t ret = ERR_OK;
+    if (formJsInfo.uiSyntax == OHOS::AppExecFwk::FormType::ETS) {
+        OHOS::AppExecFwk::FormJsInfo newFormJsInfo = formJsInfo.CopyFormJsInfoWithoutFormData();
+        ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), newFormJsInfo, newWant);
+    } else {
+        ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+    }
     formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
     if (ret == ERR_OK) {
         FormRenderEventReport::StopTimer(formJsInfo.formId);

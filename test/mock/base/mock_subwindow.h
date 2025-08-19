@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 class ACE_EXPORT MockSubwindow : public Subwindow {
-    DECLARE_ACE_TYPE(MockSubwindow, Subwindow)
+    DECLARE_ACE_TYPE(MockSubwindow, Subwindow);
 
 public:
     MOCK_METHOD0(InitContainer, void());

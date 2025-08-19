@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 using ReadyEvent = std::function<void()>;
 
 class CanvasEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CanvasEventHub, EventHub)
+    DECLARE_ACE_TYPE(CanvasEventHub, EventHub);
 
 public:
     CanvasEventHub() = default;

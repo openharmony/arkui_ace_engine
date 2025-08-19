@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& src, RefPtr<PixelMap>& pixmap,
     const std::string& bundleName, const std::string& moduleName)
 {
@@ -160,8 +161,6 @@ void ImageModelNG::ResetImage(FrameNode* frameNode)
     sourceInfo.SetIsFromReset(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    RefPtr<FrameNode> refNode = AceType::Claim(frameNode);
-    SetFrameNodeDraggable(refNode, false);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedLoadAlt(false);
@@ -696,6 +695,14 @@ void ImageModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
     pattern->SetCopyOption(copyOption);
 }
 
+CopyOptions ImageModelNG::GetCopyOption(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, CopyOptions::None);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_RETURN(pattern, CopyOptions::None);
+    return pattern->GetCopyOption();
+}
+
 void ImageModelNG::SetAutoResize(FrameNode* frameNode, bool autoResize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
@@ -969,6 +976,69 @@ ImageFit ImageModelNG::GetObjectFit(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, ImageFit::COVER);
     return layoutProperty->GetImageFit().value_or(ImageFit::COVER);
+}
+
+ImageRotateOrientation ImageModelNG::GetOrientation(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ImageRotateOrientation::UP);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ImageRotateOrientation::UP);
+    return layoutProperty->GetImageRotateOrientation().value_or(ImageRotateOrientation::UP);
+}
+
+std::pair<CalcDimension, CalcDimension> ImageModelNG::GetImageSourceSize(FrameNode* frameNode)
+{
+    auto defaultSourceSize = std::pair<CalcDimension, CalcDimension>();
+    CHECK_NULL_RETURN(frameNode, defaultSourceSize);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultSourceSize);
+    CHECK_NULL_RETURN(layoutProperty->GetImageSizeStyle(), defaultSourceSize);
+    auto sourceSize = layoutProperty->GetImageSizeStyle()->GetSourceSize().value_or(SizeF());
+    return std::make_pair(CalcDimension(sourceSize.Width()), CalcDimension(sourceSize.Height()));
+}
+
+float ImageModelNG::GetHdrBrightness(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_HDR_BRIGHTNESS);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, DEFAULT_HDR_BRIGHTNESS);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), DEFAULT_HDR_BRIGHTNESS);
+    return paintProperty->GetImagePaintStyle()->GetHdrBrightness().value_or(DEFAULT_HDR_BRIGHTNESS);
+}
+
+bool ImageModelNG::GetMatchTextDirection(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), false);
+    return paintProperty->GetImagePaintStyle()->GetMatchTextDirection().value_or(false);
+}
+
+bool ImageModelNG::GetEnableAnalyzer(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, false);
+    return imagePattern->IsEnableAnalyzer();
+}
+
+DynamicRangeMode ImageModelNG::GetDynamicRangeMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DynamicRangeMode::STANDARD);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, DynamicRangeMode::STANDARD);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), DynamicRangeMode::STANDARD);
+    return paintProperty->GetImagePaintStyle()->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+}
+
+Matrix4 ImageModelNG::GetImageMatrix(FrameNode* frameNode)
+{
+    Matrix4 matrix4;
+    CHECK_NULL_RETURN(frameNode, matrix4);
+    auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, matrix4);
+    return renderProperty->GetImageMatrix().value_or(matrix4);
 }
 
 ImageInterpolation ImageModelNG::GetInterpolation(FrameNode* frameNode)

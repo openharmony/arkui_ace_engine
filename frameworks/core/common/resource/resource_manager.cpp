@@ -55,6 +55,40 @@ void ResourceManager::RegisterMainResourceAdapter(const std::string& bundleName,
     resourceAdapters_.emplace(key, resAdapter);
 }
 
+void ResourceManager::UpdateResourceConfig(const std::string& /*bundleName*/, const std::string& /*moduleName*/,
+    int32_t instanceId, const ResourceConfiguration& config, bool themeFlag)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    std::string compareId = std::to_string(instanceId);
+    for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+        if (GetCacheKeyInstanceId(iter->first) == compareId) {
+            iter->second->UpdateConfig(config, themeFlag);
+        }
+    }
+    for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
+        if (GetCacheKeyInstanceId(iter->cacheKey) == compareId) {
+            iter->cacheObj->UpdateConfig(config, themeFlag);
+        }
+    }
+}
+
+void ResourceManager::UpdateColorMode(
+    const std::string& /*bundleName*/, const std::string& /*moduleName*/, int32_t instanceId, ColorMode colorMode)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    std::string compareId = std::to_string(instanceId);
+    for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+        if (GetCacheKeyInstanceId(iter->first) == compareId) {
+            iter->second->UpdateColorMode(colorMode);
+        }
+    }
+    for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
+        if (GetCacheKeyInstanceId(iter->cacheKey) == compareId) {
+            iter->cacheObj->UpdateColorMode(colorMode);
+        }
+    }
+}
+
 void ResourceManager::DumpResLoadError()
 {
     std::unique_lock<std::shared_mutex> lock(errorMutex_);

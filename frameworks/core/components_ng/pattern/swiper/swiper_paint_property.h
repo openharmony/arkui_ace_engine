@@ -36,7 +36,7 @@ struct SwiperAnimationStyle {
 };
 
 class SwiperPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SwiperPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SwiperPaintProperty, PaintProperty);
 
 public:
     SwiperPaintProperty() = default;

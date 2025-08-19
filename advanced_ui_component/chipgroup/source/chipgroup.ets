@@ -169,11 +169,11 @@ function parseDimension<T>(
   if (typeof value === 'object') {
     let temp: Resource = value as Resource;
     if (temp.type === 10002 || temp.type === 10007) {
-      if (resourceManager.getNumber(temp.id) >= 0) {
+      if (resourceManager && resourceManager.getNumber(temp.id) >= 0) {
         return value as T;
       }
     } else if (temp.type === 10003) {
-      if (isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+      if (resourceManager && isValidDimensionString(resourceManager.getStringSync(temp.id))) {
         return value as T;
       }
     }

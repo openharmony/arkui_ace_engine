@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsKeyFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsKeyFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsKeyFunction, JsFunction);
 
 public:
     explicit JsKeyFunction(const JSRef<JSFunc>& jsFunction)

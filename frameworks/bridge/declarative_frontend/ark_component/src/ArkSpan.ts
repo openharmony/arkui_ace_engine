@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -32,9 +29,6 @@ class SpanFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
-  constructor(value: string | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -49,9 +43,6 @@ class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
 }
 class SpanLineHeightModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -66,9 +57,6 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
   }
 }
 class SpanFontStyleModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -82,9 +70,6 @@ class SpanFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 class SpanTextCaseModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('spanTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -171,9 +156,6 @@ class SpanTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -213,9 +195,6 @@ class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
   }
 }
 class SpanFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity = Symbol('spanFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -355,6 +334,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _weakPtr: JsPointerClass;
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
+  _needDiff: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiersWithKeys = new Map();
@@ -363,8 +343,9 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     this._classType = classType;
     this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     this._nativePtrChanged = false;
+    this._needDiff = true;
   }
-  initialize(value: Object[]) {
+  initialize(value: Object[]): this {
     modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
     return this;
   }

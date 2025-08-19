@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_CUSTOM_NODE_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_CUSTOM_NODE_H
 
+#include "core/common/window_animation_config.h"
 #include "ui/base/macros.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/view.h"
@@ -39,6 +40,8 @@ public:
     static void SetOnDetachFromMainTreeCallback(const NodeHandle node, void (*onDetachFromMainTree)(NodeHandle node));
     static void SetOnAvoidInfoChangeCallback(const NodeHandle node, void (*onAvoidInfoChange)(NodeHandle node));
     static void SetIsNeedRegisterAvoidInfoChangeListener(const NodeHandle node, bool isRegister);
+    static void SetOnWindowSizeChangedCallback(const NodeHandle node,
+        void (*onWindowSizeChanged)(NodeHandle node, int32_t width, int32_t height, Ace::WindowSizeChangeReason type));
 };
 
 } // namespace OHOS::Ace::Kit

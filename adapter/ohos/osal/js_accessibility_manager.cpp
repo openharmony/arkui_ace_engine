@@ -5490,6 +5490,7 @@ RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t windowId)
 {
     auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         CHECK_NULL_RETURN(context, nullptr);
         if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
@@ -7222,6 +7223,7 @@ bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t 
     auto frameNode = pattern->GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
     uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
@@ -7254,6 +7256,7 @@ bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_
     auto frameNode = pattern->GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
     uint32_t windowId = static_cast<uint32_t>(pipeline->GetRealHostWindowId());
     Accessibility::RetError retReg = instance->DeregisterElementOperator(windowId, treeId);
     TAG_LOGI(AceLogTag::ACE_WEB,

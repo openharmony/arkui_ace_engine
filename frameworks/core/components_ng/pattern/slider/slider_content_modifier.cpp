@@ -464,8 +464,9 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
     }
 }
 
-void SliderContentModifier::SetBoardColor()
+void SliderContentModifier::SetBoardColor(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(boardColor_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -480,7 +481,8 @@ void SliderContentModifier::SetBoardColor()
     AnimationOption option = AnimationOption();
     option.SetDuration(duration);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
+    AnimationUtils::Animate(
+        option, [&]() { boardColor_->Set(LinearColor(shadowColor)); }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void SliderContentModifier::UpdateData(const Parameters& parameters)
@@ -500,8 +502,9 @@ void SliderContentModifier::JudgeNeedAnimate(bool reverse)
     }
 }
 
-void SliderContentModifier::StopSelectAnimation()
+void SliderContentModifier::StopSelectAnimation(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     AnimationOption option = AnimationOption();
     option.SetCurve(Curves::LINEAR);
     AnimationUtils::Animate(option, [this]() {
@@ -509,11 +512,12 @@ void SliderContentModifier::StopSelectAnimation()
         if (animatorStatus_ == SliderStatus::MOVE) {
             selectEnd_->Set(targetSelectEnd_);
         }
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end)
+void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     if (selectStart_) {
         selectStart_->Set(start - PointF());
     }
@@ -523,20 +527,22 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
         return;
     }
     if (animatorStatus_ != SliderStatus::DEFAULT && isVisible_) {
-        StopSelectAnimation();
+        StopSelectAnimation(host);
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
         option.SetCurve(motion);
-        AnimationUtils::Animate(option, [&]() { selectEnd_->Set(end - PointF()); });
+        AnimationUtils::Animate(
+            option, [&]() { selectEnd_->Set(end - PointF()); }, nullptr, nullptr, host->GetContextRefPtr());
     } else {
         selectEnd_->Set(end - PointF());
     }
     targetSelectEnd_ = end - PointF();
 }
 
-void SliderContentModifier::StopCircleCenterAnimation()
+void SliderContentModifier::StopCircleCenterAnimation(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     AnimationOption option = AnimationOption();
     option.SetCurve(Curves::LINEAR);
     AnimationUtils::Animate(option, [this]() {
@@ -552,11 +558,12 @@ void SliderContentModifier::StopCircleCenterAnimation()
                 blockCenterY_->Set(targetCenter_.GetY());
             }
         }
-    });
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void SliderContentModifier::SetCircleCenter(const PointF& center)
+void SliderContentModifier::SetCircleCenter(const PointF& center, const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     if (center == targetCenter_) {
         return;
     }
@@ -564,7 +571,7 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
     CHECK_NULL_VOID(blockCenterX_);
     CHECK_NULL_VOID(blockCenterY_);
     if (animatorStatus_ != SliderStatus::DEFAULT && isVisible_) {
-        StopCircleCenterAnimation();
+        StopCircleCenterAnimation(host);
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -575,7 +582,7 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
             } else {
                 blockCenterY_->Set(center.GetY());
             }
-        });
+        }, nullptr, nullptr, host->GetContextRefPtr());
         if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
             blockCenterY_->Set(center.GetY());
         } else {

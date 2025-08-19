@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Kit {
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const int32_t iconNodeId, const IconNodeType type)
+    const std::string& message, const int32_t iconNodeId, const IconNodeType type, bool isWithDialogTheme)
 {
     int32_t themeScopedId = 0;
     auto context = PipelineBase::GetCurrentContext();
@@ -49,7 +49,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     RefPtr<AceNode> dialogNode = nullptr;
     switch (type) {
         case IconNodeType::SYMBOL:
-            dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(message, frameNode);
+            dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, frameNode, isWithDialogTheme);
             break;
         case IconNodeType::IMAGE:
             {

@@ -69,11 +69,6 @@ private:
         std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize);
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
     bool CheckCurRowMeasureFinished(LayoutWrapper* layoutWrapper, int32_t curIndex, bool isGroup);
-    std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount) override;
-    std::list<int32_t> LayoutCachedALineForward(
-        LayoutWrapper* layoutWrapper, int32_t& index, float& startPos, float crossSize);
-    std::list<int32_t> LayoutCachedALineBackward(
-        LayoutWrapper* layoutWrapper, int32_t& index, float& endPos, float crossSize);
     void LayoutCachedALine(LayoutWrapper* layoutWrapper, std::pair<const int, ListItemInfo>& pos,
         int32_t startIndex, float crossSize);
     std::pair<bool, bool> CheckACachedItem(const RefPtr<LayoutWrapper>& wrapper, int32_t cnt, bool& isGroup) const;

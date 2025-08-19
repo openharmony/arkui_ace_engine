@@ -116,12 +116,15 @@ void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()
                 AnimationOption option;
                 option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
                 option.SetCurve(Curves::SHARP);
+                auto pattern = pattern_.Upgrade();
+                auto host = pattern ? pattern->GetHost() : nullptr;
+                auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
 
                 AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
                     auto paintMethod = weak.Upgrade();
                     CHECK_NULL_VOID(paintMethod);
                     paintMethod->selectOverlayModifier_->SetCirclesAndBackArrowOpacity(1.0);
-                });
+                }, nullptr, nullptr, contextPtr);
             } else {
                 selectOverlayModifier_->SetCirclesAndBackArrowOpacity(1.0);
             }
@@ -134,6 +137,9 @@ void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()
 void SelectOverlayPaintMethod::CheckHasExtensionMenu()
 {
     if (selectOverlayModifier_->GetHasExtensionMenu() != hasExtensionMenu_) {
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern ? pattern->GetHost() : nullptr;
+        auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
         if (hasExtensionMenu_) {
             AnimationOption option;
             option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
@@ -143,7 +149,7 @@ void SelectOverlayPaintMethod::CheckHasExtensionMenu()
                 auto paintMethod = weak.Upgrade();
                 CHECK_NULL_VOID(paintMethod);
                 paintMethod->selectOverlayModifier_->SetCirclesAndBackArrowOpacity(1.0);
-            });
+            }, nullptr, nullptr, contextPtr);
         } else {
             AnimationOption option;
             option.SetDuration(MENU_HIDE_ANIMATION_DURATION);
@@ -153,7 +159,7 @@ void SelectOverlayPaintMethod::CheckHasExtensionMenu()
                 auto paintMethod = weak.Upgrade();
                 CHECK_NULL_VOID(paintMethod);
                 paintMethod->selectOverlayModifier_->SetCirclesAndBackArrowOpacity(0.0);
-            });
+            }, nullptr, nullptr, contextPtr);
         }
         selectOverlayModifier_->SetHasExtensionMenu(hasExtensionMenu_);
     }
@@ -170,12 +176,15 @@ void SelectOverlayPaintMethod::CheckHandleIsShown()
             AnimationOption option;
             option.SetDuration(HANDLE_ANIMATION_DURATION);
             option.SetCurve(Curves::SHARP);
+            auto pattern = pattern_.Upgrade();
+            auto host = pattern ? pattern->GetHost() : nullptr;
+            auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
 
             AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
                 auto paintMethod = weak.Upgrade();
                 CHECK_NULL_VOID(paintMethod);
                 paintMethod->selectOverlayContentModifier_->SetHandleOpacity(1.0);
-            });
+            }, nullptr, nullptr, contextPtr);
         } else {
             selectOverlayContentModifier_->SetHandleOpacity(1.0);
         }

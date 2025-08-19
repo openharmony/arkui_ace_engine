@@ -24,7 +24,7 @@ using ChangeEvent = std::function<void(const bool)>;
 using OnSideBarWidthChangeEvent = std::function<void(const Dimension&)>;
 
 class SideBarContainerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SideBarContainerEventHub, EventHub)
+    DECLARE_ACE_TYPE(SideBarContainerEventHub, EventHub);
 
 public:
     SideBarContainerEventHub() = default;

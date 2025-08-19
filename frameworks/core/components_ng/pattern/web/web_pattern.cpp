@@ -48,6 +48,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
@@ -1089,7 +1090,7 @@ void WebPattern::OnDetachFromMainTree()
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->ReleasePageEvent(host, true, true);
+    accessibilityManager->ReleasePageEvent(host, true, false);
 }
 
 void WebPattern::OnAttachToFrameNode()
@@ -6311,7 +6312,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         }
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         CloseSelectOverlay();
-        if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle()) {
+        if (IS_CALLING_FROM_M114() || (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle())) {
             SelectCancel();
         }
         DestroyAnalyzerOverlay();

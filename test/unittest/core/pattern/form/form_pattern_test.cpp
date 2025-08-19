@@ -2088,4 +2088,25 @@ HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
     int32_t num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 0);
 }
+
+/**
+ * @tc.name: FormPatternTest_058
+ * @tc.desc: GetCurrentTimestamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_058, TestSize.Level1)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->isDynamic_ = false;
+    pattern->updateFormComponentTimestamp_ = 0;
+
+    auto nowSys = std::chrono::steady_clock::now();
+    auto epoch = nowSys.time_since_epoch();
+    int64_t nowTime = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count());
+    pattern->ReAddStaticFormSnapshotTimer();
+
+    EXPECT_TRUE(pattern->updateFormComponentTimestamp_ >= nowTime);
+}
 } // namespace OHOS::Ace::NG

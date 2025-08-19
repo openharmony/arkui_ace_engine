@@ -2109,7 +2109,7 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
-    shaderStyle(value: ShaderStyle[]): SymbolGlyphAttribute;
+    shaderStyle(value: (ShaderStyle | undefined)[] | ShaderStyle): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

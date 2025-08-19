@@ -42,7 +42,7 @@ void SliderTipPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     }
 
     sliderTipModifier_->SetBlockSize(blockSize);
-    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
+    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_, host);
     sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
     sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);

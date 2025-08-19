@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class MediaPlayerImpl : public MediaPlayer, public ExtSurfaceCallbackInterface {
-    DECLARE_ACE_TYPE(MediaPlayerImpl, NG::MediaPlayer)
+    DECLARE_ACE_TYPE(MediaPlayerImpl, NG::MediaPlayer);
 public:
     MediaPlayerImpl() = default;
     ~MediaPlayerImpl() override;

@@ -1889,10 +1889,10 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
     EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 2);
 
     /**
-     * @tc.steps4: Call FlushTaskWithCheck.
+     * @tc.steps4: Call FlushAfterModifierTask.
      * @tc.expected: afterModifierTasks_ in the taskScheduler size is 0.
      */
-    taskScheduler.FlushTaskWithCheck();
+    taskScheduler.FlushAfterModifierTask();
     EXPECT_EQ(taskScheduler.afterModifierTasks_.size(), 0);
 }
 
@@ -2183,7 +2183,7 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
     context_->vsyncTime_ = AFTER_VSYNC_TIME;
     context_->eventManager_->idToTouchPoints_.clear();
     bool isAcc = context_->touchAccelarate_;
-    context_->touchAccelarate_ = true;
+    context_->touchAccelarate_ = false;
 
     for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
         context_->resampleTimeStamp_ = testCase.vsyncTime;
@@ -3976,7 +3976,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
 
     /**
      * @tc.steps5: Call the function OnDumpBindAICaller.
-     * @tc.expected: topNavNode->CallAIFunction result is not AI_CALLER_INVALID.
+     * @tc.expected: topNavNode->CallAIFunction result is AI_CALL_SUCCESS.
      */
     std::vector<std::string> params;
     params.push_back("-bindaihelper");
@@ -4007,6 +4007,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
     context_->OnDumpBindAICaller(params);
     result = topNavNode->CallAIFunction("Success", "");
     EXPECT_EQ(result, AI_CALLER_INVALID);
+}
+
+/**
+ * @tc.name: OnDumpInfo001
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo.
+     * @tc.expected: Test that the member window_ is empty.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
 }
 } // namespace NG
 } // namespace OHOS::Ace

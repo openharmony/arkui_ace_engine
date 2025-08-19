@@ -345,6 +345,11 @@ HWTEST_F(TextFieldPatternTestFive, UpdateContentScroller001, TestSize.Level0)
     offset = Offset(7, 0);
     pattern_->UpdateContentScroller(offset);
     ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 29.5639));
+
+    Offset localOffset;
+    pattern_->contentScroller_.beforeScrollingCallback = [&](const Offset& offset) { localOffset = offset; };
+    pattern_->UpdateContentScroller(offset, 0.0f, false);
+    EXPECT_EQ(localOffset, offset);
 }
 
 /**

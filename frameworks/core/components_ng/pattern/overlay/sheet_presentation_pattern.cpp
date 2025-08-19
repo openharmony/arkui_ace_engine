@@ -571,7 +571,6 @@ void SheetPresentationPattern::HandleFocusEvent()
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
-    keyboardHeight_ = 0;
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
     SetShadowStyle(false);
 }
@@ -1108,10 +1107,12 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
     StopModifySheetTransition();
-    AnimationUtils::Animate(
-        option,
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    AnimationUtils::Animate(option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
     SetBottomStyleHotAreaInSubwindow();
 }
 
@@ -2194,6 +2195,9 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
     AnimationOption optionPosition;
     optionPosition.SetDuration(SHEET_ENTRY_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionPosition,
         [weak = WeakClaim(this)]() {
@@ -2203,7 +2207,7 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformTranslate({ 0.0f, Dimension(pattern->sheetOffsetY_), 0.0f });
         },
-        nullptr);
+        nullptr, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()> finish)
@@ -2211,6 +2215,9 @@ void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()>
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(SHEET_ENTRY_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -2220,7 +2227,7 @@ void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()>
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
         },
-        finish);
+        finish, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartOffsetExitingAnimation()
@@ -2228,6 +2235,9 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
     AnimationOption optionPosition;
     optionPosition.SetDuration(SHEET_EXIT_ANIMATION_DURATION);
     optionPosition.SetCurve(Curves::FRICTION);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionPosition,
         [weak = WeakClaim(this)]() {
@@ -2238,7 +2248,7 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
             renderContext->UpdateTransformTranslate(
                 { 0.0f, Dimension(pattern->sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
         },
-        nullptr);
+        nullptr, nullptr, pipeline);
 }
 
 void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> finish)
@@ -2246,6 +2256,9 @@ void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> 
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(SHEET_EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -2255,7 +2268,7 @@ void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> 
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
         },
-        finish);
+        finish, nullptr, pipeline);
 }
 
 RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()
@@ -2316,19 +2329,16 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     isAnimationProcess_ = true;
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
+    auto pipeline = host->GetContextRefPtr();
     if (isTransitionIn) {
         HandleDragEndAccessibilityEvent();
-        animation_ = AnimationUtils::StartAnimation(
-            option,
-            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
-            option.GetOnFinishEvent());
+        animation_ = AnimationUtils::StartAnimation(option,
+            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset), option.GetOnFinishEvent(), nullptr, pipeline);
         SetBottomStyleHotAreaInSubwindow();
     } else {
         StopModifySheetTransition();
-        animation_ = AnimationUtils::StartAnimation(
-            option,
-            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
-            option.GetOnFinishEvent());
+        animation_ = AnimationUtils::StartAnimation(option,
+            sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset), option.GetOnFinishEvent(), nullptr, pipeline);
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CleanSheet(host, GetSheetKey());
@@ -3110,16 +3120,13 @@ void SheetPresentationPattern::StopModifySheetTransition()
 
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
-    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE || !isCurrentFocus ||
+    if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE ||
         keyboardAvoidMode_ == SheetKeyboardAvoidMode::POPUP_SHEET) {
-        TAG_LOGD(AceLogTag::ACE_SHEET,
-            "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
-            keyboardAvoidMode_, isCurrentFocus);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will not avoid keyboard.");
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
@@ -3142,7 +3149,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     CHECK_NULL_VOID(host->GetFocusHub());
     // When bindSheet lift height exceed the max height, hightUp = the remaining height that needs to scroll,
     // otherwise, hightUp = the height to be lifted up
-    auto heightUp = isCurrentFocus ? GetSheetHeightChange() : 0.0f;
+    auto heightUp = host->GetFocusHub()->IsCurrentFocus() ? GetSheetHeightChange() : 0.0f;
     sheetHeightUp_ = heightUp;
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet needs to deal with %{public}f height.", heightUp);
     auto offset = pageHeight_ - height_ - heightUp;
@@ -3155,10 +3162,13 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
             // scroll needs to reset first when keyboard is down.
             renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
         } else {
-            sheetHeightUp_ = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_) - height_;
-            // sheet is raised to the top first
-            renderContext->UpdateTransformTranslate(
-                { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_, 0.0f });
+            auto sheetHeightUp = pageHeight_ - (SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_) - height_;
+            sheetHeightUp_ = LessNotEqual(sheetHeightUp, 0.0f) ? 0.0f : sheetHeightUp;
+            if (GreatNotEqual(sheetHeightUp_, 0.0f)) {
+                // sheet is raised to the top first
+                renderContext->UpdateTransformTranslate(
+                    { 0.0f, SHEET_BLANK_MINI_HEIGHT.ConvertToPx() + sheetTopSafeArea_, 0.0f });
+            }
         }
     } else {
         // offset: translate endpoint, calculated from top

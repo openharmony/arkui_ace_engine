@@ -57,6 +57,7 @@ const std::string TEST_TAG = "Test";
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID2 = 153;
 constexpr int32_t NODE_ID3 = 10;
+constexpr int32_t OPTION_INDEX_COPY = 1;
 const RectF FIRST_HANDLE_REGION(0, 0, 10, 10);
 const RectF SECOND_HANDLE_REGION(10, 10, 10, 10);
 const RectF SECOND_HANDLE_REGION2(20, 20, 10, 10);
@@ -2333,6 +2334,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     EXPECT_TRUE(selectOverlayNode->isExtensionMenu_);
     selectOverlayNode->UpdateToolBar(true);
     EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+    EXPECT_TRUE(selectOverlayNode->isShowInDefaultMenu_[OPTION_INDEX_COPY]);
 }
 
 /**

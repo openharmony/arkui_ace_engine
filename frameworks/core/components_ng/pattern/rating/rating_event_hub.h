@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const std::string&)>;
 
 class RatingEventHub : public EventHub {
-    DECLARE_ACE_TYPE(RatingEventHub, EventHub)
+    DECLARE_ACE_TYPE(RatingEventHub, EventHub);
 
 public:
     RatingEventHub() = default;

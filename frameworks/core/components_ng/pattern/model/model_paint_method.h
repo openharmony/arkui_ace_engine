@@ -29,7 +29,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ModelPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ModelPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ModelPaintMethod, NodePaintMethod);
 public:
     ModelPaintMethod(const WeakPtr<ModelAdapterWrapper>& adapter);
     ~ModelPaintMethod() override = default;

@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class QRCodePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(QRCodePaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(QRCodePaintProperty, PaintProperty);
 
 public:
     QRCodePaintProperty() = default;

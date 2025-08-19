@@ -71,7 +71,7 @@ Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    return Converter::ArkValue<Ark_Int64>(tstamp);
+    return Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(tstamp));
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
                       Ark_Int64 timestamp)

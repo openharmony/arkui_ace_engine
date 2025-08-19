@@ -42,8 +42,8 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 
     sliderContentModifier_->JudgeNeedAnimate(reverse);
-    SetAttrParameters();
-    sliderContentModifier_->SetBoardColor();
+    SetAttrParameters(host);
+    sliderContentModifier_->SetBoardColor(host);
     sliderContentModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
     UpdateBorderRadius(paintProperty);
     auto stepSize = paintProperty->GetStepSizeValue(sliderTheme->GetMarkerSize());
@@ -68,11 +68,11 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->UpdateContentDirtyRect(paintWrapper->GetGeometryNode()->GetFrameSize());
 }
 
-void SliderPaintMethod::SetAttrParameters()
+void SliderPaintMethod::SetAttrParameters(const RefPtr<FrameNode>& host)
 {
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
-    sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
-    sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
+    sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd, host);
+    sliderContentModifier_->SetCircleCenter(parameters_.circleCenter, host);
     sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
     sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
     sliderContentModifier_->SetBlockColor(parameters_.blockColor);

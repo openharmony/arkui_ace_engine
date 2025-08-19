@@ -41,7 +41,7 @@ private:
     static std::string TextDecorationToHtml(const std::vector<TextDecoration>& decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
     static std::string ToHtml(const std::string& key, const std::optional<Dimension>& value);
-    static std::string DeclarationToHtml(const NG::FontStyle& fontStyle);
+    static std::string DecorationToHtml(const NG::FontStyle& fontStyle);
     static std::string ToHtml(const std::optional<std::vector<Shadow>>& shadows);
     static std::string ToHtml(const std::string& key, const std::optional<CalcDimension>& dimesion);
     static std::string ToHtml(const std::optional<ImageSpanSize>& size);

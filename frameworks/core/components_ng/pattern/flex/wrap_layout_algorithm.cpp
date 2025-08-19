@@ -113,6 +113,11 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float baselineDistance = 0.0f;
     contentList_.clear();
     std::list<RefPtr<LayoutWrapper>> currentMainAxisItemsList;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    isPixelRoundAfterMeasure_ =
+        pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
     for (auto& item : children) {
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
@@ -123,10 +128,12 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         // can place current child at current row
-        if (GreatOrEqual(mainLengthLimit_, currentMainLength + GetItemMainAxisLength(item->GetGeometryNode()))) {
-            currentMainLength += GetItemMainAxisLength(item->GetGeometryNode());
+        float itemMainAxisLength = GetItemMainAxisLength(item->GetGeometryNode());
+        float itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
+        if (GreatOrEqual(mainLengthLimit_, currentMainLength + itemMainAxisLength)) {
+            currentMainLength += itemMainAxisLength;
             currentMainLength += spacing;
-            currentCrossLength = std::max(currentCrossLength, GetItemCrossAxisLength(item->GetGeometryNode()));
+            currentCrossLength = std::max(currentCrossLength, itemCrossAxisLength);
             if (crossAlignment_ == WrapAlignment::BASELINE) {
                 baselineDistance = std::max(baselineDistance, item->GetBaselineDistance());
             }
@@ -147,8 +154,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // place current item on a new main axis
             totalMainLength_ = std::max(currentMainLength, totalMainLength_);
             totalCrossLength_ += currentCrossLength + contentSpace;
-            currentMainLength = GetItemMainAxisLength(item->GetGeometryNode()) + spacing;
-            currentCrossLength = GetItemCrossAxisLength(item->GetGeometryNode());
+            currentMainLength = itemMainAxisLength + spacing;
+            currentCrossLength = itemCrossAxisLength;
             if (crossAlignment_ == WrapAlignment::BASELINE) {
                 baselineDistance = item->GetBaselineDistance();
             }
@@ -298,6 +305,9 @@ SizeF WrapLayoutAlgorithm::GetLeftSize(float crossLength, float mainLeftLength, 
 
 float WrapLayoutAlgorithm::GetItemMainAxisLength(const RefPtr<GeometryNode>& item) const
 {
+    if (isPixelRoundAfterMeasure_) {
+        return isHorizontal_ ? item->GetMarginPreFrameSize().Width() : item->GetMarginPreFrameSize().Height();
+    }
     return isHorizontal_ ? item->GetMarginFrameSize().Width() : item->GetMarginFrameSize().Height();
 }
 

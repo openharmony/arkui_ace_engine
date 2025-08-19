@@ -7673,11 +7673,23 @@ export type Callback_SheetDismiss_Void = (sheetDismiss: SheetDismiss) => void;
 export type Callback_DismissSheetAction_Void = (parameter: DismissSheetAction) => void;
 export type Callback_SpringBackAction_Void = (parameter: SpringBackAction) => void;
 export type Callback_SheetType_Void = (parameter: SheetType) => void;
+export type SingleLengthDetent = [
+    SheetSize | Length
+]
+export type DoubleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined
+]
+export type TripleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined,
+    SheetSize | Length | undefined
+]
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
     maskColor?: ResourceColor;
-    detents?: [ SheetSize | Length, SheetSize | Length | undefined, SheetSize | Length | undefined ];
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;

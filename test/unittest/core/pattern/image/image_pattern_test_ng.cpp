@@ -576,6 +576,70 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TriggerFirstVisibleAreaChange003
+ * @tc.desc: call TriggerFirstVisibleAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call TriggerFirstVisibleAreaChange.
+     * @tc.expected: previousVisibility_ is changed.
+     */
+    EXPECT_FALSE(imagePattern->previousVisibility_);
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_FALSE(imagePattern->previousVisibility_);
+}
+
+/**
+ * @tc.name: TriggerFirstVisibleAreaChange004
+ * @tc.desc: call TriggerFirstVisibleAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call TriggerFirstVisibleAreaChange.
+     * @tc.expected: previousVisibility_ is changed.
+     */
+    EXPECT_FALSE(imagePattern->previousVisibility_);
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_FALSE(imagePattern->previousVisibility_);
+    imagePattern->OnVisibleAreaChange(true);
+    EXPECT_TRUE(imagePattern->previousVisibility_);
+    imagePattern->TriggerFirstVisibleAreaChange();
+    EXPECT_TRUE(imagePattern->previousVisibility_);
+}
+
+/**
  * @tc.name: OnAreaChangedInner001
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC

@@ -106,7 +106,7 @@ void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
-    ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, node);
 }
 
 void ListItemModelNG::SetSticky(V2::StickyMode stickyMode)
@@ -186,7 +186,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetStartNode(startNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         RefPtr<NG::UINode> endNode;
         if (builderAction) {
@@ -197,7 +197,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         pattern->SetEndNode(endNode);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
 }
 
@@ -302,12 +302,12 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         pattern->SetStartNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, node);
     } else {
         pattern->SetEndNode(builderComponent);
         InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
             std::move(onStateChange), isStartArea);
-        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
 }
 

@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsPageTransitionFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsPageTransitionFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsPageTransitionFunction, JsFunction);
 
 public:
     explicit JsPageTransitionFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

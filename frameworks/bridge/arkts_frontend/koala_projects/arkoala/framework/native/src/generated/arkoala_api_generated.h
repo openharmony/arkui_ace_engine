@@ -3121,6 +3121,14 @@ typedef struct Ark_NavigationToolbarOptions Ark_NavigationToolbarOptions;
 typedef struct Opt_NavigationToolbarOptions Opt_NavigationToolbarOptions;
 typedef struct Ark_PopupOptions Ark_PopupOptions;
 typedef struct Opt_PopupOptions Opt_PopupOptions;
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents; 
+typedef struct Ark_SingleLengthDetent Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent Opt_SingleLengthDetent;
+typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
+typedef struct Ark_TripleLengthDetents Ark_TripleLengthDetents;
+typedef struct Opt_TripleLengthDetents Opt_TripleLengthDetents;
 typedef struct Ark_RichEditorImageSpanOptions Ark_RichEditorImageSpanOptions;
 typedef struct Opt_RichEditorImageSpanOptions Opt_RichEditorImageSpanOptions;
 typedef struct Ark_RichEditorImageSpanResult Ark_RichEditorImageSpanResult;
@@ -15510,6 +15518,46 @@ typedef struct Opt_Union_SizeOptions_ImageSize {
     Ark_Tag tag;
     Ark_Union_SizeOptions_ImageSize value;
 } Opt_Union_SizeOptions_ImageSize;
+typedef struct Ark_SingleLengthDetent {
+    Ark_Union_SheetSize_Length value0;
+} Ark_SingleLengthDetent;
+typedef struct Opt_SingleLengthDetent {
+    Ark_Tag tag;
+    Ark_SingleLengthDetent value;
+} Opt_SingleLengthDetent;
+
+typedef struct Ark_DoubleLengthDetents {
+    Ark_Union_SheetSize_Length value0;
+    Opt_Union_SheetSize_Length value1;
+} Ark_DoubleLengthDetents;
+typedef struct Opt_DoubleLengthDetents {
+    Ark_Tag tag;
+    Ark_DoubleLengthDetents value;
+} Opt_DoubleLengthDetents;
+
+typedef struct Ark_TripleLengthDetents {
+    Ark_Union_SheetSize_Length value0;
+    Opt_Union_SheetSize_Length value1;
+    Opt_Union_SheetSize_Length value2;
+} Ark_TripleLengthDetents;
+typedef struct Opt_TripleLengthDetents {
+    Ark_Tag tag;
+    Ark_TripleLengthDetents value;
+} Opt_TripleLengthDetents;
+
+typedef struct Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_SingleLengthDetent value0;
+        Ark_DoubleLengthDetents value1;
+        Ark_TripleLengthDetents value2;
+    };
+} Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
+typedef struct Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents {
+    Ark_Tag tag;
+    Ark_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents value;
+} Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents;
 typedef struct Ark_Union_String_Array_String {
     Ark_Int32 selector;
     union {
@@ -18497,7 +18545,7 @@ typedef struct Ark_SheetOptions {
     Opt_Union_SheetSize_Length height;
     Opt_Boolean dragBar;
     Opt_ResourceColor maskColor;
-    Opt_Type_SheetOptions_detents detents;
+    Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents detents;
     Opt_BlurStyle blurStyle;
     Opt_Union_Boolean_Resource showClose;
     Opt_SheetType preferType;
@@ -23881,6 +23929,7 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_NativePointer (*getFrameNodePtr)(Ark_FrameNode node);
     Ark_FrameNode (*createTypedFrameNode)(const Ark_String* type);
     Ark_String (*getNodeType)(Ark_FrameNode peer);
+    void (*applyAttributesFinish)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {

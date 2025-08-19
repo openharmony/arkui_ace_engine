@@ -20,7 +20,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SearchComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SearchComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SearchComposedElement, InspectorComposedElement);
 
 public:
     explicit SearchComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -451,6 +451,11 @@ bool ReadIsVelocityWithoutUpPoint()
     return system::GetBoolParameter(
         "persist.sys.arkui.velocitytracker.withoutuppoint", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
 }
+
+bool IsPrebuildInMultiFrameEnabled()
+{
+    return system::GetBoolParameter("persist.ace.prebuild_in_multi_frame.enabled", false);
+}
 } // namespace
 
 float ReadDragStartDampingRatio()
@@ -749,6 +754,7 @@ std::string SystemProperties::mapSearchPrefix_ = "";
 int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPointNumber();
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
+bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnabled();
 
 bool SystemProperties::IsOpIncEnable()
 {

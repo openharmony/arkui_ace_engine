@@ -864,28 +864,30 @@ void HandleGestureEvent(ArkUINodeEvent* event)
     if (gestureEvent == nullptr || extraData->targetReceiver == nullptr) {
         return;
     }
-    ArkUI_UIInputEvent uiEvent;
+    ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent();
     if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE)) {
-        uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
-        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+        uiEvent->eventTypeId = C_MOUSE_EVENT_ID;
+        uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
     } else if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS)) {
-        uiEvent.eventTypeId = C_AXIS_EVENT_ID;
-        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+        uiEvent->eventTypeId = C_AXIS_EVENT_ID;
+        uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
     } else if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY)) {
-        uiEvent.eventTypeId = C_CLICK_EVENT_ID;
-        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
+        uiEvent->eventTypeId = C_CLICK_EVENT_ID;
+        uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     } else {
-        uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
-        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+        uiEvent->eventTypeId = C_TOUCH_EVENT_ID;
+        uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
     }
-    uiEvent.apiVersion = event->apiVersion;
-    uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
-    gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    uiEvent->apiVersion = event->apiVersion;
+    uiEvent->inputEvent = gestureEvent->eventData.rawPointerEvent;
+    gestureEvent->eventData.rawPointerEvent = uiEvent;
     if (extraData->gesture) {
         ArkUI_GestureRecognizer* recognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(extraData->gesture);
         gestureEvent->attachNode = recognizer->attachNode;
     }
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
+    delete uiEvent;
+    gestureEvent->eventData.rawPointerEvent = nullptr;
 }
 
 int32_t SetGestureInterrupterToNode(

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT PickerTextDialogComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(PickerTextDialogComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(PickerTextDialogComposedElement, InspectorComposedElement);
 
 public:
     explicit PickerTextDialogComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

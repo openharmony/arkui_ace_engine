@@ -30,7 +30,7 @@ using PictureInfo = std::pair<float, int32_t>;
 using IndexChangeListener = std::function<void(int32_t)>;
 
 class ControlledAnimator : public AceType {
-    DECLARE_ACE_TYPE(ControlledAnimator, AceType)
+    DECLARE_ACE_TYPE(ControlledAnimator, AceType);
 public:
     ControlledAnimator() = default;
 

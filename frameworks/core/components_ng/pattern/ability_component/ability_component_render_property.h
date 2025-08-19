@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 
 // PaintProperty are used to set render properties.
 class AbilityComponentRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(AbilityComponentRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(AbilityComponentRenderProperty, PaintProperty);
 
 public:
     AbilityComponentRenderProperty() = default;

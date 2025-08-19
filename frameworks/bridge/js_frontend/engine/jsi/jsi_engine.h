@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsiEngineInstance final : public AceType, public JsEngineInstance {
-    DECLARE_ACE_TYPE(JsiEngineInstance, AceType)
+    DECLARE_ACE_TYPE(JsiEngineInstance, AceType);
 public:
     explicit JsiEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
         : frontendDelegate_(delegate), instanceId_(instanceId)

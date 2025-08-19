@@ -38,7 +38,7 @@ struct PackOption {
 class PixelMap;
 
 class ACE_EXPORT ImagePacker : public AceType {
-    DECLARE_ACE_TYPE(ImagePacker, AceType)
+    DECLARE_ACE_TYPE(ImagePacker, AceType);
 public:
     static RefPtr<ImagePacker> Create();
 

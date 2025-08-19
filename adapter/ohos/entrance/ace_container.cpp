@@ -3148,11 +3148,18 @@ void AceContainer::InitWindowCallback()
         return window->GetWidthBreakpoint(layoutWidthBreakpoints);
     });
 
-    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, rect);
         auto windowRect = window->GetRect();
-        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        if (windowRect.IsUninitializedRect()) {
+            rect.SetRect(container->GetViewPosX(), container->GetViewPosY(), container->GetViewWidth(),
+                container->GetViewHeight());
+        } else {
+            rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        }
         return rect;
     });
 

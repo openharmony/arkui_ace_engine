@@ -91,6 +91,7 @@ public:
     virtual void UnRegisterFoldStatusChangedCallback(int32_t callbackId) = 0;
     virtual int32_t RegisterRotationEndCallback(std::function<void()>&& callback) = 0;
     virtual void UnregisterRotationEndCallback(int32_t callbackId) = 0;
+    virtual void AddWindowSizeChangeCallback(int32_t nodeId) = 0;
 };
 
 }

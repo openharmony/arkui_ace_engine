@@ -147,6 +147,7 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(c
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
+    CHECK_NULL_RETURN(rsUIContext, false);
     return Rosen::RSNode::IsImplicitAnimationOpen(rsUIContext);
 }
 
@@ -367,5 +368,14 @@ std::shared_ptr<Rosen::RSUIContext> AnimationUtils::GetCurrentRSUIContext(RefPtr
     auto rsUIDirector = window->GetRSUIDirector();
     CHECK_NULL_RETURN(rsUIDirector, nullptr);
     return rsUIDirector->GetRSUIContext();
+}
+
+uint64_t AnimationUtils::GetRSUIContextToken(RefPtr<PipelineBase> context)
+{
+    auto rsUIContext = GetCurrentRSUIContext(context);
+    if (rsUIContext) {
+        return rsUIContext->GetToken();
+    }
+    return 0;
 }
 } // namespace OHOS::Ace

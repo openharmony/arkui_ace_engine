@@ -34,7 +34,7 @@ enum class FocusType : int32_t {
 };
 
 class FocusState : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusState, AceType)
+    DECLARE_ACE_TYPE(FocusState, AceType);
 
 public:
     FocusState() = default;

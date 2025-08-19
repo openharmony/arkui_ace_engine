@@ -133,7 +133,6 @@ private:
         currentTouchPointsNum_ = 0;
         useCatchMode_ = true;
         responseRegionBuffer_.clear();
-        localMatrix_.clear();
     }
 
     void HandleOverdueDeadline();

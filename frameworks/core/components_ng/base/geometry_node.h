@@ -36,7 +36,7 @@ class InspectorFilter;
 using ExpandEdges = PaddingPropertyF;
 // GeometryNode acts as a physical property of the size and position of the component
 class ACE_FORCE_EXPORT GeometryNode : public AceType {
-    DECLARE_ACE_TYPE(GeometryNode, AceType)
+    DECLARE_ACE_TYPE(GeometryNode, AceType);
 public:
     GeometryNode() = default;
     ~GeometryNode() override = default;
@@ -53,6 +53,8 @@ public:
     RefPtr<GeometryNode> Clone() const;
 
     SizeF GetMarginFrameSize(bool withSafeArea = false) const;
+
+    SizeF GetMarginPreFrameSize(bool withSafeArea = false) const;
 
     OffsetF GetMarginFrameOffset(bool withSafeArea = false) const;
 
@@ -170,6 +172,11 @@ public:
         return pixelGridRoundSize_;
     }
 
+    const SizeF& GetPreFrameSize() const
+    {
+        return preFrameSize_;
+    }
+
     RectF GetPixelGridRoundRect() const
     {
         return RectF(pixelGridRoundOffset_, pixelGridRoundSize_);
@@ -178,6 +185,11 @@ public:
     void SetPixelGridRoundSize(const SizeF& pixelGridRoundSize)
     {
         pixelGridRoundSize_ = pixelGridRoundSize;
+    }
+
+    void SetPreFrameSize(const SizeF& preFrameSize)
+    {
+        preFrameSize_ = preFrameSize;
     }
 
     const OffsetF& GetParentAbsoluteOffset() const
@@ -267,6 +279,7 @@ private:
     OffsetF parentAbsoluteOffset_;
     OffsetF pixelGridRoundOffset_;
     SizeF pixelGridRoundSize_;
+    SizeF preFrameSize_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -44,7 +44,7 @@ private:                                                                        
 
 namespace OHOS::Ace::NG {
 class WebEventHub : public EventHub {
-    DECLARE_ACE_TYPE(WebEventHub, EventHub)
+    DECLARE_ACE_TYPE(WebEventHub, EventHub);
 
 public:
     WebEventHub() = default;

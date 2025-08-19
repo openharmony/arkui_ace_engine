@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 class RichEditorOverlayModifier : public TextOverlayModifier {
-    DECLARE_ACE_TYPE(RichEditorOverlayModifier, TextOverlayModifier)
+    DECLARE_ACE_TYPE(RichEditorOverlayModifier, TextOverlayModifier);
 
 public:
     RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,

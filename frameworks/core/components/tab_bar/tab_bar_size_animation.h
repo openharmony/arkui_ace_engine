@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 class TabBarSizeAnimation : public virtual AceType {
-    DECLARE_ACE_TYPE(TabBarSizeAnimation, AceType)
+    DECLARE_ACE_TYPE(TabBarSizeAnimation, AceType);
 public:
     void Initialize(const WeakPtr<PipelineContext>& context);
     void Start(const WeakPtr<RenderNode>& tabBar, int32_t from, int32_t to);

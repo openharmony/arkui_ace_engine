@@ -108,10 +108,6 @@ struct AccessibilityParentRectInfo {
     bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
 };
 
-struct AccessibilityWorkMode {
-    bool isTouchExplorationEnabled = true;
-};
-
 struct AccessibilityWindowInfo {
     int32_t left = 0;
     int32_t top = 0;
@@ -120,6 +116,11 @@ struct AccessibilityWindowInfo {
     float_t scaleY = 1.0f;
     RotateTransform rotateTransform;
 };
+
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
 
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
@@ -192,6 +193,11 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
+
+    virtual bool IsTouchExplorationEnabled()
+    {
+        return true;
+    }
     virtual bool IsScreenReaderEnabled()
     {
         return false;
@@ -357,17 +363,17 @@ public:
         return AccessibilityWindowInfo();
     }
 
+    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
+    }
+
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
     virtual void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) {}
     virtual void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) {}
     virtual int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false)
     {
         return 0;
-    }
-
-    virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
-    {
-        return AccessibilityWorkMode();
     }
 
     virtual void ReleasePageEvent(

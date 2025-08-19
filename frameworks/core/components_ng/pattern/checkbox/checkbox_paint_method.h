@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class CheckBoxPaintProperty;
 constexpr float CHECKBOX_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 class CheckBoxPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod);
 
 public:
     CheckBoxPaintMethod() = default;

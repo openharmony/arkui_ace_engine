@@ -357,7 +357,7 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
-    switchModifier->SetIsOn(isOn_.value());
+    switchModifier->SetIsOn(isOn_.value_or(false));
     switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
     UpdateChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -386,7 +386,7 @@ void SwitchPattern::UpdateChangeEvent() const
 {
     auto switchEventHub = GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
-    switchEventHub->UpdateChangeEvent(isOn_.value());
+    switchEventHub->UpdateChangeEvent(isOn_.value_or(false));
 }
 
 void SwitchPattern::OnClick()
@@ -687,11 +687,11 @@ void SwitchPattern::HandleDragEnd()
     auto mainSize = GetSwitchWidth();
     auto contentOffset = GetSwitchContentOffsetX();
     if ((direction_ == TextDirection::RTL &&
-        ((isOn_.value() && dragOffsetX_ - contentOffset > mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset <= mainSize / 2))) ||
+        ((isOn_.value_or(false) && dragOffsetX_ - contentOffset > mainSize / 2) ||
+        (!isOn_.value_or(false) && dragOffsetX_ - contentOffset <= mainSize / 2))) ||
         (direction_ != TextDirection::RTL &&
-        ((isOn_.value() && dragOffsetX_ - contentOffset < mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset >= mainSize / 2)))) {
+        ((isOn_.value_or(false) && dragOffsetX_ - contentOffset < mainSize / 2) ||
+        (!isOn_.value_or(false) && dragOffsetX_ - contentOffset >= mainSize / 2)))) {
         OnClick();
     }
     isDragEvent_ = false;
@@ -756,6 +756,10 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(switchTheme);
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);

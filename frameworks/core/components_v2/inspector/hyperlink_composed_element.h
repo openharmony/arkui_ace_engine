@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT HyperlinkComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(HyperlinkComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(HyperlinkComposedElement, InspectorComposedElement);
 
 public:
     explicit HyperlinkComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

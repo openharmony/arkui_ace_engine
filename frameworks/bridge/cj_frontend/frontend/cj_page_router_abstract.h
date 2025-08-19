@@ -31,7 +31,7 @@ extern "C" ACE_EXPORT void* OHOSAceFrameworkGetCJFrontendLoader();
 
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 class CJPageRouterAbstract : public AceType {
-    DECLARE_ACE_TYPE(CJPageRouterAbstract, AceType)
+    DECLARE_ACE_TYPE(CJPageRouterAbstract, AceType);
 public:
     enum class RouterMode {
         STANDARD = 0,

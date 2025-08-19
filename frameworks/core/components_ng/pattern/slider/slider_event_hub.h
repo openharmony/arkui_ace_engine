@@ -25,7 +25,7 @@ using SliderOnChangeEvent = std::function<void(float, int32_t)>;
 using SliderOnValueChangeEvent = std::function<void(float)>;
 
 class SliderEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SliderEventHub, EventHub)
+    DECLARE_ACE_TYPE(SliderEventHub, EventHub);
 public:
     SliderEventHub() = default;
     ~SliderEventHub() override = default;

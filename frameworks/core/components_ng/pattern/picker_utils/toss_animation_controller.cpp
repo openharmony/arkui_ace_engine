@@ -121,6 +121,7 @@ void TossAnimationController::StartSpringMotion()
             }
         }
     };
+    auto context = columnNode->GetContextRefPtr();
     AnimationUtils::Animate(
         option,
         [weak]() {
@@ -128,7 +129,7 @@ void TossAnimationController::StartSpringMotion()
             CHECK_NULL_VOID(ref);
             ref->property_->Set(ref->end_);
         },
-        finishCallback);
+        finishCallback, nullptr, context);
 }
 
 void TossAnimationController::StopTossAnimation()
@@ -144,11 +145,13 @@ void TossAnimationController::StopTossAnimation()
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
     option.SetDelay(0);
+    auto columnNode = column->GetHost();
+    auto context = columnNode? columnNode->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
         ref->property_->Set(0.0);
-    });
+    }, nullptr, nullptr, context);
 }
 RefPtr<Curve> TossAnimationController::UpdatePlayAnimationValue()
 {

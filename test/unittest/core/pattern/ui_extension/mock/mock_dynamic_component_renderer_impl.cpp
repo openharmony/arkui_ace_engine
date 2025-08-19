@@ -41,8 +41,7 @@ void DynamicComponentRendererImpl::DestroyContent() {}
 void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density,
     int32_t orientation, AnimationOption animationOpt, const OffsetF& offset) {}
 
-void DynamicComponentRendererImpl::TransferPointerEvent(
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
 
 bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
 {
@@ -116,10 +115,7 @@ bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
     return true;
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker)
-{
-    return true;
-}
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker) { return true; }
 
 void DynamicComponentRendererImpl::OnDestroyContent() {}
 

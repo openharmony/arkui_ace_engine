@@ -55,7 +55,8 @@ enum class SymbolType {
 };
 
 enum class SymbolGradientType {
-    COLOR_SHADER = 0,
+    NONE = 0,
+    COLOR_SHADER,
     RADIAL_GRADIENT,
     LINEAR_GRADIENT,
 };
@@ -85,7 +86,7 @@ static const std::unordered_map<SDKGradientDirection, float> GRADIENT_DIRECTION_
 };
 
 struct SymbolGradient {
-    SymbolGradientType type = SymbolGradientType::COLOR_SHADER;
+    SymbolGradientType type = SymbolGradientType::NONE;
     std::vector<Color> symbolColor;
     std::vector<float> symbolOpacities;
     bool repeating = false;
@@ -93,6 +94,7 @@ struct SymbolGradient {
     std::optional<Dimension> radius;
     std::optional<Dimension> radialCenterX;
     std::optional<Dimension> radialCenterY;
+    bool isDefined = false;
 
     bool operator==(const SymbolGradient& other) const
     {
@@ -104,6 +106,7 @@ struct SymbolGradient {
            std::equal(symbolOpacities.begin(), symbolOpacities.end(), other.symbolOpacities.begin(),
                      [](float a, float b) { return NearZero(a - b); }) &&
            repeating == other.repeating &&
+           isDefined == other.isDefined &&
            ((!angle && !other.angle) || (angle && other.angle && NearZero(*angle - *other.angle))) &&
            radius == other.radius;
     }

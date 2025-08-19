@@ -22,7 +22,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT NavigationTitleComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(NavigationTitleComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(NavigationTitleComposedElement, InspectorComposedElement);
 
 public:
     explicit NavigationTitleComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

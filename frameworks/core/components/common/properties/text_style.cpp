@@ -18,19 +18,19 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
-const std::vector<WordBreak> WORD_BREAK_TYPES = {
-    WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD, WordBreak::HYPHENATION};
-const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = {
-    LineBreakStrategy::GREEDY, LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED};
-TextStyle::TextStyle(const std::vector<std::string> &fontFamilies, double fontSize, FontWeight fontWeight,
-    FontStyle fontStyle, const Color &textColor)
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
+TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
+    FontStyle fontStyle, const Color& textColor)
     : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor),
       fontWeight_(fontWeight)
 {
     SetFontSize(Dimension(fontSize));
 }
 
-bool TextStyle::operator==(const TextStyle &rhs) const
+bool TextStyle::operator==(const TextStyle& rhs) const
 {
     return propFontFamilies_ == rhs.propFontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
            propTextDecorationStyle_ == rhs.propTextDecorationStyle_ && preferFontSizes_ == rhs.preferFontSizes_ &&
@@ -53,13 +53,13 @@ bool TextStyle::operator==(const TextStyle &rhs) const
            NearEqual(propLineThicknessScale_, rhs.propLineThicknessScale_);
 }
 
-bool TextStyle::operator!=(const TextStyle &rhs) const
+bool TextStyle::operator!=(const TextStyle& rhs) const
 {
     return !(rhs == *this);
 }
 
 void TextStyle::SetAdaptTextSize(
-    const Dimension &maxFontSize, const Dimension &minFontSize, const Dimension &fontSizeStep)
+    const Dimension& maxFontSize, const Dimension& minFontSize, const Dimension& fontSizeStep)
 {
     adaptMaxFontSize_.value = maxFontSize;
     adaptMinFontSize_.value = minFontSize;
@@ -67,11 +67,11 @@ void TextStyle::SetAdaptTextSize(
     adaptTextSize_ = true;
 }
 
-void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue> &json, const std::optional<TextBackgroundStyle> &style,
-    const NG::InspectorFilter &filter)
+void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style,
+    const NG::InspectorFilter& filter)
 {
     NG::BorderRadiusProperty defaultRadius;
-    TextBackgroundStyle exportStyle = {.backgroundColor = Color::TRANSPARENT, .backgroundRadius = defaultRadius};
+    TextBackgroundStyle exportStyle = { .backgroundColor = Color::TRANSPARENT, .backgroundRadius = defaultRadius };
     if (style.has_value()) {
         exportStyle.backgroundColor = style.value().backgroundColor.value_or(Color::TRANSPARENT);
         exportStyle.backgroundRadius = style.value().backgroundRadius.value_or(defaultRadius);
@@ -120,8 +120,8 @@ void TextStyle::UpdateColorByResourceId()
     if (propTextBackgroundStyle_.has_value()) {
         propTextBackgroundStyle_->UpdateColorByResourceId();
     }
-    std::for_each(propRenderColors_.begin(), propRenderColors_.end(), [](Color &cl) { cl.UpdateColorByResourceId(); });
-    std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow &sd) { sd.UpdateColorByResourceId(); });
+    std::for_each(propRenderColors_.begin(), propRenderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+    std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
 }
 
 std::string TextStyle::ToString() const
@@ -143,7 +143,8 @@ std::string TextStyle::ToString() const
     JSON_STRING_PUT_INT(jsonValue, propTextVerticalAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecorationStyle_);
-    JSON_STRING_PUT_INT(jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
+    JSON_STRING_PUT_INT(
+        jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
     JSON_STRING_PUT_INT(jsonValue, propLineThicknessScale_);
     JSON_STRING_PUT_INT(jsonValue, propWhiteSpace_);
     JSON_STRING_PUT_INT(jsonValue, propWordBreak_);
@@ -153,7 +154,7 @@ std::string TextStyle::ToString() const
 
     std::stringstream ss;
     std::for_each(
-        propRenderColors_.begin(), propRenderColors_.end(), [&ss](const Color &c) { ss << c.ToString() << ","; });
+        propRenderColors_.begin(), propRenderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
     jsonValue->Put("renderColors", ss.str().c_str());
     JSON_STRING_PUT_INT(jsonValue, propRenderStrategy_);
     JSON_STRING_PUT_INT(jsonValue, propEffectStrategy_);
@@ -208,7 +209,7 @@ void TextStyle::CompareAnimationMode(const std::optional<NG::SymbolEffectOptions
         }
     }
 }
- 
+
 void TextStyle::SetWhenOnlyOneOptionIsValid(const std::optional<NG::SymbolEffectOptions>& options)
 {
     auto symbolOptions = options.value();
@@ -225,7 +226,7 @@ void TextStyle::SetWhenOnlyOneOptionIsValid(const std::optional<NG::SymbolEffect
         reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
     }
 }
- 
+
 void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
 {
     auto innerSymbolEffectOptions = GetInnerSymbolEffectOptions();

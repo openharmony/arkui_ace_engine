@@ -694,11 +694,11 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
 Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate)
 {
     Rosen::SymbolColor symbolColor;
-    symbolColor.colorType = Rosen::SymbolColorType::GRADIENT_TYPE;
     for (const auto& grad : intermediate) {
-        if (auto nativeGradient = CreateNativeGradient(grad)) {
-            symbolColor.gradients.push_back(nativeGradient);
-        }
+        auto nativeGradient = CreateNativeGradient(grad);
+        symbolColor.colorType =
+            grad.isDefined ? Rosen::SymbolColorType::GRADIENT_TYPE : Rosen::SymbolColorType::GRADIENT_DEFAULT_COLOR;
+        symbolColor.gradients.push_back(nativeGradient);
     }
 
     return symbolColor;

@@ -391,4 +391,31 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest006, TestSize.Level1)
     EXPECT_EQ(toastNotFoundError, "Toast not found. ");
 }
 
+/**
+ * @tc.name: NapiUtilsTest007
+ * @tc.desc: GetStringFromValueUtf8
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest007, TestSize.Level1)
+{
+    NativeEngineMock engine;
+    /**
+     * @tc.steps: step1. Create napi string
+     * @tc.expected: Create success
+     */
+    std::string testStr = "test napi string";
+    napi_value napiTestStr = nullptr;
+
+    napi_status status = napi_create_string_utf8(napi_env(engine), testStr.c_str(), testStr.length(), &napiTestStr);
+    EXPECT_EQ(status, napi_ok);
+
+    /**
+     * @tc.steps: step2. Call GetStringFromValueUtf8
+     * @tc.expected: Return value equals raw string
+     */
+    auto retVal = Napi::GetStringFromValueUtf8(napi_env(engine), napiTestStr);
+    EXPECT_EQ(retVal.has_value(), true);
+    EXPECT_EQ(retVal.value(), testStr);
+}
+
 } // namespace OHOS::Ace

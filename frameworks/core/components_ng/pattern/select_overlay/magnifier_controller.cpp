@@ -108,7 +108,7 @@ bool MagnifierController::UpdateMagnifierOffset()
     CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
-    if (localOffsetChanged_ && NearEqual(params_.offsetX_, magnifierOffset.x) &&
+    if (magnifierPaintOffset == geometryNode->GetFrameOffset() && NearEqual(params_.offsetX_, magnifierOffset.x) &&
         NearEqual(params_.offsetY_, magnifierOffset.y)) {
         // change x one pixel so magnifier can refresh
         magnifierPaintOffset.SetX(magnifierPaintOffset.GetX() - 1.0f);
@@ -218,10 +218,11 @@ void MagnifierController::ChangeMagnifierVisibility(const bool& visible)
     AnimationOption option;
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(ANIMATION_DURATION_150);
+    auto contextPtr = magnifierFrameNode_ ? magnifierFrameNode_->GetContextRefPtr() : nullptr;
     if (removeFrameNode_) {
-        AnimationUtils::Animate(option, callBack, endCallBack);
+        AnimationUtils::Animate(option, callBack, endCallBack, nullptr, contextPtr);
     } else {
-        AnimationUtils::Animate(option, callBack);
+        AnimationUtils::Animate(option, callBack, nullptr, nullptr, contextPtr);
     }
 }
 

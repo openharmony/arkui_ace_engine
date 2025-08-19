@@ -442,7 +442,7 @@ void FlexLayoutAlgorithm::SecondMeasureInWeightMode(
     auto remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
     auto spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
     auto secondIterLoop = magicNodes_.rbegin();
-    while (secondIterLoop != firstLoopIter) {
+    while (secondIterLoop != firstLoopIter && secondIterLoop != magicNodes_.rend()) {
         auto& childList = secondIterLoop->second;
         bool isExceed = false;
         for (auto& child : childList) {

@@ -15,6 +15,7 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
+#include "base/geometry/ng/rect_t.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
@@ -395,6 +396,50 @@ bool FrameNodeImpl::NeedAvoidContainerModal()
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_RETURN(avoidInfoMgr, false);
     return avoidInfoMgr->NeedAvoidContainerModal();
+}
+
+int32_t FrameNodeImpl::GetContainerModalTitleHeight()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, 0);
+    return avoidInfoMgr->GetContainerModalTitleHeight();
+}
+
+NG::OffsetF FrameNodeImpl::GetContainerModalButtonsOffset()
+{
+    NG::OffsetF offset = NG::OffsetF(0.0, 0.0);
+    CHECK_NULL_RETURN(frameNode_, offset);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, offset);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, offset);
+    Ace::NG::RectF containerModal;
+    Ace::NG::RectF buttonsRect;
+    auto isSuccess = avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    if (!isSuccess) {
+        return offset;
+    }
+    return buttonsRect.GetOffset();
+}
+
+NG::SizeF FrameNodeImpl::GetContainerModalButtonsSize()
+{
+    NG::SizeF buttonsSize = NG::SizeF(0.0, 0.0);
+    CHECK_NULL_RETURN(frameNode_, buttonsSize);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, buttonsSize);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, buttonsSize);
+    Ace::NG::RectF containerModal;
+    Ace::NG::RectF buttonsRect;
+    auto isSuccess = avoidInfoMgr->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    if (!isSuccess) {
+        return buttonsSize;
+    }
+    return NG::SizeF(buttonsRect.Width(), buttonsRect.Height());
 }
 
 NG::OffsetF FrameNodeImpl::GetParentGlobalOffsetDuringLayout()

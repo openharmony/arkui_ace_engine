@@ -715,4 +715,18 @@ HWTEST_F(UIContextImplTest, RotationEndCallback, TestSize.Level1)
     SUCCEED();
 }
 
+/**
+ * @tc.name: AddWindowSizeChangeCallbackTest001
+ * @tc.desc: Test AddWindowSizeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, AddWindowSizeChangeCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call AddWindowSizeChangeCallback on valid context
+     * @tc.expected: step1. Should complete without errors
+     */
+    uiContext_->AddWindowSizeChangeCallback(1);
+    SUCCEED();
+}
 } // namespace OHOS::Ace::Kit

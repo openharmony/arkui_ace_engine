@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class RadioPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(RadioPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(RadioPaintProperty, PaintProperty);
 
 public:
     RadioPaintProperty() = default;

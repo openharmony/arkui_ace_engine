@@ -44,10 +44,10 @@ const MAX_MAX_FONT_SCALE = 2;
 const MIN_MAX_FONT_SCALE = 1;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
-const CAPSULE_FOCUS_SELECTED_OFFSET = 4;
 // Space character for selected accessibility description - prevents screen readers from announcing
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
+const CAPSULE_FOCUS_SELECTED_OFFSET = 4;
 const segmentButtonTheme = {
   FONT_COLOR: {
     id: -1,

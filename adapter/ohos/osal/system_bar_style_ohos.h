@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 class SystemBarStyleOhos : public SystemBarStyle {
-    DECLARE_ACE_TYPE(SystemBarStyleOhos, SystemBarStyle)
+    DECLARE_ACE_TYPE(SystemBarStyleOhos, SystemBarStyle);
 public:
     SystemBarStyleOhos() = default;
     ~SystemBarStyleOhos() = default;

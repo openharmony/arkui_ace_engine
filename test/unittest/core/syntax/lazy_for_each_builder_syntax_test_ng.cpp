@@ -2141,6 +2141,32 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange002, Test
 }
 
 /**
+ * @tc.name: LazyForEachBuilderSetActiveChildRange003
+ * @tc.desc: Create LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderSetActiveChildRange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CreateLazyForEachBuilder
+     * @tc.expected: Create CreateLazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto& [index, node] : lazyForEachBuilder->cachedItems_) {
+        lazyForEachBuilder->expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+    }
+
+    /**
+     * @tc.steps: step2. Invoke SetActiveChildRange function.
+     * @tc.expected: Mock cachedItems_ to SetActiveChildRange success.
+     */
+    auto ret = lazyForEachBuilder->SetActiveChildRange(0, 0);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: LazyForEachBuilderGetChildIndex001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
@@ -2603,5 +2629,23 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder37, TestSize.Level1)
     lazyForEachBuilder->NotifyColorModeChange(1, true);
     EXPECT_TRUE(node->measureAnyWay_);
     EXPECT_TRUE(node->shouldRerender_);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder38
+ * @tc.desc: Test the NotifyColorModeChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder38, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    auto uiNode = AceType::MakeRefPtr<NG::CustomNode>(666, "node");
+    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
+    uiNode->children_ = { childNode };
+    uiNode->SetDarkMode(true);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("0", uiNode);
+    EXPECT_FALSE(childNode->CheckIsDarkMode());
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+    EXPECT_TRUE(childNode->CheckIsDarkMode());
 }
 } // namespace OHOS::Ace::NG

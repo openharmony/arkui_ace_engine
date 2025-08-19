@@ -25,7 +25,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ShapeContainerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ShapeContainerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ShapeContainerComposedElement, InspectorComposedElement);
 
 public:
     static std::string LineCapStyleToString(LineCapStyle lineCapStyle);

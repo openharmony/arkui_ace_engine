@@ -51,7 +51,7 @@ struct FadeoutInfo {
 };
 
 class TextContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(TextContentModifier, ContentModifier);
 
 public:
     explicit TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern = nullptr);
@@ -192,6 +192,7 @@ private:
         return marqueeState_ == state;
     }
     bool IsMarqueeVisible() const;
+    void UpdateTextDecorationColorAlpha();
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

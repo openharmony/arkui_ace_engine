@@ -37,6 +37,40 @@ constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_ALPHA = 255;
 }
 
+RefPtr<FrameNode> TextFieldModelStatic::CreateTextInputNode(
+    int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
+    textFieldLayoutProperty->UpdateMaxLines(1);
+    textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    pattern->SetTextInputFlag(true);
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    TextFieldModelNG::UpdateTextFieldPattern(frameNode, value);
+    return frameNode;
+}
+
+RefPtr<FrameNode> TextFieldModelStatic::CreateTextAreaNode(
+    int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
+    textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    TextFieldModelNG::UpdateTextFieldPattern(frameNode, value);
+    return frameNode;
+}
+
 void TextFieldModelStatic::SetShowUnit(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
 {
     CHECK_NULL_VOID(frameNode);

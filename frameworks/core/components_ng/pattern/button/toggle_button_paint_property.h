@@ -17,16 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_TOGGLE_BUTTON_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 class ToggleButtonPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty);
 
 public:
     ToggleButtonPaintProperty() = default;

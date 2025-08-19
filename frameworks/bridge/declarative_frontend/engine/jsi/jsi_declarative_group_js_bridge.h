@@ -50,7 +50,7 @@ enum class ParseJsDataResult {
 };
 
 class JsiDeclarativeGroupJsBridge : public GroupJsBridge {
-    DECLARE_ACE_TYPE(JsiDeclarativeGroupJsBridge, GroupJsBridge)
+    DECLARE_ACE_TYPE(JsiDeclarativeGroupJsBridge, GroupJsBridge);
 
     enum GroupType {
         MODULE_GROUP = 0,

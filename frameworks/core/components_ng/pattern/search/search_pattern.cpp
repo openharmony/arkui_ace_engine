@@ -1387,7 +1387,8 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetDuration(duration);
     option.SetCurve(curve);
     AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); }, nullptr,
+        nullptr, Claim(context));
 }
 
 void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
@@ -1400,7 +1401,8 @@ void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderCont
     option.SetDuration(duration);
     option.SetCurve(curve);
     AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); }, nullptr,
+        nullptr, Claim(GetContext()));
 }
 
 void SearchPattern::ResetDragOption()

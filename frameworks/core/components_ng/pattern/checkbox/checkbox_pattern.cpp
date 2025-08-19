@@ -655,6 +655,8 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
 
 void CheckBoxPattern::StartEnterAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
@@ -675,11 +677,13 @@ void CheckBoxPattern::StartEnterAnimation()
             TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check enter animation");
             renderContext->UpdateOpacity(1);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
 }
 
 void CheckBoxPattern::StartExitAnimation()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
@@ -692,7 +696,7 @@ void CheckBoxPattern::StartExitAnimation()
             TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check exit animation");
             renderContext->UpdateOpacity(0);
         },
-        nullptr);
+        nullptr, nullptr, host->GetContextRefPtr());
     const auto& eventHub = builderNode_->GetOrCreateEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);

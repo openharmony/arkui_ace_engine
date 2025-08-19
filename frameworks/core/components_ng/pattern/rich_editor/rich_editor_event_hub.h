@@ -57,7 +57,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo);
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
     ~RichEditorInsertValue() override = default;
@@ -208,7 +208,7 @@ private:
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
 
 class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo);
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
     ~RichEditorDeleteValue() = default;
@@ -230,7 +230,7 @@ private:
 };
 
 class ACE_FORCE_EXPORT RichEditorChangeValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo);
 #ifndef ACE_UNITTEST
 private:
 #else
@@ -286,7 +286,7 @@ private:
 };
 
 class StyledStringChangeValue : public BaseEventInfo {
-    DECLARE_ACE_TYPE(StyledStringChangeValue, BaseEventInfo)
+    DECLARE_ACE_TYPE(StyledStringChangeValue, BaseEventInfo);
 public:
     StyledStringChangeValue() : BaseEventInfo("StyledStringChangeValue") {}
     ~StyledStringChangeValue() = default;
@@ -311,7 +311,7 @@ private:
 };
 
 class RichEditorEventHub : public EventHub {
-    DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
+    DECLARE_ACE_TYPE(RichEditorEventHub, EventHub);
 
 public:
     RichEditorEventHub() = default;

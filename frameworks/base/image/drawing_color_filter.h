@@ -33,7 +33,7 @@ class ColorFilter;
 
 namespace Ace {
 class ACE_EXPORT DrawingColorFilter : public AceType {
-    DECLARE_ACE_TYPE(DrawingColorFilter, AceType)
+    DECLARE_ACE_TYPE(DrawingColorFilter, AceType);
 
 public:
 #if defined(ACE_STATIC)

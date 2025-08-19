@@ -66,7 +66,7 @@ enum class ViewportFit {
 };
 
 class WebConsoleLog : public AceType {
-    DECLARE_ACE_TYPE(WebConsoleLog, AceType)
+    DECLARE_ACE_TYPE(WebConsoleLog, AceType);
 public:
     WebConsoleLog() = default;
     ~WebConsoleLog() = default;
@@ -78,7 +78,7 @@ public:
 };
 
 class WebConsoleMessageParam : public WebConsoleLog {
-    DECLARE_ACE_TYPE(WebConsoleMessageParam, AceType)
+    DECLARE_ACE_TYPE(WebConsoleMessageParam, AceType);
 public:
     WebConsoleMessageParam(std::string message, std::string sourceId, int lineNumber, int messageLevel) :
                         message_(message), sourceId_(sourceId), lineNumber_(lineNumber), messageLevel_(messageLevel) {}
@@ -112,7 +112,7 @@ private:
 };
 
 class WebFileSelectorParam : public AceType {
-    DECLARE_ACE_TYPE(WebFileSelectorParam, AceType)
+    DECLARE_ACE_TYPE(WebFileSelectorParam, AceType);
 public:
     WebFileSelectorParam() = default;
     ~WebFileSelectorParam() = default;
@@ -126,7 +126,7 @@ public:
 };
 
 class ACE_EXPORT WebError : public AceType {
-    DECLARE_ACE_TYPE(WebError, AceType)
+    DECLARE_ACE_TYPE(WebError, AceType);
 
 public:
     WebError(const std::string& info, int32_t code) : info_(info), code_(code) {}
@@ -155,7 +155,7 @@ enum class WebResponseDataType : int32_t {
 };
 
 class WebResponseAsyncHandle : public AceType {
-    DECLARE_ACE_TYPE(WebResponseAsyncHandle, AceType)
+    DECLARE_ACE_TYPE(WebResponseAsyncHandle, AceType);
 public:
     WebResponseAsyncHandle() = default;
     virtual ~WebResponseAsyncHandle() = default;
@@ -177,7 +177,7 @@ struct WebKeyboardOption {
 };
 
 class ACE_EXPORT WebResponse : public AceType {
-    DECLARE_ACE_TYPE(WebResponse, AceType)
+    DECLARE_ACE_TYPE(WebResponse, AceType);
 
 public:
     WebResponse(const std::map<std::string, std::string>& headers, const std::string& data, const std::string& encoding,
@@ -352,7 +352,7 @@ private:
 };
 
 class ACE_EXPORT WebRequest : public AceType {
-    DECLARE_ACE_TYPE(WebRequest, AceType)
+    DECLARE_ACE_TYPE(WebRequest, AceType);
 
 public:
     WebRequest(const std::map<std::string, std::string>& headers, const std::string& method, const std::string& url,
@@ -402,7 +402,7 @@ private:
 };
 
 class ACE_EXPORT Result : public AceType {
-    DECLARE_ACE_TYPE(Result, AceType)
+    DECLARE_ACE_TYPE(Result, AceType);
 
 public:
     Result() = default;
@@ -414,7 +414,7 @@ public:
 };
 
 class ACE_EXPORT FileSelectorResult : public AceType {
-    DECLARE_ACE_TYPE(FileSelectorResult, AceType)
+    DECLARE_ACE_TYPE(FileSelectorResult, AceType);
 
 public:
     FileSelectorResult() = default;
@@ -474,7 +474,7 @@ private:
 };
 
 class ACE_EXPORT AuthResult : public AceType {
-    DECLARE_ACE_TYPE(AuthResult, AceType)
+    DECLARE_ACE_TYPE(AuthResult, AceType);
 
 public:
     AuthResult() = default;
@@ -516,7 +516,7 @@ private:
 };
 
 class ACE_EXPORT SslErrorResult : public AceType {
-    DECLARE_ACE_TYPE(SslErrorResult, AceType)
+    DECLARE_ACE_TYPE(SslErrorResult, AceType);
 
 public:
     SslErrorResult() = default;
@@ -559,7 +559,7 @@ private:
 };
 
 class ACE_EXPORT AllSslErrorResult : public AceType {
-    DECLARE_ACE_TYPE(AllSslErrorResult, AceType)
+    DECLARE_ACE_TYPE(AllSslErrorResult, AceType);
 
 public:
     AllSslErrorResult() = default;
@@ -658,7 +658,7 @@ private:
 };
 
 class ACE_EXPORT SslSelectCertResult : public AceType {
-    DECLARE_ACE_TYPE(SslSelectCertResult, AceType)
+    DECLARE_ACE_TYPE(SslSelectCertResult, AceType);
 public:
     SslSelectCertResult() = default;
     ~SslSelectCertResult() = default;
@@ -715,7 +715,7 @@ private:
 };
 
 class ACE_EXPORT WebGeolocation : public AceType {
-    DECLARE_ACE_TYPE(WebGeolocation, AceType)
+    DECLARE_ACE_TYPE(WebGeolocation, AceType);
 
 public:
     WebGeolocation() = default;
@@ -725,7 +725,7 @@ public:
 };
 
 class ACE_EXPORT WebPermissionRequest : public AceType {
-    DECLARE_ACE_TYPE(WebPermissionRequest, AceType)
+    DECLARE_ACE_TYPE(WebPermissionRequest, AceType);
 
 public:
     WebPermissionRequest() = default;
@@ -741,7 +741,7 @@ public:
 };
 
 class ACE_EXPORT WebScreenCaptureRequest : public AceType {
-    DECLARE_ACE_TYPE(WebScreenCaptureRequest, AceType)
+    DECLARE_ACE_TYPE(WebScreenCaptureRequest, AceType);
 
 public:
     WebScreenCaptureRequest() = default;
@@ -759,7 +759,7 @@ public:
 };
 
 class ACE_EXPORT WebWindowNewHandler : public AceType {
-    DECLARE_ACE_TYPE(WebWindowNewHandler, AceType)
+    DECLARE_ACE_TYPE(WebWindowNewHandler, AceType);
 
 public:
     WebWindowNewHandler() = default;
@@ -775,7 +775,7 @@ public:
 };
 
 class ACE_EXPORT WebAppLinkCallback : public AceType {
-    DECLARE_ACE_TYPE(WebAppLinkCallback, AceType)
+    DECLARE_ACE_TYPE(WebAppLinkCallback, AceType);
 
 public:
     WebAppLinkCallback() = default;
@@ -786,7 +786,7 @@ public:
 };
 
 class ACE_EXPORT WebCustomKeyboardHandler : public AceType {
-    DECLARE_ACE_TYPE(WebCustomKeyboardHandler, AceType)
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandler, AceType);
 
 public:
     WebCustomKeyboardHandler() = default;
@@ -948,7 +948,7 @@ private:
 };
 
 class ACE_EXPORT FullScreenExitHandler : public AceType {
-    DECLARE_ACE_TYPE(FullScreenExitHandler, AceType)
+    DECLARE_ACE_TYPE(FullScreenExitHandler, AceType);
 
 public:
     FullScreenExitHandler() = default;
@@ -1495,7 +1495,7 @@ private:
 };
 
 class WebContextMenuParam : public AceType {
-    DECLARE_ACE_TYPE(WebContextMenuParam, AceType)
+    DECLARE_ACE_TYPE(WebContextMenuParam, AceType);
 
 public:
     WebContextMenuParam() = default;
@@ -1518,7 +1518,7 @@ public:
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {
-    DECLARE_ACE_TYPE(ContextMenuResult, AceType)
+    DECLARE_ACE_TYPE(ContextMenuResult, AceType);
 
 public:
     ContextMenuResult() = default;
@@ -1661,7 +1661,7 @@ private:
 };
 
 class ACE_EXPORT DataResubmitted : public AceType {
-    DECLARE_ACE_TYPE(DataResubmitted, AceType)
+    DECLARE_ACE_TYPE(DataResubmitted, AceType);
 
 public:
     DataResubmitted() = default;
@@ -1689,7 +1689,7 @@ private:
 };
 
 class ACE_EXPORT WebFaviconReceived : public AceType {
-    DECLARE_ACE_TYPE(WebFaviconReceived, AceType)
+    DECLARE_ACE_TYPE(WebFaviconReceived, AceType);
 
 public:
     WebFaviconReceived() = default;

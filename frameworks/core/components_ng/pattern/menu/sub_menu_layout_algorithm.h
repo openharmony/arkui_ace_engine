@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SubMenuLayoutAlgorithm : public MenuLayoutAlgorithm {
-    DECLARE_ACE_TYPE(SubMenuLayoutAlgorithm, MenuLayoutAlgorithm)
+    DECLARE_ACE_TYPE(SubMenuLayoutAlgorithm, MenuLayoutAlgorithm);
 public:
     SubMenuLayoutAlgorithm() = default;
     ~SubMenuLayoutAlgorithm() override = default;

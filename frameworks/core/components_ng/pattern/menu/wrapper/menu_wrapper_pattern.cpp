@@ -411,7 +411,7 @@ void MenuWrapperPattern::ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& 
                 }
                 host->RemoveChild(subMenu);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            });
+            }, nullptr, host->GetContextRefPtr());
     } else {
         SendToAccessibility(subMenu, false);
         host->RemoveChild(subMenu);
@@ -974,7 +974,7 @@ void MenuWrapperPattern::StartShowAnimation()
                 }
             }
         },
-        animationOption_.GetOnFinishEvent());
+        animationOption_.GetOnFinishEvent(), nullptr, host->GetContextRefPtr());
 }
 
 void MenuWrapperPattern::SetAniamtinOption(const AnimationOption& animationOption)

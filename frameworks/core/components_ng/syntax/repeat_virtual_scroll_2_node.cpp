@@ -724,9 +724,10 @@ void RepeatVirtualScroll2Node::OnConfigurationUpdate(const ConfigurationChange& 
 
 void RepeatVirtualScroll2Node::NotifyColorModeChange(uint32_t colorMode)
 {
-    caches_.ForEachCacheItem([colorMode, this](RIDType rid, const CacheItem& cacheItem) {
+    auto rerenderable = GetRerenderable();
+    caches_.ForEachCacheItem([colorMode, rerenderable](RIDType rid, const CacheItem& cacheItem) {
       if (cacheItem->node_ != nullptr) {
-          cacheItem->node_->SetMeasureAnyway(GetRerenderable());
+          cacheItem->node_->SetMeasureAnyway(rerenderable);
           cacheItem->node_->NotifyColorModeChange(colorMode);
       }
     });

@@ -77,7 +77,10 @@ void TextDragOverlayModifier::StartFloatingAnimate()
         CHECK_NULL_VOID(modifier);
         modifier->SetHandleOpacity(0.0);
     };
-    AnimationUtils::Animate(handleOption, handlePropertyCallback, nullptr);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
+    AnimationUtils::Animate(handleOption, handlePropertyCallback, nullptr, nullptr, contextPtr);
     SetShadowOpacity(0.0);
     AnimationOption shadowOption;
     shadowOption.SetDuration(TEXT_ANIMATION_DURATION);
@@ -89,7 +92,7 @@ void TextDragOverlayModifier::StartFloatingAnimate()
         CHECK_NULL_VOID(modifier);
         modifier->SetShadowOpacity(1.0);
     };
-    AnimationUtils::Animate(shadowOption, shadowPropertyCallback, nullptr);
+    AnimationUtils::Animate(shadowOption, shadowPropertyCallback, nullptr, nullptr, contextPtr);
     StartFloatingSelBackgroundAnimate();
 }
 
@@ -114,7 +117,10 @@ void TextDragOverlayModifier::StartFloatingSelBackgroundAnimate()
         modifier->SetBackgroundOffset(TEXT_DRAG_DEFAULT_OFFSET.ConvertToPx());
         modifier->SetSelectedBackgroundOpacity(0.0);
     };
-    AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent());
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto contextPtr = host ? host->GetContextRefPtr() : nullptr;
+    AnimationUtils::Animate(option, propertyCallback, option.GetOnFinishEvent(), nullptr, contextPtr);
 }
 
 void TextDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)

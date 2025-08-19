@@ -20,7 +20,7 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-bool SyncloadParser::IsValidDigits(const std::string& str)
+bool SyncLoadParser::IsValidDigits(const std::string& str)
 {
     if (str.empty() || str.size() > FeatureParamManager::MAX_TIMER_SIZE) {
         return false;
@@ -33,13 +33,13 @@ bool SyncloadParser::IsValidDigits(const std::string& str)
     return true;
 }
 
-ParseErrCode SyncloadParser::ParseFeatureParam(xmlNode& node)
+ParseErrCode SyncLoadParser::ParseFeatureParam(xmlNode& node)
 {
     auto& instance = FeatureParamManager::GetInstance();
     auto enabled = ExtractPropertyValue("enable", node) == "true";
     auto responseDeadlineStr = ExtractPropertyValue("value", node);
     if (!IsValidDigits(responseDeadlineStr)) {
-        LOGW("SyncloadParser::ParseFeatureParam invalid digits %{public}s", responseDeadlineStr.c_str());
+        LOGW("SyncLoadParser::ParseFeatureParam invalid digits %{public}s", responseDeadlineStr.c_str());
         return PARSE_TYPE_ERROR;
     }
     auto deadline = StringUtils::StringToInt(responseDeadlineStr, FeatureParamManager::DEFAULT_SYNCLOAD_DEADLINE);

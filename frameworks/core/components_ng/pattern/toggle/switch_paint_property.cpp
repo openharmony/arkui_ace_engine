@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 
 void SwitchPaintParagraph::ToJsonValue(
-    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode>& host) const
 {
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {

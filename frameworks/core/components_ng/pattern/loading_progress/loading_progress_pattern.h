@@ -44,7 +44,7 @@ public:
             CHECK_NULL_RETURN(paintProperty, nullptr);
             auto loadingOwner =
                 paintProperty->GetLoadingProgressOwner().value_or(LoadingProgressOwner::SELF);
-            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner);
+            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner, WeakClaim(this));
             loadingProgressModifier_->SetUseContentModifier(UseContentModifier());
             InitThemeValues();
         }

@@ -301,11 +301,13 @@ void PickerColumnPattern::PlayPressAnimation(const Color& pressColor)
     option.SetDuration(PRESS_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(pressColor);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void PickerColumnPattern::PlayHoverAnimation(const Color& color)
@@ -314,11 +316,13 @@ void PickerColumnPattern::PlayHoverAnimation(const Color& color)
     option.SetDuration(HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::FRICTION);
     option.SetFillMode(FillMode::FORWARDS);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(color);
-    });
+    }, nullptr, nullptr, context);
 }
 
 bool PickerColumnPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -571,11 +575,13 @@ void PickerColumnPattern::CreateAnimation(double from, double to)
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(CLICK_ANIMATION_DURATION);
     scrollProperty_->Set(from);
+    auto host = GetHost();
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), to]() {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);
         column->scrollProperty_->Set(to);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void PickerColumnPattern::ScrollOption(double delta, bool isJump)

@@ -32,7 +32,7 @@ constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
 constexpr int32_t TRIGGER_BOUNDARY_DISTANCE = 2;
 } // namespace
 class ACE_EXPORT CircleDotIndicatorPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CircleDotIndicatorPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CircleDotIndicatorPaintMethod, NodePaintMethod);
 public:
     explicit CircleDotIndicatorPaintMethod(const RefPtr<CircleDotIndicatorModifier>& circleDotIndicatorModifier)
         : circleDotIndicatorModifier_(circleDotIndicatorModifier)

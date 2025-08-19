@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 
 // Paragraph is interface for drawing text and text paragraph.
 class TxtParagraph : public Paragraph {
-    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
+    DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph);
 
 public:
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)

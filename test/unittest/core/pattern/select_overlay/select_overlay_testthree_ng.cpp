@@ -569,6 +569,39 @@ HWTEST_F(SelectOverlayPatternTestNg, DisableMenuItems, TestSize.Level1)
     EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetTotalChildCount(), 6);
 }
 
+
+/**
+ * @tc.name: TextMenuController.disableSystemServiceMenuItems
+ * @tc.desc: test disableSystemServiceMenuItems of askCelia
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, DisableSystemServiceMenuItems002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    SelectOverlayInfo overlayInfo;
+    SelectMenuInfo menuInfo;
+    menuInfo.showCopy = false;
+    menuInfo.showPaste = false;
+    menuInfo.showCopyAll = false;
+    menuInfo.showCut = false;
+    menuInfo.showAIWrite = true;
+    menuInfo.showTranslate = true;
+    menuInfo.showSearch = true;
+    menuInfo.showCameraInput = true;
+    menuInfo.showShare = true;
+    menuInfo.isAskCeliaEnabled = true;
+    overlayInfo.menuInfo = menuInfo;
+    std::shared_ptr<SelectOverlayInfo> shareInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+
+    AceApplicationInfo::GetInstance().AddTextMenuDisableFlag(NG::DISABLE_ALL_FLAG);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(shareInfo, SelectOverlayMode::MENU_ONLY));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    EXPECT_EQ(selectOverlayNode->selectMenuInner_->GetChildren().size(), 0);
+}
+
 /**
  * @tc.name: FrameNode::ProcessFrameNodeChangeFlag
  * @tc.desc: test ProcessFrameNodeChangeFlag

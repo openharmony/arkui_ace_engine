@@ -392,7 +392,7 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -414,7 +414,7 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
-    });
+    }, nullptr, nullptr, pipeline);
 }
 
 // change background color when hovered

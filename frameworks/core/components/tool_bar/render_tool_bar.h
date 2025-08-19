@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 
 class RenderToolBar : public RenderNode {
-    DECLARE_ACE_TYPE(RenderToolBar, RenderNode)
+    DECLARE_ACE_TYPE(RenderToolBar, RenderNode);
 
 public:
     RenderToolBar();

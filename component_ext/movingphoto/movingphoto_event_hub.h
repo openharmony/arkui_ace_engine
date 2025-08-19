@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 using MovingPhotoEventFunc = std::function<void()>;
 
 class MovingPhotoEventHub : public EventHub {
-    DECLARE_ACE_TYPE(MovingPhotoEventHub, EventHub)
+    DECLARE_ACE_TYPE(MovingPhotoEventHub, EventHub);
 
 public:
     MovingPhotoEventHub() = default;

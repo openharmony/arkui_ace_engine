@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 
 class FrameRateRange : public AceType {
-    DECLARE_ACE_TYPE(FrameRateRange, AceType)
+    DECLARE_ACE_TYPE(FrameRateRange, AceType);
 public:
     FrameRateRange() : min_(0), max_(0), preferred_(0), componentScene_(0) {}
 

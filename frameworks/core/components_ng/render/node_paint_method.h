@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 class Modifier;
 class NodePaintMethod : public virtual AceType {
-    DECLARE_ACE_TYPE(NodePaintMethod, AceType)
+    DECLARE_ACE_TYPE(NodePaintMethod, AceType);
 
 public:
     NodePaintMethod() = default;

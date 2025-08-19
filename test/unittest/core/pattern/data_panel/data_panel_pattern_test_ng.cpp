@@ -65,7 +65,7 @@ public:
 };
 
 class DataPanelTheme : public Theme {
-    DECLARE_ACE_TYPE(DataPanelTheme, Theme)
+    DECLARE_ACE_TYPE(DataPanelTheme, Theme);
 public:
     DataPanelTheme()
     {

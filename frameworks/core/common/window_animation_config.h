@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_ANIMATION_CONFIG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_ANIMATION_CONFIG_H
 
+#include <cstdint>
+
 namespace OHOS::Ace {
 enum class WindowSizeChangeReason : uint32_t {
     UNDEFINED = 0,

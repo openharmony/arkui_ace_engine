@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,7 +69,8 @@ constexpr int32_t ANIMATION_MIN_FFR = 15;
 constexpr int32_t ANIMATION_MAX_FFR = 60;
 constexpr int32_t ANIMATION_EXPECT_FFR = 30;
 } // namespace
-LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
+LoadingProgressModifier::LoadingProgressModifier(
+    LoadingProgressOwner loadingProgressOwner, const WeakPtr<Pattern>& pattern)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
@@ -80,6 +82,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
+      pattern_(pattern),
       loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(enableLoading_);
@@ -399,11 +402,14 @@ void LoadingProgressModifier::StartCometTailAnimation()
     option.SetDuration(TAIL_ANIAMTION_DURATION);
     option.SetIteration(1);
     option.SetCurve(curve);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weakCometTailLen = AceType::WeakClaim(AceType::RawPtr(cometTailLen_))]() {
         auto cometTailLen = weakCometTailLen.Upgrade();
         CHECK_NULL_VOID(cometTailLen);
         cometTailLen->Set(TOTAL_TAIL_LENGTH);
-    });
+    }, nullptr, nullptr, context);
 }
 
 float LoadingProgressModifier::GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber)
@@ -446,11 +452,14 @@ void LoadingProgressModifier::StartRecycle()
         } else {
             option.SetIteration(-1);
         }
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern? pattern->GetHost(): nullptr;
+        auto context = host? host->GetContextRefPtr(): nullptr;
         AnimationUtils::Animate(option, [weakDate = AceType::WeakClaim(AceType::RawPtr(date_))]() {
             auto date = weakDate.Upgrade();
             CHECK_NULL_VOID(date);
             date->Set(FULL_COUNT);
-        });
+        }, nullptr, nullptr, context);
     }
     cometOpacity_->Set(INITIAL_OPACITY_SCALE);
     cometSizeScale_->Set(INITIAL_SIZE_SCALE);
@@ -471,6 +480,9 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
     option.SetDuration(TRANS_DURATION);
     option.SetIteration(1);
     option.SetCurve(curve);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(
         option,
         [weakDate = AceType::WeakClaim(AceType::RawPtr(date_)),
@@ -493,7 +505,7 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
             auto modify = weak.Upgrade();
             CHECK_NULL_VOID(modify);
             modify->StartRecycle();
-        });
+        }, nullptr, context);
     StartCometTailAnimation();
 }
 
@@ -533,6 +545,9 @@ void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float c
     cometOpacity_->Set(cometOpacity + FAKE_DELTA);
     cometSizeScale_->Set(cometScale + FAKE_DELTA);
     centerDeviation_->Set(0.0f + FAKE_DELTA);
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern? pattern->GetHost(): nullptr;
+    auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), date, cometLen, cometOpacity, cometScale]() {
         auto curObj = weak.Upgrade();
         CHECK_NULL_VOID(curObj);
@@ -541,7 +556,7 @@ void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float c
         curObj->cometOpacity_->Set(cometOpacity);
         curObj->cometSizeScale_->Set(cometScale);
         curObj->centerDeviation_->Set(0.0f);
-    });
+    }, nullptr, nullptr, context);
 }
 float LoadingProgressModifier::CorrectNormalize(float originData)
 {

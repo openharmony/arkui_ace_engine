@@ -1389,15 +1389,17 @@ public:
     const TextEditingValue& GetInputEditingValue() const override;
 #endif
 
-std::optional<float> GetLastCaretPos() const
-{
-    return lastCaretPos_;
-}
+    std::optional<float> GetLastCaretPos() const
+    {
+        return lastCaretPos_;
+    }
 
-void SetLastCaretPos(float lastCaretPos)
-{
-    lastCaretPos_ = lastCaretPos;
-}
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
+    }
+
+    bool IsShortCutBlocked() override { return IsDragging(); }
 
 protected:
     bool CanStartAITask() const override;

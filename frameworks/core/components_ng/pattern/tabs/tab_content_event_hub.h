@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class TabContentEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TabContentEventHub, EventHub)
+    DECLARE_ACE_TYPE(TabContentEventHub, EventHub);
 public:
     TabContentEventHub() = default;
     ~TabContentEventHub() override = default;

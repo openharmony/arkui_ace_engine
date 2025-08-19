@@ -340,7 +340,8 @@ std::shared_ptr<AnimationUtils::Animation> ArcSwiperPattern::Animation(bool exit
             renderContext->UpdateTranslateInXY(param.offset);
         }
     };
-    return AnimationUtils::StartAnimation(param.option, propertyCallback, finishCallback);
+    return AnimationUtils::StartAnimation(
+        param.option, propertyCallback, finishCallback, nullptr /* repeatCallback */, frameNode->GetContextRefPtr());
 }
 
 void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode,
@@ -855,7 +856,10 @@ void ArcSwiperPattern::PlayPropertyTranslateDefaultAnimation(const OffsetF& offs
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
     };
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), option);
-    AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationUtils::Animate(
+        option, propertyUpdateCallback, finishCallback, nullptr /* repeatCallback */, host->GetContextRefPtr());
 }
 
 void ArcSwiperPattern::UsePropertyAnimation(const OffsetF& offset)

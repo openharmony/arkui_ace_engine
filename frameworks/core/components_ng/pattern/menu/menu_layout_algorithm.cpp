@@ -2581,7 +2581,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
             auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
+            auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value_or(0.0f);
             if (LessNotEqual(selectModifiedHeight, maxSpaceHeight)) {
                 maxSpaceHeight = selectModifiedHeight;
             }
@@ -2629,7 +2629,7 @@ void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrap
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
             auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
+            auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value_or(0.0f);
             if (LessNotEqual(selectModifiedHeight, maxSpaceHeight)) {
                 maxSpaceHeight = selectModifiedHeight;
             }

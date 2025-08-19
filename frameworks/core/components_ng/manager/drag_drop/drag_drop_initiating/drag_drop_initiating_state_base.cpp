@@ -163,6 +163,9 @@ void DragDropInitiatingStateBase::ResetBorderRadiusAnimation()
     auto frameNode = params.frameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     BorderRadiusProperty borderRadius;
     if (renderContext->GetBorderRadius().has_value()) {
         borderRadius.UpdateWithCheck(renderContext->GetBorderRadius().value());
@@ -176,7 +179,7 @@ void DragDropInitiatingStateBase::ResetBorderRadiusAnimation()
         [renderContext = renderContext, borderRadius = borderRadius]() {
             renderContext->UpdateBorderRadius(borderRadius);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
@@ -338,6 +341,8 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
+    auto dragcontext = dragNode->GetContextRefPtr();
+    CHECK_NULL_VOID(dragcontext);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
     AnimationUtils::Animate(
         option,
@@ -349,7 +354,7 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
                 context->OnModifyDone();
             }
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, dragcontext);
 }
 
 void DragDropInitiatingStateBase::HandleTextDragCallback()

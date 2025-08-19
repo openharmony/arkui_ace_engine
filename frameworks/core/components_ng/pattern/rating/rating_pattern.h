@@ -127,6 +127,7 @@ private:
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
     void OnModifyDone() override;
+    void InitEvent();
     void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
     void LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
