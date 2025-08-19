@@ -663,7 +663,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     auto isValid = convValue && (convValue.value() > 0);
     auto maxLineValue = isValid ? Converter::OptConvert<uint32_t>(*value).value_or(UINT_MAX) : UINT_MAX;
-    RichEditorModelNG::SetMaxLines(frameNode, maxLineValue);
+    RichEditorModelStatic::SetMaxLines(frameNode, maxLineValue);
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
