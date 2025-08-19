@@ -14,7 +14,6 @@
  */
 
 #include "base/subwindow/subwindow_manager.h"
-
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -180,7 +179,6 @@ void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t nodeId, Subwin
         subwindow->DeleteHotAreas(nodeId);
     }
 }
-
 void SubwindowManager::RemoveSubwindow(int32_t instanceId, SubwindowType windowType)
 {
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId, windowType);
@@ -225,7 +223,7 @@ int32_t SubwindowManager::GetDialogSubwindowInstanceId(int32_t SubwindowId)
             return (it->first).instanceId;
         }
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to get parentContainerId of subwindow in subwindowMap_,"
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to get parentContainerId of subwindow in subwindowMap_,"
         "subwindowId is %{public}d.", SubwindowId);
     return 0;
 }
@@ -311,7 +309,7 @@ void SubwindowManager::HidePreviewNG()
 
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     auto subwindow =
         SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
@@ -341,6 +339,14 @@ void SubwindowManager::UpdateHideMenuOffsetNG(
     }
 }
 
+void SubwindowManager::UpdatePreviewPosition()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->UpdatePreviewPosition();
+    }
+}
+
 void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
     const NG::OffsetF& offset)
 {
@@ -349,14 +355,6 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
         SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
         subwindow->ContextMenuSwitchDragPreviewAnimationtNG(dragPreviewNode, offset);
-    }
-}
-
-void SubwindowManager::UpdatePreviewPosition()
-{
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->UpdatePreviewPosition();
     }
 }
 
@@ -973,17 +971,16 @@ ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
 {
     auto parentContainer = Container::GetContainer(instanceId);
     CHECK_NULL_RETURN(parentContainer, ToastWindowType::TOAST_IN_TYPE_TOAST);
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "GetToastWindowType instanceId: %{public}d", instanceId);
-    // toast window should be TOAST_IN_TYPE_APP_SUB_WINDOW when parent window is dialog window.
-    if (parentContainer->IsMainWindow() || parentContainer->IsSubWindow() ||
-        parentContainer->IsDialogWindow()) {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "GetToastWindowType instanceID: %{public}d", instanceId);
+    // toast window should be TOAST_IN_TYPE_APP_SUB_WINDOW when current window is dialogWindow.
+    if (parentContainer->IsSubWindow() || parentContainer->IsMainWindow() || parentContainer->IsDialogWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
     } else if (parentContainer->IsSceneBoardWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT;
     } else if (parentContainer->IsSystemWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW;
     } else if (parentContainer->IsUIExtensionWindow()) {
-        if (parentContainer->IsHostMainWindow() || parentContainer->IsHostSubWindow() ||
+        if (parentContainer->IsHostSubWindow() || parentContainer->IsHostMainWindow() ||
             parentContainer->IsHostDialogWindow()) {
             return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
         } else if (parentContainer->IsHostSceneBoardWindow()) {
@@ -999,7 +996,7 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     auto containerId = Container::CurrentId();
-    auto isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
+    bool isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
     // for pa service
     if ((isTopMost && containerId >= MIN_PA_SERVICE_ID && containerId < MIN_SUBCONTAINER_ID) ||
         (!isTopMost && containerId >= MIN_PA_SERVICE_ID) || containerId < 0) {
@@ -1040,7 +1037,6 @@ void SubwindowManager::CloseToast(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close toast enter");
     auto containerId = Container::CurrentId();
-
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         // for pa service
         auto subwindow = showMode == NG::ToastShowMode::SYSTEM_TOP_MOST ?
@@ -1145,7 +1141,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
+        auto subwindow = GetOrCreateSubWindow(true);
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
         // for ability
@@ -1170,14 +1166,14 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow(true);
-        CHECK_NULL_VOID(subwindow);
-        subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        auto subWindow = GetOrCreateSubWindow(true);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
         // for ability
     } else {
-        auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogAttr.isModal);
-        CHECK_NULL_VOID(subwindow);
-        subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        auto subWindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogAttr.isModal);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
     }
 }
 
@@ -1236,14 +1232,14 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
     // for pa service
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "container %{public}d open the custom dialog", containerId);
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
-        CHECK_NULL_VOID(subwindow);
-        subwindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+        auto subWindow = GetOrCreateSubWindow(true);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
         // for ability
     } else {
-        auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogAttr.isModal);
-        CHECK_NULL_VOID(subwindow);
-        subwindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+        auto subWindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogAttr.isModal);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
     }
     return;
 }
@@ -1299,9 +1295,9 @@ void SubwindowManager::HideToastSubWindowNG()
     if (container->IsDialogContainer()) {
         subwindow = GetCurrentDialogWindow();
     } else if (containerId != -1) {
-        auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
-            GetParentContainerId(containerId) : containerId;
-        subwindow = GetToastSubwindow(parentContainerId);
+        // get the subwindow which overlay node in, not current
+        auto parentContainer = containerId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(containerId) : containerId;
+        subwindow = GetToastSubwindow(parentContainer);
     }
     if (subwindow) {
         subwindow->HideSubWindowNG();
@@ -1347,7 +1343,7 @@ void MarkSubwindowSafeAreaDirtyByType(std::shared_ptr<SubwindowManager> manager,
 
 void SubwindowManager::MarkDirtyDialogSafeArea()
 {
-    auto allSubwindow = GetAllSubwindow();
+    auto allSubwindow = GetAllSubWindow();
     for (const auto& subwindow : allSubwindow) {
         CHECK_NULL_CONTINUE(subwindow);
         subwindow->MarkDirtyDialogSafeArea();
@@ -1399,7 +1395,6 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
-
 void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
 {
     auto container = Container::GetContainer(instanceId);
@@ -1407,7 +1402,6 @@ void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect wi
     if (!container->IsUIExtensionWindow() || uiExtensionWindowRect_ == windowRect) {
         return;
     }
-    uiExtensionWindowRect_ = windowRect;
 
     auto allSubcontainerId = GetAllSubContainerId(instanceId);
     std::for_each(allSubcontainerId.begin(), allSubcontainerId.end(), [](int32_t subContainerId) {
@@ -1419,6 +1413,8 @@ void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect wi
         CHECK_NULL_VOID(overlayManager);
         overlayManager->OnUIExtensionWindowSizeChange();
     });
+
+    uiExtensionWindowRect_ = windowRect;
 }
 
 void SubwindowManager::FlushSubWindowUITasks(int32_t instanceId)
@@ -1474,13 +1470,6 @@ void SubwindowManager::SetRect(const NG::RectF& rect, int32_t instanceId)
     MarkSetSubwindowRect(rect, instanceId, SubwindowType::TYPE_POPUP);
 }
 
-bool SubwindowManager::IsFreeMultiWindow(int32_t instanceId) const
-{
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    CHECK_NULL_RETURN(subWindow, false);
-    return subWindow->IsFreeMultiWindow();
-}
-
 const std::vector<RefPtr<NG::OverlayManager>> SubwindowManager::GetAllSubOverlayManager()
 {
     std::lock_guard<std::mutex> lock(subwindowMutex_);
@@ -1502,13 +1491,13 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
     uint64_t displayId = 0;
     SubwindowKey searchKey;
     searchKey.instanceId = instanceId;
+    searchKey.foldStatus = FoldStatus::UNKNOWN;
     searchKey.subwindowType = static_cast<int32_t>(windowType);
+    searchKey.nodeId = nodeId;
     if (windowType == SubwindowType::TYPE_POPUP || windowType == SubwindowType::TYPE_MENU) {
         windowType = SubwindowType::TYPE_DIALOG;
     }
     searchKey.windowType = windowType;
-    searchKey.foldStatus = FoldStatus::UNKNOWN;
-    searchKey.nodeId = nodeId;
     auto container = Container::GetContainer(instanceId);
     if (container) {
         displayId = container->GetCurrentDisplayId();
@@ -1670,6 +1659,15 @@ bool SubwindowManager::IsWindowEnableSubWindowMenu(
     return false;
 }
 
+bool SubwindowManager::GetIsExpandDisplay()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return theme->GetExpandDisplay();
+}
+
 const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(
     int32_t instanceId, SubwindowType windowType, int32_t nodeId)
 {
@@ -1690,7 +1688,8 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return CheckSubwindowDisplayId(searchKey, result->second);
+        auto subwindow = result->second;
+        return CheckSubwindowDisplayId(searchKey, subwindow);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
@@ -1742,7 +1741,7 @@ void SubwindowManager::AddSubwindow(
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.try_emplace(searchKey, subwindow);
     if (!result.second) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add failed of this searchkey, searchKey is %{public}s.",
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Add failed of this searchKey, searchKey is %{public}s.",
             searchKey.ToString().c_str());
         return;
     }
@@ -1771,21 +1770,12 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t 
     return sortSubwindow;
 }
 
-bool SubwindowManager::GetIsExpandDisplay()
-{
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    return theme->GetExpandDisplay();
-}
-
 void SubwindowManager::RemoveSubwindowByNodeId(const int32_t nodeId)
 {
     auto subwindow = RemoveSubwindowMapByNodeId(nodeId);
     CHECK_NULL_VOID(subwindow);
     if (!subwindow->Close()) {
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "fail to close subwindow by nodeid.");
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close subwindow by nodeid fail.");
     }
 }
 
@@ -1793,7 +1783,7 @@ RefPtr<Subwindow> SubwindowManager::RemoveSubwindowMapByNodeId(const int32_t nod
 {
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto it = subwindowMap_.begin();
-    for (; it != subwindowMap_.end(); ++it) {
+    for (;it != subwindowMap_.end(); ++it) {
         if (it->first.nodeId == nodeId) {
             break;
         }
@@ -1822,7 +1812,7 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::RemoveSubwindowMapByInsta
     return subwindows;
 }
 
-const std::vector<RefPtr<Subwindow>> SubwindowManager::GetAllSubwindow()
+const std::vector<RefPtr<Subwindow>> SubwindowManager::GetAllSubWindow()
 {
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     std::vector<RefPtr<Subwindow>> subwindows;
@@ -1888,7 +1878,8 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchKey(const SubwindowKey& 
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return CheckSubwindowDisplayId(searchKey, result->second);
+        auto subwindow = result->second;
+        return CheckSubwindowDisplayId(searchKey, subwindow);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());

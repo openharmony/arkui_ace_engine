@@ -46,8 +46,8 @@ struct SubwindowKey {
 
     bool operator==(const SubwindowKey& other) const
     {
-        return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus &&
-            other.windowType == windowType && other.nodeId == nodeId;
+        return other.instanceId == instanceId && other.displayId == displayId && other.windowType == windowType &&
+            other.foldStatus == foldStatus && other.nodeId == nodeId;
     }
 
     std::string ToString() const
@@ -98,6 +98,11 @@ public:
     // Get the subwindow of subInstance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindowById(int32_t subinstanceId);
 
+    void HideCurrentSubwindow();
+
+    void SetCurrentSubwindowName(const std::string& currentSubwindow);
+    std::string GetCurrentSubWindowName();
+
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
     const RefPtr<Subwindow> GetCurrentWindow();
@@ -114,16 +119,16 @@ public:
     ACE_FORCE_EXPORT void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
         bool isRedragStart = false, int32_t menuWrapperId = -1);
-    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void UpdatePreviewPosition();
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
-    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-        int32_t appearingTimeWithContinuousOperation);
+    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+        int32_t appearingTime, int32_t appearingTimeWithContinuousOperation);
     void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
@@ -159,13 +164,13 @@ public:
 
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void CloseToast(
+        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void HideToastSubWindowNG();
     ToastWindowType GetToastWindowType(int32_t instanceId);
-    ACE_FORCE_EXPORT void CloseToast(
-        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
@@ -186,7 +191,6 @@ public:
     void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
-    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
@@ -253,7 +257,7 @@ private:
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
     const std::vector<RefPtr<Subwindow>> RemoveSubwindowMapByInstanceId(const int32_t instanceId);
-    const std::vector<RefPtr<Subwindow>> GetAllSubwindow();
+    const std::vector<RefPtr<Subwindow>> GetAllSubWindow();
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
