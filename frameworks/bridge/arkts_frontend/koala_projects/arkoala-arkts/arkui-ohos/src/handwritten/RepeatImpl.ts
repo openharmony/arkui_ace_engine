@@ -162,7 +162,6 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
-
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
