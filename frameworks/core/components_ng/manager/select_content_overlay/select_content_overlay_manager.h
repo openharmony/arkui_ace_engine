@@ -92,6 +92,7 @@ public:
     float GetHandleDiameter();
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point, bool passThrough = false);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
+    void UpdateViewPort();
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
     void MarkHandleDirtyNode(PropertyChangeFlag flag);

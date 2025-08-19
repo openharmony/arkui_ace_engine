@@ -638,7 +638,7 @@ void ErrorDecorator::LayoutDecorator()
         auto textFieldContentRect = textFieldGeometryNode->GetContentRect();
         offSetX += textFieldContentRect.Width() - textFrameWidth;
     }
-    if (theme->GetErrorTextCenter()) {
+    if (theme->GetErrorTextAlign() == TextAlign::CENTER) {
         offSetX = (textFieldGeometryNode->GetFrameRect().Width() - textFrameWidth) / 2;
     }
     textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));

@@ -330,7 +330,7 @@ void HyperlinkPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
     CHECK_NULL_VOID(property);
     CHECK_NULL_VOID(value);
     using Handler = std::function<void(HyperlinkLayoutProperty*, RefPtr<PropertyValueBase>)>;
-    static const std::unordered_map<std::string, Handler> handlers = {
+    const std::unordered_map<std::string, Handler> handlers = {
         { "Color",
             [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
                 HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
@@ -341,19 +341,22 @@ void HyperlinkPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                     prop->UpdateColor(*realValue);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
                 }
-            } },
+            }
+        },
         { "Content",
             [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     prop->UpdateContent(*realValue);
                 }
-            } },
+            }
+        },
         { "Address",
             [](HyperlinkLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::string>(&(value->GetValue()))) {
                     prop->UpdateAddress(*realValue);
                 }
-            } },
+            }
+        },
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {
