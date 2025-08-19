@@ -111,6 +111,7 @@ void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWr
     auto geometryNode = controlPartsStackWrapper->GetGeometryNode();
     auto controlPartsStackRect = GetControlPartsStackRect();
     geometryNode->SetMarginFrameOffset(controlPartsStackRect);
+    
     controlPartsStackWrapper->Layout();
 }
 

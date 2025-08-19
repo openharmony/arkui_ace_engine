@@ -24,7 +24,6 @@ void RelativeContainerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RELATIVE_CONTAINER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
@@ -49,7 +48,8 @@ void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& gu
         auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](
+                                const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             std::vector<GuidelineInfo> &guidelineInfoValue = const_cast<std::vector<GuidelineInfo> &>(guidelineInfo);
@@ -97,7 +97,8 @@ void RelativeContainerModelNG::SetGuideline(FrameNode* frameNode, const std::vec
         auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto&& updateFunc = [guidelineInfo, weak = AceType::WeakClaim(frameNode)](
+                                const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             std::vector<GuidelineInfo>& guidelineInfoValue = const_cast<std::vector<GuidelineInfo>&>(guidelineInfo);

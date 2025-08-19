@@ -766,6 +766,10 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
     offset.SetY(geometryNode->GetFrameOffset().GetY());
     geometryNode->SetFrameOffset(offset);
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->SavePaintRect();
+    }
     return true;
 }
 
@@ -998,7 +1002,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
     float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
 {
     auto safeAreaPadding = GetOrCreateSafeAreaPadding();
-    DefaultPaddingBorderParam defaultParem = { .horizontalPadding = paddingHorizontalDefault,
+    DefaultPaddingBorderParam defaultParam = { .horizontalPadding = paddingHorizontalDefault,
         .verticalPadding = paddingVerticalDefault,
         .horizontalBorder = borderHorizontalDefault,
         .verticalBorder = borderVerticalDefault };
@@ -1010,12 +1014,12 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
         auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
         auto borderWidth =
             ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
-        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
     auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
     auto borderWidth =
         ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
-    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
+    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
@@ -1096,8 +1100,8 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    auto pipeline = host->GetContext();
 
+    auto pipeline = host->GetContext();
     if ((preVisibility != propVisibility_) && pipeline) {
         pipeline->SetIsDisappearChangeNodeMinDepth(host->GetDepth());
     }
@@ -1364,7 +1368,7 @@ void LayoutProperty::UpdateLayoutGravity(Alignment value)
         positionProperty_ = std::make_unique<PositionProperty>();
     }
     if (positionProperty_->UpdateLayoutGravity(value)) {
-        propertyChangeFlag_ = propertyChangeFlag_ |  PROPERTY_UPDATE_MEASURE;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }
 
@@ -1827,11 +1831,11 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     const auto& content = contentConstraint_.value();
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
         return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentWidth(preContentConstraint.value()));
+            content.EqualWithoutPercentWidth(preContentConstraint.value()));
     }
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
         return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentHeight(preContentConstraint.value()));
+            content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }
     return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
 }
@@ -2451,16 +2455,6 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
-void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
-{
-    CHECK_NULL_VOID(GetPositionProperty());
-    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
-        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
-        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
-        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
-    }
-}
-
 std::string LayoutProperty::LayoutInfoToString()
 {
     std::stringstream ss;
@@ -2478,9 +2472,20 @@ std::string LayoutProperty::LayoutInfoToString()
     }
     return ss.str();
 }
+
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();
+}
+
+void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
+{
+    CHECK_NULL_VOID(GetPositionProperty());
+    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
+        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
+    }
 }
 
 std::string LayoutProperty::GetAlignmentStringFromLocalized(
