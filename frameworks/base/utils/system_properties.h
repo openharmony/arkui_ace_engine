@@ -650,6 +650,8 @@ public:
 
     static bool GetResourceDecoupling();
 
+    static bool IsPCMode();
+
     static bool ConfigChangePerform();
 
     static void SetConfigChangePerform();
@@ -930,6 +932,7 @@ private:
     static std::string mapSearchPrefix_;
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
+    static bool isPCMode_;
 };
 
 } // namespace OHOS::Ace

@@ -1951,9 +1951,8 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     if (sheetStyle.showInSubWindow.value_or(false)) {
         return ComputeSheetTypeInSubWindow();
     }
-    DeviceType deviceType = SystemProperties::GetDeviceType();
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
-        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
             SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     auto pipeline = host->GetContext();
@@ -1997,11 +1996,10 @@ SheetType SheetPresentationPattern::GetSheetType() const
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
         return SheetType::SHEET_CONTENT_COVER;
     }
-    DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
             SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
@@ -4630,5 +4628,12 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
+}
+
+bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
+{
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    TAG_LOGD(AceLogTag::ACE_SHEET, "IsPCMode: %{public}d", SystemProperties::IsPCMode());
+    return deviceType == DeviceType::TWO_IN_ONE || SystemProperties::IsPCMode();
 }
 } // namespace OHOS::Ace::NG
