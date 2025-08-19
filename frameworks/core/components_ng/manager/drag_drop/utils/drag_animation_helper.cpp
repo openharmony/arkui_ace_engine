@@ -856,6 +856,24 @@ void DragAnimationHelper::HideDragNodeCopy(const RefPtr<OverlayManager>& overlay
     renderContext->UpdateOpacity(0.0f);
 }
 
+void DragAnimationHelper::PreLayout(const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto subwindowContext = imageNode->GetContext();
+    if (subwindowContext) {
+        subwindowContext->FlushSyncGeometryNodeTasks();
+        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
+    }
+}
+
+void DragAnimationHelper::SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(visible);
+}
+
 void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode,
     const RefPtr<FrameNode>& textNode, int32_t childSize, float previewScale, OffsetF previewOffset)
 {
@@ -964,24 +982,6 @@ void DragAnimationHelper::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameN
     if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
     }
-}
-
-void DragAnimationHelper::PreLayout(const RefPtr<FrameNode>& imageNode)
-{
-    CHECK_NULL_VOID(imageNode);
-    auto subwindowContext = imageNode->GetContext();
-    if (subwindowContext) {
-        subwindowContext->FlushSyncGeometryNodeTasks();
-        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
-    }
-}
-
-void DragAnimationHelper::SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetVisible(visible);
 }
 
 void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,

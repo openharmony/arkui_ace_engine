@@ -532,7 +532,6 @@ int32_t OH_ArkUI_SetNodeDragPreview(ArkUI_NodeHandle node, OH_PixelmapNative* pr
     impl->getDragAdapterAPI()->setDragPreview(node->uiNodeHandle, &pixelMap);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
-
 int32_t OH_ArkUI_SetNodeAllowedDropDataTypes(ArkUI_NodeHandle node, const char* typesArray[], int32_t count)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -876,7 +875,7 @@ int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ErrorCode OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled)
+int32_t OH_ArkUI_EnableDropDisallowedBadge(ArkUI_ContextHandle uiContext, bool enabled)
 {
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!fullImpl || !uiContext) {

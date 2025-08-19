@@ -82,7 +82,7 @@ void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto eventHub = frameNode ->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode ->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -131,7 +131,7 @@ bool DragDropInitiatingStateBase::IsAllowedDrag()
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
@@ -209,19 +209,6 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
         return false;
     }
     return true;
-}
-
-int32_t DragDropInitiatingStateBase::GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration)
-{
-    int64_t currentTimeStamp = GetSysTimestamp();
-    auto machine = GetStateMachine();
-    CHECK_NULL_RETURN(machine, 0);
-    int64_t eventTimeStamp = static_cast<int64_t>(touchEvent.time.time_since_epoch().count());
-    if (currentTimeStamp > eventTimeStamp) {
-        curDuration = curDuration - static_cast<int32_t>((currentTimeStamp- eventTimeStamp) / TIME_BASE);
-        curDuration = curDuration < 0 ? 0: curDuration;
-    }
-    return curDuration;
 }
 
 void DragDropInitiatingStateBase::SetTextPixelMap()
@@ -306,7 +293,7 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
@@ -374,6 +361,19 @@ void DragDropInitiatingStateBase::HandleTextDragCallback()
     } else if (!gestureHub->GetIsTextDraggable()) {
         gestureHub->SetPixelMap(nullptr);
     }
+}
+
+int32_t DragDropInitiatingStateBase::GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration)
+{
+    int64_t currentTimeStamp = GetSysTimestamp();
+    auto machine = GetStateMachine();
+    CHECK_NULL_RETURN(machine, 0);
+    int64_t eventTimeStamp = static_cast<int64_t>(touchEvent.time.time_since_epoch().count());
+    if (currentTimeStamp > eventTimeStamp) {
+        curDuration = curDuration - static_cast<int32_t>((currentTimeStamp- eventTimeStamp) / TIME_BASE);
+        curDuration = curDuration < 0 ? 0: curDuration;
+    }
+    return curDuration;
 }
 
 void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info)

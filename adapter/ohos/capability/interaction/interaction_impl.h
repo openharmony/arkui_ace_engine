@@ -50,17 +50,17 @@ public:
 
     int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) override;
 
-    int32_t GetDragState(DragState& dragState) const override;
-
     int32_t GetDragSummary(std::map<std::string, int64_t>& summary,
         std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
         int32_t& version, int64_t& totalSize) override;
 
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
 
-    int32_t EnterTextEditorArea(bool enable) override;
+    int32_t GetDragState(DragState& dragState) const override;
 
     int32_t AddPrivilege() override;
+
+    int32_t EnterTextEditorArea(bool enable) override;
 
     int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) override;
 
@@ -72,8 +72,8 @@ public:
 
     void SetDraggableStateAsync(bool state, int64_t downTime) override;
 
-    int32_t EnableInternalDropAnimation(const std::string& animationInfo) override;
-    
+    int32_t EnableInternalDropAnimation(const std::string &animationInfo) override;
+
     bool IsDragStart() const override;
 private:
     std::shared_ptr<CoordinationListenerImpl> consumer_;
