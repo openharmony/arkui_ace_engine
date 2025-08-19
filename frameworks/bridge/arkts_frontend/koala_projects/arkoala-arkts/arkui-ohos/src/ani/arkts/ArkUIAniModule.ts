@@ -296,4 +296,5 @@ export class ArkUIAniModule {
         onThemeScopeDestroy: () => void
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
 }
