@@ -674,6 +674,9 @@ export type OnTabsGestureSwipeCallback = (index: number, extraInfo: TabsAnimatio
 export type TabsCustomContentTransitionCallback = (from: number, to: number) => TabContentAnimatedTransition | undefined;
 export type OnTabsContentWillChangeCallback = (currentIndex: number, comingIndex: number) => boolean;
 export interface TabsAttribute extends CommonMethod {
+    setTabsOptions(options?: TabsOptions): this {
+        return this
+    }
     vertical(value: boolean | undefined): this
     barPosition(value: BarPosition | undefined): this
     scrollable(value: boolean | undefined): this
@@ -731,6 +734,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillChange_value?: OnTabsContentWillChangeCallback | undefined
+    public setTabsOptions(options?: TabsOptions): this {
+        return this
+    }
     public vertical(value: boolean | undefined): this {
         return this
     }
@@ -1087,10 +1093,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
 }
 /** @memo */
-export function Tabs(
+export function TabsImpl(
     /** @memo */
     style: ((attributes: TabsAttribute) => void) | undefined,
-    options?: TabsOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1098,9 +1103,7 @@ export function Tabs(
         return new ArkTabsComponent()
     })
     NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer) => {
-        receiver.setTabsOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

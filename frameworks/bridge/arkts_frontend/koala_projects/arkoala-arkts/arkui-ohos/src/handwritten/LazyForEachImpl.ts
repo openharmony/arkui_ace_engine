@@ -43,7 +43,7 @@ export function updateLazyItems() {
 }
 
 /** @memo:intrinsic */
-export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
+export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,

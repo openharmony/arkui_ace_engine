@@ -203,6 +203,9 @@ export interface SceneOptions {
 }
 export type Component3DInterface = (sceneOptions?: SceneOptions) => Component3DAttribute;
 export interface Component3DAttribute extends CommonMethod {
+    setComponent3DOptions(sceneOptions?: SceneOptions): this {
+        return this
+    }
     environment(value: ResourceStr | undefined): this
     shader(value: ResourceStr | undefined): this
     shaderImageTexture(value: ResourceStr | undefined): this
@@ -218,6 +221,9 @@ export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Compone
     shaderInputBuffer_value?: Array<number> | undefined
     renderWidth_value?: Dimension | undefined
     renderHeight_value?: Dimension | undefined
+    public setComponent3DOptions(sceneOptions?: SceneOptions): this {
+        return this
+    }
     public environment(value: ResourceStr | undefined): this {
         return this
     }
@@ -316,10 +322,9 @@ export class ArkComponent3DComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function Component3D(
+export function Component3DImpl(
     /** @memo */
     style: ((attributes: Component3DAttribute) => void) | undefined,
-    sceneOptions?: SceneOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -327,9 +332,7 @@ export function Component3D(
         return new ArkComponent3DComponent()
     })
     NodeAttach<ArkComponent3DPeer>((): ArkComponent3DPeer => ArkComponent3DPeer.create(receiver), (_: ArkComponent3DPeer) => {
-        receiver.setComponent3DOptions(sceneOptions)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

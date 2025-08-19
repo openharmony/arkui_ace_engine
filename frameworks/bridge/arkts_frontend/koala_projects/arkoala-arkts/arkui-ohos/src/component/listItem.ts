@@ -206,6 +206,9 @@ export interface ListItemOptions {
     style?: ListItemStyle;
 }
 export interface ListItemAttribute extends CommonMethod {
+    setListItemOptions(value?: ListItemOptions | undefined): this {
+        return this
+    }
     sticky(value: Sticky | undefined): this { return this; }
     editable(value: boolean | EditMode | undefined): this { return this; }
     selectable(value: boolean | undefined): this { return this; }
@@ -222,6 +225,9 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     selected_value?: boolean | Bindable<boolean> | undefined
     swipeAction_value?: SwipeActionOptions | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
+    public setListItemOptions(value?: ListItemOptions | undefined): this {
+        return this
+    }
     public sticky(value: Sticky | undefined): this {
         return this
     }
@@ -335,10 +341,9 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
     }
 }
 /** @memo */
-export function ListItem(
+export function ListItemImpl(
     /** @memo */
     style: ((attributes: ListItemAttribute) => void) | undefined,
-    value?: ListItemOptions | undefined,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -346,9 +351,7 @@ export function ListItem(
         return new ArkListItemComponent()
     })
     NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (_: ArkListItemPeer) => {
-        receiver.setListItemOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

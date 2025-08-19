@@ -16,9 +16,10 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { __context, __id } from "@koalaui/runtime"
-import { DynamicNode } from "./common"
-import { LazyForEachImpl } from "../handwritten/LazyForEachImpl"
+import { __context, __id, remember } from "@koalaui/runtime"
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, DynamicNode } from "./common"
+import { LazyForEachImplForOptions } from "../handwritten/LazyForEachImpl"
+import { InteropNativeModule } from "@koalaui/interop";
 
 export enum DataOperationType {
     ADD = "add",
@@ -111,14 +112,45 @@ export interface IDataSource<T> {
     unregisterDataChangeListener(listener: DataChangeListener): void;
 }
 
+export interface LazyForEachAttribute<T> extends CommonMethod {
+    dataSource: IDataSource<T> | null;
+    setLazyForEachOptions(dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        return this;
+}
+
+}
+export class ArkLazyForEachComponent<T> extends ArkCommonMethodComponent implements LazyForEachAttribute<T> {
+    dataSource: IDataSource<T> | null = null;
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void = (item: T, index: number) => {};
+    keyGenerator?: (item: T, index: number) => string = undefined;
+
+    public setLazyForEachOptions(dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: number) => void,
+        keyGenerator?: (item: T, index: number) => string): this {
+        this.dataSource = dataSource;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        return this;
+    }
+}
 /** @memo */
-export function LazyForEach<T>(
+export function LazyForEachImpl<T>(
     /** @memo */
-    style: ((attributes: DynamicNode<T>) => void) | undefined,
-    dataSource: IDataSource<T>,
-    /** @memo */
-    itemGenerator: (item: T, index: number) => void,
-    keyGenerator?: (item: T, index: number) => string,
+    style: ((attributes: LazyForEachAttribute<T>) => void) | undefined
 ) {
-    LazyForEachImpl(dataSource, itemGenerator, keyGenerator)
+    const receiver = remember(() => {
+        return new ArkLazyForEachComponent<T>()
+    })
+    style?.(receiver)
+    if(!receiver.dataSource) {
+        InteropNativeModule._NativeLog("LazyForEach receiver.dataSource null ")
+    }
+    else {
+        LazyForEachImplForOptions(receiver.dataSource!, receiver.itemGenerator, receiver.keyGenerator)
+    }
 }

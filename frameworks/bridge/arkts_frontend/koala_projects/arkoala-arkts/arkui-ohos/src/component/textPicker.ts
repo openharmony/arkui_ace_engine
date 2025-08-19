@@ -491,6 +491,9 @@ export type Type_TextPickerAttribute_onChange_callback = (value: string | Array<
 export type Callback_Union_Number_Array_Number_Void = (selected: number | Array<number>) => void;
 export type Callback_Union_String_Array_String_Void = (value: string | Array<string>) => void;
 export interface TextPickerAttribute extends CommonMethod {
+    setTextPickerOptions(options?: TextPickerOptions): this {
+        return this
+    }
     defaultPickerItemHeight(value: number | string | undefined): this
     canLoop(value: boolean | undefined): this
     disappearTextStyle(value: PickerTextStyle | undefined): this
@@ -529,6 +532,9 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     gradientHeight_value?: Dimension | undefined
     enableHapticFeedback_value?: boolean | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
+    public setTextPickerOptions(options?: TextPickerOptions): this {
+        return this
+    }
     public defaultPickerItemHeight(value: number | string | undefined): this {
         return this
     }
@@ -884,10 +890,9 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function TextPicker(
+export function TextPickerImpl(
     /** @memo */
     style: ((attributes: TextPickerAttribute) => void) | undefined,
-    options?: TextPickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -895,9 +900,7 @@ export function TextPicker(
         return new ArkTextPickerComponent()
     })
     NodeAttach<ArkTextPickerPeer>((): ArkTextPickerPeer => ArkTextPickerPeer.create(receiver), (_: ArkTextPickerPeer) => {
-        receiver.setTextPickerOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

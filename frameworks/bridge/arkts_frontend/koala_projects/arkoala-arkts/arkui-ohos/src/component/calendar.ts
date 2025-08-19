@@ -370,6 +370,9 @@ export type CalendarInterface = (value: Type_CalendarInterface_callable0_value) 
 export type Callback_CalendarSelectedDate_Void = (event: CalendarSelectedDate) => void;
 export type Callback_CalendarRequestedData_Void = (event: CalendarRequestedData) => void;
 export interface CalendarAttribute {
+    setCalendarOptions(value: Type_CalendarInterface_callable0_value): this {
+        return this
+    }
     showLunar(value: boolean | undefined): this
     showHoliday(value: boolean | undefined): this
     needSlide(value: boolean | undefined): this
@@ -398,6 +401,9 @@ export class ArkCalendarStyle implements CalendarAttribute {
     workStateStyle_value?: WorkStateStyle | undefined
     onSelectChange_value?: ((event: CalendarSelectedDate) => void) | undefined
     onRequestData_value?: ((event: CalendarRequestedData) => void) | undefined
+    public setCalendarOptions(value: Type_CalendarInterface_callable0_value): this {
+        return this
+    }
     public showLunar(value: boolean | undefined): this {
         return this
     }
@@ -560,10 +566,9 @@ export class ArkCalendarComponent extends ComponentBase implements CalendarAttri
     }
 }
 /** @memo */
-export function Calendar(
+export function CalendarImpl(
     /** @memo */
     style: ((attributes: CalendarAttribute) => void) | undefined,
-    value: Type_CalendarInterface_callable0_value,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -571,9 +576,7 @@ export function Calendar(
         return new ArkCalendarComponent()
     })
     NodeAttach<ArkCalendarPeer>((): ArkCalendarPeer => ArkCalendarPeer.create(receiver), (_: ArkCalendarPeer) => {
-        receiver.setCalendarOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

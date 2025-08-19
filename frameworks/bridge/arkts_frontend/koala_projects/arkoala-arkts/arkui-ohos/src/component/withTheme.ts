@@ -22,7 +22,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { CustomTheme } from "@ohos/arkui/theme"
-import { AttributeModifier, ThemeColorMode } from "./common"
+import { ArkCommonMethodComponent, ArkCommonMethodPeer, AttributeModifier, CommonMethod, ThemeColorMode } from "./common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Serializer } from "./peers/Serializer"
 import { Deserializer } from "./peers/Deserializer";
@@ -30,7 +30,7 @@ import { ArkThemeScopeManager } from '../handwritten/theme/ArkThemeScopeManager'
 import { ArkThemeBase } from '../handwritten/theme/ArkThemeBase';
 import { ArkThemeNativeHelper } from '../handwritten/theme/ArkThemeNativeHelper';
 
-export class ArkWithThemePeer extends PeerNode {
+export class ArkWithThemePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -67,7 +67,10 @@ export interface WithThemeOptions {
     colorMode?: ThemeColorMode;
 }
 export type WithThemeInterface = (options: WithThemeOptions) => WithThemeAttribute;
-export interface WithThemeAttribute {
+export interface WithThemeAttribute extends CommonMethod {
+    setWithThemeOptions(options: WithThemeOptions): this {
+        return this
+    }
     // attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this
 }
 export class ArkWithThemeStyle implements WithThemeAttribute {
@@ -76,9 +79,12 @@ export class ArkWithThemeStyle implements WithThemeAttribute {
     }
     public apply(target: WithThemeAttribute): void {
     }
+    public setWithThemeOptions(options: WithThemeOptions): this {
+        return this
+    }
 }
 
-export class ArkWithThemeComponent extends ComponentBase implements WithThemeAttribute {
+export class ArkWithThemeComponent extends ArkCommonMethodComponent implements WithThemeAttribute {
     getPeer(): ArkWithThemePeer {
         return (this.peer as ArkWithThemePeer)
     }
@@ -98,15 +104,12 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
-        ArkThemeScopeManager.getInstance().onScopeExit();
-        // getUINativeModule().theme.pop();
     }
 }
 /** @memo */
-export function WithTheme(
+export function WithThemeImpl(
     /** @memo */
     style: ((attributes: WithThemeAttribute) => void) | undefined,
-    options: WithThemeOptions,
     /** @memo */
     content_: (() => void) | undefined,
 ): void {
@@ -115,11 +118,10 @@ export function WithTheme(
     })
     NodeAttach<ArkWithThemePeer>((): ArkWithThemePeer => ArkWithThemePeer.create(receiver), (_: ArkWithThemePeer): void => {
         ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstBuild)
-        receiver.setWithThemeOptions(options)
         style?.(receiver)
         content_?.()
         ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
-        receiver.applyAttributesFinish()
+        ArkThemeScopeManager.getInstance().onScopeExit();
     })
 }
 

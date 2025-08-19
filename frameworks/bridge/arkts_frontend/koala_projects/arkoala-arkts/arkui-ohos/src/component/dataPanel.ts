@@ -237,6 +237,9 @@ export interface DataPanelConfiguration extends CommonConfiguration {
     maxValue: number;
 }
 export interface DataPanelAttribute extends CommonMethod {
+    setDataPanelOptions(options: DataPanelOptions): this {
+        return this
+    }
     closeEffect(value: boolean | undefined): this
     valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this
     trackBackgroundColor(value: ResourceColor | undefined): this
@@ -251,6 +254,9 @@ export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanel
     strokeWidth_value?: Length | undefined
     trackShadow_value?: DataPanelShadowOptions | undefined
     contentModifier_value?: ContentModifier | undefined
+    public setDataPanelOptions(options: DataPanelOptions): this {
+        return this
+    }
     public closeEffect(value: boolean | undefined): this {
         return this
     }
@@ -337,10 +343,9 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
     }
 }
 /** @memo */
-export function DataPanel(
+export function DataPanelImpl(
     /** @memo */
     style: ((attributes: DataPanelAttribute) => void) | undefined,
-    options: DataPanelOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -348,9 +353,7 @@ export function DataPanel(
         return new ArkDataPanelComponent()
     })
     NodeAttach<ArkDataPanelPeer>((): ArkDataPanelPeer => ArkDataPanelPeer.create(receiver), (_: ArkDataPanelPeer) => {
-        receiver.setDataPanelOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -158,6 +158,9 @@ export interface RadioStyle {
 export type RadioInterface = (options: RadioOptions) => RadioAttribute;
 export type OnRadioChangeCallback = (isChecked: boolean) => void;
 export interface RadioAttribute extends CommonMethod {
+    setRadioOptions(options: RadioOptions): this {
+        return this
+    }
     checked(value: boolean | Bindable<boolean> | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this
     radioStyle(value: RadioStyle | undefined): this
@@ -169,6 +172,9 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     onChange_value?: ((isVisible: boolean) => void) | undefined
     radioStyle_value?: RadioStyle
     contentModifier_value?: ContentModifier<RadioConfiguration> | undefined
+    public setRadioOptions(options: RadioOptions): this {
+        return this
+    }
     public checked(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -266,10 +272,9 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
     }
 }
 /** @memo */
-export function Radio(
+export function RadioImpl(
     /** @memo */
     style: ((attributes: RadioAttribute) => void) | undefined,
-    options: RadioOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -277,9 +282,7 @@ export function Radio(
         return new ArkRadioComponent()
     })
     NodeAttach<ArkRadioPeer>((): ArkRadioPeer => ArkRadioPeer.create(receiver), (_: ArkRadioPeer) => {
-        receiver.setRadioOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

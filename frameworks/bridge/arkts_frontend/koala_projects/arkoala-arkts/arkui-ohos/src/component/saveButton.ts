@@ -94,10 +94,16 @@ export enum SaveButtonOnClickResult {
 }
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void>) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
+    setSaveButtonOptions(options?: SaveButtonOptions): this {
+        return this
+    }
     onClick(value: SaveButtonCallback | undefined): this
 }
 export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
     onClick_value?: SaveButtonCallback | undefined
+    public setSaveButtonOptions(options?: SaveButtonOptions): this {
+        return this
+    }
     public onClick(value: SaveButtonCallback | undefined): this {
         return this
         }
@@ -130,10 +136,9 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     }
 }
 /** @memo */
-export function SaveButton(
+export function SaveButtonImpl(
     /** @memo */
     style: ((attributes: SaveButtonAttribute) => void) | undefined,
-    options?: SaveButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -141,9 +146,7 @@ export function SaveButton(
         return new ArkSaveButtonComponent()
     })
     NodeAttach<ArkSaveButtonPeer>((): ArkSaveButtonPeer => ArkSaveButtonPeer.create(receiver), (_: ArkSaveButtonPeer) => {
-        receiver.setSaveButtonOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

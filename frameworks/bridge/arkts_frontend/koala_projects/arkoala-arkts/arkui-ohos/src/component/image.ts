@@ -603,6 +603,9 @@ export interface ImageCompleteEvent {
 }
 export type ImageOnCompleteCallback = (event?: ImageCompleteEvent) => void;
 export interface ImageAttribute extends CommonMethod {
+    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+        return this
+    }
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
     fitOriginalSize(value: boolean | undefined): this
@@ -659,6 +662,9 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     privacySensitive_value?: boolean | undefined
     enhancedImageQuality_value?: ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
+    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
+        return this
+    }
     public alt(value: string | Resource | PixelMap | undefined): this {
         return this
     }
@@ -983,10 +989,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
 export type ImageInterface = (...param: Object[]) => ArkImageNode
 
 /** @memo */
-export function Image(
+export function ImageImpl(
     /** @memo */
     style: ((attributes: ImageAttribute) => void) | undefined,
-    src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -994,9 +999,7 @@ export function Image(
         return new ArkImageComponent()
     })
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer) => {
-        receiver.setImageOptions(src,imageAIOptions)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
