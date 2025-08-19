@@ -166,7 +166,6 @@ class LengthMetrics {
 }
 
 declare interface Resource {}
-declare type BusinessError = any
 
 declare enum Color {
   White,
