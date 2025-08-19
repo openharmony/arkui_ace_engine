@@ -18,6 +18,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/dump_log.h"
+#include "core/common/transform/input_compatible_manager.h"
 #include "core/event/event_info_convertor.h"
 
 namespace OHOS::Ace::Platform {
@@ -414,7 +415,8 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
             markEnabled);
     };
 
-    if (NG::EventInfoConvertor::IfNeedMouseTransform() &&
+    if (InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+        Kit::InputCompatibleSource::LEFT_PRESS) &&
         ProcessMouseEventWithTouch(pointerEvent, event, node, markProcess)) {
         return;
     }
@@ -449,12 +451,12 @@ bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerE
 void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected)
 {
-    if (NG::EventInfoConvertor::IfNeedMouseTransform()) {
+    if (InputCompatibleManager::GetInstance().IsCompatibleConvertingEnabledFor(
+        Kit::InputCompatibleSource::SCROLL_AXIS_EVENT)) {
         if (ProcessAxisEventWithTouch(pointerEvent, node, isInjected)) {
             return;
         }
     }
-
     CHECK_NULL_VOID(axisEventCallback_);
     AxisEvent event;
     event.isInjected = isInjected;

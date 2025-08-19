@@ -61,6 +61,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
+#include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -2815,6 +2816,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     } else {
         taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
             TaskExecutor::TaskType::UI, "ArkUIFrameReportInit");
+    }
+
+    if (GetSettings().usePlatformAsUIThread) {
+        InputCompatibleManager::GetInstance().LoadProductCompatiblePolicy();
+    } else {
+        taskExecutor_->PostTask([] { InputCompatibleManager::GetInstance().LoadProductCompatiblePolicy(); },
+            TaskExecutor::TaskType::UI, "ArkUITransformInit");
     }
 
     // Load custom style at UI thread before frontend attach, for loading style before building tree.

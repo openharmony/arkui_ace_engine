@@ -114,6 +114,7 @@ adapter/ohos/osal/background_task_helper_ohos.cpp @arkuiframework
 adapter/ohos/osal/background_task_helper_ohos.h @arkuiframework
 adapter/ohos/osal/BUILD.gn @arkui_architecture
 adapter/ohos/osal/clipboard_impl.cpp @huawei_g_five
+adapter/ohos/osal/input_compatible_manager.cpp @arkuievent
 adapter/ohos/osal/text_translation_adapter.cpp @huawei_g_five
 adapter/ohos/osal/text_translation_loader.cpp @huawei_g_five
 adapter/ohos/osal/text_translation_mgr.cpp @huawei_g_five
@@ -1937,6 +1938,7 @@ frameworks/core/common/thread_container.cpp @arkuiframework
 frameworks/core/common/thread_container.h @arkuiframework
 frameworks/core/common/thread_model_impl.cpp @arkuiframework
 frameworks/core/common/thread_model_impl.h @arkuiframework
+frameworks/core/common/transform/input_compatible_manager.h @arkuievent
 frameworks/core/common/udmf/ @arkuievent
 frameworks/core/common/update_config_manager.h @arkuiframework
 frameworks/core/common/vibrator/ @arkuiscroll
@@ -3225,6 +3227,7 @@ test/unittest/core/common/sharedata/ @arkuiframework
 test/unittest/core/common/storage/ @arkuistatemgmt
 test/unittest/core/common/task/ @arkuiframework
 test/unittest/core/common/vibrator/ @arkuiframework
+test/unittest/core/common/transform/ @arkuievent
 test/unittest/core/event/ @arkuievent
 test/unittest/core/gestures/ @arkuievent
 test/unittest/core/image_file_cache/ @arkui_image
