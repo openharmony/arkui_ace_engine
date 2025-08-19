@@ -31,7 +31,9 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { TabsOpsHandWritten, hookTabsApplyAttributesFinish } from "./../handwritten"
+import { TabsOpsHandWritten, hookTabsApplyAttributesFinish, hookTabsAttributeModifier } from "./../handwritten"
+import { TabsModifier } from "../TabsModifier"
+import { AttributeModifier } from "./common"
 
 export class TabsControllerInternal {
     public static fromPtr(ptr: KPointer): TabsController {
@@ -183,6 +185,7 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     }
 }
 export class ArkTabsPeer extends ArkCommonMethodPeer {
+    _attributeSet?: TabsModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -677,6 +680,7 @@ export interface TabsAttribute extends CommonMethod {
     vertical(value: boolean | undefined): this
     barPosition(value: BarPosition | undefined): this
     scrollable(value: boolean | undefined): this
+    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod>| undefined): this
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
     barWidth(value: Length | undefined): this
     barHeight(value: Length | undefined): this
@@ -738,6 +742,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
         return this
     }
     public scrollable(value: boolean | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod>| undefined): this {
         return this
     }
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
@@ -837,6 +844,10 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
             }
         }
         return false;
+    }
+    public attributeModifier(modifier: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookTabsAttributeModifier(this, modifier);
+        return this
     }
     public setTabsOptions(options?: TabsOptions): this {
         if (this.checkPriority("setTabsOptions")) {

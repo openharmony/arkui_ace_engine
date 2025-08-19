@@ -16,6 +16,7 @@
 # ../tools/gen_gni.py --json arktsconfig-gn.json --output components.gni --gn-tool ../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn
 
 arkui_files = [
+  "arkui-preprocessed/arkui/AlphabetIndexerModifier.ets",
   "arkui-preprocessed/@ohos.animator.ets",
   "arkui-preprocessed/@ohos.arkui.ArcAlphabetIndexer.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
@@ -375,6 +376,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/StepperItemHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/StepperOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/SwiperOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/TabContentModifier.ets",
+  "arkui-preprocessed/arkui/TabsModifier.ets",
   "arkui-preprocessed/arkui/handwritten/TabsOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/TextFieldOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/TimePickerOpsHandWritten.ets",

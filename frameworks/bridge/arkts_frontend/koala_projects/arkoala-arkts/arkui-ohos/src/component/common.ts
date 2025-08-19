@@ -5592,7 +5592,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void {
+    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5611,7 +5611,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+    backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
@@ -5637,7 +5637,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: ForegroundBlurStyleOptions): void {
+    foregroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5656,7 +5656,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+    foregroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
@@ -5746,7 +5746,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    blur0Attribute(value: number | undefined, options?: BlurOptions): void {
+    blur0Attribute(value: number | undefined, options?: BlurOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5765,7 +5765,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_blur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    blur1Attribute(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    blur1Attribute(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let blurRadius_type : int32 = RuntimeType.UNDEFINED
         blurRadius_type = runtimeType(blurRadius)
@@ -5832,7 +5832,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     systemBarEffectAttribute(): void {
         ArkUIGeneratedNativeModule._CommonMethod_systemBarEffect(this.peer.ptr)
     }
-    backdropBlur0Attribute(value: number | undefined, options?: BlurOptions): void {
+    backdropBlur0Attribute(value: number | undefined, options?: BlurOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5851,7 +5851,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backdropBlur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backdropBlur1Attribute(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    backdropBlur1Attribute(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let radius_type : int32 = RuntimeType.UNDEFINED
         radius_type = runtimeType(radius)
@@ -8881,10 +8881,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         return this
     }
-    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
-    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -8902,7 +8902,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
@@ -8911,7 +8911,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public systemBarEffect(): this {
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -11082,7 +11082,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("backgroundBlurStyle")) {
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
@@ -11104,7 +11104,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("foregroundBlurStyle")) {
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
@@ -11169,7 +11169,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("blur")) {
             const blurRadius_type = runtimeType(blurRadius)
             const options_type = runtimeType(options)
@@ -11218,7 +11218,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("backdropBlur")) {
             const radius_type = runtimeType(radius)
             const options_type = runtimeType(options)
