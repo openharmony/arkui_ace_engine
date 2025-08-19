@@ -85,7 +85,7 @@ public:
         return xVals_.size();
     }
 
-    void CloneFromRaw(const LeastSquareImpl& raw, int32_t cnt)
+    void ResetValsFromRaw(const LeastSquareImpl& raw, int32_t cnt)
     {
         if (cnt > raw.GetTrackNum()) {
             cnt = raw.GetTrackNum();
