@@ -83,8 +83,10 @@ private:
     static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetForegroundC(void* drawable);
     static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetBackgroundC(void* drawable);
     static std::shared_ptr<OHOS::Media::PixelMap> LayeredGetMaskC(void* drawable);
-    static void AnimatedGetParamsC(void* drawable, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMapVec,
-        size_t* duration, size_t* iterations);
+    static void AnimatedGetPixelMapVec(
+        void* drawable, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>* pixelMapVec);
+    static int32_t AnimatedGetDurationC(void* drawable);
+    static int32_t AnimatedGetIterationsC(void* drawable);
     static std::shared_ptr<OHOS::Media::PixelMap> PixelMapGetPixelMapC(void* drawable);
     static napi_value CreatDrawable(napi_env env, void* native);
     static napi_value CreatLayeredDrawable(napi_env env, void* native);
