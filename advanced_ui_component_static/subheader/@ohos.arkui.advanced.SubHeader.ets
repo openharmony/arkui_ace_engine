@@ -1219,7 +1219,7 @@ class Util {
    */
   public static getNumberByResource(resourceId: long, defaultNumber: number): number {
     try {
-      let resourceNumber: number = resourceManager.getSystemResourceManager().getDouble(resourceId);
+      let resourceNumber: number = resourceManager.getSysResourceManager().getDouble(resourceId);
       if (resourceNumber === 0) {
         return defaultNumber;
       } else {
@@ -1263,7 +1263,7 @@ class Util {
     } else if (typeof fontSize === 'number') {
       return fontSize as number;
     } else {
-      return resourceManager.getSystemResourceManager().getDouble((fontSize as Resource).id);
+      return resourceManager.getSysResourceManager().getDouble((fontSize as Resource).id);
     }
   }
 

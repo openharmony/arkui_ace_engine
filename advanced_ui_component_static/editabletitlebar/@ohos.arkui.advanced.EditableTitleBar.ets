@@ -953,7 +953,7 @@ struct EditableTitleBarDialog {
  */
 function getNumberByResource(resourceId: number, defaultNumber: number): number {
   try {
-    let resourceNumber: number = resourceManager.getSystemResourceManager().getDouble(resourceId as Long);
+    let resourceNumber: number = resourceManager.getSysResourceManager().getDouble(resourceId as Long);
     if (resourceNumber === 0) {
       return defaultNumber;
     } else {
