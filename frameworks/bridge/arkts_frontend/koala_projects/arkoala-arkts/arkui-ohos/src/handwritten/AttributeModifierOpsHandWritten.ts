@@ -24,6 +24,7 @@ import { ArkFlexComponent, FlexAttribute, ArkFlexPeer } from '../component/flex'
 import { ArkFolderStackComponent, FolderStackAttribute, ArkFolderStackPeer } from '../component/folderStack';
 import { ArkGridColComponent, GridColAttribute, ArkGridColPeer } from '../component/gridCol';
 import { ArkGridRowComponent, GridRowAttribute, ArkGridRowPeer } from '../component/gridRow';
+import { ArkParticleComponent, ParticleAttribute } from '../component/particle';
 import { ArkRelativeContainerComponent, RelativeContainerAttribute, ArkRelativeContainerPeer } from '../component/relativeContainer';
 import { ArkRowComponent, RowAttribute, ArkRowPeer } from '../component/row';
 import { ArkRowSplitComponent, RowSplitAttribute, ArkRowSplitPeer } from '../component/rowSplit';
@@ -47,6 +48,7 @@ import { FlexModifier } from '../FlexModifier';
 import { FolderStackModifier } from '../FolderStackModifier';
 import { GridColModifier } from '../GridColModifier';
 import { GridRowModifier } from '../GridRowModifier';
+import { ParticleModifier } from '../ParticleModifier';
 import { RelativeContainerModifier } from '../RelativeContainerModifier';
 import { RowModifier } from '../RowModifier';
 import { RowSplitModifier } from '../RowSplitModifier';
@@ -1132,4 +1134,36 @@ export function hookRichEditorAttributeModifier(component: ArkRichEditorComponen
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<RichEditorAttribute>, attributeSet,
         constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookParticleAttributeModifier(component: ArkParticleComponent, modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ParticleModifier => {
+        let isParticleModifier: boolean = modifier instanceof ParticleModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ParticleModifier();
+        if (isParticleModifier) {
+            let particleModifier = modifier as object as ParticleModifier;
+            initModifier.mergeModifier(particleModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkParticleComponent => {
+        let componentNew: ArkParticleComponent = new ArkParticleComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

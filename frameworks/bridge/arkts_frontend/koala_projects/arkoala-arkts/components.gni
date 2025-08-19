@@ -80,6 +80,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/NavigationModifier.ets",
   "arkui-preprocessed/arkui/NodeContent.ets",
   "arkui-preprocessed/arkui/NodeController.ets",
+  "arkui-preprocessed/arkui/ParticleModifier.ets",
   "arkui-preprocessed/arkui/PathModifier.ets",
   "arkui-preprocessed/arkui/PeerNode.ets",
   "arkui-preprocessed/arkui/PolygonModifier.ets",
