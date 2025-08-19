@@ -1174,7 +1174,9 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
     if (shaderStyleObj->HasProperty("options")) {
         auto optionsValue = shaderStyleObj->GetProperty("options");
-        shaderStyleObj = JSRef<JSObject>::Cast(optionsValue);
+        if (optionsValue->IsObject()) {
+            shaderStyleObj = JSRef<JSObject>::Cast(optionsValue);
+        }
     }
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewRadialGradient(shaderStyleObj, gradient);

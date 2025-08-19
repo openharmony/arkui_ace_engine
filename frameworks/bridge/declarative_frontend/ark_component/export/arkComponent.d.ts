@@ -776,7 +776,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         radius: number | string;
         angle?: number | string;
         direction?: GradientDirection;
-        colors: Array<any>;
+        colors: Array<[ ResourceColor, number ]>;
         repeating?: boolean;
     }): this;
 }
