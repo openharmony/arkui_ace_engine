@@ -184,7 +184,6 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-
 int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
 {
     if (node == nullptr) {
@@ -435,6 +434,19 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index)
+{
+    if (node == nullptr || target_parent == nullptr
+        || !OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(target_parent)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(node->uiNodeHandle,
+        target_parent->uiNodeHandle, index);
+    return errorCode;
+}
+
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
     if (node == nullptr || option == nullptr || node->cNode == false) {
@@ -489,19 +501,6 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
         return false;
     }
     return option->attributeSetting;
-}
-
-int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index)
-{
-    if (node == nullptr || target_parent == nullptr
-        || !OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(target_parent)) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(node->uiNodeHandle,
-        target_parent->uiNodeHandle, index);
-    return errorCode;
 }
 
 int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
@@ -564,19 +563,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntO
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToParent(node->uiNodeHandle, &tempOffset, false);
     globalOffset->x = tempOffset[0];
     globalOffset->y = tempOffset[1];
-
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData))
-{
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
-    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
-    impl->getNodeModifiers()->getFrameNodeModifier()->runScopedTask(context->id, userData, callback);
-    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_ErrorCode OH_ArkUI_AddSupportedUIStates(ArkUI_NodeHandle node, int32_t uiStates,
@@ -598,6 +585,17 @@ ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t 
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeSupportedUIStates(node->uiNodeHandle, uiStates);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData))
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    impl->getNodeModifiers()->getFrameNodeModifier()->runScopedTask(context->id, userData, callback);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 

@@ -57,9 +57,9 @@ class NodeControllerRegisterProxy {
   public static __NodeControllerMap__ = new Map<number, NodeController>();
 }
 
-globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number,nodeController:NodeController ) {
+globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number, nodeController:NodeController): void {
   NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
-}
+};
 
 globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number): void {
   let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
@@ -81,4 +81,4 @@ globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent: 
     globalThis.__viewPuStack__?.push(_BuilderNodeView);
   }
   return (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
-}
+};

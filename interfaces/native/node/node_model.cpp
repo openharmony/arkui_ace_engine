@@ -15,7 +15,6 @@
 
 #include "node_model.h"
 
-
 #include "event_converter.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "node_extened.h"
@@ -221,7 +220,7 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    // a
+    // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }

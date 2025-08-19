@@ -18,6 +18,7 @@
 #pragma once
 
 #include "core/interfaces/native/node/node_api.h"
+
 #include "core/interfaces/native/node/extension_companion_node.h"
 
 namespace OHOS::Ace::NG::ViewModel {
@@ -58,11 +59,11 @@ ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Fl
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 
-ArkUI_Bool IsBuilderNode(void* nodePtr);
-
 void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode);
 
 void* GetAttachNodePtr(ArkUINodeHandle nodePtr);
+
+ArkUI_Bool IsBuilderNode(void* nodePtr);
 
 void* CreateCustomNode(ArkUI_CharPtr tag);
 
