@@ -80,11 +80,7 @@ void LongPressRecognizer::OnAccepted()
         isPostEventResult_, touchPoint.postEventNodeId);
     UpdateFingerListInfo();
     SendCallbackMsg(onAction_, false, GestureCallbackType::START);
-    if (isLimitFingerCount_ && hasRepeated_) {
-        return;
-    }
     if (repeat_) {
-        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -209,7 +205,6 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onAction_, false, GestureCallbackType::START);
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
-            hasRepeated_ = false;
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
             if (firstInputTime_.has_value()) {
@@ -484,7 +479,6 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
-    hasRepeated_ = false;
     longPressFingerCountForSequence_ = 0;
     isOnActionTriggered_ = false;
 }

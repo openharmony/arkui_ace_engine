@@ -1620,7 +1620,6 @@ HWTEST_F(LongPressRecognizerTestNg, HandleTouchUpEventTest001, TestSize.Level1)
     longPressRecognizer->isLimitFingerCount_ = true;
     longPressRecognizer->HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
-    EXPECT_FALSE(longPressRecognizer->hasRepeated_);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
