@@ -31,7 +31,12 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { VerticalAlign, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
+import { hookTabContentAttributeModifier } from "./../handwritten"
+import { TabContentModifier } from "../TabContentModifier"
+import { AttributeModifier } from "./common"
+
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
+    _attributeSet?: TabContentModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -220,9 +225,10 @@ export interface TabContentAttribute extends CommonMethod {
     setTabContentOptions(): this {
         return this
     }
-    tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
+    tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle | ComponentContent | undefined): this
     onWillShow(value: VoidCallback | undefined): this
     onWillHide(value: VoidCallback | undefined): this
+    attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod>| undefined): this
 }
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
     tabBar_value?: string | Resource | CustomBuilder | TabBarOptions | undefined
@@ -231,7 +237,7 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     public setTabContentOptions(): this {
         return this
     }
-    public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | undefined | SubTabBarStyle | BottomTabBarStyle | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle | ComponentContent | undefined): this {
         return this
     }
     public onWillShow(value: VoidCallback | undefined): this {
@@ -240,10 +246,17 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     public onWillHide(value: VoidCallback | undefined): this {
         return this
         }
+    public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
 }
 export class ArkTabContentComponent extends ArkCommonMethodComponent implements TabContentAttribute {
     getPeer(): ArkTabContentPeer {
         return (this.peer as ArkTabContentPeer)
+    }
+    public attributeModifier(modifier: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookTabContentAttributeModifier(this, modifier);
+        return this
     }
     public setTabContentOptions(): this {
         if (this.checkPriority("setTabContentOptions")) {
@@ -252,7 +265,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public tabBar(value: SubTabBarStyle | BottomTabBarStyle | undefined | string | Resource | CustomBuilder | TabBarOptions | undefined | ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle | ComponentContent | undefined): this {
         if (this.checkPriority("tabBar")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {

@@ -17,7 +17,6 @@
 #define ARKUI_NATIVE_NODE_ANI_H
 
 #include "ani.h"
-
 #include "native_type.h"
 
 #ifdef __cplusplus
@@ -75,6 +74,31 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
  * @since 20
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle node, ani_env* env, ani_value* param);
+
+/**
+ * @brief 获取ArkTS侧创建的DrawableDescriptor映射到native侧的ArkUI_DrawableDescriptor
+ *
+ * @param env ani的环境指针
+ * @param drawable ArkTS侧创建的DrawableDescriptor对象。
+ * @param drawableDescriptor ArkUI_DrawableDescriptor指针.
+ * @return 0 - 成功。
+ *         401 - 函数参数异常。
+ * @since 20
+ */
+int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromAniValue(
+    ani_env* env, ani_object drawable, ArkUI_DrawableDescriptor** drawableDescriptor);
+/**
+ * @brief 获取ArkTS侧创建的Resource映射到native侧的ArkUI_DrawableDescriptor
+ *
+ * @param env ani的环境指针。
+ * @param resource ArkTS侧创建的Resource对象。
+ * @param drawableDescriptor ArkUI_DrawableDescriptor指针。
+ * @return 0 - 成功。
+ *         401 - 函数参数异常。
+ * @since 20
+ */
+int32_t OH_ArkUI_NativeModule_GetDrawableDescriptorFromResourceAniValue(
+    ani_env* env, ani_object resource, ArkUI_DrawableDescriptor** drawableDescriptor);
 
 #ifdef __cplusplus
 };

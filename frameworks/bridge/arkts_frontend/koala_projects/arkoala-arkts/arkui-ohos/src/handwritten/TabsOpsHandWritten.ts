@@ -15,8 +15,14 @@
 
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { TabsOps, BarMode, ScrollableBarModeOptions, BlurStyle, BackgroundBlurStyleOptions, Bindable } from "../component"
-import { TabsExtender, ArkTabsComponent } from "../component"
+import { TabsExtender, ArkTabsComponent, TabsAttribute, ArkTabContentComponent, TabContentAttribute } from "../component"
 import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from '../component/common';
+import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
+import { CommonModifier } from '../CommonModifier';
+import { TabsModifier } from "../TabsModifier"
+import { TabContentModifier } from "../TabContentModifier"
+
 
 export class TabsOpsHandWritten {
     static hookTabsAttributeBarModeImpl(node: KPointer, value: BarMode | undefined, options: ScrollableBarModeOptions | undefined) {
@@ -36,4 +42,68 @@ export class TabsOpsHandWritten {
 
 export function hookTabsApplyAttributesFinish(node: ArkTabsComponent) : void {
     TabsExtender.ApplyAttributesFinish(node.getPeer().peer.ptr)
+}
+
+export function hookTabsAttributeModifier(component: ArkTabsComponent, modifier: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TabsModifier => {
+        let isTabsModifier: boolean = modifier instanceof TabsModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new TabsModifier();
+        if (isTabsModifier) {
+            let TabsModifier = modifier as object as TabsModifier;
+            initModifier.mergeModifier(TabsModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkTabsComponent => {
+        let componentNew: ArkTabsComponent = new ArkTabsComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TabsAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookTabContentAttributeModifier(component: ArkTabContentComponent, modifier: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TabContentModifier => {
+        let isTabContentModifier: boolean = modifier instanceof TabContentModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new TabContentModifier();
+        if (isTabContentModifier) {
+            let TabContentModifier = modifier as object as TabContentModifier;
+            initModifier.mergeModifier(TabContentModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkTabContentComponent => {
+        let componentNew: ArkTabContentComponent = new ArkTabContentComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TabContentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

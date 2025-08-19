@@ -29,8 +29,13 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { AlphabetIndexerOpsHandWritten } from "./../handwritten"
+import { AlphabetIndexerOpsHandWritten, hookAlphabetIndexerAttributeModifier } from "./../handwritten"
+import { AttributeModifier } from "./common"
+import { AlphabetIndexerModifier } from "../AlphabetIndexerModifier"
+
 export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
+    _attributeSet?: AlphabetIndexerModifier
+
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -620,6 +625,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     selectedFont(value: Font | undefined): this
     popupFont(value: Font | undefined): this
     popupItemFont(value: Font | undefined): this
+    attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod>| undefined): this
     itemSize(value: string | number | undefined): this
     font(value: Font | undefined): this
     onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this
@@ -705,6 +711,9 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     public popupItemFont(value: Font | undefined): this {
         return this
     }
+    public attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod>| undefined): this {
+        return this
+    }
     public itemSize(value: string | number | undefined): this {
         return this
     }
@@ -754,6 +763,10 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
 export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implements AlphabetIndexerAttribute {
     getPeer(): ArkAlphabetIndexerPeer {
         return (this.peer as ArkAlphabetIndexerPeer)
+    }
+    public attributeModifier(modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookAlphabetIndexerAttributeModifier(this, modifier);
+        return this
     }
     AlphabetIndexerOptionsValueIsBindable(options: AlphabetIndexerOptions): boolean {
         if ((RuntimeType.UNDEFINED) != runtimeType(options)) {

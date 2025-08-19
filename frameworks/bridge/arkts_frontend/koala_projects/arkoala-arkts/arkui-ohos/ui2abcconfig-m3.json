@@ -96,6 +96,9 @@
             ],
             "@ohos/arkui/theme": [
                 "./@ohos.arkui.theme"
+            ],
+            "@ohos.arkui.component": [
+                "./arkui/component"
             ]
         },
         "plugins": [

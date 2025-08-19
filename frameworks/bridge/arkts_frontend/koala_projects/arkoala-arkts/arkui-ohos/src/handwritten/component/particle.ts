@@ -10,6 +10,8 @@ import { ParticlePropertyOptionsInner, AccelerationOptionsInner, ParticleAnnulus
 import { ParticleUpdaterOptionsInner, PositionLengthMetricsInner, ParticleColorPropertyUpdaterConfigsInner, EmitterPropertyInner } from "./particle_helper"
 import { ParticlePropertyUpdaterConfigsInner, ParticlePropertyAnimationColorInner, ParticlePropertyAnimationNumberInner } from "./particle_helper"
 import { PositionNumberInner, SizeNumberInner, DisturbanceFieldOptionsInner } from "./particle_helper"
+import { ParticleModifier } from "../ParticleModifier"
+import { hookParticleAttributeModifier } from "./../handwritten"
 
 export interface AccelerationOptions {
     speed?: ParticlePropertyOptions;
@@ -71,8 +73,7 @@ export interface ParticleAttribute extends CommonMethod {
     }
     disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this
     emitter(value: Array<EmitterProperty> | undefined): this
-    /** @memo */
-    attributeModifier<T>(modifier: AttributeModifier<T>): this
+    attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 
 class ParticleToParticleInnerHelper {
@@ -272,6 +273,7 @@ class ParticleToParticleInnerHelper {
 
 
 export class ArkParticlePeer extends ArkCommonMethodPeer {
+    _attributeSet?: ParticleModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -309,9 +311,8 @@ export class ArkParticleStyle extends ArkCommonMethodStyle implements ParticleAt
     public emitter(value: Array<EmitterProperty> | undefined): this {
         return this
     }
-    /** @memo */
-    public attributeModifier<T>(modifier: AttributeModifier<T>): this {
-        throw new Error("Not implemented")
+    public attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        return this
     }
 }
 
@@ -345,9 +346,8 @@ export class ArkParticleComponent extends ArkCommonMethodComponent implements Pa
         return this
     }
 
-    /** @memo */
-    public attributeModifier<T>(modifier: AttributeModifier<T>): this {
-        throw new Error("Not implemented");
+    public attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookParticleAttributeModifier(this, modifier);
         return this;
     }
     public applyAttributesFinish(): void {

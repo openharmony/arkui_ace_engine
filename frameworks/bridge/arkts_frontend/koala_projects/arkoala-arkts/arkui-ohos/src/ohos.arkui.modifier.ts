@@ -15,6 +15,12 @@
 
 export { AttributeUpdater } from './AttributeUpdater'
 
+export { AlphabetIndexerModifier } from './AlphabetIndexerModifier';
+
+export { TabsModifier } from './TabsModifier';
+
+export { TabContentModifier } from './TabContentModifier';
+
 export { CommonModifier } from './CommonModifier'
 
 export { DividerModifier } from './DividerModifier';
@@ -84,3 +90,5 @@ export { NavigationModifier } from './NavigationModifier';
 export { SwiperModifier } from './SwiperModifier';
 
 export { RichEditorModifier } from './RichEditorModifier'
+
+export { ParticleModifier } from './ParticleModifier';

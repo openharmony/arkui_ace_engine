@@ -147,6 +147,7 @@ struct ArkUI_DrawableDescriptor {
     OH_PixelmapNativeHandle pixelMap;
     OH_PixelmapNativeHandle* pixelMapArray;
     ArkUI_Int32 size;
+    void* newDrawableDescriptor;
     std::shared_ptr<OHOS::Ace::Napi::DrawableDescriptor> drawableDescriptor;
     std::shared_ptr<OHOS::Ace::Napi::AnimatedDrawableDescriptor> animatedDrawableDescriptor;
     std::shared_ptr<OHOS::Ace::Napi::LayeredDrawableDescriptor> layeredDrawableDescriptor;

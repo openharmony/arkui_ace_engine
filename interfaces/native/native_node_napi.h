@@ -92,6 +92,36 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env);
 void OH_ArkUI_NotifyArkTSEnvDestroy(napi_env env);
 
 /**
+ * @brief Obtains a <b>DrawableDescriptor</b> object on the ArkTS side and maps it to an
+ * <b>ArkUI_DrawableDescriptro</b> object on the native side.
+ *
+ * @param env Indicates the NAPI environment pointer.
+ * @param value Indicates the <b>DrawableDescriptor</b> object created on the ArkTS side.
+ * @param drawableDescriptor Indicates the pointer to the <b>ArkUI_DrawableDescriptro</b> object.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+*/
+int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
+    napi_env env, napi_value value, ArkUI_DrawableDescriptor** drawableDescriptor);
+
+/**
+ * @brief Obtains a <b>Resource</b> object on the ArkTS side and maps it to an
+ * <b>ArkUI_DrawableDescriptro</b> object on the native side.
+ *
+ * @param env Indicates the NAPI environment pointer.
+ * @param value Indicates the <b>Resource</b> object created on the ArkTS side.
+ * @param drawableDescriptor Indicates the pointer to the <b>ArkUI_DrawableDescriptro</b> object.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+*/
+int32_t OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue(
+    napi_env env, napi_value value, ArkUI_DrawableDescriptor** drawableDescriptor);
+
+/**
  * @brief Obtain the ID of the Navigation component where the node is located.
  *
  * @param node The node.
