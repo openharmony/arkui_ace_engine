@@ -8057,6 +8057,31 @@ HWTEST_F(NativeNodeTest, NativeNodeTest145, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTest146
+ * @tc.desc: Test imageNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest146, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE, nullptr, true});
+    ArkUI_NumberValue value1[] = {{.i32 = -200}, {.i32 = 300}}; // 200 300 means source size width height
+    ArkUI_AttributeItem item1 = {value1, sizeof(value1) / sizeof(ArkUI_NumberValue)};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SOURCE_SIZE, &item1), ERROR_CODE_PARAM_INVALID);
+    ArkUI_NumberValue value2[] = {};
+    ArkUI_AttributeItem item2 = {value2, sizeof(value2) / sizeof(ArkUI_NumberValue)};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_MATCH_TEXT_DIRECTION, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_IMAGE_MATRIX, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_HDR_BRIGHTNESS, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_COPY_OPTION, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_ENABLE_ANALYZER, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_DYNAMIC_RANGE_MODE, &item2), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_ORIENTATION, &item2), ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: NativeNodeTest_SetForceDarkConfig_001
  * @tc.desc: Test OH_ArkUI_SetForceDarkConfig
  * @tc.type: FUNC
