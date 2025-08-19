@@ -85,7 +85,7 @@ HWTEST_F(LeastSquareImplTest, LeastSquareImplTest002, TestSize.Level1)
     leastSquareImpl2.UpdatePoint(NUM_D1, NUM_D2);
     leastSquareImpl2.UpdatePoint(NUM_D1, NUM_D2);
     LeastSquareImpl leastSquareImpl3(PARAMS_NUM3);
-    leastSquareImpl3.CloneFromRaw(leastSquareImpl2, 2);
+    leastSquareImpl3.ResetValsFromRaw(leastSquareImpl2, 2);
     EXPECT_FALSE(leastSquareImpl3.GetLeastSquareParams(params));
 }
 } // namespace OHOS::Ace
