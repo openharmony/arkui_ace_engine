@@ -1903,7 +1903,7 @@ void TextFieldPattern::HandleOnCameraInput()
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (imeShown_) {
-        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+        inputMethod->StartInputTypeAsync(MiscServices::InputType::CAMERA_INPUT);
     } else {
         FireOnWillAttachIME();
         auto optionalTextConfig = GetMiscTextConfig();
