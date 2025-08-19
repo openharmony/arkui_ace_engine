@@ -9,6 +9,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
 import { ArkUIAniModule } from "arkui.ani"
 import { setNeedCreate } from "arkui/ArkComponentRoot"
+import { AceTrace } from "arkui/AceTrace";
 
 
 /** @memo:stable */
@@ -33,9 +34,24 @@ export class ParallelNode {
     /** @memo */
     build(
         /** @memo */
-        builder: () => void) {
+        builder: () => void, updateUseParallel: boolean = false) {
         if (this.needAttach && this.status == 2) {
             this.manager!.merge(__context(), this.rootState!, () => {
+                if (updateUseParallel) {
+                    const task = () => {
+                        AceTrace.begin('update use Parallel')
+                        this.manager!.syncChanges()
+                        this.manager!.updateSnapshot()
+                        this.rootState!.value
+                        AceTrace.end()
+                    }
+                    //@ts-ignore
+                    taskpool.execute(task).then(() => { }).catch((err: Error) => {
+                        console.error('update use Parallel in taskpool error :', err);
+                        console.error(err.stack);
+                    })
+                    return;
+                }
                 this.manager!.syncChanges()
                 this.manager!.updateSnapshot()
                 this.rootState!.value
@@ -76,6 +92,21 @@ export class ParallelNode {
             return;
         }
         this.manager!.merge(__context(), this.rootState!, () => {
+            if (updateUseParallel) {
+                const task = () => {
+                    AceTrace.begin('update use Parallel')
+                    this.manager!.syncChanges()
+                    this.manager!.updateSnapshot()
+                    this.rootState!.value
+                    AceTrace.end()
+                }
+                //@ts-ignore
+                taskpool.execute(task).then(() => { }).catch((err: Error) => {
+                    console.error('update use Parallel in taskpool error :', err);
+                    console.error(err.stack);
+                })
+                return;
+            }
             this.manager!.syncChanges()
             this.manager!.updateSnapshot()
             this.rootState!.value
@@ -92,6 +123,7 @@ export interface ParallelOption {
     enable?: boolean,
     initlize?: () => void,
     completed?: () => void,
+    updateUseParallel?: boolean,
 }
 
 /** @memo:stable */
@@ -106,10 +138,10 @@ export function ParallelizeUI(
     /** @memo */
     content_?: () => void,
 ) {
-    const enable = rememberDisposable<ParallelOption | undefined>(() => {
+    const option = rememberDisposable<ParallelOption | undefined>(() => {
         return options;
     }, () => { })
-    if (options?.enable === false) {
+    if (option?.enable === false) {
         content_?.()
         return;
     }
@@ -120,6 +152,6 @@ export function ParallelizeUI(
         parallelNode?.dispose()
     })
     if (content_ !== undefined) {
-        receiver.build(content_!)
+        receiver.build(content_!, options?.updateUseParallel);
     }
 }
