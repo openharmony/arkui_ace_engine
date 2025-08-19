@@ -26,7 +26,6 @@
 #include "test/mock/core/common/mock_image_analyzer_manager.h"
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/base/mock_task_executor.h"
-
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
