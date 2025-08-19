@@ -151,7 +151,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
 const RepeatEachFuncType: string = '';
 
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
-    arr: RepeatArray<T>;
+    arr: RepeatArray<T> = [];
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
     templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
