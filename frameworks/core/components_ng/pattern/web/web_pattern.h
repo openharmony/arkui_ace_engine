@@ -840,6 +840,7 @@ public:
 
     // WebAccessibilityEventReport funcs
     RefPtr<WebAccessibilityEventReport> GetAccessibilityEventReport();
+    void InitInputEventReportCallback();
     void SetTextEventAccessibilityEnable(bool enable);
 
     // Data Detector funcs

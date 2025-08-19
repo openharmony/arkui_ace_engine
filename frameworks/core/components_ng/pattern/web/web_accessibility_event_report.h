@@ -24,19 +24,20 @@
 
 namespace OHOS::Ace::NG {
 
-using EventReportCallback = std::function<void(int64_t, const std::string)>;
+using EventReportCallback = std::function<void(int64_t, const std::string&)>;
 
 class WebAccessibilityEventReport : public AceType {
     DECLARE_ACE_TYPE(WebAccessibilityEventReport, AceType);
 public:
     explicit WebAccessibilityEventReport(const WeakPtr<Pattern>& pattern);
 
-    void RegisterAllReportEventCallBack();
+    void RegisterAllReportEventCallback();
     void RegisterCallback(EventReportCallback&& callback, AccessibilityEventType type);
-    void UnRegisterCallback();
+    void UnregisterCallback();
 
     void ReportEvent(AccessibilityEventType type, int64_t accessibilityId);
     void ReportTextBlurEventByFocus(int64_t accessibilityId);
+    void SetIsFirstRegister(bool isFirstRegister) { isFirstRegister_ = isFirstRegister; }
 
 private:
     void CheckAccessibilityNodeAndReport(AccessibilityEventType type, int64_t accessibilityId);
@@ -44,6 +45,7 @@ private:
     WeakPtr<Pattern> pattern_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;  // last report blur id by focus event
+    bool isFirstRegister_ = false;
     EventReportCallback textFocusCallback_ = nullptr;
     EventReportCallback textBlurCallback_ = nullptr;
     EventReportCallback textChangeCallback_ = nullptr;

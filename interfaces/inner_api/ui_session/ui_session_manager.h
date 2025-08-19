@@ -94,7 +94,7 @@ public:
      * @description: Report web editing area focus/blur/textChange event
      * @param type The type of event (focus, blur, or textChange), defaults to empty string
      */
-    virtual void ReportWebUnfocusEvent(
+    virtual void ReportWebInputEvent(
         int64_t accessibilityId, const std::string& data, const std::string& type = "") {};
     virtual void NotifyAllWebPattern(bool isRegister) {};
     virtual void NotifySendCommandPattern(int32_t id, const std::string& command) {};
