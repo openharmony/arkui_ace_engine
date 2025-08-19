@@ -308,9 +308,8 @@ void CustomNode::FireRecycleRenderFunc()
         ACE_SCOPED_TRACE("CustomNode:BuildRecycle [%s][self:%d][parent:%d][reuseId:%s][parentCustomNode:%s]",
             GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0,
             reuseId.c_str(), parentInfo.c_str());
+        CustomNodeBase::FireRecycleRenderFunc();
     }
-
-    CustomNodeBase::FireRecycleRenderFunc();
 }
 
 RefPtr<CustomNode> CustomNode::FindParentCustomNode() const
