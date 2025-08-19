@@ -84,21 +84,21 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
     style.lineStyleHalfLeading = paraStyle.halfLeading;
+    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
+    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.locale = paraStyle.fontLocale;
     if (paraStyle.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
-    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.enableAutoSpace = paraStyle.enableAutoSpacing;
     style.defaultTextStyleUid = paraStyle.textStyleUid;
-    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
     if (paraStyle.isOnlyBetweenLines) {
         style.textHeightBehavior =
             paraStyle.isFirstParagraphLineSpacing
                 ? static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_ALL)
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
+    style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
@@ -108,8 +108,8 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_);
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle id:%d", style.GetTextStyleUid());
     if (!builder_) {
         CreateBuilder();
     }
@@ -130,11 +130,11 @@ void TxtParagraph::PopStyle()
 void TxtParagraph::AddText(const std::u16string& text)
 {
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
-    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     builder_->AppendText(text);
 }
 
@@ -574,6 +574,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             boxes = getTextRects(extent, end);
         }
     }
+    
     if (boxes.empty()) {
         return false;
     }
