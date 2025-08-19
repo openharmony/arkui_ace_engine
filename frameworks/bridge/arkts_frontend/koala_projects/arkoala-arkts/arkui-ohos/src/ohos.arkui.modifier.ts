@@ -58,3 +58,5 @@ export { SymbolGlyphModifier } from "./SymbolGlyphModifier"
 // export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'
 
 export { VideoModifier } from './VideoModifier';
+
+export { RichEditorModifier } from './RichEditorModifier'
