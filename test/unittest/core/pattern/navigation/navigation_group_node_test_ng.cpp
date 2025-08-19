@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
 
+#include "core/components_ng/pattern/navigation/navigation_model_static.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -368,6 +369,95 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
 
     navigationNode->RemoveJsChildImmediately(preTopNavDestinationNode, false, 1);
     EXPECT_FALSE(preTopNavDestinationNode->isInDestroying_);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: HandleBackForHomeDestination001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, HandleBackForHomeDestination001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    bool res = navigationNode->HandleBackForHomeDestination();
+    EXPECT_FALSE(res);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: StartSoftOpacityAnimationPush001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, StartSoftOpacityAnimationPush, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    navigationNode->StartSoftOpacityAnimationPush(destNode);
+    ASSERT_NE(destNode, nullptr);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: SoftTransitionAnimationPush
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, SoftTransitionAnimationPush001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto preNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(preNode, nullptr);
+    auto curNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(curNode, nullptr);
+    NavigationGroupNode::AnimationFinishCallback callback = []() { return false; };
+    navigationNode->SoftTransitionAnimationPush(preNode, curNode, true, true, true, callback);
+    ASSERT_NE(curNode, nullptr);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: SetSplitPlaceholder001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, SetSplitPlaceholder001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    navigationNode->SetSplitPlaceholder(navigationNode);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
 

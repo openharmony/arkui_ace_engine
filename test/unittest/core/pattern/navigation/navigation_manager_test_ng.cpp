@@ -1446,4 +1446,162 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively004, TestSize.Leve
     ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
     NavigationManagerTestNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: GetTopNavDestinationInfo001
+ * @tc.desc: Branch: if (navigationMap_.find(pageId) == navigationMap_.end()) return {}
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetTopNavDestinationInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    navigationManager->navigationMap_.clear();
+    string res = navigationManager->GetTopNavDestinationInfo(-1, false, false);
+    ASSERT_EQ(res, "{}");
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetTopNavDestinationInfo002
+ * @tc.desc: Branch: if (navigationMap_.find(pageId) == navigationMap_.end())  false
+ * if (onlyFullScreen && !pattern->IsFullPageNavigation()) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetTopNavDestinationInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    navigationManager->AddNavigation(1, navigationGroupNode);
+    string res = navigationManager->GetTopNavDestinationInfo(1, true, false);
+    ASSERT_EQ(res, "{}");
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetTopNavDestinationInfo003
+ * @tc.desc: Branch: if (navigationMap_.find(pageId) == navigationMap_.end())  false
+ * if (onlyFullScreen && !pattern->IsFullPageNavigation()) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, GetTopNavDestinationInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    navigationManager->AddNavigation(1, navigationGroupNode);
+    string res = navigationManager->GetTopNavDestinationInfo(1, false, false);
+    ASSERT_EQ(res, "{}");
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo001
+ * @tc.desc: Branch: if (!navDestinationJson || !navDestinationJson->IsObject())  false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    string navDestinationInfo = "name";
+    navigationManager->navigationRecoveryInfo_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, false);
+    ASSERT_NE(pipelineContext, nullptr);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RestoreNavDestinationInfo002
+ * @tc.desc: Branch: if (!navDestinationJson || !navDestinationJson->IsObject())  false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
+    string navDestinationInfo = "name";
+    navigationManager->navigationRecoveryInfo_.clear();
+    navigationManager->RestoreNavDestinationInfo(navDestinationInfo, true);
+    ASSERT_NE(pipelineContext, nullptr);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
 } // namespace OHOS::Ace::NG
