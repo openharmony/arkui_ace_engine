@@ -110,6 +110,7 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
+
     bool syncLoad = false;
     std::optional<std::vector<float>> colorFilterMatrix;
     std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
@@ -206,6 +207,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationOptions, TextDecorationOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
@@ -220,10 +223,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
-    
+
     void UpdateColorByResourceId();
 
     TextDecoration GetTextDecorationFirst() const

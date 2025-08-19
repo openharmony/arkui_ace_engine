@@ -86,7 +86,9 @@ class TextDragPattern : public Pattern {
 public:
     TextDragPattern() = default;
     ~TextDragPattern() override = default;
+
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+
     void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
@@ -258,8 +260,8 @@ protected:
 
 protected:
     RefPtr<TextDragOverlayModifier> overlayModifier_;
-    TextDragData textDragData_;
 
+    TextDragData textDragData_;
 private:
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;

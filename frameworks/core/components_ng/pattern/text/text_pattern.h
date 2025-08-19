@@ -180,6 +180,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -405,9 +406,9 @@ public:
     virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
-
     std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end, bool includeStartHalf = false,
         bool includeEndHalf = true, bool getSubstrDirectly = true) const;
+
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -544,6 +545,7 @@ public:
         CloseSelectOverlay();
         ResetSelection();
     }
+
     virtual bool NeedShowAIDetect();
 
     int32_t GetDragRecordSize() override
@@ -619,6 +621,19 @@ public:
     virtual bool IsSelectAll();
     void HandleOnCopy();
     virtual void HandleAIMenuOption(const std::string& labelInfo = "");
+
+    virtual void HandleOnAskCelia();
+
+    void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
+    {
+        isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
+    }
+    
+    bool IsAskCeliaEnabled() const
+    {
+        return isAskCeliaEnabled_;
+    }
+
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
     bool IsShowTranslate();
@@ -683,6 +698,7 @@ public:
     {
         return childNodes_;
     }
+
     // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
     void SetExternalParagraph(void* paragraph)
     {
@@ -885,18 +901,6 @@ public:
     void RelayoutResetOrUpdateTextEffect();
     void ResetTextEffect();
     bool ResetTextEffectBeforeLayout(bool onlyReset = true);
-
-    virtual void HandleOnAskCelia();
-
-    void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
-    {
-        isAskCeliaEnabled_ = isAskCeliaEnabled && IsNeedAskCelia();
-    }
-    
-    bool IsAskCeliaEnabled() const
-    {
-        return isAskCeliaEnabled_;
-    }
     bool IsNeedAskCelia() const
     {
         // placeholder and symbol not support
@@ -992,7 +996,6 @@ protected:
     int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
-
     virtual bool CanStartAITask() const;
 
     void MarkDirtySelf();
@@ -1140,7 +1143,6 @@ private:
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();
@@ -1163,7 +1165,6 @@ private:
     {
         return lastDragTool_;
     }
-
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
     void ProcessMarqueeVisibleAreaCallback();
@@ -1202,7 +1203,6 @@ private:
     bool isCustomFont_ = false;
     bool blockPress_ = false;
     bool isDoubleClick_ = false;
-    bool showSelected_ = false;
     bool isSensitive_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
