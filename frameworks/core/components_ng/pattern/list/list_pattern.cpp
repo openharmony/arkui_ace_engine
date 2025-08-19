@@ -3422,15 +3422,18 @@ bool ListPattern::LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextInd
     return true;
 }
 
-bool ListPattern::LayoutListForFocus(int32_t nextIndex, int32_t curIndex)
+bool ListPattern::LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup)
 {
-    if (!IsLayout(nextIndex, std::nullopt, ScrollAlign::AUTO)) {
+    if (!IsLayout(nextIndex, indexInGroup, ScrollAlign::AUTO)) {
         isLayoutListForFocus_ = true;
         targetIndex_ = nextIndex;
         if (nextIndex < startIndex_) {
             scrollAlign_ = ScrollAlign::START;
         } else if (nextIndex > endIndex_) {
             scrollAlign_ = ScrollAlign::END;
+        }
+        if (indexInGroup) {
+            targetIndexInGroup_ = indexInGroup.value();
         }
         auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
@@ -3496,7 +3499,7 @@ int32_t ListPattern::GetNextMoveStepForMultiLanes(
         auto it = itemPosition_.find(loopIndex);
         auto itCache = cachedItemPosition_.find(loopIndex);
         if (it == itemPosition_.end() && itCache == cachedItemPosition_.end()) {
-            LayoutListForFocus(loopIndex, curIndex);
+            LayoutListForFocus(loopIndex, std::nullopt);
             it = itemPosition_.find(loopIndex);
             itCache = cachedItemPosition_.find(loopIndex);
             if (it == itemPosition_.end() && itCache == cachedItemPosition_.end()) {
@@ -3544,7 +3547,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
         if (nextIndex == curIndex) {
             return nullptr;
         }
-        LayoutListForFocus(nextIndex, curIndex);
+        LayoutListForFocus(nextIndex, std::nullopt);
         auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step, curIndex);
         auto isDefault = GetFocusWrapMode() == FocusWrapMode::DEFAULT;
         if (nextFocusNode.Upgrade()) {
