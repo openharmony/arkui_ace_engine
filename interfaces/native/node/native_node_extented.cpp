@@ -1163,7 +1163,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
     if (value < 0) {
         value = EXPECTED_UPDATE_INTERVAL_VALUE;
     }
-    if (value > 0 && valuew < EXPECTED_UPDATE_INTERVAL_MIN_VALUE) {
+    if (value > 0 && value < EXPECTED_UPDATE_INTERVAL_MIN_VALUE) {
         value = EXPECTED_UPDATE_INTERVAL_MIN_VALUE;
     }
     option->expectedUpdateInterval = value;
