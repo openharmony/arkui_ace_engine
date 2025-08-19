@@ -47,7 +47,7 @@ export function isFunctionDeclaration(node: AstNode): node is FunctionDeclaratio
 }
 
 export function isMethodDefinition(node: AstNode): node is MethodDefinition {
-    return global.es2panda._IsMethodDefinition(node.peer);
+    return global.generatedEs2panda._IsMethodDefinition(node.peer);
 }
 
 export function isEtsScript(node: AstNode): node is EtsScript {

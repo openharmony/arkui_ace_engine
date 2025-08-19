@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-import { Assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { Changes, Journal } from "../../src/states/Journal"
 
 function assertChange<Value>(changes: Changes | undefined, state: Object, expected: Value) {
     const change = changes?.getChange(state)
-    Assert.isDefined(change)
-    Assert.equal(change?.value, expected)
+    assert.isDefined(change)
+    assert.equal(change?.value, expected)
 }
 
 function assertNoChange(changes: Changes | undefined, state: Object) {
     const change = changes?.getChange(state)
-    Assert.isUndefined(change)
+    assert.isUndefined(change)
 }
 
 function assertNoChanges(journal: Journal) {
-    Assert.isUndefined(journal.getChanges())
+    assert.isUndefined(journal.getChanges())
 }
 
 suite("Journal tests", () => {
@@ -91,7 +91,7 @@ suite("Journal tests", () => {
         journal.addChange(state, "value3")
         journal.addChange(state, "value4")
         const changes = journal.getChanges()
-        Assert.isDefined(changes)
+        assert.isDefined(changes)
         changes?.clear()
         assertChange(journal, state, "value4")
         assertNoChanges(journal)

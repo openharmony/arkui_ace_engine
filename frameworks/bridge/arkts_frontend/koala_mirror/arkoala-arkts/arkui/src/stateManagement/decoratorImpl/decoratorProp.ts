@@ -114,7 +114,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         if (sourceValue !== newValue) {
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
-            // TODO: this order need to be checked again
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {

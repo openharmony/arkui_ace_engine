@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerModelStatic {
 public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isArc);
     static void SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue);
     static void SetSelected(FrameNode* frameNode, int32_t selected);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect);
@@ -54,7 +54,7 @@ public:
     static void SetOnPopupSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onPopupSelected);
     static void SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt);
     static void SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt);
-    static void SetAutoCollapse(FrameNode* frameNode, const std::optional<bool>& autoCollapse);
+    static void SetAutoCollapse(FrameNode* frameNode, bool autoCollapse);
     static void SetPopupItemBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void SetPopupBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void SetItemBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
@@ -64,7 +64,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
     static void SetAlignStyle(FrameNode* frameNode, const std::optional<AlignStyle>& alignStyle);
     static void SetPopupHorizontalSpace(FrameNode* frameNode, const std::optional<Dimension>& popupHorizontalSpace);
-    static void SetCreatChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
+    static void SetCreateChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_BAR_SCROLL_BAR_MODEL_STATIC_H

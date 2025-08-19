@@ -22,14 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles } from "./common"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { HyperlinkModifier } from "../HyperlinkModifier"
+import { hookHyperlinkAttributeModifier } from "../handwritten"
 
 export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
+    _attributeSet?: HyperlinkModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -111,16 +114,11 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
 }
 export type HyperlinkInterface = (address: string | Resource, content?: string | Resource) => HyperlinkAttribute;
 export interface HyperlinkAttribute extends CommonMethod {
-    setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
-        return this
-    }
-    color(value: Color | number | string | Resource | undefined): this
+    color(value: Color | number | string | Resource | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
 }
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined
-    public setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
-        return this
-    }
     public color(value: Color | number | string | Resource | undefined): this {
         return this
         }
@@ -146,16 +144,22 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookHyperlinkAttributeModifier(this, modifier);
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function HyperlinkImpl(
+export function Hyperlink(
     /** @memo */
     style: ((attributes: HyperlinkAttribute) => void) | undefined,
+    address: string | Resource, content?: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -163,7 +167,9 @@ export function HyperlinkImpl(
         return new ArkHyperlinkComponent()
     })
     NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer) => {
+        receiver.setHyperlinkOptions(address,content)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

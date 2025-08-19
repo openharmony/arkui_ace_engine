@@ -22,7 +22,7 @@ type SetType<T> = (newVal: T) => void;
 export type OnChangeType<T> = (propName: string, newValue: T) => void;
 
 export interface IStorageProperties {
-    value: NullishType;
+    value: Any;
     ttype: Type;
 }
 

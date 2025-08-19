@@ -987,6 +987,7 @@ export enum GestureRecognizerState {
 }
 export interface BaseGestureEvent {
     fingerList: Array<FingerInfo>
+    type: GestureControl.GestureType
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
     get fingerList(): Array<FingerInfo> {
@@ -994,6 +995,12 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
+    }
+    get type(): GestureControl.GestureType {
+        return this.getType();
+    }
+    set type(type: GestureControl.GestureType) {
+        return
     }
     static ctor_basegestureevent(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_ctor()
@@ -1014,6 +1021,9 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         const fingerList_casted = fingerList as (Array<FingerInfo>)
         this.setFingerList_serialize(fingerList_casted)
         return
+    }
+    private getType(): GestureControl.GestureType {
+        return this.getType_serialize()
     }
     private getFingerList_serialize(): Array<FingerInfo> {
         // @ts-ignore
@@ -1042,6 +1052,10 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         }
         ArkUIGeneratedNativeModule._BaseGestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private getType_serialize(): GestureControl.GestureType {
+        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getType(this.peer!.ptr)
+        return TypeChecker.GestureControl_GestureType_FromNumeric(retval)
     }
     public static fromPtr(ptr: KPointer): BaseGestureEventInternal {
         const obj : BaseGestureEventInternal = new BaseGestureEventInternal()

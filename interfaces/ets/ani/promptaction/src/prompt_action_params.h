@@ -164,8 +164,6 @@ bool GetShadowOptionsOffsetY(ani_env *env, ani_object object, double& result);
 bool GetShadowOptionsParam(ani_env *env, ani_object object, OHOS::Ace::Shadow& result);
 bool GetShadowParam(ani_env *env, ani_object object, OHOS::Ace::Shadow& result);
 bool GetShadowParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace::Shadow>& result);
-ani_object WrapBusinessError(ani_env* env, const std::string& msg);
-ani_ref CreateBusinessError(ani_env* env, int32_t code, const std::string& msg);
 bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& result);
 bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result);
 bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result);

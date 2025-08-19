@@ -51,6 +51,7 @@ export class ArkUIAniModule {
 //    native static _Common_GetFocused_InstanceId(): KInt
 //    native static _Common_GetSharedLocalStorage(): LocalStorage
 //    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+//    native static _CustomNode_RequestFrame(): void
 //    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
 //    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
 //    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
@@ -65,6 +66,45 @@ export class ArkUIAniModule {
 //    native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
 //    native static _LazyForEachNode_Construct(id: KInt): KPointer
 //    native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
+
+    // for web
+//    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+//    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferJsResultToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferEventResultToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+//    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: ESValue): boolean
+//    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+//    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: ESValue): boolean
+
+//    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Any
+//    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Any
+//    native static _TransferJsResultToDynamic(ptr: KPointer) : Any
+//    native static _TransferEventResultToDynamic(ptr: KPointer) : Any
+//    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Any
+//    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Any
+//    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Any
+//    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Any
+//    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Any
+//    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Any
+//    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Any
+//    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Any
+//    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Any
+//    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Any
+//    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Any
+//    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Any
+//    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Any
+//    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Any
 
     // for Drag
 //    native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -121,8 +161,12 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
-    
+
 //    native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
+    // for StyledString
+//    native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+//    native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
     // for ImageSpan
 //    native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
 //    native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -138,6 +182,9 @@ export class ArkUIAniModule {
 
     // for Shape
 //    native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
+
+    // for RichEditor
+//    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string): string
@@ -162,10 +209,25 @@ export class ArkUIAniModule {
 //    native static _IsDebugMode(id: KInt): KBoolean
 //    native static _OnMeasure_InnerMeasure(ptr: KPointer): void
 //    native static _OnLayout_InnerLayout(ptr: KPointer): void
-//    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
 //    native static _SetParallelScoped(parallel: boolean): void
 //    native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
 //        getCallback: (name: string) => string | undefined): void
 //    native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
 //    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+
+//    native static _Common_vp2px(value:number, instanceId: KInt): number
+//    native static _Common_px2vp(value:number, instanceId: KInt): number
+//    native static _Common_fp2px(value:number, instanceId: KInt): number
+//    native static _Common_px2fp(value:number, instanceId: KInt): number
+//    native static _Common_lpx2px(value:number, instanceId: KInt): number
+//    native static _Common_px2lpx(value:number, instanceId: KInt): number
+
+    // for Canvas
+//    native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+//    native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap
+//    native static _CanvasRenderer_DrawPixelMap0(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number): void
+//    native static _CanvasRenderer_DrawPixelMap1(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number, dw: number, dh: number): void
+//    native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+//    native static _ImageBitmap_Construct0(src: string, unit: KInt): KPointer
+//    native static _ImageBitmap_Construct1(src: image.PixelMap, unit: KInt): KPointer
 }

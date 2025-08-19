@@ -43,6 +43,7 @@ struct _ArkUICanvasRenderer;
 struct _ArkUIImageData;
 struct _ArkUIImageBitmap;
 struct _ArkUIDrawingRenderingContext;
+struct _ArkUICanvasRenderingContext;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
@@ -69,6 +70,7 @@ typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
 typedef _ArkUIDrawingRenderingContext* ArkUIDrawingRenderingContext;
+typedef _ArkUICanvasRenderingContext* ArkUICanvasRenderingContext;
 typedef void* ArkUIAniICurve;
 typedef int32_t ArkUIAniCurve;
 typedef const char* ArkUIAniString;
@@ -311,6 +313,27 @@ struct ArkUIAniImageModifier {
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
+
+struct ArkUIWaterFlowSectionGap {
+    int32_t unit = 1;
+    float value = 0.0f;
+};
+
+struct ArkUIWaterFlowSectionPadding {
+    ArkUIWaterFlowSectionGap top;
+    ArkUIWaterFlowSectionGap right;
+    ArkUIWaterFlowSectionGap bottom;
+    ArkUIWaterFlowSectionGap left;
+};
+
+struct ArkUIWaterFlowSection {
+    int32_t itemsCount = 0;
+    int32_t crossCount = 1;
+    ArkUIWaterFlowSectionGap columnsGap;
+    ArkUIWaterFlowSectionGap rowsGap;
+    ArkUIWaterFlowSectionPadding margin;
+    std::function<float(int32_t)> onGetItemMainSizeByIndex;
+};
 struct ArkUIAniWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
     void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
@@ -449,8 +472,13 @@ struct ArkUIAniContentSlotModifier {
 struct ArkUIAniLazyForEachNodeModifier {
     ani_long (*constructLazyForEachNode)(ani_int);
 };
+struct ArkUIAniSyntaxNodeModifier {
+    ani_long (*constructSyntaxNode)(ani_int);
+};
 struct ArkUIAniWaterFlowModifier {
-    void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
+    void (*setWaterFlowSection)(
+        ArkUINodeHandle node, double start, double deleteCount, void* section, ArkUI_Int32 size);
+    void (*setWaterFlowFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
 };
 struct ArkUIAniListModifier {
     bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
@@ -577,6 +605,7 @@ struct ArkUIAniCanvasModifier {
         ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth,
         ani_double dirtyHeight);
     void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
+    ani_int (*getCanvasId)(ArkUICanvasRenderingContext peer);
 };
 
 struct ArkUIAniTraceModifier {
@@ -594,6 +623,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
+    const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();

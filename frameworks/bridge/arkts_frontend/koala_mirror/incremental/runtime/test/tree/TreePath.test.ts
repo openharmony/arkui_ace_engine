@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Assert as assert, suite, test } from "@koalaui/harness"
+import { assert, suite, test } from "@koalaui/harness"
 import { TreePath } from "../../src/tree/TreePath"
 
 suite("TreePath", () => {

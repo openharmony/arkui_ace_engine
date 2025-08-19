@@ -308,9 +308,6 @@ export interface CheckboxGroupResult {
 export type CheckboxGroupInterface = (options?: CheckboxGroupOptions) => CheckboxGroupAttribute;
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
-    setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        return this
-    }
     selectAll(value: boolean | Bindable<boolean> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     unselectedColor(value: ResourceColor | undefined): this
@@ -326,9 +323,6 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     mark_value?: MarkStyle | undefined
     onChange_value?: OnCheckboxGroupChangeCallback | undefined
     checkboxShape_value?: CheckBoxShape | undefined
-    public setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
-        return this
-    }
     public selectAll(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -475,9 +469,10 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function CheckboxGroupImpl(
+export function CheckboxGroup(
     /** @memo */
     style: ((attributes: CheckboxGroupAttribute) => void) | undefined,
+    options?: CheckboxGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -485,7 +480,9 @@ export function CheckboxGroupImpl(
         return new ArkCheckboxGroupComponent()
     })
     NodeAttach<ArkCheckboxGroupPeer>((): ArkCheckboxGroupPeer => ArkCheckboxGroupPeer.create(receiver), (_: ArkCheckboxGroupPeer) => {
+        receiver.setCheckboxGroupOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

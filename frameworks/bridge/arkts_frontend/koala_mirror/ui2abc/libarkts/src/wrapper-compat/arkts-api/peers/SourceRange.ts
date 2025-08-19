@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
+import { SourcePosition } from '../../../generated';
 import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
@@ -24,15 +24,15 @@ export class SourceRange extends ArktsObject {
 
     static create(start: SourcePosition, end: SourcePosition): SourceRange {
         return new SourceRange(
-            global.es2panda._CreateSourceRange(global.context, start.peer, end.peer)
+            global.generatedEs2panda._CreateSourceRange(global.context, start.peer, end.peer)
         );
     }
 
     start(): SourcePosition {
-        return new SourcePosition(global.es2panda._SourceRangeStart(global.context, this.peer));
+        return new SourcePosition(global.generatedEs2panda._SourceRangeStart(global.context, this.peer));
     }
 
     end(): SourcePosition {
-        return new SourcePosition(global.es2panda._SourceRangeEnd(global.context, this.peer));
+        return new SourcePosition(global.generatedEs2panda._SourceRangeEnd(global.context, this.peer));
     }
 }

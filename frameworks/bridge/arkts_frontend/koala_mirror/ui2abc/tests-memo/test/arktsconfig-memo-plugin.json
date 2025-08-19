@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "package": "@memo-plugin-tests",
+        "outDir": "./build/memo-plugin",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": ["../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
+            "@koalaui/harness": ["../../../incremental/harness/src/arkts"],
+            "@koalaui/runtime": ["../../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"]
+        },
+        "plugins": [
+            {
+                "transform": "../../memo-plugin",
+                "state": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "../../memo-plugin",
+                "state": "checked",
+                "name": "memo"
+            }
+        ]
+    },
+    "include": [
+        "./build/ets/**/*.ts"
+    ]
+}

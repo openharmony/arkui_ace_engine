@@ -95,7 +95,7 @@ struct FrameNodePeer {
 
     RenderNodePeer* GetRenderNodePeer()
     {
-        return RenderNodePeer::Create(node);
+        return RenderNodePeer::Create(GetFrameNodeByPeer(this));
     }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_FRAME_NODE_PEER_IMPL_H

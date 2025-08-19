@@ -211,8 +211,11 @@ struct InteropTypeConverter<KStringPtr> {
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
       int length = value.length();
-      CHECK_ANI_FATAL(
-          env->String_NewUTF8(value.c_str(), length > 0 ? length - 1 /* drop zero terminator */ : 0, &result));
+      if (length > 0 && value.c_str()[length - 1] == 0) {
+          CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length - 1 /* drop zero terminator */, &result));
+      } else {
+          CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length, &result));
+      }
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}

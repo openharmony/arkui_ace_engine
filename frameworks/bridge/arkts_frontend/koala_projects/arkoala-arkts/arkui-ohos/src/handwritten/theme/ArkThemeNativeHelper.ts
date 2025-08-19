@@ -67,6 +67,7 @@ export class ArkThemeNativeHelper {
         SerializeUtils.writeColorArray(thisSerializer, colorArray);
         ArkUIAniModule._CreateAndBindTheme(themeScopeId, themeId,
             thisSerializer.asBuffer(), thisSerializer.length(), colorMode, onThemeScopeDestroy);
+        thisSerializer.release();
 
         // reset local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {

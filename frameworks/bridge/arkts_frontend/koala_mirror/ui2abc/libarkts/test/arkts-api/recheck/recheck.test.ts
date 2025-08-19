@@ -55,6 +55,7 @@ function createConfig(file: string) {
 
 function createContext(file: string) {
     const code = fs.readFileSync(`${DIR}/${file}/main.ets`, 'utf-8')
+    arkts.arktsGlobal.filePath = `${DIR}/${file}/main.ets`
     arkts.arktsGlobal.compilerContext = arkts.Context.createFromString(code)
 }
 
@@ -66,8 +67,8 @@ function proceedToChecked() {
     arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
 }
 
-function applyTransformOnStage(transform?: arkts.ProgramTransformer, onlyModifyMain?: boolean, stage: arkts.Es2pandaContextState = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
-    arkts.runTransformer(arkts.arktsGlobal.compilerContext.program, stage, false, transform, new arkts.PluginContextImpl(), {})
+function applyTransformOnState(transform?: arkts.ProgramTransformer, state: arkts.Es2pandaContextState = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+    arkts.runTransformer(arkts.arktsGlobal.compilerContext.program, state, transform, new arkts.PluginContextImpl(), {})
 }
 
 function recheck() {
@@ -109,13 +110,11 @@ function proceedToBin() {
 interface TestOptions {
     skipSrc?: boolean,
     skipJson?: boolean,
-    onlyModifyMain?: boolean,
 }
 
 const defaultTestOptions: TestOptions = {
     skipSrc: false,
     skipJson: true,
-    onlyModifyMain: false
 }
 
 function runTest(
@@ -126,12 +125,11 @@ function runTest(
     const options = {
         skipSrc: userOptions.skipSrc ?? defaultTestOptions.skipSrc,
         skipJson: userOptions.skipJson ?? defaultTestOptions.skipJson,
-        onlyModifyMain: userOptions.onlyModifyMain ?? defaultTestOptions.onlyModifyMain
     }
     createConfig(file)
     createContext(file)
     proceedToChecked()
-    applyTransformOnStage(transform, options.onlyModifyMain)
+    applyTransformOnState(transform)
     recheck()
     if (process.env.TEST_GOLDEN == "1") {
         if (!options.skipSrc) dumpSrc(file)
@@ -152,14 +150,13 @@ function runTestWithParsedTransform(
     const options = {
         skipSrc: userOptions.skipSrc ?? defaultTestOptions.skipSrc,
         skipJson: userOptions.skipJson ?? defaultTestOptions.skipJson,
-        onlyModifyMain: userOptions.onlyModifyMain ?? defaultTestOptions.onlyModifyMain
     }
     createConfig(file)
     createContext(file)
     proceedToParsed()
-    applyTransformOnStage(parsedTransform, options.onlyModifyMain, arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
+    applyTransformOnState(parsedTransform, arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
     proceedToChecked()
-    applyTransformOnStage(transform, options.onlyModifyMain)
+    applyTransformOnState(transform)
     recheck()
     if (process.env.TEST_GOLDEN == "1") {
         if (!options.skipSrc) dumpSrc(file)
@@ -256,11 +253,11 @@ suite(util.basename(__filename), () => {
         })
 
         test('add another import from the same file with dedicated API and use it', () => {
-            runTest('imports/add-use-same-file', addUseImportSameFile, {onlyModifyMain: true})
+            runTest('imports/add-use-same-file', addUseImportSameFile)
         })
 
         test.skip('add import from the new file with dedicated API', () => {
-            runTest('imports/add-new-file', addImportNewFile, {onlyModifyMain: true})
+            runTest('imports/add-new-file', addImportNewFile)
         })
 
         test('recursive', () => {

@@ -288,9 +288,6 @@ export interface ToggleOptions {
 }
 export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
-    setToggleOptions(options: ToggleOptions): this {
-        return this
-    }
     onChange(value: ((isVisible: boolean) => void) | undefined): this
     contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
@@ -304,9 +301,6 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
     selectedColor_value?: ResourceColor | undefined
     switchPointColor_value?: ResourceColor | undefined
     switchStyle_value?: SwitchStyle | undefined
-    public setToggleOptions(options: ToggleOptions): this {
-        return this
-    }
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         return this
     }
@@ -534,18 +528,45 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     }
 }
 /** @memo */
-export function ToggleImpl(
+export function Toggle(
     /** @memo */
     style: ((attributes: ToggleAttribute) => void) | undefined,
+    options: ToggleOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
-    const receiver = remember(() => {
-        return new ArkToggleComponent()
-    })
-    
-    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (_: ArkTogglePeer) => {
-        style?.(receiver)
-        content_?.()
-    })
+    if (options.type == ToggleType.SWITCH) {
+        const receiver = remember(() => {
+            return new ArkToggleComponent()
+        })
+        
+        NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (_: ArkTogglePeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } else if (options.type === ToggleType.BUTTON) {
+        const receiver = remember(() => {
+            return new ArkToggleButtonComponent()
+        })
+        
+        NodeAttach<ArkToggleButtonPeer>((): ArkToggleButtonPeer => ArkToggleButtonPeer.create(receiver), (_: ArkToggleButtonPeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } else if (options.type == ToggleType.CHECKBOX) {
+        const receiver = remember(() => {
+            return new ArkToggleCheckboxComponent()
+        })
+        
+        NodeAttach<ArkToggleCheckboxPeer>((): ArkToggleCheckboxPeer => ArkToggleCheckboxPeer.create(receiver), (_: ArkToggleCheckboxPeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } 
 }

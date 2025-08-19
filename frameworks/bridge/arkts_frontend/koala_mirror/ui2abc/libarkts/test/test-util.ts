@@ -17,11 +17,11 @@ import { global } from "../src/arkts-api/static/global"
 import * as arkts from "../src/arkts-api"
 
 import * as pth from "path"
-import { assert } from "chai"
+import { assert } from "@koalaui/harness"
 import { exec, execSync } from "child_process"
 
 export { Es2pandaNativeModule } from "../src/Es2pandaNativeModule"
-export { assert } from "chai"
+export { assert } from "@koalaui/harness"
 
 export function alignText(text: string): string {
     const lines = text.replace(/\t/gy, '    ').split('\n')

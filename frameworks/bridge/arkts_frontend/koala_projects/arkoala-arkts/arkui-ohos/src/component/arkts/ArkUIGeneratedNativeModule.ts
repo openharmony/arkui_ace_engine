@@ -128,6 +128,38 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AnimatorAttribute_onFrame(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupBackground(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetUsePopup(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetItemSize(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelected(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetAutoCollapse(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetOnSelect(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupBackgroundBlurStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_ArcAlphabetIndexerConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetConstructInfo(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32, selected: number): void
+    @ani.unsafe.Direct
     native static _Badge_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _BadgeInterface_setBadgeOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -5794,6 +5826,8 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BaseGestureEvent_getType(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _TapGestureEvent_ctor(): KPointer
     @ani.unsafe.Direct

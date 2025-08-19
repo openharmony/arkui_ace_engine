@@ -53,17 +53,23 @@
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
@@ -148,6 +154,56 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
         return peer;
     }
     peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+    return peer;
+}
+
+Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName)
+{
+    Ark_BaseGestureEvent peer = nullptr;
+    switch (typeName) {
+        case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
+            auto tapGestureEvent = TypeInfoHelper::DynamicCast<TapGestureEvent>(info.get());
+            CHECK_NULL_RETURN(tapGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_TapGestureEvent>(info);
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
+            auto longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
+            CHECK_NULL_RETURN(longPressGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_LongPressGestureEvent>(info);
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
+            auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
+            CHECK_NULL_RETURN(panGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_PanGestureEvent>(info);
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {
+            auto pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(info.get());
+            CHECK_NULL_RETURN(pinchGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_PinchGestureEvent>(info);
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::ROTATION_GESTURE: {
+            auto rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(info.get());
+            CHECK_NULL_RETURN(rotationGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_RotationGestureEvent>(info);
+            break;
+        }
+        case OHOS::Ace::GestureTypeName::SWIPE_GESTURE: {
+            auto swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(info.get());
+            CHECK_NULL_RETURN(swipeGestureEvent, peer);
+            peer = Converter::ArkValue<Ark_SwipeGestureEvent>(info);
+            break;
+        }
+        default:
+            peer = Converter::ArkValue<Ark_BaseGestureEvent>(info);
+            break;
+    }
+    if (peer) {
+        peer->SetRecognizerType(typeName);
+    }
     return peer;
 }
 }
@@ -4408,10 +4464,16 @@ void GeometryTransition0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto id = Converter::OptConvertPtr<std::string>(value).value_or("");
-    bool followWithoutTransition {false};
-    bool doRegisterSharedTransition {false};
-    ViewAbstractModelStatic::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    auto idOpt = Converter::OptConvertPtr<std::string>(value);
+    if (!idOpt) {
+        return; // undefined return, same with ArkTS1.1
+    }
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -4419,18 +4481,24 @@ void GeometryTransition1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_EQUAL_VOID(id && options, false);
-    auto idValue = Converter::OptConvertPtr<std::string>(id).value_or("");
-    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
-    auto followWithoutTransition {false};
-    auto hierarchyStrategy = TransitionHierarchyStrategy::NONE;
-    auto doRegisterSharedTransition {false};
-    if (optOptions.has_value()) {
-        followWithoutTransition = optOptions.value().follow.value_or(false);
-        hierarchyStrategy = optOptions.value().hierarchyStrategy.value_or(TransitionHierarchyStrategy::NONE);
-        doRegisterSharedTransition = hierarchyStrategy == TransitionHierarchyStrategy::ADAPTIVE;
+    auto idOpt = Converter::OptConvertPtr<std::string>(id);
+    if (!idOpt) {
+        return; // undefined return, same with ArkTS1.1
     }
-    // ViewAbstract::SetGeometryTransition(frameNode, idValue, followWithoutTransition, doRegisterSharedTransition);
+    auto optOptions = Converter::OptConvertPtr<GeometryTransitionOptions>(options);
+    // follow flag
+    bool followWithoutTransition { false };
+    // hierarchy flag
+    bool doRegisterSharedTransition { true };
+    if (optOptions.has_value()) {
+        followWithoutTransition = optOptions->follow.value_or(false);
+        if (optOptions->hierarchyStrategy &&
+            optOptions->hierarchyStrategy.value() == TransitionHierarchyStrategy::NONE) {
+            doRegisterSharedTransition = false;
+        }
+    }
+    ViewAbstractModelStatic::SetGeometryTransition(
+        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
 }
 void StateStylesImpl(Ark_NativePointer node,
                      const Opt_StateStyles* value)
@@ -4835,7 +4903,8 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
         CHECK_NULL_RETURN(gestureInfo && baseGestureInfo, defVal);
         PipelineContext::SetCallBackNode(node);
         auto arkGestInfo = Converter::ArkValue<Ark_GestureInfo>(*gestureInfo);
-        auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(baseGestureInfo);
+        auto arkGestEvent = CreateArkBaseGestureEvent(baseGestureInfo, gestureInfo->GetRecognizerType());
+        CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto resultOpt = callback.InvokeWithOptConvertResult
             <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(arkGestInfo, arkGestEvent);
         return resultOpt.value_or(defVal);
@@ -4871,8 +4940,10 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
         CHECK_NULL_RETURN(info && current, defVal);
         PipelineContext::SetCallBackNode(node);
-
-        auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(info);
+        auto gestureInfo = current->GetGestureInfo();
+        CHECK_NULL_RETURN(gestureInfo, defVal);
+        auto arkGestEvent = CreateArkBaseGestureEvent(info, gestureInfo->GetRecognizerType());
+        CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
         auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(others, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
@@ -5584,14 +5655,15 @@ void BindContextMenuBase(Ark_NativePointer node,
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
                               MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
-        auto builder = [node, frameNode, callback]() {
-            auto uiNode = callback.BuildSync(node);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        ViewAbstractModelStatic::BindContextMenuStatic(
-            AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-        ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+        callback.BuildAsync([frameNode, type, menuParam, previewBuildFunc](const RefPtr<UINode>& uiNode) mutable {
+            auto builder = [frameNode, uiNode]() {
+                PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstractModelStatic::BindContextMenuStatic(
+                AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+            ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+            }, node);
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);

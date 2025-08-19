@@ -33,8 +33,6 @@ export const options = program
     .option('--link-name <path>', 'Path to final linked file', "all")
 
     .option('--group-by <size>', 'Group files by groups before passing them to compiler')
-    .option('--restart-stages', 'Compilation with plugins and compiler restarting')
-    .option('--cache', 'Enable AST cache in the compiler')
     .option('--simultaneous', 'Use simultaneous compilation')
 
     .option('--output-dir <path>', 'Path to output dir (only used by AOT compilation)')
@@ -84,99 +82,61 @@ function produceNinjafile(
     files: string[],
     config: string,
     linkPath: string,
-    baseUrl: string,
-    intermediateOutDirs: string[],
-    groupBy: number,
 ): string {
     // We have no Panda SDK for macOS.
     const tools_prefix =  process.platform == "darwin" ? "echo " : ""
     let result: string[] = []
     let basename = path.basename(compiler)
     let linker = compiler.replace(basename, 'arklink')
-    const stages = intermediateOutDirs.length
 
     const passFlags = [
-        options.restartStages ? `--restart-stages` : ``,
-        options.cache ? `--cache` : ``,
-        options.simultaneous ? `--simultaneous` : ``,
-    ].join(` `)
-    let flags = options.compilerFlags ?? ''
-    const buildCommand = (stage: number, _in: string, _out: string) => {
-        return `${tools_prefix}${compiler} ${options.compilerFlags ?? ''} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${stages > 1 ? `--stage ${stage}` : ``} ${passFlags} ${_in}`
-    }
-
-    if (options.simultaneous) {
-        if (options.restartStages) {
-            throw new Error(`Do not mix "--simultaneous" and "--restart-stages" flags together`)
-        }
-        if (options.cache) {
-            throw new Error(`Do not mix "--simultaneous" and "--cache" flags together`)
-        }
-        const synthetic_rule = "synthetic_rule"
-        const outputs = Array(files.length).fill(linkPath)
-        result.push(
-`
-rule ${synthetic_rule}
-    command = ${buildCommand(0, files.join(':'), outputs.join(':'))}
-
-build ${linkPath}: ${synthetic_rule} | ${files.join(' ')}
-`)
-        result.push(`build link: phony ${linkPath}\n`)
-        result.push(`build all: phony link\n`)
-        result.push("default all\n")
-        return result.join('\n')
-    }
-
-    let compilerPrefix = [...Array(stages).keys()].map((i) => `
-rule arkts_compiler_stage${i}
-    command = ${buildCommand(i, '$in', '$out')}
-    description = "Compiling ARKTS ${stages > 1 ? `(stage ${i})` : ``} $in"
-`).join('')
+        options.simultaneous ? '--simultaneous' : '',
+    ].filter(it => it != '').join(' ')
 
     let linker_prefix = `
 rule arkts_linker
-    command = ${tools_prefix}${linker} --output $out -- $in
+    command = ${tools_prefix}${linker} --output $out -- @$out.rsp
+    rspfile = $out.rsp
+    rspfile_content = $in_newline
     description = "Linking ARKTS $out"
 `
 
-    const getTargets = (stage: number) => {
-        return files.map((it) => {
-            let output = path.resolve(intermediateOutDirs[stage], relativeOrDot(baseUrl, it))
-            if (stage + 1 == stages) {
-                output = `${path.dirname(output)}/${path.basename(output, path.extname(output))}.abc`
-            }
-            return output
-        })
-    }
-
-    const targets: string[][] = []
-    for (var i = 0; i < stages; i++) {
-        targets.push(getTargets(i))
-    }
-
-    for (var i = 0; i < stages; i++) {
-        for (var j = 0; j < targets[i].length; j += groupBy) {
-            const synthetic_rule = getFileGroupAsString(targets[i], groupBy, j, ':', 'synthetic_rule_').replaceAll('/', '_').replaceAll(':', '_')
-            result.push(
+    let compiler_prefix = `
+rule arkts_compiler
+    command = ${tools_prefix}${compiler} ${options.compilerFlags ?? ''} --ets-module --arktsconfig ${path.resolve(config)} --output $out ${passFlags} @$out.rsp
+    rspfile = $out.rsp
+    rspfile_content = $in
+    description = "Compiling ARKTS $out"
 `
-rule ${synthetic_rule}
-    command = ${buildCommand(i, getFileGroupAsString(files, groupBy, j, ':', ''), getFileGroupAsString(targets[i], groupBy, j, ':', ''))}
 
-build ${getFileGroupAsString(targets[i], groupBy, j, ' ', '')}: ${synthetic_rule} | ${getFileGroupAsString(files, groupBy, j, ' ', '')}${i > 0 ? ` || stage${i - 1}` : ``}
+    const groupBy = Number(options.groupBy ?? (options.simultaneous ? files.length : 1))
+    const groupOutputs: string[] = []
+    const oneGroup = groupBy >= files.length
+
+    let index = 0
+    for (var i = 0; i < files.length; i += groupBy) {
+        const output = oneGroup ? linkPath : `${linkPath}_${index}.abc`
+        groupOutputs.push(output)
+
+        result.push(
 `
-            )
-        }
+build ${output}: arkts_compiler ${getFileGroupAsString(files, groupBy, i, ' ', '')}
+`
+
+        )
+        ++index
     }
 
-    for (var i = 0; i < stages; i++) {
-        result.push(`build stage${i}: phony ${i > 0 ? `stage${i - 1} ` : ``}${targets[i].join(' ')}\n`)
+    if (!oneGroup) {
+        result.push(`build ${linkPath}: arkts_linker ${groupOutputs.join(' ')}\n`)
+        result.push(`build link: phony ${linkPath}\n`)
+        result.push(`build all: phony link\n`)
+    } else {
+        result.push(`build all: phony ${linkPath}\n`)
     }
-
-    result.push(`build ${linkPath}: arkts_linker ${targets[stages - 1].join(' ')}\n`)
-    result.push(`build link: phony ${linkPath}\n`)
-    result.push(`build all: phony link\n`)
     result.push("default all\n")
-    return compilerPrefix + linker_prefix + '\n' + result.join('')
+
+    return compiler_prefix + '\n' + linker_prefix + '\n' + result.join('')
 }
 
 function main(configPath: string, linkName: string) {
@@ -189,7 +149,6 @@ function main(configPath: string, linkName: string) {
 
     fs.mkdirSync(outDir, { recursive: true })
     const [firstConfigPath, intermediateOutDirs] = resolveConfig(configPath, options.restartStages)
-    section()
     const linkPath = path.resolve(process.cwd(), linkName)
     log(`computed location of linked .abc: ${linkPath}`)
 
@@ -198,7 +157,7 @@ function main(configPath: string, linkName: string) {
         throw new Error(`No files matching include "${include.join(",")}" exclude "${exclude.join(",")}"`)
     }
 
-    let ninja = produceNinjafile(path.resolve(options.compiler), files, firstConfigPath, linkPath, baseUrl, intermediateOutDirs, Number(options.groupBy ?? 1))
+    let ninja = produceNinjafile(path.resolve(options.compiler), files, firstConfigPath, linkPath)
     fs.writeFileSync(`${outDir}/build.ninja`, ninja)
 }
 

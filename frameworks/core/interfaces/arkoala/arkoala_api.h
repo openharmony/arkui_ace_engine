@@ -269,6 +269,17 @@ typedef enum {
     ARKUI_GESTURE_EVENT_ACTION_CANCEL = 0x08,
 } ArkUIGestureEventActionType;
 
+typedef enum {
+    /** pixel map drawable descrtiptor */
+    ARKUI_PIXELMAP_DRAWABLE = 0,
+
+    /** animated drawable descrtiptor */
+    ARKUI_ANIMATED_DRAWABLE = 1,
+
+    /** layered drawable descrtiptor */
+    ARKUI_LAYERED_DRAWABLE = 2,
+} ArkUIDrawableDescriptorType;
+
 struct ArkUIHistoryTouchEvent {
     ArkUI_Int32 action;
     ArkUI_Int32 sourceType;

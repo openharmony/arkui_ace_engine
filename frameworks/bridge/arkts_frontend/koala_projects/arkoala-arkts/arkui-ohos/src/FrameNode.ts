@@ -224,6 +224,9 @@ export class FrameNode implements MaterializedBase {
                 this.nodePtr_ = this.peer?.ptr
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            if (this.renderNode_ && this.getType() === "CustomFrameNode") {
+                this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+            }
             this._nodeId = this.getIdByFrameNode_serialize(this);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
@@ -409,9 +412,16 @@ export class FrameNode implements MaterializedBase {
         return this.getChildrenCount_serialize();
     }
     public dispose(): void {
-        this.dispose_serialize();
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
         this.nodePtr_ = undefined;
-        return
+        this.renderNode_?.resetNodePtr();
+    }
+    public resetNodePtr(): void {
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
     }
     public getOpacity(): number {
         return this.getOpacity_serialize();
@@ -846,8 +856,7 @@ export class FrameNode implements MaterializedBase {
         ArkUIGeneratedNativeModule._FrameNode_recycle(this.peer!.ptr);
     }
     public getRenderNode(): RenderNode | null {
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
-        return RenderNodeInternal.fromPtr(retval)
+        return this.renderNode_ ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)
@@ -934,17 +943,34 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
+    public getRenderNode(): RenderNode | null {
+        return null;
+    }
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, type, ptr);
+        if (!ptr) {
+            return;
+        }
+        this.peer = new Finalizable(ptr!, FrameNode.getFinalizer());
+        this.nodePtr_ = this.peer?.ptr;
+        if (this.renderNode_) {
+            this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(ptr), RenderNode.getFinalizer());
+        }
     }
     getType(): string {
         return 'BuilderRootFrameNode';
     }
     setJsBuilderNode(weak?: JSBuilderNode<T>) {
         this.__BuilderNodeOpt = weak;
+    }
+    public resetNodePtr(): void {
+        super.resetNodePtr();
+        this.__BuilderNodeOpt?.disposeNode();
+        this.__BuilderNodeOpt = undefined;
+        this._nodeId = -1;
     }
     public disposeNode(): void {
         super.dispose();
@@ -990,8 +1016,6 @@ export class FrameNodeUtils {
         if (nodeId !== -1 && !ArkUIGeneratedNativeModule._FrameNode_isModifiable(ptr)) {
             let frameNode = new BuilderRootFrameNode<T>(uiContext, "BuilderRootFrameNode", ptr);
             frameNode._nodeId = nodeId;
-            frameNode.peer = new Finalizable(ptr, FrameNode.getFinalizer());
-            frameNode.nodePtr_ = frameNode.peer?.ptr;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
             return frameNode;
         }
@@ -1313,9 +1337,17 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkImageNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent, options?: ImageAIOptions): ImageAttribute {
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor): ImageAttribute {
             let arkImageNode = this.attribute as ArkImageNode;
             return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor, options: ImageAIOptions): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src, options);
         }
     }
 
@@ -1333,7 +1365,11 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBadgeNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(value: BadgeParamWithNumber | BadgeParamWithString): BadgeAttribute {
+        initialize(value: BadgeParamWithNumber): BadgeAttribute {
+            let arkBadgeNode = this.attribute as ArkBadgeNode;
+            return arkBadgeNode!.initialize(value);
+        }
+        initialize(value: BadgeParamWithString): BadgeAttribute {
             let arkBadgeNode = this.attribute as ArkBadgeNode;
             return arkBadgeNode!.initialize(value);
         }
@@ -1382,8 +1418,8 @@ export namespace typeNode {
     overload createNode {
         createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
         createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
-        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode,
-        createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode, createBadgeNode,
+        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
+        createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
         createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,createImageNode
     }
 
@@ -1662,7 +1698,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNode(context: UIContext, type: string): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext, type: string): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1688,7 +1724,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));

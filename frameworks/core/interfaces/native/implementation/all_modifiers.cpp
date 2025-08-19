@@ -378,6 +378,7 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
+const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* GetArcAlphabetIndexerExtenderAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
 const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
@@ -749,6 +750,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetHierarchicalSymbolEffectAccessor,
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,
+        GetArcAlphabetIndexerExtenderAccessor,
         GetBounceSymbolEffectAccessor,
         GetBuilderNodeOpsAccessor,
         GetPulseSymbolEffectAccessor,

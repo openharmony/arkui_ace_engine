@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { TypeChecker, ArkUIGeneratedNativeModule, ArkUINativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
@@ -69,7 +69,7 @@ import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookC
     hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl,
     hookCustomPropertyImpl
 } from "../handwritten/CommonHandWritten"
-import { CommonMethodModifier } from "../CommonMethodModifier"
+import { CommonMethodModifier, AttributeUpdaterFlag } from "../CommonMethodModifier"
 import { ScrollableCommonMethodModifier } from '../ScrollableCommonMethodModifier'
 import { ICurve as ICurve_} from "#external"
 export type ICurve = ICurve_
@@ -5592,7 +5592,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundImage1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void {
+    backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5611,7 +5611,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+    backgroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
@@ -5637,7 +5637,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: ForegroundBlurStyleOptions): void {
+    foregroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5656,7 +5656,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    foregroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): void {
+    foregroundBlurStyle1Attribute(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
@@ -5746,7 +5746,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    blur0Attribute(value: number | undefined, options?: BlurOptions): void {
+    blur0Attribute(value: number | undefined, options?: BlurOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5765,7 +5765,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_blur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    blur1Attribute(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    blur1Attribute(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let blurRadius_type : int32 = RuntimeType.UNDEFINED
         blurRadius_type = runtimeType(blurRadius)
@@ -5832,7 +5832,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     systemBarEffectAttribute(): void {
         ArkUIGeneratedNativeModule._CommonMethod_systemBarEffect(this.peer.ptr)
     }
-    backdropBlur0Attribute(value: number | undefined, options?: BlurOptions): void {
+    backdropBlur0Attribute(value: number | undefined, options?: BlurOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -5851,7 +5851,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_backdropBlur0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backdropBlur1Attribute(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): void {
+    backdropBlur1Attribute(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let radius_type : int32 = RuntimeType.UNDEFINED
         radius_type = runtimeType(radius)
@@ -8215,13 +8215,14 @@ export interface CommonMethod {
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {return this;}
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {return this;}
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
+    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {return this;}
+    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {return this;}
     bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {return this;}
     bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {return this;}
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
     onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
     keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {return this;}
-    applyAttributesFinish(): void {}
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | undefined
@@ -8880,10 +8881,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         return this
     }
-    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
-    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
@@ -8901,7 +8902,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
@@ -8910,7 +8911,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public systemBarEffect(): this {
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         return this
     }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
@@ -8940,7 +8941,13 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         return this
     }
+    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+        return this
+    }
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
+        return this
+    }
+    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
     public bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
@@ -9283,16 +9290,13 @@ export interface DateRange {
 }
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
 
-    protected _modifierHost: ArkBaseNode | undefined
-    setModifierHost(value: ArkBaseNode): void {
-        this._modifierHost = value
+    _attributeOptimizer: CommonAttributeOptimizer;
+
+    constructor(optimizer: CommonAttributeOptimizer) {
+        this._attributeOptimizer = optimizer;
     }
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkBaseNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
+    constructor() {
+        this._attributeOptimizer = new CommonAttributeOptimizer(new CommonMethodModifier());
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -10696,14 +10700,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("geometryTransition")) {
             const id_type = runtimeType(id)
             const options_type = runtimeType(options)
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && (RuntimeType.UNDEFINED == options_type)) {
                 const value_casted = id as (string | undefined)
                 this.getPeer()?.geometryTransition0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) {
+            if (((RuntimeType.STRING == id_type) || (RuntimeType.UNDEFINED == id_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const id_casted = id as (string | undefined)
-                const options_casted = options as (GeometryTransitionOptions)
+                const options_casted = options as (GeometryTransitionOptions | undefined)
                 this.getPeer()?.geometryTransition1Attribute(id_casted, options_casted)
                 return this
             }
@@ -11078,7 +11082,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("backgroundBlurStyle")) {
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
@@ -11100,7 +11104,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("foregroundBlurStyle")) {
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
@@ -11165,7 +11169,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public blur(blurRadius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("blur")) {
             const blurRadius_type = runtimeType(blurRadius)
             const options_type = runtimeType(options)
@@ -11214,7 +11218,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+    public backdropBlur(radius: number | undefined, options?: BlurOptions | undefined, sysOptions?: SystemAdaptiveOptions | undefined): this {
         if (this.checkPriority("backdropBlur")) {
             const radius_type = runtimeType(radius)
             const options_type = runtimeType(options)
@@ -11316,6 +11320,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+        if (this.checkPriority("bindMenu")) {
+            const isShow_type = runtimeType(isShow)
+            const content_type = runtimeType(content)
+            const options_type = runtimeType(options)
+            if ((RuntimeType.BOOLEAN == isShow_type) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
+                const isShow_casted = isShow as (boolean | undefined)
+                const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
+                const options_casted = options as (MenuOptions | undefined)
+                this.getPeer()?.bindMenu1Attribute(isShow_casted, content_casted, options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
     public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
@@ -11326,6 +11346,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 const responseType_casted = responseType as (ResponseType | undefined)
                 const options_casted = options as (ContextMenuOptions | undefined)
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions | undefined): this {
+        if (this.checkPriority("bindContextMenu")) {
+            const isShown_type = runtimeType(isShown)
+            const content_type = runtimeType(content)
+            const options_type = runtimeType(options)
+            if ((RuntimeType.BOOLEAN == isShown_type) && (RuntimeType.FUNCTION == content_type) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
+                const isShown_casted = isShown as (boolean);
+                const content_casted = content as (CustomBuilder)
+                const options_casted = options as (ContextMenuOptions | undefined)
+                this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -11395,6 +11431,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        this._attributeOptimizer.applyModifierPatch(this.getPeer()); 
         super.applyAttributesFinish()
     }
 }
@@ -13415,3 +13452,67 @@ export interface Bindable<T> {
 }
 export type BindableResourceStr = string | Resource | ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>
 export type BindableResourceStrArray = string[] | Resource[] | ResourceStr[] | Bindable<ResourceStr[]> | Bindable<Resource[]> | Bindable<string[]>
+
+export class CommonAttributeOptimizer {
+    _attribute: CommonMethodModifier;
+    _disable: boolean = false;
+    _updater: boolean = false;
+    _peer?: PeerNode // frameNode 和 attributeUpdater 需要设置
+    constructor(attributeSet: CommonMethodModifier) {
+        this._attribute = attributeSet;
+    }
+    requestMarkDirty(): boolean {
+        markDirty(this._peer!, NodeDirtyFlag.NODE_NEED_ALL);
+        return true;
+    }
+    nextFrame(): void {
+        setFrameCallback();
+    }
+    applyModifierPatch(node: ArkCommonMethodPeer): void {
+        if (this._disable) {
+            return;
+        }
+        this._attribute.applyModifierPatch(node);
+    }
+    checkWidthPriority(value: Length | LayoutPolicy | undefined): boolean {
+        if (!this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.width(value);
+        if (this._attribute._width_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._width_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+    checkBackgroundColorPriority(value: ResourceColor | undefined): boolean {
+        if (this._disable && this._updater) {
+            this.requestMarkDirty();
+            return true;
+        }
+        this._attribute.backgroundColor(value);
+        if (this._attribute._backgroundColor_flag === AttributeUpdaterFlag.UPDATE) {
+            this._attribute._backgroundColor_flag = AttributeUpdaterFlag.SKIP;
+            return true;
+        }
+        return false;
+    }
+}
+export enum NodeDirtyFlag {
+    NODE_NEED_MEASURE = 1,
+    NODE_NEED_LAYOUT = 2,
+    NODE_NEED_RENDER = 3,
+    NODE_NEED_ALL = 4,
+}
+export function markDirty(node: PeerNode, flag: NodeDirtyFlag) {
+    ArkUIAniModule._FrameNode_MarkDirtyNode(node.getPeerPtr());
+}
+export function setFrameCallback(): void {
+    const thisSerializer: Serializer = Serializer.hold()
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    thisSerializer.holdAndWriteCallback((index: number) => { })
+    ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
+        thisSerializer.length(), 0);
+    thisSerializer.release()
+}

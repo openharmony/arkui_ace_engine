@@ -322,9 +322,6 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
 }
 export type AnimatorInterface = (value: string) => AnimatorAttribute;
 export interface AnimatorAttribute extends CommonMethod {
-    setAnimatorOptions(value: string): this {
-        return this
-    }
     state(value: AnimationStatus | undefined): this
     duration(value: number | undefined): this
     curve(value: Curve | undefined): this
@@ -355,9 +352,6 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
     onCancel_value?: (() => void) | undefined
     onFinish_value?: (() => void) | undefined
     onFrame_value?: ((index: number) => void) | undefined
-    public setAnimatorOptions(value: string): this {
-        return this
-    }
     public state(value: AnimationStatus | undefined): this {
         return this
     }
@@ -531,9 +525,10 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
     }
 }
 /** @memo */
-export function AnimatorImpl(
+export function Animator(
     /** @memo */
     style: ((attributes: AnimatorAttribute) => void) | undefined,
+    value: string,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -541,7 +536,9 @@ export function AnimatorImpl(
         return new ArkAnimatorComponent()
     })
     NodeAttach<ArkAnimatorPeer>((): ArkAnimatorPeer => ArkAnimatorPeer.create(receiver), (_: ArkAnimatorPeer) => {
+        receiver.setAnimatorOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

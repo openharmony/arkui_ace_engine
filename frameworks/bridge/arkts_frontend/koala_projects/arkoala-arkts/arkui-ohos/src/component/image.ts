@@ -37,7 +37,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
-import { ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
+import { ImageModifier } from "../ImageModifier"
 import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 import { AttributeUpdater } from "../AttributeUpdater"
 import { drawing } from "@ohos/graphics/drawing"
@@ -603,9 +603,6 @@ export interface ImageCompleteEvent {
 }
 export type ImageOnCompleteCallback = (event?: ImageCompleteEvent) => void;
 export interface ImageAttribute extends CommonMethod {
-    setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
-        return this
-    }
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
     fitOriginalSize(value: boolean | undefined): this
@@ -662,9 +659,6 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     privacySensitive_value?: boolean | undefined
     enhancedImageQuality_value?: ResolutionQuality | undefined
     orientation_value?: ImageRotateOrientation | undefined
-    public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
-        return this
-    }
     public alt(value: string | Resource | PixelMap | undefined): this {
         return this
     }
@@ -762,14 +756,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         return (this.peer as ArkImagePeer)
     }
 
-    getModifierHost(): ArkBaseNode {
-        if (this._modifierHost == undefined || this._modifierHost == null) {
-            this._modifierHost = new ArkImageNode()
-            this._modifierHost!.setPeer(this.getPeer())
-        }
-        return this._modifierHost!
-    }
-
+  
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
             hookSetImageOptions(this, src, imageAIOptions)
@@ -996,9 +983,10 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
 export type ImageInterface = (...param: Object[]) => ArkImageNode
 
 /** @memo */
-export function ImageImpl(
+export function Image(
     /** @memo */
     style: ((attributes: ImageAttribute) => void) | undefined,
+    src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1006,7 +994,9 @@ export function ImageImpl(
         return new ArkImageComponent()
     })
     NodeAttach<ArkImagePeer>((): ArkImagePeer => ArkImagePeer.create(receiver), (_: ArkImagePeer) => {
+        receiver.setImageOptions(src,imageAIOptions)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

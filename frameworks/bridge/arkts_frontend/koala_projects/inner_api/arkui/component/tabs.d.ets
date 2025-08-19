@@ -22,6 +22,7 @@ import {
     BlurStyle,
     BackgroundEffectOptions,
     BackgroundBlurStyleOptions,
+    DividerStyle,
 } from 'arkui.component.common';
 import { int32 } from '@koalaui.compat';
 import { KPointer } from '@koalaui.interop';
@@ -38,7 +39,6 @@ import {
     BarMode,
     BarPosition,
     TabsAttribute,
-    DividerStyle,
     BarGridColumnOptions,
     ScrollableBarModeOptions,
     TabsOptions,

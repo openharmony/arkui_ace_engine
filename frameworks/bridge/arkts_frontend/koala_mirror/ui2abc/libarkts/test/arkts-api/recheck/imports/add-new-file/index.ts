@@ -16,7 +16,7 @@
 import * as arkts from "../../../../../src/arkts-api"
 
 export function addImportNewFile(program: arkts.Program, options: arkts.CompilationOptions) {
-    if (options.isMainProgram) {
+    if (options.isProgramForCodegeneration) {
         const module = program.ast as arkts.ETSModule
         program.setAst(
             arkts.factory.updateETSModule(

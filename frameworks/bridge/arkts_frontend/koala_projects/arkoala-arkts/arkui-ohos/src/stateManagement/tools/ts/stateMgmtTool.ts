@@ -71,6 +71,9 @@ export class StateMgmtTool {
     static tryGetHandler(value: NullableObject): NullableObject {
         return value;
     }
+    static tryGetTarget(value: Object): NullableObject {
+        return value as NullableObject;
+    }
     static createProxy<T extends Object>(value: T): T {
         return value;
     }

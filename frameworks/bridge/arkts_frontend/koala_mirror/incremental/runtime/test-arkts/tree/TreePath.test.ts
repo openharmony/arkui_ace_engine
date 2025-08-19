@@ -13,30 +13,29 @@
  * limitations under the License.
  */
 
-// TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
-import { Assert, suite, test } from "@koalaui/harness"
-import { TreePath } from "../../src/tree/TreePath"
+import { assert, suite, test } from "@koalaui/harness"
+import { TreePath } from "../../ets/tree/TreePath"
 
 suite("TreePath", () => {
 
     let root = new TreePath<string>("root")
 
-    test("root path is root", () => Assert.strictEqual(root.root, root))
-    test("root path depth", () => Assert.equal(root.depth, 0))
-    test("root path has undefined parent", () => Assert.strictEqual(root.parent, undefined))
-    test("root path to string", () => Assert.equal(root.toString(), "/root"))
+    test("root path is root", () => assert.strictEqual(root.root, root))
+    test("root path depth", () => assert.equal(root.depth, 0))
+    test("root path has undefined parent", () => assert.strictEqual(root.parent, undefined))
+    test("root path to string", () => assert.equal(root.toString(), "/root"))
 
     let parent = root.child("parent")
     let current = parent.child("node")
 
-    test("tree path has root", () => Assert.strictEqual(current.root, root))
-    test("tree path has parent", () => Assert.strictEqual(current.parent, parent))
-    test("tree path depth", () => Assert.equal(current.depth, 2))
-    test("tree path parent depth", () => Assert.equal(current.parent?.depth, 1))
-    test("tree path to string", () => Assert.equal(current.toString(), "/root/parent/node"))
+    test("tree path has root", () => assert.strictEqual(current.root, root))
+    test("tree path has parent", () => assert.strictEqual(current.parent, parent))
+    test("tree path depth", () => assert.equal(current.depth, 2))
+    test("tree path parent depth", () => assert.equal(current.parent?.depth, 1))
+    test("tree path to string", () => assert.equal(current.toString(), "/root/parent/node"))
 
     let sibling = parent.child("sibling")
 
-    test("siblings has the same parents", () => Assert.strictEqual(current.parent, sibling.parent))
+    test("siblings has the same parents", () => assert.strictEqual(current.parent, sibling.parent))
 })
 export const __ARKTEST__ = "tree/TreePath.test"

@@ -191,10 +191,10 @@ declare namespace promptAction {
         maskTransition?: TransitionEffect;
         maskColor?: ResourceColor;
         onWillDismiss?: Callback<DismissDialogAction>;
-        onDidAppear?: (() => void);
-        onDidDisappear?: (() => void);
-        onWillAppear?: (() => void);
-        onWillDisappear?: (() => void);
+        onDidAppear?: ((data: undefined) => void);
+        onDidDisappear?: ((data: undefined) => void);
+        onWillAppear?: ((data: undefined) => void);
+        onWillDisappear?: ((data: undefined) => void);
         keyboardAvoidMode?: KeyboardAvoidMode;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;

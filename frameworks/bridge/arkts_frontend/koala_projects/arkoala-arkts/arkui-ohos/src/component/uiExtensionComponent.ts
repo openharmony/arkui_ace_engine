@@ -297,9 +297,6 @@ export interface UIExtensionOptions {
 export type Callback_UIExtensionProxy_Void = (parameter: UIExtensionProxy) => void;
 export type UIExtensionComponentInterface = (want: Want, options?: UIExtensionOptions) => UIExtensionComponentAttribute;
 export interface UIExtensionComponentAttribute extends CommonMethod {
-    setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
-        return this
-    }
     onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this
     onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this
     onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this
@@ -316,9 +313,6 @@ export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implement
     onError_value?: ErrorCallback | undefined
     onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
     onDrawReady_value?: (() => void) | undefined
-    public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
-        return this
-    }
     public onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this {
         return this
     }
@@ -423,9 +417,10 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
     }
 }
 /** @memo */
-export function UIExtensionComponentImpl(
+export function UIExtensionComponent(
     /** @memo */
     style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
+    want: Want, options?: UIExtensionOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -433,7 +428,9 @@ export function UIExtensionComponentImpl(
         return new ArkUIExtensionComponentComponent()
     })
     NodeAttach<ArkUIExtensionComponentPeer>((): ArkUIExtensionComponentPeer => ArkUIExtensionComponentPeer.create(receiver), (_: ArkUIExtensionComponentPeer) => {
+        receiver.setUIExtensionComponentOptions(want,options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

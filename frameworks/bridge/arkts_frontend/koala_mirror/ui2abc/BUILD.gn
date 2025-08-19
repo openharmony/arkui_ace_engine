@@ -21,7 +21,6 @@ node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
 libarkts_root = "./libarkts"
-
 build_root = "//build"
 
 npm_cmd("fast_arktsc_build") {

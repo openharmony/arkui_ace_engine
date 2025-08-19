@@ -27,7 +27,7 @@ export class SuggestionInfo extends ArktsObject {
 
   static create(kind: DiagnosticKind, substitutionCode: string, range: SourceRange, ...args: string[]): SuggestionInfo {
     return new SuggestionInfo(
-      global.es2panda._CreateSuggestionInfo(global.context, kind.peer, passStringArray(args), args.length, substitutionCode, range.peer)
+      global.es2panda._CreateSuggestionInfo(global.context, kind.peer, passStringArray(args), args.length, substitutionCode, "", range.peer)
     );
   }
 

@@ -30,7 +30,7 @@ import { FrameNode } from "./FrameNode"
 import { Utils } from "@ohos/arkui/graphics"
 import { ArkUIAniModule } from "arkui.ani"
 import hilog from '@ohos.hilog'
-import { Matrix4TransitInternal, TimePickerImpl } from "./component"
+import { Matrix4TransitInternal, TimePicker } from "./component"
 import { RenderNodeTransfer } from "./handwritten/transfer/RenderNodeTransfer"
 
 export type DrawCallback = (context: DrawContext) => void;
@@ -460,8 +460,15 @@ export class RenderNode implements MaterializedBase {
         return
     }
     dispose() {
-        this.frameNode_?.deref()?.dispose()
-        this.peer?.release()
+        this.frameNode_?.deref()?.resetNodePtr()
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
+    }
+    resetNodePtr() {
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
     }
     private getBackgroundColor(): number {
         return this.getBackgroundColor_serialize()

@@ -167,9 +167,6 @@ export interface GridItemOptions {
 }
 export type GridItemInterface = (value?: GridItemOptions) => GridItemAttribute;
 export interface GridItemAttribute extends CommonMethod {
-    setGridItemOptions(value?: GridItemOptions): this {
-        return this
-    }    
     rowStart(value: number | undefined): this {return this;}
     rowEnd(value: number | undefined): this {return this;}
     columnStart(value: number | undefined): this {return this;}
@@ -190,9 +187,6 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     selectable_value?: boolean | undefined
     selected_value?: boolean | Bindable<boolean> | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
-    public setGridItemOptions(value?: GridItemOptions): this {
-        return this
-    }
     public rowStart(value: number | undefined): this {
         return this
     }
@@ -320,9 +314,10 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
     }
 }
 /** @memo */
-export function GridItemImpl(
+export function GridItem(
     /** @memo */
     style: ((attributes: GridItemAttribute) => void) | undefined,
+    value?: GridItemOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -330,7 +325,9 @@ export function GridItemImpl(
         return new ArkGridItemComponent()
     })
     NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (_: ArkGridItemPeer) => {
+        receiver.setGridItemOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

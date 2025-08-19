@@ -22,7 +22,8 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
-#include "lazy_for_each_module.h"
+#include "syntax/lazy_for_each_module.h"
+#include "syntax/syntax_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -32,7 +33,7 @@
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
-#include "water_flow/waterFlowSection_module.h"
+#include "water_flow/water_flow_module.h"
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
@@ -369,6 +370,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
+            "_SyntaxNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxNode)
+        },
+        ani_native_function {
             "_BuilderProxyNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
@@ -404,9 +410,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
-            "_SetWaterFlowOptions",
-            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+            "_SetWaterFlowSection",
+            "JLarkui/component/waterFlow/WaterFlowSections;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
             "_SetListChildrenMainSize",
@@ -987,6 +993,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DrawingRenderingContext_GetCanvas",
             "J:L@ohos/graphics/drawing/drawing/Canvas;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetDrawingCanvas)
+        },
+        ani_native_function {
+            "_CanvasRenderingContext_GetCanvasId",
+            "J:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasId)
         },
         ani_native_function {
             "_FrameNode_MarkDirtyNode",

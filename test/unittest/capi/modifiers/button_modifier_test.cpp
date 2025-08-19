@@ -62,7 +62,7 @@ namespace {
     const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("0.00px");
     const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE("FontWeight.Medium");
     const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE("FontStyle.Normal");
-    const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE("");
+    const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE("0.850000");
     const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE("2147483648.000000");
 
     // typedefs

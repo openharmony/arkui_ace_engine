@@ -6,7 +6,7 @@
   "bin": "lib/annotate.js",
   "scripts": {
     "clean": "rimraf out lib",
-    "compile": "npx tsc -p ."
+    "compile": "tsc -p ."
   },
   "keywords": [],
   "dependencies": {

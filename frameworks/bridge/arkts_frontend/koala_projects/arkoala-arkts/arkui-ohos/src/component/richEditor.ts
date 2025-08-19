@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, DecorationStyleResult, MenuType, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
-import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -42,6 +42,8 @@ import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 import { OnHoverCallback } from "./sdk-stubs"
 import { ColorMetrics } from "../Graphics"
+import { RichEditorModifier } from "../RichEditorModifier"
+import { hookRichEditorAttributeModifier } from "../handwritten"
 
 import { CustomNodeBuilder } from "./customBuilder"
 export class RichEditorBaseControllerInternal {
@@ -191,6 +193,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
+    _attributeSet?:RichEditorModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -936,9 +939,6 @@ export type Callback_RichEditorChangeValue_Boolean = (parameter: RichEditorChang
 export type Callback_CutEvent_Void = (parameter: CutEvent) => void;
 export type Callback_CopyEvent_Void = (parameter: CopyEvent) => void;
 export interface RichEditorAttribute extends CommonMethod {
-    setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
-        return this
-    }
     onReady(value: (() => void) | undefined): this
     onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this
     onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this
@@ -972,6 +972,7 @@ export interface RichEditorAttribute extends CommonMethod {
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
+    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
     onReady_value?: (() => void) | undefined
@@ -1004,9 +1005,6 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: number | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
-    public setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
-        return this
-    }
     public onReady(value: (() => void) | undefined): this {
         return this
     }
@@ -1410,6 +1408,11 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+
+    public attributeModifier(modifier: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookRichEditorAttributeModifier(this, modifier);
+        return this
+    }
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -1417,9 +1420,10 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function RichEditorImpl(
+export function RichEditor(
     /** @memo */
     style: ((attributes: RichEditorAttribute) => void) | undefined,
+    value: RichEditorOptions | RichEditorStyledStringOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1427,8 +1431,10 @@ export function RichEditorImpl(
         return new ArkRichEditorComponent()
     })
     NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer) => {
+        receiver.setRichEditorOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
 export class RichEditorControllerInternal {

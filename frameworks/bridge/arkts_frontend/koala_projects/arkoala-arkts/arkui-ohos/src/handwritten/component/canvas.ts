@@ -15,6 +15,9 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32 } from "@koalaui/compat"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { UIContextImpl } from "../handwritten/UIContextImpl";
+import { UIContextUtil } from "../handwritten/UIContextUtil"
 
 const DIFF: number = 1e-10
 const INT32_MAX: number = 2147483647
@@ -189,6 +192,25 @@ export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, op
 export function hookGetCanvas(peerPtr: DrawingRenderingContext): drawing.Canvas{
     return ArkUIAniModule._DrawingRenderingContext_GetCanvas(peerPtr.peer!.ptr)
 }
+export function hookGetCanvas(peerPtr: CanvasRenderingContext2D): FrameNode {
+    const context: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl
+    const nodeId: number = ArkUIAniModule._CanvasRenderingContext_GetCanvasId(peerPtr.peer!.ptr) as number
+    return context.getFrameNodeByNodeId(nodeId) as FrameNode
+}
+export function hookOn(peerPtr: CanvasRenderingContext2D, type: string, callback_: Callback<void>): void {
+    if (type == "onAttach") {
+        peerPtr.onOnAttach(callback_)
+    } else if (type == "onDetach") {
+        peerPtr.onOnDetach(callback_)
+    }
+}
+export function hookOff(peerPtr: CanvasRenderingContext2D, type: string, callback_?: Callback<void>): void {
+    if (type == "offAttach") {
+        peerPtr.offOnAttach(callback_)
+    } else if (type == "offDetach") {
+        peerPtr.offOnDetach(callback_)
+    }
+}
 export class ImageBitmapInternal {
     public static fromPtr(ptr: KPointer): ImageBitmap {
         const obj: ImageBitmap = new ImageBitmap(undefined, undefined)
@@ -270,13 +292,11 @@ export class ImageData {
     get data(): Uint8ClampedArray {
         return this.data_val
     }
-    get height(): number {
-        const height_cast: number = this.finalHeight as number
-        return height_cast
+    get height(): int32 {
+        return this.finalHeight
     }
-    get width(): number {
-        const width_cast: number = this.finalWidth as number
-        return width_cast
+    get width(): int32 {
+        return this.finalWidth
     }
     constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: LengthMetricsUnit) {
         if (width == undefined || height == undefined) {

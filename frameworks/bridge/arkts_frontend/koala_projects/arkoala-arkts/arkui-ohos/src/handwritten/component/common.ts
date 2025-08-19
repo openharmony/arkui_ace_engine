@@ -818,12 +818,14 @@ export class TouchEventTransfer {
                 x: changedTouch.getProperty("x").toNumber(),
                 y: changedTouch.getProperty("y").toNumber(),
                 hand: TypeChecker.InteractionHand_FromNumeric(changedTouch.getProperty("hand").toNumber() as int32),
-                // TODO: need change number to long
                 pressedTime: touchEvent.changedTouches[index].pressedTime,
-                // pressedTime: changedTouch.getProperty("pressedTime").toNumber(),
                 pressure: changedTouch.getProperty("pressure").toNumber(),
                 width: changedTouch.getProperty("width").toNumber(),
-                height: changedTouch.getProperty("height").toNumber()
+                height: changedTouch.getProperty("height").toNumber(),
+                // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+                // despite some property types having default values
+                screenX: 0,
+                screenY: 0
             };
             index++;
             changedTouchArray.push(staticChangedTouch)
@@ -846,7 +848,11 @@ export class TouchEventTransfer {
                 pressedTime: touchEvent.touches[index].pressedTime,
                 pressure: touch.getProperty("pressure").toNumber(),
                 width: touch.getProperty("width").toNumber(),
-                height: touch.getProperty("height").toNumber()
+                height: touch.getProperty("height").toNumber(),
+                // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal,
+                // despite some property types having default values
+                screenX: 0,
+                screenY: 0
             };
             index++;
             touchesArray.push(staticTouch)
@@ -996,9 +1002,8 @@ export class AxisEventTransfer {
         axisEvent.axisVertical = axisVerticalValue;
         const axisHorizontalValue = esValue.getProperty("axisHorizontal").toNumber();
         axisEvent.axisHorizontal = axisHorizontalValue;
-        // TODO: this field doesn't set value in trunk
-        // const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
-        // axisEvent.targetDisplayId = targetDisplayIdValue;
+        const targetDisplayIdValue = esValue.getProperty("targetDisplayId").toNumber();
+        axisEvent.targetDisplayId = targetDisplayIdValue;
         const actionValue = esValue.getProperty("action").toNumber();
         axisEvent.action = TypeChecker.AxisAction_FromNumeric(actionValue as int32);
         const displayXValue = esValue.getProperty("displayX").toNumber();

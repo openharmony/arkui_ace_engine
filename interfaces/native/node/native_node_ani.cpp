@@ -15,6 +15,7 @@
 
 #include "native_node_ani.h"
 
+#include "node/node_extened.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
@@ -27,7 +28,7 @@ namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";
 constexpr char GET_PARAM_WITH_NAVDESTINATION_ID_METHOD[] = "getParamWithNavDestinationId";
 
-int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHOS::Ace::NG::FrameNode ** frameNode)
+int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHOS::Ace::NG::FrameNode** frameNode)
 {
     ani_class pointerClass;
     env->FindClass("std.core.Long", &pointerClass);
@@ -133,7 +134,7 @@ int32_t GetNodeHandleFromBuilderNode(ani_env* env, ani_object builderNode, ArkUI
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
-}
+} // namespace
 
 extern "C" {
 int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object value, ArkUI_NodeHandle* handle)
@@ -252,5 +253,38 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
     }
     param->r = paramRef;
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_GetDrawableDescriptorFromAniValue(
+    ani_env* env, ani_object value, ArkUI_DrawableDescriptor** drawableDescriptor)
+{
+    ani_long nativeObj = 0;
+    env->Object_GetPropertyByName_Long(value, "nativeObj", &nativeObj);
+    if (nativeObj == 0) {
+        LOGE("drawable descriptor have not native object");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto* object = reinterpret_cast<void*>(nativeObj);
+    if (object == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    auto increaseRefApi = reinterpret_cast<void (*)(void*)>(OHOS::Ace::NodeModel::IncreaseRefDrawable());
+    if (!increaseRefApi) {
+        LOGE("find increase drawable ref count api failed in libace module");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_DrawableDescriptor* drawable =
+        new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, object, nullptr, nullptr, nullptr, nullptr };
+    increaseRefApi(object);
+    *drawableDescriptor = drawable;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_GetDrawableDescriptorFromResourceAniValue(
+    ani_env* env, ani_object value, ArkUI_DrawableDescriptor** drawableDescriptor)
+{
+    ani_double id = 0.0;
+    env->Object_GetPropertyByName_Double(value, "id", &id);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 }

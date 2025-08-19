@@ -23,7 +23,7 @@ export function memoBind<T>(
 {
     return (
         /** @memo */
-        () => { item(value) }
+        (): void => { item(value) }
     )
 }
 
@@ -37,7 +37,7 @@ export function memoBind2<T1, T2>(
 {
     return (
         /** @memo */
-        () => { item(value1, value2) }
+        (): void => { item(value1, value2) }
     )
 }
 
@@ -52,7 +52,7 @@ export function memoPartialBind2_1<T1, T2>(
 {
     return (
         /** @memo */
-        (arg2: T2) => { item(value1, arg2) }
+        (arg2: T2): void => { item(value1, arg2) }
     )
 }
 
@@ -67,6 +67,6 @@ export function memoPartialBind3_2<T1, T2, T3>(
 {
     return (
         /** @memo */
-    (arg2: T2, arg3: T3) => { item(value1, arg2, arg3) }
+    (arg2: T2, arg3: T3): void => { item(value1, arg2, arg3) }
     )
 }

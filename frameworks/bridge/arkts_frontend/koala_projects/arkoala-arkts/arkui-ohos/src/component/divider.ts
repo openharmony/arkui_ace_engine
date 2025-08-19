@@ -131,9 +131,6 @@ export class ArkDividerPeer extends ArkCommonMethodPeer {
 }
 export type DividerInterface = () => DividerAttribute;
 export interface DividerAttribute extends CommonMethod {
-    setDividerOptions(): this {
-        return this
-    }
     vertical(value: boolean | undefined): this {return this;}
     color(value: ResourceColor | undefined): this {return this;}
     strokeWidth(value: number | string | undefined): this {return this;}
@@ -145,9 +142,6 @@ export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttr
     color_value?: ResourceColor | undefined
     strokeWidth_value?: number | string | undefined
     lineCap_value?: LineCapStyle | undefined
-    public setDividerOptions(): this {
-        return this
-    }
     public vertical(value: boolean | undefined): this {
         return this
     }
@@ -217,9 +211,10 @@ export class ArkDividerComponent extends ArkCommonMethodComponent implements Div
     }
 }
 /** @memo */
-export function DividerImpl(
+export function Divider(
     /** @memo */
     style: ((attributes: DividerAttribute) => void) | undefined,
+    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -227,7 +222,9 @@ export function DividerImpl(
         return new ArkDividerComponent()
     })
     NodeAttach<ArkDividerPeer>((): ArkDividerPeer => ArkDividerPeer.create(receiver), (_: ArkDividerPeer) => {
+        receiver.setDividerOptions()
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

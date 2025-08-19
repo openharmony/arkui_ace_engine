@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
-
 import { AttributeModifier, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge, CustomBuilder, Callback } from "arkui/component/common"
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, Orientation, NavDestinationAttribute, NavDestinationCommonTitle, NavDestinationCustomTitle, ArkNavDestinationPeer } from "arkui/component/navDestination"

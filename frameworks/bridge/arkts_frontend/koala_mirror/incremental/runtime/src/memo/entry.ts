@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey, KoalaCallsiteKeys } from "@koalaui/common"
+import { KoalaCallsiteKey } from "@koalaui/common"
 import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, StateContext, StateManager } from "../states/State"
@@ -34,10 +34,7 @@ export function memoRoot<Node extends IncrementalNode>(
 ): ComputableState<Node> {
     return manager.updatableNode<Node>(node, (context: StateContext) => {
         RuntimeProfiler.instance?.buildRootEnter()
-        const frozen = manager.frozen
-        manager.frozen = true // states are frozen during recomposition
-        memoEntry1<Node, void>(context, KoalaCallsiteKeys.empty, update, node)
-        manager.frozen = frozen
+        memoEntry1<Node, void>(context, 0, update, node)
         RuntimeProfiler.instance?.buildRootExit()
     })
 }

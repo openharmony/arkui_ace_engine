@@ -483,49 +483,6 @@ inline KSerializerBuffer getArgument<KSerializerBuffer>(const CallbackInfo& info
 }
 
 template <>
-inline KLength getArgument<KLength>(const CallbackInfo& info, int index) {
-  KLength result { 0 };
-  NAPI_ASSERT_INDEX(info, index, result);
-  auto value = info[index];
-  napi_valuetype type;
-  auto status = napi_typeof(info.Env(), value, &type);
-  if (status != 0) return result;
-  switch (type) {
-    case napi_number: {
-      result.value = getFloat32(info.Env(), value);
-      result.unit = 1;
-      result.type = 0;
-      break;
-    }
-    case napi_string: {
-      KStringPtr string = getString(info.Env(), value);
-      parseKLength(string, &result);
-      result.type = 1;
-      result.resource = 0;
-      break;
-    }
-    case napi_object: {
-      result.value = 0;
-      result.unit = 1;
-      result.type = 2;
-      napi_value field;
-      napi_status status = napi_get_named_property(info.Env(), value, "id", &field);
-      if (status == 0) {
-        status = napi_get_value_int32(info.Env(), field, &result.resource);
-        if (status != 0) result.resource = 0;
-      } else {
-        result.resource = 0;
-      }
-      break;
-    }
-    default:
-      INTEROP_FATAL("Error, unexpected KLength type");
-  }
-  return result;
-}
-
-
-template <>
 inline KInteropBuffer getArgument<KInteropBuffer>(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, {});
   return getArgument<KInteropBuffer>((napi_env)info.Env(), (napi_value)info[index]);

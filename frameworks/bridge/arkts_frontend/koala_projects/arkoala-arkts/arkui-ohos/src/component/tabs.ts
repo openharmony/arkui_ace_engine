@@ -31,7 +31,9 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { TabsOpsHandWritten, hookTabsApplyAttributesFinish } from "./../handwritten"
+import { TabsOpsHandWritten, hookTabsApplyAttributesFinish, hookTabsAttributeModifier } from "./../handwritten"
+import { TabsModifier } from "../TabsModifier"
+import { AttributeModifier } from "./common"
 
 export class TabsControllerInternal {
     public static fromPtr(ptr: KPointer): TabsController {
@@ -183,6 +185,7 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     }
 }
 export class ArkTabsPeer extends ArkCommonMethodPeer {
+    _attributeSet?: TabsModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -674,12 +677,10 @@ export type OnTabsGestureSwipeCallback = (index: number, extraInfo: TabsAnimatio
 export type TabsCustomContentTransitionCallback = (from: number, to: number) => TabContentAnimatedTransition | undefined;
 export type OnTabsContentWillChangeCallback = (currentIndex: number, comingIndex: number) => boolean;
 export interface TabsAttribute extends CommonMethod {
-    setTabsOptions(options?: TabsOptions): this {
-        return this
-    }
     vertical(value: boolean | undefined): this
     barPosition(value: BarPosition | undefined): this
     scrollable(value: boolean | undefined): this
+    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod>| undefined): this
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
     barWidth(value: Length | undefined): this
     barHeight(value: Length | undefined): this
@@ -734,9 +735,6 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillChange_value?: OnTabsContentWillChangeCallback | undefined
-    public setTabsOptions(options?: TabsOptions): this {
-        return this
-    }
     public vertical(value: boolean | undefined): this {
         return this
     }
@@ -744,6 +742,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
         return this
     }
     public scrollable(value: boolean | undefined): this {
+        return this
+    }
+    public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod>| undefined): this {
         return this
     }
     public barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
@@ -843,6 +844,10 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
             }
         }
         return false;
+    }
+    public attributeModifier(modifier: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookTabsAttributeModifier(this, modifier);
+        return this
     }
     public setTabsOptions(options?: TabsOptions): this {
         if (this.checkPriority("setTabsOptions")) {
@@ -1093,9 +1098,10 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
 }
 /** @memo */
-export function TabsImpl(
+export function Tabs(
     /** @memo */
     style: ((attributes: TabsAttribute) => void) | undefined,
+    options?: TabsOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1103,7 +1109,9 @@ export function TabsImpl(
         return new ArkTabsComponent()
     })
     NodeAttach<ArkTabsPeer>((): ArkTabsPeer => ArkTabsPeer.create(receiver), (_: ArkTabsPeer) => {
+        receiver.setTabsOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

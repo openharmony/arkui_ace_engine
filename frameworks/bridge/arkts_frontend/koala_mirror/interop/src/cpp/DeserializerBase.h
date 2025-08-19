@@ -102,44 +102,6 @@ inline const char *getUnitName(int value)
   }
 }
 
-inline void parseDimension(const InteropString &string, InteropLength *result)
-{
-  char *suffixPtr = nullptr;
-  float value = std::strtof(string.chars, &suffixPtr);
-
-  if (!suffixPtr || suffixPtr == string.chars)
-  {
-    // not a numeric value
-    result->unit = -1;
-    return;
-  }
-  result->value = value;
-  if (suffixPtr[0] == '\0' || (suffixPtr[0] == 'v' && suffixPtr[1] == 'p'))
-  {
-    result->unit = 1;
-  }
-  else if (suffixPtr[0] == '%')
-  {
-    result->unit = 3;
-  }
-  else if (suffixPtr[0] == 'p' && suffixPtr[1] == 'x')
-  {
-    result->unit = 0;
-  }
-  else if (suffixPtr[0] == 'l' && suffixPtr[1] == 'p' && suffixPtr[2] == 'x')
-  {
-    result->unit = 4;
-  }
-  else if (suffixPtr[0] == 'f' && suffixPtr[1] == 'p')
-  {
-    result->unit = 2;
-  }
-  else
-  {
-    result->unit = -1;
-  }
-}
-
 template <typename T>
 inline void convertor(T value) = delete;
 
@@ -333,6 +295,9 @@ public:
     if (length > 0)
     {
       value = malloc(length * sizeof(E));
+      if (!value) {
+        INTEROP_FATAL("Cannot allocate memory");
+      }
       interop_memset(value, length * sizeof(E), 0, length * sizeof(E));
       toClean.push_back(value);
     }
@@ -348,10 +313,16 @@ public:
     if (length > 0)
     {
       keys = malloc(length * sizeof(K));
+      if (!keys) {
+        INTEROP_FATAL("Cannot allocate memory");
+      }
       interop_memset(keys, length * sizeof(K), 0, length * sizeof(K));
       toClean.push_back(keys);
 
       values = malloc(length * sizeof(V));
+      if (!values) {
+        INTEROP_FATAL("Cannot allocate memory");
+      }
       interop_memset(values, length * sizeof(V), 0, length * sizeof(V));
       toClean.push_back(values);
     }
@@ -526,38 +497,6 @@ public:
     return InteropBuffer { resource, (void*)data, length };
   }
 
-  // Improve: produce them with prefix in generator.
-  InteropLength readLength()
-  {
-    InteropLength result = {};
-    result.unit = 1;
-    result.type = readInt8();
-    switch (result.type)
-    {
-    case INTEROP_RUNTIME_OBJECT:
-    {
-      result.resource = readInt32();
-      break;
-    }
-    case INTEROP_RUNTIME_STRING:
-    {
-      InteropString string = readString();
-      parseDimension(string, &result);
-      break;
-    }
-    case INTEROP_RUNTIME_NUMBER:
-    {
-      result.value = readFloat32();
-      break;
-    }
-    default:
-    {
-      INTEROP_FATAL("Fatal error");
-    }
-    }
-    return result;
-  }
-
   InteropString readString()
   {
     InteropString result;
@@ -695,18 +634,6 @@ inline void WriteToString(std::string *result, const InteropNumber *value)
     result->append(".i32=" + std::to_string(value->i32));
   }
 
-  result->append("}");
-}
-
-template <>
-inline void WriteToString(std::string *result, const InteropLength *value)
-{
-  result->append("{");
-  result->append(".type=" + std::to_string(value->type));
-  result->append(", .value=");
-  WriteToString(result, value->value);
-  result->append(", .unit=" + std::to_string(value->unit));
-  result->append(", .resource=" + std::to_string(value->resource));
   result->append("}");
 }
 

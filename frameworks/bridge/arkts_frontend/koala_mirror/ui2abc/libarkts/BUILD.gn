@@ -63,7 +63,8 @@ shared_library("es2panda_lib") {
     ]
 
     deps = [
-        ":regenerate"
+        "$ui2abc_root:ui2abc_install(${host_toolchain})",
+        ":regenerate(${host_toolchain})"
     ]
 
     configs -= [ "//build/config/compiler:compiler" ]
@@ -174,7 +175,7 @@ shared_library("es2panda_lib") {
     }
 }
 
-action("es2panda_copy_lib") {
+action("es2panda_lib_copy") {
     script = "gn/command/copy.py"
     outputs = [
         "$target_out_dir/es2panda.node"
@@ -196,16 +197,19 @@ action("es2panda_copy_lib") {
     ]
 }
 
-npm_cmd("regenerate") {
-    outputs = [
-        "$target_out_dir/regenerate"
-    ]
-    deps = [
-        "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
-        "$ui2abc_root:ui2abc_panda_sdk"
-    ]
-    project_path = rebase_path(".")
-    run_tasks = [ "regenerate" ]
+if (current_toolchain == host_toolchain) {
+    npm_cmd("regenerate") {
+        assert(current_toolchain == host_toolchain, "must be executed with host_toolchain")
+        outputs = [
+            "$target_out_dir/regenerate"
+        ]
+        deps = [
+            "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
+            "$ui2abc_root:ui2abc_panda_sdk"
+        ]
+        project_path = rebase_path(".")
+        run_tasks = [ "regenerate" ]
+    }
 }
 
 if (current_toolchain == host_toolchain) {
@@ -220,57 +224,38 @@ if (current_toolchain == host_toolchain) {
     }
 }
 
-npm_cmd("es2panda.js") {
-    outputs = [
-        "$target_out_dir/es2panda.js"
+action("libarkts_sdk_copy") {
+    script = "../gn/command/copy_libs.py"
+    args = [
+        "--source_path", rebase_path(get_path_info(".", "abspath")),
+        "--output_path", rebase_path("$target_gen_dir"),
+        "--root_out_dir", rebase_path(root_out_dir),
     ]
+    outputs = [ "$target_gen_dir" ]
     deps = [
-        ":es2panda_copy_lib"
+        "$ui2abc_root:ui2abc"
     ]
-    project_path = rebase_path(".")
-    run_tasks = [ "compile:koala:interop", "compile:js" ]
-}
-
-action("gen_libarkts") {
-  script = "../gn/command/copy_libs.py"
-  args = [
-    "--source_path",
-    rebase_path(get_path_info(".", "abspath")),
-    "--output_path",
-    rebase_path("$target_gen_dir"),
-    "--root_out_dir",
-    rebase_path(root_out_dir),
-  ]
-  outputs = [ "$target_gen_dir" ]
-  deps = [
-    "$ui2abc_root:ui2abc"
-  ]
 }
 
 # Use from OHOS-SDK build (//build/ohos/sdk/ohos_sdk_description_std.json)
 
 ohos_copy("libarkts-sdk") {
-  deps = [":gen_libarkts" ]
-  sources = [ rebase_path("$target_gen_dir") ]
-  outputs = [ target_out_dir + "/$target_name" ]
-  module_source_dir = target_out_dir + "/$target_name"
-  module_install_name = ""
-  subsystem_name = "arkui"
-  part_name = "ace_engine"
-}
-
-group("es2panda") {
     deps = [
-      ":es2panda.js"
+        ":libarkts_sdk_copy"
     ]
+    sources = [ rebase_path("$target_gen_dir") ]
+    outputs = [ target_out_dir + "/$target_name" ]
+    module_source_dir = target_out_dir + "/$target_name"
+    module_install_name = ""
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
 }
 
 # for //developtools/ace_ets2bundle
 
-npm_cmd("libarkts.js") {
+npm_cmd("libarkts_compile") {
     deps = [
-        "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
-        ":regenerate"
+        ":regenerate(${host_toolchain})"
     ]
     outputs = [
         "$target_out_dir/libarkts.js"
@@ -279,9 +264,16 @@ npm_cmd("libarkts.js") {
     run_tasks = [ "compile:koala:interop", "compile:js" ]
 }
 
+group("es2panda") {
+    deps = [
+        ":es2panda_lib_copy",
+        ":libarkts_compile(${host_toolchain})"
+    ]
+}
+
 group("libarkts") {
     deps = [
-        ":es2panda_lib",
-        ":libarkts.js(${host_toolchain})"
+      ":es2panda_lib",
+      ":libarkts_compile(${host_toolchain})"
     ]
 }

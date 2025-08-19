@@ -231,6 +231,33 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
 }
 
 /**
+ * @tc.name: RegisterContextEventMultiThreadTest
+ * @tc.desc: Test RegisterContextEventMultiThread func for typedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, RegisterContextEventMultiThreadTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent pattern
+     * @tc.expected: xcomponent pattern created
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->transformHintChangedCallbackId_ = std::nullopt;
+    /**
+     * @tc.steps: step2. call RegisterContextEventMultiThread
+     * @tc.expected: pipeline context event is registered
+     */
+    pattern->RegisterContextEventMultiThread(frameNode);
+    EXPECT_TRUE(pattern->transformHintChangedCallbackId_.has_value());
+}
+
+/**
  * @tc.name: XComponentEventTest002
  * @tc.desc: Test XComponent onLoad and onDestroy event.
  * @tc.type: FUNC

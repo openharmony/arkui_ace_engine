@@ -36,73 +36,85 @@ Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_RETURN(pinchGestureEvent, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetScaleImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    double value = event->GetScale();
+    double value = pinchGestureEvent->GetScale();
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetScaleImpl(Ark_PinchGestureEvent peer,
                   const Ark_Number* scale)
 {
     CHECK_NULL_VOID(peer);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(scale);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_VOID(pinchGestureEvent);
 
     auto convValue = Converter::Convert<float>(*scale);
-    event->SetScale(convValue);
+    pinchGestureEvent->SetScale(convValue);
 }
 Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_RETURN(pinchGestureEvent, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterXImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetX());
+    double value = PipelineBase::Px2VpWithCurrentDensity(pinchGestureEvent->GetPinchCenter().GetX());
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetPinchCenterXImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterX)
 {
     CHECK_NULL_VOID(peer);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(pinchCenterX);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_VOID(pinchGestureEvent);
 
     auto convValue = Converter::Convert<float>(*pinchCenterX);
     Offset pinchCenter;
     pinchCenter.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
-    pinchCenter.SetY(event->GetPinchCenter().GetY());
-    event->SetPinchCenter(pinchCenter);
+    pinchCenter.SetY(pinchGestureEvent->GetPinchCenter().GetY());
+    pinchGestureEvent->SetPinchCenter(pinchCenter);
 }
 Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_RETURN(pinchGestureEvent, errValue);
     LOGW("ARKOALA PinchGestureEventAccessor::GetPinchCenterYImpl returns Ark_Int32, "
         "but should return Ark_Number.");
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetPinchCenter().GetY());
+    double value = PipelineBase::Px2VpWithCurrentDensity(pinchGestureEvent->GetPinchCenter().GetY());
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
 void SetPinchCenterYImpl(Ark_PinchGestureEvent peer,
                          const Ark_Number* pinchCenterY)
 {
     CHECK_NULL_VOID(peer);
-    PinchGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(pinchCenterY);
+    PinchGestureEvent* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(event);
+    CHECK_NULL_VOID(pinchGestureEvent);
 
     auto convValue = Converter::Convert<float>(*pinchCenterY);
     Offset pinchCenter;
-    pinchCenter.SetX(event->GetPinchCenter().GetX());
+    pinchCenter.SetX(pinchGestureEvent->GetPinchCenter().GetX());
     pinchCenter.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
-    event->SetPinchCenter(pinchCenter);
+    pinchGestureEvent->SetPinchCenter(pinchCenter);
 }
 } // PinchGestureEventAccessor
 const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()

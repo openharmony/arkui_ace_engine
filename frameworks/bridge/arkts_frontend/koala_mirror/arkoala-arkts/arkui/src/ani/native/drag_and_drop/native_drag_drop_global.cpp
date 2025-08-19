@@ -31,7 +31,7 @@ void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
 {
     auto dragEvent = reinterpret_cast<ani_ref>(pointer);
     auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
-    auto unifiedData = reinterpret_cast<void*>(dataValue.get());
+    auto unifiedData = reinterpret_cast<void*>(&dataValue);
     if (!dragEvent || !unifiedData) {
         return;
     }
@@ -69,6 +69,7 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
         return result_obj;
     }
     return unifiedData_obj;
+    return {};
 }
 
 ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -95,6 +96,7 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return result_obj;
     }
     return summary_obj;
+    return {};
 }
 
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -120,6 +122,7 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     }
     auto result = AniUtils::StdStringToANIString(env, key);
     return result.value_or(value);
+    return value;
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

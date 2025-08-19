@@ -591,7 +591,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    status = env->FindNamespace("C{@ohos.promptAction.promptAction}", &ns);
+    status = env->FindNamespace("@ohos.promptAction.promptAction", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction FindNamespace fail. status: %{public}d", status);
         return ANI_ERROR;

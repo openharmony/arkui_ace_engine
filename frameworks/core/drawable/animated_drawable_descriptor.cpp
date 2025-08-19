@@ -15,9 +15,11 @@
 
 #include "core/drawable/animated_drawable_descriptor.h"
 
+#include <numeric>
+
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t DEFAULT_DURATION = 100;
+constexpr int32_t DEFAULT_TOTAL_DURATION = 1000;
 } // namespace
 
 RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
@@ -30,18 +32,23 @@ RefPtr<PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
 
 int32_t AnimatedDrawableDescriptor::GetTotalDuration()
 {
-    auto size = pixelMapList_.size();
     if (totalDuration_ < 0) {
-        totalDuration_ = static_cast<int32_t>(size*DEFAULT_DURATION);
+        totalDuration_ = DEFAULT_TOTAL_DURATION;
     }
     return totalDuration_;
+}
+
+void AnimatedDrawableDescriptor::SetDurations(const std::vector<int32_t>& durations)
+{
+    durations_ = durations;
+    totalDuration_ = std::accumulate(durations_.begin(), durations_.end(), 0);
 }
 
 std::vector<int32_t> AnimatedDrawableDescriptor::GetDurations()
 {
     auto size = pixelMapList_.size();
-    if (durations_.empty()) {
-        durations_.resize(size, DEFAULT_DURATION);
+    if (durations_.empty() && size > 0) {
+        durations_.resize(size, DEFAULT_TOTAL_DURATION / size);
     }
     return durations_;
 }

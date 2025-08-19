@@ -179,7 +179,7 @@ void WaterFlowModelStatic::SetItemMinHeight(FrameNode* frameNode, const std::opt
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (minHeight) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(minHeight.value()), std::nullopt));
+        layoutProperty->UpdateItemMinSize(CalcSize(std::nullopt, CalcLength(minHeight.value())));
     }
 }
 
@@ -189,7 +189,7 @@ void WaterFlowModelStatic::SetItemMaxWidth(FrameNode* frameNode, const std::opti
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (maxWidth) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(maxWidth.value()), std::nullopt));
+        layoutProperty->UpdateItemMaxSize(CalcSize(CalcLength(maxWidth.value()), std::nullopt));
     }
 }
 
@@ -199,7 +199,7 @@ void WaterFlowModelStatic::SetItemMaxHeight(FrameNode* frameNode, const std::opt
     auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (maxHeight) {
-        layoutProperty->UpdateItemMinSize(CalcSize(CalcLength(maxHeight.value()), std::nullopt));
+        layoutProperty->UpdateItemMaxSize(CalcSize(std::nullopt, CalcLength(maxHeight.value())));
     }
 }
 

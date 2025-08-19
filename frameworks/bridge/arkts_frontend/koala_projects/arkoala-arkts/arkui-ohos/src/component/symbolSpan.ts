@@ -168,9 +168,6 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
 }
 export type SymbolSpanInterface = (value: Resource) => SymbolSpanAttribute;
 export interface SymbolSpanAttribute extends CommonMethod {
-    setSymbolSpanOptions(value: Resource): this {
-        return this
-    }
     fontSize(value: number | string | Resource | undefined): this
     fontColor(value: Array<ResourceColor> | undefined): this
     fontWeight(value: number | FontWeight | string | undefined): this
@@ -183,9 +180,6 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     fontWeight_value?: number | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
-    public setSymbolSpanOptions(value: Resource): this {
-        return this
-    }
     public fontSize(value: number | string | Resource | undefined): this {
         return this
     }
@@ -261,9 +255,10 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function SymbolSpanImpl(
+export function SymbolSpan(
     /** @memo */
     style: ((attributes: SymbolSpanAttribute) => void) | undefined,
+    value: Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -271,7 +266,9 @@ export function SymbolSpanImpl(
         return new ArkSymbolSpanComponent()
     })
     NodeAttach<ArkSymbolSpanPeer>((): ArkSymbolSpanPeer => ArkSymbolSpanPeer.create(receiver), (_: ArkSymbolSpanPeer) => {
+        receiver.setSymbolSpanOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

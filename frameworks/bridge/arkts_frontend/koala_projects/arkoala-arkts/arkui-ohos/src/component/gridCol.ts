@@ -139,9 +139,6 @@ export interface GridColOptions {
 }
 export type GridColInterface = (option?: GridColOptions) => GridColAttribute;
 export interface GridColAttribute extends CommonMethod {
-    setGridColOptions(option?: GridColOptions): this {
-        return this
-    }
     span(value: number | GridColColumnOption | undefined): this {return this;}
     gridColOffset(value: number | GridColColumnOption | undefined): this {return this;}
     order(value: number | GridColColumnOption | undefined): this {return this;}
@@ -151,9 +148,6 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
     span_value?: number | GridColColumnOption | undefined
     gridColOffset_value?: number | GridColColumnOption | undefined
     order_value?: number | GridColColumnOption | undefined
-    public setGridColOptions(option?: GridColOptions): this {
-        return this
-    }
     public span(value: number | GridColColumnOption | undefined): this {
         return this
     }
@@ -213,9 +207,10 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
     }
 }
 /** @memo */
-export function GridColImpl(
+export function GridCol(
     /** @memo */
     style: ((attributes: GridColAttribute) => void) | undefined,
+    option?: GridColOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -223,7 +218,9 @@ export function GridColImpl(
         return new ArkGridColComponent()
     })
     NodeAttach<ArkGridColPeer>((): ArkGridColPeer => ArkGridColPeer.create(receiver), (_: ArkGridColPeer) => {
+        receiver.setGridColOptions(option)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

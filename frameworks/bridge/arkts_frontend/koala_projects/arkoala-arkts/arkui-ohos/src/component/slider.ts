@@ -573,9 +573,6 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
 export type SliderInterface = (options?: SliderOptions) => SliderAttribute;
 export type Callback_Number_SliderChangeMode_Void = (value: number, mode: SliderChangeMode) => void;
 export interface SliderAttribute extends CommonMethod {
-    setSliderOptions(options?: SliderOptions): this {
-        return this
-    }
     blockColor(value: ResourceColor | undefined): this
     trackColor(value: ResourceColor | LinearGradient | undefined): this
     selectedColor(value: ResourceColor | LinearGradient | undefined): this
@@ -604,7 +601,7 @@ export interface SliderAttribute extends CommonMethod {
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined
     trackColor_value?: ResourceColor | LinearGradient | undefined
-    selectedColor_value?: ResourceColor | undefined
+    selectedColor_value?: ResourceColor | LinearGradient | undefined
     minLabel_value?: string | undefined
     maxLabel_value?: string | undefined
     showSteps_value?: boolean | undefined
@@ -624,9 +621,6 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     slideRange_value?: SlideRange | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
-    public setSliderOptions(options?: SliderOptions): this {
-        return this
-    }
     public blockColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -743,18 +737,9 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     }
     public selectedColor(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("selectedColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.selectedColor1Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | LinearGradient | undefined)
-                this.getPeer()?.selectedColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ResourceColor | LinearGradient | undefined)
+            this.getPeer()?.selectedColor1Attribute(value_casted)
+            return this
         }
         return this
     }
@@ -932,9 +917,10 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     }
 }
 /** @memo */
-export function SliderImpl(
+export function Slider(
     /** @memo */
     style: ((attributes: SliderAttribute) => void) | undefined,
+    options?: SliderOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -942,7 +928,9 @@ export function SliderImpl(
         return new ArkSliderComponent()
     })
     NodeAttach<ArkSliderPeer>((): ArkSliderPeer => ArkSliderPeer.create(receiver), (_: ArkSliderPeer) => {
+        receiver.setSliderOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

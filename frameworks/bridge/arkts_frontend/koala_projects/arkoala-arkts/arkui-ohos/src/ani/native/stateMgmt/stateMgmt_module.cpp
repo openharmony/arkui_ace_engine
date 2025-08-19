@@ -20,9 +20,10 @@
 #include <memory>
 
 namespace OHOS::Ace::Ani {
-ani_int getAreaMode(ani_env* env, ani_object IntObject) {
+ani_int getAreaMode(ani_env* env, ani_object IntObject)
+{
     ani_int areaMode = -1;
-    ani_boolean isUndefined = false;
+    ani_boolean isUndefined = true;
 
     // check areaMode whether is undefined
     env->Reference_IsUndefined(IntObject, &isUndefined);
@@ -76,7 +77,7 @@ ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniC
     }
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
     auto areaMode = getAreaMode(env, IntObject);
-    bool ret = modifier->getStateMgmtAniModifier()->persistentStorageHas(strKey, areaMode);    
+    bool ret = modifier->getStateMgmtAniModifier()->persistentStorageHas(strKey, areaMode);
     if (ret) {
         return true;
     }

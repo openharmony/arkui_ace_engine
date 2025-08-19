@@ -499,8 +499,11 @@ export namespace Assert {
      * @param haystack   Container string.
      * @param needle   Potential substring of haystack.
      * @param message   Message to display on error.
-     * /
-    static include(haystack: string, needle: string, message?: string): void*/
+     */
+    export function include(haystack: string, needle: string, message?: string): void {
+        if (haystack.includes(needle)) return
+        Assert.fail(message ?? `'${needle}' is not in '${haystack}'`)
+    }
 
     /**
      * Asserts that haystack includes needle.
@@ -542,8 +545,11 @@ export namespace Assert {
      * @param haystack   Container string.
      * @param needle   Potential substring of haystack.
      * @param message   Message to display on error.
-     * /
-    static notInclude(haystack: string, needle: string, message?: string): void;*/
+     */
+    export function notInclude(haystack: string, needle: string, message?: string): void {
+        if (!haystack.includes(needle)) return
+        Assert.fail(message ?? `actual '${needle}' is in '${haystack}'`)
+    }
 
     /**
      * Asserts that haystack does not includes needle.

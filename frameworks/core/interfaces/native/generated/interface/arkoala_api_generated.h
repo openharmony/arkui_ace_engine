@@ -26636,7 +26636,7 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     void (*startImageAnalyzer)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_CanvasRenderingContext2D peer,
@@ -26669,7 +26669,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
 } GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
 
@@ -26730,6 +26730,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
                           const Array_FingerInfo* fingerList);
+    Ark_GestureControl_GestureType (*getType)(Ark_BaseGestureEvent peer);
 } GENERATED_ArkUIBaseGestureEventAccessor;
 
 typedef struct GENERATED_ArkUITapGestureEventAccessor {
@@ -27359,6 +27360,44 @@ typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
     void (*setScope)(Ark_DisappearSymbolEffect peer,
                      Ark_EffectScope scope);
 } GENERATED_ArkUIDisappearSymbolEffectAccessor;
+
+typedef struct GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor {
+    void (*SetColor)(Ark_NativePointer node,
+                     const Opt_ColorMetrics* color);
+    void (*SetSelectedColor)(Ark_NativePointer node,
+                             const Opt_ColorMetrics* color);
+    void (*SetPopupColor)(Ark_NativePointer node,
+                          const Opt_ColorMetrics* color);
+    void (*SetSelectedBackgroundColor)(Ark_NativePointer node,
+                                       const Opt_ColorMetrics* color);
+    void (*SetPopupBackground)(Ark_NativePointer node,
+                               const Opt_ColorMetrics* color);
+    void (*SetUsePopup)(Ark_NativePointer node,
+                        const Opt_Boolean* enabled);
+    void (*SetSelectedFont)(Ark_NativePointer node,
+                            const Opt_Font* font);
+    void (*SetPopupFont)(Ark_NativePointer node,
+                         const Opt_Font* font);
+    void (*SetFont)(Ark_NativePointer node,
+                    const Opt_Font* font);
+    void (*SetItemSize)(Ark_NativePointer node,
+                        const Opt_LengthMetrics* size);
+    void (*SetSelected)(Ark_NativePointer node,
+                        const Opt_Number* index,
+                        const Opt_Callback_Number_Void* bindableCallback);
+    void (*SetAutoCollapse)(Ark_NativePointer node,
+                            const Opt_Boolean* enable);
+    void (*SetOnSelect)(Ark_NativePointer node,
+                        const Opt_Callback_Number_Void* handler);
+    void (*SetPopupBackgroundBlurStyle)(Ark_NativePointer node,
+                                        const Opt_BlurStyle* style);
+    Ark_NativePointer (*ArcAlphabetIndexerConstruct)(Ark_Int32 id,
+                                                     Ark_Int32 flags);
+    void (*SetConstructInfo)(Ark_NativePointer node,
+                             const Array_String* arrayValue,
+                             const Ark_Number* selected,
+                             const Opt_Callback_Number_Void* bindableCallback);
+} GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor;
 
 typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
     void (*destroyPeer)(Ark_BounceSymbolEffect peer);
@@ -28581,6 +28620,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* (*getHierarchicalSymbolEffectAccessor)();
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
+    const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* (*getArcAlphabetIndexerExtenderAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
     const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();

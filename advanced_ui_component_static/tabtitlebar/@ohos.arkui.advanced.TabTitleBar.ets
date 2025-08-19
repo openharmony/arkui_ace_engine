@@ -18,7 +18,7 @@ import {
   Canvas, BlendMode, px2vp, Scroller, ForEach,AttributeModifier, GestureModifier, ListItem, BuilderParam,
   ResourceStr, UIGestureEvent, LongPressGestureHandler, PopupOptions,PopupStateChangeParam, CustomPopupOptions,
   CustomDialogController,ScrollOptions, ScrollAnimationOptions, SwiperController, ResourceColor, Area,
-  RenderingContextSettings, CanvasRenderingContext2D, Column, Builder, FontWeight, FlexAlign, KeyEvent,
+  RenderingContextSettings, CanvasRenderingContext2D, Builder, FontWeight, FlexAlign, KeyEvent,
   TouchEvent, ItemAlign, Stack, Alignment,EdgeEffect, Axis, BarState, BlendApplyType, Swiper, Curve,
   Color ,ButtonType, SymbolGlyph, BorderStyle, TouchType, KeyType, Placement ,GeometryInfo, Layoutable,
   ConstraintSizeOptions, focusControl, BorderOptions ,HitTestMode, SymbolEffect, ImageCompleteEvent, Resource,
@@ -32,7 +32,6 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
 import { MeasureOptions } from '@ohos.measure';
 import common from '@ohos.app.ability.common';
-import { BusinessError } from '@ohos.base';
 import window from '@ohos.window';
 import hilog from '@ohos.hilog';
 
@@ -52,14 +51,11 @@ export class TabTitleBarTabItem {
   icon?: ResourceStr;
   symbolStyle?: SymbolGlyphModifier;
 }
-
-const PUBLIC_MORE = $r('sys.symbol.dot_grid_2x2');
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const RESOURCE_TYPE_SYMBOL: number = 40000;
-
 class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
@@ -243,16 +239,18 @@ export struct TabTitleBar {
         .height('100%')
         .curve(Curve.Friction)
         .onChange((index: number) => {
-          const offset = this.tabOffsets[Double.toInt(index)] + TabTitleBar.correctionOffset;
-          this.currentIndex = index;
-          this.scroller.scrollTo({
-            xOffset: offset > 0 ? offset : 0,
-            yOffset: 0,
-            animation: {
-              duration: 300,
-              curve: Curve.EaseInOut
-            } as ScrollAnimationOptions
-          } as ScrollOptions)
+          if(index < this.tabOffsets.length) {
+            const offset = this.tabOffsets[Double.toInt(index)] + TabTitleBar.correctionOffset;
+            this.currentIndex = index;
+            this.scroller.scrollTo({
+              xOffset: offset > 0 ? offset : 0,
+              yOffset: 0,
+              animation: {
+                duration: 300,
+                curve: Curve.EaseInOut
+              } as ScrollAnimationOptions
+            } as ScrollOptions)
+          }
         } as Callback<number>)
         .onAppear(() => {
           this.scroller.scrollToIndex(this.currentIndex);
@@ -264,17 +262,16 @@ export struct TabTitleBar {
 }
 
 @Component
-struct CollapsibleMenuSection {
+export struct CollapsibleMenuSection {
+
   menuItems: Array<TabTitleBarMenuItem> = new Array<TabTitleBarMenuItem>();
   index: number = 0;
   height: number = 0;
+  PUBLIC_MORE: Resource= $r('sys.symbol.dot_grid_2x2');
   item: TabTitleBarMenuItem = {
-    value: PUBLIC_MORE,
-    symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE) as SymbolGlyphModifier,
+    value: this.PUBLIC_MORE,
+    symbolStyle: new SymbolGlyphModifier(this.PUBLIC_MORE) as SymbolGlyphModifier,
     label: $r('sys.string.ohos_toolbar_more'),
-    action: (): void => {
-      throw new Error('Function not implemented.');
-    }
   } as TabTitleBarMenuItem;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
@@ -334,7 +331,7 @@ struct CollapsibleMenuSection {
     } catch (exception) {
         let code: number | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+        hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
 
     }
     this.menuItems.forEach((item, index) => {
@@ -373,15 +370,14 @@ struct CollapsibleMenuSection {
             (item: TabTitleBarMenuItem, index: number) => {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 });
             })
-
           Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
-            SymbolGlyph(PUBLIC_MORE)
+            SymbolGlyph(this.PUBLIC_MORE)
               .fontSize(TabContentItem.symbolSize)
               .draggable(false)
               .fontColor([$r('sys.color.icon_primary')])
               .focusable(true)
           }
-          // .accessibilityText($r('sys.string.ohos_toolbar_more'))
+          .accessibilityText($r('sys.string.ohos_toolbar_more'))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -556,18 +552,18 @@ struct TabContentItem {
     this.onImageComplete?.(onImageComplete);
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): ResourceStr | undefined {
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
     if (typeof resource === 'string') {
-      return resource;
+      return resource as string;
     } else if (typeof resource === 'undefined') {
       return '';
     } else {
       let resourceString: undefined | string = '';
       try {
-        resourceString = resourceManager.getSystemResourceManager().getStringSync((resource as Resource).id as Long);
-      } catch (err) {
-        let code: undefined | Int = (err as BusinessError)?.code;
-        let message: undefined | string = (err as BusinessError)?.message;
+        resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
+      } catch (exception) {
+        let code: number | undefined = (exception as ClassCastError)?.code;
+        let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
@@ -629,7 +625,7 @@ struct TabContentItem {
                   this.onCustomClick?.(this.index);
                 }
               } as () => void)
-            // .accessibilitySelected(this.index === this.currentIndex)
+            .accessibilitySelected(this.index === this.currentIndex)
           } else {
             Row() {
               if (this.item.symbolStyle) {
@@ -639,7 +635,7 @@ struct TabContentItem {
                   .fontSize(TabContentItem.symbolSize)
                   .width(this.getImageLayoutWidth())
                   .height(TabContentItem.imageSize)
-                  //.accessibilityText(this.toStringFormat(this.item.title) as Resource)
+                  .accessibilityText(this.toStringFormat(this.item.title))
                   .scale({
                     x: this.getImageScaleFactor(),
                     y: this.getImageScaleFactor()
@@ -655,7 +651,7 @@ struct TabContentItem {
                     .fontSize(TabContentItem.symbolSize)
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
-                    //.accessibilityText(this.toStringFormat(this.item.title) as Resource)
+                    .accessibilityText(this.toStringFormat(this.item.title))
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -669,7 +665,7 @@ struct TabContentItem {
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
                     .objectFit(ImageFit.Fill)
-                    //.accessibilityText(this.toStringFormat(this.item.title) as Resource)
+                    .accessibilityText(this.toStringFormat(this.item.title))
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -724,7 +720,7 @@ struct TabContentItem {
                 this.onCustomClick?.(this.index as number);
               }
             } as () => void)
-            // .accessibilitySelected(this.index === this.currentIndex)
+            .accessibilitySelected(this.index === this.currentIndex)
           }
         }
         .justifyContent(FlexAlign.Center)
@@ -770,7 +766,8 @@ struct ImageMenuItem {
     value: ''
   } as TabTitleBarMenuItem;
   index: number = 0;
-
+  
+  PUBLIC_MORE: Resource= $r('sys.symbol.dot_grid_2x2');
   static readonly imageSize: number = 24;
   static readonly imageHotZoneWidth: number = 48;
   static readonly buttonBorderRadius: number = 8;
@@ -798,31 +795,37 @@ struct ImageMenuItem {
     }
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): ResourceStr | undefined {
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
     if (typeof resource === 'string') {
-      return resource;
+      return resource as string;
     } else if (typeof resource === 'undefined') {
       return '';
     } else {
       let resourceString: undefined | string = '';
       try {
-        resourceString = resourceManager.getSystemResourceManager().getStringSync((resource as Resource).id as Long);
-      } catch (err) {
-        let code: undefined | Int = (err as BusinessError)?.code;
-        let message: undefined | string = (err as BusinessError)?.message;
+        resourceString = resourceManager.getSysResourceManager().getStringSync((resource as Resource).id as Long);
+      } catch (exception) {
+        let code: number | undefined = (exception as ClassCastError)?.code;
+        let message: string | undefined = (exception as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
     }
   }
 
-  private getAccessibilityReadText(): string | undefined | Resource {
-    if (this.item.value === PUBLIC_MORE) {
-      return resourceManager.getSystemResourceManager().getStringByNameSync('ohos_toolbar_more');
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === this.PUBLIC_MORE) {
+      try {
+      	return resourceManager.getSysResourceManager().getStringByNameSync('ohos_toolbar_more');
+	    } catch (exception) {
+        let code: number | undefined = (exception as ClassCastError)?.code;
+        let message: string | undefined = (exception as ClassCastError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -856,9 +859,9 @@ struct ImageMenuItem {
         }
       }
     }
-    // .accessibilityText(this.getAccessibilityReadText() as Resource)
-    // .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    // .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription) as Resource)
+    .accessibilityText(this.getAccessibilityReadText())
+    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -933,7 +936,7 @@ struct ImageMenuItem {
  *  TabTitleBarDialog
  */
 @CustomDialog
-export struct TabTitleBarDialog {
+struct TabTitleBarDialog {
   tabTitleDialog: TabTitleBarMenuItem = { value: '' } as TabTitleBarMenuItem;
   callbackId: number | undefined = undefined;
   tabTitleBarDialog?: ResourceStr = '';

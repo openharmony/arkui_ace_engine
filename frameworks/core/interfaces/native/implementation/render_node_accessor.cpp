@@ -47,7 +47,10 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
 }
 } // namespace
 namespace RenderNodeAccessor {
-void DestroyPeerImpl(Ark_RenderNode peer) {}
+void DestroyPeerImpl(Ark_RenderNode peer)
+{
+    RenderNodePeer::Destroy(peer);
+}
 Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* value)
 {
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(

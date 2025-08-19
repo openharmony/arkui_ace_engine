@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,130 +12,100 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file
+ * @kit ArkUI
+ */
+import { memo } from "@koalaui/runtime/annotations"
+import { UIContext } from '../framework/ohos.arkui.UIContext'
 
-
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
-
-import { UIContext, UIContextInternal } from "./../generated/ohos.arkui.UIContext"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, DeserializerBase, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-export class ExtendableComponentInternal {
-    public static fromPtr(ptr: KPointer): ExtendableComponent {
-        return new ExtendableComponent(ptr)
-    }
-}
-export class ExtendableComponent implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ExtendableComponent.getFinalizer())
-    }
-    constructor() {
-        this(ExtendableComponent.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ExtendableComponent_getFinalizer()
-    }
-    public getUIContext(): UIContext {
-        return this.getUIContext_serialize()
-    }
-    public getUniqueId(): int32 {
-        return this.getUniqueId_serialize()
-    }
-    private getUIContext_serialize(): UIContext {
-        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_getUIContext(this.peer!.ptr)
-        const obj : UIContext = UIContextInternal.fromPtr(retval)
-        return obj
-    }
-    private getUniqueId_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._ExtendableComponent_getUniqueId(this.peer!.ptr)
-        return retval
-    }
-}
+/**
+ * Defining interface of LifeCycle for custom component and custom dialog
+ *
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @crossplatform
+ * @atomicservice
+ * @since 20
+ */
 export interface LifeCycle {
+    /**
+     * aboutToAppear Method.
+     *
+     * The aboutToAppear function is executed after a new instance of the custom component is created,
+     * before its build() function is executed.
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
     aboutToAppear(): void
+
+    /**
+     * aboutToDisappear Method.
+     *
+     * The aboutToDisappear function executes before a custom component is destroyed.
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
     aboutToDisappear(): void
+
+    /**
+     * The callback method after the custom component is built.
+     *
+     * Triggered when the custom component has been built.
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
     onDidBuild(): void
+
+    /**
+     * Customize the build process of the custom component.
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
+    @memo
     build(): void
 }
-export class LifeCycleInternal implements MaterializedBase,LifeCycle {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, LifeCycleInternal.getFinalizer())
-    }
-    constructor() {
-        this(LifeCycleInternal.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LifeCycle_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._LifeCycle_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): LifeCycleInternal {
-        return new LifeCycleInternal(ptr)
-    }
-    public aboutToAppear(): void {
-        this.aboutToAppear_serialize()
-        return
-    }
-    public aboutToDisappear(): void {
-        this.aboutToDisappear_serialize()
-        return
-    }
-    public onDidBuild(): void {
-        this.onDidBuild_serialize()
-        return
-    }
-    public build(): void {
-        this.build_serialize()
-        return
-    }
-    private aboutToAppear_serialize(): void {
-        ArkUIGeneratedNativeModule._LifeCycle_aboutToAppear(this.peer!.ptr)
-    }
-    private aboutToDisappear_serialize(): void {
-        ArkUIGeneratedNativeModule._LifeCycle_aboutToDisappear(this.peer!.ptr)
-    }
-    private onDidBuild_serialize(): void {
-        ArkUIGeneratedNativeModule._LifeCycle_onDidBuild(this.peer!.ptr)
-    }
-    private build_serialize(): void {
-        ArkUIGeneratedNativeModule._LifeCycle_build(this.peer!.ptr)
-    }
-}
-export class ExtendableComponent_serializer {
-    public static write(buffer: SerializerBase, value: ExtendableComponent): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ExtendableComponent {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ExtendableComponentInternal.fromPtr(ptr)
-    }
-}
-export class LifeCycle_serializer {
-    public static write(buffer: SerializerBase, value: LifeCycle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): LifeCycle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LifeCycleInternal.fromPtr(ptr)
-    }
+
+/**
+ * Definition of extendable component, which is base class of custom component and custom dialog.
+ *
+ * @implements LifeCycle
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @crossplatform
+ * @atomicservice
+ * @since 20
+ */
+export abstract class ExtendableComponent implements LifeCycle {
+    /**
+     * Get current UIContext.
+     *
+     * @returns { UIContext } The UIContext that the custom component belongs to.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
+    abstract getUIContext(): UIContext
+
+    /**
+     * Get uniqueId of the custom component.
+     *
+     * @returns { int } - The uniqueId of the custom component.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
+    abstract getUniqueId(): int
 }

@@ -136,9 +136,6 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
 }
 export type QRCodeInterface = (value: string) => QRCodeAttribute;
 export interface QRCodeAttribute extends CommonMethod {
-    setQRCodeOptions(value: string): this {
-        return this
-    }
     color(value: ResourceColor | undefined): this
     backgroundColor(value: ResourceColor | undefined): this
     contentOpacity(value: number | Resource | undefined): this
@@ -147,9 +144,6 @@ export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttrib
     color_value?: ResourceColor | undefined
     backgroundColor_value?: ResourceColor | undefined
     contentOpacity_value?: number | Resource | undefined
-    public setQRCodeOptions(value: string): this {
-        return this
-    }
     public color(value: ResourceColor | undefined): this {
         return this
     }
@@ -203,9 +197,10 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
     }
 }
 /** @memo */
-export function QRCodeImpl(
+export function QRCode(
     /** @memo */
     style: ((attributes: QRCodeAttribute) => void) | undefined,
+    value: string,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -213,7 +208,9 @@ export function QRCodeImpl(
         return new ArkQRCodeComponent()
     })
     NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (_: ArkQRCodePeer) => {
+        receiver.setQRCodeOptions(value)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

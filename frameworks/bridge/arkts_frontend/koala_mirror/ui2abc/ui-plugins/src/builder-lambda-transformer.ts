@@ -14,9 +14,8 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { BuilderLambdaNames, InternalAnnotations, getCustomComponentOptionsName, styledInstance, uiAttributeName } from "./utils"
+import { BuilderLambdaNames, InternalAnnotations, getCustomComponentOptionsName, styledInstance, uiAttributeName, DecoratorNames } from "./utils"
 import { StructDescriptor, StructsResolver } from "./struct-recorder"
-import { DecoratorNames } from "./property-translators/utils"
 import { fieldOf } from "./property-transformers"
 import { addAnnotation, annotation, backingField, removeAnnotationByName } from "./common/arkts-utils"
 
@@ -116,7 +115,7 @@ export function builderLambdaFunctionName(node: arkts.CallExpression): string | 
     return builderLambdaArgumentName(annotation)
 }
 /*
- Improve: remove this once compiler is capable of inferring type on it's own
+ Improve: remove this once compiler is capable of inferring type on its own
   whole function is a couple of hacks
  */
 function inferType(node: arkts.CallExpression): arkts.Identifier | undefined {
@@ -262,7 +261,7 @@ function transformBuilderLambdaCall(resolver: StructsResolver | undefined, node:
         })
     }
     const reuseAgrs: arkts.Expression[] = []
-    if (reuseIndex > -1 && node.arguments.length <= reuseIndex + 1) {
+    if (reuseIndex > -1) {
         reuseAgrs.push(arkts.factory.createStringLiteral(reuseKey!))
         if (node.arguments.length <= reuseIndex + 1) {
             reuseAgrs.push(arkts.factory.createUndefinedLiteral())

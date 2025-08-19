@@ -60,7 +60,9 @@ export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeListDividerOptions({ strokeWidth: 0.0 } as ListDividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeListDividerOptions(value_value)
         }
@@ -94,9 +96,6 @@ export interface ListItemGroupOptions {
 }
 export type ListItemGroupInterface = (options?: ListItemGroupOptions) => ListItemGroupAttribute;
 export interface ListItemGroupAttribute extends CommonMethod {
-    setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
     divider(value: ListDividerOptions | null | undefined): this { return this; }
     childrenMainSize(value: ChildrenMainSize | undefined): this { return this; }
     attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
@@ -104,9 +103,6 @@ export interface ListItemGroupAttribute extends CommonMethod {
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | null | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
-    public setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        return this
-    }
     public divider(value: ListDividerOptions | null | undefined): this {
         return this
     }
@@ -151,9 +147,10 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
     }
 }
 /** @memo */
-export function ListItemGroupImpl(
+export function ListItemGroup(
     /** @memo */
     style: ((attributes: ListItemGroupAttribute) => void) | undefined,
+    options?: ListItemGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -161,7 +158,9 @@ export function ListItemGroupImpl(
         return new ArkListItemGroupComponent()
     })
     NodeAttach<ArkListItemGroupPeer>((): ArkListItemGroupPeer => ArkListItemGroupPeer.create(receiver), (_: ArkListItemGroupPeer) => {
+        receiver.setListItemGroupOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

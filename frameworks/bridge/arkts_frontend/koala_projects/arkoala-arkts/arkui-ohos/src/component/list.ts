@@ -122,7 +122,9 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeListDividerOptions({ strokeWidth: 0.0 } as ListDividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeListDividerOptions(value_value)
         }
@@ -643,9 +645,6 @@ export type Callback_Number_Number_Number_Void = (start: number, end: number, ce
 export type Callback_Number_Boolean = (index: number) => boolean;
 export type Callback_Number_Number_Boolean = (from: number, to: number) => boolean;
 export interface ListAttribute extends ScrollableCommonMethod {
-    setListOptions(options?: ListOptions): this {
-        return this
-    }
     alignListItem(value: ListItemAlign | undefined): this { return this; }
     listDirection(value: Axis | undefined): this { return this; }
     contentStartOffset(value: number | undefined): this { return this; }
@@ -714,9 +713,6 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
-    public setListOptions(options?: ListOptions): this {
-        return this
-    }
     public alignListItem(value: ListItemAlign | undefined): this {
         return this
     }
@@ -1187,9 +1183,10 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     }
 }
 /** @memo */
-export function ListImpl(
+export function List(
     /** @memo */
     style: ((attributes: ListAttribute) => void) | undefined,
+    options?: ListOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1197,8 +1194,10 @@ export function ListImpl(
         return new ArkListComponent()
     })
     NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (_: ArkListPeer) => {
+        receiver.setListOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }
 export class ListScrollerInternal {

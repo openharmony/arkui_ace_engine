@@ -26,7 +26,10 @@ config("ani_config") {
 ohos_shared_library("drawable_descriptor_ani") {
   configs = [ ":ani_config" ]
   sources = [ "./src/drawable_descriptor_inner.cpp" ]
-  deps = [ "$ace_root/build:libace_compatible" ]
+  deps = [ 
+    "$ace_root/build:libace_compatible",
+    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
+  ]
   external_deps = [
     "cJSON:cjson",
     "graphic_2d:2d_graphics",
@@ -34,6 +37,7 @@ ohos_shared_library("drawable_descriptor_ani") {
     "image_framework:image_taihe",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   part_name = "ace_engine"
   subsystem_name = "arkui"

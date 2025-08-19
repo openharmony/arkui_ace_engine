@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CustomTextDecoder, float32, int32, int64 } from "@koalaui/common"
+import { CustomTextDecoder, float32, float64, int32, int64 } from "@koalaui/common"
 import { Tags, CallbackResource } from "./SerializerBase";
 import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer";
@@ -115,6 +115,13 @@ export class DeserializerBase {
         return value
     }
 
+    readFloat64(): float64 {
+        this.checkCapacity(8)
+        const value = this.view.getFloat64(this.position, true)
+        this.position += 8
+        return value
+    }
+
     readBoolean(): boolean {
         this.checkCapacity(1)
         const value = this.view.getInt8(this.position)
@@ -202,12 +209,11 @@ export class DeserializerBase {
         }
         return suffix
     }
-    readBuffer(): NativeBuffer {
+    readBuffer(): ArrayBuffer {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
-        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
-        return new NativeBuffer(data, length, resource.release)
+        return InteropNativeModule._MaterializeBuffer(data, BigInt(length), resource.resourceId, resource.hold, resource.release)
     }
 }
 

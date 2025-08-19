@@ -36,113 +36,133 @@ Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_RETURN(panGestureEvent, errValue);
 
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetX());
+    double value = PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX());
     return Converter::ArkValue<Ark_Number>(value);
 }
 void SetOffsetXImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetX)
 {
     CHECK_NULL_VOID(peer);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(offsetX);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_VOID(panGestureEvent);
 
     auto convValue = Converter::Convert<float>(*offsetX);
-    event->SetOffsetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
+    panGestureEvent->SetOffsetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
 Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_RETURN(panGestureEvent, errValue);
 
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetOffsetY());
+    double value = PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY());
     return Converter::ArkValue<Ark_Number>(value);
 }
 void SetOffsetYImpl(Ark_PanGestureEvent peer,
                     const Ark_Number* offsetY)
 {
     CHECK_NULL_VOID(peer);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(offsetY);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_VOID(panGestureEvent);
 
     auto convValue = Converter::Convert<float>(*offsetY);
-    event->SetOffsetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
+    panGestureEvent->SetOffsetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
 }
 Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_RETURN(panGestureEvent, errValue);
 
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityX());
+    double value = PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX());
     return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityXImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityX)
 {
     CHECK_NULL_VOID(peer);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(velocityX);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_VOID(panGestureEvent);
 
     auto convValue = Converter::Convert<float>(*velocityX);
-    Offset offsetPerSecond = event->GetVelocity().GetOffsetPerSecond();
+    Offset offsetPerSecond = panGestureEvent->GetVelocity().GetOffsetPerSecond();
     offsetPerSecond.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
-    event->SetVelocity(Velocity(offsetPerSecond));
+    panGestureEvent->SetVelocity(Velocity(offsetPerSecond));
 }
 Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_RETURN(panGestureEvent, errValue);
 
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityY());
+    double value = PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY());
     return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityYImpl(Ark_PanGestureEvent peer,
                       const Ark_Number* velocityY)
 {
     CHECK_NULL_VOID(peer);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(velocityY);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_VOID(panGestureEvent);
 
     auto convValue = Converter::Convert<float>(*velocityY);
-    Offset offsetPerSecond = event->GetVelocity().GetOffsetPerSecond();
+    Offset offsetPerSecond = panGestureEvent->GetVelocity().GetOffsetPerSecond();
     offsetPerSecond.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
-    event->SetVelocity(Velocity(offsetPerSecond));
+    panGestureEvent->SetVelocity(Velocity(offsetPerSecond));
 }
 Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_RETURN(panGestureEvent, errValue);
 
-    double value = PipelineBase::Px2VpWithCurrentDensity(event->GetVelocity().GetVelocityValue());
+    double value = PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue());
     return Converter::ArkValue<Ark_Number>(value);
 }
 void SetVelocityImpl(Ark_PanGestureEvent peer,
                      const Ark_Number* velocity)
 {
     CHECK_NULL_VOID(peer);
-    PanGestureEvent* event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
     CHECK_NULL_VOID(velocity);
+    PanGestureEvent* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(event);
+    CHECK_NULL_VOID(panGestureEvent);
 
     auto convValue = Converter::Convert<float>(*velocity);
-    Offset offsetPerSecond = event->GetVelocity().GetOffsetPerSecond();
+    Offset offsetPerSecond = panGestureEvent->GetVelocity().GetOffsetPerSecond();
     offsetPerSecond.SetX(PipelineBase::Vp2PxWithCurrentDensity(convValue));
     offsetPerSecond.SetY(PipelineBase::Vp2PxWithCurrentDensity(convValue));
-    event->SetVelocity(Velocity(offsetPerSecond));
+    panGestureEvent->SetVelocity(Velocity(offsetPerSecond));
 }
 } // PanGestureEventAccessor
 const GENERATED_ArkUIPanGestureEventAccessor* GetPanGestureEventAccessor()

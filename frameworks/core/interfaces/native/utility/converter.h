@@ -275,10 +275,7 @@ namespace Converter {
     }
 
     template<>
-    inline std::string Convert(const Ark_String& src)
-    {
-        return (src.chars != nullptr) ? std::string(src.chars, src.length) : "";
-    }
+    std::string Convert(const Ark_String& src);
 
     template<>
     inline std::string Convert(const Ark_Buffer& src)
@@ -356,8 +353,7 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
     {
-        auto str = value.chars ? value.chars : "";
-        return ImageSourceInfo(str);
+        return ImageSourceInfo(Convert<std::string>(value));
     }
 
     template<>
@@ -858,6 +854,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
     template<> void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

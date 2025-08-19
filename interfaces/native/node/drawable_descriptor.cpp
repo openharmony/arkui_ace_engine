@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-
 #include "node_extened.h"
+#include "node_model.h"
 
 #include "base/utils/utils.h"
 
@@ -57,6 +57,11 @@ ArkUI_DrawableDescriptor* OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap
 
 void OH_ArkUI_DrawableDescriptor_Dispose(ArkUI_DrawableDescriptor* drawableDescriptor)
 {
+    auto decreaseRefApi = reinterpret_cast<void (*)(void*)>(OHOS::Ace::NodeModel::DecreaseRefDrawable());
+    if (decreaseRefApi && drawableDescriptor->newDrawableDescriptor) {
+        decreaseRefApi(drawableDescriptor->newDrawableDescriptor);
+        return;
+    }
     delete drawableDescriptor;
 }
 
@@ -93,8 +98,7 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimationDuration(ArkUI_DrawableDescripto
     return drawableDescriptor->animatedDrawableDescriptor->GetDuration();
 }
 
-void OH_ArkUI_DrawableDescriptor_SetAnimationIteration(
-    ArkUI_DrawableDescriptor* drawableDescriptor, int32_t iteration)
+void OH_ArkUI_DrawableDescriptor_SetAnimationIteration(ArkUI_DrawableDescriptor* drawableDescriptor, int32_t iteration)
 {
     CHECK_NULL_VOID(drawableDescriptor);
     CHECK_NULL_VOID(drawableDescriptor->animatedDrawableDescriptor);

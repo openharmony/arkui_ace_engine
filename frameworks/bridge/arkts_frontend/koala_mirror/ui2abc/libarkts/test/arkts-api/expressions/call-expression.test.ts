@@ -54,6 +54,9 @@ suite(util.basename(__filename), () => {
                             )
                         ],
                         undefined,
+                        false,
+                        false,
+                        undefined,
                     )
                 )
             ],

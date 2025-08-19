@@ -28,6 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -55,6 +56,7 @@ namespace {
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
+    constexpr uint16_t UTF16_BOM = 0xFEFF;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -668,8 +670,28 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
+    if (src.chars == nullptr) return u"";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return std::u16string(data, src.length);
+    }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
+std::string Convert(const Ark_String& src)
+{
+    if (src.chars == nullptr) return "";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
+    }
+    return std::string(src.chars, src.length);
 }
 
 template<>
@@ -2085,6 +2107,9 @@ template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
+    dst.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+
     if (auto dim = OptConvert<Dimension>(src.width); dim) {
         if (dim.has_value()) {
             if (dim.value().IsNegative()) {
@@ -3287,5 +3312,15 @@ void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src)
             dst = std::make_optional(peer->levelOrder->GetOrder());
         }
     }
+}
+
+template<>
+void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
+{
+    if (src) {
+        dst = Color(src->colorValue.value);
+        return;
+    }
+    dst = std::nullopt;
 }
 } // namespace OHOS::Ace::NG::Converter

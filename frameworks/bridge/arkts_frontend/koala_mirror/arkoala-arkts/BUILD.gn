@@ -132,8 +132,22 @@ npm_cmd("arkui_build") {
     ]
     project_path = rebase_path("./arkui")
     target_out_path = rebase_path("$target_out_dir/arkui.abc")
-    built_file_path = rebase_path("./arkui/build-m3-impl/arkui-m3.abc")
-    run_tasks = [ "build:m3" ]
+    built_file_path = rebase_path("./arkui/build/arkui.abc")
+    run_tasks = [ "build" ]
+}
+
+npm_cmd("global_resource_build") {
+    outputs = [
+        "$target_out_dir/resource.abc"
+    ]
+    deps = [
+      "$koala_root/incremental:incremental_abc",
+      "$koala_root/interop:interop",
+    ]
+    project_path = rebase_path("./modules/global.resource")
+    target_out_path = rebase_path("$target_out_dir/resource.abc")
+    built_file_path = rebase_path("./modules/global.resource/build/src/resource.abc")
+    run_tasks = [ "build:modules" ]
 }
 
 npm_cmd("arkoala_link") {
@@ -143,10 +157,11 @@ npm_cmd("arkoala_link") {
     project_path = rebase_path(".")
     target_out_path = rebase_path("$target_out_dir")
     built_file_path = rebase_path("build/bootPandaFiles/arkoala.abc")
-    run_tasks = [ "link:arkoala:m3" ]
+    run_tasks = [ "link" ]
 
     deps = [
-      ":arkui_build"
+      ":arkui_build",
+      ":global_resource_build",
     ]
 
     external_deps = [

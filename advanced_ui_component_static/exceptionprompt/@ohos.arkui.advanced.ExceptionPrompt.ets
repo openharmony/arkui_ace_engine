@@ -74,7 +74,7 @@ class EnvironmentCallbackEntry implements EnvironmentCallback {
 @Component
 export struct ExceptionPrompt {
   @Observed
-  @PropRef options: PromptOptions = {} as PromptOptions;
+  @PropRef options: PromptOptions = {marginType: MarginType.DEFAULT_MARGIN, marginTop: 0} as PromptOptions;
   @State fontSizeScale: number | undefined = undefined;
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   maxAppFontScale: number = 1;

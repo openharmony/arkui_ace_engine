@@ -113,9 +113,6 @@ export enum LoadingProgressStyle {
 }
 export type LoadingProgressInterface = () => LoadingProgressAttribute;
 export interface LoadingProgressAttribute extends CommonMethod {
-    setLoadingProgressOptions(): this {
-        return this
-    }
     color(value: ResourceColor | undefined): this
     enableLoading(value: boolean | undefined): this
     contentModifier(value: ContentModifier | undefined): this
@@ -124,9 +121,6 @@ export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements Loa
     color_value?: ResourceColor | undefined
     enableLoading_value?: boolean | undefined
     contentModifier_value?: ContentModifier | undefined
-    public setLoadingProgressOptions(): this {
-        return this
-    }
     public color(value: ResourceColor | undefined): this {
         return this
     }
@@ -182,9 +176,10 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
     }
 }
 /** @memo */
-export function LoadingProgressImpl(
+export function LoadingProgress(
     /** @memo */
     style: ((attributes: LoadingProgressAttribute) => void) | undefined,
+    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -192,7 +187,9 @@ export function LoadingProgressImpl(
         return new ArkLoadingProgressComponent()
     })
     NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (_: ArkLoadingProgressPeer) => {
+        receiver.setLoadingProgressOptions()
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

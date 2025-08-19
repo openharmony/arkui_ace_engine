@@ -373,7 +373,9 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeDividerOptions({ strokeWidth: 0.0 } as DividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerOptions(value_value)
         }
@@ -385,7 +387,9 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeDividerOptions({ strokeWidth: 0.0 } as DividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerOptions(value_value)
         }
@@ -487,9 +491,6 @@ export type Type_TextPickerAttribute_onChange_callback = (value: string | Array<
 export type Callback_Union_Number_Array_Number_Void = (selected: number | Array<number>) => void;
 export type Callback_Union_String_Array_String_Void = (value: string | Array<string>) => void;
 export interface TextPickerAttribute extends CommonMethod {
-    setTextPickerOptions(options?: TextPickerOptions): this {
-        return this
-    }
     defaultPickerItemHeight(value: number | string | undefined): this
     canLoop(value: boolean | undefined): this
     disappearTextStyle(value: PickerTextStyle | undefined): this
@@ -528,9 +529,6 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     gradientHeight_value?: Dimension | undefined
     enableHapticFeedback_value?: boolean | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
-    public setTextPickerOptions(options?: TextPickerOptions): this {
-        return this
-    }
     public defaultPickerItemHeight(value: number | string | undefined): this {
         return this
     }
@@ -886,9 +884,10 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function TextPickerImpl(
+export function TextPicker(
     /** @memo */
     style: ((attributes: TextPickerAttribute) => void) | undefined,
+    options?: TextPickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -896,7 +895,9 @@ export function TextPickerImpl(
         return new ArkTextPickerComponent()
     })
     NodeAttach<ArkTextPickerPeer>((): ArkTextPickerPeer => ArkTextPickerPeer.create(receiver), (_: ArkTextPickerPeer) => {
+        receiver.setTextPickerOptions(options)
         style?.(receiver)
         content_?.()
+        receiver.applyAttributesFinish()
     })
 }

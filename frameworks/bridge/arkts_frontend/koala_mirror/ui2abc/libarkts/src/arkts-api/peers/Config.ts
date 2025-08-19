@@ -17,6 +17,7 @@ import { ArktsObject } from "./ArktsObject"
 import { global } from "../static/global"
 import { passStringArray } from "../utilities/private"
 import { KNativePointer, nullptr } from "@koalaui/interop"
+import { trace } from "../../tracer"
 
 export class Config extends ArktsObject {
     constructor(peer: KNativePointer) {
