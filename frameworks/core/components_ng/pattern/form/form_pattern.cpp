@@ -191,7 +191,6 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
-    EventReport::StartFormModifyTimeoutReportTimer(cardInfo_.id, cardInfo_.bundleName, cardInfo_.cardName);
 }
 
 void FormPattern::InitClickEvent()
@@ -648,7 +647,6 @@ void FormPattern::OnVisibleChange(bool isVisible)
 
 void FormPattern::OnModifyDone()
 {
-    EventReport::StopFormModifyTimeoutReportTimer(cardInfo_.id);
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
