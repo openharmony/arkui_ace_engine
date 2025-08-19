@@ -29,6 +29,11 @@ import { ArkRowComponent, RowAttribute, ArkRowPeer } from '../component/row';
 import { ArkRowSplitComponent, RowSplitAttribute, ArkRowSplitPeer } from '../component/rowSplit';
 import { ArkStackComponent, StackAttribute, ArkStackPeer } from '../component/stack';
 import { ArkSymbolGlyphComponent, SymbolGlyphAttribute, ArkSymbolGlyphPeer } from '../component/symbolglyph';
+import { ArkSearchComponent, SearchAttribute, ArkSearchPeer, SearchOptions } from '../component/search';
+import { ArkTextInputComponent, TextInputAttribute, ArkTextInputPeer, TextInputOptions } from '../component/textInput';
+import { ArkTextAreaComponent, TextAreaAttribute, ArkTextAreaPeer, TextAreaOptions } from '../component/textArea';
+import { ArkMarqueeComponent, MarqueeAttribute, ArkMarqueePeer, MarqueeOptions } from '../component/marquee';
+import { ArkHyperlinkComponent, HyperlinkAttribute, ArkHyperlinkPeer } from '../component/hyperlink';
 import { ArkRichEditorComponent, RichEditorAttribute, RichEditorOptions, RichEditorStyledStringOptions } from '../component/richEditor';
 import { applyAttributeModifierBase, applyCommonModifier } from "./modifiers/ArkCommonModifier";
 import { CommonModifier } from '../CommonModifier';
@@ -47,6 +52,11 @@ import { RowModifier } from '../RowModifier';
 import { RowSplitModifier } from '../RowSplitModifier';
 import { StackModifier } from '../StackModifier';
 import { SymbolGlyphModifier } from '../SymbolGlyphModifier';
+import { SearchModifier } from '../SearchModifier';
+import { TextInputModifier } from '../TextInputModifier';
+import { TextAreaModifier } from '../TextAreaModifier';
+import { MarqueeModifier } from '../MarqueeModifier';
+import { HyperlinkModifier } from '../HyperlinkModifier';
 import { RichEditorModifier } from '../RichEditorModifier';
 import { Resource } from 'global.resource';
 import { runtimeType, RuntimeType } from '@koalaui/interop';
@@ -858,6 +868,229 @@ export function hookWaterFlowAttributeModifier(component: ArkWaterFlowComponent,
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<WaterFlowAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 
+}
+
+export function hookSearchAttributeModifier(component: ArkSearchComponent,
+    modifier: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): SearchModifier => {
+        let isSearchModifier: boolean = modifier instanceof SearchModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new SearchModifier();
+        if (isSearchModifier) {
+            let searchModifier = modifier as object as SearchModifier;
+            initModifier.mergeModifier(searchModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length > 1) {
+            throw new Error('more than 1 parameters')
+        }
+        let value_casted: SearchOptions | undefined = undefined
+        if (params.length >= 0) {
+            value_casted = params[0] as SearchOptions
+        }
+        let searchPeer: ArkSearchPeer = component.getPeer() as Object as ArkSearchPeer;
+        searchPeer.setSearchOptionsAttribute(value_casted)
+    };
+    let updaterReceiver = (): ArkSearchComponent => {
+        let componentNew: ArkSearchComponent = new ArkSearchComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SearchAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookTextInputAttributeModifier(component: ArkTextInputComponent,
+    modifier: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TextInputModifier => {
+        let isTextInputModifier: boolean = modifier instanceof TextInputModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new TextInputModifier();
+        if (isTextInputModifier) {
+            let textInputModifier = modifier as object as TextInputModifier;
+            initModifier.mergeModifier(textInputModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length > 1) {
+            throw new Error('more than 1 parameters')
+        }
+        let value_casted: TextInputOptions | undefined = undefined
+        if (params.length >= 0) {
+            value_casted = params[0] as TextInputOptions
+        }
+        let textInputPeer: ArkTextInputPeer = component.getPeer() as Object as ArkTextInputPeer;
+        textInputPeer.setTextInputOptionsAttribute(value_casted)
+    };
+    let updaterReceiver = (): ArkTextInputComponent => {
+        let componentNew: ArkTextInputComponent = new ArkTextInputComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TextInputAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookTextAreaAttributeModifier(component: ArkTextAreaComponent,
+    modifier: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): TextAreaModifier => {
+        let isTextAreaModifier: boolean = modifier instanceof TextAreaModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new TextAreaModifier();
+        if (isTextAreaModifier) {
+            let textAreaModifier = modifier as object as TextAreaModifier;
+            initModifier.mergeModifier(textAreaModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length > 1) {
+            throw new Error('more than 1 parameters')
+        }
+        let value_casted: TextAreaOptions | undefined = undefined
+        if (params.length >= 0) {
+            value_casted = params[0] as TextAreaOptions
+        }
+        let textAreaPeer: ArkTextAreaPeer = component.getPeer() as Object as ArkTextAreaPeer;
+        textAreaPeer.setTextAreaOptionsAttribute(value_casted)
+    };
+    let updaterReceiver = (): ArkTextAreaComponent => {
+        let componentNew: ArkTextAreaComponent = new ArkTextAreaComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<TextAreaAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookMarqueeAttributeModifier(component: ArkMarqueeComponent,
+    modifier: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): MarqueeModifier => {
+        let isMarqueeModifier: boolean = modifier instanceof MarqueeModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new MarqueeModifier();
+        if (isMarqueeModifier) {
+            let marqueeModifier = modifier as object as MarqueeModifier;
+            initModifier.mergeModifier(marqueeModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length > 1) {
+            throw new Error('more than 1 parameters')
+        }
+        let value_casted: MarqueeOptions | undefined = undefined
+        if (params.length >= 0) {
+            value_casted = params[0] as MarqueeOptions
+        }
+        if (value_casted !== undefined) {
+            let marqueePeer: ArkMarqueePeer = component.getPeer() as Object as ArkMarqueePeer;
+            marqueePeer.setMarqueeOptionsAttribute(value_casted! as MarqueeOptions)
+        }
+    };
+    let updaterReceiver = (): ArkMarqueeComponent => {
+        let componentNew: ArkMarqueeComponent = new ArkMarqueeComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<MarqueeAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookHyperlinkAttributeModifier(component: ArkHyperlinkComponent, modifier: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return ;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return ;
+    }
+    let attributeSet = (): HyperlinkModifier => {
+        let isHyperlinkModifier: boolean = modifier instanceof HyperlinkModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new HyperlinkModifier();
+        if (isHyperlinkModifier) {
+            let hyperlinkModifier = modifier as object as HyperlinkModifier;
+            initModifier.mergeModifier(hyperlinkModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length > 2) {
+            throw new Error('more than 2 parameters')
+        }
+        let address_casted: string | Resource | undefined = undefined
+        let content_casted: string | Resource | undefined = undefined
+        if (params.length >= 1) {
+            const param0_type = runtimeType(params[0])
+            if (RuntimeType.UNDEFINED !== param0_type) {
+                address_casted = params[0] as string | Resource
+            }
+        }
+        if (params.length == 2) {
+            const param1_type = runtimeType(params[1])
+            if (RuntimeType.UNDEFINED !== param1_type) {
+                content_casted = params[1] as string | Resource
+            }
+        }
+        if (address_casted !== undefined) {
+            let hyperlinkPeer: ArkHyperlinkPeer = component.getPeer() as Object as ArkHyperlinkPeer;
+            hyperlinkPeer.setHyperlinkOptionsAttribute(address_casted! as string | Resource, content_casted);
+        }
+    };
+    let updaterReceiver = (): ArkHyperlinkComponent => {
+        let initComponent: ArkHyperlinkComponent = new ArkHyperlinkComponent();
+        initComponent.setPeer(component.getPeer());
+        return initComponent;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<HyperlinkAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookRichEditorAttributeModifier(component: ArkRichEditorComponent,
