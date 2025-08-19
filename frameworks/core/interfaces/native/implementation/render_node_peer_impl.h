@@ -17,14 +17,14 @@
 
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "base/memory/referenced.h"
 
 struct RenderNodePeer final {
 public:
-    enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
-    LengthMetricsUnit lengthMetricsUnit{ LengthMetricsUnit::DEFAULT };
+    OHOS::Ace::NG::LengthMetricsUnit lengthMetricsUnit{ OHOS::Ace::NG::LengthMetricsUnit::DEFAULT };
     std::optional<uint8_t> shadowAlpha{ std::nullopt };
     std::string label = "";
     friend OHOS::Ace::NG::PeerUtils;
@@ -35,16 +35,6 @@ public:
 
 protected:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
-
-    RenderNodePeer()
-    {
-        auto nodeId = OHOS::Ace::ElementRegister::GetInstance()->MakeUniqueId();
-        node = OHOS::Ace::NG::FrameNode::GetOrCreateFrameNode(
-            OHOS::Ace::V2::RENDER_NODE_ETS_TAG,
-            nodeId,
-            []() { return OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RenderNodePattern>(); });
-        node->SetIsArkTsRenderNode(true);
-    }
 
     RenderNodePeer(const OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>& src)
         : node(src)

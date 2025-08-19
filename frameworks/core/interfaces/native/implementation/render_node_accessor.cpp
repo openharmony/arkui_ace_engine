@@ -31,7 +31,6 @@ namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
 namespace {
 constexpr int32_t ARK_UNION_UNDEFINED = 1;
-enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
 
 DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, DimensionUnit defaultUnit)
 {
