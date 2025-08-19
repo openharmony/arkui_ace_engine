@@ -557,6 +557,8 @@ float ErrorDecorator::MeasureDecorator(float contentWidth, const std::u16string&
     CHECK_NULL_RETURN(textLayoutProperty, 0.0);
     RectF textFieldFrameRect = decoratedNode->GetGeometryNode()->GetFrameRect();
     auto errorValue = textFieldPattern->GetErrorTextString();
+    auto theme = textFieldPattern->GetTheme();
+    CHECK_NULL_RETURN(theme, 0.0);
     if (textFieldPattern->IsShowError() && !textFieldPattern->IsDisabled() && !errorValue.empty()) {
         float padding = 0.0f;
         if (textFieldLayoutProperty && textFieldLayoutProperty->GetPaddingProperty()) {
@@ -573,6 +575,9 @@ float ErrorDecorator::MeasureDecorator(float contentWidth, const std::u16string&
             auto counterDecorator = textFieldPattern->GetCounterDecorator();
             if (counterDecorator) {
                 layoutWidth -= counterDecorator->GetContentWidth(); // subtract counter length
+            }
+            if (theme->GetErrorTextAlign() == TextAlign::CENTER) {
+                layoutWidth -= counterDecorator->GetContentWidth();
             }
         }
         LayoutConstraintF invisibleConstraint;
