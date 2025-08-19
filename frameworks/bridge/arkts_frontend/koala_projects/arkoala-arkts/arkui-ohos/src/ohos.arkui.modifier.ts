@@ -59,6 +59,16 @@ export { ShapeModifier } from './ShapeModifier';
 
 export { SymbolGlyphModifier } from "./SymbolGlyphModifier"
 
+export { SearchModifier } from "./SearchModifier"
+
+export { TextInputModifier } from "./TextInputModifier"
+
+export { TextAreaModifier } from "./TextAreaModifier"
+
+export { MarqueeModifier } from "./MarqueeModifier"
+
+export { HyperlinkModifier } from "./HyperlinkModifier"
+
 // export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'
 
 export { VideoModifier } from './VideoModifier';

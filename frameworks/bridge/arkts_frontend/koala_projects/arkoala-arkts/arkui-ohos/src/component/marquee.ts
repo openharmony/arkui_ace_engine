@@ -22,15 +22,18 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles } from "./common"
 import { ResourceColor, Length } from "./units"
 import { FontWeight, MarqueeUpdateStrategy, Color } from "./enums"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { MarqueeModifier } from "../MarqueeModifier"
+import { hookMarqueeAttributeModifier } from "../handwritten"
 
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
+    _attributeSet?: MarqueeModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -232,15 +235,16 @@ export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
         return this
     }
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    allowScale(value: boolean | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this
-    onStart(value: (() => void) | undefined): this
-    onBounce(value: (() => void) | undefined): this
-    onFinish(value: (() => void) | undefined): this
+    fontColor(value: ResourceColor | undefined): this { return this; }
+    fontSize(value: Length | undefined): this { return this; }
+    allowScale(value: boolean | undefined): this { return this; }
+    fontWeight(value: number | FontWeight | string | undefined): this { return this; }
+    fontFamily(value: string | Resource | undefined): this { return this; }
+    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this { return this; }
+    onStart(value: (() => void) | undefined): this { return this; }
+    onBounce(value: (() => void) | undefined): this { return this; }
+    onFinish(value: (() => void) | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
 }
 export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttribute {
     fontColor_value?: ResourceColor | undefined
@@ -367,7 +371,12 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         }
         return this
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookMarqueeAttributeModifier(this, modifier);
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
