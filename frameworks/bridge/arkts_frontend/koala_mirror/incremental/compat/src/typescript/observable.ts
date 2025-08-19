@@ -522,22 +522,9 @@ function clearObservable(data: any) {
     }
 }
 
-/**
- * Interface for getting the observed properties of a class
- */
-export interface TrackableProps {
-    /**
-     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
-     */
-    trackedProperties(): ReadonlySet<string> | undefined
-}
-
-export function trackableProperties(value: any): ReadonlySet<string> | undefined  {
-    if (typeof value.trackedProperties === 'function') {
-       return (value as TrackableProps).trackedProperties()
-    }
-    if (typeof value.tracedProperties === 'function') {
-        return (value as ObservableClassV2).tracedProperties()
+function getClassMetadata(value: any): ClassMetadata | undefined {
+    if (value !== undefined && typeof value.getClassMetadata === 'function') {
+        return (value as ObservableClass).getClassMetadata()
     }
     return undefined
 }
@@ -546,15 +533,96 @@ export function trackableProperties(value: any): ReadonlySet<string> | undefined
  * Interface for getting the observability status of a class
  */
 export interface ObservableClass {
-    /**
-     * Indicates whether the class is decorated with `@Observed`.
-     */
-    isObserved(): boolean
+    getClassMetadata(): ClassMetadata | undefined
 }
 
 /**
- * To implement the ObservedV2 decorator
+ * Interface for checking the observed properties of a class
  */
-export interface ObservableClassV2 {
-    tracedProperties(): ReadonlySet<string> | undefined
+export interface TrackableProperties {
+    isTrackable(propertyName: string): boolean
+}
+
+/**
+ * If value is a class, then returns a list of trackable properties
+ * @param value
+ */
+export function trackableProperties<T>(value: T): TrackableProperties | undefined  {
+    return getClassMetadata(value)
+}
+
+export class ClassMetadata implements TrackableProperties {
+    private readonly parent: ClassMetadata | undefined
+    private readonly markAsObservedV1: boolean
+    private readonly markAsObservedV2: boolean
+    private static readonly metadataPropName = "__classMetadata"
+
+    /**
+     * Class property names marked with the @Track or @Trace decorator
+     * @private
+     */
+    private readonly trackableProperties: ReadonlySet<string> | undefined
+
+    /**
+     * Contains fields marked with the @Type decorator.
+     * The key of the map is the property name and the value is the typename of the corresponding field.
+     * @private
+     */
+    private readonly typedProperties: ReadonlyMap<string, string> | undefined
+
+    constructor(parent: ClassMetadata | undefined,
+                markAsObservedV1: boolean,
+                markAsObservedV2: boolean,
+                trackable: string[] | undefined,
+                typed: [string, string][] | undefined) {
+        this.parent = parent
+        this.markAsObservedV1 = markAsObservedV1
+        this.markAsObservedV2 = markAsObservedV2
+        if (trackable) {
+            this.trackableProperties = new Set<string>(trackable)
+        }
+        if (typed) {
+            this.typedProperties = new Map<string, string>(typed)
+        }
+    }
+
+    isObservedV1(value: Object): boolean {
+        return this.markAsObservedV1
+    }
+
+    isObservedV2(value: Object): boolean {
+        return this.markAsObservedV2
+    }
+
+    isTrackable(propertyName: string): boolean {
+        return (this.trackableProperties?.has(propertyName) || this.parent?.isTrackable(propertyName)) ?? false
+    }
+
+    hasTrackableProperties(): boolean {
+        if (this.trackableProperties) {
+            return this.trackableProperties!.size > 0
+        }
+        return this.parent?.hasTrackableProperties() ?? false
+    }
+
+    getTypenameTypeDecorator(propertyName: string): string | undefined {
+        if (this.typedProperties) {
+            return this.typedProperties?.get(propertyName)
+        }
+        if (this.parent) {
+            return this.parent!.getTypenameTypeDecorator(propertyName)
+        }
+        return undefined
+    }
+
+    private static findClassMetadata(type: any): ClassMetadata | undefined {
+        let prototype = Object.getPrototypeOf(type)
+        while (prototype) {
+            if (prototype.hasOwnProperty(ClassMetadata.metadataPropName) && prototype.__classMetadata !== undefined) {
+                return prototype.__classMetadata
+            }
+            prototype = Object.getPrototypeOf(prototype)
+        }
+        return undefined
+    }
 }

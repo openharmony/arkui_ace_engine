@@ -14,7 +14,7 @@
  */
 
 import { KBuffer, DeserializerBase } from "@koalaui/interop"
-import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
+import { deserializeAndCallCallback } from "#generated/peers/CallbackDeserializeCall"
 import { ResourceHolder, InteropNativeModule } from "@koalaui/interop"
 
 enum CallbackEventKind {

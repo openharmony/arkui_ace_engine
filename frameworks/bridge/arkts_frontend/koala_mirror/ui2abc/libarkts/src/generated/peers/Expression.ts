@@ -36,6 +36,8 @@ import { AnnotatedExpression } from "./AnnotatedExpression"
 import { Literal } from "./Literal"
 import { TypeNode } from "./TypeNode"
 import { TypedAstNode } from "./TypedAstNode"
+import { extension_ExpressionGetPreferredTypePointer } from "./../../reexport-for-generated"
+import { extension_ExpressionSetPreferredTypePointer } from "./../../reexport-for-generated"
 
 export class Expression extends TypedAstNode {
     constructor(pointer: KNativePointer) {
@@ -73,6 +75,8 @@ export class Expression extends TypedAstNode {
     get toString(): string {
         return unpackString(global.generatedEs2panda._ExpressionToStringConst(global.context, this.peer))
     }
+    getPreferredTypePointer = extension_ExpressionGetPreferredTypePointer
+    setPreferredTypePointer = extension_ExpressionSetPreferredTypePointer
     protected readonly brandExpression: undefined
 }
 export function isExpression(node: object | undefined): node is Expression {

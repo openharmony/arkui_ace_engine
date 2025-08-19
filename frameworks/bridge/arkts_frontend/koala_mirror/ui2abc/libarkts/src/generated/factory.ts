@@ -1052,11 +1052,11 @@ export const factory = {
         return updateNodeByNode(TSAnyKeyword.createTSAnyKeyword(), original)
     }
     ,
-    createClassDeclaration(definition?: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
+    createClassDeclaration(definition: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
         return ClassDeclaration.createClassDeclaration(definition, modifierFlags)
     }
     ,
-    updateClassDeclaration(original: ClassDeclaration, definition?: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
+    updateClassDeclaration(original: ClassDeclaration, definition: ClassDefinition, modifierFlags?: Es2pandaModifierFlags): ClassDeclaration {
         if (isSameNativeObject(definition, original.definition) && isSameNativeObject(modifierFlags, original.modifierFlags))
             return original
         return updateNodeByNode(ClassDeclaration.createClassDeclaration(definition, modifierFlags), original)

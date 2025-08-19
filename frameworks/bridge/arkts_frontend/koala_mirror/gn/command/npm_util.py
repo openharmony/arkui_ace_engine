@@ -59,20 +59,15 @@ def run(args, dir = None):
     if os.environ.get("KOALA_LOG_STDOUT"):
         subprocess.run(["npm"] + args, env=os.environ, text=True, check=True, stderr=subprocess.STDOUT)
         return
-    try:
-        ret = subprocess.run(["npm"] + args, capture_output=True, env=os.environ, text=True, check=True)
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write(f"npm args: {args}; project: {project_path}:\n" + ret.stdout)
-            f.close()
-    except subprocess.CalledProcessError as e:
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("Error: " + e.stderr + "\n")
-            f.close()
-        print(f"Error: npm failure logged to {koala_log}")
-        print(open(koala_log, "r").read())
-        raise
+
+    result = subprocess.run(["npm"] + args, capture_output=True, env=os.environ, text=True)
+    with open(koala_log, "a+") as f:
+        f.write(f"npm args: {args}; project: {project_path}:\n" + result.stdout)
+        if result.returncode != 0:
+            f.write(f"npm args: {args}; project: {project_path}:\n" + result.stderr)
+            print(open(koala_log, "r").read())
+            raise Exception("npm failed")
+        f.close()
 
 def install(dir = None):
     run(["install", "--registry", NPM_REPO, "--verbose"], dir or project_path)

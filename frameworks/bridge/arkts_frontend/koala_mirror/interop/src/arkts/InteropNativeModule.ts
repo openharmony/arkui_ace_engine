@@ -75,5 +75,7 @@ export class InteropNativeModule {
     @ani.unsafe.Quick
     native static _CopyArray(data: KPointer, length: int64, args: KUint8ArrayPtr): void
     native static _ReportMemLeaks(): void
+    native static _MaterializeBuffer(data: KPointer, length: int64, resourceId: int32, hold: KPointer, release: KPointer): ArrayBuffer
+    native static _GetNativeBufferPointer(data: ArrayBuffer): KPointer
 }
 

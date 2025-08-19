@@ -62,7 +62,7 @@ export class ImportStorage {
                         Es2pandaImportFlags.IMPORT_FLAGS_NONE, // Improve: where to get it?
                     )
                 )
-                global.es2panda._InsertETSImportDeclarationAndParse(global.context, this.program.peer, importDeclaration.peer)
+                global.generatedEs2panda._InsertETSImportDeclarationAndParse(global.context, this.program.peer, importDeclaration.peer)
                 newStatements.push(importDeclaration)
             } else {
                 newStatements.push(statement)

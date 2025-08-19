@@ -4264,18 +4264,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetGestureModifierImpl(Ark_NativePointer node,
-                                const Opt_GestureModifier* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setGestureModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetBackgroundBrightnessImpl(Ark_NativePointer node,
                                      const Opt_BackgroundBrightnessOptions* value)
     {
@@ -20515,7 +20503,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetReuseIdImpl,
             CommonMethodModifier::SetReuseImpl,
             CommonMethodModifier::SetRenderFitImpl,
-            CommonMethodModifier::SetGestureModifierImpl,
             CommonMethodModifier::SetBackgroundBrightnessImpl,
             CommonMethodModifier::SetOnGestureJudgeBeginImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
@@ -34402,54 +34389,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<Ark_GestureGroupInterface>(300);
     }
     } // GestureGroupInterfaceAccessor
-    namespace GestureModifierAccessor {
-    void DestroyPeerImpl(Ark_GestureModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_GestureModifier ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_GestureModifier>(100);
-        }
-        string out("new GestureModifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_GestureModifier>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_GestureModifier>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    void ApplyGestureImpl(Ark_GestureModifier peer,
-                          const Ark_UIGestureEvent* event)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("applyGesture(");
-        WriteToString(&out, event);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // GestureModifierAccessor
     namespace GestureRecognizerAccessor {
     void DestroyPeerImpl(Ark_GestureRecognizer peer)
     {
@@ -35115,90 +35054,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // HttpAuthHandlerAccessor
-    namespace image_PixelMapAccessor {
-    void DestroyPeerImpl(Ark_image_PixelMap peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_image_PixelMap ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_image_PixelMap>(100);
-        }
-        string out("new PixelMap(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_PixelMap>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_image_PixelMap>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    void ReadPixelsToBufferSyncImpl(Ark_image_PixelMap peer,
-                                    const Ark_Buffer* dst)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("readPixelsToBufferSync(");
-        WriteToString(&out, dst);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void WriteBufferToPixelsImpl(Ark_image_PixelMap peer,
-                                 const Ark_Buffer* src)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("writeBufferToPixels(");
-        WriteToString(&out, src);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_Boolean GetIsEditableImpl(Ark_image_PixelMap peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return 0;
-        }
-        string out("getIsEditable(");
-        out.append(") \n");
-        out.append("[return 0] \n");
-        appendGroupedLog(1, out);
-        return 0;
-    }
-    Ark_Boolean GetIsStrideAlignmentImpl(Ark_image_PixelMap peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return 0;
-        }
-        string out("getIsStrideAlignment(");
-        out.append(") \n");
-        out.append("[return 0] \n");
-        appendGroupedLog(1, out);
-        return 0;
-    }
-    } // image_PixelMapAccessor
     namespace ImageAnalyzerControllerAccessor {
     void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
     {
@@ -51661,18 +51516,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_font_UIFontConfig Font_getUIFontConfigImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("font_getUIFontConfig(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
     Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
     {
         if (!needGroupedLog(1))
@@ -53521,20 +53364,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct GestureGroupInterfacePeer {
         virtual ~GestureGroupInterfacePeer() = default;
     };
-    const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
-    {
-        static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
-            GestureModifierAccessor::DestroyPeerImpl,
-            GestureModifierAccessor::ConstructImpl,
-            GestureModifierAccessor::GetFinalizerImpl,
-            GestureModifierAccessor::ApplyGestureImpl,
-        };
-        return &GestureModifierAccessorImpl;
-    }
-
-    struct GestureModifierPeer {
-        virtual ~GestureModifierPeer() = default;
-    };
     const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
     {
         static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
@@ -53665,23 +53494,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct HttpAuthHandlerPeer {
         virtual ~HttpAuthHandlerPeer() = default;
-    };
-    const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
-    {
-        static const GENERATED_ArkUIImage_PixelMapAccessor Image_PixelMapAccessorImpl {
-            image_PixelMapAccessor::DestroyPeerImpl,
-            image_PixelMapAccessor::ConstructImpl,
-            image_PixelMapAccessor::GetFinalizerImpl,
-            image_PixelMapAccessor::ReadPixelsToBufferSyncImpl,
-            image_PixelMapAccessor::WriteBufferToPixelsImpl,
-            image_PixelMapAccessor::GetIsEditableImpl,
-            image_PixelMapAccessor::GetIsStrideAlignmentImpl,
-        };
-        return &Image_PixelMapAccessorImpl;
-    }
-
-    struct Image_PixelMapPeer {
-        virtual ~Image_PixelMapPeer() = default;
     };
     const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
     {
@@ -56393,7 +56205,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::EdgeColorsImpl,
             GlobalScopeAccessor::EdgeWidthsImpl,
             GlobalScopeAccessor::FocusControl_requestFocusImpl,
-            GlobalScopeAccessor::Font_getUIFontConfigImpl,
             GlobalScopeAccessor::GetRectangleByIdImpl,
             GlobalScopeAccessor::PostCardActionImpl,
             GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
@@ -56496,7 +56307,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupInterfaceAccessor,
-            GetGestureModifierAccessor,
             GetGestureRecognizerAccessor,
             GetGestureStyleAccessor,
             GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
@@ -56506,7 +56316,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,
-            GetImage_PixelMapAccessor,
             GetImageAnalyzerControllerAccessor,
             GetImageAttachmentAccessor,
             GetImageBitmapAccessor,

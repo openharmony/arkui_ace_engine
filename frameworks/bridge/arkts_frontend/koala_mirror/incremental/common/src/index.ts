@@ -34,7 +34,7 @@ export {
     ObservableHandler,
     observableProxy,
     observableProxyArray,
-    TrackableProps,
+    TrackableProperties,
     trackableProperties,
     isFunction,
     propDeepCopy,
@@ -53,3 +53,4 @@ export * from "./Finalization"
 export { SHA1Hash, createSha1 } from "./sha1"
 export { UniqueId } from "./uniqueId"
 export * from "./koalaKey"
+export * from "./Utils"

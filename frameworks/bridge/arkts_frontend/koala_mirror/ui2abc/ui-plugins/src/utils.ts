@@ -39,7 +39,8 @@ export enum CustomComponentNames {
     COMPONENT_IS_CUSTOM_LAYOUT = 'isCustomLayoutComponent',
     COMPONENT_ONPLACECHILDREN_ORI = 'onPlaceChildren',
     COMPONENT_ONMEASURESIZE_ORI = 'onMeasureSize',
-    COMPONENT_BUILDER_LAMBDA = 'CustomComponent.$_instantiate'
+    COMPONENT_BUILDER_LAMBDA = 'CustomComponent.$_instantiate',
+    COMPONENT_IS_FREEZABLE = 'isFreezable',
 }
 
 export enum BuilderLambdaNames {
@@ -91,6 +92,30 @@ export function getComponentPackage(): string {
         return 'arkui'
     } else {
         return 'arkui.component'
+    }
+}
+
+export function getCustomComponentPackage(): string {
+    if (isKoalaWorkspace()) {
+        return 'arkui'
+    } else {
+        return 'arkui.component.customComponent'
+    }
+}
+
+export function getCommonMethodPackage(): string {
+    if (isKoalaWorkspace()) {
+        return 'arkui'
+    } else {
+        return 'arkui.component.common'
+    }
+}
+
+export function getRouterPackage(): string {
+    if (isKoalaWorkspace()) {
+        return 'arkui'
+    } else {
+        return 'arkui.ohos.router'
     }
 }
 
@@ -244,6 +269,7 @@ export function createETSTypeReference(typeName: string, typeParamsName?: string
 export enum DecoratorNames {
     ENTRY = "Entry",
     COMPONENT = "Component",
+    COMPONENT_V2 = "ComponentV2",
     REUSABLE = "Reusable",
     STATE = "State",
     STORAGE_LINK = "StorageLink",
@@ -251,7 +277,9 @@ export enum DecoratorNames {
     LINK = "Link",
     PROP = "Prop",
     PROVIDE = "Provide",
+    PROVIDER = "Provider",
     CONSUME = "Consume",
+    CONSUMER = "Consumer",
     OBJECT_LINK = "ObjectLink",
     OBSERVED = "Observed",
     OBSERVED_V2 = "ObservedV2",
@@ -264,7 +292,14 @@ export enum DecoratorNames {
     LOCAL_BUILDER = "LocalBuilder",
     TRACK = "Track",
     TRACE = "Trace",
+    TYPE = "Type",
+    LOCAL = "Local",
+    ONCE = "Once",
+    EVENT = "Event",
+    PARAM = "Param"
 }
+
+const DECORATOR_NAMES_SET = new Set(Object.values(DecoratorNames));
 
 export enum DecoratorParameters {
     USE_SHARED_STORAGE = "useSharedStorage",
@@ -277,25 +312,65 @@ export function hasEntryAnnotation(node: arkts.ClassDefinition): boolean {
     )
 }
 
-export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName: DecoratorNames): boolean {
-    return !!anno.expr && arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName;
+export function getAnnotationName(anno: arkts.AnnotationUsage): string | undefined {
+    if (!anno.expr) {
+        return undefined
+    }
+    return arkts.isIdentifier(anno.expr) ? anno.expr.name : undefined
 }
 
-export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration | arkts.ETSParameterExpression, decoratorName: DecoratorNames): boolean {
+export function getDecoratorName(anno: arkts.AnnotationUsage): DecoratorNames | undefined {
+    const name = getAnnotationName(anno);
+    return name && DECORATOR_NAMES_SET.has(name as DecoratorNames)
+        ? name as DecoratorNames
+        : undefined
+}
+
+export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName: DecoratorNames): boolean {
+    return getAnnotationName(anno) === decoratorName;
+}
+
+export function hasDecorator(property:
+    arkts.ClassProperty |
+    arkts.ClassDefinition |
+    arkts.ClassDeclaration |
+    arkts.MethodDefinition |
+    arkts.FunctionDeclaration |
+    arkts.ETSParameterExpression |
+    arkts.TSTypeAliasDeclaration |
+    arkts.ETSFunctionType,
+    decoratorName: DecoratorNames
+): boolean {
     if (arkts.isMethodDefinition(property)) {
-        return property.function!.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
+        return findDecorator(property.function!.annotations, decoratorName) != undefined
+    }
+    if (arkts.isETSStructDeclaration(property)) {
+        return findDecorator(property.definition!.annotations, decoratorName) != undefined
     }
     if (arkts.isClassDeclaration(property)) {
         return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName)
     }
-    return property.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
+    return findDecorator(property.annotations, decoratorName) != undefined
 }
 
-export function replaceDecorator(node: arkts.ETSParameterExpression, oldName: DecoratorNames, newName: string) {
+export function replaceParameterDecorator(node: arkts.ETSParameterExpression, oldName: DecoratorNames, newName: string) {
     if (node.annotations.find(annotation => annotation.baseName?.name == oldName) == undefined) return node
     let newAnnotations = node.annotations?.map(anno => isDecoratorAnnotation(anno, oldName) ? annotation(newName) : anno)
     return arkts.factory.updateETSParameterExpression(node, node.ident, node.isOptional, node.initializer, newAnnotations)
 }
+
+export function replaceTypeAliasDecorator(node: arkts.TSTypeAliasDeclaration, oldName: DecoratorNames, newName: string) {
+    if (node.annotations.find(annotation => annotation.baseName?.name == oldName) == undefined) return node
+    let newAnnotations = node.annotations?.map(anno => isDecoratorAnnotation(anno, oldName) ? annotation(newName) : anno)
+    return arkts.factory.updateTSTypeAliasDeclaration(node, node.id, node.typeParams, node.typeAnnotation, newAnnotations, node.modifierFlags)
+}
+
+export function replaceFunctionTypeDecorator(node: arkts.ETSFunctionType, oldName: DecoratorNames, newName: string) {
+    if (node.annotations.find(annotation => annotation.baseName?.name == oldName) == undefined) return node
+    let newAnnotations = node.annotations?.map(anno => isDecoratorAnnotation(anno, oldName) ? annotation(newName) : anno)
+    return arkts.factory.updateETSFunctionType(node, node.typeParams, node.params, node.returnType, node.isExtensionFunction, node.flags, newAnnotations)
+}
+
 
 export function hasBuilderDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration): boolean {
     return hasDecorator(property, DecoratorNames.BUILDER) || hasDecorator(property, DecoratorNames.LOCAL_BUILDER)
@@ -489,4 +564,27 @@ export function generateGetOrSetCall(beforCall: arkts.Expression, type: string) 
         false,
         undefined,
     );
+}
+
+export function findDecorator(annotations: readonly arkts.AnnotationUsage[], decoratorName: DecoratorNames): arkts.AnnotationUsage | undefined {
+    return annotations.find(anno => isDecoratorAnnotation(anno, decoratorName) ? anno : undefined)
+}
+
+export function getDecoratorProperties(anno: arkts.AnnotationUsage | undefined): Array<[arkts.Identifier, arkts.Expression | undefined]> {
+    return anno
+        ? anno.properties
+            .filter((prop): prop is arkts.ClassProperty & { key: arkts.Identifier } =>
+                arkts.isClassProperty(prop) && arkts.isIdentifier(prop.key)
+            )
+            .map(prop => [prop.key, prop.value])
+        : []
+}
+
+export function createThrowError(message?: string): arkts.ThrowStatement {
+    return arkts.factory.createThrowStatement(
+        arkts.factory.createETSNewClassInstanceExpression(
+            createETSTypeReference("Error"),
+            message ? [arkts.factory.createStringLiteral(message)] : []
+        )
+    )
 }

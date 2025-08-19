@@ -47,11 +47,12 @@ import { createMethodDefinition, updateMethodDefinition } from "../node-utilitie
 import { createTSInterfaceDeclaration, updateTSInterfaceDeclaration } from "../node-utilities/TSInterfaceDeclaration"
 import { updateTryStatement } from "../node-utilities/TryStatement"
 import { createAssignmentExpression, updateAssignmentExpression } from "../node-utilities/AssignmentExpression"
-import { updateObjectExpression } from "../node-utilities/ObjectExpression"
+import { createObjectExpression, updateObjectExpression } from "../node-utilities/ObjectExpression"
 import { updateETSTuple } from "../node-utilities/ETSTuple"
 import { createArrayExpression, updateArrayExpression } from "../node-utilities/ArrayExpression"
 import { updateBlockStatement } from "../node-utilities/BlockStatement"
 import { updateETSModule } from "../node-utilities/ETSModule"
+import { createOpaqueTypeNode } from "../node-utilities/OpaqueTypeNode"
 
 export const factory = {
     ...generatedFactory,
@@ -110,7 +111,7 @@ export const factory = {
     createAssignmentExpression,
     updateAssignmentExpression,
 
-    createObjectExpression: ObjectExpression.createObjectExpression,
+    createObjectExpression,
     updateObjectExpression,
 
     createETSTuple: ETSTuple.create2ETSTuple,
@@ -123,4 +124,6 @@ export const factory = {
     updateBlockStatement,
 
     updateInterfaceBody : generatedFactory.updateTSInterfaceBody,
+
+    createOpaqueTypeNode,
 }

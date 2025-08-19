@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
+import { ArkCommonMethodPeer, Bindable, CommonMethod, TextDecorationOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions, AttributeModifier, StateStyles } from "./common"
 import { ResourceColor, Dimension, Font, ResourceStr, PX, VP, FP, LPX, Percentage, Length } from "./units"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Callback_Boolean_Void } from "./navigation"
@@ -35,10 +35,13 @@ import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SearchModifier } from "../SearchModifier"
+import { hookSearchAttributeModifier } from "../handwritten"
 
 import { Deserializer } from "./peers/Deserializer"
 
 export class ArkSearchPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SearchModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -892,53 +895,54 @@ export type Callback_DeleteValue_Boolean = (parameter: DeleteValue) => boolean;
 export type Callback_DeleteValue_Void = (parameter: DeleteValue) => void;
 export type Callback_EditableTextChangeValue_Boolean = (parameter: EditableTextChangeValue) => boolean;
 export interface SearchAttribute extends CommonMethod {
-    fontColor(value: ResourceColor | undefined): this
-    searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this
-    textIndent(value: Dimension | undefined): this
-    onEditChange(value: ((isVisible: boolean) => void) | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    caretStyle(value: CaretStyle | undefined): this
-    placeholderColor(value: ResourceColor | undefined): this
-    placeholderFont(value: Font | undefined): this
-    textFont(value: Font | undefined): this
-    enterKeyType(value: EnterKeyType | undefined): this
-    onSubmit(value: ((breakpoints: string) => void) | undefined | SearchSubmitCallback | undefined): this
-    onChange(value: EditableTextOnChangeCallback | undefined): this
-    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this
-    onContentScroll(value: OnContentScrollCallback | undefined): this
-    onCopy(value: ((breakpoints: string) => void) | undefined): this
-    onCut(value: ((breakpoints: string) => void) | undefined): this
-    onPaste(value: OnPasteCallback | undefined): this
-    copyOption(value: CopyOptions | undefined): this
-    maxLength(value: number | undefined): this
-    textAlign(value: TextAlign | undefined): this
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    selectionMenuHidden(value: boolean | undefined): this
-    minFontSize(value: number | string | Resource | undefined): this
-    maxFontSize(value: number | string | Resource | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    decoration(value: TextDecorationOptions | undefined): this
-    letterSpacing(value: number | string | Resource | undefined): this
-    lineHeight(value: number | string | Resource | undefined): this
-    type(value: SearchType | undefined): this
-    fontFeature(value: string | undefined): this
-    onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this
-    onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this
-    onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this
-    onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    enablePreviewText(value: boolean | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this
-    halfLeading(value: boolean | undefined): this
-    stopBackPress(value: boolean | undefined): this
-    onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    searchButton(value: string | undefined, option?: SearchButtonOptions): this
-    inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
+    fontColor(value: ResourceColor | undefined): this { return this; }
+    searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this { return this; }
+    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this { return this; }
+    textIndent(value: Dimension | undefined): this { return this; }
+    onEditChange(value: ((isVisible: boolean) => void) | undefined): this { return this; }
+    selectedBackgroundColor(value: ResourceColor | undefined): this { return this; }
+    caretStyle(value: CaretStyle | undefined): this { return this; }
+    placeholderColor(value: ResourceColor | undefined): this { return this; }
+    placeholderFont(value: Font | undefined): this { return this; }
+    textFont(value: Font | undefined): this { return this; }
+    enterKeyType(value: EnterKeyType | undefined): this { return this; }
+    onSubmit(value: ((breakpoints: string) => void) | undefined | SearchSubmitCallback | undefined): this { return this; }
+    onChange(value: EditableTextOnChangeCallback | undefined): this { return this; }
+    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this { return this; }
+    onContentScroll(value: OnContentScrollCallback | undefined): this { return this; }
+    onCopy(value: ((breakpoints: string) => void) | undefined): this { return this; }
+    onCut(value: ((breakpoints: string) => void) | undefined): this { return this; }
+    onPaste(value: OnPasteCallback | undefined): this { return this; }
+    copyOption(value: CopyOptions | undefined): this { return this; }
+    maxLength(value: number | undefined): this { return this; }
+    textAlign(value: TextAlign | undefined): this { return this; }
+    enableKeyboardOnFocus(value: boolean | undefined): this { return this; }
+    selectionMenuHidden(value: boolean | undefined): this { return this; }
+    minFontSize(value: number | string | Resource | undefined): this { return this; }
+    maxFontSize(value: number | string | Resource | undefined): this { return this; }
+    minFontScale(value: number | Resource | undefined): this { return this; }
+    maxFontScale(value: number | Resource | undefined): this { return this; }
+    decoration(value: TextDecorationOptions | undefined): this { return this; }
+    letterSpacing(value: number | string | Resource | undefined): this { return this; }
+    lineHeight(value: number | string | Resource | undefined): this { return this; }
+    type(value: SearchType | undefined): this { return this; }
+    fontFeature(value: string | undefined): this { return this; }
+    onWillInsert(value: ((parameter: InsertValue) => boolean) | undefined): this { return this; }
+    onDidInsert(value: ((parameter: InsertValue) => void) | undefined): this { return this; }
+    onWillDelete(value: ((parameter: DeleteValue) => boolean) | undefined): this { return this; }
+    onDidDelete(value: ((parameter: DeleteValue) => void) | undefined): this { return this; }
+    editMenuOptions(value: EditMenuOptions | undefined): this { return this; }
+    enablePreviewText(value: boolean | undefined): this { return this; }
+    enableHapticFeedback(value: boolean | undefined): this { return this; }
+    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this { return this; }
+    halfLeading(value: boolean | undefined): this { return this; }
+    stopBackPress(value: boolean | undefined): this { return this; }
+    onWillChange(value: ((parameter: EditableTextChangeValue) => boolean) | undefined): this { return this; }
+    keyboardAppearance(value: KeyboardAppearance | undefined): this { return this; }
+    searchButton(value: string | undefined, option?: SearchButtonOptions): this { return this; }
+    inputFilter(value: ResourceStr | undefined, error?: ((breakpoints: string) => void)): this { return this; }
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this { return this; }
+    attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
     _onChangeEvent_value(callback: ((breakpoints: string) => void)): void
 }
 export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttribute {
@@ -1537,7 +1541,12 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return
     }
-    
+
+    public attributeModifier(modifier: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSearchAttributeModifier(this, modifier);
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

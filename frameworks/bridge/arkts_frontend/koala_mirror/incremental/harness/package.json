@@ -21,7 +21,9 @@
     },
     "exports": {
         "./golden": "./js/golden.js",
+        "./golden.js": "./js/golden.js",
         "./register": "./js/register.js",
+        "./register.js": "./js/register.js",
         ".": "./build/src/index.js"
     },
     "scripts": {

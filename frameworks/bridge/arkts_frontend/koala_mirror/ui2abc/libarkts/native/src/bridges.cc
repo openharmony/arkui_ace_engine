@@ -19,15 +19,6 @@
 #include <string>
 #include <mutex>
 
-KNativePointer impl_AstNodeRecheck(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    GetImpl()->AstNodeRecheck(context, node);
-    return nullptr;
-}
-KOALA_INTEROP_2(AstNodeRecheck, KNativePointer, KNativePointer, KNativePointer)
-
 KNativePointer impl_AstNodeRebind(KNativePointer contextPtr, KNativePointer nodePtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -57,17 +48,6 @@ KNativePointer impl_AnnotationAllowedAnnotationsConst(KNativePointer contextPtr,
 }
 KOALA_INTEROP_3(AnnotationAllowedAnnotationsConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_AstNodeVariableConst(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-
-    return GetImpl()->AstNodeVariableConst(context, node);
-}
-KOALA_INTEROP_2(AstNodeVariableConst, KNativePointer, KNativePointer, KNativePointer)
-*/
-
 KNativePointer impl_VariableDeclaration(KNativePointer contextPtr, KNativePointer variablePtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -86,15 +66,6 @@ KNativePointer impl_DeclNode(KNativePointer contextPtr, KNativePointer declPtr)
 }
 KOALA_INTEROP_2(DeclNode, KNativePointer, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_AstNodeScopeConst(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->AstNodeScopeConst(context, node);
-}
-KOALA_INTEROP_2(AstNodeScopeConst, KNativePointer, KNativePointer, KNativePointer)
-*/
 KNativePointer impl_ScopeSetParent(KNativePointer contextPtr, KNativePointer nodePtr, KNativePointer parentPtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -105,16 +76,6 @@ KNativePointer impl_ScopeSetParent(KNativePointer contextPtr, KNativePointer nod
 }
 KOALA_INTEROP_3(ScopeSetParent, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
-/*
-KNativePointer impl_CreateNumberLiteral(KNativePointer contextPtr, KDouble value)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-
-    return GetImpl()->CreateNumberLiteral(context, value);
-}
-KOALA_INTEROP_2(CreateNumberLiteral, KNativePointer, KNativePointer, KDouble)
-*/
-
 KNativePointer impl_ETSParserCreateExpression(KNativePointer contextPtr, KStringPtr& sourceCodePtr, KInt flagsT)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -124,41 +85,12 @@ KNativePointer impl_ETSParserCreateExpression(KNativePointer contextPtr, KString
 }
 KOALA_INTEROP_3(ETSParserCreateExpression, KNativePointer, KNativePointer, KStringPtr, KInt)
 
-KBoolean impl_IsProgram(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->AstNodeIsProgramConst(context, node);
-}
-KOALA_INTEROP_2(IsProgram, KBoolean, KNativePointer, KNativePointer)
-
-KBoolean impl_IsBlockStatement(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsBlockStatement(node);
-}
-KOALA_INTEROP_1(IsBlockStatement, KBoolean, KNativePointer)
-
 KNativePointer impl_ProceedToState(KNativePointer contextPtr, KInt state)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     return GetImpl()->ProceedToState(context, intToState(state));
 }
 KOALA_INTEROP_2(ProceedToState, KNativePointer, KNativePointer, KInt)
-
-KNativePointer impl_ContextProgram(KNativePointer contextPtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    return GetImpl()->ContextProgram(context);
-}
-KOALA_INTEROP_1(ContextProgram, KNativePointer, KNativePointer)
-
-KBoolean impl_IsIdentifier(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsIdentifier(node);
-}
-KOALA_INTEROP_1(IsIdentifier, KBoolean, KNativePointer)
 
 KNativePointer impl_CreateContextFromString(KNativePointer configPtr, KStringPtr& sourcePtr, KStringPtr& filenamePtr)
 {
@@ -182,32 +114,6 @@ KInt impl_ContextState(KNativePointer contextPtr)
 }
 KOALA_INTEROP_1(ContextState, KInt, KNativePointer)
 
-KNativePointer impl_ContextErrorMessage(KNativePointer contextPtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-
-    return StageArena::strdup(GetImpl()->ContextErrorMessage(context));
-}
-KOALA_INTEROP_1(ContextErrorMessage, KNativePointer, KNativePointer)
-
-KNativePointer impl_GetAllErrorMessages(KNativePointer contextPtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-
-    return StageArena::strdup(GetImpl()->GetAllErrorMessages(context));
-}
-KOALA_INTEROP_1(GetAllErrorMessages, KNativePointer, KNativePointer)
-
-/*
-KNativePointer impl_CallExpressionSignature(KNativePointer context, KNativePointer classInstance)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _classInstance = reinterpret_cast<es2panda_AstNode*>(classInstance);
-    const auto result = GetImpl()->CallExpressionSignature(_context, _classInstance);
-    return result;
-}
-KOALA_INTEROP_2(CallExpressionSignature, KNativePointer, KNativePointer, KNativePointer)
-*/
 KNativePointer impl_SignatureFunction(KNativePointer context, KNativePointer classInstance)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -216,15 +122,6 @@ KNativePointer impl_SignatureFunction(KNativePointer context, KNativePointer cla
     return result;
 }
 KOALA_INTEROP_2(SignatureFunction, KNativePointer, KNativePointer, KNativePointer)
-
-KNativePointer impl_DeclarationFromIdentifier(KNativePointer context, KNativePointer identifier)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _identifier = reinterpret_cast<es2panda_AstNode*>(identifier);
-    const auto result = GetImpl()->DeclarationFromIdentifier(_context, _identifier);
-    return result;
-}
-KOALA_INTEROP_2(DeclarationFromIdentifier, KNativePointer, KNativePointer, KNativePointer)
 
 static KNativePointer impl_ProgramExternalSources(KNativePointer contextPtr, KNativePointer instancePtr)
 {
@@ -272,27 +169,6 @@ static KNativePointer impl_ExternalSourcePrograms(KNativePointer instance)
 }
 KOALA_INTEROP_1(ExternalSourcePrograms, KNativePointer, KNativePointer);
 
-KBoolean impl_IsClassProperty(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsClassProperty(node);
-}
-KOALA_INTEROP_1(IsClassProperty, KBoolean, KNativePointer)
-
-KBoolean impl_IsETSUnionType(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsETSUnionType(node);
-}
-KOALA_INTEROP_1(IsETSUnionType, KBoolean, KNativePointer)
-
-KBoolean impl_IsETSFunctionType(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsETSFunctionType(node);
-}
-KOALA_INTEROP_1(IsETSFunctionType, KBoolean, KNativePointer)
-
 KNativePointer impl_ETSParserBuildImportDeclaration(KNativePointer context, KInt importKinds, KNativePointerArray specifiers, KUInt specifiersSequenceLength, KNativePointer source, KNativePointer program, KInt importFlag)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -307,15 +183,6 @@ KNativePointer impl_ETSParserBuildImportDeclaration(KNativePointer context, KInt
 }
 KOALA_INTEROP_7(ETSParserBuildImportDeclaration, KNativePointer, KNativePointer, KInt, KNativePointerArray, KUInt, KNativePointer, KNativePointer, KInt)
 
-void impl_InsertETSImportDeclarationAndParse(KNativePointer context, KNativePointer program, KNativePointer importDeclaration)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _program = reinterpret_cast<es2panda_Program*>(program);
-    const auto _import = reinterpret_cast<es2panda_AstNode*>(importDeclaration);
-    GetImpl()->InsertETSImportDeclarationAndParse(_context, _program, _import);
-}
-KOALA_INTEROP_V3(InsertETSImportDeclarationAndParse, KNativePointer, KNativePointer, KNativePointer)
-
 KNativePointer impl_ETSParserGetImportPathManager(KNativePointer contextPtr)
 {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
@@ -323,37 +190,13 @@ KNativePointer impl_ETSParserGetImportPathManager(KNativePointer contextPtr)
 }
 KOALA_INTEROP_1(ETSParserGetImportPathManager, KNativePointer, KNativePointer);
 
-KNativePointer impl_CreateSourcePosition(KNativePointer context, KInt index, KInt line)
-{
-    auto&& _context_ = reinterpret_cast<es2panda_Context *>(context);
-    return GetImpl()->CreateSourcePosition(_context_, index, line);
-}
-KOALA_INTEROP_3(CreateSourcePosition, KNativePointer, KNativePointer, KInt, KInt);
-
-KInt impl_SourcePositionIndex(KNativePointer context, KNativePointer instance)
+KInt impl_SourcePositionCol(KNativePointer context, KNativePointer instance)
 {
     auto&& _context_ = reinterpret_cast<es2panda_Context *>(context);
     auto&& _instance_ = reinterpret_cast<es2panda_SourcePosition *>(instance);
-    return GetImpl()->SourcePositionIndex(_context_, _instance_);
+    return GetImpl()->SourcePositionCol(_context_, _instance_);
 }
-KOALA_INTEROP_2(SourcePositionIndex, KInt, KNativePointer, KNativePointer);
-
-KInt impl_SourcePositionLine(KNativePointer context, KNativePointer instance)
-{
-    auto&& _context_ = reinterpret_cast<es2panda_Context *>(context);
-    auto&& _instance_ = reinterpret_cast<es2panda_SourcePosition *>(instance);
-    return GetImpl()->SourcePositionLine(_context_, _instance_);
-}
-KOALA_INTEROP_2(SourcePositionLine, KInt, KNativePointer, KNativePointer);
-
-KNativePointer impl_CreateSourceRange(KNativePointer context, KNativePointer start, KNativePointer end)
-{
-    auto&& _context_ = reinterpret_cast<es2panda_Context *>(context);
-    auto&& _start_ = reinterpret_cast<es2panda_SourcePosition *>(start);
-    auto&& _end_ = reinterpret_cast<es2panda_SourcePosition *>(end);
-    return GetImpl()->CreateSourceRange(_context_, _start_, _end_);
-}
-KOALA_INTEROP_3(CreateSourceRange, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
+KOALA_INTEROP_2(SourcePositionCol, KInt, KNativePointer, KNativePointer);
 
 KNativePointer impl_ConfigGetOptions(KNativePointer config)
 {
@@ -405,6 +248,14 @@ KOALA_INTEROP_V1(DestroyGlobalContext, KNativePointer)
 // All these "Checker_" bridges are related to checker namespace in es2panda, so work with them carefully
 // Checker.Type does reset on recheck, so modifying them makes no sence
 // It seems that compiler does not provide API to convert Checker.Type to ir.Type
+KNativePointer impl_Checker_CreateOpaqueTypeNode(KNativePointer context, KNativePointer type)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _type = reinterpret_cast<es2panda_Type*>(type);
+    return GetImpl()->CreateOpaqueTypeNode(_context, _type);
+}
+KOALA_INTEROP_2(Checker_CreateOpaqueTypeNode, KNativePointer, KNativePointer, KNativePointer)
+
 KNativePointer impl_Checker_ScriptFunctionSignature(KNativePointer context, KNativePointer node)
 {
     auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -449,6 +300,24 @@ void impl_Checker_ScriptFunctionSetPreferredReturnType(KNativePointer context, K
 }
 KOALA_INTEROP_V3(Checker_ScriptFunctionSetPreferredReturnType, KNativePointer, KNativePointer, KNativePointer)
 
+KNativePointer impl_Checker_ExpressionGetPreferredType(KNativePointer context, KNativePointer node)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    return GetImpl()->ExpressionPreferredTypeConst(_context, _node);
+}
+KOALA_INTEROP_2(Checker_ExpressionGetPreferredType, KNativePointer, KNativePointer, KNativePointer)
+
+void impl_Checker_ExpressionSetPreferredType(KNativePointer context, KNativePointer node, KNativePointer type)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _node = reinterpret_cast<es2panda_AstNode*>(node);
+    auto _type = reinterpret_cast<es2panda_Type*>(type);
+    GetImpl()->ExpressionSetPreferredType(_context, _node, _type);
+    return;
+}
+KOALA_INTEROP_V3(Checker_ExpressionSetPreferredType, KNativePointer, KNativePointer, KNativePointer)
+
 KNativePointer impl_Checker_TypeToString(KNativePointer context, KNativePointer type)
 {
     auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -457,6 +326,14 @@ KNativePointer impl_Checker_TypeToString(KNativePointer context, KNativePointer 
     return StageArena::strdup(result);
 }
 KOALA_INTEROP_2(Checker_TypeToString, KNativePointer, KNativePointer, KNativePointer)
+
+KNativePointer impl_Checker_TypeClone(KNativePointer context, KNativePointer type)
+{
+    auto _context = reinterpret_cast<es2panda_Context*>(context);
+    auto _type = reinterpret_cast<es2panda_Type*>(type);
+    return GetImpl()->TypeClone(_context, _type);
+}
+KOALA_INTEROP_2(Checker_TypeClone, KNativePointer, KNativePointer, KNativePointer)
 
 KNativePointer impl_Checker_TypeNodeGetType(KNativePointer context, KNativePointer astNode)
 {
@@ -512,12 +389,6 @@ KNativePointer impl_ClassVariableDeclaration(KNativePointer context, KNativePoin
 }
 KOALA_INTEROP_2(ClassVariableDeclaration, KNativePointer, KNativePointer, KNativePointer)
 
-KBoolean impl_IsMethodDefinition(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsMethodDefinition(node);
-}
-KOALA_INTEROP_1(IsMethodDefinition, KBoolean, KNativePointer)
 KNativePointer impl_TSInterfaceBodyBodyPtr(KNativePointer context, KNativePointer receiver)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -537,30 +408,6 @@ KNativePointer impl_AnnotationDeclarationPropertiesPtrConst(KNativePointer conte
     return StageArena::cloneVector(result, length);
 }
 KOALA_INTEROP_2(AnnotationDeclarationPropertiesPtrConst, KNativePointer, KNativePointer, KNativePointer);
-
-KNativePointer impl_SourceRangeStart(KNativePointer context, KNativePointer range)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
-    auto result = GetImpl()->SourceRangeStart(_context, _range);
-    return result;
-}
-KOALA_INTEROP_2(SourceRangeStart, KNativePointer, KNativePointer, KNativePointer)
-
-KNativePointer impl_SourceRangeEnd(KNativePointer context, KNativePointer range) {
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
-    auto result = GetImpl()->SourceRangeEnd(_context, _range);
-    return result;
-}
-KOALA_INTEROP_2(SourceRangeEnd, KNativePointer, KNativePointer, KNativePointer)
-
-KBoolean impl_IsArrayExpression(KNativePointer nodePtr)
-{
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return GetImpl()->IsArrayExpression(node);
-}
-KOALA_INTEROP_1(IsArrayExpression, KBoolean, KNativePointer)
 
 KNativePointer impl_ETSParserGetGlobalProgramAbsName(KNativePointer contextPtr)
 {
@@ -601,7 +448,7 @@ KOALA_INTEROP_5(CreateDiagnosticInfo, KNativePointer, KNativePointer, KNativePoi
                 KStringArray, KInt, KNativePointer)
 
 KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr,
-                                         KInt argc, KStringPtr& substitutionCode, KNativePointer range)
+                                         KInt argc, KStringPtr& substitutionCode, KStringPtr& title, KNativePointer range)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _kind = reinterpret_cast<es2panda_DiagnosticKind *>(kind);
@@ -617,9 +464,10 @@ KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer 
         position += strLen;
     }
     const auto _substitutionCode = getStringCopy(substitutionCode);
-    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode, _range);
+    const auto _title = getStringCopy(title);
+    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode, _title, _range);
 }
-KOALA_INTEROP_6(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr, KNativePointer)
+KOALA_INTEROP_7(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr, KStringPtr, KNativePointer)
 
 void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArray argvPtr,
                         KInt argc, KNativePointer pos)
@@ -641,23 +489,6 @@ void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArra
 }
 KOALA_INTEROP_V5(LogDiagnostic, KNativePointer, KNativePointer, KStringArray, KInt, KNativePointer)
 
-void impl_LogDiagnosticWithSuggestion(KNativePointer context, KNativePointer diagnosticInfo,
-                                      KNativePointer suggestionInfo)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _diagnosticInfo = reinterpret_cast<es2panda_DiagnosticInfo*>(diagnosticInfo);
-    const auto _suggestionInfo = reinterpret_cast<es2panda_SuggestionInfo*>(suggestionInfo);
-    GetImpl()->LogDiagnosticWithSuggestion(_context, _diagnosticInfo, _suggestionInfo);
-}
-KOALA_INTEROP_V3(LogDiagnosticWithSuggestion, KNativePointer, KNativePointer, KNativePointer)
-
-KInt impl_GenerateStaticDeclarationsFromContext(KNativePointer contextPtr, KStringPtr &outputPath)
-{
-    auto context = reinterpret_cast<es2panda_Context *>(contextPtr);
-    return GetImpl()->GenerateStaticDeclarationsFromContext(context, outputPath.data());
-}
-KOALA_INTEROP_2(GenerateStaticDeclarationsFromContext, KInt, KNativePointer, KStringPtr)
-
 KNativePointer impl_AnnotationUsageIrPropertiesPtrConst(KNativePointer context, KNativePointer receiver)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -672,7 +503,7 @@ KInt impl_GenerateTsDeclarationsFromContext(KNativePointer contextPtr, KStringPt
                                             KBoolean exportAll, KBoolean isolated, KStringPtr &recordFile)
 {
     auto context = reinterpret_cast<es2panda_Context *>(contextPtr);
-    return GetImpl()->GenerateTsDeclarationsFromContext(context, outputDeclEts.data(), outputEts.data(), exportAll, isolated, recordFile.data());
+    return GetImpl()->GenerateTsDeclarationsFromContext(context, outputDeclEts.data(), outputEts.data(), exportAll, isolated, recordFile.data() );
 }
 KOALA_INTEROP_6(GenerateTsDeclarationsFromContext, KInt, KNativePointer, KStringPtr, KStringPtr, KBoolean, KBoolean, KStringPtr)
 
@@ -699,12 +530,3 @@ KNativePointer impl_CreateContextGenerateAbcForExternalSourceFiles(
         config, fileNamesCount, argv);
 }
 KOALA_INTEROP_3(CreateContextGenerateAbcForExternalSourceFiles, KNativePointer, KNativePointer, KInt, KStringArray)
-
-KNativePointer impl_JsdocStringFromDeclaration(KNativePointer contextPtr, KNativePointer nodePtr)
-{
-    auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
-    auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    return StageArena::strdup(GetImpl()->JsdocStringFromDeclaration(context, node));
-}
-KOALA_INTEROP_2(JsdocStringFromDeclaration, KNativePointer, KNativePointer, KNativePointer)
-

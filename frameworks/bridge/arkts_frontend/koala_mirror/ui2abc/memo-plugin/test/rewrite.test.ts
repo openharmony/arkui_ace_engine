@@ -132,6 +132,10 @@ suite("golden tests", () => {
         })
     })
 
+    test("implicit return type", () => {
+        testBody("implicit-type/main")
+    })
+
     suite("HQ", () => {
         test.skip("memo class property implemented from interface", () => {
             testBody("HQ/implemented-property")

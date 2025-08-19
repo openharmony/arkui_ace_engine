@@ -460,7 +460,10 @@ export struct SubHeader {
     if (!this.operationItem || this.operationItem.length <= 0) {
       return '';
     }
-    if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
+    if (Util.isResourceType(this.operationItem[0].accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.operationItem[0].accessibilityText as Resource).id);
+    } else if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
       return this.operationItem[0].accessibilityText as string;
     } else {
       if (this.operationType === OperationType.TEXT_ARROW && this.operationItem[0].value.toString().length <= 0) {
@@ -475,7 +478,11 @@ export struct SubHeader {
     if (!this.operationItem || this.operationItem.length <= 0) {
       return '';
     }
-    if (this.operationItem[0].accessibilityDescription && this.operationItem[0].accessibilityDescription !== '') {
+    if (Util.isResourceType(this.operationItem[0].accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.operationItem[0].accessibilityDescription as Resource).id);
+    } else if (this.operationItem[0].accessibilityDescription &&
+      this.operationItem[0].accessibilityDescription !== '') {
       return this.operationItem[0].accessibilityDescription as string;
     }
     return '';
@@ -1051,7 +1058,10 @@ struct SingleIconStyle {
   isSingleIcon: boolean = true;
 
   private getRightIconAccessibilityText(): string | undefined {
-    if (this.item?.accessibilityText) {
+    if (Util.isResourceType(this.item?.accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.item?.accessibilityText as Resource).id);
+    } else if (this.item?.accessibilityText) {
       return this.item?.accessibilityText as string;
     }
     return '';
@@ -1065,7 +1075,10 @@ struct SingleIconStyle {
   }
 
   private getRightIconAccessibilityDescription(): string | undefined {
-    if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
+    if (Util.isResourceType(this.item?.accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.item?.accessibilityDescription as Resource).id);
+    } else if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
       return this.item?.accessibilityDescription as string;
     }
     return '';

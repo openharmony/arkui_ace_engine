@@ -59,7 +59,7 @@ char* StageArena::strdup(const char* string)
     auto* arena = StageArena::instance();
     auto size = strlen(string) + 1;
     char* memory = (char*)arena->alloc(size);
-    memcpy(memory, string, size);
+    interop_memcpy(memory, size, string, size);
     return memory;
 }
 

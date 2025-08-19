@@ -52,22 +52,10 @@ export class Context extends ArktsObject {
         );
     }
 
-    static createFromFile(filePath: string, configPath: string, stdlibPath: string, outputPath: string): Context | undefined {
-        const config = Config.create([
-            "",
-            "--arktsconfig",
-            configPath,
-            '--extension',
-            'ets',
-            '--stdlib',
-            stdlibPath,
-            filePath,
-            '--output',
-            outputPath,
-        ])
+    static createFromFile(filePath: string): Context {
         return new Context(
             global.es2panda._CreateContextFromFile(
-                config.peer,
+                global.config,
                 passString(filePath)
             )
         )
@@ -112,7 +100,7 @@ export class Context extends ArktsObject {
     }
 
     get program(): Program {
-        return new Program(global.es2panda._ContextProgram(this.peer));
+        return new Program(global.generatedEs2panda._ContextProgram(this.peer));
     }
 }
 

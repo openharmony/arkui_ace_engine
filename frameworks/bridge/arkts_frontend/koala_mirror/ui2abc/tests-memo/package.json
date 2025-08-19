@@ -28,7 +28,7 @@
         "@koalaui/runtime": "1.7.6+devel",
         "@koalaui/annotate": "file:../annotate",
         "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/compiler-plugin": "file:../../incremental/compiler-plugin",
+        "@koalaui/compiler-plugin": "1.7.6+devel",
         "@koalaui/fast-arktsc": "1.7.6+devel"
     },
     "devDependencies": {

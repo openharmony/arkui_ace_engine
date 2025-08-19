@@ -62,7 +62,7 @@ export class EtsScript extends ETSModule {
     static fromContext(): EtsScript {
         console.log('[TS WRAPPER] GET AST FROM CONTEXT');
         return new EtsScript(
-            global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context))
+            global.generatedEs2panda._ProgramAst(global.context, global.generatedEs2panda._ContextProgram(global.context))
         );
     }
 
@@ -79,7 +79,7 @@ export class EtsScript extends ETSModule {
         global.compilerContext = Context.createFromString(source) as any; // Improve: commonize context
         proceedToState(state, global.context);
         return new EtsScript(
-            global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context))
+            global.generatedEs2panda._ProgramAst(global.context, global.generatedEs2panda._ContextProgram(global.context))
         );
     }
 

@@ -42,3 +42,4 @@ export { global as arktsGlobal } from "./arkts-api/static/global"
 export * as arkts from "./arkts-api"
 
 export * from "./plugin-utils"
+export * from "./tracer"

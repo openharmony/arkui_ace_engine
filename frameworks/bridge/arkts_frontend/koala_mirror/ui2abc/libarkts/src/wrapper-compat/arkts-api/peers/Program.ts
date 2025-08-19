@@ -34,7 +34,7 @@ export class Program extends ArktsObject {
     }
 
     get astNode(): EtsScript {
-        return new EtsScript(global.es2panda._ProgramAst(global.context, this.peer));
+        return new EtsScript(global.generatedEs2panda._ProgramAst(global.context, this.peer));
     }
 
     get externalSources(): ExternalSource[] {

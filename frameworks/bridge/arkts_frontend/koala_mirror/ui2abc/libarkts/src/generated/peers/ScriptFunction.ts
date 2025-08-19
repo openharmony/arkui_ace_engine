@@ -216,6 +216,14 @@ export class ScriptFunction extends AstNode {
         return global.generatedEs2panda._ScriptFunctionFormalParamsLengthConst(global.context, this.peer)
     }
     /** @deprecated */
+    setAsyncPairMethod(asyncPairFunction?: ScriptFunction): this {
+        global.generatedEs2panda._ScriptFunctionSetAsyncPairMethod(global.context, this.peer, passNode(asyncPairFunction))
+        return this
+    }
+    get asyncPairMethod(): ScriptFunction | undefined {
+        return unpackNode(global.generatedEs2panda._ScriptFunctionAsyncPairMethod(global.context, this.peer))
+    }
+    /** @deprecated */
     emplaceReturnStatements(returnStatements?: ReturnStatement): this {
         global.generatedEs2panda._ScriptFunctionEmplaceReturnStatements(global.context, this.peer, passNode(returnStatements))
         return this

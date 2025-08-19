@@ -49,7 +49,7 @@ function main() {}
 }
 
 @memo() function call_with_receiver(__memo_context: __memo_context_type, __memo_id: __memo_id_type, obj: A, @memo() v: ((this: A, __memo_context: __memo_context_type, __memo_id: __memo_id_type)=> int)) {
-  const __memo_scope = __memo_context.scope<int>(((__memo_id) + (__hash("id_call_with_receiver_@test/input/other.ets"))), 2);
+  const __memo_scope = __memo_context.scope<Int>(((__memo_id) + (__hash("id_call_with_receiver_@test/input/other.ets"))), 2);
   const __memo_parameter_obj = __memo_scope.param(0, obj), __memo_parameter_v = __memo_scope.param(1, v);
   if (__memo_scope.unchanged) {
     return __memo_scope.cached;
@@ -308,13 +308,13 @@ class Test {
       return;
     }
     @memo() const f = ((__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
-      const __memo_scope = __memo_context.scope<int>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 0);
+      const __memo_scope = __memo_context.scope<Int>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 0);
       if (__memo_scope.unchanged) {
         return __memo_scope.cached;
       }
       return __memo_scope.recache(123);
     }), g = ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, x: number) => {
-      const __memo_scope = __memo_context.scope<double>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 1);
+      const __memo_scope = __memo_context.scope<Double>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 1);
       const __memo_parameter_x = __memo_scope.param(0, x);
       if (__memo_scope.unchanged) {
         return __memo_scope.cached;
@@ -322,7 +322,7 @@ class Test {
       return __memo_scope.recache(((123) + (__memo_parameter_x.value)));
     });
     const h = @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type) => {
-      const __memo_scope = __memo_context.scope<int>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 0);
+      const __memo_scope = __memo_context.scope<Int>(((__memo_id) + (__hash("id__@test/input/other.ets"))), 0);
       if (__memo_scope.unchanged) {
         return __memo_scope.cached;
       }
@@ -546,10 +546,10 @@ class Use {
       });
     })));
     test.obj_arg(__memo_context, ((__memo_id) + (__hash("id_obj_arg_@test/input/other.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_obj_arg_@test/input/other.ets"))), ((): A => {
-      return ({
+      return {
         x: 1,
         y: 2,
-      } as A);
+      };
     })));
     test.compute_test(__memo_context, ((__memo_id) + (__hash("id_compute_test_@test/input/other.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_compute_test_@test/input/other.ets"))), ((): ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) => {
       return ((__memo_context: __memo_context_type, __memo_id: __memo_id_type): void => {
@@ -570,8 +570,8 @@ class Use {
     MemoStableClass_instance.test1(__memo_context, ((__memo_id) + (__hash("id_test1_@test/input/other.ets"))), "a");
     MemoStableClass_instance.test2(__memo_context, ((__memo_id) + (__hash("id_test2_@test/input/other.ets"))), 5);
     const obj: A = new A();
-    test.wrap_param_test(__memo_context, ((__memo_id) + (__hash("id_wrap_param_test_@test/input/other.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_wrap_param_test_@test/input/other.ets"))), ((): A => {
-      return (obj as A);
+    test.wrap_param_test(__memo_context, ((__memo_id) + (__hash("id_wrap_param_test_@test/input/other.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_wrap_param_test_@test/input/other.ets"))), (() => {
+      return obj;
     })));
     test.prop_func(__memo_context, ((__memo_id) + (__hash("id_prop_func_@test/input/other.ets"))));
     test.property(__memo_context, ((__memo_id) + (__hash("id_property_@test/input/other.ets"))), 12345);

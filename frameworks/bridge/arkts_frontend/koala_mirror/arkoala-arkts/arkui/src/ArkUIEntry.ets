@@ -18,16 +18,16 @@ import { errorAsString, int32, int64, scheduleCoroutine } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemCallback } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
-import { EventEmulator } from "./generated"
+import { EventEmulator } from "#generated"
 import { UserView, UserApplicationControl } from "./UserView"
-import { ClickEvent, ClickEventInternal } from "./generated"
+import { ClickEvent, ClickEventInternal } from "#generated"
 import { checkEvents, setCustomEventsChecker } from "./Events"
 import { checkArkoalaCallbacks } from "./CallbacksChecker"
 import { setUIDetachedRootCreator } from "./CallbackTransformer"
-import { enterForeignContext, leaveForeignContext } from "./handwritten"
-import { Routed, TestComponentPeer } from "./handwritten"
+import { enterForeignContext, leaveForeignContext } from "#handwritten"
+import { Routed, TestComponentPeer } from "#handwritten"
 import { AppStorage } from "./Storage"
-import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
+import { deserializeAndCallCallback } from "#generated/peers/CallbackDeserializeCall"
 import { NativeLog } from "./NativeLog"
 import { taskpool } from "escompat"
 import { EntryPoint } from "./UserView"
@@ -95,10 +95,7 @@ export function createUiDetachedBuilderRoot(
     manager: StateManager
 ): ComputableState<PeerNode> {
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
         memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
     detachedStateManager.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
@@ -112,10 +109,7 @@ export function createUiDetachedRoot(
 ): PeerNode {
     const manager = GlobalStateManager.instance
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
         memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
     return node.value
@@ -329,10 +323,7 @@ export class Application implements UserApplicationControl {
     ): ComputableState<PeerNode> {
         const peer = PeerNode.generateRootPeer()
         return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             memoEntry<void>(context, 0, () => { Routed(builder) })
-            manager.frozen = frozen
         })
     }
 
@@ -617,7 +608,6 @@ export class Application implements UserApplicationControl {
 
     // Improve: make [emitEvent] suitable to get string argument
     emitEvent(type: int32, target: int32, arg0: int32, arg1: int32): string {
-        console.log(`emitEvent ${type}, ${target}`)
         const node = PeerNode.findPeerByNativeId(target)
         try {
             switch (EventType.fromValue(type).valueOf()) {
@@ -645,7 +635,7 @@ export class Application implements UserApplicationControl {
                 }
                 case EventType.ExitApp.valueOf(): {
                     this.exitApp = true
-                    break
+                    return this.currentCrash ?? ""
                 }
                 case EventType.SyncNeeded.valueOf(): {
                     return GlobalStateManager.instance.isUpdateNeeded() ? "true" : "false"

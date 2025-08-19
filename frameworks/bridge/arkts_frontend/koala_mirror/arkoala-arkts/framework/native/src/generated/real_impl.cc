@@ -2167,10 +2167,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Opt_RenderFit* value)
     {
     }
-    void SetGestureModifierImpl(Ark_NativePointer node,
-                                const Opt_GestureModifier* value)
-    {
-    }
     void SetBackgroundBrightnessImpl(Ark_NativePointer node,
                                      const Opt_BackgroundBrightnessOptions* value)
     {
@@ -8121,7 +8117,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetReuseIdImpl,
             CommonMethodModifier::SetReuseImpl,
             CommonMethodModifier::SetRenderFitImpl,
-            CommonMethodModifier::SetGestureModifierImpl,
             CommonMethodModifier::SetBackgroundBrightnessImpl,
             CommonMethodModifier::SetOnGestureJudgeBeginImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin0Impl,
@@ -14533,27 +14528,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // GestureGroupInterfaceAccessor
-    namespace GestureModifierAccessor {
-    void DestroyPeerImpl(Ark_GestureModifier peer)
-    {
-        auto peerImpl = reinterpret_cast<GestureModifierPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_GestureModifier ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    void ApplyGestureImpl(Ark_GestureModifier peer,
-                          const Ark_UIGestureEvent* event)
-    {
-    }
-    } // GestureModifierAccessor
     namespace GestureRecognizerAccessor {
     void DestroyPeerImpl(Ark_GestureRecognizer peer)
     {
@@ -14801,39 +14775,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // HttpAuthHandlerAccessor
-    namespace image_PixelMapAccessor {
-    void DestroyPeerImpl(Ark_image_PixelMap peer)
-    {
-        auto peerImpl = reinterpret_cast<image_PixelMapPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_image_PixelMap ConstructImpl()
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    void ReadPixelsToBufferSyncImpl(Ark_image_PixelMap peer,
-                                    const Ark_Buffer* dst)
-    {
-    }
-    void WriteBufferToPixelsImpl(Ark_image_PixelMap peer,
-                                 const Ark_Buffer* src)
-    {
-    }
-    Ark_Boolean GetIsEditableImpl(Ark_image_PixelMap peer)
-    {
-        return {};
-    }
-    Ark_Boolean GetIsStrideAlignmentImpl(Ark_image_PixelMap peer)
-    {
-        return {};
-    }
-    } // image_PixelMapAccessor
     namespace ImageAnalyzerControllerAccessor {
     void DestroyPeerImpl(Ark_ImageAnalyzerController peer)
     {
@@ -21052,10 +20993,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_font_UIFontConfig Font_getUIFontConfigImpl()
-    {
-        return {};
-    }
     Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
     {
         return {};
@@ -22795,20 +22732,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct GestureGroupInterfacePeer {
         virtual ~GestureGroupInterfacePeer() = default;
     };
-    const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
-    {
-        static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
-            GestureModifierAccessor::DestroyPeerImpl,
-            GestureModifierAccessor::ConstructImpl,
-            GestureModifierAccessor::GetFinalizerImpl,
-            GestureModifierAccessor::ApplyGestureImpl,
-        };
-        return &GestureModifierAccessorImpl;
-    }
-
-    struct GestureModifierPeer {
-        virtual ~GestureModifierPeer() = default;
-    };
     const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
     {
         static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
@@ -22939,23 +22862,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct HttpAuthHandlerPeer {
         virtual ~HttpAuthHandlerPeer() = default;
-    };
-    const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
-    {
-        static const GENERATED_ArkUIImage_PixelMapAccessor Image_PixelMapAccessorImpl {
-            image_PixelMapAccessor::DestroyPeerImpl,
-            image_PixelMapAccessor::ConstructImpl,
-            image_PixelMapAccessor::GetFinalizerImpl,
-            image_PixelMapAccessor::ReadPixelsToBufferSyncImpl,
-            image_PixelMapAccessor::WriteBufferToPixelsImpl,
-            image_PixelMapAccessor::GetIsEditableImpl,
-            image_PixelMapAccessor::GetIsStrideAlignmentImpl,
-        };
-        return &Image_PixelMapAccessorImpl;
-    }
-
-    struct Image_PixelMapPeer {
-        virtual ~Image_PixelMapPeer() = default;
     };
     const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
     {
@@ -25667,7 +25573,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::EdgeColorsImpl,
             GlobalScopeAccessor::EdgeWidthsImpl,
             GlobalScopeAccessor::FocusControl_requestFocusImpl,
-            GlobalScopeAccessor::Font_getUIFontConfigImpl,
             GlobalScopeAccessor::GetRectangleByIdImpl,
             GlobalScopeAccessor::PostCardActionImpl,
             GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
@@ -25770,7 +25675,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupInterfaceAccessor,
-            GetGestureModifierAccessor,
             GetGestureRecognizerAccessor,
             GetGestureStyleAccessor,
             GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
@@ -25780,7 +25684,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,
-            GetImage_PixelMapAccessor,
             GetImageAnalyzerControllerAccessor,
             GetImageAttachmentAccessor,
             GetImageBitmapAccessor,
