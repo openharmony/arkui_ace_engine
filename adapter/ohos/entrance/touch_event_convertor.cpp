@@ -42,14 +42,9 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     Platform::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
 }
 
-void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
+void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent)
 {
-    Platform::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
-}
-
-void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
-{
-    Platform::DestroyRawPointerEvent(arkUITouchEvent);
+    Platform::SetPostPointerEvent(pointerEvent, touchEvent);
 }
 
 TouchType GetTouchEventType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
