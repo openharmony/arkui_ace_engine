@@ -8709,7 +8709,8 @@ bool WebPattern::PageClosePip(int delegateId, int childId, int frameRoutingId)
         if (pip.delegateId == delegateId && pip.childId == childId &&
             pip.frameRoutingId == frameRoutingId) {
             bool result = true;
-            if (OH_PictureInPicture_StopPip(it.first) != 0) {
+            auto errCode = OH_PictureInPicture_StopPip(it.first);
+            if (errCode != 0) {
                 TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StopPip err: %{public}d", errCode);
                 result = false;
             }
