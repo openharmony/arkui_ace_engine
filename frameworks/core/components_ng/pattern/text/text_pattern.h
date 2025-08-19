@@ -869,6 +869,7 @@ public:
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
     void ResetAISelected(AIResetSelectionReason reason) override;
+    std::function<void()> GetPreviewMenuAISpanClickrCallback(const AISpan& aiSpan);
 
     void ShowAIEntityMenuForCancel() override;
     bool IsPreviewMenuShow() override;

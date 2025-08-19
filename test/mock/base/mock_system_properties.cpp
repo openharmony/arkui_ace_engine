@@ -391,8 +391,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return 1;
 }
 
-std::string SystemProperties::GetMapSearchPrefix()
+int32_t SystemProperties::GetPreviewStatus()
 {
-    return "";
+    return -1;
 }
 } // namespace OHOS::Ace
