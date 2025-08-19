@@ -24,10 +24,10 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_v2_test_ng.cpp",
   ]
 
-  external_deps = [ "bounds_checking_function:libsec_shared" ]
-  if (current_os == "ohos") {
-    external_deps += [ "napi:ace_napi" ]
-  }
+  external_deps = [ 
+    "bounds_checking_function:libsec_shared",
+    "napi:ace_napi"
+  ]
 }
 
 ace_unittest("xcomponent_test_set_rate_range") {
