@@ -102,7 +102,7 @@ Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetHorizontalAxis();
+    float value = peer->GetBaseInfo()->GetHorizontalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
@@ -116,7 +116,7 @@ Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     auto invalid = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
-    int32_t value = peer->GetBaseInfo()->GetVerticalAxis();
+    float value = peer->GetBaseInfo()->GetVerticalAxis();
     return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
