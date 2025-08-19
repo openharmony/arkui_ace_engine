@@ -215,6 +215,8 @@ enum PictureInPictureState {
     PIP_STATE_HLS_EXIT,
     PIP_STATE_RESIZE,
     PIP_STATE_NONE,
+    PIP_STATE_UPDATE_SURFACE,
+    PIP_STATE_PAGE_CLOSE,
 };
 
 struct PipData {
@@ -8528,6 +8530,10 @@ bool WebPattern::Pip(int status,
             result = StopPip(delegateId, childId, frameRoutingId);
             break;
         }
+        case PIP_STATE_PAGE_CLOSE: {
+            result = PageClosePip(delegateId, childId, frameRoutingId);
+            break;
+        }
         case PIP_STATE_PLAY: {
             result = PlayPip(delegateId, childId, frameRoutingId);
             break;
@@ -8690,6 +8696,23 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
                 CHECK_NE_RETURN(errCode, 0, false);
             }
             return result;
+        }
+    }
+    return false;
+}
+
+bool WebPattern::PageClosePip(int delegateId, int childId, int frameRoutingId)
+{
+    std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+    for (auto &it : pipCallbackMap_) {
+        auto pip = it.second;
+        if (pip.delegateId == delegateId && pip.childId == childId &&
+            pip.frameRoutingId == frameRoutingId) {
+            auto errCode = OH_PictureInPicture_StopPip(it.first);
+            if (errCode != 0) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StopPip err: %{public}d", errCode);
+            }
+            return errCode == 0;
         }
     }
     return false;

@@ -48,6 +48,8 @@ enum PictureInPictureState {
     PIP_STATE_HLS_EXIT,
     PIP_STATE_RESIZE,
     PIP_STATE_NONE,
+    PIP_STATE_UPDATE_SURFACE,
+    PIP_STATE_PAGE_CLOSE,
 };
 
 enum PictureInPictureCallback {
@@ -4628,6 +4630,83 @@ HWTEST_F(WebPatternTestNg, StopPipPip_004, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = webPattern.StopPip(0, 0, 0);
     EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PageClosePip_001
+ * @tc.desc: PageClosePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PageClosePip_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.RegisterPip(pipController);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.StartPip(pipController);
+    ASSERT_EQ(ret, true);
+    webPattern.EnablePip(pipController);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.PageClosePip(info.delegateId + 1, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId + 1, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId + 1);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: PageClosePip_002
+ * @tc.desc: PageClosePip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, PageClosePip_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = PIP_ID_OK_2;
+    napi_env env = nullptr;
+    PipInfo info{1, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info);
+    ASSERT_EQ(ret, true);
+    ret = webPattern.PageClosePip(info.delegateId, info.childId, info.frameRoutingId);
+    ASSERT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: OnPipPip_007
+ * @tc.desc: OnPipPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnPipPip_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    bool init = false;
+    uint32_t pipController = 0;
+    napi_env env = nullptr;
+    PipInfo pipInfo{0, 0, 0, 0, PIP_WIDTH, PIP_HEIGHT};
+    bool ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, pipInfo);
+    ASSERT_EQ(ret, true);
+    webPattern.OnPip(PIP_STATE_PAGE_CLOSE, 0, 0, 0, 0, 0);
 #endif
 }
 
