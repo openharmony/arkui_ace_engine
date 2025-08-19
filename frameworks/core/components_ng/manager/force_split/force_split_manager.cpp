@@ -58,6 +58,12 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool ignoreOrient
     if (width > 0) {
         UpdateIsInForceSplitMode(width);
         context->ForceUpdateDesignWidthScale(width);
+        auto rootNode = context->GetRootElement();
+        CHECK_NULL_VOID(rootNode);
+        const auto& geometryNode = rootNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->ResetParentLayoutConstraint();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
  
