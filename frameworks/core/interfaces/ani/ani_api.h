@@ -532,10 +532,10 @@ struct ArkUIAniRichEditorModifier {
     ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
-    std::string (*persistentStorageGet)(const std::string& key);
-    void (*persistentStorageSet)(const std::string& key, const std::string& value);
-    bool (*persistentStorageHas)(const std::string& key);
-    void (*persistentStorageDelete)(const std::string& key);
+    std::string (*persistentStorageGet)(const std::string& key, const int32_t areaMode);
+    void (*persistentStorageSet)(const std::string& key, const std::string& value, const int32_t areaMode);
+    bool (*persistentStorageHas)(const std::string& key, const int32_t areaMode);
+    void (*persistentStorageDelete)(const std::string& key, const int32_t areaMode);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();
