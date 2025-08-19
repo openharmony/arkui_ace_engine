@@ -1024,8 +1024,6 @@ protected:
         return isBackToTopRunning_;
     }
 
-    std::string ParseCommand(const std::string& command);
-
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
@@ -1158,7 +1156,6 @@ private:
     void SetNestedScrolling(bool nestedScrolling);
     void InitRatio();
     void SetOnHiddenChangeForParent();
-    void ReportOnItemStopEvent();
     virtual void ResetForExtScroll() {};
 
     Axis axis_ = Axis::VERTICAL;
