@@ -1979,11 +1979,10 @@ void MenuPattern::ShowArrowRotateAnimation() const
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void MenuPattern::ShowArrowReverseRotateAnimation() const
+void MenuPattern::ShowArrowReverseRotateAnimation(const RefPtr<FrameNode>& subMenuNode) const
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto subImageNode = GetArrowNode(host);
+    CHECK_NULL_VOID(subMenuNode);
+    auto subImageNode = GetArrowNode(subMenuNode);
     CHECK_NULL_VOID(subImageNode);
     auto subImageContext = subImageNode->GetRenderContext();
     CHECK_NULL_VOID(subImageContext);
@@ -1995,7 +1994,7 @@ void MenuPattern::ShowArrowReverseRotateAnimation() const
         if (subImageContext) {
             subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
         }
-    }, nullptr, nullptr, host->GetContextRefPtr());
+    }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
 }
 
 RefPtr<FrameNode> MenuPattern::GetArrowNode(const RefPtr<FrameNode>& host) const
@@ -2057,7 +2056,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
         }
     }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
 
-    ShowArrowReverseRotateAnimation();
+    ShowArrowReverseRotateAnimation(subMenuNode);
 
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
