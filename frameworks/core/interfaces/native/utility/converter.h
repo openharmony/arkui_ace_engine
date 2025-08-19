@@ -588,6 +588,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
+    template<> RefPtr<Ellipse> Convert(const Ark_Rect& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
     template<> RefPtr<Gesture> Convert(const Ark_GestureGroupInterface& src);
     template<> RefPtr<Gesture> Convert(const Ark_LongPressGestureInterface& src);

@@ -82,15 +82,11 @@ HWTEST_F(ShapeMaskAccessorTest, setRectShapeTopLeftTest, TestSize.Level1)
 
             auto expectedW = Dimension(DEFAULT_FLOAT_VALUE - expectedX.Value());
             auto expectedH = Dimension(DEFAULT_FLOAT_VALUE - expectedY.Value());
-            ASSERT_NE(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->rect->GetPosition().GetX(), expectedX);
-            EXPECT_EQ(peer_->rect->GetPosition().GetY(), expectedY);
-            EXPECT_EQ(peer_->rect->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->rect->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedX);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedY);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
         }
     }
 }
@@ -118,15 +114,11 @@ HWTEST_F(ShapeMaskAccessorTest, setRectShapeRightBottomTest, TestSize.Level1)
             auto expectedW = Dimension(expectedX.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedH = Dimension(expectedY.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-            ASSERT_NE(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->rect->GetPosition().GetX(), expectedD);
-            EXPECT_EQ(peer_->rect->GetPosition().GetY(), expectedD);
-            EXPECT_EQ(peer_->rect->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->rect->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedD);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedD);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
         }
     }
 }
@@ -164,24 +156,21 @@ HWTEST_F(ShapeMaskAccessorTest, setRoundRectShapeTopLeftTest, TestSize.Level1)
             auto expectedW = Dimension(DEFAULT_FLOAT_VALUE - expectedX.Value());
             auto expectedH = Dimension(DEFAULT_FLOAT_VALUE - expectedY.Value());
             auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-            ASSERT_NE(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->roundRect->GetPosition().GetX(), expectedX);
-            EXPECT_EQ(peer_->roundRect->GetPosition().GetY(), expectedY);
-            EXPECT_EQ(peer_->roundRect->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->roundRect->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->roundRect->GetTopLeftRadius().GetX(), expectedX);
-            EXPECT_EQ(peer_->roundRect->GetTopLeftRadius().GetY(), expectedY);
-            EXPECT_EQ(peer_->roundRect->GetTopRightRadius().GetX(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetTopRightRadius().GetY(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetBottomLeftRadius().GetX(), expectedX);
-            EXPECT_EQ(peer_->roundRect->GetBottomLeftRadius().GetY(), expectedY);
-            EXPECT_EQ(peer_->roundRect->GetBottomRightRadius().GetX(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetBottomRightRadius().GetY(), expectedD);
-
-            EXPECT_EQ(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedX);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedY);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
+            auto roundShapeRect = AceType::DynamicCast<ShapeRect>(peer_->shape);
+            ASSERT_NE(roundShapeRect, nullptr);
+            EXPECT_EQ(roundShapeRect->GetTopLeftRadius().GetX(), expectedX);
+            EXPECT_EQ(roundShapeRect->GetTopLeftRadius().GetY(), expectedY);
+            EXPECT_EQ(roundShapeRect->GetTopRightRadius().GetX(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetTopRightRadius().GetY(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetBottomLeftRadius().GetX(), expectedX);
+            EXPECT_EQ(roundShapeRect->GetBottomLeftRadius().GetY(), expectedY);
+            EXPECT_EQ(roundShapeRect->GetBottomRightRadius().GetX(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetBottomRightRadius().GetY(), expectedD);
         }
     }
 }
@@ -219,24 +208,21 @@ HWTEST_F(ShapeMaskAccessorTest, setRoundRectShapeRightBottomTest, TestSize.Level
             auto expectedW = Dimension(expectedX.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedH = Dimension(expectedY.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-            ASSERT_NE(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->roundRect->GetPosition().GetX(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetPosition().GetY(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->roundRect->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->roundRect->GetTopLeftRadius().GetX(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetTopLeftRadius().GetY(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetTopRightRadius().GetX(), expectedX);
-            EXPECT_EQ(peer_->roundRect->GetTopRightRadius().GetY(), expectedY);
-            EXPECT_EQ(peer_->roundRect->GetBottomLeftRadius().GetX(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetBottomLeftRadius().GetY(), expectedD);
-            EXPECT_EQ(peer_->roundRect->GetBottomRightRadius().GetX(), expectedX);
-            EXPECT_EQ(peer_->roundRect->GetBottomRightRadius().GetY(), expectedY);
-
-            EXPECT_EQ(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedD);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedD);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
+            auto roundShapeRect = AceType::DynamicCast<ShapeRect>(peer_->shape);
+            ASSERT_NE(roundShapeRect, nullptr);
+            EXPECT_EQ(roundShapeRect->GetTopLeftRadius().GetX(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetTopLeftRadius().GetY(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetTopRightRadius().GetX(), expectedX);
+            EXPECT_EQ(roundShapeRect->GetTopRightRadius().GetY(), expectedY);
+            EXPECT_EQ(roundShapeRect->GetBottomLeftRadius().GetX(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetBottomLeftRadius().GetY(), expectedD);
+            EXPECT_EQ(roundShapeRect->GetBottomRightRadius().GetX(), expectedX);
+            EXPECT_EQ(roundShapeRect->GetBottomRightRadius().GetY(), expectedY);
         }
     }
 }
@@ -261,14 +247,12 @@ HWTEST_F(ShapeMaskAccessorTest, setCircleShapeXYTest, TestSize.Level1)
             accessor_->setCircleShape(peer_, &circle);
 
             auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-            ASSERT_NE(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->circle->GetPosition().GetX(), expectedX);
-            EXPECT_EQ(peer_->circle->GetPosition().GetY(), expectedY);
-            EXPECT_EQ(peer_->circle->GetRadius(), expectedD);
-            EXPECT_EQ(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedX);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedY);
+            auto circleShape = AceType::DynamicCast<Circle>(peer_->shape);
+            ASSERT_NE(circleShape, nullptr);
+            EXPECT_EQ(circleShape->GetRadius(), expectedD);
         }
     }
 }
@@ -292,16 +276,14 @@ HWTEST_F(ShapeMaskAccessorTest, setCircleShapeRadiusTest, TestSize.Level1)
         accessor_->setCircleShape(peer_, &circle);
 
         auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-        ASSERT_NE(peer_->circle, nullptr);
-        EXPECT_EQ(peer_->circle->GetPosition().GetX(), expectedD);
-        EXPECT_EQ(peer_->circle->GetPosition().GetY(), expectedD);
+        ASSERT_NE(peer_->shape, nullptr);
+        EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedD);
+        EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedD);
+        auto circleShape = AceType::DynamicCast<Circle>(peer_->shape);
+        ASSERT_NE(circleShape, nullptr);
         if (expectedR.IsValid()) {
-            EXPECT_EQ(peer_->circle->GetRadius(), expectedR);
+            EXPECT_EQ(circleShape->GetRadius(), expectedR);
         }
-        EXPECT_EQ(peer_->rect, nullptr);
-        EXPECT_EQ(peer_->roundRect, nullptr);
-        EXPECT_EQ(peer_->oval, nullptr);
-        EXPECT_EQ(peer_->path, std::nullopt);
     }
 }
 
@@ -327,15 +309,11 @@ HWTEST_F(ShapeMaskAccessorTest, setOvalShapeTopLeftTest, TestSize.Level1)
 
             auto expectedW = Dimension(DEFAULT_FLOAT_VALUE - expectedX.Value());
             auto expectedH = Dimension(DEFAULT_FLOAT_VALUE - expectedY.Value());
-            ASSERT_NE(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->oval->GetPosition().GetX(), expectedX);
-            EXPECT_EQ(peer_->oval->GetPosition().GetY(), expectedY);
-            EXPECT_EQ(peer_->oval->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->oval->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedX);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedY);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
         }
     }
 }
@@ -363,15 +341,11 @@ HWTEST_F(ShapeMaskAccessorTest, setOvalShapeRightBottomTest, TestSize.Level1)
             auto expectedW = Dimension(expectedX.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedH = Dimension(expectedY.Value() - DEFAULT_FLOAT_VALUE);
             auto expectedD = Dimension(DEFAULT_FLOAT_VALUE);
-            ASSERT_NE(peer_->oval, nullptr);
-            EXPECT_EQ(peer_->oval->GetPosition().GetX(), expectedD);
-            EXPECT_EQ(peer_->oval->GetPosition().GetY(), expectedD);
-            EXPECT_EQ(peer_->oval->GetWidth(), expectedW);
-            EXPECT_EQ(peer_->oval->GetHeight(), expectedH);
-            EXPECT_EQ(peer_->rect, nullptr);
-            EXPECT_EQ(peer_->roundRect, nullptr);
-            EXPECT_EQ(peer_->circle, nullptr);
-            EXPECT_EQ(peer_->path, std::nullopt);
+            ASSERT_NE(peer_->shape, nullptr);
+            EXPECT_EQ(peer_->shape->GetPosition().GetX(), expectedD);
+            EXPECT_EQ(peer_->shape->GetPosition().GetY(), expectedD);
+            EXPECT_EQ(peer_->shape->GetWidth(), expectedW);
+            EXPECT_EQ(peer_->shape->GetHeight(), expectedH);
         }
     }
 }
@@ -391,12 +365,10 @@ HWTEST_F(ShapeMaskAccessorTest, setCommandPathTest, TestSize.Level1)
         };
         accessor_->setCommandPath(peer_, &path);
 
-        ASSERT_NE(peer_->path, std::nullopt);
-        EXPECT_EQ(peer_->path.value(), expectedP);
-        EXPECT_EQ(peer_->rect, nullptr);
-        EXPECT_EQ(peer_->roundRect, nullptr);
-        EXPECT_EQ(peer_->circle, nullptr);
-        EXPECT_EQ(peer_->oval, nullptr);
+        ASSERT_NE(peer_->shape, nullptr);
+        auto pathShape = AceType::DynamicCast<Path>(peer_->shape);
+        ASSERT_NE(pathShape, nullptr);
+        EXPECT_EQ(pathShape->GetValue(), expectedP);
     }
 }
 
