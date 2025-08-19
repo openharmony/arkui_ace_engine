@@ -44,7 +44,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -3132,7 +3131,6 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
-    ReportOnItemStopEvent();
     if (onScrollStop) {
         onScrollStop();
     }
@@ -4458,31 +4456,6 @@ void ScrollablePattern::MarkScrollBarProxyDirty()
 {
     if (scrollBarProxy_) {
         scrollBarProxy_->MarkScrollBarDirty();
-    }
-}
-
-std::string ScrollablePattern::ParseCommand(const std::string& command)
-{
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || json->IsNull()) {
-        return std::string("");
-    }
-    return json->GetString("cmd");
-}
-
-void ScrollablePattern::ReportOnItemStopEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetTag() == V2::GRID_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
-        TAG_LOGI(
-            AceLogTag::ACE_GRID, "nodeId:[%{public}d] Grid reportComponentChangeEvent onScrollStop", host->GetId());
-    }
-    if (host->GetTag() == V2::LIST_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "List.onScrollStop");
-        TAG_LOGI(
-            AceLogTag::ACE_LIST, "nodeId:[%{public}d] List reportComponentChangeEvent onScrollStop", host->GetId());
     }
 }
 } // namespace OHOS::Ace::NG

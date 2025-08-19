@@ -99,7 +99,6 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
-    dragDropManager->SetDragStartPoint(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY());
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [weakHost = WeakClaim(RawPtr(host)), info, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
