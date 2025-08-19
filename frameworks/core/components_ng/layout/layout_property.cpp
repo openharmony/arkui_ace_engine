@@ -945,7 +945,6 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
-    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     if (layoutConstraint_.has_value()) {
         std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
         PaddingPropertyF roundOffFraction;
@@ -966,6 +965,7 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
             isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
         return truncatedSafeAreaPadding;
     }
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     return ConvertToPaddingPropertyF(
         safeAreaPadding_, scaleProperty, rootWidth, true, true);
 }
@@ -978,7 +978,6 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
     }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
-    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
         auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
@@ -992,6 +991,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
         }
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
     }
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
     auto borderWidth =
         ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
@@ -1009,13 +1009,13 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
-    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     if (layoutConstraint_.has_value()) {
         auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
         auto borderWidth =
             ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
+    auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
     auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
     auto borderWidth =
         ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
