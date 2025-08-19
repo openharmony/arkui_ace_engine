@@ -1707,31 +1707,35 @@ export class ChipComponent extends ViewPU {
   isChipActivated() {
     return this.chipActivated ?? false;
   }
-  resourceToNumber(resource, defaultValue) {
-    if (!resource || !resource.type) {
-      console.error('[Chip] failed: resource get fail');
-      return defaultValue;
-    }
+  getResourceNumber(resource) {
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
     if (!resourceManager) {
       console.error('[Chip] failed to get resourceManager');
-      return defaultValue;
+      return null;
     }
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
         try {
           if (resource.id !== -1) {
-            return resourceManager.getNumber(resource);
+            return resourceManager.getNumber(resource.id);
           }
           return resourceManager.getNumberByName(resource.params[0].split('.')[2]);
         } catch (error) {
-          console.error(`[Chip] get resource error, return defaultValue`);
-          return defaultValue;
+          console.error(`[Chip] get resource error`);
+          return null;
         }
       default:
-        return defaultValue;
+        return null;
     }
+  }
+  resourceToNumber(resource, defaultValue) {
+    if (!resource || !resource.type) {
+      console.error('[Chip] failed: resource get fail');
+      return defaultValue;
+    }
+    const result = this.getResourceNumber(resource);
+    return result !== null ? result : defaultValue;
   }
   isValidLength(length) {
     if (typeof length === 'number') {
@@ -1740,20 +1744,16 @@ export class ChipComponent extends ViewPU {
       return this.isValidLengthString(length);
     } else if (typeof length === 'object') {
       const resource = length;
-      const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-      if (!resourceManager) {
-        console.error('[Chip] failed to get resourceManager.');
-        return false;
-      }
-      switch (resource.type) {
-        case RESOURCE_TYPE_FLOAT:
-        case RESOURCE_TYPE_INTEGER:
-          return resourceManager.getNumber(resource) >= 0;
-        case RESOURCE_TYPE_STRING:
-          return this.isValidLengthString(resourceManager.getStringSync(resource));
-        default:
+      if (resource.type === RESOURCE_TYPE_STRING) {
+        const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+        if (!resourceManager) {
+          console.error('[Chip] failed to get resourceManager.');
           return false;
+        }
+        return this.isValidLengthString(resourceManager.getStringSync(resource));
       }
+      const result = this.getResourceNumber(resource);
+      return result !== null && result >= 0;
     }
     return false;
   }
@@ -1763,6 +1763,25 @@ export class ChipComponent extends ViewPU {
       return false;
     }
     return Number.parseInt(matches[1], 10) >= 0;
+  }
+  chipZoomOut() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: 1,
+        y: 1,
+      };
+    }
+  }
+  chipZoomIn() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+      };
+    }
+  }
+  isNeedShowCloseIconMargin() {
+    return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1776,25 +1795,6 @@ export class ChipComponent extends ViewPU {
       }
     }, If);
     If.pop();
-  }
-  chipZoomOut() {
-   if (this.isSuffixIconFocusStyleCustomized) {
-    this.chipScale = {
-     x: 1,
-     y: 1,
-    };
-   }
-  }
-  chipZoomIn() {
-   if (this.isSuffixIconFocusStyleCustomized) {
-     this.chipScale = {
-      x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-      y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-     };
-    }
-  }
-  isNeedShowCloseIconMargin() {
-    return this.isClosable() && this.isSuffixIconFocusStyleCustomized;
   }
   rerender() {
     this.updateDirtyElements();
