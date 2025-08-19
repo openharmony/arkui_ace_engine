@@ -76,6 +76,11 @@ RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
 }
 } // namespace
 namespace RenderNodeAccessor {
+RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
+{
+    return peer ? peer->shape : nullptr;
+}
+
 void DestroyPeerImpl(Ark_RenderNode peer)
 {
     PeerUtils::DestroyPeer(peer);
