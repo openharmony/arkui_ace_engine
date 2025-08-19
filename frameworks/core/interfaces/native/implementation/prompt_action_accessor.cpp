@@ -490,13 +490,22 @@ void OpenMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
     g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
     auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
+    if (!theme) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     menuParam.isShowInSubWindow =
         Converter::OptConvert<bool>(options->value.showInSubWindow).value_or(theme->GetExpandDisplay());
     int targetId = INVALID_ID;
@@ -504,6 +513,10 @@ void OpenMenuImpl(Ark_VMContext vmContext,
     if (result == ERROR_CODE_NO_ERROR) {
         result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
     }
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void UpdateMenuImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -515,17 +528,25 @@ void UpdateMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     MenuParam menuParam;
     auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
     if (isPartialUpdate) {
         auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
         if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(promiseValue, result);
             return;
         }
     }
     g_bindMenuOptionsParam(*options, menuParam);
-    ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    auto result = ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void CloseMenuImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -535,8 +556,15 @@ void CloseMenuImpl(Ark_VMContext vmContext,
 {
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 } // PromptActionAccessor
 
