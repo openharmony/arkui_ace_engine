@@ -105,6 +105,9 @@
             ],
             "@ohos/arkui/Parallelize": [
                 "../ohos.arkui.Parallelize.ts"
+            ],
+            "@ohos.arkui.component": [
+                "./arkui/component"
             ]
         }
     },
