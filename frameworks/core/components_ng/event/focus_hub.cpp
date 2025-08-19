@@ -20,6 +20,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
@@ -2153,12 +2154,26 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    MoveOffsetParam param {
-        scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset,
-        scrollAbility.contentEndOffset,
-        false
-    };
+    MoveOffsetParam param { scrollAxis == Axis::VERTICAL, scrollAbility.contentStartOffset,
+        scrollAbility.contentEndOffset, false };
+    if (AceType::InstanceOf<ListPattern>(parentPattern)) {
+        auto listPattern = AceType::DynamicCast<ListPattern>(parentPattern);
+        RefPtr<UINode> parent = curFrameNode;
+        RefPtr<FrameNode> listItemNode;
+        while (parent && parent != parentFrameNode) {
+            if (parent->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                listItemNode = AceType::DynamicCast<FrameNode>(parent);
+            }
+            parent = parent->GetParent();
+        }
+        if (listItemNode) {
+            auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+            auto indexInListItemGroup = listItemPattern->GetIndexInListItemGroup();
+            auto indexInList = listItemPattern->GetIndexInList();
+            listPattern->LayoutListForFocus(
+                indexInList, indexInListItemGroup == -1 ? std::nullopt : std::optional<int32_t>(indexInListItemGroup));
+        }
+    }
     auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
