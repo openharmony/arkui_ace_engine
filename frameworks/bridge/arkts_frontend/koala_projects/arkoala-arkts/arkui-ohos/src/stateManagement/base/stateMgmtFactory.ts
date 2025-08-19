@@ -74,6 +74,9 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
         return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
+    makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T> {
+        return new LocalDecoratedVariable<T>(null, varName, uiUtils.makeObserved(initValue, true) as T);
+    }
 
     makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
         return new ParamDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
