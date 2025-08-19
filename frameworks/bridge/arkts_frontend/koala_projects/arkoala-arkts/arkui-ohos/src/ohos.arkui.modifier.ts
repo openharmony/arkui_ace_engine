@@ -90,3 +90,5 @@ export { NavigationModifier } from './NavigationModifier';
 export { SwiperModifier } from './SwiperModifier';
 
 export { RichEditorModifier } from './RichEditorModifier'
+
+export { ParticleModifier } from './ParticleModifier';
