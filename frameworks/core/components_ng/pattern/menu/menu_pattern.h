@@ -776,7 +776,7 @@ private:
         bool isNeedRestoreNodeId) const;
     std::vector<RefPtr<RenderContext>> GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const;
     void ShowArrowRotateAnimation() const;
-    void ShowArrowReverseRotateAnimation() const;
+    void ShowArrowReverseRotateAnimation(const RefPtr<FrameNode>& subMenuNode) const;
     RefPtr<FrameNode> GetArrowNode(const RefPtr<FrameNode>& host) const; // arrowNode in subMenu
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
