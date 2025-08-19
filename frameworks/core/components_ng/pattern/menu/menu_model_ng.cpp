@@ -19,7 +19,6 @@
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
-
 void MenuModelNG::CreateWithColorResourceObj(
     const RefPtr<ResourceObject>& resObj, const MenuColorType menuColorType)
 {
@@ -45,8 +44,9 @@ void MenuModelNG::CreateWithColorResourceObj(
         std::string colorStr = pattern->GetResCacheMapByKey(key);
         Color color;
         if (colorStr.empty()) {
-            CHECK_NE_VOID(ResourceParseUtils::ParseResColor(resObj, color), true);
-            pattern->AddResCache(key, color.ToString());
+            if (ResourceParseUtils::ParseResColor(resObj, color)) {
+                pattern->AddResCache(key, color.ToString());
+            }
         } else {
             color = Color::ColorFromString(colorStr);
         }
@@ -177,7 +177,7 @@ void MenuModelNG::CreateWithFontFamilyResourceObj(
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
-const std::string MenuModelNG::ColorTypeToString(const MenuColorType menuColorType)
+std::string MenuModelNG::ColorTypeToString(const MenuColorType menuColorType)
 {
     std::string rst;
     switch (menuColorType) {
@@ -197,7 +197,7 @@ const std::string MenuModelNG::ColorTypeToString(const MenuColorType menuColorTy
     return rst;
 }
 
-const std::string MenuModelNG::DimensionTypeToString(const MenuDimensionType menuDimensionType)
+std::string MenuModelNG::DimensionTypeToString(const MenuDimensionType menuDimensionType)
 {
     std::string rst;
     switch (menuDimensionType) {
@@ -229,7 +229,7 @@ const std::string MenuModelNG::DimensionTypeToString(const MenuDimensionType men
     return rst;
 }
 
-const std::string MenuModelNG::FamilyTypeToString(const MenuFamilyType type)
+std::string MenuModelNG::FamilyTypeToString(const MenuFamilyType type)
 {
     std::string rst;
     switch (type) {
@@ -344,15 +344,15 @@ void MenuModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
         pattern->RemoveResObj("borderRadius");
         auto&& updateFunc = [borderRadius, weak = AceType::WeakClaim(frameNode)](
                                 const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weak.Upgrade();
-            if (!frameNode) {
+            auto node = weak.Upgrade();
+            if (!node) {
                 return;
             }
             NG::BorderRadiusProperty& borderRadiusValue = const_cast<NG::BorderRadiusProperty&>(borderRadius);
             borderRadiusValue.ReloadResources();
-            ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius);
-            frameNode->MarkModifyDone();
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, node);
+            node->MarkModifyDone();
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         };
         if (borderRadius.HasResources()) {
             RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -432,6 +432,7 @@ void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivide
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColorSetByUser, true, frameNode);
@@ -511,15 +512,15 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusPr
         pattern->RemoveResObj("borderRadius");
         auto&& updateFunc = [borderRadius, weak = AceType::WeakClaim(frameNode)](
                                 const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weak.Upgrade();
-            if (!frameNode) {
+            auto node = weak.Upgrade();
+            if (!node) {
                 return;
             }
             NG::BorderRadiusProperty& borderRadiusValue = const_cast<NG::BorderRadiusProperty&>(borderRadius);
             borderRadiusValue.ReloadResources();
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
-            frameNode->MarkModifyDone();
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, node);
+            node->MarkModifyDone();
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         };
         if (borderRadius.HasResources()) {
             RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
@@ -536,5 +537,4 @@ void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
     ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
-
 } // namespace OHOS::Ace::NG

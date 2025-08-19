@@ -62,9 +62,10 @@ void JSMenu::FontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
-    if (ParseJsDimensionFp(info[0], fontSize, fontSizeResObj)) {
-        MenuModel::GetInstance()->SetFontSize(fontSize);
+    if (!ParseJsDimensionFp(info[0], fontSize, fontSizeResObj)) {
+        return;
     }
+    MenuModel::GetInstance()->SetFontSize(fontSize);
     if (SystemProperties::ConfigChangePerform()) {
         MenuModel::GetInstance()->CreateWithDimensionResourceObj(fontSizeResObj, MenuDimensionType::FONT_SIZE);
     }
@@ -127,14 +128,21 @@ void JSMenu::HandleFontObject(
         }
     }
     auto jsFamily = obj->GetProperty("family");
-    if (!jsFamily->IsNull() && jsFamily->IsString()) {
-        RefPtr<ResourceObject> familyResObj;
-        std::vector<std::string> fontFamilies;
-        if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
+    if (!jsFamily->IsNull()) {
+        if (jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
             MenuModel::GetInstance()->SetFontFamily(fontFamilies);
-        }
-        if (SystemProperties::ConfigChangePerform()) {
-            MenuModel::GetInstance()->CreateWithFontFamilyResourceObj(familyResObj, MenuFamilyType::FONT_FAMILY);
+        } else if (jsFamily->IsObject()) {
+            RefPtr<ResourceObject> familyResObj;
+            std::vector<std::string> fontFamilies;
+            if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
+                MenuModel::GetInstance()->SetFontFamily(fontFamilies);
+            }
+            if (SystemProperties::ConfigChangePerform()) {
+                MenuModel::GetInstance()->CreateWithFontFamilyResourceObj(
+                    familyResObj, MenuFamilyType::FONT_FAMILY);
+            }
         }
     }
 }
@@ -451,12 +459,12 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
     JSClass<JSMenu>::StaticMethod("subMenuExpandSymbol", &JSMenu::SetExpandSymbol);
-    JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenu>::StaticMethod("menuItemDivider", &JSMenu::SetItemDivider);
     JSClass<JSMenu>::StaticMethod("menuItemGroupDivider", &JSMenu::SetItemGroupDivider);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);
 }

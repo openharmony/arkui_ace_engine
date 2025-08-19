@@ -1146,6 +1146,33 @@ ArkUINativeModuleValue SelectBridge::ResetSelectDirection(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SelectBridge::SetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!modeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    int32_t mode = 0;
+    if (modeArg->IsNumber()) {
+        mode = modeArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getSelectModifier()->setAvoidance(nativeNode, mode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetAvoidance(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
 {
     options.push_back(static_cast<uint32_t>(valueColor.has_value()));
@@ -1214,33 +1241,6 @@ ArkUINativeModuleValue SelectBridge::ResetMenuOutline(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSelectModifier()->resetMenuOutline(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue SelectBridge::SetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(!modeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    int32_t mode = 0;
-    if (modeArg->IsNumber()) {
-        mode = modeArg->Int32Value(vm);
-    }
-    GetArkUINodeModifiers()->getSelectModifier()->setAvoidance(nativeNode, mode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue SelectBridge::ResetAvoidance(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getSelectModifier()->resetAvoidance(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
