@@ -363,11 +363,11 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     float overScrollPastEnd = 0.0f;
     float overScrollPast = 0.0f;
     // not consider rowReverse or colReverse
-    overScrollPastStart = std::max(currentOffset_, 0.0f);
+    overScrollPastStart = std::max(currentOffset_, 0.0);
     if (Positive(scrollableDistance_)) {
-        overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
+        overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0);
     } else {
-        overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0f));
+        overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0));
     }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {
@@ -377,7 +377,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     delta = delta * friction;
 }
 
-float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)
+double ScrollPattern::ValidateOffset(int32_t source, double willScrollOffset)
 {
     if (LessOrEqual(scrollableDistance_, 0.0f) || source == SCROLL_FROM_JUMP) {
         return willScrollOffset;
@@ -388,12 +388,12 @@ float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
-                willScrollOffset = std::clamp(willScrollOffset, 0.0f, scrollableDistance_);
+                willScrollOffset = std::clamp(willScrollOffset, 0.0, scrollableDistance_);
             } else {
-                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0f);
+                willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
             }
         } else {
-            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0f);
+            willScrollOffset = std::clamp(willScrollOffset, -scrollableDistance_, 0.0);
         }
     }
     return willScrollOffset;
@@ -410,12 +410,12 @@ void ScrollPattern::ValidateOffset(int32_t source)
         source == SCROLL_FROM_ROTATE || source == SCROLL_FROM_AXIS) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
-                currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
+                currentOffset_ = std::clamp(currentOffset_, 0.0, scrollableDistance_);
             } else {
-                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+                currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
             }
         } else {
-            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0);
         }
     }
 }

@@ -63,7 +63,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
         isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
         if (isMainFix) {
-            frameSize_.SetMainSize(Infinity<float>(), info_.axis_);
+            frameSize_.SetMainSize(LayoutInfinity<float>(), info_.axis_);
         }
     }
     bool matchChildren = GreaterOrEqualToInfinity(mainSize) || isMainWrap;

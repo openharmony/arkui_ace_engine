@@ -414,7 +414,7 @@ private:
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);
-    float ValidateOffset(int32_t source, float willScrollOffset);
+    double ValidateOffset(int32_t source, double willScrollOffset);
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     TwoDimensionScrollResult FireObserverTwoDimensionOnWillScroll(Dimension xOffset, Dimension yOffset,
@@ -432,11 +432,11 @@ private:
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
 
-    float currentOffset_ = 0.0f;
-    float lastOffset_ = 0.0f;
+    double currentOffset_ = 0.0;
+    double lastOffset_ = 0.0;
     // keep lastOffset_ for compatibility, use prevOffset_ for onReachStart/onReachEnd
-    float prevOffset_ = 0.0f;
-    float scrollableDistance_ = 0.0f;
+    double prevOffset_ = 0.0;
+    double scrollableDistance_ = 0.0;
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
     SizeF viewSize_;
