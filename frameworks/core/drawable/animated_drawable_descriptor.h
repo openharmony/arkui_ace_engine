@@ -31,6 +31,8 @@ public:
 
     int32_t GetTotalDuration();
 
+    void SetDurations(const std::vector<int32_t>& durations);
+
     std::vector<int32_t> GetDurations();
 
     DrawableType GetDrawableType() const override

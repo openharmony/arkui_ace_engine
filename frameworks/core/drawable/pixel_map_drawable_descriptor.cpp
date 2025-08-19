@@ -50,14 +50,3 @@ void PixelMapDrawableDescriptor::CreatePixelMap()
 }
 
 } // namespace OHOS::Ace
-
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_SetRawData(void* object, uint8_t* data, size_t len)
-{
-    if (len == 0 || data == nullptr) {
-        return;
-    }
-    auto* drawable = reinterpret_cast<OHOS::Ace::PixelMapDrawableDescriptor*>(object);
-    if (drawable) {
-        drawable->SetRawData(data, len);
-    }
-}

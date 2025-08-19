@@ -161,6 +161,7 @@ void CreatePixelMapDrawable(
     env->Reference_IsUndefined(pixelAni, &isUndefined);
     // first create native pixel map drawable descriptor
     auto* drawable = new PixelMapDrawableDescriptor();
+    drawable->IncRefCount();
     auto ptr = reinterpret_cast<ani_long>(drawable);
     env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
     if (!isUndefined) {
@@ -179,6 +180,7 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
     env->Reference_IsUndefined(backgroundAni, &isBackgroundUndefined);
     env->Reference_IsUndefined(maskAni, &isMaskUndefined);
     auto* drawable = new LayeredDrawableDescriptor();
+    drawable->IncRefCount();
     auto ptr = reinterpret_cast<ani_long>(drawable);
     env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
     if (!isForegroundUndefined) {
@@ -201,6 +203,7 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     ani_boolean isOptionsUndefined;
     env->Reference_IsUndefined(optionsAni, &isOptionsUndefined);
     auto* drawable = new AnimatedDrawableDescriptor();
+    drawable->IncRefCount();
     auto ptr = reinterpret_cast<ani_long>(drawable);
     env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
     ani_size size;
@@ -387,6 +390,16 @@ ani_object NativeTransferStatic(ani_env* env, [[maybe_unused]] ani_class aniClas
     }
     return retValue;
 }
+void DestructDrawable([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_class aniClass, ani_long pointer)
+{
+    if (pointer == 0) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<DrawableDescriptor*>(pointer);
+    if (drawable != nullptr) {
+        drawable->DecRefCount();
+    }
+}
 } // namespace OHOS::Ace::Ani
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -417,6 +430,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "getMaskClipPath", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableMaskClipPath) },
         ani_native_function {
             "nativeTransferStatic", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::NativeTransferStatic) },
+        ani_native_function { "destructDrawable", nullptr, reinterpret_cast<void*>(OHOS::Ace::Ani::DestructDrawable) },
     };
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
     if (bindRst != ANI_OK) {

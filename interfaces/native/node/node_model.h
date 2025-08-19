@@ -44,7 +44,7 @@ struct ArkUI_Node {
     void* eventListeners = nullptr;
     void* barrierOption = nullptr;
     void* guidelineOption = nullptr;
-    void* alignRuleOption = nullptr;  
+    void* alignRuleOption = nullptr;
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
     void* imageFrameInfos = nullptr;
@@ -171,6 +171,8 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
+void* IncreaseRefDrawable();
+void* DecreaseRefDrawable();
 bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
