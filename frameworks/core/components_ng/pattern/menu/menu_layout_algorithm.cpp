@@ -3540,7 +3540,7 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isShowInSubWindow, Lay
     auto theme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     // false for phone devices
-    isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_;
+    isExpandDisplay_ = theme->GetExpandDisplay() || isFreeMultiWindow_ || SystemProperties::IsPCMode();
     auto isUIExtensionSubWindow = container->IsUIExtensionWindow();
     if ((isExpandDisplay_ || isUIExtensionSubWindow) && !isShowInSubWindow && containerId >= MIN_SUBCONTAINER_ID) {
         canExpandCurrentWindow_ = true;
