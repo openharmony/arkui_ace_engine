@@ -586,7 +586,6 @@ HWTEST_F(TextFieldAutoFillControllerTest, ResetAutoFillAnimationStatus001, TestS
     });
     auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
     pattern_->autoFillController_ = autoFillController;
-
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
     layoutProperty->layoutDirection_ = TextDirection::RTL;

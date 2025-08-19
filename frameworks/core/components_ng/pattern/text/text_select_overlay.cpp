@@ -436,6 +436,28 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
     }
 }
 
+void TextSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+
+    auto oldIsShowAIMenuOption = textPattern->IsShowAIMenuOption();
+    auto oldIsShowAskCelia = textPattern->IsAskCeliaEnabled();
+    textPattern->UpdateAIMenuOptions();
+    menuInfo.isShowAIMenuOptionChanged =
+        oldIsShowAIMenuOption != textPattern->IsShowAIMenuOption() ||
+        oldIsShowAskCelia != textPattern->IsAskCeliaEnabled();
+
+    if (textPattern->IsShowAIMenuOption()) {
+        // do not support two selected ai entity, hence it's enough to pick first item to determine type
+        auto firstSpanItem = textPattern->GetAIItemOption().begin()->second; // null check
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
+    menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
+}
+
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     auto isDragging = GetIsHandleDragging();
@@ -667,41 +689,11 @@ bool TextSelectOverlay::GetRenderClipValue() const
     return renderContext->GetClipEdge().value_or(defaultClipValue);
 }
 
-bool TextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
+std::optional<SelectOverlayInfo> TextSelectOverlay::GetSelectOverlayInfo()
 {
-    auto host = GetOwner();
-    CHECK_NULL_RETURN(host, false);
-    auto geo = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geo, false);
-    auto rect = RectF(OffsetF(0.0f, 0.0f), geo->GetFrameSize());
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, false);
-
-    auto selectedArea = GetSelectArea();
-    selectedArea.SetOffset(selectedArea.GetOffset() - textPattern->GetParentGlobalOffset());
-    return rect.IsInRegion(touchPoint) || selectedArea.IsInRegion(touchPoint);
-}
-
-void TextSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-
-    auto oldIsShowAIMenuOption = textPattern->IsShowAIMenuOption();
-    auto oldIsShowAskCelia = textPattern->IsAskCeliaEnabled();
-    textPattern->UpdateAIMenuOptions();
-    menuInfo.isShowAIMenuOptionChanged =
-        oldIsShowAIMenuOption != textPattern->IsShowAIMenuOption() ||
-        oldIsShowAskCelia != textPattern->IsAskCeliaEnabled();
-
-    if (textPattern->IsShowAIMenuOption()) {
-        // do not support two selected ai entity, hence it's enough to pick first item to determine type
-        auto firstSpanItem = textPattern->GetAIItemOption().begin()->second; // null check
-        menuInfo.aiMenuOptionType = firstSpanItem.type;
-    } else {
-        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
-    }
-    menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+    return manager->GetSelectOverlayInfo();
 }
 
 bool TextSelectOverlay::ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode)
