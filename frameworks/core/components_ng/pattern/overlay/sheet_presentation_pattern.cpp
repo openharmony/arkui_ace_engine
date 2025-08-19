@@ -2386,7 +2386,9 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE) ||
          (sheetType == SheetType::SHEET_BOTTOM_OFFSET))) {
         windowRotate_ = true;
-        SetColumnMinSize(true);
+        if (IsAvoidingKeyboard()) {
+            SetColumnMinSize(true);
+        }
         // Before rotation, reset to the initial mode sheet ratio of the current vertical or horizontal screen
         // It's actually a state where the soft keyboard is not pulled up
         if (isScrolling_) {
