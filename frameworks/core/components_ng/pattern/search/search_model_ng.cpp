@@ -970,8 +970,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value, bool hasTextFieldNode,
     const RefPtr<SearchTheme>& searchTheme)
 {
-    FREE_NODE_CHECK(parentNode, CreateTextField, parentNode,
-        placeholder, value, hasTextFieldNode, searchTheme);  // call CreateTextFieldMultiThread() by multi thread
+    FREE_NODE_CHECK(parentNode, CreateTextField, parentNode, placeholder, value, hasTextFieldNode, searchTheme);
     CHECK_NULL_VOID(searchTheme);
     auto nodeId = parentNode->GetTextFieldId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1011,6 +1010,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
+    ViewAbstract::SetClipEdge(frameNode.GetRawPtr(), true);
     TextFieldUpdateContext(frameNode);
     if (!hasTextFieldNode) {
         auto pattern = parentNode->GetPattern<SearchPattern>();
