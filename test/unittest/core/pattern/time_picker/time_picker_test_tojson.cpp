@@ -608,7 +608,7 @@ HWTEST_F(TimePickerTestToJson, TimePickerLayoutPropertyToJsonValue008, TestSize.
     ASSERT_NE(timePickerModeNG, nullptr);
 
     /**
-     *  @tc.step: step2 Set dateTimeOptions exception value and call ToJsonValue()
+     *  @tc.step: step2 Set dateTimeOptions exception value and call ToJsonValue().
      */
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     bool isUseMilitaryTime = true;

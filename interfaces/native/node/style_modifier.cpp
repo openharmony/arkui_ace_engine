@@ -9719,7 +9719,10 @@ int32_t SetTimePickerSelected(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
     auto fullImpl = GetFullImpl();
     std::vector<std::string> time;
-    StringUtils::StringSplitter(item->string, '-', time);
+
+    std::string timeStr(item->string);
+    std::replace(timeStr.begin(), timeStr.end(), '-', ':');
+    StringUtils::StringSplitter(timeStr, ':', time);
     if (time.size() != NUM_2) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -9938,7 +9941,10 @@ int32_t SetTimePickerStart(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     auto fullImpl = GetFullImpl();
     std::vector<std::string> time;
-    StringUtils::StringSplitter(item->string, ':', time);
+
+    std::string timeStr(item->string);
+    std::replace(timeStr.begin(), timeStr.end(), '-', ':');
+    StringUtils::StringSplitter(timeStr, ':', time);
     if (time.size() != NUM_2) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -9981,7 +9987,10 @@ int32_t SetTimePickerEnd(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto fullImpl = GetFullImpl();
     std::vector<std::string> time;
-    StringUtils::StringSplitter(item->string, ':', time);
+
+    std::string timeStr(item->string);
+    std::replace(timeStr.begin(), timeStr.end(), '-', ':');
+    StringUtils::StringSplitter(timeStr, ':', time);
     if (time.size() != NUM_2) {
         return ERROR_CODE_PARAM_INVALID;
     }
