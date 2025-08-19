@@ -62,10 +62,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
     }
     auto parentIdealSize = layoutConstraint.parentIdealSize;
-    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT && parentIdealSize.Width().has_value()) {
-        // When the width parameter is MATCH_PARENT, set the width to be equal to the parent's width.
-        frameWidth = layoutConstraint.parentIdealSize.Width().value();
-    }
     if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         // When the width parameter is FIX_AT_IDEAL_SIZE, reset the width adaptive content area
         frameWidth = contentWidth + horizontalPadding;

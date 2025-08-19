@@ -38,13 +38,16 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        widthLayoutPolicy_ = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        heightLayoutPolicy_ = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
 
         // When the width or height parameter is MATCH_PARENT, set its value to the parent's value.
-        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(constraint.value(),
-            widthLayoutPolicy, heightLayoutPolicy, axis);
-        tabsIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+        if (widthLayoutPolicy_ == LayoutCalPolicy::MATCH_PARENT
+            || heightLayoutPolicy_ == LayoutCalPolicy::MATCH_PARENT) {
+            auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(constraint.value(),
+            widthLayoutPolicy_, heightLayoutPolicy_, axis);
+            tabsIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+        }
     }
     auto idealSize = tabsIdealSize.ConvertToSizeT();
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
@@ -93,13 +96,22 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto paddingH = layoutProperty->CreatePaddingAndBorder().Width();
     auto paddingV = layoutProperty->CreatePaddingAndBorder().Height();
-    if ((axis == Axis::VERTICAL) && layoutProperty->GetWidthAutoValue(false)) {
+    bool isWidthNeedSetFrameWidth =
+        layoutProperty->GetWidthAutoValue(false) ||
+        widthLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+        widthLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    bool isHeightNeedSetFrameWidth =
+        layoutProperty->GetHeightAutoValue(false) ||
+        heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+        heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    // If the width or height is set to auto/FIX_AT_IDEAL_SIZE/WRAP_CONTENT, tabs need to reset frame size.
+    if ((axis == Axis::VERTICAL) && isWidthNeedSetFrameWidth) {
         if (!barOverlap) {
             geometryNode->SetFrameWidth(tabBarSize.Width() + dividerStrokeWidth + swiperSize.Width() + paddingH);
         } else {
             geometryNode->SetFrameWidth(dividerStrokeWidth + swiperSize.Width() + paddingH);
         }
-    } else if ((axis == Axis::HORIZONTAL) && layoutProperty->GetHeightAutoValue(false)) {
+    } else if ((axis == Axis::HORIZONTAL) && isHeightNeedSetFrameWidth) {
         if (!barOverlap) {
             geometryNode->SetFrameHeight(tabBarSize.Height() + dividerStrokeWidth + swiperSize.Height() + paddingV);
         } else {
@@ -317,21 +329,47 @@ SizeF TabsLayoutAlgorithm::MeasureSwiper(const RefPtr<TabsLayoutProperty>& layou
 {
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto barOverlap = layoutProperty->GetBarOverlap().value_or(false);
-    bool autoWidth = layoutProperty->GetWidthAutoValue(false);
-    bool autoHeight = layoutProperty->GetHeightAutoValue(false);
+
+    /*
+     * When the width or height of tabs are set to auto, WRAP_CONTENT, FIX_AT_IDEAL_SIZE,
+     * the size of the tabs adaptive child nodes is required, but the constraints are different.
+     *
+     * 1. When set to auto, the maxSize of tabcontent is the idealsize of the tabs,
+     *    and the maxSize of tabs will exceed the parent node size.
+     *
+     * 2. When set to WRAP_CONTENT,
+     *    the maxSize of tabcontent should be tabs size minus the rest of the tabs node size,
+     *    the maxSize of tabs is equal to the size of the parent node;
+     *
+     * 3. When set to FIX_AT_IDEAL_SIZE, there is no limit to the maxSize of tabcontent/tabs.
+     */
+    bool autoWidth = layoutProperty->GetWidthAutoValue(false) || IsWidthFixOrWrap();
+    bool autoHeight = layoutProperty->GetHeightAutoValue(false) || IsHeightFixOrWrap();
     SizeF parentIdealSize = idealSize;
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
+    // If the width or height is set to FIX_AT_IDEAL_SIZE, the maxSize should be set to infinite.
+    SetFixAtIdealSizeMaxSize(childLayoutConstraint);
+
+    /*
+     * If the width or height is set to WRAP_CONTENT,
+     * the maxSize of tabs should be idealsize,
+     * and the maxSize of tabcontent should be tabs size minus the rest of the tabs node size.
+     */
+    auto paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
+    auto paddingHeight = layoutProperty->CreatePaddingAndBorder().Height();
     if (axis == Axis::HORIZONTAL) {
         if (!barOverlap) {
+            auto idealHeight = idealSize.Height() - tabBarSize.Height() - dividerWidth;
+            SetWrapContentMaxHeight(childLayoutConstraint, (idealHeight - paddingHeight));
             if (!autoHeight) {
-                childLayoutConstraint.selfIdealSize.SetHeight(
-                    idealSize.Height() - tabBarSize.Height() - dividerWidth);
+                childLayoutConstraint.selfIdealSize.SetHeight(idealHeight);
             }
             childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
-            parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height() - dividerWidth);
+            parentIdealSize.SetHeight(idealHeight);
         } else {
+            SetWrapContentMaxHeight(childLayoutConstraint, (idealSize.Height() - paddingHeight));
             if (!autoHeight) {
                 childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
             }
@@ -340,13 +378,15 @@ SizeF TabsLayoutAlgorithm::MeasureSwiper(const RefPtr<TabsLayoutProperty>& layou
         }
     } else if (axis == Axis::VERTICAL) {
         if (!barOverlap) {
+            auto idealWidth = idealSize.Width() - tabBarSize.Width() - dividerWidth;
+            SetWrapContentMaxWidth(childLayoutConstraint, (idealWidth - paddingWidth));
             if (!autoWidth) {
-                childLayoutConstraint.selfIdealSize.SetWidth(
-                    idealSize.Width() - tabBarSize.Width() - dividerWidth);
+                childLayoutConstraint.selfIdealSize.SetWidth(idealWidth);
             }
             childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
-            parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width() - dividerWidth);
+            parentIdealSize.SetWidth(idealWidth);
         } else {
+            SetWrapContentMaxWidth(childLayoutConstraint, (idealSize.Width() - paddingWidth));
             if (!autoWidth) {
                 childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
             }
