@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
@@ -107,6 +108,14 @@ struct MenuParam {
     bool disappearScaleToTarget = false;
     std::optional<NG::BorderWidthProperty> outlineWidth;
     std::optional<NG::BorderColorProperty> outlineColor;
+    std::optional<bool> maskEnable;
+    std::optional<MenuMaskType> maskType;
+    std::optional<ModalMode> modalMode;
+    std::optional<PreviewScaleMode> previewScaleMode;
+    std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
+    std::optional<OffsetF> anchorPosition;
+    bool isDarkMode = false;
+    bool isWithTheme = false;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, MenuParam&)> updateFunc;
@@ -122,6 +131,14 @@ struct MenuParam {
         resMap_[key] = { resObj, std::move(updateFunc) };
     }
 
+    void AddResourceNoUpdate(const std::string& key, const RefPtr<ResourceObject>& resObj)
+    {
+        if (resObj == nullptr) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(nullptr) };
+    }
+    
     const RefPtr<ResourceObject> GetResource(const std::string& key) const
     {
         auto iter = resMap_.find(key);
@@ -142,14 +159,6 @@ struct MenuParam {
             resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
         }
     }
-    std::optional<bool> maskEnable;
-    std::optional<MenuMaskType> maskType;
-    std::optional<ModalMode> modalMode;
-    std::optional<PreviewScaleMode> previewScaleMode;
-    std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
-    std::optional<OffsetF> anchorPosition;
-    bool isDarkMode = false;
-    bool isWithTheme = false;
 };
 
 } // namespace OHOS::Ace::NG
