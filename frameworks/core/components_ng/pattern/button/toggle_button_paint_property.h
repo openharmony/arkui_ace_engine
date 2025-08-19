@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class ToggleButtonPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(ToggleButtonPaintProperty, PaintProperty);
 
 public:
     ToggleButtonPaintProperty() = default;

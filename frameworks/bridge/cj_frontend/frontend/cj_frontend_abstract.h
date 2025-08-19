@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT CJFrontendAbstract : public Frontend {
-    DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend)
+    DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend);
 public:
     // page lifecycle
     bool OnBackPressed() override;

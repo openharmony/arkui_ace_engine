@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class RenderSvgMask : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgMask, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgMask, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();

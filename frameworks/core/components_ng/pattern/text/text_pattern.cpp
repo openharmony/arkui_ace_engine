@@ -414,6 +414,18 @@ AISpan TextPattern::GetSelectedAIData()
     return aiSpan->second;
 }
 
+std::function<void()> TextPattern::GetPreviewMenuAISpanClickrCallback(const AISpan& aiSpan)
+{
+    return [weak = WeakClaim(this), aiSpan, mainId = Container::CurrentIdSafelyWithCheck()]() {
+        ContainerScope scope(mainId);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto dataDetectorAdapter_ = pattern->GetDataDetectorAdapter();
+        CHECK_NULL_VOID(dataDetectorAdapter_);
+        dataDetectorAdapter_->ResponseBestMatchItem(aiSpan);
+    };
+}
+
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
     auto host = GetHost();
@@ -2578,6 +2590,10 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     CheckPressedSpanPosition(textOffset);
     leftMousePressed_ = true;
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
+    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+        blockPress_ = true;
+        return;
+    }
     mouseStatus_ = MouseStatus::PRESSED;
     lastLeftMouseClickStyle_ = currentMouseStyle_;
     CHECK_NULL_VOID(pManager_);
@@ -2601,9 +2617,16 @@ void TextPattern::CheckPressedSpanPosition(const Offset& textOffset)
     leftMousePressedOffset_ = textOffset;
 }
 
+void TextPattern::ResetMouseLeftPressedState()
+{
+    isMousePressed_ = false;
+    leftMousePressed_ = false;
+}
+
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
-    blockPress_ = blockPress_ ? false : blockPress_;
+    bool pressBetweenSelectedPosition = blockPress_;
+    blockPress_ = false;
     auto oldMouseStatus = mouseStatus_;
     mouseStatus_ = MouseStatus::RELEASED;
     auto oldEntityDragging = isTryEntityDragging_;
@@ -2612,8 +2635,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlHoverColor());
     if (isDoubleClick_) {
         isDoubleClick_ = false;
-        isMousePressed_ = false;
-        leftMousePressed_ = false;
+        ResetMouseLeftPressedState();
         return;
     }
     if (oldMouseStatus != MouseStatus::MOVE && oldMouseStatus == MouseStatus::PRESSED &&
@@ -2621,8 +2643,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
         if (GetDataDetectorAdapter()->hasClickedAISpan_) {
             selectOverlay_->DisableMenu();
-            isMousePressed_ = false;
-            leftMousePressed_ = false;
+            ResetMouseLeftPressedState();
             return;
         }
     }
@@ -2630,7 +2651,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
-    if (!IsSelected()) {
+    if (!IsSelected() || (pressBetweenSelectedPosition && !mouseUpAndDownPointChange_)) {
         start = -1;
         end = -1;
     }
@@ -2644,9 +2665,9 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         textResponseType_ = TextResponseType::SELECTED_BY_MOUSE;
         ShowSelectOverlay({ .animation = true });
     }
-    isMousePressed_ = false;
-    leftMousePressed_ = false;
+    ResetMouseLeftPressedState();
     moveOverClickThreshold_ = false;
+    mouseUpAndDownPointChange_ = false;
     // stop auto scroll.
     auto host = GetHost();
     if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
@@ -2673,7 +2694,7 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         auto distance = (textOffset - leftMousePressedOffset_).GetDistance();
         if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
             moveOverClickThreshold_ = true;
-            return;
+            mouseUpAndDownPointChange_ = true;
         }
     }
 }

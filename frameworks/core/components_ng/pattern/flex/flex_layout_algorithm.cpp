@@ -1299,7 +1299,8 @@ void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, f
     }
 }
 
-void FlexLayoutAlgorithm::SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize)
+void FlexLayoutAlgorithm::SetCrossPos(
+    const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos, const float& crossAxisSize)
 {
     auto alignItem = GetSelfAlign(layoutWrapper);
     auto crossDirection = FlipAxis(direction_);
@@ -1315,8 +1316,7 @@ void FlexLayoutAlgorithm::SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper
             crossPos = crossAxisSize * HALF - childCrossAxisSize * HALF;
             break;
         case FlexAlign::STRETCH:
-            crossPos =
-                IsStartTopLeft(crossDirection, textDir_) ? 0.0f : crossAxisSize - childCrossAxisSize;
+            crossPos = IsStartTopLeft(crossDirection, textDir_) ? 0.0f : crossAxisSize - childCrossAxisSize;
             break;
         case FlexAlign::BASELINE:
             crossPos = 0.0;

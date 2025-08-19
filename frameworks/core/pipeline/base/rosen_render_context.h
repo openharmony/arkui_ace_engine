@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 class RosenRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(RosenRenderContext, RenderContext)
+    DECLARE_ACE_TYPE(RosenRenderContext, RenderContext);
 
 public:
     RosenRenderContext() = default;

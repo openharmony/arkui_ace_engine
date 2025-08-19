@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ShapeComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ShapeComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ShapeComposedElement, InspectorComposedElement);
 public:
     explicit ShapeComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
     ~ShapeComposedElement() override = default;

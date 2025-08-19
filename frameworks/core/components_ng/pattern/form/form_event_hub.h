@@ -27,7 +27,7 @@ using FormCallback = std::function<void(const std::string&)>;
 using FormCacheCallback = std::function<void()>;
 
 class FormEventHub : public EventHub {
-    DECLARE_ACE_TYPE(FormEventHub, EventHub)
+    DECLARE_ACE_TYPE(FormEventHub, EventHub);
 
 public:
     FormEventHub() = default;

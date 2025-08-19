@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsWebViewFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsWebViewFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsWebViewFunction, JsFunction);
 
 public:
     explicit JsWebViewFunction(const JSRef<JSFunc>& jsFunction)

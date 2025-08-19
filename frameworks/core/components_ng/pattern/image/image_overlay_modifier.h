@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class ImageOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(ImageOverlayModifier, OverlayModifier)
+    DECLARE_ACE_TYPE(ImageOverlayModifier, OverlayModifier);
 
 public:
     ImageOverlayModifier(const Color& selectedColor);

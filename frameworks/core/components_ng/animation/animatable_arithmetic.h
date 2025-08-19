@@ -77,7 +77,7 @@ public:
 
 class ACE_EXPORT CustomAnimatableArithmetic : public AceType,
                                               public AnimatableArithmetic<RefPtr<CustomAnimatableArithmetic>> {
-    DECLARE_ACE_TYPE(CustomAnimatableArithmetic, AceType)
+    DECLARE_ACE_TYPE(CustomAnimatableArithmetic, AceType);
 public:
     CustomAnimatableArithmetic() = default;
     ~CustomAnimatableArithmetic() override = default;

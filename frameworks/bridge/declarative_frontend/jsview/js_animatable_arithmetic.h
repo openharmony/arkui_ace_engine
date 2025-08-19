@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 using OHOS::Ace::NG::CustomAnimatableArithmetic;
 
 class JSAnimatableArithmetic : public CustomAnimatableArithmetic {
-    DECLARE_ACE_TYPE(JSAnimatableArithmetic, CustomAnimatableArithmetic)
+    DECLARE_ACE_TYPE(JSAnimatableArithmetic, CustomAnimatableArithmetic);
 public:
     JSAnimatableArithmetic() = default;
     ~JSAnimatableArithmetic() override = default;

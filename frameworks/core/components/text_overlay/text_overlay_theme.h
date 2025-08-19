@@ -53,6 +53,7 @@ public:
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             ParseAIMenu(themeConstants->GetThemeStyle(), theme);
+            ParseAIPreviewMenu(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
@@ -72,66 +73,62 @@ public:
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
-            theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             theme->shareSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.share");
+            theme->aiMenuSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
             theme->askCeliaSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.AI_retouch");
         }
 
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
-            if (!themeStyle || !theme) {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            if (!themeStyle || !theme || !pattern) {
                 return;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
-            if (pattern) {
-                const double defaultTertiaryColorAlpha = 0.4;
+            const double defaultTertiaryColorAlpha = 0.4;
 
-                theme->menuBorder_ = Border(BorderEdge(
-                    pattern->GetAttr<Color>("text_overlay_menu_border_color", Color()),
-                    pattern->GetAttr<Dimension>("text_overlay_menu_border_width", 0.0_vp),
-                    BorderStyle(
-                        static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_menu_border_style", 0.0)))));
-                theme->menuPadding_ = Edge(pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp),
-                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_top", 0.0_vp),
-                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_right", 0.0_vp),
-                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_bottom", 0.0_vp));
-                theme->menuSpacingWithText_ =
-                    pattern->GetAttr<Dimension>("text_overlay_menu_spacing_with_text", 0.0_vp);
-                theme->menuSafeSpacing_ = pattern->GetAttr<Dimension>("text_overlay_menu_safe_spacing", 16.0_vp);
-                theme->menuButtonWidth_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_width", 0.0_vp);
-                theme->menuButtonHeight_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_height", 0.0_vp);
-                theme->menuButtonTextStyle_.SetFontWeight(FontWeight(
-                    static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_button_text_font_weight", 0.0))));
-                theme->menuButtonPadding_ =
-                    Edge(pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_left", 0.0_vp).Value(),
-                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_top", 0.0_vp).Value(),
-                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_right", 0.0_vp).Value(),
-                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_bottom", 0.0_vp).Value(),
-                        pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp).Unit());
-                theme->menuButtonRadius_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_radius", 14.0_vp);
-                theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
-                theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
-                theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
-                theme->handleColorInner_ = pattern->GetAttr<Color>("handle_inner_color", Color());
-                theme->menuBackgroundColor_ = pattern->GetAttr<Color>("menu_bg_color", Color());
-                theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
-                theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
-                theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
-                theme->menuButtonTextStyle_.SetTextColor(
-                    pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
-                theme->menuButtonTextStyle_.SetFontSize(
-                    pattern->GetAttr<Dimension>("text_overlay_text_font_size", 14.0_fp));
-                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 14.0_vp);
-                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 12.0_vp);
-                theme->alphaDisabled_ =
-                    pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
-                theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
-                theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
-                theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0_vp);
-                theme->symbolColor_ = pattern->GetAttr<Color>("more_or_back_symbol_color", Color());
-            } else {
-                LOGW("find pattern of textoverlay fail");
-            }
+            theme->menuBorder_ = Border(BorderEdge(
+                pattern->GetAttr<Color>("text_overlay_menu_border_color", Color()),
+                pattern->GetAttr<Dimension>("text_overlay_menu_border_width", 0.0_vp),
+                BorderStyle(
+                    static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_menu_border_style", 0.0)))));
+            theme->menuPadding_ = Edge(pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp),
+                pattern->GetAttr<Dimension>("text_overlay_menu_padding_top", 0.0_vp),
+                pattern->GetAttr<Dimension>("text_overlay_menu_padding_right", 0.0_vp),
+                pattern->GetAttr<Dimension>("text_overlay_menu_padding_bottom", 0.0_vp));
+            theme->menuSpacingWithText_ =
+                pattern->GetAttr<Dimension>("text_overlay_menu_spacing_with_text", 0.0_vp);
+            theme->menuSafeSpacing_ = pattern->GetAttr<Dimension>("text_overlay_menu_safe_spacing", 16.0_vp);
+            theme->menuButtonWidth_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_width", 0.0_vp);
+            theme->menuButtonHeight_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_height", 0.0_vp);
+            theme->menuButtonTextStyle_.SetFontWeight(FontWeight(
+                static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_button_text_font_weight", 0.0))));
+            theme->menuButtonPadding_ =
+                Edge(pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_left", 0.0_vp).Value(),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_top", 0.0_vp).Value(),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_right", 0.0_vp).Value(),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_bottom", 0.0_vp).Value(),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp).Unit());
+            theme->menuButtonRadius_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_radius", 14.0_vp);
+            theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
+            theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
+            theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
+            theme->handleColorInner_ = pattern->GetAttr<Color>("handle_inner_color", Color());
+            theme->menuBackgroundColor_ = pattern->GetAttr<Color>("menu_bg_color", Color());
+            theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
+            theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
+            theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
+            theme->menuButtonTextStyle_.SetTextColor(
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->menuButtonTextStyle_.SetFontSize(
+                pattern->GetAttr<Dimension>("text_overlay_text_font_size", 14.0_fp));
+            theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 14.0_vp);
+            theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 12.0_vp);
+            theme->alphaDisabled_ =
+                pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
+            theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
+            theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
+            theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0_vp);
+            theme->symbolColor_ = pattern->GetAttr<Color>("more_or_back_symbol_color", Color());
         }
 
         void ParseMenuPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
@@ -152,12 +149,11 @@ public:
             theme->translateLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_translate_label", "Translate");
             theme->shareLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_share_label", "Share");
             theme->searchLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_search_label", "Search");
-            theme->moreAccessibilityText_ = pattern->GetAttr<std::string>(
-                "text_overlay_menu_more_accessibility_text", "more");
-            theme->backAccessibilityText_ = pattern->GetAttr<std::string>(
-                "text_overlay_menu_back_accessibility_text", "back");
+            theme->moreAccessibilityText_ =
+                pattern->GetAttr<std::string>("text_overlay_menu_more_accessibility_text", "more");
+            theme->backAccessibilityText_ =
+                pattern->GetAttr<std::string>("text_overlay_menu_back_accessibility_text", "back");
         }
-
         void ParseAIMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
         {
             CHECK_NULL_VOID(themeStyle && theme);
@@ -175,22 +171,6 @@ public:
                 pattern->GetAttr<std::string>("general_ai_menu_phone_number", "Call now");
             theme->aiMenuTypeOptionNames_[OHOS::Ace::TextDataDetectType::URL] =
                 pattern->GetAttr<std::string>("general_ai_menu_url", "Open");
-            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::ADDRESS] =
-                pattern->GetAttr<std::string>("general_ai_preview_menu_address_open_map_app", "");
-            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::URL] =
-                pattern->GetAttr<std::string>("general_ai_preview_menu_url_open_browser_app", "");
-            auto failedValue = pattern->GetAttr<std::string>("general_ai_preview_menu_display_failed", "");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::URL] = failedValue;
-            auto addressValue = failedValue + "\n" +
-                                pattern->GetAttr<std::string>("general_ai_preview_menu_address_install_map_app", "");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::ADDRESS] = addressValue;
-            auto dataValue = failedValue + "\n" +
-                             pattern->GetAttr<std::string>("general_ai_preview_menu_date_install_calendar_app", "");
-            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::DATE_TIME] = dataValue;
-            theme->previewFailedFontColor_ =
-                pattern->GetAttr<Color>("general_ai_preview_menu_display_failed_font_color", Color());
-            theme->previewFailedFontSize_ =
-                pattern->GetAttr<Dimension>("general_ai_preview_menu_display_failed_font_size", 14.0_fp);
 
             theme->aiMenuFontGradientColors_ = {
                 pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color()),
@@ -202,9 +182,42 @@ public:
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar2", 0.0),
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar3", 0.0),
                 pattern->GetAttr<double>("ai_intelligent_gradient_scalar4", 0.0) };
-            theme->aiMenuSymbolColor_ = pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color(0xFF3A73DE));
+            theme->aiMenuSymbolColor_ = pattern->GetAttr<Color>("ai_intelligent_gradient_color1", Color(0xFF42CBF7));
 
             theme->askCelia_ = pattern->GetAttr<std::string>("general_ai_ask_celia", "Ask Celia");
+        }
+
+        void ParseAIPreviewMenu(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
+        {
+            CHECK_NULL_VOID(themeStyle && theme);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            CHECK_NULL_VOID(pattern);
+            theme->previewMenuPadding_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_left", 0.0_vp);
+            theme->aiMenuTypePreviewOptionNames_[TextDataDetectType::URL] =
+                pattern->GetAttr<std::string>("general_ai_preview_menu_url_open_browser_app", "");
+            auto failedValue = pattern->GetAttr<std::string>("general_ai_preview_menu_display_failed", "");
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::URL] = failedValue;
+            auto addressValue = failedValue + "\n" +
+                                pattern->GetAttr<std::string>("general_ai_preview_menu_address_install_map_app", "");
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::ADDRESS] = addressValue;
+            std::string dataValue;
+            if (SystemProperties::GetPreviewStatus() == 0) {
+                dataValue = failedValue + "\n" +
+                            pattern->GetAttr<std::string>("general_ai_preview_menu_date_install_calendar_app",
+                                "Click to install the Calendar app");
+            } else {
+                dataValue = failedValue + "\n" +
+                            pattern->GetAttr<std::string>(
+                                "general_ai_preview_menu_date_retry", "Please install the Calendar app and try again.");
+            }
+            theme->aiMenuPreviewDisplayFailedContent_[TextDataDetectType::DATE_TIME] = dataValue;
+            theme->previewFailedFontColor_ =
+                pattern->GetAttr<Color>("general_ai_preview_menu_display_failed_font_color", Color());
+            theme->previewFailedFontSize_ =
+                pattern->GetAttr<Dimension>("general_ai_preview_menu_display_failed_font_size", 14.0_fp);
+            theme->loactionTitle_ = pattern->GetAttr<std::string>("general_ai_loation_title", "位置");
+            theme->linkTitle_ = pattern->GetAttr<std::string>("general_ai_link_title", "网址");
+            theme->previewContentSpace_ = pattern->GetAttr<Dimension>("general_ai_content_space", 2.0_vp);
         }
     };
 
@@ -429,6 +442,11 @@ public:
     {
         return translateSymbolId_;
     }
+ 
+    const uint32_t& GetShareSymbolId() const
+    {
+        return shareSymbolId_;
+    }
 
     const Dimension& GetSymbolSize() const
     {
@@ -553,11 +571,6 @@ public:
     {
         return aiMenuSymbolId_;
     }
-    
-    const uint32_t& GetShareSymbolId() const
-    {
-        return shareSymbolId_;
-    }
 
     const Color& GetAIMenuSymbolColor() const
     {
@@ -577,6 +590,26 @@ public:
     const std::string& GetAskCelia() const
     {
         return askCelia_;
+    }
+
+    std::string GetLocationTitle()
+    {
+        return loactionTitle_;
+    }
+
+    std::string GetLinkTitle()
+    {
+        return linkTitle_;
+    }
+
+    Dimension GetPreviewContentSpace()
+    {
+        return previewContentSpace_;
+    }
+
+    Dimension GetPreviewMenuPadding()
+    {
+        return previewMenuPadding_;
     }
 protected:
     TextOverlayTheme() = default;
@@ -602,6 +635,7 @@ private:
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
     Dimension previewFailedFontSize_;
+    Dimension previewMenuPadding_;
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;
     std::string aiWrite_;
@@ -620,10 +654,13 @@ private:
     std::string searchLabel_;
     std::string moreAccessibilityText_;
     std::string backAccessibilityText_;
+    std::string loactionTitle_ = "";
+    std::string linkTitle_ = "";
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
 
+    Dimension previewContentSpace_;
     Dimension symbolSize_;
     Color symbolColor_;
     uint32_t moreSymbolId_ = 0;
@@ -636,8 +673,8 @@ private:
     uint32_t aiWriteSymbolId_ = 0;
     uint32_t searchSymbolId_ = 0;
     uint32_t translateSymbolId_ = 0;
-    uint32_t aiMenuSymbolId_ = 0;
     uint32_t shareSymbolId_ = 0;
+    uint32_t aiMenuSymbolId_ = 0;
     uint32_t askCeliaSymbolId_ = 0;
 
     std::unordered_map<OHOS::Ace::TextDataDetectType, std::string> aiMenuPreviewDisplayFailedContent_;

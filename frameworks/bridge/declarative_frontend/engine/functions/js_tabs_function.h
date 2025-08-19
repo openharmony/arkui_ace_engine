@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsTabsFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsTabsFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsTabsFunction, JsFunction);
 
 public:
     explicit JsTabsFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

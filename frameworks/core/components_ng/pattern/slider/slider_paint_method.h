@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod);
 
 public:
     struct TipParameters {

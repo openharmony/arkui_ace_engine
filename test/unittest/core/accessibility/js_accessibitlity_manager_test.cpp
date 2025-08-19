@@ -673,8 +673,11 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager012, TestSize.Level1)
      * @tc.steps: step1. construct JsAccessibilityManager
      */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
     auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
     int64_t elementId = 0;
     std::map<std::string, std::string> actionArguments;
     /**

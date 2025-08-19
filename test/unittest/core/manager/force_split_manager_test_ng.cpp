@@ -369,4 +369,34 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithWidthThreshold001,
     manager->UpdateIsInForceSplitMode(static_cast<int32_t>(SMALL_WIDTH.ConvertToPx()));
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
+
+/**
+ * @tc.name: UpdateIsInForceSplitModeWithSplitScreen001
+ * @tc.desc: Test force split mode when already in split screen mode (primary)
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithSplitScreen001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    auto windowManager = context->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+
+    // Setup: in split screen primary mode, should not enable force split
+    EXPECT_CALL(*container, IsMainWindow).Times(
+        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
+    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; };
+    context->SetIsCurrentInForceSplitMode(false);
+    manager->isForceSplitSupported_ = true;
+    manager->isForceSplitEnable_ = true;
+    manager->ignoreOrientation_ = false;
+    manager->UpdateIsInForceSplitMode(static_cast<int32_t>(TEST_WIDTH.ConvertToPx()));
+    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
+}
 } // namespace OHOS::Ace::NG

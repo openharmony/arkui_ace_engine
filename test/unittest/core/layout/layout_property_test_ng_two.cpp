@@ -998,28 +998,6 @@ HWTEST_F(LayoutPropertyTestNgTwo, FromJson001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSafeAreaPadding001
- * @tc.desc: Test UpdateSafeAreaPadding
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, UpdateSafeAreaPadding001, TestSize.Level1)
-{
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
-    layoutProperty->SetHost(frameNodeHost);
-
-    PaddingProperty paddingProperty;
-    layoutProperty->ResetSafeAreaPadding();
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
-    EXPECT_TRUE(layoutProperty->GetSafeAreaPaddingProperty());
-
-    paddingProperty.start = std::make_optional<CalcLength>(5.0);
-    layoutProperty->UpdateSafeAreaPadding(paddingProperty);
-    layoutProperty->ResetSafeAreaPadding();
-    EXPECT_FALSE(layoutProperty->GetSafeAreaPaddingProperty());
-}
-
-/**
  * @tc.name: PixelRoundToJsonValue001
  * @tc.desc: Test PixelRoundToJsonValue
  * @tc.type: FUNC
@@ -1161,6 +1139,41 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.L
     borderImage1->SetEdgeWidth(BorderImageDirection::START, widthDimension);
     layoutProperty->CheckLocalizedBorderImageOutset(textDirection);
     EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageOutset(), outsetDimension);
+}
+
+/**
+ * @tc.name: UpdateLocalizedAlignment001
+ * @tc.desc: Test cast to UpdateLocalizedAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->positionProperty_);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->UpdateLocalizedAlignment("bottom_end");
+    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align1, "bottom_end");
+}
+
+/**
+ * @tc.name: UpdateIsMirrorable001
+ * @tc.desc: Test cast to UpdateIsMirrorable
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable, true);
+
+    layoutProperty->UpdateIsMirrorable(false);
+    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable1, false);
 }
 
 HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint001, TestSize.Level1)
@@ -1351,12 +1364,12 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestGenIgnoreOpts, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     IgnoreLayoutSafeAreaOpts expectedRes = {
         .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
-        .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE
+        .edges = NG::LAYOUT_SAFE_AREA_TYPE_NONE
     };
     EXPECT_EQ(layoutProperty->GenIgnoreOpts(), expectedRes);
-    layoutProperty->ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
-    layoutProperty->ignoreLayoutSafeAreaOpts_->type = LAYOUT_SAFE_AREA_TYPE_SYSTEM;
-    layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_ALL;
+    layoutProperty->ignoreLayoutSafeAreaOpts_=std::make_unique<IgnoreLayoutSafeAreaOpts>();
+    layoutProperty->ignoreLayoutSafeAreaOpts_->type=LAYOUT_SAFE_AREA_TYPE_SYSTEM;
+    layoutProperty->ignoreLayoutSafeAreaOpts_->edges=LAYOUT_SAFE_AREA_EDGE_ALL;
     expectedRes = {
         .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
         .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL
@@ -1428,41 +1441,6 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestConvertSafeAreaPadding, TestSize.Level1)
     };
     auto res = ConvertWithResidueToPaddingPropertyF(safeAreaPadding, scaleProperty, fract);
     EXPECT_EQ(res, expectedRes);
-}
-
-/**
- * @tc.name: UpdateLocalizedAlignment001
- * @tc.desc: Test cast to UpdateLocalizedAlignment
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level1)
-{
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    EXPECT_FALSE(layoutProperty->positionProperty_);
-    layoutProperty->UpdateLocalizedAlignment("top_start");
-    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
-    EXPECT_EQ(align, "top_start");
-
-    layoutProperty->UpdateLocalizedAlignment("bottom_end");
-    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
-    EXPECT_EQ(align1, "bottom_end");
-}
-
-/**
- * @tc.name: UpdateIsMirrorable001
- * @tc.desc: Test cast to UpdateIsMirrorable
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
-{
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    layoutProperty->UpdateIsMirrorable(true);
-    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
-    EXPECT_EQ(isMirrorable, true);
-
-    layoutProperty->UpdateIsMirrorable(false);
-    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
-    EXPECT_EQ(isMirrorable1, false);
 }
 
 /**

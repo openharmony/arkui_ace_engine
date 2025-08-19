@@ -20,7 +20,7 @@
 #include "frameworks/core/components_ng/event/gesture_event_hub.h"
 namespace OHOS::Ace::Framework {
 class JsOnChildTouchTestFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsOnChildTouchTestFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsOnChildTouchTestFunction, JsFunction);
 
 public:
     explicit JsOnChildTouchTestFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

@@ -69,7 +69,7 @@ struct FocusEvent {
 };
 
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
+    DECLARE_ACE_TYPE(FocusCallbackEvents, AceType);
 public:
     FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
@@ -104,7 +104,7 @@ enum class OnKeyEventType : int32_t {
 };
 
 class FocusEventHandler : public virtual FocusState {
-    DECLARE_ACE_TYPE(FocusEventHandler, FocusState)
+    DECLARE_ACE_TYPE(FocusEventHandler, FocusState);
 public:
     FocusEventHandler() = default;
     ~FocusEventHandler() override = default;

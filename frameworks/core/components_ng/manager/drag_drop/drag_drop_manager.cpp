@@ -40,7 +40,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -1873,8 +1872,6 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     OHOS::Ace::ItemDragInfo itemDragInfo;
     itemDragInfo.SetX(windowX);
     itemDragInfo.SetY(windowY);
-    auto dropPositionX = PipelineBase::Px2VpWithCurrentDensity(windowX);
-    auto dropPositionY = PipelineBase::Px2VpWithCurrentDensity(windowY);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY);
     if (!dragFrameNode) {
@@ -1889,20 +1886,16 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
                 CHECK_NULL_VOID(eventHub);
                 eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
             }
-            ReportOnItemDropEvent(dragType, draggedGridFrameNode_, dropPositionX, dropPositionY);
         }
     } else {
         int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         // drag and drop on the same grid
         if (dragFrameNode == draggedGridFrameNode_) {
-            ReportOnItemDropEvent(dragType, draggedGridFrameNode_, dropPositionX, dropPositionY);
             FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, draggedIndex, insertIndex, true);
         } else {
             // drag and drop on different grid
-            ReportOnItemDropEvent(dragType, dragFrameNode, dropPositionX, dropPositionY);
             bool isSuccess = FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, -1, insertIndex, true);
             if (draggedGridFrameNode_) {
-                ReportOnItemDropEvent(dragType, draggedGridFrameNode_, dropPositionX, dropPositionY);
                 FireOnItemDropEvent(draggedGridFrameNode_, dragType, itemDragInfo, draggedIndex, -1, isSuccess);
             }
         }
@@ -3292,51 +3285,6 @@ bool DragDropManager::CheckIsUIExtensionBoundary(float x, float y, int32_t insta
     auto distance = std::min(std::min(x - rect.Left(), rect.Right() - x),
         std::min(y - rect.Top(), rect.Bottom() - y));
     return distance < MIN_UI_EXTENSION_BOUNDARY_DISTANCE;
-}
-
-void DragDropManager::ReportOnItemDropEvent(
-    DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
-{
-    CHECK_NULL_VOID(dragFrameNode);
-    auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
-    auto windowX = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetX() * windowScale);
-    auto windowY = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetY() * windowScale);
-
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("StartX", windowX);
-    params->Put("StartY", windowY);
-    params->Put("InsertX", dropPositionX);
-    params->Put("InsertY", dropPositionY);
-
-    std::string eventName;
-    std::string type;
-    if (dragType == DragType::GRID) {
-        eventName = "Grid.onItemDrop";
-        type = "Grid";
-    } else {
-        eventName = "List.onItemDrop";
-        type = "List";
-    }
-    auto event = JsonUtil::Create();
-    CHECK_NULL_VOID(event);
-    event->Put("name", eventName.c_str());
-    event->Put("params", params);
-
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("nodeId", dragFrameNode->GetId());
-    json->Put("event", event);
-
-    auto result = JsonUtil::Create();
-    CHECK_NULL_VOID(result);
-    result->Put("result", json);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
-    TAG_LOGI(AceLogTag::ACE_DRAG,
-        "nodeId:[%{public}d] %{public}s reportComponentChangeEvent onItemDrop StartX:%{public}.15f "
-        "StartY:%{public}.15f "
-        "InsertX:%{public}.15f InsertY:%{public}.15f",
-        dragFrameNode->GetId(), type.c_str(), windowX, windowY, dropPositionX, dropPositionY);
 }
 
 void DragDropManager::SetDragAnimationPointerEvent(

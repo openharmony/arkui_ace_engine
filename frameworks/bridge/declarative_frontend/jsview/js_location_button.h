@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsLocationButtonClickFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsLocationButtonClickFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsLocationButtonClickFunction, JsFunction);
 public:
     explicit JsLocationButtonClickFunction(const JSRef<JSFunc>& jsFunction) :
         JsFunction(JSRef<JSObject>(), jsFunction) {}

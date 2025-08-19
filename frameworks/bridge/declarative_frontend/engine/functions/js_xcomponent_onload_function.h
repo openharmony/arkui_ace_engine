@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsXComponentOnloadFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsXComponentOnloadFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsXComponentOnloadFunction, JsFunction);
 
 public:
     explicit JsXComponentOnloadFunction(const JSRef<JSFunc>& jsFunction)

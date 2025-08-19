@@ -2424,8 +2424,6 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftReleaseAction020, TestSize.Level1)
     textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
     textPattern->HandleMouseLeftReleaseAction(info, textOffset);
     EXPECT_EQ(textPattern->isMousePressed_, false);
-    textPattern->HandleMouseLeftPressAction(info, textOffset);
-    EXPECT_EQ(textPattern->blockPress_, false);
 }
 
 /**

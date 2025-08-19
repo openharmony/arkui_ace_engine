@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT RadioComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(RadioComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(RadioComposedElement, InspectorComposedElement);
 
 public:
     explicit RadioComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

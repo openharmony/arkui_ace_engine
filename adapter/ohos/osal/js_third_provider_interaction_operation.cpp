@@ -154,12 +154,8 @@ void RemoveKeysForClickAction(
         return;
     }
 
-    if (auto it = args.find(ACTION_ARGU_CLICK_ENHANCE_DATA); it != args.end()) {
-        args.erase(it);
-    }
-    if (auto it = args.find(ACTION_ARGU_CLICK_TIMESTAMP); it != args.end()) {
-        args.erase(it);
-    }
+    args.erase(ACTION_ARGU_CLICK_ENHANCE_DATA);
+    args.erase(ACTION_ARGU_CLICK_TIMESTAMP);
 }
 } // namespace
 

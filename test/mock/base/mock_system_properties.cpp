@@ -111,6 +111,7 @@ bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
+bool SystemProperties::isPCMode_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -325,6 +326,11 @@ bool SystemProperties::GetResourceDecoupling()
     return g_isResourceDecoupling;
 }
 
+bool SystemProperties::IsPCMode()
+{
+    return isPCMode_;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return g_isConfigChangePerform;
@@ -385,8 +391,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return 1;
 }
 
-std::string SystemProperties::GetMapSearchPrefix()
+int32_t SystemProperties::GetPreviewStatus()
 {
-    return "";
+    return -1;
 }
 } // namespace OHOS::Ace

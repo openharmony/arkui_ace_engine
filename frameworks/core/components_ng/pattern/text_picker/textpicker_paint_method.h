@@ -30,7 +30,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod);
 public:
     TextPickerPaintMethod() = default;
     ~TextPickerPaintMethod() override {}

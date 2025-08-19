@@ -547,11 +547,13 @@ HWTEST_F(EventManagerTestNg, EventManagerClearHover001, TestSize.Level1)
 
     MouseEvent event;
     TouchTestResult touchTestResults;
+    eventManager->lastMouseEvent_ = event;
     auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
     touchTestResults.push_back(eventTarget);
     eventManager->mouseTestResults_.emplace(event.id, touchTestResults);
     eventManager->CleanHoverStatusForDragBegin();
     EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_EQ(eventManager->lastMouseEvent_.id, event.id);
 }
 
 /**

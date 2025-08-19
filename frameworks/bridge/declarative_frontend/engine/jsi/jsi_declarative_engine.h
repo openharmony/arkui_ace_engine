@@ -47,7 +47,7 @@ struct NamedRouterProperty {
 };
 
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
-    DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
+    DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType);
 public:
     explicit JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate) : frontendDelegate_(delegate) {}
     ~JsiDeclarativeEngineInstance() override;
@@ -277,7 +277,7 @@ private:
 };
 
 class JsiDeclarativeEngine : public JsEngine {
-    DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine)
+    DECLARE_ACE_TYPE(JsiDeclarativeEngine, JsEngine);
 public:
     JsiDeclarativeEngine(int32_t instanceId, void* runtime) : instanceId_(instanceId), runtime_(runtime) {}
     explicit JsiDeclarativeEngine(int32_t instanceId) : instanceId_(instanceId) {}

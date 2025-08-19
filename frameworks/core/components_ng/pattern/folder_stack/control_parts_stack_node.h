@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ControlPartsStackNode : public GroupNode {
-    DECLARE_ACE_TYPE(ControlPartsStackNode, GroupNode)
+    DECLARE_ACE_TYPE(ControlPartsStackNode, GroupNode);
 public:
     ControlPartsStackNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)

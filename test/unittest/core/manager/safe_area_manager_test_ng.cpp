@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "gtest/gtest.h"
-
 #define protected public
 #define private public
-
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
@@ -996,10 +993,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest2, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest3, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * not valid safeAreaInsets before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * not valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
@@ -1057,10 +1054,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest3, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
@@ -1118,10 +1115,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest5, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty or non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
@@ -1179,10 +1176,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest5, TestSize.Level1)
 HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
 {
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     *  valid safeAreaInsets before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns non-empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     *  valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navArea);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
@@ -1194,10 +1191,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
     EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - NAV_BOTTOM_START);
 
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * not valid safeAreaInsets before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * not valid safeAreaInsets before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemAreaNotValid);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
@@ -1205,10 +1202,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
     EXPECT_EQ(paddingProperty.Empty(), true);
 
     /**
-     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns non-empty.
-     */
+     * @tc.steps: Call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * valid systemArea and not valid navArea cutoutArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutAreaNotValid);
@@ -1220,10 +1217,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest6, TestSize.Level1)
     EXPECT_EQ(paddingProperty.bottom, SYSTEM_BOTTOM_END - SYSTEM_BOTTOM_START);
 
     /**
-     * @tc.steps: step4 call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
-     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
-     * @tc.expected: SafeAreaToPadding returns non-empty.
-     */
+     * @tc.steps: step4 call UpdateSystemSafeArea, UpdateNavSafeArea, UpdateCutoutSafeArea with
+     * valid systemArea and cutoutArea and not valid navArea before calling SafeAreaToPadding.
+     * @tc.expected: SafeAreaToPadding returns non-empty.
+     */
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navAreaNotValid);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
@@ -1377,7 +1374,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
-    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 5);
 
     // repeat add should not work
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), false);
@@ -1385,6 +1381,7 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), false);
+    EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 5);
 
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
@@ -1423,19 +1420,19 @@ HWTEST_F(SafeAreaManagerTest, IsModeResizeOrIsModeOffset, TestSize.Level1)
  * @tc.desc: test functionality of GetKeyboardWebInset interface
  * @tc.type: FUNC
  */
- HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
- {
-     SafeAreaInsets::Inset inset;
-     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
-     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
-     EXPECT_EQ(keyboardInset.start, inset.start);
-     EXPECT_EQ(keyboardInset.end, inset.end);
-     safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
-     keyboardInset = safeAreaManager_ ->GetKeyboardWebInset();
-     EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
-     EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
- }
- 
+HWTEST_F(SafeAreaManagerTest, GetKeyboardWebInset, TestSize.Level1)
+{
+    SafeAreaInsets::Inset inset;
+    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::NONE;
+    auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, inset.start);
+    EXPECT_EQ(keyboardInset.end, inset.end);
+    safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    keyboardInset = safeAreaManager_->GetKeyboardWebInset();
+    EXPECT_EQ(keyboardInset.start, safeAreaManager_->keyboardWebInset_.start);
+    EXPECT_EQ(keyboardInset.end, safeAreaManager_->keyboardWebInset_.end);
+}
+
 /**
  * @tc.name: SetAndGetKeyboardInsetImplTest
  * @tc.desc: test Set And GetKeyboardInsetImplTest interface

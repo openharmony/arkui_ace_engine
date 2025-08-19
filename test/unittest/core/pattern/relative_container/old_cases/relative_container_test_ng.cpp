@@ -186,16 +186,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -276,16 +266,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -405,15 +385,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(CONTAINER_SIZE);
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
 

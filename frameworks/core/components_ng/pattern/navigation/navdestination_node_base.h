@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 class NavDestinationNodeBase : public GroupNode {
-    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode)
+    DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode);
 public:
     NavDestinationNodeBase(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern) {}

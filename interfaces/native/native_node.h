@@ -2800,7 +2800,7 @@ typedef enum {
      * .value[0].i32: copy option {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_NONE</b>.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: copy option {@link ArkUI_CopyOptions.\n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions}.\n
      *
      * @since 21
      */
@@ -2827,7 +2827,7 @@ typedef enum {
      * The default value is <b>ARKUI_DYNAMIC_RANGE_MODE_STANDARD</b>.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode.\n
+     * .value[0].i32: dynamic range mode {@link ArkUI_DynamicRangeMode}.\n
      *
      * @since 21
      */
@@ -2854,7 +2854,7 @@ typedef enum {
      * The default value is <b>ARKUI_ORIENTATION_UP</b>.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: orientation {@link ArkUI_Orientation.\n
+     * .value[0].i32: orientation {@link ArkUI_Orientation}.\n
      *
      * @since 21
      */

@@ -611,9 +611,6 @@ private:
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
     void CreatePositionInfo(std::unique_ptr<JsonValue>& json);
-    void ReportOnItemListEvent(const std::string& event);
-    void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
-    int32_t OnInjectionEvent(const std::string& command) override;
     bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;

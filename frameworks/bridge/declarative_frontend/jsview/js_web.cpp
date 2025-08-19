@@ -2574,7 +2574,11 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
         JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
         certsArr->SetValueAt(i, cert);
     }
-    obj->SetPropertyObject("certChainData", certsArr);
+    if (IS_CALLING_FROM_M114()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CertChainData unsupported engine version: M114.");
+    } else {
+        obj->SetPropertyObject("certChainData", certsArr);
+    }
     return JSRef<JSVal>::Cast(obj);
 }
 

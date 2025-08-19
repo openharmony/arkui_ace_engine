@@ -35,7 +35,7 @@ enum class ClickSpringEffectType {
 };
 
 class ClickSpringEffect : public AceType {
-    DECLARE_ACE_TYPE(ClickSpringEffect, AceType)
+    DECLARE_ACE_TYPE(ClickSpringEffect, AceType);
 
 public:
     explicit ClickSpringEffect(const WeakPtr<PipelineContext>& context);

@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuWrapperPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuWrapperPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(MenuWrapperPaintProperty, PaintProperty);
 
 public:
     MenuWrapperPaintProperty() = default;

@@ -6207,7 +6207,8 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
+                                       bool withClip) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
@@ -6228,7 +6229,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
             visibleRect = visibleRect.Constrain(parentRect);
         }
 
-        if (isCalculateInnerVisibleRectClip_) {
+        if (isCalculateInnerVisibleRectClip_ || withClip) {
             visibleInnerRect = ApplyFrameNodeTranformToRect(visibleInnerRect, parentUi);
             auto parentContext = parentUi->GetRenderContext();
             if (!visibleInnerRect.IsEmpty() && ((parentContext && parentContext->GetClipEdge().value_or(false)) ||
@@ -6237,7 +6238,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
             }
         }
 
-        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || visibleInnerRect.IsEmpty())) {
+        if (visibleRect.IsEmpty() && (!(isCalculateInnerVisibleRectClip_ || withClip) || visibleInnerRect.IsEmpty())) {
             visibleInnerRect = visibleRect;
             return;
         }
@@ -6245,7 +6246,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
 
-    if (!isCalculateInnerVisibleRectClip_) {
+    if (!(isCalculateInnerVisibleRectClip_ || withClip)) {
         visibleInnerRect = visibleRect;
     }
 }

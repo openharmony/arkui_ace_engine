@@ -129,6 +129,8 @@ public:
         CONTAINER_MODAL_WINDOW_MINIMIZE,
         CONTAINER_MODAL_WINDOW_RECOVER,
         IC_PERSON_FILL_SVG,
+        IC_LINK_SVG,
+        IC_LOACTION_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

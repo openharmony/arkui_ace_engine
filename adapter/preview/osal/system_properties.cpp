@@ -291,6 +291,11 @@ bool SystemProperties::GetResourceDecoupling()
     return true;
 }
 
+bool SystemProperties::IsPCMode()
+{
+    return false;
+}
+
 bool SystemProperties::ConfigChangePerform()
 {
     return false;
@@ -500,8 +505,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return 0;
 }
 
-std::string SystemProperties::GetMapSearchPrefix()
+int32_t SystemProperties::GetPreviewStatus()
 {
-    return "";
+    return -1;
 }
 } // namespace OHOS::Ace

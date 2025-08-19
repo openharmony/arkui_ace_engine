@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 
 class RosenRenderSvgFilter : public RenderSvgFilter {
-    DECLARE_ACE_TYPE(RosenRenderSvgFilter, RenderSvgFilter)
+    DECLARE_ACE_TYPE(RosenRenderSvgFilter, RenderSvgFilter);
 
 public:
     void Paint(RenderContext& context, const Offset& offset) override;

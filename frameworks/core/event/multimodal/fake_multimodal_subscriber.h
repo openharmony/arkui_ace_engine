@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Platform {
 
 class FakeMultimodalSubscriber : public MultimodalSubscriber {
-    DECLARE_ACE_TYPE(FakeMultimodalSubscriber, MultimodalSubscriber)
+    DECLARE_ACE_TYPE(FakeMultimodalSubscriber, MultimodalSubscriber);
 
 public:
     FakeMultimodalSubscriber() = default;

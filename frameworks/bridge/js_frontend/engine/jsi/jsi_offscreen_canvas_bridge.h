@@ -27,7 +27,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiOffscreenCanvasBridge : public BaseCanvasBridge {
-    DECLARE_ACE_TYPE(JsiOffscreenCanvasBridge, BaseCanvasBridge)
+    DECLARE_ACE_TYPE(JsiOffscreenCanvasBridge, BaseCanvasBridge);
 
 public:
     JsiOffscreenCanvasBridge() = default;

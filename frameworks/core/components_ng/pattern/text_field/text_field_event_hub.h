@@ -98,7 +98,7 @@ private:
 };
 
 class TextFieldEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TextFieldEventHub, EventHub)
+    DECLARE_ACE_TYPE(TextFieldEventHub, EventHub);
 
 public:
     TextFieldEventHub() = default;

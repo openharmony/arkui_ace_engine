@@ -1133,7 +1133,7 @@ struct PathArgs {
 };
 
 class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
-    DECLARE_ACE_TYPE(CanvasPath2D, AceType)
+    DECLARE_ACE_TYPE(CanvasPath2D, AceType);
 public:
     CanvasPath2D() = default;
     ~CanvasPath2D() = default;

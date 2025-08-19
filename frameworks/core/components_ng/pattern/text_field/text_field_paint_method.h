@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TextFieldPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(TextFieldPaintMethod, NodePaintMethod);
 public:
     TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
         const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,

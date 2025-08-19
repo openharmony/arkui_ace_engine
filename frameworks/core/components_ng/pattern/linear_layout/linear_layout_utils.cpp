@@ -159,7 +159,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
         float remainSize = GetMainAxisSize(idealSize, isVertical) - linearMeasureProperty.allocatedSize -
                            linearMeasureProperty.space * static_cast<float>(linearMeasureProperty.weightNodes.size());
         if (LessNotEqual(remainSize, 0.0)) {
-            LOGE("the remain size is less than zero, use mainSize to measure weight node");
+            LOGW("the remain size is less than zero, use mainSize to measure weight node");
             remainSize = GetMainAxisSize(idealSize, isVertical);
         }
         for (auto& child : linearMeasureProperty.weightNodes) {

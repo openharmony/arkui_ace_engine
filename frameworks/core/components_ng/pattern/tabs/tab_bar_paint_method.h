@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 
 class TabBarPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TabBarPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(TabBarPaintMethod, NodePaintMethod);
 
 public:
     TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier, const RectF& frameRect,

@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 class Pattern;
 
 class WebContentModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(WebContentModifier, ContentModifier)
+    DECLARE_ACE_TYPE(WebContentModifier, ContentModifier);
 
 public:
     WebContentModifier(RefPtr<NG::RenderSurface> renderSuface) : renderSuface_(renderSuface) {}

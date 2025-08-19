@@ -56,7 +56,7 @@ struct FilterProperty {
 };
 
 class CustomPaintPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod);
 public:
     CustomPaintPaintMethod();
     ~CustomPaintPaintMethod() override = default;

@@ -38,7 +38,7 @@ struct GroupDividerInfo {
     float topMargin = 0.0f;
 };
 class ACE_EXPORT MenuItemGroupPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuItemGroupPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(MenuItemGroupPaintMethod, NodePaintMethod);
 public:
     MenuItemGroupPaintMethod() = default;
     ~MenuItemGroupPaintMethod() override = default;

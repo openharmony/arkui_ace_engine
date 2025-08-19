@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT MenuComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(MenuComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(MenuComposedElement, InspectorComposedElement);
 
 public:
     explicit MenuComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

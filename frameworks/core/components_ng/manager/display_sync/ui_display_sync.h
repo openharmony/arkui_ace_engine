@@ -50,7 +50,7 @@ using OnFrameCallBackWithData = std::function<void(const RefPtr<DisplaySyncData>
 using OnFrameCallBackWithTimestamp = std::function<void(uint64_t)>;
 
 class DisplaySyncData : public AceType {
-    DECLARE_ACE_TYPE(DisplaySyncData, AceType)
+    DECLARE_ACE_TYPE(DisplaySyncData, AceType);
 public:
     void SetTimestamp(int64_t timestamp)
     {
@@ -86,7 +86,7 @@ public:
 };
 
 class ACE_FORCE_EXPORT UIDisplaySync : public AceType, public BaseId {
-    DECLARE_ACE_TYPE(UIDisplaySync, AceType)
+    DECLARE_ACE_TYPE(UIDisplaySync, AceType);
 public:
     void AddToPipeline(WeakPtr<PipelineBase>& pipelineContext);
     void DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext);

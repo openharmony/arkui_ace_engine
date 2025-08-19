@@ -29,7 +29,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSDrawingRenderingContext : public JSRenderingContextBase {
-    DECLARE_ACE_TYPE(JSDrawingRenderingContext, JSRenderingContextBase)
+    DECLARE_ACE_TYPE(JSDrawingRenderingContext, JSRenderingContextBase);
 public:
     JSDrawingRenderingContext();
     ~JSDrawingRenderingContext() override = default;

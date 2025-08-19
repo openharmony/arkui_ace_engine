@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class BarItemEventHub : public EventHub {
-    DECLARE_ACE_TYPE(BarItemEventHub, EventHub)
+    DECLARE_ACE_TYPE(BarItemEventHub, EventHub);
 public:
     void SetItemAction(const std::function<void()>& action)
     {

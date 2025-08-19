@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsiXComponentBridge : public BaseXComponentBridge {
-    DECLARE_ACE_TYPE(JsiXComponentBridge, BaseXComponentBridge)
+    DECLARE_ACE_TYPE(JsiXComponentBridge, BaseXComponentBridge);
 
 public:
     JsiXComponentBridge();

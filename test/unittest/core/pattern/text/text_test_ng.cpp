@@ -785,7 +785,7 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
 {
     auto [frameNode, pattern] = Init();
     /**
-     * @tc.steps: step1. call ShowSelectOverlay
+     * @tc.steps: step1. call ShowSelectOverlay.
      * @tc.expected: select overlay is on.
      */
     pattern->ShowSelectOverlay();
@@ -836,7 +836,7 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. check the longPressEvent.
-     * @tc.expected: longPressEvent is triggered
+     * @tc.expected: longPressEvent is triggered.
      */
     textPattern->OnModifyDone();
     EXPECT_NE(textPattern->longPressEvent_, nullptr);
@@ -861,7 +861,7 @@ HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDone004
- * @tc.desc: Test textEffect is not cleared by OnModifyDone .
+ * @tc.desc: Test textEffect is not cleared by OnModifyDone.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestNg, OnModifyDone004, TestSize.Level1)

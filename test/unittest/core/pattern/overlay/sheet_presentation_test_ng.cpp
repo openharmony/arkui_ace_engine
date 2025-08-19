@@ -978,6 +978,44 @@ HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWindowSizeChanged002
+ * @tc.desc: Test Bottom Sheet when window ROTATION.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged002, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_BOTTOM;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = true;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto builderProp = builder->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(builderProp, nullptr);
+
+    sheetPattern->builderHeight_ = 50.0f;
+    sheetPattern->SetColumnMinSize(false);
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    const auto& calcLayoutConstraint = builderProp->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_NE(calcLayoutConstraint->minSize, std::nullopt);
+    EXPECT_EQ(calcLayoutConstraint->minSize->Height().value(), CalcLength(sheetPattern->builderHeight_));
+
+    sheetPattern->keyboardHeight_ = 500;
+    sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    EXPECT_EQ(calcLayoutConstraint->minSize, std::nullopt);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: HandleFitContontChange001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleFitContontChange function.
  * @tc.type: FUNC

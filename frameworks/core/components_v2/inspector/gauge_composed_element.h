@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::V2 {
 class ACE_EXPORT GaugeComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(GaugeComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(GaugeComposedElement, InspectorComposedElement);
 
 public:
     explicit GaugeComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

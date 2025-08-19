@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using OnEventFunc = std::function<void(const std::string&)>;
 
 class RenderStepperItem : public RenderNode {
-    DECLARE_ACE_TYPE(RenderStepperItem, RenderNode)
+    DECLARE_ACE_TYPE(RenderStepperItem, RenderNode);
 
 public:
     static RefPtr<RenderNode> Create();

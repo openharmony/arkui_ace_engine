@@ -27,7 +27,7 @@ using SelectedChangeEvent = std::function<void(const std::string&)>;
 using LayoutChangeEvent = std::function<void()>;
 
 class CalendarPickerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CalendarPickerEventHub, EventHub)
+    DECLARE_ACE_TYPE(CalendarPickerEventHub, EventHub);
 
 public:
     CalendarPickerEventHub() = default;

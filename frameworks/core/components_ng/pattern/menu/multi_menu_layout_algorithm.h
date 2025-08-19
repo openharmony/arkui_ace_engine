@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MultiMenuLayoutAlgorithm : public MenuLayoutAlgorithm {
-    DECLARE_ACE_TYPE(MultiMenuLayoutAlgorithm, MenuLayoutAlgorithm)
+    DECLARE_ACE_TYPE(MultiMenuLayoutAlgorithm, MenuLayoutAlgorithm);
 public:
     MultiMenuLayoutAlgorithm() = default;
     ~MultiMenuLayoutAlgorithm() override = default;

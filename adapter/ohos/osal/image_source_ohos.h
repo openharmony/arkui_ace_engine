@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 class ImageSourceOhos : public ImageSource {
-    DECLARE_ACE_TYPE(ImageSourceOhos, ImageSource)
+    DECLARE_ACE_TYPE(ImageSourceOhos, ImageSource);
 public:
     explicit ImageSourceOhos(std::unique_ptr<Media::ImageSource>&& source) : imageSource_(std::move(source)) {}
 

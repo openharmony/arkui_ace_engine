@@ -28,7 +28,7 @@
 namespace OHOS::Ace::Framework {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
 class JsGestureJudgeFunction : public JsCommonGestureFunction {
-    DECLARE_ACE_TYPE(JsGestureJudgeFunction, JsCommonGestureFunction)
+    DECLARE_ACE_TYPE(JsGestureJudgeFunction, JsCommonGestureFunction);
 
 public:
     explicit JsGestureJudgeFunction(const JSRef<JSFunc>& jsFunction)

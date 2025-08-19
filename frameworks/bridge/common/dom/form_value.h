@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 class FormValue : public virtual AceType {
-    DECLARE_ACE_TYPE(FormValue, AceType)
+    DECLARE_ACE_TYPE(FormValue, AceType);
 
 public:
     std::pair<std::string, std::string> GetFormValue()

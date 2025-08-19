@@ -25,7 +25,7 @@ namespace OHOS::Ace::Flutter {
 class SceneBuilder;
 
 class Layer : public AceType {
-    DECLARE_ACE_TYPE(Layer, AceType)
+    DECLARE_ACE_TYPE(Layer, AceType);
 public:
     Layer() = default;
     ~Layer() override = default;

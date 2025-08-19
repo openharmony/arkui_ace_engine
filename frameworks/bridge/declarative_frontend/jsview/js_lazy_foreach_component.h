@@ -28,7 +28,7 @@
 namespace OHOS::Ace::Framework {
 
 class DefaultDataChangeListener : public V2::DataChangeListener {
-    DECLARE_ACE_TYPE(DefaultDataChangeListener, DataChangeListener)
+    DECLARE_ACE_TYPE(DefaultDataChangeListener, DataChangeListener);
 public:
     explicit DefaultDataChangeListener(JSView* parentView) : parentView_(parentView) {}
     ~DefaultDataChangeListener() override = default;

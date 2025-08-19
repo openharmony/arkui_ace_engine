@@ -21,7 +21,6 @@ build_component("text_field") {
     "text_field_component.cpp",
     "text_field_controller.cpp",
     "text_field_element.cpp",
-    "text_field_scroll_bar_controller.cpp",
   ]
 
   rosen_sources = [ "rosen_render_text_field.cpp" ]

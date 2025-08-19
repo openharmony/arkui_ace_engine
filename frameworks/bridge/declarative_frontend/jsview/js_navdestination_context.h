@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::Framework {
 class JSNavPathInfo : public NG::NavPathInfo {
-    DECLARE_ACE_TYPE(JSNavPathInfo, NG::NavPathInfo)
+    DECLARE_ACE_TYPE(JSNavPathInfo, NG::NavPathInfo);
 public:
     JSNavPathInfo() = default;
     JSNavPathInfo(const std::string& name, JSRef<JSVal> param) : NG::NavPathInfo(name), param_(param) {}

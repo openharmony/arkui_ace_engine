@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT QrcodeComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(QrcodeComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(QrcodeComposedElement, InspectorComposedElement);
 
 public:
     explicit QrcodeComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

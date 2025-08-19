@@ -1838,4 +1838,36 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTypeTest001, TestSize.Level
     rotationRecognizerPtr->HandleReports(info, GestureCallbackType::END);
     EXPECT_EQ(rotationRecognizerPtr->GetRecognizerType(), GestureTypeName::ROTATION_GESTURE);
 }
+
+/*
+ * @tc.name: GetGestureEventInfoTest001
+ * @tc.desc: Test GetGestureEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<RotationRecognizer> rotationRecognizerPtr =
+        AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    rotationRecognizerPtr->AttachFrameNode(frameNode);
+    /**
+     * @tc.steps: step2. call GetGestureEventInfo function and compare result.
+     * @tc.steps: case: touchEvent is not default.
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    axisEvent.sourceTool = SourceTool::MOUSE;
+    rotationRecognizerPtr->lastAxisEvent_ = axisEvent;
+    rotationRecognizerPtr->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    GestureEvent info;
+    rotationRecognizerPtr->GetGestureEventInfo(info);
+    EXPECT_NE(info.GetSourceTool(), SourceTool::MOUSE);
+
+    rotationRecognizerPtr->inputEventType_ = InputEventType::AXIS;
+    rotationRecognizerPtr->GetGestureEventInfo(info);
+    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
+}
 } // namespace OHOS::Ace::NG

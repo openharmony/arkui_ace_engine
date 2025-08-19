@@ -57,7 +57,7 @@ enum class SubwindowType {
 };
 
 class ACE_EXPORT Subwindow : public AceType {
-    DECLARE_ACE_TYPE(Subwindow, AceType)
+    DECLARE_ACE_TYPE(Subwindow, AceType);
 
 public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);

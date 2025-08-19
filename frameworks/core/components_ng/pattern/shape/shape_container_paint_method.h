@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapeContainerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ShapeContainerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(ShapeContainerPaintMethod, NodePaintMethod);
 public:
     ShapeContainerPaintMethod() = delete;
     ~ShapeContainerPaintMethod() override = default;

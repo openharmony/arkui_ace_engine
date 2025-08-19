@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 class SelectOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(SelectOverlayModifier, OverlayModifier)
+    DECLARE_ACE_TYPE(SelectOverlayModifier, OverlayModifier);
 
 public:
     SelectOverlayModifier(const OffsetF& menuOptionOffset, bool isReverse, const WeakPtr<Pattern>& pattern);

@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -540,7 +539,6 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
-            ReportOnItemListEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:List",
                 scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -568,7 +566,6 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
         auto scrollSource = GetScrollSource();
         if (scrollUpToEnd || (scrollDownToEnd && scrollSource != SCROLL_FROM_NONE)) {
             FireObserverOnReachEnd();
-            ReportOnItemListEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, scrollSource:%d, id:%d, tag:List",
                 scrollUpToEnd, scrollDownToEnd, scrollSource, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -592,7 +589,6 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
         endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(endIndex);
     }
     onScrollIndex(startIndex, endIndex, centerIndex_);
-    ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);
 }
 
 void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
@@ -3241,7 +3237,6 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
         if (indexChanged || startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
             groupIndexChanged_ = true;
-            ReportOnItemListScrollEvent("onScrollVisibleContentChange", startInfo_.index, endInfo_.index);
         }
     }
     if (OnJSFrameNodeScrollVisibleContentChange) {
@@ -3972,62 +3967,6 @@ void ListPattern::OnMidIndexChanged()
     }
     VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH1);
 #endif
-}
-
-void ListPattern::ReportOnItemListEvent(const std::string& event)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::string value = std::string("List.") + event;
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value);
-    TAG_LOGI(AceLogTag::ACE_LIST, "nodeId:[%{public}d] List reportComponentChangeEvent %{public}s", host->GetId(),
-        event.c_str());
-}
-
-void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::string value = std::string("List.") + event;
-
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("StartX", startindex);
-    params->Put("StartY", endindex);
-
-    auto eventData = JsonUtil::Create();
-    CHECK_NULL_VOID(eventData);
-    eventData->Put("name", value.c_str());
-    eventData->Put("params", params);
-
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("nodeId", host->GetId());
-    json->Put("event", eventData);
-
-    auto result = JsonUtil::Create();
-    CHECK_NULL_VOID(result);
-    result->Put("result", json);
-
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
-    TAG_LOGI(AceLogTag::ACE_LIST,
-        "nodeId:[%{public}d] List reportComponentChangeEvent %{public}s startindex:%{public}d endindex:%{public}d",
-        host->GetId(), event.c_str(), startindex, endindex);
-}
-
-int32_t ListPattern::OnInjectionEvent(const std::string& command)
-{
-    TAG_LOGI(AceLogTag::ACE_LIST, "OnInjectionEvent command: %{public}s", command.c_str());
-
-    std::string ret = ScrollablePattern::ParseCommand(command);
-    if (ret == "scrollForward") {
-        ScrollPage(true);
-    } else if (ret == "scrollBackward") {
-        ScrollPage(false);
-    } else {
-        return RET_FAILED;
-    }
-    return RET_SUCCESS;
 }
 
 void ListPattern::SetFocusWrapMode(FocusWrapMode focusWrapMode)

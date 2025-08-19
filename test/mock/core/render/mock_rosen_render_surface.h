@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class MockRosenRenderSurface : public RosenRenderSurface {
-    DECLARE_ACE_TYPE(MockRosenRenderSurface, RosenRenderSurface)
+    DECLARE_ACE_TYPE(MockRosenRenderSurface, RosenRenderSurface);
 public:
     ~MockRosenRenderSurface() override = default;
     MOCK_METHOD2(DrawBuffer, void(int32_t, int32_t));

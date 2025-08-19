@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 
 class ColorFilter : public virtual AceType {
-    DECLARE_ACE_TYPE(NG::ColorFilter, AceType)
+    DECLARE_ACE_TYPE(NG::ColorFilter, AceType);
 
 public:
     static RefPtr<ColorFilter> MakeFromMatrix(const float rowMajor[20]);

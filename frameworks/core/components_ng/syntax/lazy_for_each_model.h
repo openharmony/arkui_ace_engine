@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 
 class LazyForEachActuator : public AceType {
-    DECLARE_ACE_TYPE(LazyForEachActuator, AceType)
+    DECLARE_ACE_TYPE(LazyForEachActuator, AceType);
 public:
     LazyForEachActuator() = default;
     ~LazyForEachActuator() override = default;

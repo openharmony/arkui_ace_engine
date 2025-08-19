@@ -2516,7 +2516,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
         CHECK_NULL_VOID(abilityContext);
         AAFwk::Want want;
-        auto url = SystemProperties::GetMapSearchPrefix() + address + "&utm_source=fb";
+        // In practical use, a prefix is required; this function is currently not in use as its logic has been reverted.
+        auto url = address;
         want.SetUri(url);
         abilityContext->OpenLink(want, REQUEST_CODE);
     });

@@ -27,7 +27,7 @@ using RefreshingEvent = std::function<void()>;
 using OffsetChangeEvent = std::function<void(const float)>;
 
 class RefreshEventHub : public EventHub {
-    DECLARE_ACE_TYPE(RefreshEventHub, EventHub)
+    DECLARE_ACE_TYPE(RefreshEventHub, EventHub);
 
 public:
     RefreshEventHub() = default;

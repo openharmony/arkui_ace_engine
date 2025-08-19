@@ -39,7 +39,7 @@ struct PathOffset {
 };
 
 class RenderSvgText : public RenderSvgBase {
-    DECLARE_ACE_TYPE(RenderSvgText, RenderSvgBase)
+    DECLARE_ACE_TYPE(RenderSvgText, RenderSvgBase);
 
 public:
     static RefPtr<RenderNode> Create();

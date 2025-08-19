@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT BarItemNode : public FrameNode {
-    DECLARE_ACE_TYPE(BarItemNode, FrameNode)
+    DECLARE_ACE_TYPE(BarItemNode, FrameNode);
 public:
     BarItemNode(const std::string& tag, int32_t nodeId);
     BarItemNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)

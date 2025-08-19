@@ -27,7 +27,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsOnSizeChangeFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsOnSizeChangeFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsOnSizeChangeFunction, JsFunction);
 
 public:
     explicit JsOnSizeChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}

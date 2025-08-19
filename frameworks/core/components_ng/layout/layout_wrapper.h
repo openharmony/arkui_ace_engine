@@ -131,7 +131,7 @@ enum class IgnoreStrategy {
     AXIS_INSENSITIVE
 };
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
-    DECLARE_ACE_TYPE(LayoutWrapper, AceType)
+    DECLARE_ACE_TYPE(LayoutWrapper, AceType);
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode) : hostNode_(std::move(hostNode)) {}
     ~LayoutWrapper() override = default;

@@ -116,19 +116,19 @@ public:
      */
     SafeAreaInsets GetCutoutSafeArea() const;
 
-    /**
-     * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
-     *
-     * @return The safe area insets that account for cutout areas on the screen without any judgement.
-     */
-    SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
-
     bool UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea);
 
     bool UpdateScbCutoutSafeArea(
         const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     bool UpdateScbNavSafeArea(const SafeAreaInsets& safeArea);
+
+    /**
+     * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
+     *
+     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     */
+    SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
 
     /**
      * @brief Retrieves the safe area insets combining System and Cutout.
@@ -155,12 +155,12 @@ public:
     bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
-     * @brief Updates a mirror of safe area to accommodate the keyboard from web
+     * @brief Updates a mirror of safe area to accommodate the keyboard from web.
      *
-     * Third-party platform may use SafeArea, so web_pattern using safearea to keep menu away
+     * Third-party platform may use SafeArea, so web_pattern using SafeArea to keep menu away
      * from keyboard might lead to several problem.This function is called to update a mirror of
-     * keyboardInset when the keyboard is shown or hidden by web. SelectOverlaylayoutAlgorithm will
-     * use it to calculate the position of menu, but not participate in other safearea calculation.
+     * KeyboardInset when the keyboard is shown or hidden by web. SelectOverlaylayoutAlgorithm will
+     * use it to calculate the position of menu, but not participate in other SafeArea calculation.
      *
      * @param keyboardHeight The height of the keyboard in pixels.
      * @return true if the safe area was modified, false otherwise.
@@ -254,6 +254,7 @@ public:
     {
         return safeAreaCurve_;
     }
+
     void ExpandSafeArea();
 
     OffsetF GetWindowWrapperOffset();
@@ -306,9 +307,6 @@ public:
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
 
-    PaddingPropertyF SafeAreaToPadding(
-        bool withoutProcess = false, LayoutSafeAreaType ignoreType = LAYOUT_SAFE_AREA_TYPE_SYSTEM);
-
     void SetWindowTypeConfig(bool isAppWindow, bool isSystemWindow, bool isSceneBoardWindow)
     {
         windowTypeConfig_ = WindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
@@ -355,6 +353,9 @@ public:
     {
         return useCutout_;
     }
+
+    PaddingPropertyF SafeAreaToPadding(
+        bool withoutProcess = false, LayoutSafeAreaType ignoreType = LAYOUT_SAFE_AREA_TYPE_SYSTEM);
 
     SafeAreaInsets::Inset GetKeyboardInsetImpl()
     {
@@ -407,7 +408,7 @@ private:
     std::optional<SafeAreaInsets> scbSystemSafeArea_;
     std::optional<SafeAreaInsets> scbCutoutSafeArea_;
     std::optional<SafeAreaInsets> scbNavSafeArea_;
-    
+
     WindowTypeConfig windowTypeConfig_;
 
     /**

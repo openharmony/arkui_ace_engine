@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsCrownFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsCrownFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsCrownFunction, JsFunction);
 public:
     explicit JsCrownFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class MenuPreviewLayoutAlgorithm : public LinearLayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuPreviewLayoutAlgorithm, LayoutAlgorithm)
+    DECLARE_ACE_TYPE(MenuPreviewLayoutAlgorithm, LayoutAlgorithm);
 public:
     MenuPreviewLayoutAlgorithm() = default;
     ~MenuPreviewLayoutAlgorithm() override = default;

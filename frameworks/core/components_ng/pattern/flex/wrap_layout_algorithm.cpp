@@ -235,6 +235,7 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
+        LOGE("WrapLayoutAlgorithm::Layout, children is empty");
         return;
     }
     OffsetF startPosition;
@@ -246,7 +247,6 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutWholeColumnWrap(startPosition, spaceBetweenContentsOnCrossAxis, layoutWrapper);
         TraverseColumnContent(startPosition, spaceBetweenContentsOnCrossAxis);
     }
-
     for (const auto& child : children) {
         child->Layout();
     }
@@ -371,6 +371,7 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
 {
     auto contentNum = static_cast<int32_t>(contentList_.size());
     if (contentNum == 0) {
+        LOGW("no content in wrap");
         return;
     }
 
@@ -434,6 +435,7 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
             break;
         }
         default: {
+            LOGE("Wrap::alignment setting error.");
             break;
         }
     }
@@ -527,6 +529,7 @@ float WrapLayoutAlgorithm::CalcItemCrossAxisOffset(
             break;
         }
         default: {
+            LOGW("Unknown alignment, use start alignment");
             if (isHorizontal_) {
                 return contentOffset.GetY();
             }
@@ -575,6 +578,7 @@ void WrapLayoutAlgorithm::CalcItemMainAxisStartAndSpaceBetween(
             break;
         }
         default: {
+            LOGE("Wrap::alignment setting error.");
             break;
         }
     }
@@ -584,6 +588,7 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
 {
     int32_t itemNum = content.count;
     if (itemNum == 0) {
+        LOGW("No item in current content struct");
         return;
     }
     OffsetF contentStartPosition(position.GetX(), position.GetY());
@@ -782,7 +787,6 @@ void WrapLayoutAlgorithm::LayoutColumnContent(const ContentInfo& content, const 
     OffsetF contentStartPosition(position.GetX(), position.GetY());
     OffsetF spaceBetweenItemsOnMainAxis;
     CalcItemMainAxisStartAndSpaceBetween(contentStartPosition, spaceBetweenItemsOnMainAxis, content);
-
     FlexItemProperties flexItemProperties;
     GetFlexItemProperties(content, flexItemProperties);
     float remainSpace = mainLengthLimit_ - currentMainLength_;
@@ -827,4 +831,5 @@ void WrapLayoutAlgorithm::TraverseColumnContent(
         }
     }
 }
+
 } // namespace OHOS::Ace::NG
