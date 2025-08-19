@@ -814,7 +814,7 @@ public:
         return syncLoadEnabled_;
     }
 
-    static std::string GetMapSearchPrefix();
+    static int32_t GetPreviewStatus();
 
     static bool GetDebugThreadSafeNodeEnabled()
     {
@@ -929,7 +929,7 @@ private:
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
-    static std::string mapSearchPrefix_;
+    static int32_t previewStatus_;
     static bool debugThreadSafeNodeEnable_;
     static bool prebuildInMultiFrameEnabled_;
     static bool isPCMode_;

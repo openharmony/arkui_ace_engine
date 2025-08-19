@@ -750,7 +750,7 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 bool SystemProperties::whiteBlockEnabled_ = false;
-std::string SystemProperties::mapSearchPrefix_ = "";
+int32_t SystemProperties::previewStatus_ = 0;
 int32_t SystemProperties::velocityTrackerPointNumber_ = ReadVelocityTrackerPointNumber();
 bool SystemProperties::isVelocityWithinTimeWindow_ = ReadIsVelocityWithinTimeWindow();
 bool SystemProperties::isVelocityWithoutUpPoint_ = ReadIsVelocityWithoutUpPoint();
@@ -925,7 +925,7 @@ void SystemProperties::InitDeviceInfo(
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
     whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
-    mapSearchPrefix_ = system::GetParameter("const.arkui.mapSearch", "");
+    previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", 0);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1442,8 +1442,8 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
     return StringUtils::StringToInt(ret);
 }
 
-std::string SystemProperties::GetMapSearchPrefix()
+int32_t SystemProperties::GetPreviewStatus()
 {
-    return mapSearchPrefix_;
+    return previewStatus_;
 }
 } // namespace OHOS::Ace
