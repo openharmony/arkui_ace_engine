@@ -51,14 +51,6 @@ public:
         yVals_.emplace_back(yVal);
     }
 
-    void PopFrontPoint()
-    {
-        if (!xVals_.empty() && !yVals_.empty()) {
-            xVals_.erase(xVals_.begin());
-            yVals_.erase(yVals_.begin());
-        }
-    }
-
     /**
      * @brief Set the Count Num which to compute.
      *
@@ -91,6 +83,15 @@ public:
     inline int32_t GetTrackNum() const
     {
         return xVals_.size();
+    }
+
+    void ResetValsFromRaw(const LeastSquareImpl& raw, int32_t cnt)
+    {
+        if (cnt > raw.GetTrackNum()) {
+            cnt = raw.GetTrackNum();
+        }
+        xVals_.assign(raw.xVals_.begin() + cnt, raw.xVals_.end());
+        yVals_.assign(raw.yVals_.begin() + cnt, raw.yVals_.end());
     }
 
     void Reset()
