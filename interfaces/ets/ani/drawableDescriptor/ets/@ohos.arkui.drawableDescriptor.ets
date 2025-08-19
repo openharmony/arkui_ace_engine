@@ -55,6 +55,22 @@ export class DrawableDescriptor {
     let inputVal = ESValue.wrap(input) as ESValue;
     return DrawableDescriptorInner.nativeTransferStatic(inputVal);
   }
+
+  static transferDynamic(input: Object): Any {
+    if (input == null) {
+      return new Object();
+    }
+    let drawableDescriptor = input as DrawableDescriptor;
+    if (drawableDescriptor) {
+      let module = ESValue.load("@ohos.arkui.drawableDescriptor");
+      let initFunc = module.getProperty("__createTransfer__");
+      if (initFunc) {
+        let drawableRet = initFunc.invoke(ESObject.wrap(drawableDescriptor.nativeObj));
+        return drawableRet;
+      }
+    }
+    return new Object();
+  }
 }
 
 export class PixelMapDrawableDescriptor extends DrawableDescriptor {

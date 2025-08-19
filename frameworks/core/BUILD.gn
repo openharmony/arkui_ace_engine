@@ -956,6 +956,7 @@ template("ace_core_ng_source_set") {
 
       # drawable
       "drawable/animated_drawable_descriptor.cpp",
+      "drawable/drawable_descriptor.cpp",
       "drawable/layered_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
     ]

@@ -13,10 +13,35 @@
  * limitations under the License.
  */
 
+#include "core/drawable/drawable_descriptor.h"
+
+#include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/layered_drawable_descriptor.h"
 #include "core/drawable/pixel_map_drawable_descriptor.h"
 
 namespace OHOS::Ace {
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DrawableDescriptor_GetDrawableType(void* object, size_t* type)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);
+    if (drawable) {
+        *type = static_cast<size_t>(drawable->GetDrawableType());
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DrawableDescriptor_GetPixelMap(
+    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
+    if (object == nullptr || pixelMap == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);
+    if (drawable && drawable->GetPixelMap()) {
+        pixelMap = drawable->GetPixelMap()->GetPixelMapSharedPtr();
+    }
+}
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_SetRawData(void* object, uint8_t* data, size_t len)
 {
@@ -91,4 +116,73 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DecreaseRefDrawableDescriptor(void* ob
     }
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetForeground(
+    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable && drawable->GetForeground()) {
+        pixelMap = drawable->GetForeground()->GetPixelMapSharedPtr();
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetBackground(
+    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable && drawable->GetBackground()) {
+        pixelMap = drawable->GetBackground()->GetPixelMapSharedPtr();
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetMask(
+    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
+    if (drawable && drawable->GetMask()) {
+        pixelMap = drawable->GetMask()->GetPixelMapSharedPtr();
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap(
+    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+{
+    if (object == nullptr) {
+        return;
+    }
+    auto* drawable = reinterpret_cast<OHOS::Ace::PixelMapDrawableDescriptor*>(object);
+    if (drawable && drawable->GetPixelMap()) {
+        pixelMap = drawable->GetPixelMap()->GetPixelMapSharedPtr();
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_GetParams(void* object,
+    std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMapVec, size_t* duration, size_t* iterations)
+{
+    if (object == nullptr) {
+        return;
+    }
+    pixelMapVec.clear();
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    auto pixelMapList = drawable->GetPixelMapList();
+    for (const auto& refPtrPixelMap : pixelMapList) {
+        if (refPtrPixelMap) {
+            pixelMapVec.push_back(refPtrPixelMap->GetPixelMapSharedPtr());
+        }
+    }
+    if (duration != nullptr) {
+        *duration = static_cast<size_t>(drawable->GetTotalDuration());
+    }
+    if (iterations != nullptr) {
+        *iterations = static_cast<size_t>(drawable->GetIterations());
+    }
+}
 } // namespace OHOS::Ace
