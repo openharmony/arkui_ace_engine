@@ -262,7 +262,8 @@ export class FrameNode implements MaterializedBase {
             return;
         }
         if (!this.isModifiable()) {
-            throw Error("The FrameNode is not modifiable.");
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
