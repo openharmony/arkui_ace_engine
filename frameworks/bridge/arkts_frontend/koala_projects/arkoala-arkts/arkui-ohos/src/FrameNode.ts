@@ -18,9 +18,9 @@ import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { ArkUIGeneratedNativeModule } from "#components"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer, NativeThunk
 } from "@koalaui/interop"
-import { int32 } from "@koalaui/common"
+import { finalizerRegister, int32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
@@ -105,6 +105,8 @@ import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
 import { ElementIdToCustomProperties } from './handwritten/CommonHandWritten'
+import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
+import { TapGesture } from "@component_handwritten/gesture"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -164,12 +166,17 @@ export class FrameNode implements MaterializedBase {
     public _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
-    nodeType_?: string | undefined = undefined;
+    public nodeType_?: string | undefined = undefined;
+    private nodeAdapterRef_ ?: NodeAdapter;
 
     getType(): string {
         return 'CustomFrameNode';
     }
 
+    setAdapterRef(adapter :NodeAdapter | undefined){
+        this.nodeAdapterRef_ = adapter;
+    }
+    
     checkValid(node: FrameNode): boolean {
         return true;
     }
@@ -1029,6 +1036,10 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";
 
+    public isModifiable() : boolean {
+        return true;
+    }
+
     constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => T) {
         super(uiContext, type, nullptr);
         this.attrCreator_ = attrCreator;
@@ -1812,5 +1823,204 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+}
+
+class NodeAdapterThunk extends NativeThunk {
+    private ptr?: pointer;
+
+    constructor(obj: pointer) {
+        super(obj, nullptr);
+    }
+
+    clean(): void {
+        if (this.ptr) {
+            ArkUIAniModule._NodeAdapter_Dispose(this.ptr!);
+        }
+    }
+}
+
+class NodeAdapterFinalizable extends Finalizable {
+    ptr: pointer
+    finalizer: pointer
+    cleaner: NativeThunk | undefined = undefined
+    managed: boolean
+
+    constructor(ptr: pointer) {
+        super(ptr, nullptr, false);
+        this.init(ptr)
+    }
+
+    init(ptr: pointer): void {
+        this.ptr = ptr
+        const thunk = new NodeAdapterThunk(ptr)
+        finalizerRegister(this, thunk)
+        this.cleaner = thunk
+    }
+}
+
+export class NodeAdapter implements MaterializedBase {
+    private peer?: Finalizable | undefined = undefined;
+    private attachedNodeRef_?: WeakRef<FrameNode>;
+    private count_: number = 0;
+    private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
+
+    onDisposeChild(index: number, node: FrameNode) {
+
+    }
+
+    onUpdateChild(index: number, node: FrameNode) {
+
+    }
+
+    onCreateChild(index: number): FrameNode {
+        return new FrameNode(undefined);
+    }
+
+    constructor() {
+        const retval = ArkUIAniModule._NodeAdapter_Construct(this);
+        this.peer = new NodeAdapterFinalizable(retval);
+    }
+    getPeer(): Finalizable | undefined {
+        return this.peer;
+    }
+
+    dispose() {
+        let hostNode = this.attachedNodeRef_?.deref();
+        if (hostNode !== undefined) {
+            NodeAdapter.detachNodeAdapter(hostNode);
+        }
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
+    }
+
+    set totalNodeCount(count: number) {
+        if (count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_SetTotalNodeCount(this.peer!.ptr!, count);
+        this.count_ = count;
+    }
+
+    get totalNodeCount() {
+        return this.count_;
+    }
+
+    reloadAllItems() {
+        ArkUIAniModule._NodeAdapter_NotifyItemReloaded(this.peer!.ptr!);
+    }
+    reloadItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemChanged(this.peer!.ptr!, start, count);
+    }
+    removeItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemRemoved(this.peer!.ptr!, start, count);
+    }
+    insertItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemInserted(this.peer!.ptr!, start, count);
+    }
+    moveItem(from: number, to: number) {
+        if (from < 0 || to < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemMoved(this.peer!.ptr!, from, to);
+    }
+    getAllAvailableItems(): Array<FrameNode> {
+        let result = new Array<FrameNode>();
+        let nodes = ArkUIAniModule._NodeAdapter_GetAllItems(this.peer!.ptr!);
+        if (nodes !== undefined) {
+            nodes.forEach((nodeId: number, index: number, arr: Array<number>) => {
+                if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+                    let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+                    result.push(frameNode!);
+                }
+            });
+        }
+        return result;
+    }
+    onAttachToNodePtr(nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (frameNode === undefined) {
+                return;
+            }
+            frameNode.setAdapterRef(this);
+            this.attachedNodeRef_ = new WeakRef<FrameNode>(frameNode);
+            if (this.onAttachToNode !== undefined) {
+                this.onAttachToNode(frameNode);
+            }
+        }
+    }
+    onAttachToNode(frameNode: FrameNode): void {
+
+    }
+    onDetachFromNode(): void {
+
+    }
+    onDetachFromNodePtr() {
+        if (this === undefined) {
+            return;
+        }
+        if (this.onDetachFromNode !== undefined) {
+            this.onDetachFromNode();
+        }
+        let attachedNode = this.attachedNodeRef_?.deref();
+        if (attachedNode !== undefined) {
+            attachedNode.setAdapterRef(undefined);
+        }
+        this.nodeRefs_.splice(0, this.nodeRefs_.length);
+    }
+    onCreateNewNodePtr(index: number): pointer {
+        if (this.onCreateChild !== undefined) {
+            let frameNode = this.onCreateChild(index);
+            if (!this.nodeRefs_.find((node) => {
+                return node === frameNode;
+            })) {
+                this.nodeRefs_.push(frameNode);
+            }
+            if (frameNode?.peer?.ptr) {
+                return frameNode!.peer!.ptr!;
+            }
+        }
+        return nullptr;
+    }
+
+    onDisposeNodePtr(index: number, nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (this.onDisposeChild !== undefined && frameNode !== undefined) {
+                this.onDisposeChild(index, frameNode);
+                let index2 = this.nodeRefs_.indexOf(frameNode);
+                if (index2 > -1) {
+                    this.nodeRefs_.splice(index2, 1);
+                }
+            }
+        }
+    }
+
+    onUpdateNodePtr(index: number, nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (this.onUpdateChild !== undefined && frameNode !== undefined) {
+                this.onUpdateChild(index, frameNode!);
+            }
+        }
+    }
+
+    static detachNodeAdapter(node: FrameNode) {
+        ArkUIAniModule._NodeAdapter_DetachNodeAdapter(node.peer!.ptr!);
+    }
+
+    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode) {
+        return ArkUIAniModule._NodeAdapter_AttachNodeAdapter(adapter.peer!.ptr!, node.peer!.ptr!);
     }
 }

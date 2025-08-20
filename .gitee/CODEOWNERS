@@ -3171,6 +3171,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Fra
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
 
 frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui_image
 frameworks/core/interfaces/native/implementation/calendar_controller_peer.h @arkui_image
