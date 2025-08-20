@@ -73,6 +73,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _copyOption0_value?: CopyOptions | undefined
     _draggable_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable0_value?: boolean | undefined
+    _textClip_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textClip0_value?: boolean | undefined
     _textShadow_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow0_value?: ShadowOptions | Array<ShadowOptions> | undefined
     _heightAdaptivePolicy_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -476,6 +478,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 default: {
                     this._draggable_flag = AttributeUpdaterFlag.INITIAL;
                     peer.draggableAttribute(undefined);
+                }
+            }
+        }
+        if (this._textClip_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textClip_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.clip0Attribute((this._textClip0_value as boolean | undefined));
+                    this._textClip_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textClip_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textClip_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.clip0Attribute(undefined);
                 }
             }
         }
@@ -1161,6 +1181,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (modifier._textClip_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textClip_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.clip(modifier._textClip0_value);
+                    break;
+                }
+                default: {
+                    this.clip(undefined);
+                }
+            }
+        }
         if (modifier._textShadow_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._textShadow_flag) {
@@ -1699,6 +1732,18 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         else
         {
             this._draggable_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    clip(value: boolean | undefined): this {
+        if (((this._textClip_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._textClip0_value) !== (value)))
+        {
+            this._textClip_flag = AttributeUpdaterFlag.UPDATE
+            this._textClip0_value = value
+        }
+        else
+        {
+            this._textClip_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
