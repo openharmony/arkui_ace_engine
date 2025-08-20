@@ -151,6 +151,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
     deviceType_ = point.sourceType;
     deviceTool_ = point.sourceTool;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
+
     auto result = AboutToAddCurrentFingers(point);
     if (result) {
         HandleTouchDownEvent(point);
@@ -357,7 +358,6 @@ std::vector<Matrix4> NGGestureRecognizer::GetTransformMatrix(const WeakPtr<Frame
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
-        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:"
                 SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
@@ -700,6 +700,11 @@ std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEv
     return "";
 }
 
+void NGGestureRecognizer::ResetResponseLinkRecognizer()
+{
+    responseLinkRecognizer_.clear();
+}
+
 void NGGestureRecognizer::HandleGestureAccept(
     const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType)
 {
@@ -741,10 +746,5 @@ GestureActionPhase NGGestureRecognizer::GetActionPhase(
         default:
             return GestureActionPhase::UNKNOWN;
     }
-}
-
-void NGGestureRecognizer::ResetResponseLinkRecognizer()
-{
-    responseLinkRecognizer_.clear();
 }
 } // namespace OHOS::Ace::NG

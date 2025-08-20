@@ -855,14 +855,14 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);
-    ACE_SCOPED_TRACE_COMMERCIAL(
-        "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         CheckUpEvent(event);
         lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL(
+        "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     lastTouchEvent_ = event;
 
     if (point.type == TouchType::DOWN) {
@@ -901,10 +901,6 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
 {
     if ((point.type == TouchType::UP || point.type == TouchType::CANCEL) && !point.isFalsified) {
         LogTouchTestRecognizerStates(point.id);
-        FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-        if (ft != nullptr) {
-            ft->SetFrameTraceLimit();
-        }
         refereeNG_->CleanGestureStateVoluntarily(point.id);
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
@@ -1093,6 +1089,9 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
 {
     bool isStopTouchEvent = false;
     for (const auto& entry : touchTestResult) {
+        if (touchEvent.passThrough) {
+            entry->SetIsPostEventResult(true);
+        }
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
@@ -1541,12 +1540,12 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
     }
     int32_t eventIdentity = event.GetEventIdentity();
     if (event.action == MouseAction::WINDOW_LEAVE) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "Exit hover by leave-window event.");
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "LW.");
         lastHoverTestResultsMap_[eventIdentity] = std::move(currHoverTestResultsMap_[eventIdentity]);
         currHoverTestResultsMap_[eventIdentity].clear();
         currHoverTestResultsMap_.erase(eventIdentity);
     } else if (event.action == MouseAction::WINDOW_ENTER) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "Enter hover by enter-window event.");
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "EW.");
         lastHoverTestResultsMap_[eventIdentity].clear();
         currHoverTestResultsMap_[eventIdentity] = std::move(hoverTestResult);
     } else {
@@ -1649,7 +1648,7 @@ bool EventManager::DispatchMouseEventToCurResults(
             }
             continue;
         }
-        PressMouseInfo key{ event.id, event.button };
+        PressMouseInfo key{event.id, event.button};
         auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
@@ -1702,7 +1701,7 @@ void EventManager::DoSingleMouseActionRelease(const PressMouseInfo& pressMouseIn
 }
 
 void HandleMouseHoverAnimation(const MouseAction& action,
-    RefPtr<NG::FrameNode>& hoverNodeCur, const RefPtr<NG::FrameNode>& hoverNodePre)
+    const RefPtr<NG::FrameNode>& hoverNodeCur, const RefPtr<NG::FrameNode>& hoverNodePre)
 {
     if (action == MouseAction::WINDOW_ENTER) {
         if (hoverNodeCur) {
@@ -1779,7 +1778,7 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
     uint32_t iterCountCurr = 0;
     for (const auto& hoverResult : lastHoverTestResults) {
         // get valid part of previous hover nodes while it's not in current hover nodes. Those nodes exit hover
-        // there may have some nodes in currHoverTestResults but intercepted
+        // there may have some nodes in currHoverTestResults  but intercepted
         iterCountLast++;
         if (lastHoverEndNode != currHoverTestResults.end()) {
             lastHoverEndNode++;
@@ -2390,7 +2389,6 @@ DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPoi
     }
     auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
         std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, CoordinateType::NORMAL);
-
     if (newXy.x != 0 && newXy.y != 0) {
         newPointerEvent.x = newXy.x;
         newPointerEvent.y = newXy.y;

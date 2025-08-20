@@ -302,7 +302,7 @@ public:
     void FireUntriggeredInnerOnAreaChanged(
         const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
     void FireDrawCompletedNDKCallback(PipelineContext* pipeline);
-    void FireLayoutNDKCallback(PipelineContext* pipeline);
+    void FireLayoutNDKCallback(const PipelineContext* pipeline);
     void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
     {
         ndkDrawCompletedCallback_ = std::move(callback);

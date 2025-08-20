@@ -228,7 +228,6 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
 {
     MouseEvent mouseEvent;
     mouseEvent.x = x - offset.GetX();
-    mouseEvent.x = x - offset.GetX();
     mouseEvent.y = y - offset.GetY();
     mouseEvent.z = z;
     mouseEvent.deltaX = deltaX;
@@ -273,4 +272,5 @@ const RefPtr<MouseEventResult>& NativeEmbeadMouseInfo::GetResult() const
 {
     return result_;
 }
+
 } // namespace OHOS::Ace

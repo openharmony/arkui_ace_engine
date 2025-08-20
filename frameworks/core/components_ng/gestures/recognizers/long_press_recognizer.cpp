@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+
+#include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/components_ng/event/event_constants.h"
-
-#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -484,7 +484,6 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
-    globalPoint_ = Point();
     hasRepeated_ = false;
     longPressFingerCountForSequence_ = 0;
     isOnActionTriggered_ = false;

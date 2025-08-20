@@ -169,7 +169,6 @@ class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
 public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;
-
     void AddGesture(const RefPtr<NG::Gesture>& gesture);
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void ClearGesture();
@@ -267,6 +266,7 @@ public:
     bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
     static std::string GetHitTestModeStr(const RefPtr<GestureEventHub>& GestureEventHub);
@@ -350,8 +350,8 @@ public:
     void CleanNodeRecognizer();
     void CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub);
     void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
-    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
     bool IsTextCategoryComponent(const std::string& frameTag);
+    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,

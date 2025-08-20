@@ -33,7 +33,7 @@ public:
     explicit InputEvent(OnHoverFunc&& callback) : onHoverEventCallback_(std::move(callback)) {}
 
     explicit InputEvent(OnHoverMoveFunc&& callback) : onHoverMoveCallback_(std::move(callback)) {}
-    
+
     explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
 
     explicit InputEvent(OnAccessibilityHoverFunc&& callback) : onAccessibilityHoverFunc_(std::move(callback)) {}

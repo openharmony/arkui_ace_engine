@@ -125,7 +125,6 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         touchObject->Set(info->GetVM(), ToJSValue("displayY"), ToJSValue(displayY));
         touchObject->Set(info->GetVM(), ToJSValue("globalDisplayX"), ToJSValue(globalDisplayX));
         touchObject->Set(info->GetVM(), ToJSValue("globalDisplayY"), ToJSValue(globalDisplayY));
-        touchObject->Set(info->GetVM(), ToJSValue("hand"), ToJSValue(point.GetOperatingHand()));
         touchObject->Set(info->GetVM(), ToJSValue("pressedTime"),
             ToJSValue(static_cast<double>(point.GetPressedTime().time_since_epoch().count())));
         touchObject->Set(info->GetVM(), ToJSValue("pressure"), ToJSValue(point.GetForce()));
@@ -133,6 +132,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
             ToJSValue("width"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetWidth())));
         touchObject->Set(info->GetVM(),
             ToJSValue("height"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetHeight())));
+        touchObject->Set(info->GetVM(), ToJSValue("hand"), ToJSValue(point.GetOperatingHand()));
 
         Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));

@@ -136,12 +136,12 @@ void EventManager::DispatchPenHoverEventNG(const TouchEvent& event)
 
 void EventManager::DispatchPenHoverMoveEventNG(const TouchEvent& event)
 {
-    auto it = curPenHoverMoveResultsMap_.find(event.id);
-    if (it == curPenHoverMoveResultsMap_.end()) {
+    auto item = curPenHoverMoveResultsMap_.find(event.id);
+    if (item == curPenHoverMoveResultsMap_.end()) {
         return;
     }
 
-    for (const auto& hoverMoveResult : it->second) {
+    for (const auto& hoverMoveResult : item->second) {
         if (!hoverMoveResult->HandlePenHoverMoveEvent(event)) {
             break;
         }

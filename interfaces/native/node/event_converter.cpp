@@ -14,7 +14,6 @@
  */
 #include "node/event_converter.h"
 
-
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
 #include "securec.h"

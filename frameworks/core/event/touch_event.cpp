@@ -227,12 +227,6 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
-{
-    this->operatingHand = operatingHand;
-    return *this;
-}
-
 TouchEvent& TouchEvent::SetPressedTime(TimeStamp pressedTime)
 {
     this->pressedTime = pressedTime;
@@ -248,6 +242,12 @@ TouchEvent& TouchEvent::SetWidth(int32_t width)
 TouchEvent& TouchEvent::SetHeight(int32_t height)
 {
     this->height = height;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
+{
+    this->operatingHand = operatingHand;
     return *this;
 }
 
@@ -290,13 +290,12 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
     event.isPassThroughMode = isPassThroughMode;
-    event.operatingHand = operatingHand;
     event.width = width;
     event.height = height;
     event.pressedTime = pressedTime;
-    event.convertInfo = convertInfo;
     event.passThrough = passThrough;
-    // Only set postEventNodeId when the event supports passThrough
+    event.operatingHand = operatingHand;
+    event.convertInfo = convertInfo;
     if (passThrough) {
         event.postEventNodeId = postEventNodeId;
     }
