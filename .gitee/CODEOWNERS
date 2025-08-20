@@ -3217,6 +3217,7 @@ test/unittest/core/common/ace_engine/ @arkuiframework
 test/unittest/core/common/asset/ @arkuiframework
 test/unittest/core/common/clipboard/ @huawei_g_five
 test/unittest/core/common/environment/ @arkuistatemgmt
+test/unittest/core/common/force_split/ @arkui_superman
 test/unittest/core/common/ime/ @huawei_g_five
 test/unittest/core/common/others/ @arkuiframework
 test/unittest/core/common/plugin/ @arkuiabilitygroup

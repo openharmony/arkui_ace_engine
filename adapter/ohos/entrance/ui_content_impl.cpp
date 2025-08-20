@@ -5511,14 +5511,17 @@ void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d", config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
+        config.navigationDisablePlaceholder, config.navigationDisableDivider);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
     navManager->SetForceSplitNavigationId(config.navigationId);
     navManager->SetForceSplitNavigationDepth(config.navigationDepth);
+    navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+    navManager->SetDividerDisabled(config.navigationDisableDivider);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

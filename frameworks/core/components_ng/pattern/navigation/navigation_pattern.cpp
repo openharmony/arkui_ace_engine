@@ -1079,6 +1079,8 @@ void NavigationPattern::RecognizeHomePageIfNeeded()
             navBarIsHome_ = true;
             return;
         }
+    } else {
+        navBarIsHome_ = false;
     }
 
     for (const auto& node : allDestNodes) {
@@ -5280,9 +5282,7 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     auto primaryProperty = primaryContentNode->GetLayoutProperty();
     CHECK_NULL_VOID(primaryProperty);
     auto phNode = AceType::DynamicCast<FrameNode>(host->GetForceSplitPlaceHolderNode());
-    CHECK_NULL_VOID(phNode);
-    auto phProperty = phNode->GetLayoutProperty();
-    CHECK_NULL_VOID(phProperty);
+    RefPtr<LayoutProperty> phProperty = phNode ? phNode->GetLayoutProperty() : nullptr;
 
     auto prePrimaryNodes = primaryNodes_;
     primaryNodes_.clear();
@@ -5292,9 +5292,10 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     GetNavDestinationsAndHomeIndex(destNodes, homeIndex);
     if (destNodes.empty()) {
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
-        phProperty->UpdateVisibility(VisibleType::VISIBLE);
         primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
         navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        CHECK_NULL_VOID(phProperty);
+        phProperty->UpdateVisibility(VisibleType::VISIBLE);
         return;
     }
 
@@ -5314,13 +5315,10 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     }
 
     UpdatePrimaryContentIfNeeded(primaryContentNode, prePrimaryNodes);
-    if (primaryNodes_.empty() || primaryNodes_.back().Upgrade() != destNodes.back()) {
-        phProperty->UpdateVisibility(VisibleType::INVISIBLE);
-        navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
-    } else {
-        phProperty->UpdateVisibility(VisibleType::VISIBLE);
-        navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    }
+    bool navContentIsVisible = primaryNodes_.empty() || primaryNodes_.back().Upgrade() != destNodes.back();
+    navContentProperty->UpdateVisibility(navContentIsVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+    CHECK_NULL_VOID(phProperty);
+    phProperty->UpdateVisibility(navContentIsVisible ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
 }
 
 void NavigationPattern::AdjustPrimaryAndProxyNodePosition(
@@ -5398,10 +5396,7 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
     CHECK_NULL_VOID(navContentProperty);
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(host->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
-    auto phNode = AceType::DynamicCast<FrameNode>(host->GetForceSplitPlaceHolderNode());
-    CHECK_NULL_VOID(phNode);
-    auto phProperty = phNode->GetLayoutProperty();
-    CHECK_NULL_VOID(phProperty);
+
     if (needFireLifecycle) {
         FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE);
     }
@@ -5419,13 +5414,13 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
     }
-    if (forceSplitSuccess_ && stackNodePairs.empty()) {
-        phProperty->UpdateVisibility(VisibleType::VISIBLE);
-        navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    } else {
-        phProperty->UpdateVisibility(VisibleType::INVISIBLE);
-        navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
-    }
+    bool placeHolderIsVisible = forceSplitSuccess_ && stackNodePairs.empty();
+    navContentProperty->UpdateVisibility(placeHolderIsVisible ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+    auto phNode = AceType::DynamicCast<FrameNode>(host->GetForceSplitPlaceHolderNode());
+    CHECK_NULL_VOID(phNode);
+    auto phProperty = phNode->GetLayoutProperty();
+    CHECK_NULL_VOID(phProperty);
+    phProperty->UpdateVisibility(placeHolderIsVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
 }
 
 bool NavigationPattern::IsHideNavBarInForceSplitModeNeeded()

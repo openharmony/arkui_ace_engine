@@ -46,6 +46,7 @@ group("core_common_unittest") {
   testonly = true
   deps = [
     ":common_test",
+    "force_split:force_split_utils_test",
     "form:form_manager_test",
     "ime:ime_test",
     "key_event_manager:key_event_manager_test",
