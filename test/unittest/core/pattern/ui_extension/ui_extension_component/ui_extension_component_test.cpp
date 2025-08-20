@@ -2040,6 +2040,24 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentOnDrawReadyTestNg, Test
 }
 
 /**
+ * @tc.name: UpdateViewportConfigFromContext Test
+ * @tc.desc: Test UIExtension UpdateViewportConfigFromContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionUpdateViewportConfigFromContextTest, TestSize.Level1)
+{
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SessionViewportConfig sessionViewportConfig;
+    pattern->SetSessionViewportConfig(sessionViewportConfig);
+    pattern->UpdateSessionViewportConfigFromContext();
+    pattern->UpdateSessionViewportConfigFromContext();
+    EXPECT_EQ(pattern->sessionViewportConfig_.density_, sessionViewportConfig.density_);
+}
+
+/**
  * @tc.name: ModalUIExtensionTestNg
  * @tc.desc: Test Modal UIExtension
  * @tc.type: FUNC
