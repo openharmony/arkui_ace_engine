@@ -1,5 +1,5 @@
  /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,9 @@ public:
     ~CheckBoxGroupModifier() override = default;
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         PaintCheckBox(context, offset_->Get(), size_->Get());
     }
 
@@ -224,6 +227,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetSize(SizeF& size)
     {
         if (size_) {
@@ -253,6 +263,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     HoverEffectType hoverEffectType_ = HoverEffectType::AUTO;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyInt> status_;
     RefPtr<PropertyOffsetF> offset_;

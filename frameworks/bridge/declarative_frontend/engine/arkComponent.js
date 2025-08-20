@@ -25968,6 +25968,37 @@ class ArkCheckboxGroupComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, CheckboxGroupStyleModifier.identity, CheckboxGroupStyleModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, false);
+      this.builder = undefined;
+      this.modifier = undefined;
+      return;
+    }
+    this.needRebuild = false;
+    const appliedContent = modifier.applyContent();
+    if (this.builder !== appliedContent) {
+      this.needRebuild = true;
+    }
+    this.builder = appliedContent;
+    this.modifier = modifier;
+    getUINativeModule().checkboxgroup.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, checkBoxGroupConfiguration) {
+    checkBoxGroupConfiguration.contentModifier = this.modifier;
+    if (this.checkboxgroupNode === undefined || this.needRebuild) {
+      if (this.checkboxgroupNode !== undefined) {
+        this.checkboxgroupNode = null;
+      }
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.checkboxgroupNode = new xNode.BuilderNode(context);
+      this.checkboxgroupNode.build(this.builder, checkBoxGroupConfiguration);
+      this.needRebuild = false;
+    } else {
+      this.checkboxgroupNode.update(checkBoxGroupConfiguration);
+    }
+    return this.checkboxgroupNode.getFrameNode();
+  }
 }
 
 class CheckBoxGroupOptionsModifier extends ModifierWithKey {
@@ -25988,6 +26019,17 @@ class CheckBoxGroupOptionsModifier extends ModifierWithKey {
 }
 CheckBoxGroupOptionsModifier.identity = Symbol('checkBoxGroupOptions');
 
+class CheckBoxGroupContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let checkboxgroupComponent = component;
+    checkboxgroupComponent.setContentModifier(this.value);
+  }
+}
+CheckBoxGroupContentModifier.identity = Symbol('checkBoxGroupContentModifier');
+
 // @ts-ignore
 if (globalThis.CheckboxGroup !== undefined) {
   globalThis.CheckboxGroup.attributeModifier = function (modifier) {
@@ -25998,6 +26040,15 @@ if (globalThis.CheckboxGroup !== undefined) {
     });
   };
 }
+
+  globalThis.CheckboxGroup.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkCheckboxGroupComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
 
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {

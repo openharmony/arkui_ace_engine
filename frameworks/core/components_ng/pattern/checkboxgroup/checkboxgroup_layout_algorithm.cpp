@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -24,7 +25,15 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto themeScopeId = layoutWrapper->GetHostNode() ? layoutWrapper->GetHostNode()->GetThemeScopeId() : 0;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->ResetContent();
+        return std::nullopt;
+    }
+    auto themeScopeId = host->GetThemeScopeId();
     InitializeParam(themeScopeId);
     auto layoutPolicy = GetLayoutPolicy(layoutWrapper);
     if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {

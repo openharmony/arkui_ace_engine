@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -23,8 +25,33 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr float DEFAULT_SIZE_VALUE = -1.0f;
+const char* CHECKBOXGROUP_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
+panda::Local<panda::JSValueRef> JsCheckboxgroupChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsBoolean()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool value = firstArg->ToBoolean(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount(vm) < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    CheckBoxGroupModelNG::SetChangeValue(frameNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -371,6 +398,56 @@ ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupOnChange(ArkUIRunt
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
 
     GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxGroupBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNull() || secondArg->IsUndefined() || !secondArg->IsObject(vm)) {
+        CheckBoxGroupModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    CheckBoxGroupModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
+            CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+            const char* keysOfCheckboxgroup[] = { "name", "status", "enabled", "triggerChange"};
+            Local<JSValueRef> valuesOfCheckboxgroup[] = { panda::StringRef::NewFromUtf8(vm, config.name_.c_str()),
+                panda::NumberRef::New(vm, int32_t(config.status_)), panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsCheckboxgroupChangeCallback)};
+            auto checkboxgroup = panda::ObjectRef::NewWithNamedProperties(vm,
+                ArraySize(keysOfCheckboxgroup), keysOfCheckboxgroup, valuesOfCheckboxgroup);
+            checkboxgroup->SetNativePointerFieldCount(vm, 1);
+            checkboxgroup->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { context, checkboxgroup };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, PARAM_ARR_LENGTH_2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, CHECKBOXGROUP_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* newFrameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(newFrameNode, nullptr);
+            return AceType::Claim(newFrameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

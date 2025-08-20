@@ -1568,8 +1568,14 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     OptionalSizeF optionalSizeF(nullLength, nullLength);
     LayoutConstraintF contentConstraint;
     contentConstraint.selfIdealSize = optionalSizeF;
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+        LayoutWrapperNode(frameNode, geometryNode, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
@@ -2369,8 +2375,14 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureContentTest001, TestSize.Level
      * @tc.steps: step1. Create CheckBoxGroupLayoutAlgorithm.
      * @tc.expected: Create successfully.
      */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+        LayoutWrapperNode(frameNode, geometryNode, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
     ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
 
