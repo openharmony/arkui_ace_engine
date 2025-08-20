@@ -472,9 +472,6 @@ struct ArkUIAniContentSlotModifier {
 struct ArkUIAniLazyForEachNodeModifier {
     ani_long (*constructLazyForEachNode)(ani_int);
 };
-struct ArkUIAniSyntaxNodeModifier {
-    ani_long (*constructSyntaxNode)(ani_int);
-};
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowSection)(
         ArkUINodeHandle node, double start, double deleteCount, void* section, ArkUI_Int32 size);
@@ -614,6 +611,9 @@ struct ArkUIAniTraceModifier {
     void (*asyncTraceBegin)(const std::string& traceName, int taskId);
     void (*asyncTraceEnd)(const std::string& traceName, int taskId);
 };
+struct ArkUIAniSyntaxNodeModifier {
+    ani_long (*constructSyntaxNode)(ani_int);
+};
 
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
@@ -623,7 +623,6 @@ struct ArkUIAniModifiers {
     const ArkUIAniCommonModifier* (*getCommonAniModifier)();
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniLazyForEachNodeModifier* (*getLazyForEachNodeAniModifier)();
-    const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
@@ -644,6 +643,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
     const ArkUIAniTraceModifier* (*getTraceAniModifier)();
+    const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
