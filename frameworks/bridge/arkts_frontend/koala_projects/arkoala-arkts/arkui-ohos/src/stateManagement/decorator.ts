@@ -124,6 +124,7 @@ export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T>;
+    makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T>;
     makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T>;
     makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
     makeProvider<T>(
