@@ -57,6 +57,7 @@ namespace {
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
+    constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -3198,6 +3199,9 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst = NavigationTitlebarOptions();
     dst->bgOptions = Converter::Convert<NavigationBackgroundOptions>(value);
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
+    if (value.enableHoverMode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+    }
 }
 
 template<>
@@ -3292,6 +3296,40 @@ void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_Navigati
         callback.Invoke(transition);
     };
     dst->transition = std::move(transitionCallback);
+}
+
+template<>
+void AssignCast(std::optional<std::vector<NG::NavDestinationTransition>>& dst,
+    const Opt_Array_NavDestinationTransition& src)
+{
+    std::vector<NG::NavDestinationTransition> allTransitions;
+    if (src.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    int length = src.value.length;
+    for (int i = 0; i < length; i++) {
+        NG::NavDestinationTransition indexValue = Converter::Convert<NG::NavDestinationTransition>(src.value.array[i]);
+        allTransitions.push_back(indexValue);
+    }
+    dst = allTransitions;
+}
+
+template<>
+NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
+{
+    NG::NavDestinationTransition dst;
+    dst.event = [callback = CallbackHelper(src.event)]() {
+        callback.Invoke();
+    };
+    if (src.onTransitionEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst.onTransitionEnd = [callback = CallbackHelper(src.onTransitionEnd.value)]() {
+            callback.Invoke();
+        };
+    }
+    dst.duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_NAVDESTINATION_TRANSITION_DURATION);
+    dst.delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
+    dst.curve = Converter::OptConvert<RefPtr<Curve>>(src.curve).value_or(Curves::EASE_IN_OUT);
+    return dst;
 }
 
 template<>

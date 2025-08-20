@@ -803,11 +803,11 @@ export interface NestedScrollInfo {
     child: Scroller;
 }
 export interface NavDestinationTransition {
-    onTransitionEnd?: (() => void);
+    onTransitionEnd?: Callback<void>;
     duration?: number;
     curve?: Curve;
     delay?: number;
-    event: (() => void);
+    event: Callback<void>;
 }
 export type Callback_Boolean = () => boolean;
 export type Callback_Object_Void = (parameter: Object) => void;

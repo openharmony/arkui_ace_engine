@@ -2396,4 +2396,28 @@ void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& sr
         default: LOGE("Unexpected enum value in Ark_DatePickerMode: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_Curve& src)
+{
+    switch (src) {
+        case ARK_CURVE_LINEAR: dst = Curves::LINEAR; break;
+        case ARK_CURVE_EASE: dst = Curves::EASE; break;
+        case ARK_CURVE_EASE_IN: dst = Curves::EASE_IN; break;
+        case ARK_CURVE_EASE_OUT: dst = Curves::EASE_OUT; break;
+        case ARK_CURVE_EASE_IN_OUT: dst = Curves::EASE_IN_OUT; break;
+        case ARK_CURVE_FAST_OUT_SLOW_IN: dst = Curves::FAST_OUT_SLOW_IN; break;
+        case ARK_CURVE_LINEAR_OUT_SLOW_IN: dst = Curves::LINEAR_OUT_SLOW_IN; break;
+        case ARK_CURVE_FAST_OUT_LINEAR_IN: dst = Curves::FAST_OUT_LINEAR_IN; break;
+        case ARK_CURVE_EXTREME_DECELERATION: dst = Curves::EXTREME_DECELERATION; break;
+        case ARK_CURVE_SHARP: dst = Curves::SHARP; break;
+        case ARK_CURVE_RHYTHM: dst = Curves::RHYTHM; break;
+        case ARK_CURVE_SMOOTH: dst = Curves::SMOOTH; break;
+        case ARK_CURVE_FRICTION: dst = Curves::FRICTION; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_Curve: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
