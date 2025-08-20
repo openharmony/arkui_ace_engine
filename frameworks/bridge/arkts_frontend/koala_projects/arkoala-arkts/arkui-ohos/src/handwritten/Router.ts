@@ -226,7 +226,8 @@ class RouterImpl implements Router {
                 const incNode = stateNode.value;
                 peerNode = findPeerNode(incNode);
             } catch (e: Error) {
-                console.log("AceRouter: create page failed: " + e.stack)
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
@@ -275,7 +276,8 @@ class RouterImpl implements Router {
                 const incNode = stateNode.value;
                 peerNode = findPeerNode(incNode);
             } catch (e: Error) {
-                console.log("AceRouter: create page failed: " + e.stack);
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
@@ -421,7 +423,8 @@ class RouterImpl implements Router {
             const incNode = stateNode.value;
             peerNode = findPeerNode(incNode);
         } catch (e: Error) {
-            console.log("AceRouter: create page failed: " + e.stack)
+            console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
         }
         if (peerNode === undefined) {
             InteropNativeModule._NativeLog("AceRouter:create jsView failed");
