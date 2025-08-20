@@ -925,6 +925,16 @@ void WebDelegate::HandleTouchMove(
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>>& touch_point_infos, bool from_overlay)
 {}
 void WebDelegate::HandleTouchCancel() {}
+void WebDelegate::HandleStylusTouchDown(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& touchPoint, bool from_overlay)
+{}
+void WebDelegate::HandleStylusTouchUp(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& touchPoint, bool from_overlay)
+{}
+void WebDelegate::HandleStylusTouchMove(
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>>& stylus_touch_point_infos,
+    bool from_overlay)
+{}
 void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy) {}
 void WebDelegate::WebHandleTouchpadFlingEvent(
     const double& x, const double& y, const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
