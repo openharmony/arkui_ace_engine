@@ -587,7 +587,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
     info.SetMainVelocity(-1000.f);
     HandleDragEnd(info);
     MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    FlushUITasks(stackNode_);
     EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
 
     /**
@@ -597,7 +597,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
     info.SetMainVelocity(1000.f);
     HandleDragEnd(info);
     MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    FlushUITasks(stackNode_);
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
 }
 
