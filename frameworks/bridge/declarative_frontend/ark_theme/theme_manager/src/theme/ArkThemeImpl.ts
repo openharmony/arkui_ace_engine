@@ -26,13 +26,13 @@ class ArkThemeImpl extends ArkThemeBase {
               new ArkColorsImpl(undefined, baselineTheme.colors),
               new ArkColorsImpl(undefined, baselineTheme.darkColors),
               new ArkShapesImpl(undefined, baselineTheme.shapes),
-              new ArkTypographyImpl(undefined, baselineTheme.typography))
+              new ArkTypographyImpl(undefined, baselineTheme.typography));
             return;
         }
         super(baselineTheme.id, customTheme, colorMode,
           new ArkColorsImpl(customTheme.colors, baselineTheme.colors),
           new ArkColorsImpl(customTheme.darkColors, baselineTheme.darkColors),
           new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes),
-          new ArkTypographyImpl(customTheme.typography, baselineTheme.typography))
+          new ArkTypographyImpl(customTheme.typography, baselineTheme.typography));
     }
 }

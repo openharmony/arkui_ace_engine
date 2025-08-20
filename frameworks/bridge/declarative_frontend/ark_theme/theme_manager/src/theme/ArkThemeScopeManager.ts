@@ -238,7 +238,7 @@ class ArkThemeScopeManager {
                 return false;
             }
             return true;
-        })
+        });
     }
 
     /**
@@ -372,7 +372,7 @@ class ArkThemeScopeManager {
      * or previously set Default Theme or System Theme
      */
     getFinalTheme(ownerComponent: ViewPuInternal): Theme {
-        return ownerComponent.themeScope_?.getTheme() ?? this.defaultTheme  ?? ArkThemeScopeManager.SystemTheme;
+        return ownerComponent.themeScope_?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme;
     }
 
     /**
@@ -435,8 +435,8 @@ class ArkThemeScopeManager {
         if (scope === undefined) {
             return;
         }
-        const theme: Theme = scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme
-        scope.componentsInScope()?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()))
+        const theme: Theme = scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme;
+        scope.componentsInScope()?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
     }
 
     /**
@@ -521,7 +521,7 @@ class ArkThemeScopeManager {
         this.defaultTheme?.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.SystemTheme;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
-        this.defaultTheme = this.makeTheme(customTheme, ThemeColorMode.SYSTEM);
+        this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         // bind new default theme to 0 theme scope
         this.defaultTheme.bindToScope(0);
 
