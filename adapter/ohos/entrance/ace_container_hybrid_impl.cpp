@@ -120,6 +120,8 @@ void AceContainer::InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFw
         return;
     }
     subFrontend_ = arktsFrontend;
+    // open statemanagement interop
+    subFrontend_->OpenStateMgmtInterop();
     // 1.1 initialization
     if (isFormRender_) {
 #ifdef FORM_SUPPORTED
