@@ -99,6 +99,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 bool SystemProperties::syncLoadEnabled_ = true;
@@ -356,6 +357,11 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 bool SystemProperties::IsPageTransitionFreeze()
 {
     return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsForcibleLandscapeEnabled()
+{
+    return forcibleLandscapeEnabled_;
 }
 
 bool SystemProperties::IsSoftPageTransition()

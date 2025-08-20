@@ -39,9 +39,14 @@ build_component_ng("base_ng") {
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
   ]
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode)) {
-    sources += vendor_configs.ace_engine_advanced_split_mode
+  if (ace_engine_feature_enable_split_mode) {
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_page_pattern.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_manager.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_pattern.cpp",
+      "view_advanced_register.cpp",
+    ]
   } else if (ace_engine_enable_circle_feature &&
              defined(vendor_configs.ace_engine_advanced_router_circle_mode)) {
     sources += vendor_configs.ace_engine_advanced_router_circle_mode

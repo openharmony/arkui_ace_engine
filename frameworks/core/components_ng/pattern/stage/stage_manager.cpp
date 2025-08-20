@@ -809,5 +809,4 @@ void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& hom
     ignoreOrientation_ = ignoreOrientation;
     OnForceSplitConfigUpdate();
 }
-
 } // namespace OHOS::Ace::NG
