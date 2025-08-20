@@ -47,12 +47,14 @@ DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_
         values_.emplace_back(value);
     }
     max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
+    count_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE_COUNT);
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
     isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(date_);
     AttachProperty(max_);
+    AttachProperty(count_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
     AttachProperty(isEffect_);
