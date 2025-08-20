@@ -91,8 +91,8 @@ private:
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
     void RemoveAbnormalId();
-    void TraverseTreeFindTransformScene(const RefPtr<FrameNode>& rootNode,
-        std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr, uint32_t targetZOrder);
+    void TraverseTreeFindTransformScene(const RefPtr<FrameNode>& rootNode, uint32_t targetZOrder,
+        std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr);
     std::shared_ptr<Rosen::RSNode> FindScenePanelRsNodeByZOrder(uint64_t screenId, uint32_t targetZOrder);
     std::unordered_set<uint64_t> abnormalNodeDfxSet_;
     std::unordered_set<uint64_t> windowSceneOnTreeDfxSet_;

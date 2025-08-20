@@ -844,7 +844,7 @@ void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNo
 }
 
 void WindowSceneLayoutManager::TraverseTreeFindTransformScene(const RefPtr<FrameNode>& rootNode,
-    std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr, uint32_t targetZOrder)
+    uint32_t targetZOrder, std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr)
 {
     CHECK_NULL_VOID(rootNode);
     auto nodeType = rootNode->GetWindowPatternType();
@@ -864,12 +864,12 @@ void WindowSceneLayoutManager::TraverseTreeFindTransformScene(const RefPtr<Frame
         scenePanelNodeArr.emplace_back(std::make_pair(rootNode, nodeZOrder));
         return;
     }
-    for (auto& weakNode: rootNode->GetFrameChildren()) {
+    for (const auto& weakNode: rootNode->GetFrameChildren()) {
         auto node = weakNode.Upgrade();
         if (!node) {
             continue;
         }
-        TraverseTreeFindTransformScene(node, scenePanelNodeArr, targetZOrder);
+        TraverseTreeFindTransformScene(node, targetZOrder, scenePanelNodeArr);
     }
 }
 
@@ -885,13 +885,12 @@ std::shared_ptr<Rosen::RSNode> WindowSceneLayoutManager::FindScenePanelRsNodeByZ
     }
     RefPtr<FrameNode> screenNode = iter->second.Upgrade();
     std::vector<std::pair<RefPtr<FrameNode>, uint32_t>> scenePanelNodeArr;
-    TraverseTreeFindTransformScene(screenNode, scenePanelNodeArr, targetZOrder);
+    TraverseTreeFindTransformScene(screenNode, targetZOrder, scenePanelNodeArr);
     if (scenePanelNodeArr.empty()) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "No transform scene node found");
         return nullptr;
     }
     RefPtr<FrameNode> retNode = nullptr;
-    uint32_t minDiff = std::numeric_limits<uint32_t>::max();
     std::sort(scenePanelNodeArr.begin(), scenePanelNodeArr.end(),
         [](const auto& a, const auto& b) {
             return a.second > b.second;
@@ -900,5 +899,4 @@ std::shared_ptr<Rosen::RSNode> WindowSceneLayoutManager::FindScenePanelRsNodeByZ
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "Find node zOrder: %{public}d", scenePanelNodeArr.front().second);
     return GetRSNode(scenePanelNodeArr.front().first);
 }
-
 } // namespace OHOS::Ace::NG
