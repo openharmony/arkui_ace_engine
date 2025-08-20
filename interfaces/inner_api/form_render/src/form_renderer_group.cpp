@@ -143,7 +143,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             formJsInfo.formData.size());
         errCode = formRenderer_->AddForm(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
-        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_CREATE_FAILED;
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_CREATE_FAILED;
     } else if (initState_ == FormRendererInitState::PRE_INITIALIZED) {
         HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}zu",
             compId.c_str(),
@@ -151,7 +151,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             formJsInfo.formData.size());
         errCode = formRenderer_->RunFormPage(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
-        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_CREATE_FAILED;
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_CREATE_FAILED;
     } else { // initState_ == FormRendererInitState::INITIALIZED
         HILOG_INFO("AttachForm compId: %{public}s, currentCompId_: %{public}s, formRequests size is %{public}s, "
                    "formJsInfo.formData.size is %{public}zu",
@@ -160,7 +160,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             std::to_string(formRequests_.size()).c_str(),
             formJsInfo.formData.size());
         errCode = formRenderer_->AttachForm(want, formJsInfo);
-        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_REUSE_FAILED;
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_REUSE_FAILED;
     }
 
     if (errCode != ERR_OK) {
