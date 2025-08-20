@@ -59,6 +59,11 @@ RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(
     return nullptr;
 }
 
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const DecodeOptions& options)
+{
+    return nullptr;
+}
+
 RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap()
 {
     return nullptr;

@@ -172,13 +172,10 @@ RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
 }
 
-#if defined(ACE_STATIC)
-// only for 1.2
 RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
 {
     return AceType::MakeRefPtr<PixelMapOhos>(pixmap);
 }
-#endif
 
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
@@ -226,8 +223,8 @@ RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
     return AceType::MakeRefPtr<PixelMapOhos>(drawable->GetPixelMap());
 }
 
-bool PixelMap::GetPxielMapListFromAnimatedDrawable(void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps,
-    int32_t& duration, int32_t& iterations)
+bool PixelMap::GetPxielMapListFromAnimatedDrawable(
+    void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t& duration, int32_t& iterations)
 {
     CHECK_NULL_RETURN(ptr, false);
     auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
@@ -332,7 +329,7 @@ void PixelMapOhos::Scale(float xAxis, float yAxis)
     pixmap_->scale(xAxis, yAxis);
 }
 
-void PixelMapOhos::Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option)
+void PixelMapOhos::Scale(float xAxis, float yAxis, const AceAntiAliasingOption& option)
 {
     CHECK_NULL_VOID(pixmap_);
     switch (option) {
@@ -441,7 +438,7 @@ RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
     options.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     options.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
 
-    Media::Rect rect {static_cast<int32_t>(srcRect.Left()), static_cast<int32_t>(srcRect.Top()),
+    Media::Rect rect { static_cast<int32_t>(srcRect.Left()), static_cast<int32_t>(srcRect.Top()),
         static_cast<int32_t>(srcRect.Width()), static_cast<int32_t>(srcRect.Height()) };
     auto resPixelmap = OHOS::Media::PixelMap::Create(*pixmap_, rect, options);
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(resPixelmap));

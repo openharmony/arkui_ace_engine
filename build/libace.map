@@ -212,6 +212,10 @@
       OHOS::Ace::RecycleViewModel::*;
       OHOS::Ace::NG::RecycleDummyNode::*;
       OHOS::Ace::XComponentModel::*;
+      OHOS::Ace::DrawableDescriptor::*;
+      OHOS::Ace::PixelMapDrawableDescriptor::*;
+      OHOS::Ace::LayeredDrawableDescriptor::*;
+      OHOS::Ace::AnimatedDrawableDescriptor::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -408,6 +412,10 @@
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
+      VTT?for?OHOS::Ace::DrawableDescriptor;
+      VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
+      VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -551,6 +559,10 @@
       vtable?for?OHOS::Ace::NavDestinationModel;
       vtable?for?OHOS::Ace::SystemBarStyle;
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
+      vtable?for?OHOS::Ace::DrawableDescriptor;
+      vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
+      vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

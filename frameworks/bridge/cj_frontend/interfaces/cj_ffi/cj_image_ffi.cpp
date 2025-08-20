@@ -64,8 +64,7 @@ void FfiOHOSAceFrameworkImageCreateWithUrl(const char* url)
     imageInfoConfig.moduleName = "";
     imageInfoConfig.isUriPureNumber = false;
     imageInfoConfig.isImageSpan = false;
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageModel::GetInstance()->Create(imageInfoConfig, pixMap);
+    ImageModel::GetInstance()->Create(imageInfoConfig);
 }
 
 void FfiOHOSAceFrameworkImageCreateWithPixelMap(int64_t id)
@@ -82,11 +81,12 @@ void FfiOHOSAceFrameworkImageCreateWithPixelMap(int64_t id)
     RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&pixelMap);
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.src = nullptr;
+    imageInfoConfig.pixelMap = pixelMapRef;
     imageInfoConfig.bundleName = "";
     imageInfoConfig.moduleName = "";
     imageInfoConfig.isUriPureNumber = false;
     imageInfoConfig.isImageSpan = false;
-    ImageModel::GetInstance()->Create(imageInfoConfig, pixelMapRef);
+    ImageModel::GetInstance()->Create(imageInfoConfig);
 #endif
 }
 

@@ -29,6 +29,7 @@ public:
         RefPtr<PixelMap>(const ImageSource::Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig));
     MOCK_METHOD4(CreatePixelMap, RefPtr<PixelMap>(uint32_t index, const ImageSource::Size& size, uint32_t& errorCode,
                                      const PixelMapConfig& pixelMapConfig));
+    MOCK_METHOD1(CreatePixelMap, RefPtr<PixelMap>(const DecodeOptions& options));
     MOCK_METHOD0(CreatePixelMap, RefPtr<PixelMap>());
     MOCK_METHOD0(GetImageSize, ImageSource::Size());
     MOCK_METHOD0(GetFrameCount, uint32_t());

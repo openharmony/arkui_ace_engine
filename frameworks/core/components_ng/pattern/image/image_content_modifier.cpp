@@ -15,14 +15,15 @@
 
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
+
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_ui_director.h"
-#include "2d_graphics/include/recording/draw_cmd_list.h"
-#endif
 
 namespace OHOS::Ace::NG {
 ImageContentModifier::ImageContentModifier(const WeakPtr<ImagePattern>& pattern)
@@ -38,7 +39,6 @@ ImageContentModifier::ImageContentModifier(const WeakPtr<ImagePattern>& pattern)
 
 void ImageContentModifier::onDraw(DrawingContext& drawingContext)
 {
-    DrawDrawable(drawingContext);
     CHECK_NULL_VOID(canvasImageWrapper_);
     auto canvasImage = canvasImageWrapper_->Get().GetCanvasImage();
     CHECK_NULL_VOID(canvasImage);
@@ -57,13 +57,6 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
 #endif
         imagePainter.DrawImage(drawingContext.canvas, {}, size_->Get());
     }
-}
-
-void ImageContentModifier::DrawDrawable(DrawingContext& drawingContext)
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->DrawDrawable(drawingContext.canvas);
 }
 
 void ImageContentModifier::UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage)

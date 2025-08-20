@@ -26,7 +26,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/vector.h"
-#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -402,10 +401,10 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
     CheckIsCard(src, imageInfo);
     RefPtr<PixelMap> pixmap = nullptr;
-
-    if (!srcValid) {
+    ImageType type = ImageType::BASE;
 #ifdef PIXEL_MAP_SUPPORTED
-        auto type = ParseImageType(imageInfo);
+    if (!srcValid) {
+        type = ParseImageType(imageInfo);
         if (type == ImageType::ANIMATED_DRAWABLE) {
             std::vector<RefPtr<PixelMap>> pixelMaps;
             int32_t duration = -1;
@@ -414,33 +413,23 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
-        } else if (type == ImageType::PIXELMAP_DRAWABLE) {
-            auto* address = UnwrapNapiValue(imageInfo);
-            auto drawable = DrawableDescriptor::CreateDrawable(address);
-            if (!drawable) {
-                return;
-            }
-            if (drawable->GetDrawableSrcType() == 1) {
-                pixmap = GetDrawablePixmap(imageInfo);
-            } else {
-                ImageModel::GetInstance()->Create(drawable);
-                ParseImageAIOptions(info);
-                return;
-            }
-        } else if (type == ImageType::LAYERED_DRAWABLE || type == ImageType::DRAWABLE) {
+        } else if (type == ImageType::PIXELMAP_DRAWABLE || type == ImageType::DRAWABLE ||
+                   type == ImageType::LAYERED_DRAWABLE) {
             pixmap = GetDrawablePixmap(imageInfo);
         } else {
             pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
-#endif
     }
+#endif
     ImageInfoConfig config;
+    config.type = type;
     config.src = std::make_shared<std::string>(src);
+    config.pixelMap = pixmap;
     config.bundleName = bundleName;
     config.moduleName = moduleName;
     config.isUriPureNumber = (resId == -1);
     config.isImageSpan = isImageSpan;
-    ImageModel::GetInstance()->Create(config, pixmap);
+    ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
     if (SystemProperties::ConfigChangePerform() && resObj) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::SRC, resObj);

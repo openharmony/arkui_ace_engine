@@ -468,11 +468,11 @@ void ImagePattern::OnImageLoadSuccess()
         context->SetColorGamut(pixelMap->GetInnerColorGamut());
     }
     ReportPerfData(host, IMAGE_LOAD_SUCCESS);
-    /*  
-    * Trigger the completion callback. Since the callback is executed externally and its behavior 
-    * is not controlled here, it may lead to object mutation or destruction. Therefore, avoid 
-    * accessing internal member pointers or state after this call to prevent use-after-free 
-    * issues or crashes.  
+    /*
+    * Trigger the completion callback. Since the callback is executed externally and its behavior
+    * is not controlled here, it may lead to object mutation or destruction. Therefore, avoid
+    * accessing internal member pointers or state after this call to prevent use-after-free
+    * issues or crashes.
     */
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
@@ -800,10 +800,6 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         return false;
     }
 
-    if (imageType_ == ImageType::PIXELMAP_DRAWABLE) {
-        return true;
-    }
-
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
     if (loadingCtx_) {
@@ -994,9 +990,6 @@ void ImagePattern::OnModifyDone()
         case ImageType::ANIMATED_DRAWABLE:
             OnAnimatedModifyDone();
             break;
-        case ImageType::PIXELMAP_DRAWABLE:
-            OnPixelMapDrawableModifyDone();
-            break;
         default:
             break;
     }
@@ -1130,80 +1123,6 @@ void ImagePattern::OnImageModifyDone()
     CloseSelectOverlay();
     UpdateOffsetForImageAnalyzerOverlay();
     SetFrameOffsetForOverlayNode();
-}
-
-void ImagePattern::OnPixelMapDrawableModifyDone()
-{
-    Pattern::OnModifyDone();
-    UpdateGestureAndDragWhenModify();
-    CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
-    CloseSelectOverlay();
-    UpdateOffsetForImageAnalyzerOverlay();
-    SetFrameOffsetForOverlayNode();
-    // Data loading is not managed by image. Therefore, during component
-    // attribute initilizationm, the dirty node mark of image needs to
-    // be registered withe Drawable. Drawable triggers drawing again after
-    // data loading is complete.
-    RegisterDrawableRedrawCallback();
-}
-
-void ImagePattern::RegisterDrawableRedrawCallback()
-{
-    if (isRegisterRedrawCallback_) {
-        return;
-    }
-    CHECK_NULL_VOID(drawable_);
-    drawable_->RegisterRedrawCallback([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto context = pattern->GetContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = weak] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->Validate();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIImageDrawableMarkRender");
-    });
-    isRegisterRedrawCallback_ = true;
-}
-
-void ImagePattern::Validate()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("[Drawable][%d] validate callback", host->GetId());
-    // first mark dirty render
-    host->MarkNeedRenderOnly();
-    CHECK_NULL_VOID(contentMod_);
-    // because drawable is not a drawing attribute of the
-    // content modifier, redrawing cannot be trigged when
-    // drawable validates the content modifier. Therefore
-    // count attribute in the modifier needs to be used to
-    // forcibly refresh the content modifier.
-    contentMod_->SetContentChange();
-}
-
-ImagePaintConfig ImagePattern::CreatePaintConfig()
-{
-    ImagePaintConfig config;
-    auto lp = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(lp, config);
-    config.imageFit_ = lp->GetImageFit().value_or(ImageFit::COVER);
-    return config;
-}
-
-void ImagePattern::DrawDrawable(RSCanvas& canvas)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_SCOPED_TRACE("[Drawable][%d] draw to canvas", host->GetId());
-    CHECK_NULL_VOID(drawable_);
-    auto config = CreatePaintConfig();
-    drawable_->Draw(canvas, config);
 }
 
 std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()

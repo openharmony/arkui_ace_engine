@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,8 @@
 
 #include "image_source_ohos.h"
 
-#if defined(ACE_STATIC)
-#include "pixel_map_ohos.h"
-#endif
-
 #include "media_errors.h"
+#include "pixel_map_ohos.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -32,15 +29,15 @@ void InitDecodeOptions(Media::DecodeOptions& options, const std::pair<int32_t, i
         options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
     }
     if (photoDecodeFormat == PixelFormat::NV21) {
-        options.photoDesiredPixelFormat  = Media::PixelFormat::NV21;
+        options.photoDesiredPixelFormat = Media::PixelFormat::NV21;
     } else if (photoDecodeFormat == PixelFormat::RGBA_8888) {
-        options.photoDesiredPixelFormat  = Media::PixelFormat::RGBA_8888;
+        options.photoDesiredPixelFormat = Media::PixelFormat::RGBA_8888;
     } else if (photoDecodeFormat == PixelFormat::RGBA_1010102) {
-        options.photoDesiredPixelFormat  = Media::PixelFormat::RGBA_1010102;
+        options.photoDesiredPixelFormat = Media::PixelFormat::RGBA_1010102;
     } else if (photoDecodeFormat == PixelFormat::YCBCR_P010) {
-        options.photoDesiredPixelFormat  = Media::PixelFormat::YCBCR_P010;
+        options.photoDesiredPixelFormat = Media::PixelFormat::YCBCR_P010;
     } else if (photoDecodeFormat == PixelFormat::YCRCB_P010) {
-        options.photoDesiredPixelFormat  = Media::PixelFormat::YCRCB_P010;
+        options.photoDesiredPixelFormat = Media::PixelFormat::YCRCB_P010;
     }
     // Pass imageQuality to imageFramework
     options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
@@ -135,8 +132,7 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap()
     Media::DecodeOptions decodeOpts;
     auto pixelMap = imageSource_->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != Media::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "create PixelMap from ImageSource failed, errorCode = %{public}u", errorCode);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create PixelMap from ImageSource failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
     return PixelMap::Create(std::move(pixelMap));
@@ -153,7 +149,6 @@ ImageSource::Size ImageSourceOhos::GetImageSize()
     return { info.size.width, info.size.height };
 }
 
-#if defined(ACE_STATIC)
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const DecodeOptions& options)
 {
     uint32_t errorCode;
@@ -166,7 +161,6 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const DecodeOptions& options)
     }
     return PixelMap::Create(std::move(pixelmap));
 }
-#endif
 
 uint32_t ImageSourceOhos::GetFrameCount()
 {

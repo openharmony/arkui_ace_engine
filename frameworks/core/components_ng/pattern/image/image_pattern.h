@@ -21,7 +21,6 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/offset.h"
-#include "base/image/drawable_descriptor.h"
 #include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
@@ -390,19 +389,11 @@ public:
     }
     void AddPixelMapToUiManager();
 
-    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
-    {
-        drawable_ = drawable;
-    }
-
     // this method for measure content
     std::optional<SizeF> GetImageSizeForMeasure();
 
     // this method for on complete callback execute after measuring
     void FinishMeasureForOnComplete();
-
-    void DrawDrawable(RSCanvas& canvas);
-
     void OnConfigurationUpdate();
     void UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo);
     void UpdateImageFill(const Color& color);
@@ -447,10 +438,6 @@ private:
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
     void OnModifyDone() override;
-    void OnPixelMapDrawableModifyDone();
-    ImagePaintConfig CreatePaintConfig();
-    void Validate();
-    void RegisterDrawableRedrawCallback();
     void UpdateGestureAndDragWhenModify();
     bool CheckImagePrivacyForCopyOption();
     void UpdateOffsetForImageAnalyzerOverlay();
@@ -599,11 +586,6 @@ private:
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
-
-    // The component has an internal encapsulation class drawable of the image.
-    // The internal drawable has an external raw pointer.
-    RefPtr<DrawableDescriptor> drawable_;
-    bool isRegisterRedrawCallback_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
