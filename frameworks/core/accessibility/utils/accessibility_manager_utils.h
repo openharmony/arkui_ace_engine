@@ -79,13 +79,55 @@ public:
                 if (deleteController) {
                     controllerMap.erase(mapIt);
                 }
-                return true;
+                if (IsHighPriorityNode(frameNode)) {
+                    return true;
+                }
+                return CheckHighPriorityEmpty(containerId);
             }
         }
         return false;
     }
 
-    void DeleteInstanceNodeAll(const RefPtr<FrameNode>& frameNode)
+    bool IsHighPriorityNode(const RefPtr<FrameNode>& frameNode)
+    {
+        CHECK_NULL_RETURN(frameNode, false);
+        return frameNode->GetTag() == V2::WEB_ETS_TAG;
+    }
+
+    bool CheckHighPriorityEmpty(int32_t containerId)
+    {
+        auto it = controller_.find(containerId);
+        if (it == controller_.end()) {
+            return true;
+        }
+        auto& controllerMap = it->second;
+        auto findResult = std::any_of(controllerMap.begin(), controllerMap.end(), [&](const auto& pair) {
+            auto node = pair.first;
+            auto frameNode = node.Upgrade();
+            CHECK_NULL_RETURN(frameNode, false);
+            return IsHighPriorityNode(frameNode);
+        });
+        return !findResult;
+    }
+
+    void DeleteLowPriorityNode(int32_t containerId)
+    {
+        auto it = controller_.find(containerId);
+        if (it != controller_.end()) {
+            auto& controllerMap = it->second;
+            for (auto mapIt = controllerMap.begin(); mapIt != controllerMap.end();) {
+                auto node = mapIt->first;
+                auto frameNode = node.Upgrade();
+                if (frameNode && IsHighPriorityNode(frameNode)) {
+                    ++mapIt;
+                } else {
+                    mapIt = controllerMap.erase(mapIt);
+                }
+            }
+        }
+    }
+
+    void DeleteInstanceNodeAllWithPriority(const RefPtr<FrameNode>& frameNode)
     {
         CHECK_NULL_VOID(frameNode);
         auto pipeline = frameNode->GetContextRefPtr();
@@ -93,13 +135,10 @@ public:
         auto containerId = pipeline->GetInstanceId();
         auto it = controller_.find(containerId);
         if (it != controller_.end()) {
-            auto& controllerMap = it->second;
-            for (auto mapIt = controllerMap.begin(); mapIt != controllerMap.end();) {
-                if (WeakPtr(frameNode) == mapIt->first) {
-                    mapIt = controllerMap.erase(mapIt);
-                } else {
-                    ++mapIt;
-                }
+            if (IsHighPriorityNode(frameNode)) {
+                controller_.erase(it);
+            } else {
+                DeleteLowPriorityNode(containerId);
             }
         }
     }
