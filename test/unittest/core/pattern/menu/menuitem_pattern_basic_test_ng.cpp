@@ -323,6 +323,8 @@ HWTEST_F(MenuItemPatternBasicTestNg, AddSelectIcon003, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -679,7 +681,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, UpdateText003, TestSize.Level1)
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto itemEventHub = itemNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto itemEventHub = itemNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(itemEventHub, nullptr);
     itemEventHub->SetEnabled(false);
     // update item
@@ -760,7 +762,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, UpdateText005, TestSize.Level1)
     ASSERT_NE(itemNode, nullptr);
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto itemEventHub = itemNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto itemEventHub = itemNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(itemEventHub, nullptr);
     itemEventHub->SetEnabled(false);
     // update item
@@ -1083,7 +1085,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg019, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(menuItemEventHub, nullptr);
 
     bool isSelected = true;
@@ -1130,7 +1132,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg022, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(menuItemEventHub, nullptr);
 
     menuItemPattern->onClickAIMenuItem_ = []() {
@@ -1197,7 +1199,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg029, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(menuItemEventHub, nullptr);
     menuItemPattern->OnClick();
     ASSERT_TRUE(menuItemPattern->IsSelected());

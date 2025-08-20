@@ -520,7 +520,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
             []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(outerMenuNode, nullptr);
     auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
-
+ 
     auto jsViewNode = FrameNode::CreateFrameNode(
         V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(jsViewNode, nullptr);
@@ -529,27 +529,27 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
         V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(jsViewNode1, nullptr);
     jsViewNode1->MountToParent(jsViewNode);
-
+ 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
             []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
-
+ 
     auto menuItemNode =
         FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode, nullptr);
     menuItemNode->MountToParent(innerMenuNode);
-
+ 
     /**
      * @tc.steps: step2. get InnerMenuPattern
      */
     auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-
+ 
     /**
      * @tc.steps: step3. Call UpdateBorderRadius.
      * @tc.expected: the function runs normally
@@ -558,7 +558,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
     CalcDimension radiusDim(20.0f, DimensionUnit::VP);
     borderRadius.SetRadius(radiusDim);
     menuPattern->UpdateBorderRadius(innerMenuNode, borderRadius);
-
+ 
     auto menuRenderContext = innerMenuNode->GetRenderContext();
     ASSERT_NE(menuRenderContext, nullptr);
     EXPECT_EQ(menuRenderContext->GetBorderRadius(), borderRadius);
@@ -1337,7 +1337,6 @@ HWTEST_F(MenuPattern2TestNg, GetFirstMenuItem001, TestSize.Level1)
 
     auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
-    ASSERT_NE(menuPattern->GetFirstMenuItem(), nullptr);
     EXPECT_EQ(menuPattern->GetFirstMenuItem(), menuItemNode);
 }
 
