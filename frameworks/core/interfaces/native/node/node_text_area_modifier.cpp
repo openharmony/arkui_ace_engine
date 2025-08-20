@@ -773,7 +773,7 @@ ArkUI_Int32 GetTextAreaType(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetType(frameNode));
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetJSInputType(frameNode));
 }
 
 ArkUI_Int32 GetTextAreaTextAlign(ArkUINodeHandle node)
