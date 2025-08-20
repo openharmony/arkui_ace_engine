@@ -116,6 +116,7 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>&
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
 RefPtr<ResourceWrapper> CreateResourceWrapper();
 using PopupOnWillDismiss = std::function<void(int32_t)>;
+std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, int32_t nodeId);
 class JSViewAbstract {
 public:
     static RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
@@ -221,10 +222,10 @@ public:
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
-    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
-        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static bool ParseSheetIsShow(
         const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
+    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static void ParseSheetStyle(
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     static NG::SheetEffectEdge ParseSheetEffectEdge(const JSRef<JSObject>& paramObj);
@@ -252,8 +253,10 @@ public:
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
         std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
-        std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
-        std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack);
+        std::function<void(const float)>& onDetentsDidChange,
+        std::function<void(const float)>& onWidthDidChange,
+        std::function<void(const float)>& onTypeDidChange,
+        std::function<void()>& sheetSpringBack);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
