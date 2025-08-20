@@ -927,7 +927,7 @@ export class MultiNavPathStack extends NavPathStack {
     let oriStackSize = this.totalStack.length;
     console.log('removeByIndexes oriStackSize=' + oriStackSize);
     indexes.sort((a, b) => a - b);
-    let i: number = 0;
+    let i: int = 0;
     let currentStackInfoLength: number = 0;
     let outerIndexes: number[] = [];
     console.log('removeByIndexes this.subStackList.length=' + this.subStackList.length +
@@ -1159,7 +1159,7 @@ export class MultiNavPathStack extends NavPathStack {
       let currentPath = this.totalStack[totalSize - 1].navInfo;
       let secondaryStackSize: number[] = [];
       this.subStackList.forEach((subStack, index) => {
-        secondaryStackSize.push(this.subStackList[index].secondaryStack.size());
+        secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
       });
       let removeIndex = 0;
       for (let i = 0; i < subStackLength; i++) {
@@ -1198,7 +1198,7 @@ export class MultiNavPathStack extends NavPathStack {
       let currentPath = this.totalStack[totalSize - 1].navInfo;
       let secondaryStackSize: number[] = [];
       this.subStackList.forEach((subStack, index) => {
-        secondaryStackSize.push(this.subStackList[index].secondaryStack.size());
+        secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
       });
       let removeIndex = 0;
       for (let i = 0; i < subStackLength; i++) {
@@ -1246,7 +1246,7 @@ export class MultiNavPathStack extends NavPathStack {
     let currentPath = this.totalStack[totalSize - 1].navInfo;
     let secondaryStackSize: number[] = [];
     this.subStackList.forEach((subStack, index) => {
-      secondaryStackSize.push(this.subStackList[index].secondaryStack.size());
+      secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
     });
     let removeIndex = 0;
     for (let i = 0; i < subStackLength; i++) {
@@ -1286,7 +1286,7 @@ export class MultiNavPathStack extends NavPathStack {
     let currentPath = this.totalStack[totalSize - 1].navInfo;
     let secondaryStackSize: number[] = [];
     this.subStackList.forEach((subStack, index) => {
-      secondaryStackSize.push(this.subStackList[index].secondaryStack.size());
+      secondaryStackSize.push(this.subStackList[index.toInt()].secondaryStack.size());
     });
     let removeIndex = 0;
     for (let i = 0; i < subStackLength; i++) {
@@ -1323,7 +1323,7 @@ export class MultiNavPathStack extends NavPathStack {
     animated = typeof animated === 'undefined' ? true : animated
     result = typeof result === 'undefined' ? {} as Object : result
     console.log('MultiNavPathStack popToIndex clearTrashStack' + index);
-    for (let i = index; i < this.subStackList.length; i++) {
+    for (let i = index.toInt(); i < this.subStackList.length; i++) {
       console.log('MultiNavPathStack popToIndex subStackList' + index);
       this.subStackList[i].primaryStack.clear();
       this.subStackList[i].secondaryStack.clear();
@@ -1448,7 +1448,7 @@ export class MultiNavPathStack extends NavPathStack {
   public getParamByIndex(index: number): Object | undefined {
     let result: Object | undefined = undefined;
     if (index >= 0 && index < this.totalStack.length) {
-      result = this.totalStack[index].navInfo?.param as Object;
+      result = this.totalStack[index.toInt()].navInfo?.param as Object;
     }
     return result;
   }
@@ -1584,7 +1584,7 @@ export class MultiNavPathStack extends NavPathStack {
   }
 
   private removeFirstPlaceHolder(subIndex: number): void {
-    this.subStackList[subIndex].removeByIndexes([1]);
+    this.subStackList[subIndex.toInt()].removeByIndexes([1]);
     this.totalStack = [];
     this.subStackList.forEach((subStack) => {
       this.totalStack.push(...subStack.getPrimaryInfoList());
@@ -1593,12 +1593,12 @@ export class MultiNavPathStack extends NavPathStack {
   }
 
   private pushPlaceHolder(subIndex: number): void {
-    this.subStackList[subIndex].pushSecondaryPath(this.placeHolderPolicyInfo!, false);
+    this.subStackList[subIndex.toInt()].pushSecondaryPath(this.placeHolderPolicyInfo!, false);
     this.totalStack.push(this.placeHolderPolicyInfo!);
   }
 
   private popPlaceHolder(subIndex: number): void {
-    this.subStackList[subIndex].pop(false);
+    this.subStackList[subIndex.toInt()].pop(false);
     this.totalStack.pop();
     this.checkAndNotifyHomeChange();
   }

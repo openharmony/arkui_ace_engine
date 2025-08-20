@@ -1005,7 +1005,7 @@ export struct SubHeader {
                 icon: item.value as Resource,
                 symbolicIconOption: this.operationSymbolOptions &&
                   (this.operationSymbolOptions as SymbolOptions[]).length > index ?
-                (this.operationSymbolOptions as SymbolOptions[])[index] : null,
+                (this.operationSymbolOptions as SymbolOptions[])[index.toInt()] : null,
               },
               action: item.action,
               defaultFocus: item.defaultFocus,

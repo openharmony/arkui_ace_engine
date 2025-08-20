@@ -399,7 +399,7 @@ export class RenderNode implements MaterializedBase {
         if (index === -1) {
             return
         }
-        const child = this.childrenList[index]
+        const child = this.childrenList[index as int32]
         child.parentRenderNode = null
         this.childrenList.splice(index, 1)
         this.removeChild_serialize(node_casted)
@@ -412,7 +412,7 @@ export class RenderNode implements MaterializedBase {
     }
     public getChild(index: number): RenderNode | null {
         if (this.childrenList.length > index && index >= 0) {
-            return this.childrenList[index]
+            return this.childrenList[index as int32]
         }
         return null
     }
