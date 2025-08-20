@@ -70,7 +70,9 @@ import hilog from '@ohos.hilog'
             }
             staticValue.navigationId = navigationId.toString();
             let navPathStack = dynamicValue.getProperty("pathStack");
-            staticValue.pathStack = navPathStack.unwrap() as NavPathStack;
+            if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
+                staticValue.pathStack = navPathStack.unwrap() as NavPathStack;
+            }
             return staticValue;
         }
 

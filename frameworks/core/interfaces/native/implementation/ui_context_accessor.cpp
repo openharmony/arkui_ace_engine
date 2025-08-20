@@ -23,6 +23,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextAccessor {
@@ -87,6 +88,25 @@ Ark_Union_FrameNode_Undefined GetFrameNodeByUniqueIdImpl(Ark_UIContext peer,
                                                          const Ark_Number* id)
 {
     return {};
+}
+Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(const Ark_Number* instanceId,
+                                                              const Ark_Number* id)
+{
+    auto retVal = Converter::ArkValue<Opt_uiObserver_NavigationInfo>();
+    retVal.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+    CHECK_NULL_RETURN(instanceId, retVal);
+    CHECK_NULL_RETURN(id, retVal);
+    ContainerScope cope(Converter::Convert<int32_t>(*instanceId));
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, retVal);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationMgr, retVal);
+    auto nodeId = Converter::Convert<int32_t>(*id);
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    CHECK_NULL_RETURN(nodePtr, retVal);
+    auto result = navigationMgr->GetNavigationInfo(nodePtr);
+    CHECK_NULL_RETURN(result, retVal);
+    return Converter::ArkValue<Opt_uiObserver_NavigationInfo>(result);
 }
 Ark_Number Vp2pxImpl(Ark_UIContext peer,
                      const Ark_Number* value)
@@ -265,6 +285,7 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
         UIContextAccessor::GetFrameNodeByIdImpl,
         UIContextAccessor::GetAttachedFrameNodeByIdImpl,
         UIContextAccessor::GetFrameNodeByUniqueIdImpl,
+        UIContextAccessor::GetNavigationInfoByUniqueIdImpl,
         UIContextAccessor::Vp2pxImpl,
         UIContextAccessor::Px2vpImpl,
         UIContextAccessor::Fp2pxImpl,

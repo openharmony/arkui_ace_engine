@@ -74,6 +74,7 @@ import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { CommonMethodHandWritten } from "./CommonHandWritten"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
+import { uiObserver } from "@ohos/arkui/observer"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1432,6 +1433,13 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
+    public getNavigationInfoByUniqueId(id: number): uiObserver.NavigationInfo | undefined {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const id_casted = id as (number)
+        let ret = this.getNavigationInfoByUniqueId_serialize(id_casted)
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return ret;
+    }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
@@ -1574,6 +1582,24 @@ export class UIContextImpl extends UIContext {
         ArkUIGeneratedNativeModule._SystemOps_setFrameCallback(thisSerializer.asBuffer(),
                                                                thisSerializer.length(), delayTime)
         thisSerializer.release()
+    }
+    private getNavigationInfoByUniqueId_serialize(id: number): uiObserver.NavigationInfo | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._UIContext_getNavigationInfoByUniqueId(this.instanceId_, id) as FixedArray<byte>;
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = retvalDeserializer.readInt8() as int32
+        let buffer : uiObserver.NavigationInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readNavigationInfo()
+        }
+        const returnResult : uiObserver.NavigationInfo | undefined = buffer
+        return returnResult
     }
     runScopedTask(callback: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
