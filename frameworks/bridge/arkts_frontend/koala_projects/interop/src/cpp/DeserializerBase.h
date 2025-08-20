@@ -115,7 +115,7 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
 
   int autoUnitValue = 5;
   if (suffixPtr[indexFirst] == 'a' && suffixPtr[indexSecond] == 'u' &&
-      suffixPtr[indexThird] == 't' && suffixPtr[indexFourth] == 'o')
+    suffixPtr[indexThird] == 't' && suffixPtr[indexFourth] == 'o')
   {
       result->unit = autoUnitValue;
       return;
