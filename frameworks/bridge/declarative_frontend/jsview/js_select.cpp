@@ -570,7 +570,7 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resObj;
-    bool isValidValue = true;
+    bool isNormal = true;
     if (!ParseJsColor(info[0], textColor, resObj)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -578,13 +578,13 @@ void JSSelect::OptionFontColor(const JSCallbackInfo& info)
             auto theme = pipeline->GetTheme<SelectTheme>();
             CHECK_NULL_VOID(theme);
             textColor = theme->GetMenuFontColor();
-            isValidValue = false;
+            isNormal = false;
         } else {
             return;
         }
     }
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetOptionFontColorByUser(isValidValue);
+        SelectModel::GetInstance()->SetOptionFontColorByUser(isNormal);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::OPTION_FONT_COLOR);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set option font color %{public}s", textColor.ColorToString().c_str());
@@ -897,7 +897,7 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
         menuBackgroundColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetMenuBackgroundColorByUser(true);
+        SelectModel::GetInstance()->SetMenuBackgroundColorByUser();
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::MENU_BACKGROUND_COLOR);
     }
 }
