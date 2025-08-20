@@ -24,6 +24,14 @@ void CountLimitLRU::CacheWithCountLimitLRU(const std::string& key, const T& cach
 {
     auto iter = cache.find(key);
     if (iter == cache.end()) {
+        // If capacity is zero, ensure cache is empty and skip insert.
+        if (capacity == 0) {
+            if (!cacheList.empty()) {
+                cache.clear();
+                cacheList.clear();
+            }
+            return;
+        }
         if (cache.size() == capacity) {
             cache.erase(cacheList.back().cacheKey);
             cacheList.pop_back();

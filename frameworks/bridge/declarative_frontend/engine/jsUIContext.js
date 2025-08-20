@@ -311,6 +311,10 @@ class UIContext {
         }
     }
 
+    static setResourceManagerCacheMaxCountForHSP(count) {
+        getUINativeModule().resource.setResourceManagerCacheMaxCountForHSP(count);
+    }
+
     getDragController() {
         this.dragController_ = new DragController(this.instanceId_);
         return this.dragController_;

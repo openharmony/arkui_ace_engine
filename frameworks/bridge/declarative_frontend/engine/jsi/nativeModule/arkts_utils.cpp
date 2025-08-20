@@ -2490,6 +2490,16 @@ void ArkTSUtils::ThrowError(const EcmaVM* vm, const std::string& msg, int32_t co
     panda::JSNApi::ThrowException(vm, errorObj);
 }
 
+void ArkTSUtils::ThrowBusinessError(const EcmaVM* vm, const std::string& msg, int32_t code)
+{
+    auto errorVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, msg.c_str()));
+    auto codeVal = panda::NumberRef::New(vm, static_cast<int32_t>(code));
+    Local<panda::StringRef> codeKey = panda::StringRef::NewFromUtf8(vm, "code");
+    Local<panda::ObjectRef> errorObj(errorVal);
+    errorObj->Set(vm, codeKey, codeVal);
+    panda::JSNApi::ThrowException(vm, errorObj);
+}
+
 Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
     ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes)
 {
