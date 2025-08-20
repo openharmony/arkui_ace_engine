@@ -681,17 +681,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Get",
-            "Lstd/core/String;:Lstd/core/String;",
+            "Lstd/core/String;Lstd/core/Int;:Lstd/core/String;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-            "Lstd/core/String;Lstd/core/String;:V",
+            "Lstd/core/String;Lstd/core/String;Lstd/core/Int;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
             "_PersistentStorage_Has",
-            "Lstd/core/String;:Z",
+            "Lstd/core/String;Lstd/core/Int;:Z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
         },
         ani_native_function {
@@ -701,7 +701,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Delete",
-            "Lstd/core/String;:V",
+            "Lstd/core/String;Lstd/core/Int;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
         },
         ani_native_function {

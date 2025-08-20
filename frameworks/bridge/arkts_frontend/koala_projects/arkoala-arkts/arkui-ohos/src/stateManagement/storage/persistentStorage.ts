@@ -100,19 +100,19 @@ class TypedMap {
 
 export class AniStorage implements IAniStorage {
     get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined {
-        return ArkUIAniModule._PersistentStorage_Get(key);
+        return ArkUIAniModule._PersistentStorage_Get(key, areaMode);
     }
     set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Set(key, val);
+        ArkUIAniModule._PersistentStorage_Set(key, val, areaMode);
     }
     has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean {
-        return ArkUIAniModule._PersistentStorage_Has(key);
+        return ArkUIAniModule._PersistentStorage_Has(key, areaMode);
     }
     clear(): void {
         ArkUIAniModule._PersistentStorage_Clear();
     }
     delete(key: string, areaMode: AreaMode = AreaMode.EL2): void {
-        ArkUIAniModule._PersistentStorage_Delete(key);
+        ArkUIAniModule._PersistentStorage_Delete(key, areaMode);
     }
 }
 

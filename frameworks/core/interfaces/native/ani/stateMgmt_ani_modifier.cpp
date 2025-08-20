@@ -28,14 +28,14 @@
 
 namespace OHOS::Ace::NG {
 
-std::string PersistentStorageGet(const std::string& key)
+std::string PersistentStorageGet(const std::string& key, const int32_t areaMode)
 {
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return "";
 #endif
-    auto storage = StorageProxy::GetInstance()->GetStorage();
+    auto storage = StorageProxy::GetInstance()->GetStorage(areaMode);
     if (!storage) {
         LOGW("no storage available");
         return "";
@@ -48,50 +48,50 @@ std::string PersistentStorageGet(const std::string& key)
     return value;
 }
 
-void PersistentStorageSet(const std::string& key, const std::string& value)
+void PersistentStorageSet(const std::string& key, const std::string& value, const int32_t areaMode)
 {
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage()->SetString(key, value);
+    StorageProxy::GetInstance()->GetStorage(areaMode)->SetString(key, value);
 }
 
-bool PersistentStorageHas(const std::string& key)
+bool PersistentStorageHas(const std::string& key, const int32_t areaMode)
 {
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return false;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return false;
     }
-    std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage(areaMode)->GetString(key);
     if (!value.empty()) {
         return true;
     }
     return false;
 }
 
-void PersistentStorageDelete(const std::string& key)
+void PersistentStorageDelete(const std::string& key, const int32_t areaMode)
 {
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
 #endif
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage()->Delete(key);
+    StorageProxy::GetInstance()->GetStorage(areaMode)->Delete(key);
 }
 
 void PersistentStorageClear()
