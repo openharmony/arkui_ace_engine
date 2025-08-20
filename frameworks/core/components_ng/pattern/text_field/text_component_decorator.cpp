@@ -26,6 +26,7 @@ namespace {
 
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
+constexpr int32_t CONSTANT_TWO_FOR_CENTER = 2;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
 
@@ -190,7 +191,6 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
                                 theme->GetOverCountTextStyle() :
                                 theme->GetCountTextStyle();
     counterNodeLayoutProperty->UpdateContent(counterText);
-    
     if (textFieldLayoutProperty->HasMaxFontScale()) {
         auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value();
         counterNodeLayoutProperty->UpdateMaxFontScale(maxFontScale);
@@ -357,10 +357,12 @@ void CounterDecorator::HandleNonTextArea()
     CHECK_NULL_VOID(pipeline);
     auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
+    auto decoratedGeometryNode = decoratedNode->GetGeometryNode();
+    CHECK_NULL_VOID(decoratedGeometryNode);
 
     bool isRTL = decoratedNodeProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    RectF frameRect = decoratedNode->GetGeometryNode()->GetFrameRect();
-    RectF contentRect = decoratedNode->GetGeometryNode()->GetContentRect();
+    RectF frameRect = decoratedGeometryNode->GetFrameRect();
+    RectF contentRect = decoratedGeometryNode->GetContentRect();
     float countX = contentRect.GetX();
     auto responseArea = textFieldPattern->GetResponseArea();
     auto cleanNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
@@ -644,7 +646,7 @@ void ErrorDecorator::LayoutDecorator()
         offSetX += textFieldContentRect.Width() - textFrameWidth;
     }
     if (theme->GetErrorTextAlign() == TextAlign::CENTER) {
-        offSetX = (textFieldGeometryNode->GetFrameRect().Width() - textFrameWidth) / 2;
+        offSetX = (textFieldGeometryNode->GetFrameRect().Width() - textFrameWidth) / CONSTANT_TWO_FOR_CENTER;
     }
     textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));
     textNode->Layout();

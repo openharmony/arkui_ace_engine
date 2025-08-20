@@ -640,8 +640,8 @@ void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
     paragraph->Paint(canvas, textRectX, contentOffset.GetY());
     canvas.Restore();
 
-    auto textWidth = paragraph->GetTextWidth();
     auto textIndent = std::max(textFieldPattern->GetTextParagraphIndent(), 0.0f);
+    auto textWidth = paragraph->GetTextWidth();
     if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
         leftFadeOn = LessNotEqual(textRectX + MIN_TEXTFADEOUT_DELTA, contentRectX);
         rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent - MIN_TEXTFADEOUT_DELTA), contentRect.Right());
