@@ -110,7 +110,7 @@ private:
     void CalcFlexGrowLayout(
         const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
 
-    void UpdatePercentSensitive(LayoutWrapper *layoutWrapper);
+    void UpdatePercentSensitive(LayoutWrapper *layoutWrapper, bool usingWidthPercent, bool usingHeightPercent);
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;
@@ -133,6 +133,8 @@ private:
     OffsetF frameOffset_;
     bool hasIdealWidth_ = false;
     bool hasIdealHeight_ = false;
+    bool isHeightPercentSensitive_ = false;
+    bool isWidthPercentSensitive_ = false;
 
     // Should be clear after Layout.
     std::list<ContentInfo> contentList_;

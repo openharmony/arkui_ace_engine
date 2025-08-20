@@ -206,6 +206,7 @@ void FlexLayoutAlgorithm::CheckBaselineProperties(const RefPtr<LayoutWrapper>& l
  */
 void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 {
+    isUsingPercentReference_ = false;
     mainAxisSize_ = 0.0f;
     crossAxisSize_ = 0.0f;
     allocatedSize_ = 0.0f;
@@ -590,6 +591,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
          * If the total main axis size of the element is larger than the main axis size of Flex, the lower priority
          * element will be deleted.
          */
+        UpdatePercentSensitive(containerLayoutWrapper);
         auto firstLoopIter = FirstMeasureInWeightMode();
         SecondMeasureInWeightMode(firstLoopIter);
         FinalMeasureInWeightMode();
@@ -614,6 +616,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
                 if (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(containerLayoutWrapper), 0.0f)) {
+                    UpdatePercentSensitive(containerLayoutWrapper);
                     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
@@ -995,6 +998,16 @@ void FlexLayoutAlgorithm::CheckMainAxisSizeAuto(
     }
 }
 
+void FlexLayoutAlgorithm::UpdatePercentSensitive(LayoutWrapper* layoutWrapper)
+{
+    CHECK_EQUAL_VOID(isUsingPercentReference_, false);
+    if (IsHorizontal(direction_)) {
+        SetWidthPercentSensitive(layoutWrapper);
+        return;
+    }
+    SetHeightPercentSensitive(layoutWrapper);
+}
+
 void FlexLayoutAlgorithm::SetInitMainAxisSize(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -1019,6 +1032,7 @@ void FlexLayoutAlgorithm::SetInitMainAxisSize(LayoutWrapper* layoutWrapper)
                 IsHorizontal(direction_)
                     ? (mainAxisInf ? layoutConstraint->percentReference.Width() : layoutConstraint->maxSize.Width())
                     : (mainAxisInf ? layoutConstraint->percentReference.Height() : layoutConstraint->maxSize.Height());
+            isUsingPercentReference_ = mainAxisInf;
         }
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }

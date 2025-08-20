@@ -52,13 +52,15 @@ bool IsColumnReverse(WrapDirection direction)
     }
 }
 
-void WrapLayoutAlgorithm::UpdatePercentSensitive(LayoutWrapper *layoutWrapper)
+void WrapLayoutAlgorithm::UpdatePercentSensitive(
+    LayoutWrapper *layoutWrapper, bool usingWidthPercent, bool usingHeightPercent)
 {
-    CHECK_NULL_VOID(layoutWrapper && layoutWrapper->GetHostTag() == V2::FLEX_ETS_TAG);
-    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    layoutAlgorithmWrapper->SetPercentWidth(true);
-    layoutAlgorithmWrapper->SetPercentHeight(true);
+    if (usingWidthPercent) {
+        SetWidthPercentSensitive(layoutWrapper);
+    }
+    if (usingHeightPercent) {
+        SetHeightPercentSensitive(layoutWrapper);
+    }
 }
 
 void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -72,7 +74,6 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     outOfLayoutChildren_.clear();
     auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
-    UpdatePercentSensitive(layoutWrapper);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
     // alignment for alignContent, alignment when cross axis has extra space
     alignment_ = flexProp->GetAlignment().value_or(WrapAlignment::START);
@@ -89,6 +90,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isRightDirection_ = textDir_ == TextDirection::RTL;
     isColumnReverse_ = IsColumnReverse(direction_);
     PerformLayoutInitialize(flexProp);
+    UpdatePercentSensitive(layoutWrapper, isWidthPercentSensitive_, isHeightPercentSensitive_);
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
     auto realMaxSize = GetLeftSize(0.0f, mainLengthLimit_, crossLengthLimit_);
@@ -284,6 +286,8 @@ void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& 
             mainLengthLimit_ = std::min(constraint->maxSize.Height(), constraint->percentReference.Height());
             crossLengthLimit_ = std::min(constraint->maxSize.Width(), constraint->percentReference.Width());
         }
+        isWidthPercentSensitive_ = GreaterOrEqualToInfinity(constraint->maxSize.Width());
+        isHeightPercentSensitive_ = GreaterOrEqualToInfinity(constraint->maxSize.Height());
     } else {
         if (isHorizontal_) {
             mainLengthLimit_ = constraint->maxSize.Width();
