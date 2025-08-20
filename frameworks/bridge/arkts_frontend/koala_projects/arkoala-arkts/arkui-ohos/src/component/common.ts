@@ -1290,7 +1290,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 }
 export class ProgressMaskInternal {
     public static fromPtr(ptr: KPointer): ProgressMask {
-        const obj : ProgressMask = new ProgressMask(undefined, undefined, undefined)
+        const obj : ProgressMask = new ProgressMask()
         obj.peer = new Finalizable(ptr, ProgressMask.getFinalizer())
         return obj
     }
@@ -1328,12 +1328,11 @@ export class ProgressMask implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(value?: number, total?: number, color?: ResourceColor) {
-        if (((value) !== (undefined)) || ((total) !== (undefined)) || ((color) !== (undefined)))
-        {
-            const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
-            this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
-        }
+    constructor(value: number, total: number, color: ResourceColor) {
+        const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
+        this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
+    }
+    constructor() {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ProgressMask_getFinalizer()
@@ -4386,28 +4385,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_aspectRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    clickEffect0Attribute(value: ClickEffect | undefined): void {
+    clickEffect0Attribute(value: ClickEffect | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
+        if (value !== null) {
+            value_type = runtimeType(value)
+        }
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeClickEffect(value_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_clickEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    clickEffect1Attribute(value: ClickEffect | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeClickEffect(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_clickEffect1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
@@ -4902,39 +4891,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_maskShape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    maskShape1Attribute(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (TypeChecker.isCircleShape(value_value)) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as CircleShape
-                thisSerializer.writeCircleShape(value_value_0)
-            }
-            else if (TypeChecker.isEllipseShape(value_value)) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as EllipseShape
-                thisSerializer.writeEllipseShape(value_value_1)
-            }
-            else if (TypeChecker.isPathShape(value_value)) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as PathShape
-                thisSerializer.writePathShape(value_value_2)
-            }
-            else if (TypeChecker.isRectShape(value_value)) {
-                thisSerializer.writeInt8(3 as int32)
-                const value_value_3  = value_value as RectShape
-                thisSerializer.writeRectShape(value_value_3)
-            }
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_maskShape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     keyAttribute(value: string | undefined): void {
@@ -8137,7 +8093,7 @@ export interface CommonMethod {
         return this;
     }
     aspectRatio(value: number | undefined): this {return this;}
-    clickEffect(value: ClickEffect | undefined): this {return this;}
+    clickEffect(value: ClickEffect | null | undefined): this {return this;}
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
     onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
     onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
@@ -8727,7 +8683,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public aspectRatio(value: number | undefined): this {
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         return this
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
@@ -10464,20 +10420,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         if (this.checkPriority("clickEffect")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ClickEffect | undefined)
-                this.getPeer()?.clickEffect1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (ClickEffect | null | undefined)
+            this.getPeer()?.clickEffect0Attribute(value_casted)
         }
         return this
     }
@@ -10964,18 +10910,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public renderFit(value: RenderFit | undefined): this {
         if (this.checkPriority("renderFit")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (RenderFit | undefined)
-                this.getPeer()?.renderFit1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (RenderFit | undefined)
+            this.getPeer()?.renderFit0Attribute(value_casted)
+            return this
         }
         return this
     }
