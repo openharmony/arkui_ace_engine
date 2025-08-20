@@ -222,6 +222,9 @@ export interface TabBarOptions {
 }
 export type TabContentInterface = () => TabContentAttribute;
 export interface TabContentAttribute extends CommonMethod {
+    setTabContentOptions(): this {
+        return this
+    }
     tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle | ComponentContent | undefined): this
     onWillShow(value: VoidCallback | undefined): this
     onWillHide(value: VoidCallback | undefined): this
@@ -231,6 +234,9 @@ export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabConte
     tabBar_value?: string | Resource | CustomBuilder | TabBarOptions | undefined
     onWillShow_value?: VoidCallback | undefined
     onWillHide_value?: VoidCallback | undefined
+    public setTabContentOptions(): this {
+        return this
+    }
     public tabBar(value: string | Resource | CustomBuilder | TabBarOptions | SubTabBarStyle | BottomTabBarStyle | ComponentContent | undefined): this {
         return this
     }
@@ -304,10 +310,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function TabContent(
+export function TabContentImpl(
     /** @memo */
     style: ((attributes: TabContentAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -315,10 +320,8 @@ export function TabContent(
         return new ArkTabContentComponent()
     })
     NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (_: ArkTabContentPeer) => {
-        receiver.setTabContentOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class SubTabBarStyle {

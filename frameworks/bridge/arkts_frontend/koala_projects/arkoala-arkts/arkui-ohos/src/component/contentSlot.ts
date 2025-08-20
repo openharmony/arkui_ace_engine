@@ -20,7 +20,11 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Content } from "../Content"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 
-export interface ContentSlotAttribute {
+export interface ContentSlotAttribute extends CommonMethod {
+    setContentSlotOptions(content?: Content): this {
+        return this
+    }
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;

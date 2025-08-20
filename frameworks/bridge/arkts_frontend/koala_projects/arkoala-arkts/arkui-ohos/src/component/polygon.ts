@@ -82,10 +82,16 @@ export interface PolygonOptions {
 export type PolygonInterface = (options?: PolygonOptions) => PolygonAttribute;
 export interface PolygonAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
+    setPolygonOptions(options?: PolygonOptions): this {
+        return this
+    }
     attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements PolygonAttribute {
     points_value?: Array<ShapePoint> | undefined
+    public setPolygonOptions(options?: PolygonOptions): this {
+        return this
+    }
     public points(value: Array<ShapePoint> | undefined): this {
         return this
         }
@@ -122,10 +128,9 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
     }
 }
 /** @memo */
-export function Polygon(
+export function PolygonImpl(
     /** @memo */
     style: ((attributes: PolygonAttribute) => void) | undefined,
-    options?: PolygonOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -133,9 +138,7 @@ export function Polygon(
         return new ArkPolygonComponent()
     })
     NodeAttach<ArkPolygonPeer>((): ArkPolygonPeer => ArkPolygonPeer.create(receiver), (_: ArkPolygonPeer) => {
-        receiver.setPolygonOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -21,13 +21,13 @@ import { KPointer } from '@koalaui/interop';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
-import { LazyForEachImpl } from './LazyForEachImpl';
+import { LazyForEachImplForOptions } from './LazyForEachImpl';
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
 
 /** @memo:intrinsic */
-export function RepeatImpl<T>(
+export function RepeatImplForOptions<T>(
     /** @memo */
     style: ((attributes: RepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
@@ -151,6 +151,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
 const RepeatEachFuncType: string = '';
 
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
+    arr: RepeatArray<T> = [];
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
     templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
@@ -161,6 +162,9 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
+    setRepeatOptions(arr: RepeatArray<T>): this {
+        return this;
+    }
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
@@ -254,7 +258,7 @@ function virtualRender<T>(
             itemBuilder(ri);
         }
     };
-    LazyForEachImpl<T>(dataSource, itemGen, attributes.keyGenFunc_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_);
 }
 
 /** @memo */

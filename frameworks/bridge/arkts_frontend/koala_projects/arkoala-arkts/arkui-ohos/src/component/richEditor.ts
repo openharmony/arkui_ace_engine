@@ -939,6 +939,9 @@ export type Callback_RichEditorChangeValue_Boolean = (parameter: RichEditorChang
 export type Callback_CutEvent_Void = (parameter: CutEvent) => void;
 export type Callback_CopyEvent_Void = (parameter: CopyEvent) => void;
 export interface RichEditorAttribute extends CommonMethod {
+    setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
+        return this
+    }
     onReady(value: (() => void) | undefined): this
     onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this
     onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this
@@ -1005,6 +1008,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: number | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    public setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
+        return this
+    }
     public onReady(value: (() => void) | undefined): this {
         return this
     }
@@ -1420,10 +1426,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function RichEditor(
+export function RichEditorImpl(
     /** @memo */
     style: ((attributes: RichEditorAttribute) => void) | undefined,
-    value: RichEditorOptions | RichEditorStyledStringOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1431,10 +1436,8 @@ export function RichEditor(
         return new ArkRichEditorComponent()
     })
     NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer) => {
-        receiver.setRichEditorOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class RichEditorControllerInternal {

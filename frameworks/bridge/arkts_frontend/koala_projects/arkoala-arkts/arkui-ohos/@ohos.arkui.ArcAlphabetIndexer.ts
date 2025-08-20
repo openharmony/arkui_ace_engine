@@ -121,6 +121,9 @@ export class ArkArcAlphabetIndexerPeer extends ArkCommonMethodPeer {
 }
 
 export interface ArcAlphabetIndexerAttribute extends CommonMethod {
+    setConstructInfo(info: ArcAlphabetIndexerInitInfo): this {
+        return this
+    }
     color(color: ColorMetrics | undefined): this;
     selectedColor(color: ColorMetrics | undefined): this;
     popupColor(color: ColorMetrics | undefined): this;
@@ -142,10 +145,11 @@ export class ArkArcAlphabetIndexerComponent extends ArkCommonMethodComponent imp
         return (this.peer as ArkArcAlphabetIndexerPeer)
     }
 
-    public setConstructInfo(info: ArcAlphabetIndexerInitInfo): void {
+    public setConstructInfo(info: ArcAlphabetIndexerInitInfo): this {
         if (this.checkPriority("setConstructInfo")) {
             this.getPeer()?.setConstructInfoAttribute(info)
         }
+        return this
     }
 
     public color(color: ColorMetrics | undefined): this {
@@ -258,10 +262,9 @@ export class ArkArcAlphabetIndexerComponent extends ArkCommonMethodComponent imp
 }
 
 /** @memo */
-export function ArcAlphabetIndexer(
+export function ArcAlphabetIndexerImpl(
     /** @memo */
     style: ((attributes: ArcAlphabetIndexerAttribute) => void) | undefined,
-    info: ArcAlphabetIndexerInitInfo,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -269,9 +272,7 @@ export function ArcAlphabetIndexer(
         return new ArkArcAlphabetIndexerComponent()
     })
     NodeAttach<ArkArcAlphabetIndexerPeer>((): ArkArcAlphabetIndexerPeer => ArkArcAlphabetIndexerPeer.create(receiver), (_: ArkArcAlphabetIndexerPeer) => {
-        receiver.setConstructInfo(info)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

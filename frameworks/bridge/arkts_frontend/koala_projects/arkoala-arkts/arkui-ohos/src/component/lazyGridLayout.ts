@@ -107,10 +107,16 @@ export class ArkLazyGridLayoutStyle extends ArkCommonMethodStyle implements Lazy
         }
 }
 export interface LazyVGridLayoutAttribute extends LazyGridLayoutAttribute {
+    setLazyVGridLayoutOptions(): this {
+        return this
+    }
     columnsTemplate(value: string | undefined): this
 }
 export class ArkLazyVGridLayoutStyle extends ArkLazyGridLayoutStyle implements LazyVGridLayoutAttribute {
     columnsTemplate_value?: string | undefined
+    public setLazyVGridLayoutOptions(): this {
+        return this
+    }
     public columnsTemplate(value: string | undefined): this {
         return this
         }
@@ -167,10 +173,9 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutComponent impl
     }
 }
 /** @memo */
-export function LazyVGridLayout(
+export function LazyVGridLayoutImpl(
     /** @memo */
     style: ((attributes: LazyVGridLayoutAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -178,9 +183,7 @@ export function LazyVGridLayout(
         return new ArkLazyVGridLayoutComponent()
     })
     NodeAttach<ArkLazyVGridLayoutPeer>((): ArkLazyVGridLayoutPeer => ArkLazyVGridLayoutPeer.create(receiver), (_: ArkLazyVGridLayoutPeer) => {
-        receiver.setLazyVGridLayoutOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

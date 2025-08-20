@@ -126,6 +126,9 @@ export interface OnFoldStatusChangeInfo {
 export type OnFoldStatusChangeCallback = (event: OnFoldStatusChangeInfo) => void;
 export type OnHoverStatusChangeCallback = (param: HoverEventParam) => void;
 export interface FolderStackAttribute extends CommonMethod {
+    setFolderStackOptions(options?: FolderStackOptions): this {
+        return this
+    }
     alignContent(value: Alignment | undefined): this {return this;}
     onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {return this;}
     onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {return this;}
@@ -139,6 +142,9 @@ export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderS
     onHoverStatusChange_value?: OnHoverStatusChangeCallback | undefined
     enableAnimation_value?: boolean | undefined
     autoHalfFold_value?: boolean | undefined
+    public setFolderStackOptions(options?: FolderStackOptions): this {
+        return this
+    }
     public alignContent(value: Alignment | undefined): this {
         return this
     }
@@ -226,10 +232,9 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function FolderStack(
+export function FolderStackImpl(
     /** @memo */
     style: ((attributes: FolderStackAttribute) => void) | undefined,
-    options?: FolderStackOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -237,9 +242,7 @@ export function FolderStack(
         return new ArkFolderStackComponent()
     })
     NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (_: ArkFolderStackPeer) => {
-        receiver.setFolderStackOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

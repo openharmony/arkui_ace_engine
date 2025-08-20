@@ -1282,8 +1282,7 @@ export class Deserializer extends DeserializerBase {
         throw new Error("Interface with functions is not supported")
     }
     readWithThemeAttribute(): WithThemeAttribute {
-        let value : WithThemeAttribute = ({} as WithThemeAttribute)
-        return value
+        throw new Error("Interface with functions is not supported")
     }
     readWorkerEventListener(): WorkerEventListener {
         let valueDeserializer : Deserializer = this

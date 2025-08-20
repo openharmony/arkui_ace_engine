@@ -359,6 +359,9 @@ export interface ButtonLabelStyle {
 }
 
 export interface ButtonAttribute extends CommonMethod {
+    setButtonOptions(label?: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
+        return this
+    }
     type(value: ButtonType | undefined): this {return this;}
     stateEffect(value: boolean | undefined): this { return this;}
     buttonStyle(value: ButtonStyleMode | undefined): this { return this;}
@@ -391,6 +394,9 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     labelStyle_value?: ButtonLabelStyle | undefined
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
+    public setButtonOptions(label?: ButtonOptions | ResourceStr, options?: ButtonOptions): this {
+        return this
+    }
     public type(value: ButtonType | undefined): this {
         return this
     }
@@ -583,10 +589,9 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
     }
 }
 /** @memo */
-export function Button(
+export function ButtonImpl(
     /** @memo */
     style: ((attributes: ButtonAttribute) => void) | undefined,
-    label?: ButtonOptions | ResourceStr, options?: ButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -594,9 +599,7 @@ export function Button(
         return new ArkButtonComponent()
     })
     NodeAttach<ArkButtonPeer>((): ArkButtonPeer => ArkButtonPeer.create(receiver), (_: ArkButtonPeer) => {
-        receiver.setButtonOptions(label,options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -81,8 +81,14 @@ export interface BadgeParamWithString extends BadgeParam {
     value: string;
 }
 export interface BadgeAttribute extends CommonMethod {
+    setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
+        return this
+    }
 }
 export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribute {
+    public setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
+        return this
+    }
 }
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
     getPeer(): ArkBadgePeer {
@@ -111,10 +117,9 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
     }
 }
 /** @memo */
-export function Badge(
+export function BadgeImpl(
     /** @memo */
     style: ((attributes: BadgeAttribute) => void) | undefined,
-    value: BadgeParamWithNumber | BadgeParamWithString,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -122,9 +127,7 @@ export function Badge(
         return new ArkBadgeComponent()
     })
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer) => {
-        receiver.setBadgeOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -306,6 +306,9 @@ export interface WaterFlowOptions {
 }
 export type WaterFlowInterface = (options?: WaterFlowOptions) => WaterFlowAttribute;
 export interface WaterFlowAttribute extends ScrollableCommonMethod {
+    setWaterFlowOptions(options?: WaterFlowOptions): this {
+        return this
+    }
     columnsTemplate(value: string | undefined): this { return this; }
     itemConstraintSize(value: ConstraintSizeOptions | undefined): this { return this; }
     rowsTemplate(value: string | undefined): this { return this; }
@@ -337,6 +340,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
+    public setWaterFlowOptions(options?: WaterFlowOptions): this {
+        return this
+    }
     public columnsTemplate(value: string | undefined): this {
         return this
     }
@@ -564,10 +570,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     }
 }
 /** @memo */
-export function WaterFlow(
+export function WaterFlowImpl(
     /** @memo */
     style: ((attributes: WaterFlowAttribute) => void) | undefined,
-    options?: WaterFlowOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -575,9 +580,7 @@ export function WaterFlow(
         return new ArkWaterFlowComponent()
     })
     NodeAttach<ArkWaterFlowPeer>((): ArkWaterFlowPeer => ArkWaterFlowPeer.create(receiver), (_: ArkWaterFlowPeer) => {
-        receiver.setWaterFlowOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

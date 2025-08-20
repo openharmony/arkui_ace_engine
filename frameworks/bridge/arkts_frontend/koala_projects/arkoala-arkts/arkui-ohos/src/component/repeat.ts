@@ -16,8 +16,10 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { __context, __id } from '@koalaui/runtime';
-import { RepeatImpl } from '../handwritten/RepeatImpl';
+import { __context, __id, remember } from '@koalaui/runtime';
+import { RepeatImplForOptions } from '../handwritten/RepeatImpl';
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from './common';
+import { InteropNativeModule } from "@koalaui/interop";
 
 export interface RepeatItem<T> {
     readonly item: T;
@@ -42,19 +44,55 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface RepeatAttribute<T> {
+export interface RepeatAttribute<T> extends CommonMethod {
+    arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
     key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
     virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
     template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
     templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
+    setRepeatOptions(arr: RepeatArray<T>): this {
+        return this;
+    }
 }
 
+// export class ArkRepeatStyle<T> extends ArkCommonMethodStyle implements RepeatAttribute<T> {
+//     public arr: RepeatArray<T> = [];
+//     public setRepeatOptions(arr: RepeatArray<T>): this {
+//         this.arr = arr;
+//         return this;
+//     }
+// }
+export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements RepeatAttribute<T> {
+    public arr: RepeatArray<T> = [];
+    public setRepeatOptions(arr: RepeatArray<T>): this {
+    this.arr = arr;
+        return this;
+    }
+    public each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T> {
+        return this;
+    };
+    public key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T> {
+        return this;
+    };
+    public virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T> {
+        return this;
+    };
+    public template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T> {
+        return this;
+    };
+    public templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T> {
+        return this;
+    };
+}
 /** @memo */
-export function Repeat<T>(
+export function RepeatImpl<T>(
     /** @memo */
     style: ((attributes: RepeatAttribute<T>) => void) | undefined,
-    arr: RepeatArray<T>
 ): void {
-    RepeatImpl<T>(style, arr);
+    const receiver = remember(() => {
+        return new ArkRepeatComponent<T>()
+    })
+    style?.(receiver)
+    RepeatImplForOptions<T>(style, receiver.arr);
 }

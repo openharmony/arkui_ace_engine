@@ -416,6 +416,9 @@ export type Callback_FullscreenInfo_Void = (parameter: FullscreenInfo) => void;
 export type Callback_PreparedInfo_Void = (parameter: PreparedInfo) => void;
 export type Callback_PlaybackInfo_Void = (parameter: PlaybackInfo) => void;
 export interface VideoAttribute extends CommonMethod {
+    setVideoOptions(value: VideoOptions): this {
+        return this
+    }
     muted(value: boolean | undefined): this
     autoPlay(value: boolean | undefined): this
     controls(value: boolean | undefined): this
@@ -457,6 +460,9 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     analyzerConfig_value?: ImageAnalyzerConfig | undefined
     surfaceBackgroundColor_value?: ColorMetrics | undefined
     enableShortcutKey_value?: boolean | undefined
+    public setVideoOptions(value: VideoOptions): this {
+        return this
+    }
     public muted(value: boolean | undefined): this {
         return this
     }
@@ -689,10 +695,9 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
 }
 /** @memo */
-export function Video(
+export function VideoImpl(
     /** @memo */
     style: ((attributes: VideoAttribute) => void) | undefined,
-    value: VideoOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -700,9 +705,7 @@ export function Video(
         return new ArkVideoComponent()
     })
     NodeAttach<ArkVideoPeer>((): ArkVideoPeer => ArkVideoPeer.create(receiver), (_: ArkVideoPeer) => {
-        receiver.setVideoOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
