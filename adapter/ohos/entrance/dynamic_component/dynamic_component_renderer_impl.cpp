@@ -354,6 +354,9 @@ void DynamicComponentRendererImpl::RegisterContainerHandler()
 
 void DynamicComponentRendererImpl::SetUIContentJsContext()
 {
+    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
+        return;
+    }
     CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -409,6 +412,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
     taskExecutor->PostSyncTask(
         [weak = WeakClaim(this), aceLogTag = aceLogTag_, instanceId = uiContent_->GetInstanceId()] {
             auto container = Container::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
             auto frontend = AceType::DynamicCast<OHOS::Ace::FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
             auto delegate = frontend->GetDelegate();
@@ -433,8 +437,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                         CHECK_NULL_VOID(renderer);
                         renderer->HandleCardSizeChangeEvent(size);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged",
-                    TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
             };
             pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
         }, TaskExecutor::TaskType::UI, "ArkUIRegisterSizeChangedCallback");
@@ -491,16 +494,14 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
                         ContainerScope scope(subContainer->GetInstanceId());
                         subContainer->UpdateConfiguration(config, configuration);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged",
-                    TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
             };
 
             auto hostContainer = Platform::AceContainer::GetContainer(hostInstanceId);
             CHECK_NULL_VOID(hostContainer);
             hostContainer->AddOnConfigurationChange(subInstanceId, configChangedCallback);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentConfigurationChanged");
 }
 
 void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
@@ -613,11 +614,11 @@ void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MM
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [uiContent = uiContent_, pointerEvent]() {
+            CHECK_NULL_VOID(uiContent);
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessPointerEvent(pointerEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer");
 }
 
 bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
@@ -638,8 +639,7 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
             TAG_LOGI(aceLogTag, "send key event: %{public}s, result = %{public}d",
                 keyEvent.ToString().c_str(), result);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
     return result;
 }
 
@@ -660,8 +660,7 @@ void DynamicComponentRendererImpl::TransferFocusState(bool isFocus)
                 uiContent->UnFocus();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusState");
 }
 
 void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
@@ -677,8 +676,7 @@ void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
             TAG_LOGI(aceLogTag, "send focus active event: %{public}d", isFocus);
             uiContent->SetIsFocusActive(isFocus);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent");
 }
 
 SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
@@ -752,9 +750,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task),
-            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
     }
 }
 
@@ -778,8 +774,7 @@ void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& off
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
-        "ArkUIDynamicComponentUpdateParentOffsetToWindow",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        "ArkUIDynamicComponentUpdateParentOffsetToWindow");
 }
 
 void DynamicComponentRendererImpl::DestroyContent()
@@ -808,6 +803,7 @@ void DynamicComponentRendererImpl::OnDestroyContent()
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [uiContent = uiContent_, aceLogTag = aceLogTag_]() {
+            CHECK_NULL_VOID(uiContent);
             ContainerScope scope(uiContent->GetInstanceId());
             TAG_LOGI(aceLogTag, "destroy dynamic UI content");
             uiContent->Destroy();
@@ -819,7 +815,6 @@ void DynamicComponentRendererImpl::AfterDestroyContent()
 {
     if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         DeleteWorkerUsing(runtime_);
-        return;
     }
 }
 

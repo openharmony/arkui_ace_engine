@@ -52,11 +52,10 @@ enum class BusinessDataSendType : uint32_t {
 
 enum class UIContentBusinessCode : uint32_t {
     UNDEFINED = 0,
-    // uiextension session business begin
+    SEND_STATAUSBAR_TYPE = 1,
     EVENT_PROXY = 1001,
     SEND_PAGE_MODE_REQUEST = 1002,
     SEND_PAGE_MODE_TO_UEA = 1003,
-    // accessibility business begin
     TRANSFORM_PARAM = 2001,
     // avoid info business begin
     NOTIFY_AVOID_INFO_CHANGE = 3001,
