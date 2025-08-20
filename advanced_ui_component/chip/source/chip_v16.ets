@@ -1132,31 +1132,38 @@ export struct ChipComponent {
     return this.chipActivated ?? false;
   }
 
-  resourceToNumber(resource: Resource, defaultValue: number): number {
-    if (!resource || !resource.type) {
-      console.error('[Chip] failed: resource get fail');
-      return defaultValue;
-    }
+  private getResourceNumber(resource: Resource): number | null {
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
     if (!resourceManager) {
       console.error('[Chip] failed to get resourceManager');
-      return defaultValue;
+      return null;
     }
+    
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
         try {
           if (resource.id !== -1) {
-            return resourceManager.getNumber(resource);
+            return resourceManager.getNumber(resource.id);
           }
           return resourceManager.getNumberByName((resource.params as string[])[0].split('.')[2]);
         } catch (error) {
-          console.error(`[Chip] get resource error, return defaultValue`);
-          return defaultValue;
+          console.error(`[Chip] get resource error`);
+          return null;
         }
       default:
-        return defaultValue;
+        return null;
     }
+  }
+
+  resourceToNumber(resource: Resource, defaultValue: number): number {
+    if (!resource || !resource.type) {
+      console.error('[Chip] failed: resource get fail');
+      return defaultValue;
+    }
+    
+    const result = this.getResourceNumber(resource);
+    return result !== null ? result : defaultValue;
   }
 
   isValidLength(length: Length): boolean {
@@ -1166,20 +1173,17 @@ export struct ChipComponent {
       return this.isValidLengthString(length);
     } else if (typeof length === 'object') {
       const resource = length as Resource;
-      const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-      if (!resourceManager) {
-        console.error('[Chip] failed to get resourceManager.');
-        return false;
-      }
-      switch (resource.type) {
-        case RESOURCE_TYPE_FLOAT:
-        case RESOURCE_TYPE_INTEGER:
-          return resourceManager.getNumber(resource) >= 0;
-        case RESOURCE_TYPE_STRING:
-          return this.isValidLengthString(resourceManager.getStringSync(resource));
-        default:
+      if (resource.type === RESOURCE_TYPE_STRING) {
+        const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+        if (!resourceManager) {
+          console.error('[Chip] failed to get resourceManager.');
           return false;
+        }
+        return this.isValidLengthString(resourceManager.getStringSync(resource));
       }
+      
+      const result = this.getResourceNumber(resource);
+      return result !== null && result >= 0;
     }
     return false;
   }
