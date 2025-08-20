@@ -279,11 +279,6 @@ void MenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // isNeedDivider_ = false;
-    // auto uiNode = AceType::DynamicCast<UINode>(host);
-    // RefPtr<UINode> previousNode = nullptr;
-    // UpdateMenuItemChildren(uiNode, previousNode);
-    // RemoveLastNodeDivider(previousNode);
     ResetThemeByInnerMenuCount();
     auto menuWrapperNode = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapperNode);
@@ -545,11 +540,6 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // ResetNeedDivider();
-    // auto uiNode = AceType::DynamicCast<UINode>(host);
-    // RefPtr<UINode> previousNode = nullptr;
-    // UpdateMenuItemChildren(uiNode, previousNode);
-    // RemoveLastNodeDivider(previousNode);
     SetAccessibilityAction();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
