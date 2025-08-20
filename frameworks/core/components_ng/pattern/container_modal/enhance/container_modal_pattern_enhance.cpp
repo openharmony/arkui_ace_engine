@@ -356,7 +356,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [floatingContext, height]() {
             auto rect = floatingContext->GetPaintRectWithoutTransform();
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -366,7 +366,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
             buttonsContext->OnTransformTranslateUpdate(
                 { 0.0f, static_cast<float>(height - buttonPopupDistance - rect.GetY()), 0.0f });
-        });
+        }, nullptr, nullptr, GetContextRefPtr());
     }
 
     if (!isShow && CanHideFloatingTitle()) {
@@ -383,7 +383,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 CHECK_NULL_VOID(pattern);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
-            });
+            }, nullptr, GetContextRefPtr());
     }
 }
 

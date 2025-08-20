@@ -310,6 +310,7 @@ protected:
     void InitContainerEvent();
     void InitLayoutProperty();
     void InitContainerColor();
+    RefPtr<PipelineContext> GetContextRefPtr();
 
     virtual void InitButtonsLayoutProperty();
     virtual void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) {}
