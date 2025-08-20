@@ -170,6 +170,10 @@ void NavigationPattern::ReplaceNodeWithProxyNodeIfNeeded(
     if (property) {
         property->UpdateVisibility(VisibleType::VISIBLE);
     }
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabledInternal(true);
+    }
     auto childIndex = navContentNode->GetChildIndex(node);
     if (childIndex < 0) {
         return;
@@ -1826,7 +1830,14 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
         if (layoutProperty && layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK
             && navBarOrHomeDestNode) {
             navBarOrHomeDestNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
-            DealTransitionVisibility(navBarOrHomeDestNode, false, true);
+            /**
+             * In the follow situations, navBar is still visible
+             * 1. Navigation is in force split mode, and navBar was recognized as the homePage.
+             * 2. Push a Standard NavDestination from navBar.
+             * 3. Finally navBar is displayed on the primary side, NavDestination is displayed on the secondary side.
+             */
+            bool isVisible = forceSplitSuccess_ && navBarIsHome_;
+            DealTransitionVisibility(navBarOrHomeDestNode, isVisible, true);
         }
         // if current mode is auto, need set navBar need set invisible true
         navigationNode->SetNeedSetInvisible(true);

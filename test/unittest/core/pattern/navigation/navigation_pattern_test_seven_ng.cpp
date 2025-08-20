@@ -430,6 +430,37 @@ HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded004, Test
 }
 
 /**
+ * @tc.name: ReplaceNodeWithProxyNodeIfNeeded005
+ * @tc.desc: Branch: if (!proxyNode) { => false
+ *                   if (eventHub) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded005, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto navContentNode = AceType::DynamicCast<FrameNode>(navNode->GetContentNode());
+    ASSERT_NE(navContentNode, nullptr);
+    auto property = navNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    auto eventHub = dest->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(false);
+    pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
+    EXPECT_TRUE(eventHub->enabled_);
+}
+
+/**
  * @tc.name: RestoreNodeFromProxyNodeIfNeeded001
  * @tc.desc: Branch: if (childIndex < 0) { => true
  * @tc.type: FUNC
