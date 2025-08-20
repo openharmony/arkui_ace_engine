@@ -29,12 +29,9 @@ void ConditionScopeNode::AddChild(
     const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    bool isDisappearing = child->IsDisappearing();
     UINode::AddChild(child, slot, silently, addDefaultTransition, addModalUiextension);
-    if (isDisappearing) {
-        // for geometryTransition, let all reused children call UpdateGeometryTransition.
-        LayoutProperty::UpdateAllGeometryTransition(child);
-    }
+    // for geometryTransition, let all reused children call UpdateGeometryTransition.
+    LayoutProperty::UpdateAllGeometryTransition(child);
 }
 
 } // namespace OHOS::Ace::NG

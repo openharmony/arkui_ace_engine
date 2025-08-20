@@ -64,7 +64,6 @@ class ConditionScopePeer extends PeerNode {
             return true;
         }
 
-        console.log(`condition scope: already has key [${id}]`);
         return false;
     }
 
