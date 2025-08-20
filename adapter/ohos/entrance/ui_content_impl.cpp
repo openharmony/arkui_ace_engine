@@ -40,6 +40,7 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
+#include "ui_extension_context.h"
 #include "wm_common.h"
 
 #include "base/log/event_report.h"
@@ -2465,16 +2466,26 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             });
     }
 
-    container->SetAbilityOnSearch([context = context_](const std::string& queryWord) {
+    container->SetAbilityOnSearch([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+                                      const std::string& queryWord) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
