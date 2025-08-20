@@ -696,8 +696,7 @@ Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>&
     Rosen::SymbolColor symbolColor;
     for (const auto& grad : intermediate) {
         auto nativeGradient = CreateNativeGradient(grad);
-        symbolColor.colorType =
-            grad.isDefined ? Rosen::SymbolColorType::GRADIENT_TYPE : Rosen::SymbolColorType::GRADIENT_DEFAULT_COLOR;
+        symbolColor.colorType = static_cast<Rosen::SymbolColorType>(grad.gradientType);
         symbolColor.gradients.push_back(nativeGradient);
     }
 
