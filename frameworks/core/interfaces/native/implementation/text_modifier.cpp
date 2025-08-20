@@ -169,7 +169,54 @@ void AssignArkValue(Ark_MarqueeState& dst, int32_t src)
             break;
     }
 }
+
+std::optional<Dimension> OptConvertTextFromResource(const Ark_Resource& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    auto localResource = src;
+
+    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::STRING));
+    ResourceConverter converter(localResource);
+    std::optional<std::string> optStr = converter.ToString();
+    if (optStr.has_value() && !optStr.value().empty()) {
+        dimension = ConvertFromString(optStr.value(), defaultUnit);
+        return dimension;
+    }
+
+    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::INTEGER));
+    ResourceConverter converterInt(localResource);
+    std::optional<int32_t> intValue = converterInt.ToInt();
+    if (intValue.has_value() && intValue.value() > 0) {
+        dimension = Dimension(intValue.value(), defaultUnit);
+        return dimension;
+    }
+
+    localResource.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
+    ResourceConverter converterFloat(localResource);
+    dimension = converterFloat.ToDimension();
+    if (dimension.has_value()) {
+        return dimension;
+    }
+
+    return std::nullopt;
 }
+
+std::optional<Dimension> OptConvertTextFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    if (src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        return OptConvertTextFromResource(resource, defaultUnit);
+    } else {
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f;
+        }
+        return Dimension(value, unit);
+    }
+}
+} /* namespace OHOS::Ace::NG::Converter */
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextModifier {
@@ -491,7 +538,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indent = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> indent = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        indent = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     TextModelStatic::SetTextIndent(frameNode, indent);
 }
 void WordBreakImpl(Ark_NativePointer node,
