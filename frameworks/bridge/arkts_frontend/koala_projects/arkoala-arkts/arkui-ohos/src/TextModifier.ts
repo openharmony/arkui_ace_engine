@@ -1949,6 +1949,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._font_flag = AttributeUpdaterFlag.UPDATE
             this._font0_value = fontValue
             this._font1_value = options
+            if (this._fontWeight_flag == AttributeUpdaterFlag.UPDATE && this._font0_value != undefined) {
+                this._fontWeight0_value = this._font0_value!.weight
+            }
         }
         else
         {
@@ -1963,6 +1966,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._fontWeight_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight0_value = weight
             this._fontWeight1_value = options
+            if (this._font_flag == AttributeUpdaterFlag.UPDATE && this._font0_value != undefined) {
+                this._font0_value!.weight = this._fontWeight0_value
+            }
         }
         else
         {
