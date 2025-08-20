@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 const std::u16string PREVIEW_TEXT = u"nin'hao";
+const std::string INIT_NUMBER = "01234567";
 }
 class RichEditorDeleteTestNg : public RichEditorCommonTestNg {
 public:
@@ -737,6 +738,37 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level1)
     richEditorNode_->children_.push_back(newFrameNode);
     richEditorPattern->DeleteSpansOperation(0, 5);
     EXPECT_EQ(richEditorPattern->textForDisplay_.size(), 0);
+}
+
+/**
+ * @tc.name: DeleteSpansOperation003
+ * @tc.desc: test DeleteSpansOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. add empty spans
+     */
+    AddSpan("");
+    AddSpan(INIT_NUMBER);
+    AddSpan("");
+    AddSpan(INIT_NUMBER);
+
+    /**
+     * @tc.steps: step2. test DeleteSpansOperation
+     */
+    richEditorPattern->DeleteSpansOperation(0, 8);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
 }
 
 /**
