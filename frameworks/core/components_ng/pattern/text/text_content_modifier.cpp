@@ -478,7 +478,9 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
                 const RectF& contentRect = textPattern->GetTextRect();
                 RectF boundsRect;
                 pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
-                recordingCanvas->ResetHybridRenderSize(boundsRect.Width(), boundsRect.Height());
+                recordingCanvas->ResetHybridRenderSize(
+                    std::max(boundsRect.Width(), pManager->GetLongestLineWithIndent()),
+                    std::max(boundsRect.Height(), pManager->GetHeight()));
             }
         }
     }
