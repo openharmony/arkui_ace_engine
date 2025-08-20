@@ -2477,6 +2477,7 @@ frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout
+frameworks/core/components_ng/pattern/arc_list/ @arkuiscroll
 frameworks/core/components_ng/pattern/list/ @arkuiscroll
 frameworks/core/components_ng/pattern/loading_progress/ @arkui_image
 frameworks/core/components_ng/pattern/marquee/ @huawei_g_five
@@ -3271,6 +3272,7 @@ test/unittest/core/pattern/indexer/ @arkuiscroll
 test/unittest/core/pattern/lazy_layout/ @arkuiscroll
 test/unittest/core/pattern/linear_layout/ @arkuilayout
 test/unittest/core/pattern/linear_split/ @arkuilayout
+test/unittest/core/pattern/arc_list/ @arkuiscroll
 test/unittest/core/pattern/list/ @arkuiscroll
 test/unittest/core/pattern/loading_progress/ @arkui_image
 test/unittest/core/pattern/marquee/ @huawei_g_five

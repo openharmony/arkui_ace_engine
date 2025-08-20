@@ -977,6 +977,65 @@ HWTEST_F(ArcListLayoutTestNg, LayoutHeader003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutHeader004
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader when the height of first item changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with header.
+     */
+    ListModelNG model = CreateList();
+    auto headerSize = 50.0f;
+    auto column = CreateColumn([headerSize](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(headerSize));
+        ViewAbstract::SetHeight(CalcLength(headerSize));
+    });
+    model.SetHeader(column);
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The distance between the header and the first item
+     * is greater than 0, that is, the value of headerOffset_ is greater than 0.
+     */
+    FlushUITasks(frameNode_);
+    auto headerDist = 40.0f;
+    auto headerOffset = (LIST_HEIGHT - ITEM_HEIGHT * 1.08f) / 2.0f - headerDist - headerSize;
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->oldHeaderSize_, headerSize);
+
+    /**
+     * @tc.steps: step3. Scroll list.
+     * @tc.expected: The value of headerOffset_ unchanged.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+
+    /**
+     * @tc.steps: step4. Decrease the height of the first item.
+     * @tc.expected: The value of headerOffset_ becomes larger.
+     */
+    auto firstItem = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(firstItem), CalcLength(ITEM_HEIGHT / 2.0f));
+    FlushUITasks(frameNode_);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT / 2.0f);
+
+    /**
+     * @tc.steps: step5. Scroll list.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The value of headerOffset_ unchanged.
+     */
+    ScrollTo(-200);
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
+}
+
+/**
  * @tc.name: CreateLayoutAlgorithm001
  * @tc.desc: Test ArcListPattern::CreateLayoutAlgorithm
  * @tc.type: FUNC
