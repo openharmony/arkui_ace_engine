@@ -93,7 +93,9 @@ void TextPattern::OnAttachToMainTreeMultiThread()
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
+    if (!textLayoutProperty->HasTextAlign()) {
+        textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
+    }
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     isDetachFromMainTree_ = false;
     MultiThreadDelayedExecution(); // Delayed operation
