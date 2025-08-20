@@ -599,7 +599,7 @@ void SetMouseDragMonitorState(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, 
     if (asyncCtx->dragPointerEvent.sourceType != SOURCE_TYPE_MOUSE) {
         return;
     }
-    auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->SetMouseDragMonitorState(state);
+    auto ret = InteractionInterface::GetInstance()->SetMouseDragMonitorState(state);
     if (ret != 0) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d failed, return value is %{public}d",
             state, ret);
@@ -897,7 +897,7 @@ int32_t StartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Msdp::
     bool isStartDragService)
 {
     OHOS::Ace::DragDataCore dragDataCore { {}, {}, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
-        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId, dragData.toolType,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, dragData.dragNum, dragData.pointerId,
         dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
         dragData.hasCoordinateCorrected, dragData.summarys };
     for (const auto& shadowInfo : dragData.shadowInfos) {

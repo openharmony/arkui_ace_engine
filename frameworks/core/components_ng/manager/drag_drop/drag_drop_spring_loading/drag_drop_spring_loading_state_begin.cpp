@@ -44,7 +44,7 @@ void DragDropSpringLoadingStateBegin::OnEnter(std::string_view extraInfo)
     const auto& userConfig = context->GetDragSpringLoadingConfiguration();
     CHECK_NULL_VOID(userConfig);
     stateMachine->SetUserConfig(userConfig);
-    auto weak = AceType::WeakClaim(AceType::RawPtr(stateMachine));
+    auto weak = WeakPtr<DragDropSpringLoadingStateMachine>(stateMachine);
     if (userConfig->updateNotifyCount == 0) {
         stateMachine->PostDelayedTask(
             [weak, extraInfoStr = std::string(extraInfo)]() {

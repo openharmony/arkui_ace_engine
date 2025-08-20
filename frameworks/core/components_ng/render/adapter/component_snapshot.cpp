@@ -370,7 +370,7 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
         if (children.empty()) {
             callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Children is empty from FrameNode(Id=%{public}d),Tag=%{public}s)",
+                "Children is empty from FrameNode(Id=%{public}d,Tag=%{public}s)",
                 node->GetId(), node->GetTag().c_str());
             return;
         }
@@ -613,7 +613,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Children is empty from FrameNode(Id=%{public}d),Tag=%{public}s)",
+                "Children is empty from FrameNode(Id=%{public}d,Tag=%{public}s)",
                 node->GetId(), node->GetTag().c_str());
             return result;
         }
@@ -816,7 +816,7 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
 std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnapshot::GetSoloNode(
     const RefPtr<FrameNode>& node)
 {
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    std::pair<uint64_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
     std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> results;
     results.push_back(result);
     if (!node) {
@@ -835,7 +835,7 @@ std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnap
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to get solo node snapshot, rootId=" SEC_PLD(%{public}d) " depth=%{public}d size=%{public}s",
         SEC_PARAM(node->GetId()), node->GetDepth(), node->GetGeometryNode()->GetFrameSize().ToString().c_str());
-    auto pixelMaps =  rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
+    auto pixelMaps = rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
     return pixelMaps;
 }
 } // namespace OHOS::Ace::NG

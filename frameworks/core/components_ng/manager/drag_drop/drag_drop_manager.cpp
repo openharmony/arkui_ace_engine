@@ -1572,7 +1572,6 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
     CHECK_NULL_VOID(event);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-
 #ifdef ENABLE_ROSEN_BACKEND
     OHOS::Rosen::RSSyncTransactionController* transactionController = nullptr;
     std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler;
@@ -1592,7 +1591,6 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
         overlayManager->RemoveFilter();
     }
     HideSubwindowDragNode();
-    
     if (transactionController) {
         auto transaction = transactionController->GetRSTransaction();
         InteractionInterface::GetInstance()->SetDragWindowVisible(false, transaction);
@@ -2712,25 +2710,12 @@ void DragDropManager::StartDragTransitionAnimation(const Offset& newOffset, Anim
     pipeline->Animate(option, option.GetCurve(), callback, option.GetOnFinishEvent());
 }
 
-void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32_t containerId)
-{
-    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
-    constexpr int32_t animateDuration = 300;
-    option.SetCurve(curve);
-    option.SetDuration(animateDuration);
-    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
-        auto dragDropManager = weakManager.Upgrade();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->HandleStartDragAnimationFinish(containerId);
-    });
-}
-
 void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
 {
     if (IsAllStartAnimationFinished()) {
         SetStartAnimation(true);
     }
-    if (!IsPullMoveReceivedForCurrentDrag()) {
+    if (IsPullMoveReceivedForCurrentDrag()) {
         TransDragWindowToDragFwk(containerId);
     }
     auto overlayManager = GetDragAnimationOverlayManager(containerId);
@@ -2746,6 +2731,19 @@ void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
         }
         cnt++;
     }
+}
+
+void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32_t containerId)
+{
+    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
+    constexpr int32_t animateDuration = 300;
+    option.SetCurve(curve);
+    option.SetDuration(animateDuration);
+    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
+        auto dragDropManager = weakManager.Upgrade();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->HandleStartDragAnimationFinish(containerId);
+    });
 }
 
 void DragDropManager::SetDragResult(
