@@ -194,6 +194,7 @@ import promptAction from '@ohos/promptAction'
 import { LevelOrderInternal, LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { uiObserver } from "@ohos/arkui/observer"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -28719,5 +28720,12 @@ export class Deserializer extends DeserializerBase {
         else {
             return undefined
         }
+    }
+    readNavigationInfo(): uiObserver.NavigationInfo {
+        let valueDeserializer : Deserializer = this
+        const navigationIdTmpResult : string = (valueDeserializer.readString() as string)
+        const pathStackTmpResult : NavPathStack = (this.readNavPathStack() as NavPathStack)
+        let value : uiObserver.NavigationInfo = ({navigationId: navigationIdTmpResult, pathStack: pathStackTmpResult} as uiObserver.NavigationInfo)
+        return value
     }
 }

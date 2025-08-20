@@ -777,6 +777,8 @@ typedef struct Opt_Undefined Opt_Undefined;
 typedef struct UnifiedDataPeer UnifiedDataPeer;
 typedef struct UnifiedDataPeer* Ark_UnifiedData;
 typedef struct Opt_UnifiedData Opt_UnifiedData;
+typedef struct Ark_uiObserver_NavigationInfo Ark_uiObserver_NavigationInfo;
+typedef struct Opt_uiObserver_NavigationInfo Opt_uiObserver_NavigationInfo;
 typedef struct Ark_Union_Boolean_EditMode Ark_Union_Boolean_EditMode;
 typedef struct Opt_Union_Boolean_EditMode Opt_Union_Boolean_EditMode;
 typedef struct Ark_Union_Boolean_Number Ark_Union_Boolean_Number;
@@ -8064,6 +8066,15 @@ typedef struct Opt_UnifiedData {
     Ark_Tag tag;
     Ark_UnifiedData value;
 } Opt_UnifiedData;
+typedef struct Ark_uiObserver_NavigationInfo {
+    /* kind: Interface */
+    Ark_String navigationId;
+    Ark_NavPathStack pathStack;
+} Ark_uiObserver_NavigationInfo;
+typedef struct Opt_uiObserver_NavigationInfo {
+    Ark_Tag tag;
+    Ark_uiObserver_NavigationInfo value;
+} Opt_uiObserver_NavigationInfo;
 typedef struct Ark_Union_Boolean_EditMode {
     Ark_Int32 selector;
     union {
@@ -24654,6 +24665,8 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                                                               const Ark_String* id);
     Ark_Union_FrameNode_Undefined (*getFrameNodeByUniqueId)(Ark_UIContext peer,
                                                             const Ark_Number* id);
+    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(const Ark_Number* instanceId,
+                                                                 const Ark_Number* id);
     Ark_Number (*vp2px)(Ark_UIContext peer,
                         const Ark_Number* value);
     Ark_Number (*px2vp)(Ark_UIContext peer,

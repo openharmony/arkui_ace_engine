@@ -32723,6 +32723,20 @@ KInteropReturnBuffer impl_UIContext_getFrameNodeByUniqueId(Ark_NativePointer thi
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(UIContext_getFrameNodeByUniqueId, KInteropReturnBuffer, Ark_NativePointer, KInteropNumber)
+KInteropReturnBuffer impl_UIContext_getNavigationInfoByUniqueId(const KInteropNumber instanceId, KInteropNumber id) {
+    const auto &retValue = GetAccessors()->getUIContextAccessor()->getNavigationInfoByUniqueId((const Ark_Number*) (&instanceId), (const Ark_Number*) (&id));
+    Serializer _retSerializer {};
+    Ark_Int32 retValue_type = retValue.tag;
+    if (retValue_type != InteropTag::INTEROP_TAG_UNDEFINED) {
+        _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto retValueTmpValue = retValue.value;
+        _retSerializer.writeNavigationInfo(retValueTmpValue);
+    } else {
+        _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(UIContext_getNavigationInfoByUniqueId, KInteropReturnBuffer, KInteropNumber, KInteropNumber)
 Ark_Number impl_UIContext_vp2px(Ark_NativePointer thisPtr, KInteropNumber value) {
         Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
         return GetAccessors()->getUIContextAccessor()->vp2px(self, (const Ark_Number*) (&value));

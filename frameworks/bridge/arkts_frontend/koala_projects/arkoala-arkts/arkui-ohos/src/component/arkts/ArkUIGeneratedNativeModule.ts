@@ -3986,6 +3986,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContext_getFrameNodeByUniqueId(ptr: KPointer, id: number): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _UIContext_getNavigationInfoByUniqueId(instanceId: number, id: number): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _FrameNode_getId(name: KPointer): string
     @ani.unsafe.Direct
     native static _FrameNode_getUniqueId(point: KPointer): int32

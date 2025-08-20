@@ -181,6 +181,7 @@ import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import promptAction from '@ohos/promptAction'
 import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
+import { uiObserver } from "@ohos/arkui/observer"
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -25961,5 +25962,13 @@ export class Serializer extends SerializerBase {
         else if ((RuntimeType.OBJECT) == (valueType)) {
             this.writeInt32((value as Resource).id as int32)
         }
+    }
+
+    writeNavigationInfo(value: uiObserver.NavigationInfo): void {
+        let valueSerializer : Serializer = this
+        const valueHolderForNavigationId  = value.navigationId
+        valueSerializer.writeString(valueHolderForNavigationId)
+        const valueHolderForPathStack  = value.pathStack
+        this.writeNavPathStack(valueHolderForPathStack)
     }
 }

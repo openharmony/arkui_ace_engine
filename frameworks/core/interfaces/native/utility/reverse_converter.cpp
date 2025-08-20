@@ -31,6 +31,7 @@
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
@@ -250,6 +251,13 @@ void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src)
 {
     dst.value0 = ArkValue<Ark_Number>(src.GetX());
     dst.value1 = ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
+{
+    CHECK_NULL_VOID(src);
+    dst.navigationId = ArkValue<Ark_String>(src->navigationId);
+    dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
 }
 
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
