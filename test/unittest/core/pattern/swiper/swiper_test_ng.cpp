@@ -1465,11 +1465,11 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
     auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
     int32_t nodeId = frameNode_->GetId();
-    frameRateManager->AddNodeRate(nodeId, 1);
+    frameRateManager->AddNodeRate(nodeId, "", 1);
     frameRateManager->isRateChanged_ = false;
     pattern_->UpdateNodeRate();
     auto iter = frameRateManager->nodeRateMap_.find(nodeId);
-    EXPECT_EQ(iter->second, expectedRate);
+    EXPECT_EQ(iter->second.second, expectedRate);
     EXPECT_TRUE(frameRateManager->isRateChanged_);
 }
 

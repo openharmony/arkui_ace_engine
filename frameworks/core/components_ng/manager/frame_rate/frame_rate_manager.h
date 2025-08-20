@@ -23,12 +23,6 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t UI_ANIMATION_FRAME_RATE_TYPE = 2;
-constexpr int32_t DISPLAY_SYNC_FRAME_RATE_TYPE = 3;
-constexpr int32_t ACE_COMPONENT_FRAME_RATE_TYPE = 4;
-constexpr int32_t DRAG_SCENE_FRAME_RATE_TYPE = 6;
-constexpr int32_t ANIMATION_STATE_FIRST_FRAME = 0x1000;
-
 class FrameRateManager : public virtual AceType {
     DECLARE_ACE_TYPE(FrameRateManager, AceType);
 
@@ -40,7 +34,7 @@ public:
 
     void SetIsRateChanged(bool isChanged);
 
-    void AddNodeRate(int32_t nodeId, int32_t rate = 0);
+    void AddNodeRate(int32_t nodeId, const std::string& scene, int32_t rate = 0);
 
     void RemoveNodeRate(int32_t nodeId);
 
@@ -48,21 +42,19 @@ public:
 
     void SetAnimateRate(int32_t rate, bool hasFirstFrameAnimation);
 
-    void SetDisplaySyncRate(int32_t displaySyncRate);
+    void SetDisplaySyncRate(int32_t displaySyncRate, uint32_t displaySyncType);
 
     int32_t GetDisplaySyncRate() const;
 
     std::pair<int32_t, int32_t> GetExpectedRate();
 
-    void SetDragScene(int32_t status);
-
 private:
-    std::unordered_map<int32_t, int32_t> nodeRateMap_;
+    std::unordered_map<int32_t, std::pair<std::string, int32_t>> nodeRateMap_;
     bool isRateChanged_ = false;
     int32_t displaySyncRate_ = 0;
+    uint32_t displaySyncType_ = 0;
     int32_t animateRate_ = 0;
     bool hasFirstFrameAnimation_ = false;
-    int32_t dragScene_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameRateManager);
 };

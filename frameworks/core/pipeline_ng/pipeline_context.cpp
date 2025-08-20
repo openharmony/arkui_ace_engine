@@ -1007,7 +1007,8 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     }
 
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
-    frameRateManager_->SetDisplaySyncRate(displaySyncRate);
+    uint32_t displaySyncType = displaySyncManager->GetDisplaySyncType();
+    frameRateManager_->SetDisplaySyncRate(displaySyncRate, displaySyncType);
     auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
     auto id = GetInstanceId();
     ArkUIPerfMonitor::GetPerfMonitor(id)->RecordDisplaySyncRate(monitorVsyncRate);
