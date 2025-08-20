@@ -268,8 +268,10 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     }
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
-    RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
-        const ri = new RepeatItemImpl<T>(ele, (i as number));
-        itemGenerator(ri);
+    NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
+        RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
+            const ri = new RepeatItemImpl<T>(ele, (i as number));
+            itemGenerator(ri);
+        });
     });
 }
