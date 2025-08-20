@@ -187,6 +187,7 @@ const d1 = '8vp';
 const e1 = '12vp';
 const f1 = '10vp';
 const g1 = '16vp';
+const y1 = '224vp';
 const h1 = 1000;
 const i1 = 2000;
 const j1 = 1000;
@@ -973,7 +974,10 @@ class c3 extends ViewPU {
         }
     }
     setMenuWidth(width) {
-        this.menuWidth = (80 + parseInt(width)) + 'vp';
+        let widthNumber = (80 + parseInt(width)) + 'vp';
+        if (widthNumber > this.menuWidth) {
+            this.menuWidth = widthNumber;
+        }
     }
     setRowVisibility() {
         if (this.maximizeVisibility === Visibility.None && this.minimizeVisibility === Visibility.None &&
@@ -1193,7 +1197,7 @@ class c3 extends ViewPU {
                 height: b1
             });
             Button.visibility(this.maximizeVisibility);
-            Button.bindMenu(this.isShowMenu, { builder: this.MenuBuilder.bind(this) }, {
+            Button.bindContextMenu(this.isShowMenu, { builder: this.MenuBuilder.bind(this) }, {
                 placement: Placement.BottomRight, aboutToDisappear: () => {
                     this.isShowMenu = false;
                     this.cancelMenuDisappearTimer();
@@ -1203,6 +1207,7 @@ class c3 extends ViewPU {
             GestureGroup.create(GestureMode.Exclusive);
             LongPressGesture.create({ repeat: false });
             LongPressGesture.onAction(() => {
+                this.menuWidth = y1;
                 this.onMenuWidthChange();
                 this.isShowMenu = !this.hideSplit;
                 this.menuDisappearTimer(i1);
