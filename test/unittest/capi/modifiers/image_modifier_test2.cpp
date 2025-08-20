@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "generated/test_fixtures.h"
 #include "point_light_test.h"
 #include "generated/type_helpers.h"
@@ -151,6 +152,34 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
 
     auto resultPixelMap = alt->GetPixmap();
     EXPECT_EQ(resultPixelMap, expectedPixelMapRefPtr);
+}
+
+/**
+ * @tc.name: setImageMatrixTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest2, setImageMatrixTest, TestSize.Level1)
+{
+    Matrix4TransitPeer* matrix4transit = PeerUtils::CreatePeer<Matrix4TransitPeer>();
+    matrix4transit->matrix = Matrix4::CreateScale(11.0, 7.0, 1.0);
+    auto optValue = Converter::ArkValue<Opt_Matrix4Transit>(matrix4transit);
+
+    modifier_->setImageMatrix(node_, &optValue);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(property, nullptr);
+    auto result = property->GetImageMatrix();
+    ASSERT_TRUE(result);
+    Matrix4 expected(
+        11.0, 0.0, 0.0, 0.0,
+        0.0, 7.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    );
+    EXPECT_EQ(result.value(), expected);
 }
 
 } // namespace OHOS::Ace::NG
