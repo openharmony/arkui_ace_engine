@@ -16,7 +16,7 @@
 #include "interaction_impl.h"
 
 #include "interaction_manager.h"
-#include "start_drag_listener_impl.h"
+#include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
@@ -157,14 +157,14 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
-int32_t InteractionImpl::EnterTextEditorArea(bool enable)
-{
-    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
-}
-
 int32_t InteractionImpl::AddPrivilege()
 {
     return InteractionManager::GetInstance()->AddPrivilege();
+}
+
+int32_t InteractionImpl::EnterTextEditorArea(bool enable)
+{
+    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
 }
 
 int32_t InteractionImpl::RegisterCoordinationListener(std::function<void()> dragOutCallback)
@@ -205,7 +205,7 @@ void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
     InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
 }
 
-int32_t InteractionImpl::EnableInternalDropAnimation(const std::string& animationInfo)
+int32_t InteractionImpl::EnableInternalDropAnimation(const std::string &animationInfo)
 {
     return InteractionManager::GetInstance()->EnableInternalDropAnimation(animationInfo);
 }

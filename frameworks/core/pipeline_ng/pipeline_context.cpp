@@ -5096,7 +5096,7 @@ void PipelineContext::NotifyDragOnHide()
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     manager->HandlePipelineOnHide();
-    manager->OnDragAsyncEnd();
+    manager->OnDragEnd();
 }
 
 void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)

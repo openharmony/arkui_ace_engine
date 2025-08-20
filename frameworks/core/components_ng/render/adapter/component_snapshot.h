@@ -57,6 +57,7 @@ public:
     static std::shared_ptr<Media::PixelMap> CreateSync(
         const RefPtr<AceType>& customNode, const SnapshotParam& param);
 
+    // create solo node pixelMaps, this method only for IDE.
     static std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> GetSoloNode(
         const RefPtr<FrameNode>& node);
 

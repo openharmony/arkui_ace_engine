@@ -51,7 +51,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
-constexpr int32_t DEALY_TASK_DURATION  = 350;
+constexpr int32_t DEALY_TASK_DURATION = 350;
 constexpr int32_t LONG_PRESS_DURATION = 500;
 constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 800;
 constexpr Dimension FILTER_VALUE(0.0f);
@@ -150,6 +150,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         IsBelongToMultiItemNode(frameNode)) {
         return false;
     }
+
     return true;
 }
 
@@ -226,8 +227,7 @@ void DragEventActuator::InitDragDropStatusToIdle()
 void DragEventActuator::CallTimerCallback(const RefPtr<FrameNode>& frameNode)
 {
     if (!isExecCallback_) {
-        CHECK_NULL_VOID(frameNode);
-        auto pipeline = frameNode->GetContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         RefPtr<TaskExecutor> taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -245,6 +245,7 @@ void DragEventActuator::GetThumbnailPixelMap(bool isSync)
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+
     auto getPixelMapFinishCallback = [weak = AceType::WeakClaim(this)](RefPtr<PixelMap> pixelMap, bool immediately) {
         auto dragEventActuator = weak.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
@@ -460,20 +461,20 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
-            auto frameNode = gestureHub->GetFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
-            CHECK_NULL_VOID(eventHub);
-            auto pipeline = frameNode->GetContextRefPtr();
-            gestureHub->FireCustomerOnDragEnd(pipeline, eventHub);
-        }
         actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         } else {
             actuator->HidePixelMap();
+        }
+        if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+            auto frameNode = gestureHub->GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto eventHub = frameNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(eventHub);
+            auto pipeline = frameNode->GetContextRefPtr();
+            gestureHub->FireCustomerOnDragEnd(pipeline, eventHub);
         }
         auto userActionEnd = actuator->userCallback_->GetActionEndEventFunc();
         if (userActionEnd) {
@@ -617,7 +618,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         dragDropManager->RemoveDeadlineTimer();
     };
     panRecognizer_->SetOnActionCancel(panOnActionCancel);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (touchRestrict.sourceType == SourceType::MOUSE) {
@@ -1421,7 +1422,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
     if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         return;
     }
-    auto eventHub = preDragFrameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1454,7 +1455,7 @@ void DragEventActuator::ExecutePreDragFunc(const RefPtr<FrameNode>& node,
     const PreDragStatus preDragStatus, const PreDragStatus onPreDragStatus)
 {
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
@@ -1673,7 +1674,7 @@ bool DragEventActuator::IsAllowedDrag()
     CHECK_NULL_RETURN(gestureHub, false);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
@@ -1959,7 +1960,7 @@ bool DragEventActuator::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto dragPreview = frameNode->GetDragPreviewOption();
     if (!dragPreview.isMultiSelectionEnabled) {
@@ -2358,6 +2359,7 @@ void DragEventActuator::HandleTextDragCallback(Offset offset)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextBase>();
     if (pattern->BetweenSelectedPosition(offset)) {
+        gestureHub->SetIsTextDraggable(true);
         if (textDragCallback_) {
             textDragCallback_(offset);
         }
