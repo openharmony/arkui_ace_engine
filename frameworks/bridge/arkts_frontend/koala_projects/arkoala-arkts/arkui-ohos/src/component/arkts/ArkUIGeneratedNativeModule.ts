@@ -5126,10 +5126,8 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getScrollStep(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_setScrollStep(ptr: KPointer, scrollStep: number): void
-    @ani.unsafe.Quick
-    native static _AxisEvent_getPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _AxisEvent_setPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _AxisEvent_propagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _PixelMapMock_ctor(): KPointer
     @ani.unsafe.Direct
@@ -5234,10 +5232,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FocusAxisEvent_getAxisMap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FocusAxisEvent_setAxisMap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
-    native static _FocusAxisEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _FocusAxisEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _FocusAxisEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _ProgressMask_ctor(value: number, total: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

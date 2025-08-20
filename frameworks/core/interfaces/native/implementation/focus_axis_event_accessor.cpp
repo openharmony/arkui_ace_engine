@@ -62,20 +62,12 @@ void SetAxisMapImpl(Ark_FocusAxisEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetAxisMapImpl doesn't have sense.");
 }
-Callback_Void GetStopPropagationImpl(Ark_FocusAxisEvent peer)
+void StopPropagationImpl(Ark_FocusAxisEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        FocusAxisEventInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
-}
-void SetStopPropagationImpl(Ark_FocusAxisEvent peer,
-                            const Callback_Void* stopPropagation)
-{
-    LOGE("FocusAxisEventAccessor::SetStopPropagationImpl we can only GET stopPropagation callback");
+    CHECK_NULL_VOID(peer);
+    FocusAxisEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
 }
 } // FocusAxisEventAccessor
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
@@ -86,8 +78,7 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
         FocusAxisEventAccessor::GetFinalizerImpl,
         FocusAxisEventAccessor::GetAxisMapImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,
-        FocusAxisEventAccessor::GetStopPropagationImpl,
-        FocusAxisEventAccessor::SetStopPropagationImpl,
+        FocusAxisEventAccessor::StopPropagationImpl,
     };
     return &FocusAxisEventAccessorImpl;
 }
