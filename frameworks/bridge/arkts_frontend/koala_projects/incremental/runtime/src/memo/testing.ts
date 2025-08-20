@@ -54,7 +54,11 @@ export class TestNode extends IncrementalNode {
 export class ReusableTestNode extends TestNode {
     reusePool = new Map<string, Array<Disposable>>()
 
-    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+    override reuse(reuseKey: string | undefined, id: KoalaCallsiteKey): Disposable | undefined {
+        if (reuseKey === undefined) {
+            return undefined;
+        }
+
         if (this.reusePool!.has(reuseKey)) {
             const scopes = this.reusePool!.get(reuseKey)!;
             return scopes.pop();
@@ -62,7 +66,11 @@ export class ReusableTestNode extends TestNode {
         return undefined;
     }
 
-    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+    override recycle(reuseKey: string | undefined, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (reuseKey === undefined) {
+            return false;
+        }
+
         if (!this.reusePool!.has(reuseKey)) {
             this.reusePool!.set(reuseKey, new Array<Disposable>());
         }
