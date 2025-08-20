@@ -286,6 +286,12 @@ void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& sel
     eventHub->SetOnSelect(std::move(selectCallback));
 }
 
+void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
+}
+
 void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node)
@@ -309,12 +315,6 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
             std::move(onStateChange), isStartArea);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, node);
     }
-}
-
-void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
 }
 
 void ListItemModelNG::SetStyle(FrameNode* frameNode, V2::ListItemStyle style)

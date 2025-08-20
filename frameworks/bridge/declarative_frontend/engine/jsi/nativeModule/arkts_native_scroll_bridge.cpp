@@ -622,9 +622,9 @@ ArkUINativeModuleValue ScrollBridge::SetScrollOnScroll(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
         panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+            vm, static_cast<double>(xOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+            vm, static_cast<double>(yOffset.ConvertToVp()));
         panda::Local<panda::JSValueRef> params[2] = { xOffsetParam, yOffsetParam }; // 2: Array .length
         func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
     };
@@ -709,9 +709,9 @@ ArkUINativeModuleValue ScrollBridge::SetScrollOnDidScroll(ArkUIRuntimeCallInfo* 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
         panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
-            vm, static_cast<double>(xOffset.ConvertToVp()));
+            vm, static_cast<float>(xOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
-            vm, static_cast<double>(yOffset.ConvertToVp()));
+            vm, static_cast<float>(yOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
          // 3: Array length
         panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };

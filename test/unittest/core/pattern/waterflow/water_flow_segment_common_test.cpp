@@ -1256,7 +1256,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, SafeAreaExpand001, TestSize.Level1)
         .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
 
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);

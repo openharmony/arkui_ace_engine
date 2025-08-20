@@ -182,6 +182,13 @@ float ScrollableUtils::GetMoveOffset(
     auto curGeometry = curFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(curGeometry, notMove);
     auto curFrameSize = curGeometry->GetFrameSize();
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
+        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
+        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
+        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
+        offsetToTarFrame.GetY());
 
     float diffToTarFrame = param.isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
     if (NearZero(diffToTarFrame)) {

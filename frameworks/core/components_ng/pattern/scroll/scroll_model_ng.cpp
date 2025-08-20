@@ -382,6 +382,23 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 
+void ScrollModelNG::SetScrollSnap(
+    FrameNode* frameNode,
+    std::optional<ScrollSnapAlign> scrollSnapAlign,
+    const std::optional<Dimension>& intervalSize,
+    const std::vector<Dimension>& snapPaginations,
+    const std::optional<bool>& enableSnapToStart,
+    const std::optional<bool>& enableSnapToEnd)
+{
+    SetScrollSnap(
+        frameNode,
+        scrollSnapAlign.value_or(ScrollSnapAlign::NONE),
+        intervalSize.value_or(Dimension()),
+        snapPaginations,
+        std::make_pair(enableSnapToStart.value_or(true), enableSnapToEnd.value_or(true))
+    );
+}
+
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
@@ -841,6 +858,14 @@ void ScrollModelNG::SetZoomScale(FrameNode* frameNode, float scale)
     pattern->SetZoomScale(scale);
 }
 
+float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1.0f);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, 1.0f);
+    return pattern->GetZoomScale();
+}
+
 void ScrollModelNG::ResetZoomScale()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -853,14 +878,6 @@ void ScrollModelNG::ResetZoomScale(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetZoomScale(std::nullopt);
-}
-
-float ScrollModelNG::GetZoomScale(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, 1.0f);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(pattern, 1.0f);
-    return pattern->GetZoomScale();
 }
 
 void ScrollModelNG::SetZoomScaleChangeEvent(std::function<void(float)>&& event)

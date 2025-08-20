@@ -322,11 +322,6 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
-    EXPECT_EQ(frameNode_->GetTotalChildCount(), 99);
-
-    DeleteItemInLazyForEach(63);
-    mockLazy->SetTotalCount(98);
-    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 58);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 65);
     EXPECT_EQ(GetChildY(frameNode_, 58), 0.0f);

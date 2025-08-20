@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)

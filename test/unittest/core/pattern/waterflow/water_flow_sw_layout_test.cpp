@@ -367,6 +367,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(50);
     CreateDone();
+
     pattern_->SetAnimateCanOverScroll(true);
     for (int i = 0; i < 100; i++) {
         UpdateCurrentOffset(300000.0f);
@@ -405,6 +406,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(50);
     CreateDone();
+
     pattern_->SetAnimateCanOverScroll(true);
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
@@ -628,7 +630,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
     MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1.5);
     EXPECT_EQ(GetChildY(frameNode_, 0), -1.5);
 
@@ -651,7 +653,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_TRUE(isOnWillScrollCallBack);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     const auto &info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), -ITEM_MAIN_SIZE * 5);
     EXPECT_EQ(info->startIndex_, 7);
@@ -1920,6 +1922,7 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(2);
     CreateDone();
+
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 200.0f);
     frameNode_->RemoveChildAtIndex(1);
     frameNode_->ChildrenUpdatedFrom(1);
@@ -2109,6 +2112,7 @@ HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
     model.SetFooter(GetDefaultHeaderBuilder());
     CreateDone();
+
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 50.0f);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 

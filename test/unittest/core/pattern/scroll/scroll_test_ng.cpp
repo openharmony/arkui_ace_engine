@@ -54,9 +54,9 @@ void ScrollTestNg::SetUpTestSuite()
 void ScrollTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockAnimationManager::SetVersion(MockAnimationManager::Version::V0);
     ResetMockResourceData();
     g_isConfigChangePerform = false;
-    MockAnimationManager::SetVersion(MockAnimationManager::Version::V0);
 }
 
 void ScrollTestNg::SetUp() {}

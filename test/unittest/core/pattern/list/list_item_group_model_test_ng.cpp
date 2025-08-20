@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ListItemGroupModelTestNg : public TestNG {};
+class ListItemGroupModelTestNg : public ListTestNg {};
 
 /**
  * @tc.name: SetHeader_TwoParameters

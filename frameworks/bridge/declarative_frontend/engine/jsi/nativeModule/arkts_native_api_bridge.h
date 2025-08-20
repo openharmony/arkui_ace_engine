@@ -65,6 +65,7 @@ private:
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -102,8 +103,8 @@ private:
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
     static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -115,7 +116,6 @@ private:
 #endif
     static void RegisterCanvasAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

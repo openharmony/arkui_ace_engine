@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
 
 namespace OHOS::Ace {
@@ -495,6 +496,7 @@ using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
 
 struct ScrollerObserver {
     RefPtr<NG::TouchEventImpl> onTouchEvent;
+    GestureEventFunc onPanActionEndEvent;
     OnReachEvent onReachStartEvent;
     OnReachEvent onReachEndEvent;
     OnScrollStartEvent onScrollStartEvent;

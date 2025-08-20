@@ -402,7 +402,7 @@ private:
     float scrollableDistance_ = 0.0f;
     float controlDistance_ = 0.0f;
     bool  controlDistanceChanged_ = false;
-    float scrollableNodeOffset_  = 0.0f;
+    float scrollableNodeOffset_ = 0.0f;
     bool hasChild_ = false;
     bool preFrameChildState_ = false;
     float friction_ = BAR_FRICTION;

@@ -240,14 +240,14 @@ void ScrollableModelNG::SetEdgeEffect(
 
 void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        ScrollablePaintProperty, ScrollBarMode, static_cast<DisplayMode>(displayNumber), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
+        static_cast<DisplayMode>(displayNumber), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
+        StringUtils::StringToDimensionWithUnit(value), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -301,7 +301,8 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
-    return static_cast<float>(pattern->GetMaxFlingVelocity() / PipelineBase::GetCurrentDensity());
+    const double density = PipelineBase::GetCurrentDensity();
+    return static_cast<float>(pattern->GetMaxFlingVelocity() / density);
 }
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)

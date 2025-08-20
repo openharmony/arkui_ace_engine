@@ -714,6 +714,7 @@ private:
     StartSnapAnimationCallback startSnapAnimationCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
     std::list<GestureEventFunc> panActionEndEvents_;
+    GestureEventFunc actionEnd_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
     FixScrollParamCallback fixScrollParamCallback_;
