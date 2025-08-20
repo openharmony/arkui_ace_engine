@@ -215,7 +215,7 @@ public:
                 pattern->GetAttr<Color>("general_ai_preview_menu_display_failed_font_color", Color());
             theme->previewFailedFontSize_ =
                 pattern->GetAttr<Dimension>("general_ai_preview_menu_display_failed_font_size", 14.0_fp);
-            theme->loactionTitle_ = pattern->GetAttr<std::string>("general_ai_loation_title", "位置");
+            theme->locationTitle_ = pattern->GetAttr<std::string>("general_ai_location_title", "位置");
             theme->linkTitle_ = pattern->GetAttr<std::string>("general_ai_link_title", "网址");
             theme->previewContentSpace_ = pattern->GetAttr<Dimension>("general_ai_content_space", 2.0_vp);
         }
@@ -594,7 +594,7 @@ public:
 
     std::string GetLocationTitle()
     {
-        return loactionTitle_;
+        return locationTitle_;
     }
 
     std::string GetLinkTitle()
@@ -654,7 +654,7 @@ private:
     std::string searchLabel_;
     std::string moreAccessibilityText_;
     std::string backAccessibilityText_;
-    std::string loactionTitle_ = "";
+    std::string locationTitle_ = "";
     std::string linkTitle_ = "";
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
