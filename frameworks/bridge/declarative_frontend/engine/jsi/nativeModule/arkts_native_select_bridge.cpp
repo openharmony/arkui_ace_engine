@@ -1286,7 +1286,8 @@ ArkUINativeModuleValue SelectBridge::ResetOnSelect(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getSelectModifier()->setOnSelect(nativeNode, nullptr);
+    auto callback = [](ArkUINodeHandle node, int32_t index, ArkUI_CharPtr text) {};
+    nodeModifiers->getSelectModifier()->setOnSelect(nativeNode, callback);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
