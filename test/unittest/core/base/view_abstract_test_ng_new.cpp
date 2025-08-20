@@ -2189,4 +2189,139 @@ HWTEST_F(ViewAbstractTestNg, CheckPositionOrOffsetLocalizedEdges002, TestSize.Le
     EXPECT_FALSE(edges.left.has_value());
     EXPECT_FALSE(edges.right.has_value());
 }
+
+/**
+ * @tc.name: RegisterRadiusesResObj
+ * @tc.desc: Test RegisterRadiusesResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterRadiusesResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderRadiusProperty borderRadius;
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topLeft", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topRight", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomLeft", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomRight", borderRadius, resObj);
+    borderRadius.ReloadResources();
+    EXPECT_EQ(borderRadius.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterRadiusesResObj("", borderRadius, nullptr);
+    EXPECT_EQ(borderRadius.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterLocationPropsEdgesResObj
+ * @tc.desc: Test RegisterLocationPropsEdgesResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterLocationPropsEdgesResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    EdgesParam edges;
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.top", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.left", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.bottom", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.right", edges, resObj);
+    edges.ReloadResources();
+    EXPECT_EQ(edges.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("", edges, nullptr);
+    EXPECT_EQ(edges.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterEdgesWidthResObj
+ * @tc.desc: Test RegisterEdgesWidthResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterEdgesWidthResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderWidthProperty borderWidth;
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.top", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.left", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.bottom", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.right", borderWidth, resObj);
+    borderWidth.ReloadResources();
+    EXPECT_EQ(borderWidth.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("", borderWidth, nullptr);
+    EXPECT_EQ(borderWidth.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterEdgeMarginsResObj
+ * @tc.desc: Test RegisterEdgeMarginsResObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterEdgeMarginsResObj, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::MarginProperty margins;
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", margins, resObj);
+    margins.ReloadResources();
+    EXPECT_EQ(margins.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterEdgeMarginsResObj("", margins, nullptr);
+    EXPECT_EQ(margins.resMap_.size(), 4);
+}
+
+/**
+ * @tc.name: RegisterLocalizedBorderColor
+ * @tc.desc: Test RegisterLocalizedBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, RegisterLocalizedBorderColor, TestSize.Level1)
+{
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::BorderColorProperty borderColors;
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.top", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 1);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.start", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 2);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.bottom", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 3);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.end", borderColors, resObj);
+    borderColors.ReloadResources();
+    EXPECT_EQ(borderColors.resMap_.size(), 4);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("", borderColors, nullptr);
+    EXPECT_EQ(borderColors.resMap_.size(), 4);
+}
 } // namespace OHOS::Ace::NG
