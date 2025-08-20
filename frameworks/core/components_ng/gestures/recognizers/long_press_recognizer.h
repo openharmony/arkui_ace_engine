@@ -164,7 +164,6 @@ private:
     TimeStamp time_;
     bool useCatchMode_ = true;
     Point globalPoint_;
-    bool hasRepeated_ = false;
     int32_t longPressFingerCountForSequence_ = 0;
     bool isOnActionTriggered_ = false;
 
