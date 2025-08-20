@@ -69,8 +69,8 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {
@@ -171,18 +171,18 @@ private:
     double GetTextMaxHeight();
     double GetTextMaxWidth();
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
+    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom);
-    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverChangedCallbackId_;
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
-    Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
+    Dimension defaultBottom_;
     bool expandDisplay_ = false;
     Rect uiExtensionHostWindowRect_;
     Dimension limitPos_;

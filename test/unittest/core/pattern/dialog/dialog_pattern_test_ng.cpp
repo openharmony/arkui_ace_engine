@@ -1544,6 +1544,38 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogModelTestNgShowActionSheet002, Tes
 }
 
 /**
+ * @tc.name: GetWindowButtonRect
+ * @tc.desc: Test GetWindowButtonRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, GetWindowButtonRect, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step0. create dialog node.
+    * @tc.expected: the dialog node created successfully.
+    */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipelineContext = dialog->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    ASSERT_NE(avoidInfoMgr, nullptr);
+    avoidInfoMgr->avoidInfo_.needAvoid = false;
+    avoidInfoMgr->avoidInfo_.controlBottonsRect = CONTROL_RECT;
+    RectF floatButtons;
+    pattern->GetWindowButtonRect(floatButtons);
+    EXPECT_EQ(floatButtons, RectF());
+    avoidInfoMgr->avoidInfo_.needAvoid = true;
+    pattern->GetWindowButtonRect(floatButtons);
+    EXPECT_EQ(floatButtons, CONTROL_RECT);
+}
+
+/**
  * @tc.name: DialogModelTestNgShowActionSheet003
  * @tc.desc: Test ActionSheetModelNG's ShowActionSheet.
  * @tc.type: FUNC
@@ -1724,63 +1756,5 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityH
     DialogView::SetDialogAccessibilityHoverConsume(dialog);
     auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
     ASSERT_NE(dialogAccessibilityProperty, nullptr);
-}
-
-/**
- * @tc.name: DialogPatternTestRegisterButtonOnKeyEvent
- * @tc.desc: Test RegisterButtonOnKeyEventRegisterButtonOnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestRegisterButtonOnKeyEvent, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step0. create dialog node.
-    * @tc.expected: the dialog node created successfully.
-    */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    RefPtr<FrameNode> button = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
-        AceType::MakeRefPtr<ButtonPattern>());
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    ButtonInfo buttonInfo = { .text = TITLE };
-    pattern->RegisterButtonOnKeyEvent(buttonInfo, button, -1);
-    auto focusHub = button->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-}
-
-/**
- * @tc.name: GetWindowButtonRect
- * @tc.desc: Test GetWindowButtonRect
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternAdditionalTestNg, GetWindowButtonRect, TestSize.Level1)
-{
-    /**
-    * @tc.steps: step0. create dialog node.
-    * @tc.expected: the dialog node created successfully.
-    */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto pipelineContext = dialog->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
-    ASSERT_NE(avoidInfoMgr, nullptr);
-    avoidInfoMgr->avoidInfo_.needAvoid = false;
-    avoidInfoMgr->avoidInfo_.controlBottonsRect = CONTROL_RECT;
-    RectF floatButtons;
-    pattern->GetWindowButtonRect(floatButtons);
-    EXPECT_EQ(floatButtons, RectF());
-    avoidInfoMgr->avoidInfo_.needAvoid = true;
-    pattern->GetWindowButtonRect(floatButtons);
-    EXPECT_EQ(floatButtons, CONTROL_RECT);
 }
 } // namespace OHOS::Ace::NG

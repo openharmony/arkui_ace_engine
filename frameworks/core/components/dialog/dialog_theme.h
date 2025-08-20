@@ -273,11 +273,6 @@ public:
         return buttonDefaultFontColor_;
     }
 
-    int GetDialogBackgroundBlurStyle() const
-    {
-        return dialogBackgroundBlurStyle_;
-    }
-
     double GetFrameStart() const
     {
         return frameStart_;
@@ -462,31 +457,6 @@ public:
         return columnMeasureType_;
     }
 
-    int32_t GetDialogDoubleBorderEnable() const
-    {
-        return dialogDoubleBorderEnable_;
-    }
-
-    double GetDialogOuterBorderWidth() const
-    {
-        return dialogOuterBorderWidth_;
-    }
-
-    Color GetDialogOuterBorderColor() const
-    {
-        return dialogOuterBorderColor_;
-    }
-
-    double GetDialogInnerBorderWidth() const
-    {
-        return dialogInnerBorderWidth_;
-    }
-
-    Color GetDialogInnerBorderColor() const
-    {
-        return dialogInnerBorderColor_;
-    }
-
     double GetMinFontScaleForElderly() const
     {
         return minFontScaleForElderly_;
@@ -525,6 +495,36 @@ public:
     const Dimension& GetDialogLandscapeHeightBoundary() const
     {
         return dialogLandscapeHeightBoundary_;
+    }
+    
+    int32_t GetDialogDoubleBorderEnable() const
+    {
+        return dialogDoubleBorderEnable_;
+    }
+
+    double GetDialogOuterBorderWidth() const
+    {
+        return dialogOuterBorderWidth_;
+    }
+
+    Color GetDialogOuterBorderColor() const
+    {
+        return dialogOuterBorderColor_;
+    }
+
+    double GetDialogInnerBorderWidth() const
+    {
+        return dialogInnerBorderWidth_;
+    }
+
+    Color GetDialogInnerBorderColor() const
+    {
+        return dialogInnerBorderColor_;
+    }
+
+    int GetDialogBackgroundBlurStyle() const
+    {
+        return dialogBackgroundBlurStyle_;
     }
 
     const Color& GetBackgroudBorderColor() const

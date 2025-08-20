@@ -60,7 +60,10 @@ private:
     void UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog);
     LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
-    void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
+    void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper, bool isTitleCenter);
+    void AnalysisLayoutOfTitleColumn(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& title, bool isTitleCenter);
+    void AnalysisLayoutOfTitle(const RefPtr<LayoutWrapper>& title);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
     void AvoidScreen(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& prop, SizeF childSize);
 
@@ -70,6 +73,7 @@ private:
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
+
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
@@ -98,8 +102,8 @@ private:
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
-    void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
     void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
+    void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
 

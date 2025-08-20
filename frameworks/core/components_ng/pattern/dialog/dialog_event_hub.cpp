@@ -29,7 +29,7 @@ void DialogEventHub::FireSuccessEvent(int32_t buttonIdx, const RefPtr<FrameNode>
 {
     CHECK_NULL_VOID(onSuccess_);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContextRefPtr();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
         [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); },

@@ -28,11 +28,11 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
-#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -445,7 +445,6 @@ private:
     void OnDetachFromMainTree() override;
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
-    void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
