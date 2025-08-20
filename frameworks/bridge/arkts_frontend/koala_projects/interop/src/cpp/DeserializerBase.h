@@ -108,18 +108,19 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
 {
   char *suffixPtr = nullptr;
   float value = std::strtof(string.chars, &suffixPtr);
-  int indexFirst = 0;
-  int indexSecond = 1;
-  int indexThird = 2;
-  int indexFourth = 3;
+    //identify auto
+    int indexFirst = 0;
+    int indexSecond = 1;
+    int indexThird = 2;
+    int indexFourth = 3;
 
-  int autoUnitValue = 5;
-  if (suffixPtr[indexFirst] == 'a' && suffixPtr[indexSecond] == 'u' &&
-    suffixPtr[indexThird] == 't' && suffixPtr[indexFourth] == 'o')
-  {
-      result->unit = autoUnitValue;
-      return;
-  }
+    int autoUnitValue = 5;
+    if (suffixPtr[indexFirst] == 'a' && suffixPtr[indexSecond] == 'u' &&
+        suffixPtr[indexThird] == 't' && suffixPtr[indexFourth] == 'o')
+    {
+        result->unit = autoUnitValue;
+        return;
+    }
 
   if (!suffixPtr || suffixPtr == string.chars)
   {
