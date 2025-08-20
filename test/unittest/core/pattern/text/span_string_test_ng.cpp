@@ -1109,6 +1109,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString015, TestSize.Level1)
     SpanParagraphStyle spanParagraphStyle;
     spanParagraphStyle.align = TextAlign::END;
     spanParagraphStyle.maxLines = 4;
+
     spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
     spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
     spanParagraphStyle.textIndent = Dimension(23);
