@@ -640,21 +640,8 @@ void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t node
 void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
 {
     UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
-    windowSceneVisible_ = visible;
     if (!visible) {
-        auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = WeakClaim(this)] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                if (!pattern->IsWindowSceneVisible()) {
-                    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "window hide by window scene change invisible.");
-                    pattern->OnWindowHide();
-                }
-            }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnWindowSceneInVisible");
+        OnWindowHide();
     }
 }
 
@@ -795,8 +782,6 @@ void UIExtensionPattern::OnWindowHide()
     } else if (state_ == AbilityState::FOREGROUND) {
         NotifyBackground(false);
     }
-    curVisible_ = false;
-    isVisible_ = false;
 }
 
 void UIExtensionPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
@@ -1612,31 +1597,7 @@ bool UIExtensionPattern::GetDensityDpi()
 
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
-    UIEXT_LOGI("The component visiblity property changing from '%{public}s' to '%{public}s'.",
-        visiblityProperty_ ? "visible" : "invisible", visible ? "visible" : "invisible");
-    visiblityProperty_ = visible;
-    if (!visible) {
-        auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak = WeakClaim(this)] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                if (!pattern->GetVisiblityProperty()) {
-                    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "NotifyBackground by change invisible.");
-                    pattern->NotifyBackground();
-                    pattern->SetRealVisible(false);
-                    pattern->SetCurVisible(false);
-                }
-            }, TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnVisibleChange");
-    }
-}
-
-void UIExtensionPattern::OnRealVisibleChangeInner(bool visible)
-{
-    UIEXT_LOGI("visible change inner from '%{public}s' to '%{public}s'.", isVisible_ ? "visible" : "invisible",
+    UIEXT_LOGI("The component is changing from '%{public}s' to '%{public}s'.", isVisible_ ? "visible" : "invisible",
         visible ? "visible" : "invisible");
     isVisible_ = visible;
     if (visible) {
@@ -1806,7 +1767,7 @@ void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
     bool curVisible = !NearEqual(ratio, SHOW_START);
     if (curVisible_ != curVisible) {
         curVisible_ = curVisible;
-        OnRealVisibleChangeInner(curVisible_);
+        OnVisibleChange(curVisible_);
     }
 
     if (needCheckDisplayArea) {

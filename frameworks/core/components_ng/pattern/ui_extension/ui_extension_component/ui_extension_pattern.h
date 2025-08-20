@@ -115,7 +115,6 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void OnRealVisibleChangeInner(bool visible);
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
@@ -275,25 +274,6 @@ public:
     void SetModalRequestFocus(bool requestFocus)
     {
         isModalRequestFocus_ = requestFocus;
-    }
-    bool IsWindowSceneVisible() const
-    {
-        return windowSceneVisible_;
-    }
-
-    bool GetVisiblityProperty() const
-    {
-        return visiblityProperty_;
-    }
-
-    void SetRealVisible(bool isVisible)
-    {
-        isVisible_ = isVisible;
-    }
-
-    void SetCurVisible(bool curVisible)
-    {
-        curVisible_ = curVisible;
     }
 
 protected:
@@ -463,8 +443,6 @@ private:
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
     bool curVisible_ = false; // HandleVisibleArea visible
-    bool windowSceneVisible_ = false;
-    bool visiblityProperty_ = true;  // visibility property
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
