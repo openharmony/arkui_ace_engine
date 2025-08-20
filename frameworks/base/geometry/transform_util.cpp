@@ -601,7 +601,7 @@ bool TransformUtil::DecomposeTransform(DecomposedTransform& out, const Matrix4& 
 
     double r, s, t, x, y, z, w;
     t = q_xx + q_yy + q_zz;
-    if (t > 0) {
+    if (t > (epsilon - 1.0)) {
         r = std::sqrt(1.0 + t);
         s = 0.5 / r;
         w = 0.5 * r;
