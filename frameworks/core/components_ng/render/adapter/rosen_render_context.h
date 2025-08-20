@@ -82,6 +82,9 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
 
+    void CreateNodeByType(
+        const ContextParam& param, bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsContext);
+
     void SyncGeometryFrame(const RectF& paintRect);
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;

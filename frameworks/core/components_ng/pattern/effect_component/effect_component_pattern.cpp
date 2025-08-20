@@ -60,11 +60,15 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
         CHECK_NULL_VOID(rsNode);
         auto surfaceNode = rsNode->ReinterpretCastTo<Rosen::RSSurfaceNode>();
         CHECK_NULL_VOID(surfaceNode);
-        if (effectLayerMap.find(pattern->GetEffectLayer()) == effectLayerMap.end()) {
+        auto effectLayer = pattern->GetEffectLayer();
+        if (effectLayerMap.find(effectLayer) == effectLayerMap.end()) {
+            LOGE("effectLayer is %{public}d is invalid", static_cast<int32_t>(effectLayer));
             return;
         }
         Rosen::TopLayerZOrder zOrder = effectLayerMap[pattern->GetEffectLayer()];
         surfaceNode->SetCompositeLayer(zOrder);
+        LOGI("effectLayer is %{public}d, zOrder is %{public}d", static_cast<int32_t>(effectLayer),
+            static_cast<int32_t>(zOrder));
     });
 
     return false;
