@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
@@ -30,6 +31,15 @@
 
 namespace OHOS::Ace::NG {
 
+void BaseShapePatternTestNg::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+}
+
+void BaseShapePatternTestNg::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+}
 void BaseShapePatternTestNg::CheckSize(bool hasValue)
 {
     auto frameNode = CreadFrameNode();
