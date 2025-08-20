@@ -12651,7 +12651,7 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
-void JSViewAbstract::ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam menuOptionsParam)
+void JSViewAbstract::ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam)
 {
      if (StringToMenuItemType(menuOptionsParam.id) == MenuItemType::UNKNOWN) {
         uint32_t symbolId = 0;
