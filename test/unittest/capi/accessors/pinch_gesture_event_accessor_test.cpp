@@ -49,7 +49,7 @@ namespace {
 HWTEST_F(PinchGestureEventAccessorTest, GetScaleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetScale(value);
         auto arkRes = Converter::Convert<float>(accessor_->getScale(peer_));
@@ -67,7 +67,7 @@ HWTEST_F(PinchGestureEventAccessorTest, SetScaleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setScale(peer_, &value);
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetScale(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetScale";
@@ -82,7 +82,7 @@ HWTEST_F(PinchGestureEventAccessorTest, SetScaleTest, TestSize.Level1)
 HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(value, 0.));
         auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterX(peer_));
@@ -100,7 +100,7 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setPinchCenterX(peer_, &value);
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetPinchCenter().GetX(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetPinchCenterX";
@@ -115,7 +115,7 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
 HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetPinchCenter(Offset(0., value));
         auto arkRes = Converter::Convert<float>(accessor_->getPinchCenterY(peer_));
@@ -133,7 +133,7 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setPinchCenterY(peer_, &value);
-        PinchGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetPinchCenter().GetY(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetPinchCenterY";

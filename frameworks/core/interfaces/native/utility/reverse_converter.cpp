@@ -115,62 +115,6 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
-void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst = peer;
-}
-
-void AssignArkValue(Ark_TapGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<TapGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
-void AssignArkValue(Ark_LongPressGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<LongPressGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
-void AssignArkValue(Ark_PanGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<PanGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
-void AssignArkValue(Ark_PinchGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<PinchGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
-void AssignArkValue(Ark_RotationGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<RotationGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
-void AssignArkValue(Ark_SwipeGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    dst = PeerUtils::CreatePeer<SwipeGestureEventPeer>();
-    if (dst) {
-        dst->SetEventInfo(src);
-    }
-}
-
 void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
 {
     dst.index = Converter::ArkValue<Ark_Number>(0);

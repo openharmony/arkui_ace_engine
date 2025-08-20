@@ -81,4 +81,16 @@ protected:
     ~BaseGestureEventPeerImpl() override = default;
     friend PeerUtils;
 };
+
+template<typename TGestureEventPeer, typename AceGestureEvent,
+    std::enable_if_t<std::is_base_of_v<BaseGestureEventPeer, TGestureEventPeer>, bool> = true,
+    std::enable_if_t<std::is_base_of_v<BaseGestureEvent, AceGestureEvent>, bool> = true>
+static BaseGestureEventPeer* CreateGestureEventPeer(const std::shared_ptr<BaseGestureEvent>& info)
+{
+    auto event = TypeInfoHelper::DynamicCast<AceGestureEvent>(info.get());
+    CHECK_NULL_RETURN(event, nullptr);
+    auto peer = PeerUtils::CreatePeer<TGestureEventPeer>();
+    peer->SetEventInfo(std::static_pointer_cast<AceGestureEvent>(info));
+    return peer;
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

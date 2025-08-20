@@ -47,6 +47,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -159,51 +160,39 @@ Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognize
 
 Ark_BaseGestureEvent CreateArkBaseGestureEvent(const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName)
 {
-    Ark_BaseGestureEvent peer = nullptr;
+    BaseGestureEventPeer* peer = nullptr;
     switch (typeName) {
         case OHOS::Ace::GestureTypeName::TAP_GESTURE: {
-            auto tapGestureEvent = TypeInfoHelper::DynamicCast<TapGestureEvent>(info.get());
-            CHECK_NULL_RETURN(tapGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_TapGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<TapGestureEventPeer, TapGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::LONG_PRESS_GESTURE: {
-            auto longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
-            CHECK_NULL_RETURN(longPressGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_LongPressGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<LongPressGestureEventPeer, LongPressGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
-            auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
-            CHECK_NULL_RETURN(panGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_PanGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<PanGestureEventPeer, PanGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {
-            auto pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(info.get());
-            CHECK_NULL_RETURN(pinchGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_PinchGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<PinchGestureEventPeer, PinchGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::ROTATION_GESTURE: {
-            auto rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(info.get());
-            CHECK_NULL_RETURN(rotationGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_RotationGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<RotationGestureEventPeer, RotationGestureEvent>(info);
             break;
         }
         case OHOS::Ace::GestureTypeName::SWIPE_GESTURE: {
-            auto swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(info.get());
-            CHECK_NULL_RETURN(swipeGestureEvent, peer);
-            peer = Converter::ArkValue<Ark_SwipeGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<SwipeGestureEventPeer, SwipeGestureEvent>(info);
             break;
         }
         default:
-            peer = Converter::ArkValue<Ark_BaseGestureEvent>(info);
+            peer = GeneratedModifier::CreateGestureEventPeer<GeneratedModifier::BaseGestureEventPeerImpl,
+                BaseGestureEvent>(info);
             break;
     }
-    if (peer) {
-        peer->SetRecognizerType(typeName);
-    }
+    CHECK_NULL_RETURN(peer, nullptr);
+    peer->SetRecognizerType(typeName);
     return peer;
 }
 }
