@@ -139,6 +139,62 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
     pattern->subContainer_ = subContainer;
 }
 
+/**
+ * @tc.name: FormPatternTest_002
+ * @tc.desc: OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->OnModifyDone();
+    EXPECT_FALSE(pattern->isSnapshot_);
+
+    auto host = pattern->GetHost();
+
+    auto gestureEventHub = formNode->GetOrCreateGestureEventHub();
+    formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = nullptr;
+    pattern->OnModifyDone();
+    EXPECT_FALSE(pattern->isSnapshot_);
+    formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = gestureEventHub;
+
+    pattern->OnModifyDone();
+    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+
+    host = pattern->GetHost();
+    auto layoutProperty = host->layoutProperty_;
+    EXPECT_NE(layoutProperty, nullptr);
+    host->layoutProperty_ = nullptr;
+    pattern->OnModifyDone();
+    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    host->layoutProperty_ = layoutProperty;
+
+    auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
+    CalcSize idealSize = { CalcLength(ZERO), CalcLength(ZERO) };
+    calcLayoutConstraint->minSize = idealSize;
+    calcLayoutConstraint->maxSize = idealSize;
+
+    pattern->OnModifyDone();
+    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    layoutConstraint = std::move(calcLayoutConstraint);
+    EXPECT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
+
+    auto size = layoutConstraint->selfIdealSize;
+    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize();
+    pattern->OnModifyDone();
+    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = size;
+
+    auto sizeWidth = size->Width();
+    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_.reset();
+    pattern->OnModifyDone();
+    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_ = sizeWidth;
+}
 
 /**
  * @tc.name: FormPatternTest_003
@@ -676,63 +732,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_021, TestSize.Level1)
 
     pattern->OnVisibleChange(false);
     EXPECT_EQ(pattern->isVisible_, false);
-}
-
-/**
- * @tc.name: FormPatternTest_002
- * @tc.desc: OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    EXPECT_NE(pattern, nullptr);
-
-    pattern->OnModifyDone();
-    EXPECT_FALSE(pattern->isSnapshot_);
-
-    auto host = pattern->GetHost();
-
-    auto gestureEventHub = formNode->GetOrCreateGestureEventHub();
-    formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = nullptr;
-    pattern->OnModifyDone();
-    EXPECT_FALSE(pattern->isSnapshot_);
-    formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_ = gestureEventHub;
-
-    pattern->OnModifyDone();
-    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
-
-    host = pattern->GetHost();
-    auto layoutProperty = host->layoutProperty_;
-    EXPECT_NE(layoutProperty, nullptr);
-    host->layoutProperty_ = nullptr;
-    pattern->OnModifyDone();
-    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
-    host->layoutProperty_ = layoutProperty;
-
-    auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
-    std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
-    CalcSize idealSize = { CalcLength(ZERO), CalcLength(ZERO) };
-    calcLayoutConstraint->minSize = idealSize;
-    calcLayoutConstraint->maxSize = idealSize;
-
-    pattern->OnModifyDone();
-    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
-    layoutConstraint = std::move(calcLayoutConstraint);
-    EXPECT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
-
-    auto size = layoutConstraint->selfIdealSize;
-    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize();
-    pattern->OnModifyDone();
-    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
-    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = size;
-
-    auto sizeWidth = size->Width();
-    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_.reset();
-    pattern->OnModifyDone();
-    EXPECT_EQ(formNode->GetOrCreateEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
-    host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_ = sizeWidth;
 }
 
 /**
