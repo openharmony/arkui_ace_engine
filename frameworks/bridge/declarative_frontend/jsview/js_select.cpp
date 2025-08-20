@@ -153,11 +153,11 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
-    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
     JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
     JSClass<JSSelect>::StaticMethod("showInSubWindow", &JSSelect::SetShowInSubWindow);
     JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
 
@@ -197,7 +197,6 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     int32_t value = 0;
     RefPtr<ResourceObject> resObj;
     bool result = ParseJsInteger<int32_t>(info[0], value, resObj);
-
     if (value < -1) {
         value = -1;
     }
@@ -1048,32 +1047,6 @@ void JSSelect::SetDirection(const std::string& dir)
     SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 
-void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto menuOptionArg = info[0];
-    auto menuTheme = GetTheme<NG::MenuTheme>();
-    NG::MenuParam menuParam;
-    MenuDefaultParam(menuParam);
-    if (!menuOptionArg->IsObject()) {
-        NG::BorderWidthProperty outlineWidth;
-        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
-        menuParam.outlineWidth = outlineWidth;
-        NG::BorderColorProperty outlineColor;
-        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
-        menuParam.outlineColor = outlineColor;
-    } else {
-        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
-        auto outlineWidthValue = menuOptions->GetProperty("width");
-        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
-        auto outlineColorValue = menuOptions->GetProperty("color");
-        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
-    }
-    SelectModel::GetInstance()->SetMenuOutline(menuParam);
-}
-
 void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
 {
     std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
@@ -1117,6 +1090,32 @@ void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
     }
     JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
     SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuOptionArg = info[0];
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (!menuOptionArg->IsObject()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(menuOptionArg);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
 }
 
 void JSSelect::SetShowInSubWindow(const JSCallbackInfo& info)

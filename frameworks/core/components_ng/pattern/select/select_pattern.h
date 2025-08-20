@@ -213,13 +213,13 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
-    void ShowSelectMenu();
-    void ShowSelectMenuInSubWindow();
 
     Dimension GetFontSize();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
+    void ShowSelectMenu();
+    void ShowSelectMenuInSubWindow();
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     void SetDivider(const SelectDivider& divider);
@@ -237,7 +237,7 @@ public:
         return MakeRefPtr<SelectLayoutProperty>();
     }
     void ResetFontColor();
-    void SetMenuOutline(const MenuParam& menuParam);
+    void DumpInfo() override;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
     void SetArrowColor(const Color& color);
@@ -253,8 +253,7 @@ public:
     void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
     void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
-    void DumpInfo() override;
-
+    void SetMenuOutline(const MenuParam& menuParam);
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
     void SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);

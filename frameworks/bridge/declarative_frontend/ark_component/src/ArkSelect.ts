@@ -177,14 +177,15 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
     return this;
   }
-  menuOutline(outline: MenuOutlineOptions): this {
-    modifierWithKey(
-      this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
-  }
   avoidance(mode: AvoidanceMode): this {
     modifierWithKey(
       this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
+  }
+  menuOutline(outline: MenuOutlineOptions): this {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+      return this;
   }
 }
 
