@@ -42,6 +42,8 @@ public:
     virtual RefPtr<FrameNode> CreadFrameNode();
     virtual void Draw(RefPtr<FrameNode> frameNode);
     ~BaseShapePatternTestNg() = default;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
     static constexpr float WIDTH = 200.0f;
     static constexpr float HEIGHT = 300.0f;
