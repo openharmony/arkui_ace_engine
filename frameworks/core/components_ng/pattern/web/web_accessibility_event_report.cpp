@@ -37,21 +37,22 @@ WebAccessibilityEventReport::WebAccessibilityEventReport(const WeakPtr<Pattern>&
     pattern_ = pattern;
 }
 
-void WebAccessibilityEventReport::RegisterAllReportEventCallBack()
+void WebAccessibilityEventReport::RegisterAllReportEventCallback()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::RegisterAllReportEventCallBack");
-    auto focusCallback = [](int64_t accessibilityId, const std::string data) {
-        UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data, FOCUS_SYMBOL);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::RegisterAllReportEventCallback");
+    auto focusCallback = [](int64_t accessibilityId, const std::string& data) {
+        UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, FOCUS_SYMBOL);
     };
-    auto blurCallback = [](int64_t accessibilityId, const std::string data) {
-        UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data, BLUR_SYMBOL);
+    auto blurCallback = [](int64_t accessibilityId, const std::string& data) {
+        UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, BLUR_SYMBOL);
     };
-    auto textChangeCallback = [](int64_t accessibilityId, const std::string data) {
-        UiSessionManager::GetInstance()->ReportWebUnfocusEvent(accessibilityId, data, TEXT_CHANGE_SYMBOL);
+    auto textChangeCallback = [](int64_t accessibilityId, const std::string& data) {
+        UiSessionManager::GetInstance()->ReportWebInputEvent(accessibilityId, data, TEXT_CHANGE_SYMBOL);
     };
     RegisterCallback(std::move(focusCallback), AccessibilityEventType::FOCUS);
     RegisterCallback(std::move(blurCallback), AccessibilityEventType::BLUR);
     RegisterCallback(std::move(textChangeCallback), AccessibilityEventType::TEXT_CHANGE);
+    SetIsFirstRegister(false);
 }
 
 void WebAccessibilityEventReport::RegisterCallback(EventReportCallback&& callback, AccessibilityEventType type)
@@ -72,13 +73,13 @@ void WebAccessibilityEventReport::RegisterCallback(EventReportCallback&& callbac
     }
     auto webPattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetAccessibilityState(true);
+    webPattern->SetAccessibilityState(true, isFirstRegister_);
     webPattern->SetTextEventAccessibilityEnable(true);
 }
 
-void WebAccessibilityEventReport::UnRegisterCallback()
+void WebAccessibilityEventReport::UnregisterCallback()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::UnRegisterCallback");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebAccessibilityEventReport::UnregisterCallback");
     textFocusCallback_ = nullptr;
     textBlurCallback_ = nullptr;
     textChangeCallback_ = nullptr;

@@ -96,7 +96,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
     }
 }
 
-void UiSessionManagerOhos::ReportWebUnfocusEvent(
+void UiSessionManagerOhos::ReportWebInputEvent(
     int64_t accessibilityId, const std::string& data, const std::string& type)
 {
     auto jsonValue = InspectorJsonUtil::Create(true);
@@ -110,7 +110,7 @@ void UiSessionManagerOhos::ReportWebUnfocusEvent(
         if (reportService != nullptr) {
             reportService->ReportWebUnfocusEvent(accessibilityId, jsonValue->ToString());
         } else {
-            LOGW("report web unfocus event failed, process id:%{public}d", pair.first);
+            LOGW("report web input event failed, process id:%{public}d", pair.first);
         }
     }
 }

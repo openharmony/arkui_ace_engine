@@ -1137,12 +1137,6 @@ void WebPattern::OnAttachToFrameNode()
     });
     UpdateTransformHintChangedCallbackId(callbackId);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToFrameNode, register event report callback");
-        auto report = GetAccessibilityEventReport();
-        CHECK_NULL_VOID(report);
-        report->RegisterAllReportEventCallBack();
-    }
     pipeline->RegisterListenerForTranslate(WeakClaim(RawPtr(host)));
     EventRecorder::Get().OnAttachWeb(host);
 #endif
@@ -1167,10 +1161,10 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnDetachFromFrameNode UnRegisterCallback");
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnDetachFromFrameNode, unregister event report callback");
         auto report = GetAccessibilityEventReport();
         CHECK_NULL_VOID(report);
-        report->UnRegisterCallback();
+        report->UnregisterCallback();
     }
     pipeline->UnRegisterListenerForTranslate(id);
     EventRecorder::Get().OnDetachWeb(id);
@@ -3912,6 +3906,9 @@ void WebPattern::OnModifyDone()
     // Initialize web params.
     InitFeatureParam();
     InitializeAccessibility();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    InitInputEventReportCallback();
+#endif
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [weak = AceType::WeakClaim(this)]() {
@@ -8369,6 +8366,20 @@ RefPtr<WebAccessibilityEventReport> WebPattern::GetAccessibilityEventReport()
         webAccessibilityEventReport_ = AceType::MakeRefPtr<WebAccessibilityEventReport>(WeakClaim(this));
     }
     return webAccessibilityEventReport_;
+}
+
+void WebPattern::InitInputEventReportCallback()
+{
+    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitInputEventReportCallback, register event report callback");
+        auto report = GetAccessibilityEventReport();
+        CHECK_NULL_VOID(report);
+        report->SetIsFirstRegister(true);
+        report->RegisterAllReportEventCallback();
+    } else if (webAccessibilityEventReport_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::InitInputEventReportCallback, unregister event report callback");
+        webAccessibilityEventReport_->UnregisterCallback();
+    }
 }
 
 void WebPattern::SetTextEventAccessibilityEnable(bool enable)

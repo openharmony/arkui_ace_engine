@@ -6755,9 +6755,9 @@ void FrameNode::NotifyWebPattern(bool isRegister)
         auto report = pattern->GetAccessibilityEventReport();
         CHECK_NULL_VOID(report);
         if (isRegister) {
-            report->RegisterAllReportEventCallBack();
+            report->RegisterAllReportEventCallback();
         } else {
-            report->UnRegisterCallback();
+            report->UnregisterCallback();
         }
     }
 #endif
