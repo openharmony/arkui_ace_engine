@@ -95,7 +95,7 @@ std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::s
     return std::string();
 }
 
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::Converter::ResourceType type)
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::ResourceType type)
 {
     return {
         .id = Converter::ArkValue<Ark_Number>(id),
@@ -106,7 +106,7 @@ Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::Converter::ResourceType 
     };
 }
 
-Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::Converter::ResourceType type)
+Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::ResourceType type)
 {
     static std::vector<std::unique_ptr<Ark_String>> s_strCache;
     s_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));

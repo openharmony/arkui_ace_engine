@@ -496,7 +496,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     double testVal = 0.317;
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
-    auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::FLOAT};
+    auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::FLOAT};
     auto friction = CreateResourceUnion<Opt_Union_Number_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);

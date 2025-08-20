@@ -316,7 +316,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
 
     std::string text = "S";
     std::string resName = "app.string.symbol";
-    Ark_Resource value = CreateResource(resName.c_str(), Converter::ResourceType::INTEGER);
+    Ark_Resource value = CreateResource(resName.c_str(), ResourceType::INTEGER);
     AddResource(resName, text);
 
     auto options = Converter::ArkValue<Opt_RichEditorSymbolSpanOptions>(symbolSpanOptions);

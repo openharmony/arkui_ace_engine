@@ -425,7 +425,7 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
     for (auto& [input, value, expected] : controlButtonIconStringValues) {
         checkValue(input, expected, Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(value));
     }
-    auto res = CreateResource(RES_SRC_TEST, Converter::ResourceType::STRING);
+    auto res = CreateResource(RES_SRC_TEST, ResourceType::STRING);
     auto valueRes = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_Resource>(res);
     checkValue(ICON_STRING, ICON_STRING, valueRes);
 }

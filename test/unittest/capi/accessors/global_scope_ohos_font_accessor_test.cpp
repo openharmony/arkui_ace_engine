@@ -82,7 +82,7 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTest, TestSize.Level1)
 HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTestResurse, TestSize.Level1)
 {
     ASSERT_NE(accessor_->registerFont, nullptr);
-    const auto RES_NAME_ID = NamedResourceId { "text_resource_name", Converter::ResourceType::STRING };
+    const auto RES_NAME_ID = NamedResourceId { "text_resource_name", ResourceType::STRING };
 
     auto arkResource = CreateResource(RES_NAME_ID);
 

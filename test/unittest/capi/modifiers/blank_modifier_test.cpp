@@ -65,12 +65,12 @@ HWTEST_F(BlankModifierTest, BlankModifierTest001, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto optResNameColor = CreateResourceUnion<Opt_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", ResourceType::COLOR});
     modifier_->setColor(node_, &optResNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
+    auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, ResourceType::COLOR});
     modifier_->setColor(node_, &optResIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)

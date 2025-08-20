@@ -65,12 +65,12 @@ const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME = "disableTextStyleAnimation";
 const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME = "defaultTextStyle";
 
-const auto RES_STR_1_ID = IntResourceId { 111, Converter::ResourceType::STRING };
-const auto RES_STR_2_ID = IntResourceId { 222, Converter::ResourceType::STRING };
-const auto RES_STR_3_ID = IntResourceId { 333, Converter::ResourceType::STRING };
-const auto RES_PIC_1_ID = IntResourceId { 444, Converter::ResourceType::STRING };
-const auto RES_PIC_2_ID = IntResourceId { 555, Converter::ResourceType::STRING };
-const auto RES_PIC_3_ID = IntResourceId { 666, Converter::ResourceType::STRING };
+const auto RES_STR_1_ID = IntResourceId { 111, ResourceType::STRING };
+const auto RES_STR_2_ID = IntResourceId { 222, ResourceType::STRING };
+const auto RES_STR_3_ID = IntResourceId { 333, ResourceType::STRING };
+const auto RES_PIC_1_ID = IntResourceId { 444, ResourceType::STRING };
+const auto RES_PIC_2_ID = IntResourceId { 555, ResourceType::STRING };
+const auto RES_PIC_3_ID = IntResourceId { 666, ResourceType::STRING };
 const auto TEST_COMMENT_ID = 0;
 const auto RANGE_ID = 1;
 const auto VALUES_ID = 2;
@@ -139,7 +139,7 @@ const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 

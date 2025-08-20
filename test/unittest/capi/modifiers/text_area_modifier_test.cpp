@@ -50,9 +50,9 @@ const std::string STR_TEST_TEXT2("test_text2");
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
-const auto COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::COLOR);
-const auto COLOR_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
-const auto WRONG_COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::STRING);
+const auto COLOR_NAME = NamedResourceId("color_name", ResourceType::COLOR);
+const auto COLOR_ID = IntResourceId(1234, ResourceType::COLOR);
+const auto WRONG_COLOR_NAME = NamedResourceId("color_name", ResourceType::STRING);
 const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
 const std::string TEST_CONTENT_ONE = "ContentTestOne";
 const std::string TEST_CONTENT_TWO = "ContentTestTwo";
@@ -134,7 +134,7 @@ const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
 };
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN_RES = {
-    { CreateResourceUnion<Ark_Union_Number_String_Resource>(IntResourceId(1234, Converter::ResourceType::STRING)),
+    { CreateResourceUnion<Ark_Union_Number_String_Resource>(IntResourceId(1234, ResourceType::STRING)),
         "0.00px" }
 };
 
@@ -227,7 +227,7 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 };
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
@@ -651,7 +651,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
         EXPECT_EQ(resourceId, expectedResId);
         g_EventTestKey = enterKeyType;
     };
-    
+
     auto func = Converter::ArkValue<TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
     modifier_->setOnSubmit1(node_, &func);
     TextFieldCommonEvent event;
