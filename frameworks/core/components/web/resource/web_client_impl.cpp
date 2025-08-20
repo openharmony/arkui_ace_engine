@@ -1549,6 +1549,6 @@ void WebClientImpl::OnInsertBlanklessFrameWithSize(const std::string& pathToFram
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
-    delegate->CreateSnapshotFrameNode(pathToFrame);
+    delegate->CreateSnapshotFrameNode(pathToFrame, width, height);
 }
 } // namespace OHOS::Ace
