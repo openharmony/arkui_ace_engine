@@ -36,15 +36,15 @@ constexpr double JUDGE_DISTANCE = 3.125;
 constexpr int64_t INVALID_DATA = -1;
 }
 
+struct ReportConfig {
+    bool isReportTid = false;
+    uint64_t tid = 0;
+};
+
 struct ResEventInfo {
     TimeStamp timeStamp;
     Offset offset;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-};
-
-struct ReportConfig {
-    bool isReportTid = false;
-    uint64_t tid = 0;
 };
 
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
@@ -64,12 +64,12 @@ public:
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
+    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
         const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
     bool AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
-    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);

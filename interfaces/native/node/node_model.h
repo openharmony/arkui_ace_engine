@@ -50,8 +50,8 @@ struct ArkUI_Node {
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
-    void* imageFrameInfos = nullptr;
     void* drawableDescriptor = nullptr;
+    void* imageFrameInfos = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
     void* progressLinearStyle = nullptr;
