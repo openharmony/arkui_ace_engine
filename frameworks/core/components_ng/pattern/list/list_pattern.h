@@ -460,6 +460,7 @@ public:
     {
         draggingIndex_ = index;
     }
+    bool LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup);
 
 protected:
     void OnModifyDone() override;
@@ -580,7 +581,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
     // focus
-    bool LayoutListForFocus(int32_t nextIndex, int32_t curIndex);
     bool IsLayout(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
     WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
