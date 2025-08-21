@@ -420,9 +420,6 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
 {
     std::string callbackName = GetCallbackName(callback);
     ACE_SCOPED_TRACE("PinchRecognizer %s, currentDev_: %f", callbackName.c_str(), currentDev_);
-    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
-        localMatrix_.clear();
-    }
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
     }
@@ -434,6 +431,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         HandleGestureAccept(info, type, GestureListenerType::PINCH);
         callbackFunction(info);
         HandleReports(info, type);
+    }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
     }
 }
 
