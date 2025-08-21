@@ -52,7 +52,7 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver {
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }
