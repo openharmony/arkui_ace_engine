@@ -28,9 +28,9 @@ class BuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHan
         this.source = source;
     }
     override get(target: T, name: string): Any {
-        const propertyGetter = this.source.get(name);
+        const propertyGetter: (() => Any) | undefined = this.source.get(name);
         if (propertyGetter) {
-            return propertyGetter!();
+            return (propertyGetter as () => Any)();
         }
         return super.get(target, name);
     }
