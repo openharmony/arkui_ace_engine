@@ -10585,7 +10585,7 @@ void RichEditorPattern::HandleOnCameraInput()
     StartTwinkling();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (imeShown_) {
-        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+        inputMethod->StartInputTypeAsync(MiscServices::InputType::CAMERA_INPUT);
     } else {
         HandleOnEditChanged(true);
         auto optionalTextConfig = GetMiscTextConfig();
