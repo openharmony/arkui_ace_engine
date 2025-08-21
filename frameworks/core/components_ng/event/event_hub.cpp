@@ -1140,7 +1140,7 @@ void EventHub::FireUntriggeredInnerOnAreaChanged(
     hasInnerAreaChangeUntriggered_.clear();
 }
 
-void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
+void EventHub::FireDrawCompletedNDKCallback(const RefPtr<PipelineContext>& pipeline)
 {
     if (!ndkDrawCompletedCallback_) {
         return;
