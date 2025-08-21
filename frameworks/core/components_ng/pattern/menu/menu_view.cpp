@@ -17,10 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -262,7 +262,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 }
 
 void MountScrollToMenu(
-    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, RefPtr<FrameNode> menuNode)
 {
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
@@ -629,7 +629,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu(HideMenuType::VIEW_DRAG_END);
 }
 
@@ -717,6 +716,30 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
         previewPattern->GetHoverImageAfterScaleHeight()) / HALF_DIVIDE));
 }
 
+void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& imageNode)
+{
+    auto targetProps = targetNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(targetProps);
+    targetProps->SetOnAccessibilityFocusCallback([targetWK = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+        imageWK = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool focus) {
+        if (!focus) {
+            auto targetNode = targetWK.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            auto context = targetNode->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto pixelMap = context->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(pixelMap);
+            auto imageNode = imageWK.Upgrade();
+            CHECK_NULL_VOID(imageNode);
+            auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            props->UpdateAutoResize(false);
+            props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+            imageNode->MarkModifyDone();
+        }
+    });
+}
+
 BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_RETURN(previewNode, {});
@@ -762,11 +785,15 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
+    SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
@@ -1498,7 +1525,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
-    MountScrollToMenu(customNode, scroll, type, menuNode);
+    MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
@@ -1533,6 +1560,12 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
+            if (!menuParamValue.borderRadius->radiusTopLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusTopRight.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomRight.has_value()) {
+                menuParamValue.borderRadius = std::nullopt;
+            }
         }
         if (menuParamValue.previewBorderRadius) {
             menuParamValue.previewBorderRadius->ReloadResources();

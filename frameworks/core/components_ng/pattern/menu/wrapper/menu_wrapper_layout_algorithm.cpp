@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 
-#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -64,18 +63,14 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // first layout after created subwindow, constraint is zero
     CheckLayoutConstraint(layoutConstraint, layoutWrapper->GetHostNode());
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (child->CheckNeedForceMeasureAndLayout()) {
-            child->Measure(layoutConstraint);
-        }
+        child->Measure(layoutConstraint);
     }
 }
 
 void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        if (child->CheckNeedForceMeasureAndLayout()) {
-            child->Layout();
-        }
+        child->Layout();
     }
 }
 
