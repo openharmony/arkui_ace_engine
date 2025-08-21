@@ -1032,7 +1032,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep)
 bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
 {
     if (IsHomeOrEndStep(moveStep)) {
-        if (!GetIsFocusGroup() && IsNestingFocusGroup()) {
+        if (!GetIsFocusGroup() || IsNestingFocusGroup()) {
             return false;
         }
         auto nextNode = GetHeadOrTailChild(!IsFocusStepForward(moveStep), true);
