@@ -60,18 +60,6 @@ public:
         ResetWrapLayoutAttribute();
     }
 
-    std::pair<bool, bool> GetPercentSensitive() override
-    {
-        auto flexDirection = GetFlexDirection().value_or(FlexDirection::ROW);
-        auto res = LayoutProperty::GetPercentSensitive();
-        if (flexDirection == FlexDirection::ROW || flexDirection == FlexDirection::ROW_REVERSE) {
-            res.first = true;
-        } else if (flexDirection == FlexDirection::COLUMN || flexDirection == FlexDirection::COLUMN_REVERSE) {
-            res.second = true;
-        }
-        return res;
-    }
-
     ACE_DEFINE_PROPERTY_GROUP(FlexLayoutAttribute, FlexLayoutAttribute);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, FlexDirection, FlexDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, MainAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);

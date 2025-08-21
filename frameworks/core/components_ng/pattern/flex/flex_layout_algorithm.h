@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,7 +142,7 @@ private:
                 break;
         }
     }
-
+    void UpdatePercentSensitive(LayoutWrapper* layoutWrapper);
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
     float crossAxisSize_ = 0.0f;
@@ -169,6 +169,7 @@ private:
     bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
+    bool isUsingPercentReference_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

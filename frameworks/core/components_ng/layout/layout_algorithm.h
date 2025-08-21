@@ -46,6 +46,8 @@ public:
         OnReset();
     }
 
+    void SetHeightPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
+    void SetWidthPercentSensitive(LayoutWrapper *layoutWrapper, bool value = true);
     virtual std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/)
     {

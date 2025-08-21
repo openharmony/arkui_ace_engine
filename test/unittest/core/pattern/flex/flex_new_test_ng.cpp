@@ -29,7 +29,6 @@ const float RK356_WIDTH = 720.0f;
 const float RK356_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const float ZERO = 0.0f;
-const float INFINITY_NUM = 1000000.0f;
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 } // namespace
 class FlexNewTestNG : public FlexBaseTestNG {
@@ -802,35 +801,6 @@ HWTEST_F(FlexNewTestNG, CalcItemCrossAxisOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FlexInfinityPercentHeight001
- * @tc.desc: test flex ignoreLayoutSafeArea
- * @tc.type: FUNC
- */
-HWTEST_F(FlexNewTestNG, FlexInfinityPercentHeight001, TestSize.Level1)
-{
-    auto frameNode = CreateColumn([this](ColumnModelNG model) {});
-    auto flexColumn = CreateFlexRow([this](FlexModelNG model) { model.SetDirection(FlexDirection::COLUMN); });
-    auto flexRow = CreateFlexRow([this](FlexModelNG model) { model.SetDirection(FlexDirection::ROW); });
-    LayoutConstraintF parentConstraint { .percentReference { RK356_WIDTH, RK356_HEIGHT },
-        .maxSize { RK356_WIDTH, INFINITY_NUM } };
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateLayoutConstraint(parentConstraint);
-    auto res = layoutProperty->GetPercentSensitive();
-    EXPECT_EQ(res.first, false);
-    EXPECT_EQ(res.second, false);
-    auto flexColumnLayoutProperty = flexColumn->GetLayoutProperty();
-    flexColumnLayoutProperty->UpdateLayoutConstraint(parentConstraint);
-    auto flexColumnSensitive = flexColumnLayoutProperty->GetPercentSensitive();
-    EXPECT_EQ(flexColumnSensitive.first, false);
-    EXPECT_EQ(flexColumnSensitive.second, true);
-    auto flexRowLayoutProperty = flexRow->GetLayoutProperty();
-    flexRowLayoutProperty->UpdateLayoutConstraint(parentConstraint);
-    auto flexRowSensitive = flexRowLayoutProperty->GetPercentSensitive();
-    EXPECT_EQ(flexRowSensitive.first, true);
-    EXPECT_EQ(flexRowSensitive.second, false);
-}
-
-/**
  * @tc.name: FlexIgnoreLayoutSafeArea001
  * @tc.desc: test flex ignoreLayoutSafeArea
  * @tc.type: FUNC
@@ -1489,5 +1459,102 @@ HWTEST_F(FlexNewTestNG, FlexWrapTest001, TestSize.Level1)
     auto offset2 = geometryNode2->GetFrameOffset();
     EXPECT_EQ(size2, SizeF(162.5f, 100.0f));
     EXPECT_EQ(offset2, OffsetF(162.5f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdatePercentSensitiveTest
+ * @tc.desc: test UpdatePercentSensitive
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, UpdatePercentSensitiveTest, TestSize.Level1)
+{
+    auto flexNode = CreateFlexRow([this](FlexModelNG model) {});
+    FlexLayoutAlgorithm algorithm;
+    algorithm.UpdatePercentSensitive(Referenced::RawPtr(flexNode));
+    auto layoutAlgorithmWrapper = flexNode->GetLayoutAlgorithm();
+    /**
+     * @tc.expected: widthPercent_ == false, heightPercent_ == false
+     */
+    EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentHeight());
+    EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentWidth());
+    algorithm.isUsingPercentReference_ = true;
+    algorithm.UpdatePercentSensitive(Referenced::RawPtr(flexNode));
+    /**
+     * @tc.expected: isUsingPercentReference_ == true means flexAlgorithm use percentReference
+     *               to initialize horizontal mainAxis size so widthPercent_ == true
+     */
+    EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentHeight());
+    EXPECT_TRUE(layoutAlgorithmWrapper->GetPercentWidth());
+    algorithm.direction_ = FlexDirection::COLUMN;
+    algorithm.UpdatePercentSensitive(Referenced::RawPtr(flexNode));
+    /**
+     * @tc.expected: isUsingPercentReference_ == true means flexAlgorithm use percentReference
+     *               to initialize horizontal mainAxis size so heightPercent_ == true
+     */
+    EXPECT_TRUE(layoutAlgorithmWrapper->GetPercentHeight());
+}
+
+/**
+ * @tc.name: SetInitMainAxisSizeTest
+ * @tc.desc: test SetInitMainAxisSize set isUsingPercentReference_ correctly
+ *           test flex layout algorithm update percentSensitive correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, SetInitMainAxisSizeTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(12);
+    auto flexNode = CreateFlexRow([this](FlexModelNG model) {});
+    auto layoutAlgorithmWrapper = flexNode->GetLayoutAlgorithm();
+    FlexLayoutAlgorithm algorithm;
+    algorithm.direction_ = FlexDirection::COLUMN;
+    algorithm.mainAxisSize_ = -1.0f;
+    LayoutConstraintF constraint;
+    flexNode->GetLayoutProperty()->UpdateLayoutConstraint(constraint);
+    /**
+     * @tc.expected: use percentReference to initialize mainAxis size, isUsingPercentReference_ == true
+     */
+    algorithm.SetInitMainAxisSize(Referenced::RawPtr(flexNode));
+    algorithm.isLinearLayoutFeature_ = false;
+    EXPECT_TRUE(algorithm.isUsingPercentReference_);
+    /**
+     * @tc.expected: when totalFlexWeight_ > 0, set percentSensitiveHeight to true
+     */
+    algorithm.totalFlexWeight_ = 10;
+    FlexItemProperties flexItemProperty;
+    algorithm.MeasureAndCleanMagicNodes(Referenced::RawPtr(flexNode), flexItemProperty);
+    EXPECT_TRUE(layoutAlgorithmWrapper->GetPercentHeight());
+    /**
+     * @tc.expected: when isInfiniteLayout_ is false, percentSensitiveHeight should be false
+     */
+    algorithm.totalFlexWeight_= 0;
+    algorithm.maxDisplayPriority_= 10;
+    algorithm.isInfiniteLayout_ = false;
+    layoutAlgorithmWrapper->SetPercentHeight(false);
+    algorithm.MeasureAndCleanMagicNodes(Referenced::RawPtr(flexNode), flexItemProperty);
+    EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentHeight());
+}
+
+/**
+ * @tc.name: MeasureAndCleanMagicNodesTest
+ * @tc.desc: test flex layout algorithm update percentSensitive correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodesTest, TestSize.Level1)
+{
+    auto flexNode = CreateFlexRow([this](FlexModelNG model) {
+        CreateText(u"text1", [this](TextModelNG model) {
+        });
+    });
+    LayoutConstraintF constraint;
+    constraint.minSize.SetHeight(100.f);
+    auto layoutProperty = flexNode->GetLayoutProperty();
+    layoutProperty->UpdateLayoutConstraint(constraint);
+    layoutProperty->UpdateContentConstraint();
+    FlexLayoutAlgorithm algorithm;
+    algorithm.Measure(Referenced::RawPtr(flexNode));
+    auto layoutAlgorithmWrapper = flexNode->GetLayoutAlgorithm();
+    EXPECT_FALSE(layoutAlgorithmWrapper->GetPercentWidth());
 }
 } // namespace OHOS::Ace::NG

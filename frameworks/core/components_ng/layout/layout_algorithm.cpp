@@ -93,4 +93,20 @@ void LayoutAlgorithmWrapper::SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgor
     absLayoutAlgorithm_ = absLayoutAlgorithm;
 }
 
+void LayoutAlgorithm::SetHeightPercentSensitive(LayoutWrapper *layoutWrapper, bool value)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    layoutAlgorithmWrapper->SetPercentHeight(value);
+}
+
+void LayoutAlgorithm::SetWidthPercentSensitive(LayoutWrapper *layoutWrapper, bool value)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    layoutAlgorithmWrapper->SetPercentWidth(value);
+}
+
 } // namespace OHOS::Ace::NG
