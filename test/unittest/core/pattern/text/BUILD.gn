@@ -37,6 +37,7 @@ ace_unittest("text_test_ng") {
     "text_testseven_ng.cpp",
     "text_testsix_ng.cpp",
     "text_testten_ng.cpp",
+    "text_testthirteen_ng.cpp",
     "text_testthree_ng.cpp",
     "text_testtwelve_ng.cpp",
     "text_testtwo_ng.cpp",
