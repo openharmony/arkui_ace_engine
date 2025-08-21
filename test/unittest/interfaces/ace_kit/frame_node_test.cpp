@@ -84,7 +84,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest002, TestSize.Level1)
 
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
-
     auto* aceNodePtr = frameNodeImpl->GetAceNodePtr();
     EXPECT_TRUE(aceNodePtr);
     auto aceNode = frameNodeImpl->GetAceNode();

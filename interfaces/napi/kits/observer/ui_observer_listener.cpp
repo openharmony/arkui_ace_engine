@@ -791,8 +791,8 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_set_named_property(env_, objValueEvent, "deviceId", napiDeviceId);
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
-    AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
+    AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
 }
 
