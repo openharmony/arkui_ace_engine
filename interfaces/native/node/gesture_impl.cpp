@@ -863,6 +863,9 @@ void HandleGestureEvent(ArkUINodeEvent* event)
         return;
     }
     ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent();
+    if (uiEvent == nullptr) {
+        return;
+    }
     if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE)) {
         uiEvent->eventTypeId = C_MOUSE_EVENT_ID;
         uiEvent->inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
@@ -885,6 +888,7 @@ void HandleGestureEvent(ArkUINodeEvent* event)
     }
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete uiEvent;
+    uiEvent = nullptr;
     gestureEvent->eventData.rawPointerEvent = nullptr;
 }
 
