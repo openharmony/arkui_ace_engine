@@ -3059,6 +3059,7 @@ interfaces/native/ui_input_event.h @arkuievent
 [ANI Interfaces]
 interfaces/ets/ani/overlayManager/ @arkuipopupwindow
 interfaces/ets/ani/promptaction/ @arkuipopupwindow
+frameworks/core/interfaces/ani/ani_api.h @arkui_architecture
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework

@@ -166,24 +166,20 @@ ani_array_double NodeAdapterGetAllItems(ani_env* env, [[maybe_unused]] ani_objec
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
-        return {};
+        return nullptr;
     }
     AniDoubleArray items = modifier->getNodeAdapterAniModifier()->nodeAdapterGetAllItems(ptr);
     ani_array_double result;
     auto size = items.size;
-    if (size == 0) {
-        delete[] items.data;
+    if (size == 0 || items.data == nullptr) {
         return nullptr;
     }
     if (env->Array_New_Double(size, &result) != ANI_OK) {
-        delete[] items.data;
-        return result;
-    }
-    if (ANI_OK != env->Array_SetRegion_Double(result, 0, size, items.data)) {
-        delete[] items.data;
         return nullptr;
     }
-    delete[] items.data;
+    if (ANI_OK != env->Array_SetRegion_Double(result, 0, size, items.data.get())) {
+        return nullptr;
+    }
     return result;
 }
 } // namespace OHOS::Ace::Ani
