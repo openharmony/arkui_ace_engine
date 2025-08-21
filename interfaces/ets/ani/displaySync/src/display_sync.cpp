@@ -17,6 +17,24 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace::Ani {
+namespace {
+    static const char *DISPLAY_SYNC_CLASS_NAME = "@ohos.graphics.displaySync.displaySync.DisplaySync";
+    static ani_ref gDisplaySyncCls {};
+    static ani_method gDisplaySyncCtor {};
+    static ani_field gDisplaySyncLongField {};
+    static const char *INTERVAL_INFO_CLASS_NAME = "@ohos.graphics.displaySync.displaySync.IntervalInfo";
+    static ani_ref gIntervalInfoCls {};
+    static ani_method gIntervalInfoCtor{};
+    static const char *EXPECTED_FRAME_RATE_RANGE_CLASS_NAME = "arkui.component.common.ExpectedFrameRateRange";
+    static ani_ref gExpectedFrameRateRangeCls {};
+    static ani_method gGetMin {};
+    static ani_method gGetMax {};
+    static ani_method gGetExpected {};
+    constexpr int EXPECTED_FRAME_RATE_RANGE_ERROR_CODE = 401;
+    static const char *CLEANER_CLASS_NAME = "@ohos.graphics.displaySync.displaySync.Cleaner";
+    static ani_ref gCleanerCls {};
+    static ani_field gCleanerPtrField {};
+}
 
 class DisplaySync final {
 public:
@@ -52,6 +70,77 @@ private:
     RefPtr<UIDisplaySync> uiDisplaySync_;
 };
 
+ani_object WrapStsError(ani_env *env, const std::string &msg)
+{
+    ani_class cls {};
+    ani_method method {};
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "null env");
+        return nullptr;
+    }
+
+    ani_string aniMsg = nullptr;
+    if ((status = env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "Error String_NewUTF8 failed %{public}d", status);
+        return nullptr;
+    }
+
+    ani_ref undefRef;
+    if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "Error GetUndefined failed %{public}d", status);
+        return nullptr;
+    }
+
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "Error FindClass failed %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(
+        cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "Error Class_FindMethod failed %{public}d", status);
+        return nullptr;
+    }
+
+    if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "Error Object_New failed %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+
+ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
+{
+    ani_class cls {};
+    ani_method method {};
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "null env");
+        return nullptr;
+    }
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "BusinessError FindClass failed %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &method)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "BusinessError Class_FindMethod failed %{public}d", status);
+        return nullptr;
+    }
+    ani_object error = WrapStsError(env, msg);
+    if (error == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "BusinessError error null");
+        return nullptr;
+    }
+    ani_double dCode(code);
+    if ((status = env->Object_New(cls, method, &obj, dCode, error)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, " BusinessError Object_New failed %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
@@ -70,38 +159,39 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
     FrameRateRange& frameRateRange)
 {
-    static const char *className = "arkui.component.common.ExpectedFrameRateRange";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return;
-    }
-
     ani_boolean isInstance;
-    if (ANI_OK != env->Object_InstanceOf(objOption, cls, &isInstance)) {
+    if (ANI_OK != env->Object_InstanceOf(
+        objOption, static_cast<ani_class>(gExpectedFrameRateRangeCls), &isInstance)) {
         return;
     }
-
-    int32_t minFPS = 0;
-    int32_t maxFPS = 0;
-    int32_t expectedFPS = 0;
 
     ani_double minAni;
     ani_double maxAni;
     ani_double expectedAni;
-    env->Object_GetPropertyByName_Double(objOption, "min", &minAni);
-    env->Object_GetPropertyByName_Double(objOption, "max", &maxAni);
-    env->Object_GetPropertyByName_Double(objOption, "expected", &expectedAni);
-
-    minFPS = static_cast<int32_t>(minAni);
-    maxFPS = static_cast<int32_t>(maxAni);
-    expectedFPS = static_cast<int32_t>(expectedAni);
-    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetMin, &minAni)) {
+        return;
+    }
+    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetMax, &maxAni)) {
+        return;
+    }
+    if (ANI_OK != env->Object_CallMethod_Double(objOption, gGetExpected, &expectedAni)) {
+        return;
+    }
+    frameRateRange.min_ = static_cast<int32_t>(minAni);
+    frameRateRange.max_ = static_cast<int32_t>(maxAni);
+    frameRateRange.preferred_ = static_cast<int32_t>(expectedAni);
+    if (!frameRateRange.IsValid()) {
+        ani_object error = CreateError(env, EXPECTED_FRAME_RATE_RANGE_ERROR_CODE, "ExpectedFrameRateRange error");
+        if (error != nullptr) {
+            env->ThrowError(static_cast<ani_error>(error));
+        }
+    }
 }
 
 static DisplaySync *GetDisplaySync(ani_env *env, ani_object obj)
 {
     ani_long displaySync;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "displaySync", &displaySync)) {
+    if (ANI_OK != env->Object_GetField_Long(obj, gDisplaySyncLongField, &displaySync)) {
         return nullptr;
     }
     return reinterpret_cast<DisplaySync *>(displaySync);
@@ -122,18 +212,11 @@ static RefPtr<UIDisplaySync> GetUIDisplaySync(ani_env *env, ani_object obj)
 
 ani_object createIntervalInfo(ani_env *env, int64_t timestamp, int64_t targetTimestamp)
 {
-    static const char *className = "@ohos.graphics.displaySync.displaySync.IntervalInfo";
-    ani_class intervalInfo_cls;
-
-    if (ANI_OK != env->FindClass(className, &intervalInfo_cls))
-    {
+    ani_object intervalInfoObj;
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gIntervalInfoCls),
+        gIntervalInfoCtor, &intervalInfoObj, ani_long(timestamp), ani_long(targetTimestamp))) {
         return nullptr;
     }
-    ani_method intervalInfoCtor;
-    env->Class_FindMethod(intervalInfo_cls, "<ctor>", "ll:", &intervalInfoCtor);
-    ani_object intervalInfoObj;
-    env->Object_New(
-        intervalInfo_cls, intervalInfoCtor, &intervalInfoObj, ani_long(timestamp), ani_long(targetTimestamp));
     return intervalInfoObj;
 }
 
@@ -161,7 +244,11 @@ static void JSOnFrame_On(ani_env *env, ani_object obj, ani_string callbackType, 
     uiDisplaySync->RegisterOnFrameWithData([env, onFrameGlobalRef] (RefPtr<DisplaySyncData> displaySyncData) {
         auto fnObj = reinterpret_cast<ani_fn_object>(onFrameGlobalRef);
         ani_ref result;
-        auto intervalInfo = createIntervalInfo(env, displaySyncData->timestamp_, displaySyncData->targetTimestamp_);
+        ani_object intervalInfo = createIntervalInfo(
+            env, displaySyncData->timestamp_, displaySyncData->targetTimestamp_);
+        if (intervalInfo == nullptr) {
+            return;
+        }
         std::vector<ani_ref> tmp = { reinterpret_cast<ani_ref>(intervalInfo) };
         env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
     });
@@ -208,22 +295,10 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object displaySync_obj = {};
-    static const char *className = "@ohos.graphics.displaySync.displaySync.DisplaySync";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find class fail");
-        return displaySync_obj;
-    }
-
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find method fail");
-        return displaySync_obj;
-    }
-
     auto uiDisplaySync = AceType::MakeRefPtr<UIDisplaySync>();
     DisplaySync* displaySync = new DisplaySync(uiDisplaySync);
-    if (ANI_OK != env->Object_New(cls, ctor, &displaySync_obj, reinterpret_cast<ani_long>(displaySync))) {
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gDisplaySyncCls),
+        gDisplaySyncCtor, &displaySync_obj, reinterpret_cast<ani_long>(displaySync))) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] create displaySync fail");
         delete displaySync;
         return displaySync_obj;
@@ -233,7 +308,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
 
 static void clean([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object) {
     ani_long ptr;
-    if (ANI_OK != env->Object_GetFieldByName_Long(object, "ptr", &ptr)) {
+    if (ANI_OK != env->Object_GetField_Long(object, gCleanerPtrField, &ptr)) {
         return;
     }
     delete reinterpret_cast<DisplaySync *>(ptr);
@@ -242,18 +317,21 @@ static void clean([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object obj
 
 ani_status BindDisplaySync(ani_env *env)
 {
-    static const char *className = "@ohos.graphics.displaySync.displaySync.DisplaySync";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind DisplaySync result fail");
+    if (ANI_OK != env->FindClass(DISPLAY_SYNC_CLASS_NAME, &cls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find DisplaySync class fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), &gDisplaySyncCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global DisplaySync failed");
         return ANI_ERROR;
     }
 
     std::array methods = {
         ani_native_function{"on", nullptr, reinterpret_cast<void *>(JSOnFrame_On)},
         ani_native_function{"off", nullptr, reinterpret_cast<void *>(JSOnFrame_Off)},
-        ani_native_function{"start", ":", reinterpret_cast<void *>(JSStart)},
-        ani_native_function{"stop", ":", reinterpret_cast<void *>(JSStop)},
+        ani_native_function{"start", nullptr, reinterpret_cast<void *>(JSStart)},
+        ani_native_function{"stop", nullptr, reinterpret_cast<void *>(JSStop)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
@@ -262,10 +340,14 @@ ani_status BindDisplaySync(ani_env *env)
         return ANI_ERROR;
     };
 
-    static const char *cleanerName = "@ohos.graphics.displaySync.displaySync.Cleaner";
     ani_class cleanerCls;
-    if (ANI_OK != env->FindClass(cleanerName, &cleanerCls)) {
-        return (ani_status)ANI_ERROR;
+    if (ANI_OK != env->FindClass(CLEANER_CLASS_NAME, &cleanerCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find Cleaner class fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cleanerCls), &gCleanerCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global Cleaner failed");
+        return ANI_ERROR;
     }
 
     std::array cleanerMethods = {
@@ -273,10 +355,81 @@ ani_status BindDisplaySync(ani_env *env)
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cleanerCls, cleanerMethods.data(), cleanerMethods.size())) {
-        return (ani_status)ANI_ERROR;
+        return ANI_ERROR;
     };
     return ANI_OK;
 }
+
+ani_status CacheDisplaySync(ani_env *env)
+{
+    if (gDisplaySyncCls != nullptr &&
+        ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gDisplaySyncCls),
+        "<ctor>", nullptr, &gDisplaySyncCtor)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global DisplaySync Ctor method failed");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->Class_FindField(
+        static_cast<ani_class>(gDisplaySyncCls), "displaySync", &gDisplaySyncLongField)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global gDisplaySyncLongField failed");
+        return ANI_ERROR;
+    }
+    if (gCleanerCls != nullptr &&
+        ANI_OK != env->Class_FindField(static_cast<ani_class>(gCleanerCls), "ptr", &gCleanerPtrField)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global gCleanerPtrField failed");
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+ani_status CacheIntervalInfo(ani_env *env)
+{
+    ani_class intervalInfoCls;
+    if (ANI_OK != env->FindClass(INTERVAL_INFO_CLASS_NAME, &intervalInfoCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find IntervalInfo class fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(intervalInfoCls), &gIntervalInfoCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global IntervalInfo failed");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->Class_FindMethod(
+        static_cast<ani_class>(gIntervalInfoCls), "<ctor>", "ll:", &gIntervalInfoCtor)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global gIntervalInfoCtor failed");
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+ani_status CacheExpectedFrameRateRange(ani_env *env)
+{
+    ani_class expectedFrameRateRangeCls;
+    if (ANI_OK != env->FindClass(EXPECTED_FRAME_RATE_RANGE_CLASS_NAME, &expectedFrameRateRangeCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] find ExpectedFrameRateRange class fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->GlobalReference_Create(
+        static_cast<ani_ref>(expectedFrameRateRangeCls), &gExpectedFrameRateRangeCls)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global gExpectedFrameRateRangeCls failed");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
+        "<get>min", nullptr, &gGetMin)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetMin method failed");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
+        "<get>max", nullptr, &gGetMax)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetMax method failed");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(gExpectedFrameRateRangeCls),
+        "<get>expected", nullptr, &gGetExpected)) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] Create Global ExpectedFrameRateRange gGetExpected method failed");
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
 }  // namespace OHOS::Ace::Ani
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -303,6 +456,20 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] BindDisplaySyncResult fail");
         return retBindResult;
     }
+
+    if (ANI_OK != OHOS::Ace::Ani::CacheDisplaySync(env)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] CacheDisplaySYnc fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != OHOS::Ace::Ani::CacheIntervalInfo(env)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] CacheIntervalInfo fail");
+        return ANI_ERROR;
+    }
+    if (ANI_OK != OHOS::Ace::Ani::CacheExpectedFrameRateRange(env)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DISPLAY_SYNC, "[ANI] CacheExpectedFrameRateRange fail");
+        return ANI_ERROR;
+    }
+
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
