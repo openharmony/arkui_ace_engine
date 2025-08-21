@@ -18,9 +18,11 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MULTIPLE_FACTOR = 2.0f;
+} //namespace
 void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
@@ -376,7 +378,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
         }
     } else {
         if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
-            margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+            margin.left = CalcLength(iconWidth * MULTIPLE_FACTOR + iconContentPadding * MULTIPLE_FACTOR);
         } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
             margin.left = CalcLength(iconWidth + iconContentPadding);
         } else {

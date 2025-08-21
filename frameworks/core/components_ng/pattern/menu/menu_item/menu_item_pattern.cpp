@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "menu_item_model.h"
 
@@ -35,6 +36,8 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -57,7 +60,6 @@ constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
-constexpr double MENU_FOCUS_TYPE = 1.0;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
 // id of system resource start from 0x07000000
@@ -72,8 +74,6 @@ constexpr Dimension STACK_EXPAND_ICON_PADDING = 2.0_vp;
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 constexpr const char* MENU_STATE_COLLAPSED = "collapsed";
 constexpr const char* MENU_STATE_EXPANDED = "expanded";
-constexpr const char* MENU_ITEM = "MenuItem";
-constexpr const char* MENU_EXPANDED_STATE = "expandedState";
 #endif
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
@@ -234,9 +234,6 @@ void MenuItemPattern::InitFocusPadding()
     auto selectTheme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
-    auto menuTheme = context->GetTheme<MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    menuFocusType_ = menuTheme->GetFocusStyleType();
 }
 
 void MenuItemPattern::OnModifyDone()
@@ -1066,12 +1063,11 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
         expandableAreaContext->UpdateChainedTransition(opacity);
     }
-    MenuRemoveChild(expandableNode, menuFocusType_ == MENU_FOCUS_TYPE);
 
     AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
-        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
-        menuItemPattern->MenuRemoveChild(expandableNode, menuItemPattern->menuFocusType_ != MENU_FOCUS_TYPE);
+        host->RemoveChild(expandableNode, true);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_VOID(rightRow);
         auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
@@ -1091,21 +1087,10 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
 
+        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
         menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
     }, nullptr, nullptr, host->GetContextRefPtr());
-}
-
-void MenuItemPattern::MenuRemoveChild(const RefPtr<FrameNode>& expandableNode, bool isOutFocus)
-{
-    if (!isOutFocus) {
-        return;
-    }
-    CHECK_NULL_VOID(expandableNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(expandableNode, true);
-    host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemPattern::CloseMenu()
@@ -1119,7 +1104,6 @@ void MenuItemPattern::CloseMenu()
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
     menuWrapperPattern->HideMenu();
 }
 
@@ -1189,7 +1173,7 @@ void MenuItemPattern::RegisterOnPress()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!onPressEventSet_) {
         eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, onPressEvent_, true);
@@ -1276,7 +1260,7 @@ bool MenuItemPattern::OnClick()
         menuWrapperPattern->HideSubMenu();
         return true;
     }
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto onChange = hub->GetOnChange();
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -1403,7 +1387,7 @@ void CustomMenuItemPattern::HandleOnChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(hub);
     auto onChange = hub->GetOnChange();
     auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -1791,7 +1775,7 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
-{ // show menu at left top point of targetNode
+{    // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
     OffsetF position = targetNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
     return position;
@@ -2072,13 +2056,13 @@ void MenuItemPattern::AddClickableArea()
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetAccessibilityText(content + "," + label);
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-        accessibilityProperty->SetAccessibilityCustomRole(MENU_ITEM);
+        accessibilityProperty->SetAccessibilityCustomRole("MenuItem");
         accessibilityProperty->SetRelatedElementInfoCallback(
             [weak = WeakClaim(this)] (Accessibility::ExtraElementInfo& extraInfo) {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 std::string expandedState = pattern->IsExpanded() ? MENU_STATE_EXPANDED : MENU_STATE_COLLAPSED;
-                extraInfo.SetExtraElementInfo(MENU_EXPANDED_STATE, expandedState);
+                extraInfo.SetExtraElementInfo("expandedState", expandedState);
                 TAG_LOGI(AceLogTag::ACE_MENU, "Get embeeded menu expanded stated: %{public}s.", expandedState.c_str());
         });
 #endif
@@ -2424,7 +2408,7 @@ void MenuItemPattern::UpdateTextNodes()
 
 bool MenuItemPattern::IsDisabled()
 {
-    auto eventHub = GetHost()->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = GetHost()->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
     return !eventHub->IsEnabled();
 }
@@ -2433,7 +2417,7 @@ void MenuItemPattern::UpdateDisabledStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
@@ -2485,7 +2469,7 @@ void MenuItemPattern::SetAccessibilityAction()
         } else {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+            auto hub = host->GetEventHub<MenuItemEventHub>();
             CHECK_NULL_VOID(hub);
             auto onChange = hub->GetOnChange();
             auto selectedChangeEvent = hub->GetSelectedChangeEvent();
@@ -2517,7 +2501,7 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isSelected_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onChange = eventHub->GetOnChange();
     auto selectedChangeEvent = eventHub->GetSelectedChangeEvent();
@@ -2728,11 +2712,6 @@ void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateItalicFontStyle(value);
-}
-
-void MenuItemPattern::SetSelected(int32_t selected)
-{
-    rowSelected_ = selected;
 }
 
 void MenuItemPattern::SetBorderColor(const Color& color)
@@ -3008,7 +2987,7 @@ bool MenuItemPattern::OnSelectProcess()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
@@ -3071,7 +3050,7 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
-    auto eventHub = host->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {
