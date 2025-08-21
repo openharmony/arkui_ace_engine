@@ -1381,8 +1381,8 @@ void WebDelegate::SetVisibility(bool isVisible)
     isVisible_ = isVisible;
 }
 void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height) {}
-double WebDelegate::ResizeWidth() { return 1.0; }
-double WebDelegate::ResizeHeight() { return 1.0; }
+double WebDelegate::ResizeWidth() const { return 1.0; }
+double WebDelegate::ResizeHeight() const { return 1.0; }
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
