@@ -608,6 +608,47 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwipeCustomAnimationTest005
+ * @tc.desc: Test check onContentDidScroll info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. create swiper.
+     */
+    bool isTrigger = false;
+    float finalPosition = 0.0f;
+    auto onContentDidScroll = [&isTrigger, &finalPosition](
+                                  int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        isTrigger = true;
+        if (index == 0) {
+            finalPosition = position;
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnContentDidScroll(std::move(onContentDidScroll));
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Show next page
+     * @tc.expected: Animation event will be called, and final position is correct.
+     */
+    pattern_->fastCurrentIndex_ = 0;
+    EXPECT_TRUE(pattern_->SupportSwiperCustomAnimation());
+    pattern_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(isTrigger);
+    EXPECT_LT(finalPosition, 0.0f);
+    EXPECT_GT(finalPosition, -1.0f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_LT(finalPosition, -1.0f + 0.001f);
+}
+
+/**
  * @tc.name: SwiperPatternSwipeTo001
  * @tc.desc: SwipeTo
  * @tc.type: FUNC

@@ -117,6 +117,7 @@ void OverlengthDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper*
         UpdateNormalIndicator(itemHalfSizes, paintWrapper);
     }
 }
+
 std::pair<float, float> OverlengthDotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
@@ -222,6 +223,7 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::CalculatePointCenterX
             longPointRightCenterMoveRate;
     return longPointCenterX;
 }
+
 std::pair<float, float> OverlengthDotIndicatorPaintMethod::ForwardCalculation(
     const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
 {
@@ -235,6 +237,8 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::ForwardCalculation(
     int32_t nposStation = 0;
     AnalysisIndexRange(nposStation);
     auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(index);
+    startCurrentIndex = std::clamp(startCurrentIndex, 0, itemCount_ - 1);
+    endCurrentIndex = std::clamp(endCurrentIndex, 0, itemCount_ - 1);
     for (int32_t i = 0; i < itemCount_; ++i) {
         float item_width = itemHalfSizes[ITEM_HALF_WIDTH];
         if (i != startCurrentIndex) {
@@ -277,6 +281,7 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::ForwardCalculation(
         pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, index);
     return CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
 }
+
 void OverlengthDotIndicatorPaintMethod::AnalysisIndexRange(int32_t& nposStation)
 {
     if (currentIndex_ == NUM_0 || currentIndex_ == NUM_1) {
