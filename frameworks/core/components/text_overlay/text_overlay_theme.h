@@ -61,8 +61,6 @@ public:
         void ParseThemeConstants(
             const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextOverlayTheme>& theme) const
         {
-            theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
-            theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
             theme->cutSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.cut");
@@ -341,16 +339,6 @@ public:
     Dimension GetHandleHotZoneRadius() const
     {
         return handleDiameter_;
-    }
-
-    InternalResource::ResourceId GetBackResourceId() const
-    {
-        return backResourceId_;
-    }
-
-    InternalResource::ResourceId GetMoreResourceId() const
-    {
-        return moreResourceId_;
     }
 
     double GetAlphaDisabled() const
@@ -656,9 +644,6 @@ private:
     std::string backAccessibilityText_;
     std::string locationTitle_ = "";
     std::string linkTitle_ = "";
-
-    InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
-    InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
 
     Dimension previewContentSpace_;
     Dimension symbolSize_;
