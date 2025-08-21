@@ -49,8 +49,8 @@ const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG_SIZE = '256vp';
 const MIN_DIALOG_SIZE = '216vp';
-const RESOURCE_TYPE_SYMBOL: number = 40000;
-const ERROR_CODE: number = 0x3900;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
+const ERROR_CODE: int = 0x3900;
 
 class Util {
   public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {

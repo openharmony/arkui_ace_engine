@@ -21,7 +21,7 @@ import { UIContextUtil } from "../handwritten/UIContextUtil"
 
 const DIFF: number = 1e-10
 const INT32_MAX: number = 2147483647
-const PIXEL_SIZE: number = 4
+const PIXEL_SIZE: int = 4
 export function getCanvasDensity(peerPtr: CanvasRenderer): number {
     return ArkUIAniModule._CanvasRenderer_GetCanvasDensity(peerPtr.peer!.ptr)
 }

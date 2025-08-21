@@ -49,10 +49,10 @@ const IMAGE_SIZE = '64vp'
 const MAX_DIALOG_SIZE = '256vp'
 const MIN_DIALOG_SIZE = '216vp'
 const ERROR_CODE = 0x3900
+const LONG_PRESS_TIME: number = 500;
 
 @Observed
 class ButtonGestureModifier implements GestureModifier {
-  public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
   public controller: CustomDialogController | null = null;
@@ -64,7 +64,7 @@ class ButtonGestureModifier implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+        new LongPressGestureHandler({ repeat: false, duration: LONG_PRESS_TIME })
           .onAction(() => {
             if (event) {
               this.controller?.open();

@@ -149,7 +149,7 @@ const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ACCESSIBILITY_LEVEL_AUTO = 'auto';
 const ACCESSIBILITY_LEVEL_YES = 'yes';
 const ACCESSIBILITY_LEVEL_NO = 'no';
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map<number, number>([
   [IconType.BADGE, BADGE_SIZE],
