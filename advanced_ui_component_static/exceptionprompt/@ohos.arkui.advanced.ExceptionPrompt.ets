@@ -26,6 +26,7 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import i18n from '@ohos.i18n';
+
 import { UIContext } from '@ohos.arkui.UIContext';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
@@ -105,7 +106,7 @@ export struct ExceptionPrompt {
               .fontColor([$r('sys.color.ohos_id_color_warning')])
               .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
           } else {
-            Image(this.options?.icon as Resource)
+            Image(this.options?.icon as ResourceStr)
               .width('24vp')
               .height('24vp')
               .fillColor($r('sys.color.ohos_id_color_warning'))
@@ -127,6 +128,7 @@ export struct ExceptionPrompt {
           .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
       }
       .padding({ right: $r('sys.float.ohos_id_default_padding_end') } as Padding)
+      .accessibilityDescription(this.onTipClick ? '' : ' ')
       .width('100%')
       .onClick((event?: ClickEvent) => {
         this.onTipClick?.();
@@ -163,6 +165,7 @@ export struct ExceptionPrompt {
         .padding({
           right: $r('sys.float.padding_level2'),
         } as Padding)
+        .accessibilityDescription(this.onActionTextClick ? '' : ' ')
         .accessibilityRole(this.onActionTextClick ? AccessibilityRoleType.BUTTON : AccessibilityRoleType.ROLE_NONE)
         .onClick((event?: ClickEvent) => {
           this.onActionTextClick?.();
