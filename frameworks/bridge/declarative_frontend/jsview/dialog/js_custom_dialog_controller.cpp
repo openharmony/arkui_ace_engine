@@ -450,10 +450,8 @@ bool JSCustomDialogController::ParseAnimation(
     int32_t iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
     float tempo = obj->GetPropertyValue<float>("tempo", 1.0);
     auto finishCallbackType = static_cast<FinishCallbackType>(obj->GetPropertyValue<int32_t>("finishCallbackType", 0));
-    if (tempo < 0) {
+    if (NonPositive(tempo)) {
         tempo = 1.0f;
-    } else if (tempo == 0) {
-        tempo = 1000.0f;
     }
     auto direction = StringToAnimationDirection(obj->GetPropertyValue<std::string>("playMode", "normal"));
     RefPtr<Curve> curve;

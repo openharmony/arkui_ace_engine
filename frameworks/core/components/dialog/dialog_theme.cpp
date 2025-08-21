@@ -33,11 +33,9 @@ void DialogTheme::Builder::ParsePattern(
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
     theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
     theme->subtitleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("subtitle_text_color", Color::BLACK));
-
     theme->subtitleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
     theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
     theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
-    theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && !isWatch) {
         theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("dialog_container_radius", 32.0_vp));
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffff));
@@ -45,9 +43,11 @@ void DialogTheme::Builder::ParsePattern(
         theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
     }
+    theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
     theme->dividerBetweenButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
     theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
+
     auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
     theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
     theme->defaultPaddingBottomFixed_ = dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
@@ -163,8 +163,11 @@ void DialogTheme::Builder::ParseNewPattern(
         Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_min", 4.0_vp).Value(), 0.0, 0.0, 0.0, DimensionUnit::VP);
     theme->buttonPaddingRight_ =
         Edge(0.0, 0.0, dialogPattern->GetAttr<Dimension>("dialog_padding_min", 4.0_vp).Value(), 0.0, DimensionUnit::VP);
-    theme->buttonPaddingCenter_ = Edge(0.0, dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(),
-        0.0, dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(), DimensionUnit::VP);
+    theme->buttonPaddingCenter_ = Edge(0.0,
+        dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(),
+        0.0,
+        dialogPattern->GetAttr<Dimension>("dialog_padding_mid", 8.0_vp).Value(),
+        DimensionUnit::VP);
     theme->buttonSpacingHorizontal_ = dialogPattern->GetAttr<Dimension>("dialog_button_spacing_vertical", 8.0_vp);
     theme->buttonSpacingVertical_ = dialogPattern->GetAttr<Dimension>("dialog_button_spacing_vertical", 8.0_vp);
     theme->buttonClickedColor_ = dialogPattern->GetAttr<Color>("button_color_clicked", Color(0x19182431));
@@ -210,13 +213,13 @@ void DialogTheme::Builder::ParseNewPattern(
         dialogPattern->GetAttr<int>("dialog_scroll_flex_align", DEFAULT_DIALOG_SCROLL_FLEX_ALIGN));
     theme->columnMeasureType_ = static_cast<NG::MeasureType>(
         dialogPattern->GetAttr<int>("dialog_column_measure_type", DEFAULT_DIALOG_COLUMN_MEASURE_TYPE));
+    theme->buttonBottomTopMargin_ = dialogPattern->GetAttr<Dimension>("button_bottom_top_margin", 10.0_vp);
+    theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
     theme->dialogDoubleBorderEnable_ = dialogPattern->GetAttr<int>("dialog_double_border_enable", 0);
     theme->dialogOuterBorderColor_ = dialogPattern->GetAttr<Color>("dialog_outer_border_color", Color::TRANSPARENT);
     theme->dialogOuterBorderWidth_ = dialogPattern->GetAttr<double>("dialog_outer_border_width", 0.0f);
     theme->dialogInnerBorderColor_ = dialogPattern->GetAttr<Color>("dialog_inner_border_color", Color::TRANSPARENT);
     theme->dialogInnerBorderWidth_ = dialogPattern->GetAttr<double>("dialog_inner_border_width", 0.0f);
-    theme->buttonBottomTopMargin_ = dialogPattern->GetAttr<Dimension>("button_bottom_top_margin", 10.0_vp);
-    theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
     theme->dialogBackgroundBlurStyle_ =
         dialogPattern->GetAttr<int>("dialog_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
     theme->cancelText_ = dialogPattern->GetAttr<std::string>("common_cancel_text", "");

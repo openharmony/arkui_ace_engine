@@ -1051,7 +1051,8 @@ HWTEST_F(DialogLayoutTestNg, DialogViewTest001, TestSize.Level1)
      * @tc.steps: step3. create dialog with a dialog node and layoutWrapper.
      * @tc.expected: the dialog node created successfully.
      */
-    DialogProperties param { .type = DialogType::ACTION_SHEET,
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
         .title = "dialog test",
         .content = "dialog content test",
         .width = 320,
@@ -1061,7 +1062,8 @@ HWTEST_F(DialogLayoutTestNg, DialogViewTest001, TestSize.Level1)
         .hoverModeArea = HoverModeAreaType::TOP_SCREEN,
         .isSceneBoardDialog = true,
         .maskTransitionEffect = maskTransitionEffect,
-        .dialogTransitionEffect = dialogTransitionEffect };
+        .dialogTransitionEffect = dialogTransitionEffect
+    };
     NG::BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(DIMENSION_RADIUS);
     param.borderRadius = borderRadius;

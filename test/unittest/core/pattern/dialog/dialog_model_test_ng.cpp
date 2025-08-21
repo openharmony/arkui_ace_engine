@@ -1235,6 +1235,11 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
     auto dialogOffset = OffsetF();
     auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
 
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
     auto offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
     EXPECT_EQ(offset.GetY(), OFFSET);
 
@@ -1276,10 +1281,10 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
- 
+
     auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
     auto selfSize = SizeF(CHILD_SIZE_2, CHILD_SIZE_2);
- 
+
     layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
     auto maskRect = layoutAlgorithm->GetMaskRect(dialog);
     EXPECT_FALSE(maskRect.has_value());
