@@ -453,6 +453,18 @@ export class Application {
         return "0"
     }
 
+    notifyConfigurationChange() {
+        if (!this.uiContext || !this.manager) {
+            console.warn("Arkoala haven't been initialized !");
+            return;
+        }
+        let uiContextRouter = this.uiContext!.getRouter();
+        let rootState = uiContextRouter.getStateRoot();
+        rootState.forceCompleteRerender();
+        this.manager!.syncChanges();
+        this.manager!.updateSnapshot();
+    }
+
     static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
         if (!userView && !entryPoint) {
             throw new Error(`Invalid EntryPoint`)

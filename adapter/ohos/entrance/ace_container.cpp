@@ -3479,6 +3479,9 @@ void AceContainer::UpdateConfiguration(
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
     NG::ImageDecoder::ClearPixelMapCache();
+
+    // For arkts 1.2
+    NotifyArkoalaConfigurationChange(configurationChange);
 }
 
 void AceContainer::UpdateConfigurationSyncForAll(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -4853,5 +4856,12 @@ UIContentErrorCode AceContainer::RunIntentPage()
     auto front = GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     return front->RunIntentPage();
+}
+
+void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange)
+{
+    auto frontend = GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    frontend->NotifyArkoalaConfigurationChange(configurationChange.IsNeedUpdate());
 }
 } // namespace OHOS::Ace::Platform
