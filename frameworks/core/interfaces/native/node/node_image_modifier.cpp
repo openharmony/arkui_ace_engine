@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 constexpr uint32_t ERROR_UINT_CODE = -1;
 constexpr int32_t DEFAULT_FALSE = 0;
+constexpr uint32_t FIT_MATRIX = 16;
 constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
 constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
@@ -423,6 +424,9 @@ void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
+    if (objectFitNumber == FIT_MATRIX) {
+        objectFitValue = ImageFit::MATRIX;
+    }
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
 }
 
