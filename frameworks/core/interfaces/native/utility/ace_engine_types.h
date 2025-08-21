@@ -31,6 +31,8 @@ struct KeyboardOptions {
 struct PathShapeOptions {
     std::optional<std::string> commands;
 };
+
+enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
 }
 
 namespace OHOS::Ace::NG::Converter {

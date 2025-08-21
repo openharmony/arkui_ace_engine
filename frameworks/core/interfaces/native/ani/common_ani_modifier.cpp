@@ -225,7 +225,7 @@ ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
 {
     FrameNode* node = reinterpret_cast<FrameNode*>(ptr);
     auto nodePtr = AceType::Claim(node);
-    auto peerPtr = RenderNodePeer::Create(nodePtr);
+    auto peerPtr = PeerUtils::CreatePeer<RenderNodePeer>(nodePtr);
     ani_long ret = reinterpret_cast<ani_long>(peerPtr);
     return ret;
 }
