@@ -3045,8 +3045,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3065,8 +3063,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3085,8 +3081,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3107,8 +3101,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3133,8 +3125,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 1;
     napi_env env = nullptr;
@@ -3159,8 +3149,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3182,8 +3170,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3205,8 +3191,6 @@ HWTEST_F(WebPatternTestNg, CreatePip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3215,6 +3199,9 @@ HWTEST_F(WebPatternTestNg, CreatePip_008, TestSize.Level1)
     ASSERT_EQ(ret, true);
     PipInfo info1{1, 0, 0, 1, PIP_WIDTH, PIP_HEIGHT};
     ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info1);
+    ASSERT_EQ(ret, true);
+    PipInfo info2{0, 0, 0, 1, PIP_WIDTH, PIP_HEIGHT};
+    ret = webPattern.CreatePip(PIP_STATE_ENTER, env, init, pipController, info2);
     ASSERT_EQ(ret, true);
 #endif
 }
@@ -3228,8 +3215,6 @@ HWTEST_F(WebPatternTestNg, StopPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3255,8 +3240,6 @@ HWTEST_F(WebPatternTestNg, StopPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3283,8 +3266,6 @@ HWTEST_F(WebPatternTestNg, StopPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3310,8 +3291,6 @@ HWTEST_F(WebPatternTestNg, StopPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3332,8 +3311,6 @@ HWTEST_F(WebPatternTestNg, StopPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3354,8 +3331,6 @@ HWTEST_F(WebPatternTestNg, StopPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3376,8 +3351,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3403,8 +3376,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3431,8 +3402,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3458,8 +3427,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3486,8 +3453,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3508,8 +3473,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3530,8 +3493,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3552,8 +3513,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3574,8 +3533,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3596,8 +3553,6 @@ HWTEST_F(WebPatternTestNg, PlayPausePip_010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3618,8 +3573,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3639,8 +3592,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3664,8 +3615,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3685,8 +3634,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3710,8 +3657,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3733,8 +3678,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3754,8 +3697,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3775,8 +3716,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3797,8 +3736,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3820,8 +3757,6 @@ HWTEST_F(WebPatternTestNg, PipLifecycleCallbackPip_010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3842,8 +3777,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3863,8 +3796,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3884,8 +3815,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3905,8 +3834,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3926,8 +3853,6 @@ HWTEST_F(WebPatternTestNg, PipStartPipCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3949,8 +3874,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3972,8 +3895,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -3993,8 +3914,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4014,8 +3933,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4035,8 +3952,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4056,8 +3971,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4077,8 +3990,6 @@ HWTEST_F(WebPatternTestNg, PipControlEventCallbackPip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4122,8 +4033,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4143,8 +4052,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4164,8 +4071,6 @@ HWTEST_F(WebPatternTestNg, PipResizeCallbackPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4186,8 +4091,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4207,8 +4110,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4228,8 +4129,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4249,8 +4148,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4270,8 +4167,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4291,8 +4186,6 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4315,8 +4208,6 @@ HWTEST_F(WebPatternTestNg, SetPipNativeWindowPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4336,8 +4227,6 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4360,8 +4249,6 @@ HWTEST_F(WebPatternTestNg, SendPipEventPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4381,8 +4268,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(0);
     EXPECT_EQ(ret, true);
 #endif
@@ -4397,8 +4282,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_START);
     EXPECT_EQ(ret, false);
 #endif
@@ -4413,8 +4296,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_LIFECYCLE);
     EXPECT_EQ(ret, false);
 #endif
@@ -4429,8 +4310,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_CONTROLEVENT);
     EXPECT_EQ(ret, false);
 #endif
@@ -4446,8 +4325,6 @@ HWTEST_F(WebPatternTestNg, RegisterPip_005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.RegisterPip(PIP_CALLBACK_RESIZE);
     EXPECT_EQ(ret, false);
 #endif
@@ -4462,8 +4339,6 @@ HWTEST_F(WebPatternTestNg, StartPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(0);
     EXPECT_EQ(ret, true);
 #endif
@@ -4478,8 +4353,6 @@ HWTEST_F(WebPatternTestNg, StartPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(1);
     EXPECT_EQ(ret, false);
 #endif
@@ -4494,8 +4367,6 @@ HWTEST_F(WebPatternTestNg, StartPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
     EXPECT_EQ(ret, false);
 #endif
@@ -4510,8 +4381,6 @@ HWTEST_F(WebPatternTestNg, StartPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
     webPattern.delegate_ = delegateMock;
@@ -4529,8 +4398,6 @@ HWTEST_F(WebPatternTestNg, EnablePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4550,8 +4417,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4572,8 +4437,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4594,8 +4457,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
@@ -4618,8 +4479,6 @@ HWTEST_F(WebPatternTestNg, StopPipPip_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = PIP_ID_OK_1;
     napi_env env = nullptr;
@@ -4642,8 +4501,6 @@ HWTEST_F(WebPatternTestNg, PageClosePip_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
@@ -4676,8 +4533,6 @@ HWTEST_F(WebPatternTestNg, PageClosePip_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = PIP_ID_OK_2;
     napi_env env = nullptr;
@@ -4698,8 +4553,6 @@ HWTEST_F(WebPatternTestNg, OnPipPip_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webPattern;
-    webPattern.delegate_ = nullptr;
-    EXPECT_EQ(webPattern.delegate_, nullptr);
     bool init = false;
     uint32_t pipController = 0;
     napi_env env = nullptr;
