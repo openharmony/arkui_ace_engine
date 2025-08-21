@@ -20,26 +20,28 @@
 #include "core/drawable/pixel_map_drawable_descriptor.h"
 
 namespace OHOS::Ace {
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DrawableDescriptor_GetDrawableType(void* object, size_t* type)
+extern "C" ACE_FORCE_EXPORT size_t OHOS_ACE_DrawableDescriptor_GetDrawableType(void* object)
 {
+    size_t type = 0;
     if (object == nullptr) {
-        return;
+        return type;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);
     if (drawable) {
-        *type = static_cast<size_t>(drawable->GetDrawableType());
+        type = static_cast<size_t>(drawable->GetDrawableType());
     }
+    return type;
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DrawableDescriptor_GetPixelMap(
-    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DrawableDescriptor_GetPixelMap(void* object, void* pixelMap)
 {
     if (object == nullptr || pixelMap == nullptr) {
         return;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::DrawableDescriptor*>(object);
     if (drawable && drawable->GetPixelMap()) {
-        pixelMap = drawable->GetPixelMap()->GetPixelMapSharedPtr();
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        *pixelMapPtr = drawable->GetPixelMap()->GetPixelMapSharedPtr();
     }
 }
 
@@ -116,73 +118,89 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DecreaseRefDrawableDescriptor(void* ob
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetForeground(
-    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetForeground(void* object, void* pixelMap)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pixelMap == nullptr) {
         return;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable && drawable->GetForeground()) {
-        pixelMap = drawable->GetForeground()->GetPixelMapSharedPtr();
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        *pixelMapPtr = drawable->GetForeground()->GetPixelMapSharedPtr();
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetBackground(
-    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetBackground(void* object, void* pixelMap)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pixelMap == nullptr) {
         return;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable && drawable->GetBackground()) {
-        pixelMap = drawable->GetBackground()->GetPixelMapSharedPtr();
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        *pixelMapPtr = drawable->GetBackground()->GetPixelMapSharedPtr();
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetMask(
-    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_LayeredDrawableDescriptor_GetMask(void* object, void* pixelMap)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pixelMap == nullptr) {
         return;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::LayeredDrawableDescriptor*>(object);
     if (drawable && drawable->GetMask()) {
-        pixelMap = drawable->GetMask()->GetPixelMapSharedPtr();
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        *pixelMapPtr = drawable->GetMask()->GetPixelMapSharedPtr();
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap(
-    void* object, std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap(void* object, void* pixelMap)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pixelMap == nullptr) {
         return;
     }
     auto* drawable = reinterpret_cast<OHOS::Ace::PixelMapDrawableDescriptor*>(object);
     if (drawable && drawable->GetPixelMap()) {
-        pixelMap = drawable->GetPixelMap()->GetPixelMapSharedPtr();
+        auto* pixelMapPtr = reinterpret_cast<std::shared_ptr<OHOS::Media::PixelMap>*>(pixelMap);
+        *pixelMapPtr = drawable->GetPixelMap()->GetPixelMapSharedPtr();
     }
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_GetParams(void* object,
-    std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMapVec, size_t* duration, size_t* iterations)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_GetPixelMapVec(void* object, void* pixelMapVec)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pixelMapVec == nullptr) {
         return;
     }
-    pixelMapVec.clear();
+    auto* pixelMapVecPtr = reinterpret_cast<std::vector<std::shared_ptr<OHOS::Media::PixelMap>>*>(pixelMapVec);
+    (*pixelMapVecPtr).clear();
     auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
     auto pixelMapList = drawable->GetPixelMapList();
     for (const auto& refPtrPixelMap : pixelMapList) {
         if (refPtrPixelMap) {
-            pixelMapVec.push_back(refPtrPixelMap->GetPixelMapSharedPtr());
+            (*pixelMapVecPtr).push_back(refPtrPixelMap->GetPixelMapSharedPtr());
         }
     }
-    if (duration != nullptr) {
-        *duration = static_cast<size_t>(drawable->GetTotalDuration());
+}
+
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetDuration(void* object)
+{
+    int32_t duration = 0;
+    if (object == nullptr) {
+        return duration;
     }
-    if (iterations != nullptr) {
-        *iterations = static_cast<size_t>(drawable->GetIterations());
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    duration = drawable->GetTotalDuration();
+    return duration;
+}
+
+extern "C" ACE_FORCE_EXPORT int32_t OHOS_ACE_AnimatedDrawableDescriptor_GetIterations(void* object)
+{
+    int32_t iterations = 0;
+    if (object == nullptr) {
+        return iterations;
     }
+    auto* drawable = reinterpret_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    iterations = drawable->GetIterations();
+    return iterations;
 }
 } // namespace OHOS::Ace

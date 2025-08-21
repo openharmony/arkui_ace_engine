@@ -58,7 +58,7 @@ export class DrawableDescriptor {
 
   static transferDynamic(input: Object): Any {
     if (input == null) {
-      return new Object();
+      return undefined;
     }
     let drawableDescriptor = input as DrawableDescriptor;
     if (drawableDescriptor) {
@@ -69,7 +69,7 @@ export class DrawableDescriptor {
         return drawableRet;
       }
     }
-    return new Object();
+    return undefined;
   }
 }
 

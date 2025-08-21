@@ -48,18 +48,21 @@ constexpr char DRAWBLE_GET_PIXEL_MAP[] = "OHOS_ACE_DrawableDescriptor_GetPixelMa
 constexpr char LAYER_GET_FOREGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetForeground";
 constexpr char LAYER_GET_BACKGROUND[] = "OHOS_ACE_LayeredDrawableDescriptor_GetBackground";
 constexpr char LAYER_GET_MASK[] = "OHOS_ACE_LayeredDrawableDescriptor_GetMask";
-constexpr char ANIMATED_GET_PARAMS[] = "OHOS_ACE_AnimatedDrawableDescriptor_GetParams";
+constexpr char ANIMATED_GET_PIXEL_MAP_VEC[] = "OHOS_ACE_AnimatedDrawableDescriptor_GetPixelMapVec";
+constexpr char ANIMATED_GET_DURATION[] = "OHOS_ACE_AnimatedDrawableDescriptor_GetDuration";
+constexpr char ANIMATED_GET_ITERATIONS[] = "OHOS_ACE_AnimatedDrawableDescriptor_GetIterations";
 constexpr char PIXEL_MAP_GET_PIXEL_MAP[] = "OHOS_ACE_PixelMapDrawableDescriptor_GetPixelMap";
 constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
 
-using DrawableGetDrawableTypeFunc = void (*)(void*, size_t*);
-using DrawableGetPixelMapFunc = void (*)(void*, std::shared_ptr<OHOS::Media::PixelMap>&);
-using LayeredGetForegroundFunc = void (*)(void*, std::shared_ptr<OHOS::Media::PixelMap>&);
-using LayeredGetBackgroundFunc = void (*)(void*, std::shared_ptr<OHOS::Media::PixelMap>&);
-using LayeredGetMaskFunc = void (*)(void*, std::shared_ptr<OHOS::Media::PixelMap>&);
-using PixelMapGetPixelMapFunc = void (*)(void*, std::shared_ptr<OHOS::Media::PixelMap>&);
-using AnimatedGetParamsFunc = void (*)(
-    void* object, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>&, size_t*, size_t*);
+using DrawableGetDrawableTypeFunc = size_t (*)(void*);
+using DrawableGetPixelMapFunc = void (*)(void*, void*);
+using LayeredGetForegroundFunc = void (*)(void*, void*);
+using LayeredGetBackgroundFunc = void (*)(void*, void*);
+using LayeredGetMaskFunc = void (*)(void*, void*);
+using PixelMapGetPixelMapFunc = void (*)(void*, void*);
+using AnimatedGetPixelMapVecFunc = void (*)(void* object, void*);
+using AnimatedGetDurationFunc = int32_t (*)(void* object);
+using AnimatedGetIterationsFunc = int32_t (*)(void* object);
 #endif
 constexpr size_t ESTIMATE_DRAWABLE_SIZE = 10 * 1024 * 1024;
 constexpr int32_t PARAMS_NUM_TWO = 2;
@@ -67,6 +70,7 @@ constexpr int32_t PARAMS_NUM_THREE = 3;
 constexpr int32_t FOREGROUND_INDEX = 0;
 constexpr int32_t BACKGROUND_INDEX = 1;
 constexpr int32_t MASK_INDEX = 2;
+constexpr int32_t MAX_ARG_NUM = 10;
 
 void UpdateLayeredParam(
     LayeredDrawableDescriptor* layeredDrawable, int32_t pos, std::shared_ptr<OHOS::Media::PixelMap> pixelMap)
@@ -221,7 +225,8 @@ size_t JsDrawableDescriptor::DrawableGetDrawableTypeC(void* drawable)
         dlclose(handle);
         return 0;
     }
-    entry(drawable, &drawableType);
+    drawableType = entry(drawable);
+    dlclose(handle);
 #endif
     return drawableType;
 }
@@ -239,7 +244,8 @@ std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::DrawableGetPixelMap
         dlclose(handle);
         return nullptr;
     }
-    entry(drawable, pixelMap);
+    entry(drawable, &pixelMap);
+    dlclose(handle);
 #endif
     return pixelMap;
 }
@@ -255,7 +261,8 @@ std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetForegroun
         dlclose(handle);
         return nullptr;
     }
-    entry(drawable, pixelMap);
+    entry(drawable, &pixelMap);
+    dlclose(handle);
 #endif
     return pixelMap;
 }
@@ -271,7 +278,8 @@ std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetBackgroun
         dlclose(handle);
         return nullptr;
     }
-    entry(drawable, pixelMap);
+    entry(drawable, &pixelMap);
+    dlclose(handle);
 #endif
     return pixelMap;
 }
@@ -287,24 +295,60 @@ std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::LayeredGetMaskC(voi
         dlclose(handle);
         return nullptr;
     }
-    entry(drawable, pixelMap);
+    entry(drawable, &pixelMap);
+    dlclose(handle);
 #endif
     return pixelMap;
 }
 
-void JsDrawableDescriptor::AnimatedGetParamsC(void* drawable,
-    std::vector<std::shared_ptr<OHOS::Media::PixelMap>>& pixelMapVec, size_t* duration, size_t* iterations)
+void JsDrawableDescriptor::AnimatedGetPixelMapVec(
+    void* drawable, std::vector<std::shared_ptr<OHOS::Media::PixelMap>>* pixelMapVec)
 {
 #ifdef OHOS_PLATFORM
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     CHECK_NULL_VOID(handle);
-    auto entry = reinterpret_cast<AnimatedGetParamsFunc>(dlsym(handle, ANIMATED_GET_PARAMS));
+    auto entry = reinterpret_cast<AnimatedGetPixelMapVecFunc>(dlsym(handle, ANIMATED_GET_PIXEL_MAP_VEC));
     if (entry == nullptr) {
         dlclose(handle);
         return;
     }
-    entry(drawable, pixelMapVec, duration, iterations);
+    entry(drawable, pixelMapVec);
+    dlclose(handle);
 #endif
+}
+
+int32_t JsDrawableDescriptor::AnimatedGetDurationC(void* drawable)
+{
+    int32_t duration = 0;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    CHECK_NULL_RETURN(handle, duration);
+    auto entry = reinterpret_cast<AnimatedGetDurationFunc>(dlsym(handle, ANIMATED_GET_DURATION));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return duration;
+    }
+    duration = entry(drawable);
+    dlclose(handle);
+#endif
+    return duration;
+}
+
+int32_t JsDrawableDescriptor::AnimatedGetIterationsC(void* drawable)
+{
+    int32_t iterations = 0;
+#ifdef OHOS_PLATFORM
+    void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
+    CHECK_NULL_RETURN(handle, iterations);
+    auto entry = reinterpret_cast<AnimatedGetIterationsFunc>(dlsym(handle, ANIMATED_GET_ITERATIONS));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return iterations;
+    }
+    iterations = entry(drawable);
+    dlclose(handle);
+#endif
+    return iterations;
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::PixelMapGetPixelMapC(void* drawable)
@@ -320,7 +364,8 @@ std::shared_ptr<OHOS::Media::PixelMap> JsDrawableDescriptor::PixelMapGetPixelMap
         dlclose(handle);
         return nullptr;
     }
-    entry(drawable, pixelMap);
+    entry(drawable, &pixelMap);
+    dlclose(handle);
 #endif
     return pixelMap;
 }
@@ -331,8 +376,11 @@ napi_value JsDrawableDescriptor::CreatDrawable(napi_env env, void* native)
         return nullptr;
     }
     napi_value cons = nullptr;
-    napi_create_object(env, &cons);
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
     auto* drawable = new Drawable::DrawableDescriptor;
+    CHECK_NULL_RETURN(drawable, nullptr);
     auto napi_status = napi_wrap(env, cons, drawable, Destructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
         delete drawable;
@@ -351,8 +399,11 @@ napi_value JsDrawableDescriptor::CreatLayeredDrawable(napi_env env, void* native
         return nullptr;
     }
     napi_value cons = nullptr;
-    napi_create_object(env, &cons);
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
     auto* layerDrawable = new LayeredDrawableDescriptor;
+    CHECK_NULL_RETURN(layerDrawable, nullptr);
     auto napi_status = napi_wrap(env, cons, layerDrawable, OldDestructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
         delete layerDrawable;
@@ -376,14 +427,17 @@ napi_value JsDrawableDescriptor::CreatAnimatedDrawable(napi_env env, void* nativ
         return nullptr;
     }
     napi_value cons = nullptr;
-    napi_create_object(env, &cons);
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
 
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapVec;
-    size_t duration = -1;
-    size_t iterations = -1;
 
-    AnimatedGetParamsC(native, pixelMapVec, &duration, &iterations);
+    AnimatedGetPixelMapVec(native, &pixelMapVec);
+    auto duration = AnimatedGetDurationC(native);
+    auto iterations = AnimatedGetIterationsC(native);
     auto* animatedDrawable = new AnimatedDrawableDescriptor(pixelMapVec, duration, iterations);
+    CHECK_NULL_RETURN(animatedDrawable, nullptr);
     auto napi_status = napi_wrap(env, cons, animatedDrawable, OldDestructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
         delete animatedDrawable;
@@ -401,18 +455,21 @@ napi_value JsDrawableDescriptor::CreatPixelMapDrawable(napi_env env, void* nativ
         return nullptr;
     }
     napi_value cons = nullptr;
-    napi_create_object(env, &cons);
-    auto* drawable = new Drawable::PixelmapDrawableDescriptor;
-    auto napi_status = napi_wrap(env, cons, drawable, Destructor, nullptr, nullptr);
+    if (napi_create_object(env, &cons) != napi_ok) {
+        return nullptr;
+    }
+    auto* pixelmapDrawable = new Drawable::PixelmapDrawableDescriptor;
+    CHECK_NULL_RETURN(pixelmapDrawable, nullptr);
+    auto napi_status = napi_wrap(env, cons, pixelmapDrawable, Destructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
-        delete drawable;
+        delete pixelmapDrawable;
         return nullptr;
     }
     auto pixelMap = PixelMapGetPixelMapC(native);
-    drawable->SetPixelMap(pixelMap);
+    pixelmapDrawable->SetPixelMap(pixelMap);
     Drawable::SourceInfo sourceInfo;
     sourceInfo.SetSrcType(Drawable::SrcType::PIXMAP);
-    drawable->SetSourceInfo(sourceInfo);
+    pixelmapDrawable->SetSourceInfo(sourceInfo);
     auto pixelDes = GetPixelMapDrawableDescriptor(env);
     NAPI_CALL(env, napi_define_properties(env, cons, pixelDes.size(), pixelDes.data()));
     return cons;
@@ -420,19 +477,22 @@ napi_value JsDrawableDescriptor::CreatPixelMapDrawable(napi_env env, void* nativ
 
 napi_value JsDrawableDescriptor::CreateDrawableDescriptorTransfer(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv;
-    napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    auto napi_status = napi_get_cb_info(env, info, &argc, argv, NULL, NULL);
+    if (napi_status != napi_ok) {
+        return nullptr;
+    }
     if (argc != 1) {
         return nullptr;
     }
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
+    napi_typeof(env, argv[0], &valueType);
     if (valueType != napi_number) {
         return nullptr;
     }
     int64_t addr = 0;
-    napi_get_value_int64(env, argv, &addr);
+    napi_get_value_int64(env, argv[0], &addr);
     auto* drawable = reinterpret_cast<void*>(addr);
     auto drawableType = DrawableGetDrawableTypeC(drawable);
     auto type = DrawableDescriptor::DrawableType(drawableType);
