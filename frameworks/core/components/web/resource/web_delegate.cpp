@@ -6212,12 +6212,12 @@ void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
     nweb_->RecordBlanklessFrameSize(width, height);
 }
 
-double WebDelegate::ResizeWidth()
+double WebDelegate::ResizeWidth() const
 {
     return resizeWidth_;
 }
 
-double WebDelegate::ResizeHeight()
+double WebDelegate::ResizeHeight() const
 {
     return resizeHeight_;
 }
