@@ -1375,7 +1375,7 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 }
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
-void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath) {}
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height) {}
 void WebDelegate::SetVisibility(bool isVisible)
 {
     isVisible_ = isVisible;
