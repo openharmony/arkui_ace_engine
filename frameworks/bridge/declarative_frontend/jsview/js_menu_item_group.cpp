@@ -66,6 +66,7 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
                 return;
             }
         }
+        return;
     }
 }
 

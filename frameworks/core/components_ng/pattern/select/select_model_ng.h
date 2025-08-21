@@ -76,9 +76,6 @@ public:
     void SetAvoidance(AvoidanceMode mode) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
-    void SetOptionWidth(const Dimension& value) override;
-    void SetOptionHeight(const Dimension& value) override;
-    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     void SetHasOptionWidth(bool hasOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
@@ -108,7 +105,6 @@ public:
     void BackgroundColor(const Color& color) override;
     void ResetBackgroundColor() override;
     void ResetFontColor() override;
-    void SetMenuOutline(const MenuParam& menuParam) override;
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override;
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override;
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override;
@@ -117,6 +113,7 @@ public:
     void ResetShowInSubWindow() override;
     void SetShowDefaultSelectedIcon(bool show) override;
     void ResetShowDefaultSelectedIcon() override;
+    void SetMenuOutline(const MenuParam& menuParam) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -145,13 +142,16 @@ public:
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    void SetOptionWidth(const Dimension& value) override;
+    void SetOptionHeight(const Dimension& value) override;
+    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
-    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
+    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
     static void SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow);
