@@ -2353,9 +2353,6 @@ std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     CHECK_NULL_RETURN(rsNode_, {});
-    if (ShouldSkipAffineTransformation(rsNode_)) {
-        return Matrix4();
-    }
     auto center = rsNode_->GetStagingProperties().GetPivot();
     Matrix4 rotateMat;
     if (transformModifier_ && !transformModifier_->GetQuaternion().IsIdentity()) {

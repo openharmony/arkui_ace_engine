@@ -2554,7 +2554,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
     /**
      * @tc.steps2: Call function OnHide;
-     * @tc.expected: isNeedCallbackAreaChange_ is false
+     * @tc.expected: isNeedCallbackAreaChange_ is true
      */
     context_->OnHide();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
