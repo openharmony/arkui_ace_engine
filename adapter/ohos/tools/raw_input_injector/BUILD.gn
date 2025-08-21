@@ -50,6 +50,8 @@ ohos_executable("rawinput") {
 
   deps = [ ":rawinput-injector" ]
 
+  external_deps = [ "c_utils:utils" ]
+
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
 }
