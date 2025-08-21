@@ -54,7 +54,7 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
-    TapGesture(int32_t count, int32_t fingers, Dimension distanceThreshold, bool isLimitFingerCount)
+    TapGesture(int32_t count, int32_t fingers, Dimension distanceThreshold, bool isLimitFingerCount = false)
         : Gesture(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
     {
         if (gestureInfo_) {
