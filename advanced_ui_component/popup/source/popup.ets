@@ -16,7 +16,7 @@
 import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics } from '@ohos.arkui.node'
+import { LengthMetrics } from '@ohos.arkui.node';
 import componentUtils from '@ohos.arkui.componentUtils';
 import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
 import { systemDateTime } from '@kit.BasicServicesKit';
@@ -501,7 +501,7 @@ export struct PopupComponent {
     let bottom =
       LengthMetrics.vp(this.theme.windows.padding.bottom.value - (this.theme.button.textMargin.bottom.value / 2));
     let start = LengthMetrics.vp(this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
-    let end = this.theme.button.padding.end;
+    let end = this.theme.windows.padding.end;
     let resolvedMaxWidth = this.toVp(this.maxWidth);
     if (resolvedMaxWidth === 0) {
       start = LengthMetrics.vp(0);
@@ -524,13 +524,13 @@ export struct PopupComponent {
   }
 
   aboutToAppear() {
-    this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+    this.listener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
       this.currentScreenStatus = mediaQueryResult.matches
     })
   }
 
   aboutToDisappear() {
-    this.listener.off("change")
+    this.listener.off('change')
   }
 
   getScrollMaxHeight(): number | undefined {
@@ -751,7 +751,7 @@ export struct PopupComponent {
             }
           }
           .direction(this.popupDirection)
-          .width("100%")
+          .width('100%')
           .margin(this.getTitleMargin())
           .onAreaChange((_, rect) => {
             this.titleHeight = rect.height as number
@@ -769,7 +769,7 @@ export struct PopupComponent {
               })
           }
           .direction(this.popupDirection)
-          .width("100%")
+          .width('100%')
           .align(Alignment.TopStart)
           .padding(this.getMessagePadding())
           .scrollBar(BarState.Auto)

@@ -644,7 +644,7 @@ export class d1 extends ViewPU {
         let top = this.theme.h2.padding.top;
         let bottom = LengthMetrics.vp(this.theme.h2.padding.bottom.value - (this.theme.button.e2.bottom.value / 2));
         let start = LengthMetrics.vp(this.theme.h2.padding.start.value - (this.theme.button.margin.end.value / 2));
-        let end = this.theme.button.padding.end;
+        let end = this.theme.h2.padding.end;
         let z1 = this.toVp(this.maxWidth);
         if (z1 === 0) {
             start = LengthMetrics.vp(0);
@@ -829,11 +829,11 @@ export class d1 extends ViewPU {
         return o1;
     }
     getTitleTextAlign() {
-        let l1 = TextAlign.Start;
+        let k2 = TextAlign.Start;
         if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
-            l1 = TextAlign.End;
+            k2 = TextAlign.End;
         }
-        return l1;
+        return k2;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
