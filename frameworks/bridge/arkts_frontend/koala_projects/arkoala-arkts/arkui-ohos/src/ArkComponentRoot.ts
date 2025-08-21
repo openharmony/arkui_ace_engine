@@ -49,8 +49,8 @@ export function ArkComponentRoot(
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                     component.aboutToAppear()
                 })
-                return mutableState(true)
-            }, (_: MutableState<boolean> | undefined) =>
+                return true;
+            }, (_: boolean | undefined) =>
                 scheduleCallback(() => {
                     component.aboutToDisappear()
                 })
