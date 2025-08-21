@@ -14,7 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("security_component_test_ng") {
-  module_out_path = pattern_test_output_path
+  part_name = "ace_engine"
+  module_name = "Component-Security"
+  module_out_path = part_name + "/" + module_name
 
   sources = [
     "security_component_test_ng.cpp",
