@@ -789,6 +789,7 @@ public:
     static bool IsSuperFoldDisplayDevice();
 
     static bool IsPageTransitionFreeze();
+    static bool IsForcibleLandscapeEnabled();
 
     static bool IsSoftPageTransition();
 
@@ -925,6 +926,7 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;

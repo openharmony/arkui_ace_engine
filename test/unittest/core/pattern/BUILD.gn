@@ -132,9 +132,8 @@ group("core_pattern_unittest") {
     deps += [ "model:model_test_ng" ]
   }
 
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng)) {
-    deps += vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng
+  if (ace_engine_feature_enable_split_mode) {
+    deps += [ "stage:force_split_stage_test_ng" ]
   }
 
   if (ace_engine_feature_wearable &&

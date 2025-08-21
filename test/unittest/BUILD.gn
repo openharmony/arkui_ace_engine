@@ -58,10 +58,6 @@ config("ace_coverage_config") {
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]
-  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_test_visibility)) {
-    visibility += vendor_configs.ace_engine_advanced_split_mode_test_visibility
-  }
 
   configs = [ ":ace_circle_config" ]
 
@@ -77,11 +73,6 @@ config("ace_unittest_config") {
       "$ace_root/test/mock/external_mock",
       "$ace_root/test/mock/interfaces/ipc_single"
     ]
-  }
-
-  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
-    include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
   }
 
   cflags_cc = [
@@ -123,21 +114,12 @@ config("ace_unittest_config") {
 # ace unittest config ext
 config("ace_unittest_config_ext") {
   visibility = [ "./../../*" ]
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_test_visibility)) {
-    visibility += vendor_configs.ace_engine_advanced_split_mode_test_visibility
-  }
 
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
     "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
-
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
-    include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
-  }
 
   cflags_cc = [
     "-Wno-unused-private-field",
@@ -238,6 +220,7 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract_multithread.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_advanced_register.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_full_update_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_partial_update_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
@@ -247,15 +230,7 @@ ohos_source_set("ace_components_base") {
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_theme.cpp",
   ]
-  if (ace_engine_feature_enable_split_mode &&
-      defined(
-          vendor_configs.ace_engine_advanced_split_mode_base_test_sources)) {
-    sources += vendor_configs.ace_engine_advanced_split_mode_base_test_sources
-  } else {
-    sources += [
-      "$ace_root/frameworks/core/components_ng/base/view_advanced_register.cpp",
-    ]
-  }
+
   if (ace_engine_feature_enable_static_instructive_code) {
     source += [ "$ace_root/frameworks/core/components_ng/base/interop/view_stack_processor_interop.cpp" ]
   }
@@ -1521,11 +1496,13 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
-  if (ace_engine_feature_enable_split_mode &&
-      defined(
-          vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources)) {
-    sources +=
-        vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources
+  if (ace_engine_feature_enable_split_mode) {
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_page_pattern.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_manager.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_pattern.cpp",
+    ]
   }
 
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
