@@ -623,12 +623,6 @@ void ViewAbstractModelStatic::SetBackgroundEffect(FrameNode* frameNode,
         sysOptions.value_or(DEFAULT_SYS_OPTIONS));
 }
 
-void ViewAbstractModelStatic::SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle)
-{
-    FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle);
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
-}
-
 void ViewAbstractModelStatic::SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value)
 {
     FREE_NODE_CHECK(frameNode, SetTranslate, frameNode, value);
@@ -1446,14 +1440,22 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
     }
 }
 
-void ViewAbstractModelStatic::SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect)
+void ViewAbstractModelStatic::SetUseEffect(
+    FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    if (useEffect.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    auto useEffect = useEffectOpt.value_or(false);
+    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+}
+
+void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
+{
+    if (invertOpt) {
+        ViewAbstract::SetInvert(frameNode, invertOpt.value());
+        return;
     }
+    InvertVariant invert = 0.0f;
+    ViewAbstract::SetInvert(frameNode, invert);
 }
 
 void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
@@ -1464,12 +1466,7 @@ void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr
 
 void ViewAbstractModelStatic::SetFreeze(FrameNode* frameNode, std::optional<bool> freeze)
 {
-    if (freeze.has_value()) {
-        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_RENDER_CONTEXT(target, Freeze);
-    }
+    ViewAbstract::SetFreeze(frameNode, freeze.value_or(false));
 }
 
 void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
