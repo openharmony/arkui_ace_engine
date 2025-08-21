@@ -116,6 +116,7 @@ private:
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;
+    float CalculateHeaderOffset(LayoutWrapper* layoutWrapper, const ListItemInfo& info);
     bool CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalcContentOffset(const RefPtr<ListLayoutProperty>& property) override

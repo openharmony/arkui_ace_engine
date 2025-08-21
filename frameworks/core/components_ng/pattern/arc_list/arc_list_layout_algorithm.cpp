@@ -461,7 +461,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
         startHeaderPos_ = itemDispStartPos - headerMainSize_;
         if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
-            headerOffset_ = GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
+            headerOffset_ = CalculateHeaderOffset(layoutWrapper, info);
         }
         startHeaderPos_ -= headerOffset_;
         if (GreatNotEqual(startHeaderPos_, -TRANSPARENCY_DIST)) {
@@ -496,6 +496,29 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         if (renderContext) {
             renderContext->UpdateOpacity(transparency);
         }
+    }
+}
+
+float ArcListLayoutAlgorithm::CalculateHeaderOffset(LayoutWrapper* layoutWrapper, const ListItemInfo& info)
+{
+    auto firstItemWrapper = GetListItem(layoutWrapper, 0);
+    if (firstItemWrapper) {
+        // Calculate the start position of the first item in the middle of the ArcList.
+        auto listItemLayoutProperty =
+            AceType::DynamicCast<ArcListItemLayoutProperty>(firstItemWrapper->GetLayoutProperty());
+        auto autoScale = listItemLayoutProperty ? listItemLayoutProperty->GetAutoScale().value_or(true) : true;
+        auto scale = autoScale ? GetNearScale(0.0f) : 1.0f;
+        auto itemHeight = (info.endPos - info.startPos) * scale;
+        auto itemDispStartPosInCenter = (contentMainSize_ - itemHeight) / FLOAT_TWO;
+
+        // Calculate the start position of the header when the first item in the middle of the ArcList.
+        auto headerStartPosInTop = itemDispStartPosInCenter - headerMainSize_;
+        headerStartPosInTop =
+            GreatNotEqual(headerStartPosInTop, HEADER_DIST) ? HEADER_DIST : headerStartPosInTop;
+
+        return itemDispStartPosInCenter - (headerStartPosInTop + headerMainSize_);
+    } else {
+        return GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
     }
 }
 
