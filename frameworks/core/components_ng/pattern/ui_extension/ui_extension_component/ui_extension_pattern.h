@@ -87,6 +87,14 @@ struct SessionViewportConfig {
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
+    bool operator==(const SessionViewportConfig& other) const
+    {
+        return (isDensityFollowHost_ == other.isDensityFollowHost_) &&
+            (NearZero(std::abs(density_ - other.density_))) &&
+            (displayId_ == other.displayId_) &&
+            (orientation_ == other.orientation_) &&
+            (transform_ == other.transform_);
+    }
 };
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
@@ -295,6 +303,8 @@ public:
     {
         curVisible_ = curVisible;
     }
+
+    void UpdateSessionViewportConfigFromContext();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

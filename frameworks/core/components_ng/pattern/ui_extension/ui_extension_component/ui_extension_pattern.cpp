@@ -519,6 +519,28 @@ void UIExtensionPattern::HandleOcclusionScene(const RefPtr<FrameNode>& node, boo
     node->AddToOcclusionMap(flag);
 }
 
+void UIExtensionPattern::UpdateSessionViewportConfigFromContext()
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    SessionViewportConfig sessionViewportConfig;
+    sessionViewportConfig.isDensityFollowHost_ = GetDensityDpi();
+    sessionViewportConfig.density_ = pipeline->GetCurrentDensity();
+    sessionViewportConfig.displayId_ = container->GetCurrentDisplayId();
+    sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
+    sessionViewportConfig.transform_ = pipeline->GetTransformHint();
+    auto curSessionViewportConfig = GetSessionViewportConfig();
+    if (curSessionViewportConfig == sessionViewportConfig) {
+        return;
+    }
+    UIEXT_LOGI("diff session viewport config between createSession and onConnect.");
+    SetSessionViewportConfig(sessionViewportConfig);
+    sessionWrapper_->UpdateSessionViewportConfig();
+}
+
 void UIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -568,7 +590,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
-    sessionWrapper_->UpdateSessionViewportConfig();
+    UpdateSessionViewportConfigFromContext();
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
