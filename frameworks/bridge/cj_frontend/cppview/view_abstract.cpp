@@ -283,7 +283,9 @@ void ViewAbstract::CompleteResourceObjectInner(
         CompleteResourceObjectFromParams(resIdValue, obj, targetModule, resType, resName);
     }
     bundleName = obj.bundleName;
-    moduleName = obj.moduleName;
+    if (obj.moduleName) {
+        moduleName = obj.moduleName;
+    }
 
     if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
         bundleName = GetBundleNameFromContainer();
