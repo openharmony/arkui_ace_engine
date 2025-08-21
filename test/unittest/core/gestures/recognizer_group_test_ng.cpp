@@ -356,5 +356,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest013, TestSize.Level1)
      */
     recognizerTest->ForceCleanRecognizerWithGroup();
     EXPECT_EQ(recognizerTest->recognizers_.empty(), true);
+    EXPECT_EQ(recognizerTest->touchPoints_.empty(), true);
 }
 }; // namespace OHOS::Ace::NG
