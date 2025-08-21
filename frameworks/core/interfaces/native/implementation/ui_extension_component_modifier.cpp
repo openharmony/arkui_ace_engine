@@ -130,7 +130,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnRemoteReady(frameNode, nullptr);
         return;
     }
     auto onRemoteReady =
@@ -161,7 +161,7 @@ void OnResultImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnResult(frameNode, nullptr);
         return;
     }
     auto onResult =
@@ -208,7 +208,7 @@ void OnReleaseImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnRelease(frameNode, nullptr);
         return;
     }
     auto onRelease =
@@ -227,7 +227,7 @@ void OnErrorImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnError(frameNode, nullptr);
         return;
     }
     auto instanceId = ContainerScope::CurrentId();
@@ -254,7 +254,7 @@ void OnTerminatedImpl(Ark_NativePointer node,
 #ifdef WINDOW_SCENE_SUPPORTED
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        UIExtensionModelNG::SetOnTerminated(frameNode, nullptr);
         return;
     }
     auto onTerminated =

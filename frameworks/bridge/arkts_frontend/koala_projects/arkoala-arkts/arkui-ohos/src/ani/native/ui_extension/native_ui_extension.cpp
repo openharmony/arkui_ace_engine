@@ -29,6 +29,15 @@
 namespace OHOS::Ace::Ani {
 namespace {
 constexpr int32_t FOLLOW_HOST_DPI = 0;
+
+bool IsNullishObject(ani_env *env, ani_ref objectRef)
+{
+    ani_boolean isUndefined = false;
+    if (ANI_OK != env->Reference_IsNullishValue(objectRef, &isUndefined)) {
+        return true;
+    }
+    return static_cast<bool>(isUndefined);
+}
 }
 ani_status NativeUiExtension::BindNativeUiExtension(ani_env *env)
 {
@@ -174,6 +183,13 @@ ani_status NativeUiExtension::SetOnResult(
             "frameNode is null when SetOnResult");
         return ANI_ERROR;
     }
+    if (IsNullishObject(env, callbackObj)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnResult callback.");
+    #ifdef WINDOW_SCENE_SUPPORTED
+        NG::UIExtensionAdapter::SetOnResult(frameNode, nullptr);
+    #endif //WINDOW_SCENE_SUPPORTED
+        return ANI_OK;
+    }
 
     ani_ref onResultRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onResultGlobalRef;
@@ -216,6 +232,13 @@ ani_status NativeUiExtension::SetOnRelease(
             "frameNode is null when SetOnRelease");
         return ANI_ERROR;
     }
+    if (IsNullishObject(env, callbackObj)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnRelease callback.");
+    #ifdef WINDOW_SCENE_SUPPORTED
+        NG::UIExtensionAdapter::SetOnRelease(frameNode, nullptr);
+    #endif //WINDOW_SCENE_SUPPORTED
+        return ANI_OK;
+    }
 
     ani_ref onReleaseRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onReleaseGlobalRef;
@@ -251,6 +274,13 @@ ani_status NativeUiExtension::SetOnError(
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "frameNode is null when SetOnError");
         return ANI_ERROR;
+    }
+    if (IsNullishObject(env, callbackObj)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnError callback.");
+    #ifdef WINDOW_SCENE_SUPPORTED
+        NG::UIExtensionAdapter::SetOnError(frameNode, nullptr);
+    #endif //WINDOW_SCENE_SUPPORTED
+        return ANI_OK;
     }
 
     ani_ref onErrorRef = reinterpret_cast<ani_ref>(callbackObj);
@@ -296,6 +326,13 @@ ani_status NativeUiExtension::SetOnRecive(
             "frameNode is null when SetOnRecive");
         return ANI_ERROR;
     }
+    if (IsNullishObject(env, callbackObj)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnReceive callback.");
+    #ifdef WINDOW_SCENE_SUPPORTED
+        NG::UIExtensionAdapter::SetOnReceive(frameNode, nullptr);
+    #endif //WINDOW_SCENE_SUPPORTED
+        return ANI_OK;
+    }
 
     ani_ref onReciveRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onReciveGlobalRef;
@@ -331,6 +368,13 @@ ani_status NativeUiExtension::SetOnTerminate(
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "frameNode is null when SetOnTerminate");
         return ANI_ERROR;
+    }
+    if (IsNullishObject(env, callbackObj)) {
+        TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnTerminated callback.");
+    #ifdef WINDOW_SCENE_SUPPORTED
+        NG::UIExtensionAdapter::SetOnTerminated(frameNode, nullptr);
+    #endif //WINDOW_SCENE_SUPPORTED
+        return ANI_OK;
     }
 
     ani_ref onTerminateRef = reinterpret_cast<ani_ref>(callbackObj);

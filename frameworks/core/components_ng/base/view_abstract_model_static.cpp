@@ -688,10 +688,14 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
         (const WeakPtr<FrameNode>& weak, const std::function<RefPtr<NG::UINode>()>& buildFunc) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
-            CHECK_NULL_VOID(buildFunc);
-            auto virtualNode = buildFunc();
             auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
+            if (buildFunc == nullptr) {
+                node->HasAccessibilityVirtualNode(false);
+                accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+                return;
+            }
+            auto virtualNode = buildFunc();
             auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
             CHECK_NULL_VOID(virtualFrameNode);
             virtualFrameNode->SetAccessibilityNodeVirtual();

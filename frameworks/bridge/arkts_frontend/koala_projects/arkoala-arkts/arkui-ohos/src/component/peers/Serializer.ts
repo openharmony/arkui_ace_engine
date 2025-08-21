@@ -5319,9 +5319,9 @@ export class Serializer extends SerializerBase {
     writePluginComponentTemplate(value: PluginComponentTemplate): void {
         let valueSerializer : Serializer = this
         const value_source  = value.source
-        valueSerializer.writeString(value_source)
+        valueSerializer.writeString(value_source == undefined ? '' : value_source)
         const value_bundleName  = value.bundleName
-        valueSerializer.writeString(value_bundleName)
+        valueSerializer.writeString(value_bundleName == undefined ? '' : value_bundleName)
     }
     writePluginErrorData(value: PluginErrorData): void {
         let valueSerializer : Serializer = this

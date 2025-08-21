@@ -4597,7 +4597,7 @@ void AccessibilityText0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
         return;
     }
     ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
@@ -4609,7 +4609,7 @@ void AccessibilityText1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvertPtr<std::string>(value);
     if (!optValue) {
-        // keep the same processing
+        ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
         return;
     }
     ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
@@ -4621,7 +4621,7 @@ void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
         return;
     }
     ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
@@ -4708,7 +4708,7 @@ void AccessibilityTextHintImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        ViewAbstractModelStatic::SetAccessibilityTextHint(frameNode, "");
         return;
     }
     ViewAbstractModelStatic::SetAccessibilityTextHint(frameNode, *convValue);
@@ -4720,7 +4720,7 @@ void AccessibilityDescription0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        ViewAbstractModelNG::SetAccessibilityDescription(frameNode, "");
         return;
     }
     ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
@@ -4731,7 +4731,10 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvertPtr<std::string>(value);
-    CHECK_EQUAL_VOID(optValue.has_value(), false);
+    if (!optValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityDescription(frameNode, "");
+        return;
+    }
     ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
@@ -4741,7 +4744,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
-        // keep the same processing
+        ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
         return;
     }
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, *convValue);
@@ -4753,7 +4756,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // keep the same processing
+        ViewAbstractModelStatic::SetAccessibilityVirtualNode(frameNode, nullptr);
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {

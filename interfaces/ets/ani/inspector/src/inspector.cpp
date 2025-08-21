@@ -233,7 +233,7 @@ static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_double act
     return ANI_FALSE;
 }
 
-static ani_object AniGetInspectorTree(ani_env *env)
+static ani_string AniGetInspectorTree(ani_env *env)
 {
     ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspector(false);
@@ -322,25 +322,27 @@ static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
     return ani_str;
 }
 
-static ani_object CreateComponentObserver(ani_env *env, ani_string id, const char *className)
+static ani_ref CreateComponentObserver(ani_env *env, ani_string id, const char *className)
 {
     ani_class cls;
+    ani_ref undefinedRef {};
+    env->GetUndefined(&undefinedRef);
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani not found class");
-        return nullptr;
+        return undefinedRef;
     }
     
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani can not get construct method.");
-        return nullptr;
+        return undefinedRef;
     }
     
     std::string key;
     ani_status status = ANIUtils_ANIStringToStdString(env, id, key);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get key of observer failed.");
-        return nullptr;
+        return undefinedRef;
     }
     TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani start to CreateComponentObserver key is %{public}s",
         key.c_str());
@@ -348,7 +350,7 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     auto arkTsFrontend = ComponentObserver::getFronted();
     if (arkTsFrontend == nullptr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not convert to arkts frontend.");
-        return nullptr;
+        return undefinedRef;
     }
     auto* observer = new ComponentObserver(key);
     
@@ -356,7 +358,7 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani Can not new object.");
         delete observer;
-        return nullptr;
+        return undefinedRef;
     }
     
     auto layoutCallback = [observer, env]() -> void {
@@ -374,12 +376,12 @@ static ani_object CreateComponentObserver(ani_env *env, ani_string id, const cha
     return context_object;
 }
 
-static ani_object CreateComponentObserverForAni(ani_env *env, ani_string id)
+static ani_ref CreateComponentObserverForAni(ani_env *env, ani_string id)
 {
     return CreateComponentObserver(env, id, ANI_COMPONENT_OBSERVER_CLS);
 }
 
-static ani_object CreateComponentObserverForKoala(ani_env *env, [[maybe_unused]] ani_object object, ani_string id)
+static ani_ref CreateComponentObserverForKoala(ani_env *env, [[maybe_unused]] ani_object object, ani_string id)
 {
     return CreateComponentObserver(env, id, KOALA_COMPONENT_CLS);
 }
@@ -399,7 +401,7 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
         ani_native_function {"sendEventByKey", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
-        ani_native_function {"getInspectorTree", nullptr,
+        ani_native_function {"getInspectorTreeNative", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
         ani_native_function {"getFilteredInspectorTree", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetFilteredInspectorTree)},

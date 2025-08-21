@@ -71,8 +71,8 @@ export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export interface PluginComponentTemplate {
-    source: string;
-    bundleName: string;
+    source: string | undefined;
+    bundleName: string | undefined;
 }
 export interface PluginComponentOptions {
     template: PluginComponentTemplate;
