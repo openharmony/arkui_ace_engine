@@ -89,7 +89,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        PluginModelStatic::SetOnComplete(frameNode, nullptr);
         return;
     }
     auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
@@ -106,7 +106,7 @@ void OnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        PluginModelStatic::SetOnError(frameNode, nullptr);
         return;
     }
     auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
