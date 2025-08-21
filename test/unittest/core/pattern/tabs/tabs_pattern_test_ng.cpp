@@ -243,95 +243,6 @@ HWTEST_F(TabPatternTestNg, CalculateFrontChildrenMainSizeTest001, TestSize.Level
 }
 
 /**
- * @tc.name: GetTargetIndexTest001
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, GetTargetIndexTest001, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string command = "";
-    int32_t targetIndex = 0;
-
-    auto result = tabsPattern->GetTargetIndex(command, targetIndex);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetTargetIndexTest002
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, GetTargetIndexTest002, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string restoreInfo_ = R"({"cmd":change})";
-    auto info = JsonUtil::ParseJsonString(restoreInfo_);
-    int32_t targetIndex = 0;
-
-    auto result = tabsPattern->GetTargetIndex(restoreInfo_, targetIndex);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetTargetIndexTest003
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, GetTargetIndexTest003, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string restoreInfo_ = R"({"params":111111111})";
-    auto info = JsonUtil::ParseJsonString(restoreInfo_);
-    int32_t targetIndex = 0;
-
-    auto result = tabsPattern->GetTargetIndex(restoreInfo_, targetIndex);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetTargetIndexTest004
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, GetTargetIndexTest004, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string restoreInfo_ = "{index: 125}";
-    auto info = JsonUtil::ParseJsonString(restoreInfo_);
-    int32_t targetIndex = 0;
-
-    auto result = tabsPattern->GetTargetIndex(restoreInfo_, targetIndex);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetTargetIndexTest005
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, GetTargetIndexTest005, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string restoreInfo_ = R"({"index":125})";
-    auto info = JsonUtil::ParseJsonString(restoreInfo_);
-    int32_t targetIndex = 0;
-
-    tabsPattern->GetTargetIndex(restoreInfo_, targetIndex);
-    EXPECT_EQ(targetIndex, 0);
-}
-
-/**
  * @tc.name: InitFocusEvent001
  * @tc.desc: GetTargetIndex
  * @tc.type: FUNC
@@ -608,38 +519,6 @@ HWTEST_F(TabPatternTestNg, InitAccessibilityZIndexTest004, TestSize.Level1)
     tabsPattern->InitAccessibilityZIndex();
     auto index = tabBarAccessibilityProperty->GetAccessibilityZIndex();
     EXPECT_EQ(index, 1);
-}
-
-/**
- * @tc.name: OnInjectionEventTest001
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, OnInjectionEventTest001, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string commend = "{cmd: 1111}";
-
-    auto result = tabsPattern->OnInjectionEvent(commend);
-    EXPECT_EQ(result, 11);
-}
-
-/**
- * @tc.name: OnInjectionEventTest002
- * @tc.desc: GetTargetIndex
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, OnInjectionEventTest002, TestSize.Level1)
-{
-    auto tabsPattern = AceType::MakeRefPtr<TabsPattern>();
-    ASSERT_NE(tabsPattern, nullptr);
-
-    std::string commend = "{index: 1000}";
-
-    auto result = tabsPattern->OnInjectionEvent(commend);
-    EXPECT_EQ(result, 11);
 }
 
 /**

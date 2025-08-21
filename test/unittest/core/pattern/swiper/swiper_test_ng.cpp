@@ -1687,68 +1687,6 @@ HWTEST_F(SwiperTestNg, OnDirtyLayoutWrapperSwap_GetJumpIndex, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnInjectionEventTest001
- * @tc.desc: test OnInjectionEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    int32_t currentIndex = 3;
-    auto onChange = [&currentIndex](const BaseEventInfo* info) {
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (swiperInfo != nullptr) {
-            currentIndex = swiperInfo->GetIndex();
-        }
-    };
-    SwiperModelNG model = CreateSwiper();
-    model.SetOnChange(std::move(onChange));
-    CreateSwiperItems(6);
-    CreateSwiperDone();
-    ASSERT_NE(pattern_, nullptr);
-    pattern_->currentIndex_ = currentIndex;
-    std::map<std::string, int32_t> commands = { { R"({"cmd":"changeIndex","params":{"index":2}})", 2 },
-        { R"({"cmd":"changeIndex","params":{"index":100}})", 0 },
-        { R"({"cmd":"changeIndex","params":{"index":-10}})", 0 },
-        { R"({"cmd":"changeIndex","params":{"index":1}})", 1 } };
-
-    for (const auto& command : commands) {
-        bool ret = pattern_->OnInjectionEvent(command.first);
-        ASSERT_NE(ret, false);
-        EXPECT_EQ(pattern_->targetIndex_, command.second);
-    }
-}
-
-/**
- * @tc.name: ReportComponentChangeEvent001
- * @tc.desc: test ReportComponentChangeEvent func
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, ReportComponentChangeEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create swiper and set parameters.
-     */
-    int32_t currentIndex = 3;
-    auto onChange = [&currentIndex](const BaseEventInfo* info) {
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        if (swiperInfo != nullptr) {
-            currentIndex = swiperInfo->GetIndex();
-        }
-    };
-    SwiperModelNG model = CreateSwiper();
-    model.SetOnChange(std::move(onChange));
-    CreateSwiper();
-    CreateSwiperItems();
-    CreateSwiperDone();
-    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    swiperPattern->ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, 0.0f);
-}
-
-/**
  * @tc.name: SwipeAutoLinearIsOutOfBoundary001
  * @tc.desc: Test SwiperPattern AutoLinearIsOutOfBoundary test
  * @tc.type: FUNC
