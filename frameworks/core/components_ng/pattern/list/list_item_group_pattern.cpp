@@ -588,6 +588,7 @@ CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
         itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_ - footerCount_;
     }
     if (outOfView) {
+        cachedItemPosition_.merge(itemPosition_);
         ClearItemPosition();
     }
     if (reCache || reCache_) {

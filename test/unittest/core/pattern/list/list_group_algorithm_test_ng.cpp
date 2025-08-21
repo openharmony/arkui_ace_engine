@@ -1322,6 +1322,7 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount006, TestSize.Level1)
     FlushUITasks();
     FlushIdleTask(pattern_);
     auto group0ChildNode = GetChildFrameNode(group0Node, 0);
+    EXPECT_EQ(group0ChildNode->IsActive(), true);
     EXPECT_NE(group0ChildNode, nullptr);
 }
 
