@@ -300,7 +300,7 @@ public:
         const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void FireUntriggeredInnerOnAreaChanged(
         const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
-    void FireDrawCompletedNDKCallback(const RefPtr<PipelineContext>& pipeline);
+    void FireDrawCompletedNDKCallback(PipelineContext* pipeline);
     void FireLayoutNDKCallback(const PipelineContext* pipeline);
     void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
     {
