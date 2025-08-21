@@ -81,13 +81,15 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     ): void {
         ArkComponentRoot(this, () => {
             this.__updateStruct(initializers);
-            this.isV2()
-                ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
-                : OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            const savedRenderingComponent = OBSERVE.renderingComponent
+            OBSERVE.renderingComponent = this.isV2() ?
+                ObserveSingleton.RenderingComponentV2 : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
+            OBSERVE.renderingComponent = savedRenderingComponent;
             remember(() => {
-                this.onDidBuild();
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    this.onDidBuild();
+                })
             });
         })
     }
