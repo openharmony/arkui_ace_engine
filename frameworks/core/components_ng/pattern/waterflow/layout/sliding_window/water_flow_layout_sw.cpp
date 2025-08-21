@@ -221,6 +221,11 @@ int32_t WaterFlowLayoutSW::CheckReset()
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
+            // Fix: When transitioning from empty to populated data, startIndex_ is Infinity
+            // but min(Infinity, itemCnt_-1) would start from last item. Return 0 for sequential loading.
+            if (info_->startIndex_ == Infinity<int32_t>() && itemCnt_ > 0) {
+                return 0;
+            }
             return std::min(info_->startIndex_, itemCnt_ - 1);
         }
         info_->jumpForRecompose_ = info_->startIndex_;
