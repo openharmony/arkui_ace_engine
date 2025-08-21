@@ -1030,13 +1030,12 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
 void TextContentModifier::SetTextDecoration(const TextDecoration& type, bool isReset)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
+    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
+                                (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
     if (oldTextDecoration == type) {
         UpdateTextDecorationColorAlpha();
         return;
     }
-
-    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-                                (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
     if (!isReset) {
         textDecoration_ = type;
     } else {
