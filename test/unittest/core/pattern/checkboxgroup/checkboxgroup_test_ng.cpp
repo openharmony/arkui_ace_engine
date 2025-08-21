@@ -1967,7 +1967,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
     ASSERT_NE(frameNode, nullptr);
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
-    ASSERT_TRUE(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle());
+    EXPECT_EQ(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle(), true);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }

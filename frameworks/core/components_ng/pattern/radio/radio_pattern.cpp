@@ -222,7 +222,9 @@ void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
     AddIsFocusActiveUpdateEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
@@ -246,16 +248,20 @@ void RadioPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(host, isFocusActiveUpdateEvent_);
 }
 
 void RadioPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(host);
 }
 
 void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
@@ -1047,6 +1053,7 @@ void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColo
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+
     switch (radioColorType) {
         case RadioColorType::CHECKED_BACKGROUND_COLOR:
             paintProperty->UpdateRadioCheckedBackgroundColor(color);
