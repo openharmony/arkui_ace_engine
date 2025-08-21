@@ -31,7 +31,7 @@ export class PathStackUtils {
     }
     static addNavPathInfo(info: NavPathInfo, launchMode: LaunchMode, isReplace: boolean = false): void {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
-            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
+            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name) as int32
             if (index !== -1) {
                 PathStackUtils.infoArray[index] = info
                 let targetInfo = PathStackUtils.infoArray.splice(index, 1)
@@ -45,7 +45,7 @@ export class PathStackUtils {
             }
             return
         } else if (launchMode === LaunchMode.POP_TO_SINGLETON) {
-            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
+            let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name) as int32
             if (index != -1) {
                 PathStackUtils.infoArray[index] = info
                 if (isReplace) {
@@ -225,7 +225,7 @@ export class PathStackUtils {
     static getParamByName(pathStack: NavPathStack, name: string): Array<object | undefined> {
         let result: Array<Object | undefined> = new Array<Object | undefined>()
         let ids = NavExtender.getIdByName(pathStack, name)
-        for (let index: number = 0; index < ids.length; index++) {
+        for (let index = 0; index < ids.length; index++) {
             if (!PathStackUtils.infoMaps.has(ids[index])) {
                 result.push(undefined)
                 continue

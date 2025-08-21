@@ -181,8 +181,8 @@ class RouterImpl implements Router {
             return;
         }
         if (this.visiblePages.length > index && this.peerNodeList.length > index) {
-            this.visiblePages.value[index].updatePeerNode(node)
-            RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[index])
+            this.visiblePages.value[index as int32].updatePeerNode(node)
+            RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[index as int32])
         }
     }
 

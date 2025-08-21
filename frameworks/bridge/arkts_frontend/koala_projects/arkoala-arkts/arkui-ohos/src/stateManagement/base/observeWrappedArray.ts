@@ -90,16 +90,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         }
     }
 
-    // [index] operator
-    public override $_get(index: number): T {
-        return this.$_get(index as int);
-    }
-
-    // [] operator
-    public override $_set(i: number, val: T): void {
-        this.$_set(i as int, val);
-    }
-
     // [] operator
     public override $_get(idx: int): T {
         if (this.shouldAddRef()) {
