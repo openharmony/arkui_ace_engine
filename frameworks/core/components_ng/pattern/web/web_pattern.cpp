@@ -828,7 +828,7 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
         uint32_t resizeWidth = static_cast<uint32_t>(std::ceil(delegate_->ResizeWidth()));
         uint32_t resizeHeight = static_cast<uint32_t>(std::ceil(delegate_->ResizeHeight()));
         if ((width != resizeWidth) || (height != resizeHeight)) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is vaild", width, height);
+            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is invalid", width, height);
             return;
         }
         delegate_->RecordBlanklessFrameSize(width, height);
