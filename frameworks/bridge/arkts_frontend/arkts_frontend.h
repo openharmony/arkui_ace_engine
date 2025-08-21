@@ -363,6 +363,7 @@ public:
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
     void OpenStateMgmtInterop() override;
+    void NotifyArkoalaConfigurationChange() override;
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

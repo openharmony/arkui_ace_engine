@@ -553,6 +553,18 @@ ani_ref* ArktsFrontend::GetHostContext(int32_t instanceId)
     return Framework::AniContextModule::GetAniContext(instanceId);
 }
 
+void ArktsFrontend::NotifyArkoalaConfigurationChange()
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(app_);
+    ani_status status;
+    if ((status = env->Object_CallMethodByName_Void((ani_object)app_, "notifyConfigurationChange", ":")) != ANI_OK) {
+        LOGE("Call notifyConfigurationChange error");
+        return;
+    }
+}
+
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
