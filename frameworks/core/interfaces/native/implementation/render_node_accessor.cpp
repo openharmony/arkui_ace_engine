@@ -33,30 +33,6 @@
 namespace OHOS::Ace::NG {
 namespace Converter {
 template<>
-RefPtr<Ellipse> Convert(const Ark_Rect& src)
-{
-    const auto two = 2;
-    auto dst = AceType::MakeRefPtr<Ellipse>();
-    float left = Converter::Convert<float>(src.left);
-    float top = Converter::Convert<float>(src.top);
-    float right = Converter::Convert<float>(src.right);
-    float bottom = Converter::Convert<float>(src.bottom);
-    auto width = Dimension(right - left);
-    auto height = Dimension(bottom - top);
-    auto deltaX = Dimension(left);
-    auto deltaY = Dimension(top);
-    auto position = DimensionOffset(deltaX, deltaY);
-    dst->SetWidth(width);
-    dst->SetHeight(height);
-    dst->SetPosition(position);
-    dst->SetRadiusX(Dimension((right - left) / two));
-    dst->SetRadiusY(Dimension((bottom - top) / two));
-    dst->SetAxisX(Dimension(left + (right - left) / two));
-    dst->SetAxisY(Dimension(top + (bottom - top) / two));
-    return dst;
-}
-
-template<>
 void AssignCast(std::optional<LengthMetricsUnit>& dst, const Ark_LengthMetricsUnit& src)
 {
     switch (src) {
@@ -66,7 +42,7 @@ void AssignCast(std::optional<LengthMetricsUnit>& dst, const Ark_LengthMetricsUn
     }
 }
 
-void AssignArkValue(Ark_LengthMetricsUnit& dst, const LengthMetricsUnit& src)
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const LengthMetricsUnit& src, ConvContext *ctx)
 {
     switch (src) {
         case LengthMetricsUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
@@ -93,13 +69,13 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
     }
     return defaultUnit;
 }
-} // namespace
-namespace RenderNodeAccessor {
+
 RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
 {
     return peer ? peer->shape : nullptr;
 }
-
+} // namespace
+namespace RenderNodeAccessor {
 void DestroyPeerImpl(Ark_RenderNode peer)
 {
     PeerUtils::DestroyPeer(peer);
