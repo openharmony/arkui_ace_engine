@@ -29,7 +29,6 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     if (!onHoverEventCallback_) {
         return false;
     }
-    ACE_SCOPED_TRACE("HandleHoverEvent node:%d/%s isHovered:%d", GetNodeId(), GetNodeName().c_str(), isHovered);
     lastHoverState_ = isHovered;
     HoverInfo hoverInfo;
     auto node = GetAttachedNode().Upgrade();

@@ -574,13 +574,12 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     }
 
     PointF localPoint(event.x, event.y);
-    bool isPostEventResult = isPostEventResult_ || event.passThrough;
     if (isRealTime) {
-        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult,
-            isPostEventResult, event.postEventNodeId);
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_ && !event.passThrough,
+            isPostEventResult_ || event.passThrough, event.postEventNodeId);
     } else {
         TransformForRecognizer(
-            localPoint, frameNode, false, isPostEventResult, event.postEventNodeId);
+            localPoint, frameNode, false, isPostEventResult_ || event.passThrough, event.postEventNodeId);
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);

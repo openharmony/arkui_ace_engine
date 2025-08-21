@@ -861,8 +861,8 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
-    ACE_SCOPED_TRACE_COMMERCIAL(
-        "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
+    ACE_SCOPED_TRACE_COMMERCIAL("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
+        point.id, point.x, point.y, (int)point.type);
     lastTouchEvent_ = event;
 
     if (point.type == TouchType::DOWN) {
@@ -1543,12 +1543,12 @@ void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResul
     }
     int32_t eventIdentity = event.GetEventIdentity();
     if (event.action == MouseAction::WINDOW_LEAVE) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "LW.");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "LW.");
         lastHoverTestResultsMap_[eventIdentity] = std::move(currHoverTestResultsMap_[eventIdentity]);
         currHoverTestResultsMap_[eventIdentity].clear();
         currHoverTestResultsMap_.erase(eventIdentity);
     } else if (event.action == MouseAction::WINDOW_ENTER) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "EW.");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "EW.");
         lastHoverTestResultsMap_[eventIdentity].clear();
         currHoverTestResultsMap_[eventIdentity] = std::move(hoverTestResult);
     } else {
