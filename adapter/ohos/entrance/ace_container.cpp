@@ -27,6 +27,7 @@
 #include "ui_extension_context.h"
 #include "system_ability_definition.h"
 #include "wm_common.h"
+#include "form_ashmem.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"

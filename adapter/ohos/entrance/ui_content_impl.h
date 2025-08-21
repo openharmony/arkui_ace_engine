@@ -61,13 +61,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
-    ~UIContentImpl()
-    {
-        UnSubscribeEventsPassThroughMode();
-        ProcessDestructCallbacks();
-        DestroyUIDirector();
-        DestroyCallback();
-    }
+    ~UIContentImpl();
 
     // UI content lifeCycles
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
