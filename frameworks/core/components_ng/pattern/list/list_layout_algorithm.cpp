@@ -288,7 +288,7 @@ void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int
         indexInList = childItemPattern->GetIndexInList();
     }
     if (indexInList == focusIndex && childFocusHub->IsCurrentFocus()) {
-        focusHub->LostChildFocusToSelf();
+        listPattern->HandleFocusParentCheck(childFocusHub, focusHub);
     }
 }
 

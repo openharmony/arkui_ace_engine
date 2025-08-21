@@ -4254,11 +4254,11 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Focus node scroll inside.
-     * @tc.expected: Node lost focus
+     * @tc.expected: Node not lost focus
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
     FlushUITasks();
-    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
 }
 
 /**
@@ -4284,6 +4284,67 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf002, TestSize.Level1)
     pattern_->focusIndex_ = 1;
     pattern_->startIndex_ = 1;
     pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, 1);
+    focusNode = GetChildFocusHub(frameNode_, 1);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node scroll inside.
+     * @tc.expected: Node not lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: LostChildFocusToSelf003
+ * @tc.desc: Test LostChildFocusToSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LostChildFocusToSelf003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    // Get ListItemNode
+    auto listItemNode = GetChildFrameNode(frameNode_, 1);
+    auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+    
+    // Create RepeatVirtualScroll2Node
+    auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        10,
+        10,
+        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, int32_t) {},
+        [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
+        [](int32_t, int32_t) {},
+        []() {}
+    );
+    
+    // Set parent-child relationships
+    repeatNode->AddChild(listItemNode);
+    frameNode_->AddChild(repeatNode);
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step1. Focus node scroll outside.
+     * @tc.expected: Node keep focus.
+     */
+    pattern_->focusIndex_ = 1;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 5;
     pattern_->maxListItemIndex_ = 10;
     pattern_->FireFocus();
     FlushUITasks();
