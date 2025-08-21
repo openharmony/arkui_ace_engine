@@ -224,6 +224,27 @@ const segmentButtonTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
+  SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_unselected_font_weight'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  SEGMENT_BUTTON_BORDER_WIDTH: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_border_width'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  SEGMENT_BUTTON_BORDER_COLOR: {
+    id: -1,
+    type: 10002,
+    params: ['sys.color.segment_button_border_color'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
 };
 function nearEqual(first, second) {
   return Math.abs(first - second) < 0.001;
@@ -231,6 +252,23 @@ function nearEqual(first, second) {
 function validateLengthMetrics(value, defaultValue) {
   const actualValue = value ?? defaultValue;
   return actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT ? defaultValue : actualValue;
+}
+function initFontWeight(defaultValue) {
+  const value = LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT).value;
+  switch (value) {
+    case 100:
+      return FontWeight.Lighter;
+    case 400:
+      return FontWeight.Regular;
+    case 500:
+      return FontWeight.Medium;
+    case 700:
+      return FontWeight.Bold;
+    case 900:
+      return FontWeight.Bolder;
+    default:
+      return defaultValue;
+  }
 }
 export var BorderRadiusMode;
 (function (BorderRadiusMode) {
@@ -350,7 +388,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
     this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE;
     this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
-    this.fontWeight = options.fontWeight ?? FontWeight.Regular;
+    this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular);
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
@@ -2174,7 +2212,7 @@ let ItemProperty = class ItemProperty {
   constructor() {
     this.fontColor = segmentButtonTheme.FONT_COLOR;
     this.fontSize = segmentButtonTheme.FONT_SIZE;
-    this.fontWeight = FontWeight.Regular;
+    this.fontWeight = initFontWeight(FontWeight.Regular)
     this.isSelected = false;
   }
 };
@@ -2897,6 +2935,8 @@ export class SegmentButton extends ViewPU {
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
                   });
+                  Stack.borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH);
+                  Stack.borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR);
                 }, Stack);
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                   If.create();
@@ -3148,7 +3188,7 @@ export class SegmentButton extends ViewPU {
         : (this.options.fontSize ?? segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontWeight = selected
         ? (this.options.selectedFontWeight ?? FontWeight.Medium)
-        : (this.options.fontWeight ?? FontWeight.Regular);
+        : (this.options.fontWeight ?? initFontWeight(FontWeight.Regular));
       this.buttonItemProperty[index].isSelected = selected;
     });
   }

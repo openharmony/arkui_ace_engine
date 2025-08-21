@@ -55,7 +55,10 @@ interface SegmentButtonThemeInterface {
   SEGMENT_BUTTON_SHADOW: Resource,
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: Resource,
   SEGMENT_BUTTON_CONTAINER_SHAPE: Resource,
-  SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: Resource
+  SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: Resource,
+  SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT: Resource,
+  SEGMENT_BUTTON_BORDER_WIDTH: DimensionNoPercentage,
+  SEGMENT_BUTTON_BORDER_COLOR: ResourceColor,
 }
 
 const segmentButtonTheme: SegmentButtonThemeInterface = {
@@ -83,7 +86,10 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: $r('sys.color.segment_button_focus_backboard_primary'),
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: $r('sys.float.segment_focus_control'),
   SEGMENT_BUTTON_CONTAINER_SHAPE: $r('sys.float.segmentbutton_container_shape'),
-  SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: $r('sys.float.segmentbutton_selected_background_shape')
+  SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: $r('sys.float.segmentbutton_selected_background_shape'),
+  SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT: $r('sys.float.segment_button_unselected_font_weight'),
+  SEGMENT_BUTTON_BORDER_WIDTH: $r('sys.float.segment_button_border_width'),
+  SEGMENT_BUTTON_BORDER_COLOR: $r('sys.color.segment_button_border_color'),
 }
 
 interface Point {
@@ -98,6 +104,24 @@ function nearEqual(first: number, second: number): boolean {
 function validateLengthMetrics(value: LengthMetrics | undefined, defaultValue: LengthMetrics): LengthMetrics {
   const actualValue = value ?? defaultValue;
   return (actualValue.value < 0 || actualValue.unit === LengthUnit.PERCENT) ? defaultValue : actualValue;
+}
+
+function initFontWeight(defaultValue: FontWeight) {
+  const value = LengthMetrics.resource(segmentButtonTheme.SEGMENT_BUTTON_UNSELECTED_FONT_WEIGHT).value;
+  switch (value) {
+    case 100:
+      return FontWeight.Lighter;
+    case 400:
+      return FontWeight.Regular;
+    case 500:
+      return FontWeight.Medium;
+    case 700:
+      return FontWeight.Bold;
+    case 900:
+      return FontWeight.Bolder;
+    default:
+      return defaultValue;
+  }
 }
 
 interface SegmentButtonTextItem {
@@ -352,7 +376,7 @@ export class SegmentButtonOptions {
     this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR
     this.fontSize = options.fontSize ?? segmentButtonTheme.FONT_SIZE
     this.selectedFontSize = options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE
-    this.fontWeight = options.fontWeight ?? FontWeight.Regular
+    this.fontWeight = options.fontWeight ?? initFontWeight(FontWeight.Regular)
     this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium
     this.backgroundColor = options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR
@@ -1237,7 +1261,7 @@ struct SegmentButtonItemArrayComponent {
 class ItemProperty {
   public fontColor: ResourceColor = segmentButtonTheme.FONT_COLOR
   public fontSize: DimensionNoPercentage = segmentButtonTheme.FONT_SIZE
-  public fontWeight: FontWeight = FontWeight.Regular
+  public fontWeight: FontWeight = initFontWeight(FontWeight.Regular)
   public isSelected: boolean = false
 }
 
@@ -1285,7 +1309,7 @@ export struct SegmentButton {
   @State shouldMirror: boolean = false
   private isGestureInProgress: boolean = false;
   private isCustomizedCache?: boolean;
-    
+
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
@@ -1405,7 +1429,7 @@ export struct SegmentButton {
   private isSegmentFocusStyleCustomized(): boolean {
     if (this.isCustomizedCache === undefined) {
       this.isCustomizedCache = resourceToNumber(
-        this.getUIContext()?.getHostContext(), 
+        this.getUIContext()?.getHostContext(),
         segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED,
         1.0
       ) < 0.1; //PC platform returns 0.0, default returns 1.0, using <0.1 to differentiate platform styles.
@@ -1441,6 +1465,8 @@ export struct SegmentButton {
             this.componentSize.height as number / 2
           ))
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
+          .borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH)
+          .borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1762,7 +1788,7 @@ export struct SegmentButton {
       this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
       segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
-        this.options.fontWeight ?? FontWeight.Regular
+        this.options.fontWeight ?? initFontWeight(FontWeight.Regular)
       this.buttonItemProperty[index].isSelected = selected
     })
   }
