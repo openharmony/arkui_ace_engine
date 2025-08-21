@@ -48,6 +48,8 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
+constexpr Dimension LUNAR_SWITCH_MIN_FONT_SIZE = 1.0_vp;
+constexpr uint32_t LUNAR_SWITCH_MAX_LINES = 1;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
@@ -190,6 +192,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
+    textLayoutProperty->UpdateAdaptMaxFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
+    textLayoutProperty->UpdateAdaptMinFontSize(ConvertFontScaleValue(LUNAR_SWITCH_MIN_FONT_SIZE));
+    textLayoutProperty->UpdateMaxLines(LUNAR_SWITCH_MAX_LINES);
+    textLayoutProperty->UpdateLayoutWeight(RATIO_ONE);
     textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     textNode->MarkModifyDone();
@@ -1323,6 +1329,7 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
                                  : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
+    checkboxLayoutProps->UpdateLayoutWeight(RATIO_ZERO);
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
