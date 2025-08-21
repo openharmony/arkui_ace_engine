@@ -92,11 +92,9 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkTextPeer {
         const peerId  = PeerNode.nextId()
-        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", peerId, component ? component.isFirstBuild : true);
         const _peerPtr  = ArkUIGeneratedNativeModule._Text_construct(peerId, flags)
         const _peer  = new ArkTextPeer(_peerPtr, peerId, "Text", flags)
         component?.setPeer(_peer)
-        ArkThemeScopeManager.getInstance().onComponentCreateExit(peerId);
         return _peer
     }
     setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void {
@@ -1594,9 +1592,8 @@ export function Text(
 
         receiver.setTextOptions(content,value)
         style?.(receiver)
+        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
         content_?.()
         receiver.applyAttributesFinish()
-
-        ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
     })
 }
