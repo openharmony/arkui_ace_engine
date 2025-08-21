@@ -117,7 +117,6 @@ void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
     if (!paintProperty->HasColor() && isFocused) {
         color_ = capsuleSelectFocusedColor_;
     }
-    color_ = progressModifier_->CalculateHoverPressColor(color_);
     progressModifier_->SetColor(LinearColor(color_));
 
     if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_) {

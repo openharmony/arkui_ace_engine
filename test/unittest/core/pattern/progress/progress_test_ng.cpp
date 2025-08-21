@@ -2203,6 +2203,40 @@ HWTEST_F(ProgressTestNg, ProgressPatternOnColorConfigurationUpdateTest001, TestS
 }
 
 /**
+ * @tc.name: ProgressDefaultFontWeight
+ * @tc.desc: Test ProgressDefaultFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressDefaultFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create instance.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+
+    /**
+     * @tc.case: get default font weight.
+     * @tc.expected: it should be Normal.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    FontWeight fontWeight = static_cast<FontWeight>(theme->GetFontWeight());
+    EXPECT_EQ(fontWeight, FontWeight::NORMAL);
+
+    /**
+     * @tc.case: case1 call to SetFontWeight with no framenode.
+     * @tc.expected: it should be as we set.
+     */
+    model.SetFontWeight(FontWeight::MEDIUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetFontWeight().value(), FontWeight::MEDIUM);
+}
+
+/**
  * @tc.name: ProgressPatternCreateWithResourceObjTest001
  * @tc.desc: Test model ng  CreateWithResourceObj
  * @tc.type: FUNC
