@@ -265,8 +265,10 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->ClearOptionsHour();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    if (isUseMilitaryTime != timePickerRowPattern->GetCachedHour24()) {
+        timePickerRowPattern->ClearOptionsHour();
+        timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    }
 }
 
 void TimePickerModelNG::SetEnableCascade(bool isEnableCascade)
@@ -286,7 +288,7 @@ void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     if ((timePickerRowPattern->GetPrefixHour() != hourType) ||
         (timePickerRowPattern->GetPrefixMinute() != minuteType) ||
-        (timePickerRowPattern->GetPrefixSecond() != secondType)) {
+        (timePickerRowPattern->GetHasSecond() && timePickerRowPattern->GetPrefixSecond() != secondType)) {
         timePickerRowPattern->SetDateTimeOptionUpdate(true);
     }
     timePickerRowPattern->SetPrefixHour(hourType);
@@ -744,8 +746,10 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->ClearOptionsHour();
-    timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    if (isUseMilitaryTime != timePickerRowPattern->GetCachedHour24()) {
+        timePickerRowPattern->ClearOptionsHour();
+        timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    }
 }
 
 void TimePickerModelNG::SetEnableCascade(FrameNode* frameNode, bool isEnableCascade)
