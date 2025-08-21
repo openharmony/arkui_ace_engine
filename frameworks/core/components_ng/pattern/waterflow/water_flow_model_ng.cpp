@@ -778,6 +778,21 @@ WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
     return pattern->GetLayoutMode();
 }
 
+void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    CHECK_NULL_VOID(footerNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
+}
+
 void WaterFlowModelNG::ParseResObjFriction(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -800,21 +815,6 @@ void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<Re
         pattern->SetFriction(friction);
     };
     pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
-}
-
-void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
-{
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<NG::UINode> footerNode;
-    if (footer) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        footer();
-        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
-    CHECK_NULL_VOID(footerNode);
-    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->AddFooter(footerNode);
 }
 
 void WaterFlowModelNG::ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj)
