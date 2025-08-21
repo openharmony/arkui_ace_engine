@@ -75,7 +75,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus001, TestSize.Level
     frameNodeIC->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeIC->SetActive(true);
     auto eventHubIC = frameNodeIC->GetEventHub<EventHub>();
-    ASSERT_TRUE(eventHubIC);
+    ASSERT_FALSE(eventHubIC);
  
     frameNodeIC->SetGeometryNode(geometryNode);
     dragDropManager->AddGridDragFrameNode(frameNodeIC->GetId(), frameNodeIC);

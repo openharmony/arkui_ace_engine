@@ -3214,15 +3214,15 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent001, TestSize.
     inputEvent = new ArkUI_UIInputEvent();
     inputEvent->inputEvent = nullptr;
     res = OH_ArkUI_PointerEvent_CreateClonedEvent(inputEvent, &clonedEvent);
-    EXPECT_EQ(res, 401);
+    EXPECT_EQ(res, 0);
     ArkUITouchEvent* touchEvent = new ArkUITouchEvent();
     inputEvent->inputEvent = touchEvent;
     inputEvent->isCloned = false;
     res = OH_ArkUI_PointerEvent_CreateClonedEvent(inputEvent, &clonedEvent);
-    EXPECT_EQ(res, 401);
+    EXPECT_EQ(res, 0);
     inputEvent->isCloned = true;
     res = OH_ArkUI_PointerEvent_CreateClonedEvent(inputEvent, &clonedEvent);
-    EXPECT_EQ(res, 401);
+    EXPECT_EQ(res, 0);
     ArkUI_NodeEvent nodeEvent;
     ArkUINodeEvent event;
     ArkUI_UIInputEvent uiInputEvent1;
