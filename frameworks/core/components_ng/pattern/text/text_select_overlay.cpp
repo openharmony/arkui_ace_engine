@@ -689,19 +689,11 @@ bool TextSelectOverlay::GetRenderClipValue() const
     return renderContext->GetClipEdge().value_or(defaultClipValue);
 }
 
-bool TextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
+std::optional<SelectOverlayInfo> TextSelectOverlay::GetSelectOverlayInfo()
 {
-    auto host = GetOwner();
-    CHECK_NULL_RETURN(host, false);
-    auto geo = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geo, false);
-    auto rect = RectF(OffsetF(0.0f, 0.0f), geo->GetFrameSize());
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, false);
-
-    auto selectedArea = GetSelectArea();
-    selectedArea.SetOffset(selectedArea.GetOffset() - textPattern->GetParentGlobalOffset());
-    return rect.IsInRegion(touchPoint) || selectedArea.IsInRegion(touchPoint);
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+    return manager->GetSelectOverlayInfo();
 }
 
 bool TextSelectOverlay::ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode)

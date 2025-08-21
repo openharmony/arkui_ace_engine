@@ -1267,8 +1267,8 @@ private:
     bool closeSelectOverlayMultiThread_ = false;
     bool closeSelectOverlayMultiThreadValue_ = false;
     bool setTextSelectionMultiThread_ = true;
-    int32_t setTextSelectionMultiThreadValue0_;
-    int32_t setTextSelectionMultiThreadValue1_;
+    int32_t setTextSelectionMultiThreadValue0_ = -1;
+    int32_t setTextSelectionMultiThreadValue1_ = -1;
     // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG

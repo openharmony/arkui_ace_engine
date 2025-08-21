@@ -141,37 +141,6 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckTouchInHostNode001
- * @tc.desc: test CheckTouchInHostNode function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, CheckTouchInHostNode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get textSelectOverlay and check geometryNode
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    stack->StartGetAccessRecordingFor(0);
-    stack->StopGetAccessRecording();
-    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    /**
-     * @tc.steps: step2: call CheckTouchInHostNode
-     * @tc.expected: inHostNode is false
-     */
-    PointF touchPoint(0.0f, 0.0f);
-    auto inHostNode = textSelectOverlay->CheckTouchInHostNode(touchPoint);
-    EXPECT_FALSE(inHostNode);
-}
-
-/**
  * @tc.name: OnMenuItemAction001
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC
