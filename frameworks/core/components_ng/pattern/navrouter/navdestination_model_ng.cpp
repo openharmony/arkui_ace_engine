@@ -1794,7 +1794,6 @@ void NavDestinationModelNG::SetTitleHeight(FrameNode* frameNode, const Dimension
 void NavDestinationModelNG::SetOnCoordScrollStartAction(
     FrameNode* frameNode, std::function<void()>&& onCoordScrollStart)
 {
-    CHECK_NULL_VOID(onCoordScrollStart);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
     auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
@@ -1803,9 +1802,8 @@ void NavDestinationModelNG::SetOnCoordScrollStartAction(
 }
 
 void NavDestinationModelNG::SetOnCoordScrollUpdateAction(
-    FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate)
+    FrameNode* frameNode, std::function<void(float, float)>&& onCoordScrollUpdate)
 {
-    CHECK_NULL_VOID(onCoordScrollUpdate);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
     auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
@@ -1815,7 +1813,6 @@ void NavDestinationModelNG::SetOnCoordScrollUpdateAction(
 
 void NavDestinationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd)
 {
-    CHECK_NULL_VOID(onCoordScrollEnd);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
     auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();

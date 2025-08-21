@@ -120,7 +120,8 @@ public:
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid);
     static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
-    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollUpdateAction(
+        FrameNode* frameNode, std::function<void(float, float)>&& onCoordScrollUpdate);
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
     static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);

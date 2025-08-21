@@ -840,7 +840,7 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
     auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
-    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
     return 0.0f;
 }
 

@@ -8653,6 +8653,24 @@ ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
     ViewAbstract::SetOnTouchTestDone(frameNode, callback);
     return ERROR_CODE_NO_ERROR;
 }
+
+ArkUIIgnoreLayoutSafeAreaOpts GetIgnoreLayoutSafeArea(ArkUINodeHandle node)
+{
+    ArkUIIgnoreLayoutSafeAreaOpts ignoreOpts;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ignoreOpts);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, ignoreOpts);
+    if (!layoutProperty->IsIgnoreOptsValid()) {
+        return ignoreOpts;
+    }
+    NG::IgnoreLayoutSafeAreaOpts& opts = *(layoutProperty->GetIgnoreLayoutSafeAreaOpts());
+    ignoreOpts = {
+        .type = opts.type,
+        .edges = opts.edges,
+    };
+    return ignoreOpts;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -9125,6 +9143,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetCompositingFilter = ResetCompositingFilter,
         .setFreeze = SetFreeze,
         .resetFreeze = ResetFreeze,
+        .getIgnoreLayoutSafeArea = GetIgnoreLayoutSafeArea,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

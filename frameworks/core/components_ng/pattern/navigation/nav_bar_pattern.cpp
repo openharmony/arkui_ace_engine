@@ -415,7 +415,7 @@ float NavBarPattern::OnCoordScrollUpdate(float offset, float currentOffset)
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
         auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
         CHECK_NULL_RETURN(eventHub, 0.0f);
-        eventHub->FireOnCoordScrollUpdateAction(currentOffset);
+        eventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
         return 0.0f;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
