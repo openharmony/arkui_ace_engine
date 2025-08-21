@@ -240,7 +240,7 @@ std::string CounterDecorator::GetAccessibilityText(uint32_t textLength, uint32_t
     if (posSecond != std::string::npos) {
         secondStr.replace(posSecond, toFindStr.length(), maxLengthStr);
     }
-    result = firstStr + secondStr;
+    result = firstStr + " " + secondStr;
     return result;
 }
 

@@ -71,7 +71,7 @@ struct IMEClient {
 
 namespace OHOS::Ace::NG {
 class TextFieldCommonEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(TextFieldCommonEvent, BaseEventInfo);
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextFieldCommonEvent, BaseEventInfo)
 public:
     TextFieldCommonEvent() : BaseEventInfo("TextFieldCommonEvent") {}
     ~TextFieldCommonEvent() override = default;

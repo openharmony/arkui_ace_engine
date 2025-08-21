@@ -79,7 +79,7 @@ public:
         const RefPtr<ScrollablePattern> scrollableParent, const Offset& globalOffset, bool isStopAutoScroll);
     const RefPtr<ScrollablePattern> FindScrollableParent();
     std::optional<Color> GetHandleColor() override;
-    bool CheckTouchInHostNode(const PointF& touchPoint) override;
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode) override;
     void GetVisibleDragViewHandles(RectF& first, RectF& second);
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
