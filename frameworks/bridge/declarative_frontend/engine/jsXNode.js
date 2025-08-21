@@ -184,7 +184,7 @@ class JSBuilderNode extends BaseNode {
     }
     findProvidePU__(providePropName) {
         if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
-            return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+            return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
         }
         return undefined;
     }
@@ -315,10 +315,10 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setBuilderNode(this);
         let id = this.frameNode_.getUniqueId();
         if (this.id_ && this.id_ !== id) {
-            this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+            this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
         }
         this.id_ = id;
-        this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+        this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
         FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -3288,7 +3288,7 @@ function __establishConnection__(allow, parentView, builderIds) {
         if (builderNode.getInheritFreeze()) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
-        builderNode.__parentViewOfBuildNode = parentView;
+        builderNode.__parentViewOfBuildNode = new WeakRef(parentView);
         parentView?.addChildBuilderNode(builderNode);
     });
     return true;
