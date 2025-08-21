@@ -1694,7 +1694,7 @@ void RichEditorPattern::DeleteSpansOperation(int32_t start, int32_t end)
     } else {
         DeleteSpansByRange(start, end, startInfo, endInfo);
     }
-    RemoveEmptySpanItems();
+    RemoveEmptySpans();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         CloseSelectOverlay();
