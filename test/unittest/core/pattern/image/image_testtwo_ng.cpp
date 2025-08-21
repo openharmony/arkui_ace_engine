@@ -195,6 +195,25 @@ HWTEST_F(ImageTestTwoNg, TestInterpolation001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImageModelSetDraggable001
+ * @tc.desc: Set the draggable attribute of ImageModelNG object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, ImageModelSetDraggable001, TestSize.Level0)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetDraggable(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode->draggable_);
+}
+
+/**
  * @tc.name: TestObjectRepeat001
  * @tc.desc: Test image objectRepeat.
  * @tc.type: FUNC

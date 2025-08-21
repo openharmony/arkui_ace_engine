@@ -72,7 +72,7 @@ void SetFrameNodeDraggable(RefPtr<FrameNode>& frameNode, bool isImageSpan)
             CHECK_NULL_VOID(gestureHub);
             gestureHub->InitDragDropEvent();
         }
-        frameNode->SetDraggable(true);
+        frameNode->SetDraggable(draggable);
     }
 }
 
