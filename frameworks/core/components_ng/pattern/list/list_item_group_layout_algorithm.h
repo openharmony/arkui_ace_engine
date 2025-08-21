@@ -135,6 +135,11 @@ public:
         return lanes_;
     }
 
+    void SetLanes(int32_t lanes)
+    {
+        lanes_ = lanes;
+    }
+
     float GetLaneGutter() const
     {
         return laneGutter_;
