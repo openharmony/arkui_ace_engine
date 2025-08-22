@@ -1400,13 +1400,13 @@ void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::s
 }
 
 void ViewAbstractModelStatic::SetFocusScopePriority(
-    FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority)
+    FrameNode* frameNode, const std::optional<std::string>& focusScopeId, const std::optional<uint32_t>& focusPriority)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto proirity = focusPriority.value_or(static_cast<uint32_t>(FocusPriority::AUTO));
-    focusHub->SetFocusScopePriority(focusScopeId, proirity);
+    focusHub->SetFocusScopePriority(focusScopeId.value_or(""), proirity);
 }
 
 void ViewAbstractModelStatic::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)

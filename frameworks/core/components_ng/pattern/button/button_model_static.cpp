@@ -263,7 +263,7 @@ void ButtonModelStatic::SetStateEffect(FrameNode* frameNode, const std::optional
     if (stateEffect) {
         buttonEventHub->SetStateEffect(stateEffect.value());
     } else {
-        buttonEventHub->SetStateEffect(false);
+        buttonEventHub->SetStateEffect(true);
     }
 }
 

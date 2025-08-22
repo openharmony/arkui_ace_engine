@@ -296,8 +296,8 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
-    static void SetFocusScopePriority(
-        FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
+        const std::optional<uint32_t>& focusPriority);
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);

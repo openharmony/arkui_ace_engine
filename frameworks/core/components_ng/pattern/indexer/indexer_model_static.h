@@ -44,7 +44,7 @@ public:
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
-    static void SetItemSize(FrameNode* frameNode, const Dimension& value);
+    static void SetItemSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
         const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);
@@ -54,7 +54,7 @@ public:
     static void SetOnPopupSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onPopupSelected);
     static void SetPopupPositionX(FrameNode* frameNode, const std::optional<Dimension>& popupPositionXOpt);
     static void SetPopupPositionY(FrameNode* frameNode, const std::optional<Dimension>& popupPositionYOpt);
-    static void SetAutoCollapse(FrameNode* frameNode, bool autoCollapse);
+    static void SetAutoCollapse(FrameNode* frameNode, const std::optional<bool>& autoCollapse);
     static void SetPopupItemBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void SetPopupBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
     static void SetItemBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius);
