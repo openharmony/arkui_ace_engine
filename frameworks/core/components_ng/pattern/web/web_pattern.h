@@ -852,6 +852,7 @@ public:
     RefPtr<WebAccessibilityEventReport> GetAccessibilityEventReport();
     void InitInputEventReportCallback();
     void SetTextEventAccessibilityEnable(bool enable);
+    bool IsAccessibilityUsedByEventReport();
 
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
@@ -900,6 +901,7 @@ private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
+    friend class WebAccessibilityEventReport;
 
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     napi_env CreateEnv();

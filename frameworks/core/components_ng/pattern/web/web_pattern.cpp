@@ -7193,6 +7193,11 @@ void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
             return;
         }
         accessibilityState_ = state;
+        // accessibilityState_ acts as a service switch rather than a master switch
+        if (IsAccessibilityUsedByEventReport()) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::SetAccessibilityState, still used by event report");
+            return;
+        }
         delegate_->SetAccessibilityState(state, isDelayed);
         return;
     }
@@ -8419,6 +8424,7 @@ void WebPattern::RecoverToTopLeft()
 RefPtr<WebAccessibilityEventReport> WebPattern::GetAccessibilityEventReport()
 {
     if (!webAccessibilityEventReport_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::GetAccessibilityEventReport, create new report instance");
         webAccessibilityEventReport_ = AceType::MakeRefPtr<WebAccessibilityEventReport>(WeakClaim(this));
     }
     return webAccessibilityEventReport_;
@@ -8441,6 +8447,14 @@ void WebPattern::InitInputEventReportCallback()
 void WebPattern::SetTextEventAccessibilityEnable(bool enable)
 {
     textBlurAccessibilityEnable_ = enable;
+}
+
+bool WebPattern::IsAccessibilityUsedByEventReport()
+{
+    if (webAccessibilityEventReport_) {
+        return webAccessibilityEventReport_->GetEventReportEnable();
+    }
+    return false;
 }
 
 RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()

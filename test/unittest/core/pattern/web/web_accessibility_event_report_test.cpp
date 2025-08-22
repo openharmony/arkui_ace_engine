@@ -151,6 +151,7 @@ void WebAccessibilityEventReportTest::SetUp()
     if (g_webPattern) {
         g_webPattern->accessibilityState_ = false;
         g_webPattern->textBlurAccessibilityEnable_ = false;
+        g_webPattern->inspectorAccessibilityEnable_ = false;
         g_webPattern->webAccessibilityEventReport_ = nullptr;
     }
     OHOS::Ace::SetReturnStatus("");
@@ -199,11 +200,76 @@ HWTEST_F(WebAccessibilityEventReportTest, InitInputEventReportCallback, TestSize
     report->SetIsFirstRegister(true);
     report->RegisterAllReportEventCallback();
     EXPECT_FALSE(report->isFirstRegister_);
+    EXPECT_TRUE(report->eventReportEnable_);
 
     UiSessionManager::GetInstance()->NotifyAllWebPattern(false);
     g_webPattern->InitInputEventReportCallback();
+    EXPECT_FALSE(report->eventReportEnable_);
+#endif
+}
+
+/**
+ * @tc.name: SetEventReportEnable
+ * @tc.desc: Test SetEventReportEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityEventReportTest, SetEventReportEnable, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto report = g_webPattern->GetAccessibilityEventReport();
+    report->SetEventReportEnable(false);
+    report->SetEventReportEnable(true);
+    EXPECT_TRUE(report->eventReportEnable_);
+
+    report->SetEventReportEnable(false);
+    EXPECT_FALSE(report->eventReportEnable_);
+
+    g_webPattern->textBlurAccessibilityEnable_ = true;
+    report->SetEventReportEnable(true);
+    report->SetEventReportEnable(false);
+    EXPECT_FALSE(report->eventReportEnable_);
+
+    g_webPattern->inspectorAccessibilityEnable_ = true;
+    report->SetEventReportEnable(true);
+    report->SetEventReportEnable(false);
+    EXPECT_FALSE(report->eventReportEnable_);
+
+    g_webPattern->accessibilityState_ = true;
+    report->SetEventReportEnable(true);
+    report->SetEventReportEnable(false);
+    EXPECT_FALSE(report->eventReportEnable_);
+#endif
+}
+
+/**
+ * @tc.name: SetAccessibilityState
+ * @tc.desc: Test SetAccessibilityState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityEventReportTest, SetAccessibilityState, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto report = g_webPattern->GetAccessibilityEventReport();
+    g_webPattern->accessibilityState_ = true;
+    report->eventReportEnable_ = true;
+    g_webPattern->SetAccessibilityState(false);
     EXPECT_FALSE(g_webPattern->accessibilityState_);
-    EXPECT_FALSE(g_webPattern->textBlurAccessibilityEnable_);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityNodeById
+ * @tc.desc: Test GetAccessibilityNodeById.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAccessibilityEventReportTest, GetAccessibilityNodeById, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    OHOS::Ace::SetReturnStatus("true");
+    EXPECT_EQ(report->GetAccessibilityNodeById(1), nullptr);
+    report->eventReportEnable_ = true;
+    EXPECT_NE(report->GetAccessibilityNodeById(1), nullptr);
 #endif
 }
 
@@ -218,8 +284,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterAllReportEventCallback, TestSi
     auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     report->RegisterAllReportEventCallback();
 
-    EXPECT_TRUE(g_webPattern->accessibilityState_);
-    EXPECT_TRUE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_TRUE(report->eventReportEnable_);
 
     EXPECT_NE(report->textFocusCallback_, nullptr);
     EXPECT_NE(report->textBlurCallback_, nullptr);
@@ -238,7 +303,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterReportBlurEventCallback, TestS
     auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     auto blurCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(blurCallback), AccessibilityEventType::BLUR);
-    EXPECT_TRUE(g_webPattern->accessibilityState_);
+    EXPECT_TRUE(report->eventReportEnable_);
 #endif
 }
 
@@ -253,7 +318,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterReportFocusEventCallback, Test
     auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     auto focusCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(focusCallback), AccessibilityEventType::FOCUS);
-    EXPECT_TRUE(g_webPattern->accessibilityState_);
+    EXPECT_TRUE(report->eventReportEnable_);
 #endif
 }
 
@@ -270,8 +335,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterReportTextChangeEventCallback,
     auto textChangeCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(textChangeCallback), AccessibilityEventType::TEXT_CHANGE);
 
-    EXPECT_TRUE(g_webPattern->accessibilityState_);
-    EXPECT_TRUE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_TRUE(report->eventReportEnable_);
 #endif
 }
 
@@ -327,8 +391,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterUndefinedReportEventCallback_0
     auto keyboardTabCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(keyboardTabCallback), AccessibilityEventType::KEYBOARD_TAB);
 
-    EXPECT_FALSE(g_webPattern->accessibilityState_);
-    EXPECT_FALSE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_FALSE(report->eventReportEnable_);
 #endif
 }
 
@@ -384,8 +447,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterUndefinedReportEventCallback_0
     auto componentChangeCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(componentChangeCallback), AccessibilityEventType::COMPONENT_CHANGE);
 
-    EXPECT_FALSE(g_webPattern->accessibilityState_);
-    EXPECT_FALSE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_FALSE(report->eventReportEnable_);
 #endif
 }
 
@@ -444,8 +506,7 @@ HWTEST_F(WebAccessibilityEventReportTest, RegisterUndefinedReportEventCallback_0
     auto unknownCallback = [](int64_t accessibilityId, const std::string data) {};
     report->RegisterCallback(std::move(unknownCallback), AccessibilityEventType::UNKNOWN);
 
-    EXPECT_FALSE(g_webPattern->accessibilityState_);
-    EXPECT_FALSE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_FALSE(report->eventReportEnable_);
 #endif
 }
 
@@ -459,12 +520,10 @@ HWTEST_F(WebAccessibilityEventReportTest, UnregisterCallback, TestSize.Level0)
 #ifdef OHOS_STANDARD_SYSTEM
     auto report = AceType::MakeRefPtr<WebAccessibilityEventReport>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     report->RegisterAllReportEventCallback();
-    EXPECT_TRUE(g_webPattern->accessibilityState_);
-    EXPECT_TRUE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_TRUE(report->eventReportEnable_);
 
     report->UnregisterCallback();
-    EXPECT_FALSE(g_webPattern->accessibilityState_);
-    EXPECT_FALSE(g_webPattern->textBlurAccessibilityEnable_);
+    EXPECT_FALSE(report->eventReportEnable_);
 
     EXPECT_EQ(report->textFocusCallback_, nullptr);
     EXPECT_EQ(report->textBlurCallback_, nullptr);
