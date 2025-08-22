@@ -212,11 +212,11 @@ PlaceholderOptions GetThemePlaceholderOptions()
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
     auto richEditorTheme = pipelineContext->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
     return PlaceholderOptions {
-        .fontSize = textStyle.GetFontSize(),
         .fontWeight = textStyle.GetFontWeight(),
-        .fontFamilies = textStyle.GetFontFamilies(),
+        .fontSize = textStyle.GetFontSize(),
+        .fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : Color(),
         .fontStyle = textStyle.GetFontStyle(),
-        .fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : Color()
+        .fontFamilies = textStyle.GetFontFamilies()
     };
 }
 
