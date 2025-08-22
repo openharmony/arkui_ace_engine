@@ -507,7 +507,7 @@ void MenuPattern::AddBuildDividerTask()
             pattern->BuildDivider();
         };
     buildDividerTaskAdded_ = true;
-    pipeline->AddBuildFinishCallBack(callback);
+    pipeline->AddBuildFinishCallBack(std::move(callback));
 }
 
 void MenuPattern::BuildDivider()
