@@ -48,7 +48,7 @@ public:
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
         if (effectLayer_ != EffectLayer::NONE) {
-            return RenderContext::ContextParam { RenderContext::ContextType::SURFACE };
+            return RenderContext::ContextParam { RenderContext::ContextType::COMPOSITE_COMPONENT };
         }
         return RenderContext::ContextParam { RenderContext::ContextType::EFFECT };
     }
