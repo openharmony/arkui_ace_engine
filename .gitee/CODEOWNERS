@@ -47,8 +47,8 @@ adapter/ohos/entrance/ace_data_ability.cpp @jayleehw
 adapter/ohos/entrance/ace_data_ability.h @jayleehw
 adapter/ohos/entrance/ace_extra_input_data.cpp @arkuievent
 adapter/ohos/entrance/ace_extra_input_data.h @arkuievent
-adapter/ohos/entrance/ace_form_ability.cpp @jayleehw
-adapter/ohos/entrance/ace_form_ability.h @jayleehw
+adapter/ohos/entrance/ace_form_ability.cpp @form_framework
+adapter/ohos/entrance/ace_form_ability.h @form_framework
 adapter/ohos/entrance/ace_new_pipe_judgement.cpp @arkuiframework
 adapter/ohos/entrance/ace_new_pipe_judgement.h @arkuiframework
 adapter/ohos/entrance/ace_rosen_sync_task.h @arkuiframework
@@ -223,7 +223,7 @@ advanced_ui_component/editabletitlebar/ @arkuiadvanceduicomponent
 advanced_ui_component/exceptionprompt/ @arkuiadvanceduicomponent
 advanced_ui_component/filter/ @arkuiadvanceduicomponent
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
-advanced_ui_component/formmenu/
+advanced_ui_component/formmenu/ @form_framework
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
 advanced_ui_component/gridobjectsortcomponent/ @arkuiadvanceduicomponent
 advanced_ui_component/interstitialdialogaction/ @giteewzp
@@ -359,8 +359,8 @@ frameworks/bridge/common/dom/dom_divider.cpp @arkuilayout
 frameworks/bridge/common/dom/dom_divider.h @arkuilayout
 frameworks/bridge/common/dom/dom_document.cpp @arkuievent
 frameworks/bridge/common/dom/dom_document.h @arkuievent
-frameworks/bridge/common/dom/dom_form.cpp @arkuiframework
-frameworks/bridge/common/dom/dom_form.h @arkuiframework
+frameworks/bridge/common/dom/dom_form.cpp @form_framework
+frameworks/bridge/common/dom/dom_form.h @form_framework
 frameworks/bridge/common/dom/dom_grid_column.cpp @arkuievent
 frameworks/bridge/common/dom/dom_grid_column.h @arkuievent
 frameworks/bridge/common/dom/dom_grid_container.cpp @arkuievent
@@ -508,7 +508,7 @@ frameworks/bridge/common/dom/dom_web.cpp @arkwebinarkuireview
 frameworks/bridge/common/dom/dom_web.h @arkwebinarkuireview
 frameworks/bridge/common/dom/dom_xcomponent.cpp @arkuieco3
 frameworks/bridge/common/dom/dom_xcomponent.h @arkuieco3
-frameworks/bridge/common/dom/form_value.h
+frameworks/bridge/common/dom/form_value.h @form_framework
 frameworks/bridge/common/dom/input/dom_button_util.cpp @arkuipopupwindow
 frameworks/bridge/common/dom/input/dom_button_util.h @arkuipopupwindow
 frameworks/bridge/common/dom/input/dom_checkbox_util.cpp @arkuipopupwindow
@@ -548,8 +548,8 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkEllipse.ts @arkuieco
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFlex.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFlowItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkFolderStack.ts @arkuilayout
-frameworks/bridge/declarative_frontend/ark_component/src/ArkFormComponent.ts @arondave
-frameworks/bridge/declarative_frontend/ark_component/src/ArkFormLink.ts @arondave
+frameworks/bridge/declarative_frontend/ark_component/src/ArkFormComponent.ts @form_framework
+frameworks/bridge/declarative_frontend/ark_component/src/ArkFormLink.ts @form_framework
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGauge.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGesture.ts @arkuievent
 frameworks/bridge/declarative_frontend/ark_component/src/ArkGridCol.ts @arkuilayout
@@ -880,8 +880,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.cpp @arondave
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @arondave
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.cpp @form_framework
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h @arkuiframework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.cpp @arkui_image
@@ -1136,12 +1136,12 @@ frameworks/bridge/declarative_frontend/jsview/js_folder_stack.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_folder_stack.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_foreach.h @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/js_form.cpp @arondave
-frameworks/bridge/declarative_frontend/jsview/js_form.h @arondave
-frameworks/bridge/declarative_frontend/jsview/js_form_link.cpp @arondave
-frameworks/bridge/declarative_frontend/jsview/js_form_link.h @arondave
-frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.cpp @arondave
-frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.h @arondave
+frameworks/bridge/declarative_frontend/jsview/js_form.cpp @form_framework
+frameworks/bridge/declarative_frontend/jsview/js_form.h @form_framework
+frameworks/bridge/declarative_frontend/jsview/js_form_link.cpp @form_framework
+frameworks/bridge/declarative_frontend/jsview/js_form_link.h @form_framework
+frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.cpp @form_framework
+frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.h @form_framework
 frameworks/bridge/declarative_frontend/jsview/js_gauge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_gauge.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_gesture.cpp @arkuievent
@@ -1728,8 +1728,8 @@ frameworks/core/accessibility/js_inspector/inspect_div.cpp @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_div.h @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_divider.cpp @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_divider.h @arkuilayout
-frameworks/core/accessibility/js_inspector/inspect_form.cpp
-frameworks/core/accessibility/js_inspector/inspect_form.h
+frameworks/core/accessibility/js_inspector/inspect_form.cpp @form_framework
+frameworks/core/accessibility/js_inspector/inspect_form.h @form_framework
 frameworks/core/accessibility/js_inspector/inspect_grid_column.cpp @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_grid_column.h @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_grid_container.cpp @arkuilayout
@@ -1882,8 +1882,8 @@ frameworks/core/common/font_loader.h @huawei_g_five
 frameworks/core/common/font_manager.cpp @huawei_g_five
 frameworks/core/common/font_manager.h @huawei_g_five
 frameworks/core/common/force_split/ @arkui_superman
-frameworks/core/common/form_manager.cpp @huawei_g_five
-frameworks/core/common/form_manager.h @huawei_g_five
+frameworks/core/common/form_manager.cpp @form_framework
+frameworks/core/common/form_manager.h @form_framework
 frameworks/core/common/frontend.cpp @arkuiframework
 frameworks/core/common/frontend.h @arkuiframework
 frameworks/core/common/hdc_register.cpp @arkuiframework
