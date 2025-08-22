@@ -815,7 +815,7 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
     return previewNode;
 }
 
-void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
+void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
     if (snapshotImageNodeId_.has_value()) {
@@ -825,6 +825,16 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
     if (!IsSnapshotPathValid(snapshotPath)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
         return;
+    }
+
+    if (delegate_ && (width != 0) && (height != 0)) {
+        uint32_t resizeWidth = static_cast<uint32_t>(std::ceil(delegate_->ResizeWidth()));
+        uint32_t resizeHeight = static_cast<uint32_t>(std::ceil(delegate_->ResizeHeight()));
+        if ((width != resizeWidth) || (height != resizeHeight)) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size:[%{public}u, %{public}u] is invalid", width, height);
+            return;
+        }
+        delegate_->RecordBlanklessFrameSize(width, height);
     }
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
@@ -856,6 +866,9 @@ void WebPattern::RemoveSnapshotFrameNode()
 {
     if (!snapshotImageNodeId_.has_value()) {
         return;
+    }
+    if (delegate_) {
+        delegate_->RecordBlanklessFrameSize(0, 0);
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNode");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
