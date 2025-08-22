@@ -1253,7 +1253,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, GetFrameNodeId());
-    UIEXT_LOGD("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
+    UIEXT_LOGI("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
         "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d.",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
         reason, duration, persistentId, GetFrameNodeId());
