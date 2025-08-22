@@ -397,9 +397,12 @@ export class DragControllerImpl extends DragController {
                     nullptr, destroyCallback, dragInfo);
             } else {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, customDragInfo.builder as CustomBuilder);
+                let peerNode: PeerNode | undefined = undefined;
+                if (customDragInfo.builder !== undefined) {
+                    peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                        return ArkComponentRootPeer.create(undefined);
+                    }, customDragInfo.builder as CustomBuilder);
+                }
                 let rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                 destroyCallback = (): void => {
                     destroyUiDetachedRoot(rootNode, this.instanceId_);
@@ -438,9 +441,12 @@ export class DragControllerImpl extends DragController {
                     dragItemInfoArray.push(dragItemInfo);
                 } else {
                     let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                    const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                        return ArkComponentRootPeer.create(undefined);
-                    }, dragItemInfo.builder as CustomBuilder);
+                    let peerNode: PeerNode | undefined = undefined;
+                    if (dragItemInfo.builder !== undefined) {
+                        peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                            return ArkComponentRootPeer.create(undefined);
+                        }, dragItemInfo.builder as CustomBuilder);
+                    }
                     const rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                     if (peerNode && rootNode) {
                         rootNodeArray.push(rootNode);
