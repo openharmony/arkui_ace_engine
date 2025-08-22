@@ -40,10 +40,8 @@ Ark_PanGestureInterface CtorImpl(const Opt_Type_PanGestureInterface_callable0_va
     int32_t fingers = DEFAULT_PAN_FINGERS;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection direction = DEFAULT_PAN_DIRECTION;
-    std::optional<Ark_Type_PanGestureInterface_callable0_value> params =
-        value ? Converter::GetOpt(*value) : std::nullopt;
-    if (params.has_value()) {
-        Converter::VisitUnion(params.value(),
+    if (true) {
+        Converter::VisitUnionPtr(value,
             [&fingers, &distance, &direction, &peer](
                 const Ark_Literal_Number_distance_fingers_PanDirection_direction& value) {
                 fingers = Converter::OptConvert<int32_t>(value.fingers).value_or(DEFAULT_PAN_FINGERS);
@@ -66,10 +64,10 @@ Ark_PanGestureInterface CtorImpl(const Opt_Type_PanGestureInterface_callable0_va
                     peer->gesture = AceType::MakeRefPtr<PanGesture>(fingers, direction, distance);
                 }
             },
-            []() {}
+            [&peer, fingers, direction, distance]() {
+                peer->gesture = AceType::MakeRefPtr<PanGesture>(fingers, direction, distance);
+            }
         );
-    } else {
-        peer->gesture = AceType::MakeRefPtr<PanGesture>(fingers, direction, distance);
     }
     return peer;
 }
