@@ -843,7 +843,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
             const options_casted = options as (TabsOptions | undefined)
             this.getPeer()?.setTabsOptionsAttribute(options_casted)
         }
-        if (this.TabsOptionsValueIsBindable(options!)) {
+        if (options && this.TabsOptionsValueIsBindable(options)) {
             TabsOpsHandWritten.hookTabsAttributeIndexImpl(this.getPeer().peer.ptr,
                 (options!.index as Bindable<number>));
         }
