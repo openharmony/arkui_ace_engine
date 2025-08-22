@@ -515,7 +515,7 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS,
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
             "Request focus on rootFocusHub: %{public}s/%{public}d",
             rootFocusHub->GetFrameName().c_str(),
             rootFocusHub->GetFrameId());

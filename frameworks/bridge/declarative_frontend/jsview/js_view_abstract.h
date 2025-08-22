@@ -592,6 +592,7 @@ public:
     static void JsAccessibilitySelected(const JSCallbackInfo& info);
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAccessibilityRole(const JSCallbackInfo& info);
+    static std::string GetRoleByType(AccessibilityRoleType roleType);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsOnAccessibilityActionIntercept(const JSCallbackInfo& info);
     static void JsOnAccessibilityHoverTransparent(const JSCallbackInfo& info);
@@ -812,6 +813,8 @@ public:
         RefPtr<ResourceWrapper> resourceWrapper);
     static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
         std::uint32_t& symbolId);
+    static bool ProcessSymbolObject(
+        JSRef<JSObject>& jsObj, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static bool ParseJsSymbolId(
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static void ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
@@ -898,7 +901,7 @@ private:
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseJsDimensionByNameInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
         DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
-    static void ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam menuOptionsParam);
+    static void ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
