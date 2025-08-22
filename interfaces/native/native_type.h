@@ -1368,6 +1368,12 @@ typedef enum {
     ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
     /** Not resized, the image is aligned with the end edge at the bottom of the container. */
     ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
+    /**
+     * Not resized, and is used in conjunction with NODE_IMAGE_IMAGE_MATRIX.
+     *
+     * @since 21
+     */
+    ARKUI_OBJECT_FIT_NONE_MATRIX,
 } ArkUI_ObjectFit;
 
 /**

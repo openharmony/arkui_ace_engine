@@ -4795,13 +4795,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest044, TestSize.Level1)
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
     auto rootNode = new ArkUI_Node({ARKUI_NODE_IMAGE, nullptr, true});
     int32_t negativeInt = -1;
+    int32_t illegalFitValue = 20; // 20 means ObjectFitEnum illegal value
     ArkUI_NumberValue value0[] = {};
     ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
     ArkUI_NumberValue valueEnum[] = {{.i32 = negativeInt}};
     ArkUI_AttributeItem itemEnum = {valueEnum, sizeof(valueEnum) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
+    ArkUI_NumberValue illegalValue[] = {{.i32 = illegalFitValue}};
+    ArkUI_AttributeItem illegalItemEnum = {illegalValue,
+        sizeof(illegalValue) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_SRC, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_OBJECT_FIT, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_OBJECT_FIT, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_OBJECT_FIT, &illegalItemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_INTERPOLATION, &itemEnum),
         ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_IMAGE_INTERPOLATION, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
