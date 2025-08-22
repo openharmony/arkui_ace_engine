@@ -448,6 +448,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorStorageProp.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorStoragePropRef.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorWatch.ets",
+  "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorInteropWatch.ets",
   "arkui-preprocessed/arkui/stateManagement/index.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/memorize/state.ets",
