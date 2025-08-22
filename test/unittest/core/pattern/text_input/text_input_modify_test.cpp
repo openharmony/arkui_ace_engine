@@ -1915,6 +1915,7 @@ HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
         model.SetTextFieldText(frameNode, HELLO_TEXT_U16);
         auto textValue = pattern->GetTextValue();
         EXPECT_EQ(textValue, HELLO_TEXT);
+        EXPECT_TRUE(pattern->isTextChangedAtCreation_);
     });
 }
 } // namespace OHOS::Ace::NG
