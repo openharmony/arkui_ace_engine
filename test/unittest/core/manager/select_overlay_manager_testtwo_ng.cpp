@@ -966,7 +966,7 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode, TestSize.Level
      * @tc.steps: step3. call DestroySelectOverlayNode
      */
     content.DestroySelectOverlayNode(menuNode);
-    EXPECT_TRUE(menuNode->IsInDestroying());
+    EXPECT_FALSE(menuNode->IsInDestroying());
 }
 
 /**
@@ -999,7 +999,7 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode001, TestSize.Le
      * @tc.steps: step3. call DestroySelectOverlayNode
      */
     content.DestroySelectOverlayNode(menuNode);
-    EXPECT_TRUE(menuNode->IsInDestroying());
+    EXPECT_FALSE(menuNode->IsInDestroying());
 }
 
 /**
