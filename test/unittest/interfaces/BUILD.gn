@@ -1013,5 +1013,6 @@ group("interfaces_unittest") {
     "ace_ui_input_event:ui_input_event_test",
     "ace_key_event:key_event_test",
     "napi:arkui_napi_test",
+    "form_render::ace_form_render_test",
   ]
 }
