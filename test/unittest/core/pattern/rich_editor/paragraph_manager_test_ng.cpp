@@ -692,4 +692,7 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetDumpInfo001, TestSize.Level1)
     pManager_->AddParagraph(std::move(paragraphInfo2));
     EXPECT_EQ(pManager_->GetDumpInfo(), "[test][test]");
 }
+
+
+
 } // namespace OHOS::Ace::NG

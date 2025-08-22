@@ -648,4 +648,7 @@ HWTEST_F(RichEditorEventTestNg, HandleUserTouchEvent001, TestSize.Level1)
     EXPECT_TRUE(isTouchTrigger);
 }
 
+
+
+
 }

@@ -762,4 +762,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetResultObjectText001, TestSize.Level0)
     EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
 }
 
+
+
+
 } // namespace OHOS::Ace::NG
