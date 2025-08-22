@@ -27,7 +27,7 @@ export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
     return new WrappedBuilder<T>(builder);
 }
 
-/** @memo */
+/** @memo:intrinsic */
 export function ConditionScope(
     /** @memo */
     content: () => void
@@ -35,7 +35,7 @@ export function ConditionScope(
     conditionScopeImpl(content);
 }
 
-/** @memo */
+/** @memo:intrinsic */
 export function ConditionBranch(
     /** @memo */
     content: () => void

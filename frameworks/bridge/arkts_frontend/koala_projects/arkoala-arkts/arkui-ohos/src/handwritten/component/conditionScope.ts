@@ -15,53 +15,59 @@
 
 import { int32 } from '@koalaui/common'
 import { KPointer } from "@koalaui/interop"
-import { IncrementalNode, NodeAttach, InternalScope, remember, __context, __id } from '@koalaui/runtime';
+import { __context, __id, IncrementalNode, InternalScope, NodeAttach } from '@koalaui/runtime';
 import { ArkUIAniModule } from "arkui.ani"
 import { PeerNode } from '../PeerNode';
 
 class ConditionScopePeer extends PeerNode {
     public static create(): ConditionScopePeer {
         const peerId  = PeerNode.nextId();
-        const _peerPtr  = ArkUIAniModule._ConditionScopeNode_Construct(peerId);
+        const _peerPtr = ArkUIAniModule._ConditionScopeNode_Construct(peerId);
         if (!_peerPtr) {
             throw new Error('create ConditionScope fail');
         }
         return new ConditionScopePeer(_peerPtr, peerId, 'ConditionScope');
     }
 
+    private _branchesNode: ConditionBranchesNode = new ConditionBranchesNode();
+
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
+    }
+
+    get branchesNode(): ConditionBranchesNode {
+        return this._branchesNode;
     }
 }
 
 class ConditionBranchesNode extends IncrementalNode {
-    public static create(): ConditionBranchesNode {
-        return new ConditionBranchesNode();
-    }
-
-    private changed = false;
+    private _changed = false;
     private _branches = new Array<ConditionBranchNode>();
 
-    onChange(): void{
-        this.changed = true
-    }
-
-    protected constructor() {
+    public constructor() {
         super();
 
         this.onChildInserted = this.onChange;
         this.onChildRemoved = this.onChange;
     }
 
+    public onChange(): void {
+        this._changed = true
+    }
+
     public get branches(): Array<ConditionBranchNode> {
-        if (this.changed) {
-            this.changed = false;
+        if (this._changed) {
+            this._changed = false;
             this._branches = new Array<ConditionBranchNode>();
             for (let child = this.firstChild; child; child = child?.nextSibling) {
                 this._branches.push(child as ConditionBranchNode);
             }
         }
         return this._branches;
+    }
+
+    public get changed(): boolean  {
+        return this._changed;
     }
 }
 
@@ -76,24 +82,6 @@ class ConditionBranchNode extends IncrementalNode {
         super();
         this.builder = builder;
     }
-}
-
-function compareArray<T>(oldValue: Array<T>, newValue: Array<T>): boolean {
-    if (oldValue === newValue) {
-        return true;
-    }
-
-    if (oldValue.length !== newValue.length) {
-        return false;
-    }
-
-    for (let i = 0; i < oldValue.length; i++) {
-        if (oldValue[i] !== newValue[i]) {
-            return false;
-        }
-    }
-
-    return false;
 }
 
 function calcIntersection<T>(oldValue: Array<T>, newValue: Array<T>): Array<T> {
@@ -127,7 +115,7 @@ function calcIntersection<T>(oldValue: Array<T>, newValue: Array<T>): Array<T> {
 
 /** @memo:intrinsic */
 function buildBranches(scope: InternalScope<void>, branches: Array<ConditionBranchNode>): void {
-    const paramBranches = scope.param(0, branches, compareArray);
+    const paramBranches = scope.param(0, branches);
     if (scope.unchanged) {
         scope.cached;
         return;
@@ -141,15 +129,12 @@ function buildBranches(scope: InternalScope<void>, branches: Array<ConditionBran
 }
 
 /** @memo:intrinsic */
-function buildContent(before: Array<ConditionBranchNode>, after: Array<ConditionBranchNode>): void {
-    const same = compareArray(before, after);
-    const intersection = same ? before : calcIntersection(before, after);
+function buildContent(before: Array<ConditionBranchNode>, node: ConditionBranchesNode): void {
+    const branchGroup = node.changed ? [calcIntersection(before, node.branches), node.branches] : [before];
 
     const scope = __context().scope<void>(__id(), 1);
-    buildBranches(scope, intersection);
-
-    if (!same) {
-        buildBranches(scope, after);
+    for (const branches of branchGroup) {
+        buildBranches(scope, branches);
     }
 }
 
@@ -161,14 +146,12 @@ export function conditionScopeImpl(
     /** @memo */
     content: () => void
 ): void {
-    NodeAttach(ConditionScopePeer.create, (_: ConditionScopePeer) => {
-        const node = remember(ConditionBranchesNode.create);
+    NodeAttach(ConditionScopePeer.create, (peer: ConditionScopePeer) => {
+        const node = peer.branchesNode;
 
         const before = node.branches;
         NodeAttach(() => node, content);
-        const after = node.branches;
-
-        buildContent(before, after);
+        buildContent(before, node);
     })
 }
 
