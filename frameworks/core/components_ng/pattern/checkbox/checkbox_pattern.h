@@ -259,7 +259,6 @@ private:
     bool focusEventInitialized_ = false;
     bool visible_ = true;
     bool isUserSetMargin_ = false;
-    bool hasVisibleChangeRegistered_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

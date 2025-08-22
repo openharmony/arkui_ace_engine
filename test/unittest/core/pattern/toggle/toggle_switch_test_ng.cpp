@@ -1685,74 +1685,6 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnColorConfigurationUpdate001
- * @tc.desc: test OnColorConfigurationUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(ToggleSwitchTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize toggle model and validate dependencies.
-     * @tc.expected: step1. Frame node, paint property, pipeline context, pattern, and theme are created and valid.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(ToggleType::SWITCH, true);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto pattern = frameNode->GetPattern<SwitchPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
-    ASSERT_NE(switchTheme, nullptr);
-
-    /**
-     * @tc.steps: step2. Configure theme colors and initialize paint method and modifier.
-     * @tc.expected: step2. Theme colors are set to RED, paint method and modifier are created.
-     */
-    switchTheme->activeColor_ = Color::RED;
-    switchTheme->pointColor_ = Color::RED;
-    switchTheme->inactiveColor_ = Color::RED;
-    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
-    ASSERT_NE(pattern->paintMethod_, nullptr);
-    OptionalSize<float> size(1.0f, 2.0f);
-    pattern->paintMethod_->switchModifier_ =
-        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, 0.0f);
-
-    /**
-     * @tc.steps: step3. First call to OnColorConfigurationUpdate with default state.
-     * @tc.expected: step3. No user-set colors, all properties should update to theme defaults.
-     */
-    pattern->OnColorConfigurationUpdate();
-
-    /**
-     * @tc.steps: step4. Simulate config change and set user preferences.
-     * @tc.expected: step4. Selected color updates to theme's RED when not set by user.
-     */
-    g_isConfigChangePerform = true;
-    paintProperty->UpdateSelectedColorSetByUser(false);
-    paintProperty->UpdateSwitchPointColorSetByUser(true);
-    paintProperty->UpdateUnselectedColorSetByUser(true);
-    pattern->OnColorConfigurationUpdate();
-    auto ret = paintProperty->GetSelectedColor();
-    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
-
-    /**
-     * @tc.steps: step5. Reverse user preferences and re-run update.
-     * @tc.expected: step5. Switch point and unselected colors update to theme's RED when not set by user.
-     */
-    paintProperty->UpdateSelectedColorSetByUser(true);
-    paintProperty->UpdateSwitchPointColorSetByUser(false);
-    paintProperty->UpdateUnselectedColorSetByUser(false);
-    pattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(paintProperty->GetSwitchPointColor(), Color::RED);
-    EXPECT_EQ(paintProperty->GetUnselectedColor(), Color::RED);
-    g_isConfigChangePerform = false;
-}
-
-/**
  * @tc.name: ToggleSwitchLayoutTest014
  * @tc.desc: Test toggle switch matchParent.
  * @tc.type: FUNC
@@ -1870,5 +1802,73 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest015, TestSize.Level1)
         frameWidth, frameHeight);
     EXPECT_EQ(frameWidth, TEST_ZERO);
     EXPECT_EQ(frameHeight, TEST_ZERO);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize toggle model and validate dependencies.
+     * @tc.expected: step1. Frame node, paint property, pipeline context, pattern, and theme are created and valid.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    ASSERT_NE(switchTheme, nullptr);
+
+    /**
+     * @tc.steps: step2. Configure theme colors and initialize paint method and modifier.
+     * @tc.expected: step2. Theme colors are set to RED, paint method and modifier are created.
+     */
+    switchTheme->activeColor_ = Color::RED;
+    switchTheme->pointColor_ = Color::RED;
+    switchTheme->inactiveColor_ = Color::RED;
+    pattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(pattern->paintMethod_, nullptr);
+    OptionalSize<float> size(1.0f, 2.0f);
+    pattern->paintMethod_->switchModifier_ =
+        AceType::MakeRefPtr<SwitchModifier>(SizeF(), OffsetF(), 0.0, false, Color::RED, Color::RED, 0.0f);
+
+    /**
+     * @tc.steps: step3. First call to OnColorConfigurationUpdate with default state.
+     * @tc.expected: step3. No user-set colors, all properties should update to theme defaults.
+     */
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step4. Simulate config change and set user preferences.
+     * @tc.expected: step4. Selected color updates to theme's RED when not set by user.
+     */
+    g_isConfigChangePerform = true;
+    paintProperty->UpdateSelectedColorSetByUser(false);
+    paintProperty->UpdateSwitchPointColorSetByUser(true);
+    paintProperty->UpdateUnselectedColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    auto ret = paintProperty->GetSelectedColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    /**
+     * @tc.steps: step5. Reverse user preferences and re-run update.
+     * @tc.expected: step5. Switch point and unselected colors update to theme's RED when not set by user.
+     */
+    paintProperty->UpdateSelectedColorSetByUser(true);
+    paintProperty->UpdateSwitchPointColorSetByUser(false);
+    paintProperty->UpdateUnselectedColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetSwitchPointColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetUnselectedColor(), Color::RED);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
