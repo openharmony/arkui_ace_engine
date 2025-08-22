@@ -164,7 +164,7 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
     }
 
     if (errCode != ERR_OK) {
-        AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::RENDER_FORM_FAILED,
+        AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::FORM_NODE_ERROR,
             formJsInfo.formId,
             formJsInfo.bundleName,
             formJsInfo.formName,

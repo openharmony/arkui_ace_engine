@@ -71,7 +71,7 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     }
     if (!uiContent_->GetFormRootNode()) {
         HILOG_WARN("PreInitUIContent failed to PreInitializeForm, rsSurfaceNode is null");
-        AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::RENDER_FORM_FAILED,
+        AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::FORM_NODE_ERROR,
             formJsInfo.formId,
             formJsInfo.bundleName,
             formJsInfo.formName,
@@ -349,6 +349,7 @@ int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJs
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT,
         isRecoverFormToHandleClickEvent);
+
     auto rsSurfaceNode = GetSurfaceNode();
     if (!rsSurfaceNode) {
         HILOG_ERROR("OnSurfaceCreate rsSurfaceNode is nullptr.");
