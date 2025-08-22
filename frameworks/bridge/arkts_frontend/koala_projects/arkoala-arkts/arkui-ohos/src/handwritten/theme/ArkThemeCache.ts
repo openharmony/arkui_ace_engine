@@ -145,21 +145,17 @@ export class ArkThemeCache {
         const theme1Colors = makeRecordfromObj(theme1!.colors!);
         const theme2Colors = makeRecordfromObj(theme2!.colors!);
         // go by color tokens attributes keys one by one
-        keys1.forEach((key: string) => {
+        for (let key of keys1) {
             if (!keys2.includes(key)) {
-                // return false if key of first custom theme colors dosn`t used by second custom theme colors
-                return;
+                return false;
             }
-
-            // take values of colors tokens by current attribute key
             let value1 = theme1Colors[key];
             let value2 = theme2Colors[key];
-
             if (value1 !== value2) {
                 // return false if color tokens values are different
-                return;
+                return false;
             }
-        });
+        }
 
         // return true because we achieved the end of the method that means that two instance of Custom Theme are the same
         return true;

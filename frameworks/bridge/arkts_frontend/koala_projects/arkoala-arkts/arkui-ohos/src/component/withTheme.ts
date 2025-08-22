@@ -117,8 +117,8 @@ export function WithTheme(
         ArkThemeScopeManager.getInstance().onComponentCreateEnter("WithTheme", receiver.getPeer()?.getId(), receiver.isFirstBuild)
         receiver.setWithThemeOptions(options)
         style?.(receiver)
-        content_?.()
         ArkThemeScopeManager.getInstance().onComponentCreateExit(receiver.getPeer()?.getId())
+        content_?.()
         receiver.applyAttributesFinish()
     })
 }
