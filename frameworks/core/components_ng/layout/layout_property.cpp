@@ -965,6 +965,9 @@ void LayoutProperty::UpdateLayoutWeight(float value)
 
 void LayoutProperty::UpdateChainWeight(const LayoutWeightPair& value)
 {
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
     if (flexItemProperty_->UpdateChainWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
