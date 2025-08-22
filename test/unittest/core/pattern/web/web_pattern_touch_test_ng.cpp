@@ -359,7 +359,6 @@ HWTEST_F(WebPatternTouchTestNg, Backward_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     auto ret = webpattern.Backward();
     EXPECT_EQ(ret, false);
 #endif
@@ -599,7 +598,6 @@ HWTEST_F(WebPatternTouchTestNg, GetWebInfoType_002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     auto expectedType = OHOS::Ace::NG::WebInfoType::TYPE_UNKNOWN;
     auto result = webpattern.GetWebInfoType();
     EXPECT_EQ(result, expectedType);
