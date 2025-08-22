@@ -2959,6 +2959,47 @@ HWTEST_F(ListCommonTestNg, EstimateHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: EstimateHeight003
+ * @tc.desc: While updating the position of scroll bar, test estimateHeight for multiple lazyforeach
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, EstimateHeight003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    const int32_t itemCount1 = 20;
+    const float itemMainSize1 = 200;
+    const int32_t itemCount2 = 100;
+    const float itemMainSize2 = 200;
+    CreateItemsInLazyForEach(itemCount1, itemMainSize1);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateItemsInLazyForEach(itemCount2, itemMainSize2);
+    CreateDone();
+    auto gtHeight = itemCount1 * itemMainSize1 + itemCount2 * itemMainSize2 + SPACE * (itemCount1 + itemCount2 - 1);
+
+    ScrollToIndex(70, false, ScrollAlign::START);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+
+    UpdateCurrentOffset(157.0f);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+}
+
+/**
  * @tc.name: OnAnimateStop001
  * @tc.desc: Test OnAnimateStop
  * @tc.type: FUNC
