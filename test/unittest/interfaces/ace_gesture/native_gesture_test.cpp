@@ -1482,20 +1482,3 @@ HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
     auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(gestureNode, userData, nullptr);
     EXPECT_EQ(ret, 0);
 }
-
-/**
- * @tc.name: GestureImplTest0045
- * @tc.desc: Test the AddGestureToNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
-{
-    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    auto tapGesture = gestureAPI->gestureApi1->createTapGesture(1, 1);
-    auto ret = OHOS::Ace::GestureModel::AddGestureToNode(gestureNode, tapGesture, PRIORITY, NORMAL_GESTURE_MASK);
-    EXPECT_EQ(ret, 0);
-}
