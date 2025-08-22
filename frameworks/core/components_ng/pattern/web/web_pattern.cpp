@@ -221,6 +221,7 @@ enum PictureInPictureState {
 };
 
 struct PipData {
+    uint32_t mainWindowId;
     int delegateId = -1;
     int childId = -1;
     int frameRoutingId = -1;
@@ -3593,6 +3594,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto pipelineContext = Claim(context);
     int32_t newId = pipelineContext->GetInstanceId();
     instanceId_ = newId;
+    windowId_ = pipelineContext->GetWindowId();
     if (delegate_) {
         delegate_->OnAttachContext(pipelineContext);
     }
@@ -8570,11 +8572,9 @@ bool WebPattern::Pip(int status,
     switch (status) {
         case PIP_STATE_ENTER:
         case PIP_STATE_HLS_ENTER: {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, false);
             napi_env env = CreateEnv();
             CHECK_NULL_RETURN(env, false);
-            PipInfo pipInfo{pipeline->GetWindowId(), delegateId, childId,
+            PipInfo pipInfo{windowId_, delegateId, childId,
                             frameRoutingId, width, height};
             result = CreatePip(status, env, init, pipController, pipInfo);
             WEB_CHECK_FALSE_RETURN(result, false);
@@ -8616,20 +8616,18 @@ bool WebPattern::Pip(int status,
 bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipController,
     const PipInfo &pipInfo)
 {
-    init = false;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
         for (auto &it : pipCallbackMap_) {
             auto pip = it.second;
             if (pip.delegateId == pipInfo.delegateId && pip.childId == pipInfo.childId &&
-                pip.frameRoutingId == pipInfo.frameRoutingId) {
+                pip.frameRoutingId == pipInfo.frameRoutingId && pip.mainWindowId == windowId_) {
                 pipController = it.first;
                 init = true;
                 return true;
             }
         }
     }
-
     PictureInPicture_PipTemplateType pipTemplateType = PictureInPicture_PipTemplateType::VIDEO_PLAY;
     PictureInPicture_PipControlGroup controlGroup[1] = {
         PictureInPicture_PipControlGroup::VIDEO_PLAY_FAST_FORWARD_BACKWARD
@@ -8655,6 +8653,7 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     pipData.pipWebPattern = AceType::WeakClaim(this).Upgrade();
     pipData.delegateId = pipInfo.delegateId;
     pipData.childId = pipInfo.childId;
+    pipData.mainWindowId = pipInfo.mainWindowId;
     pipData.frameRoutingId = pipInfo.frameRoutingId;
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
