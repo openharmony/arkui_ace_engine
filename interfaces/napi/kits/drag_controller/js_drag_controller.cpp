@@ -998,13 +998,13 @@ void HideDragPreviewWindow(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         TaskExecutor::TaskType::UI, "ArkUIHideDragPreviewWindow", PriorityType::VIP);
 }
 
-void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& ret)
+bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
-    CHECK_NULL_VOID(asyncCtx);
+    CHECK_NULL_RETURN(asyncCtx, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     NG::PreparedInfoForDrag data;
     NG::PreparedAsyncCtxForAnimate asyncCtxData;
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
@@ -1017,15 +1017,14 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
             continue;
         }
-        auto ret = CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, pixelMap);
-        if (!ret) {
-            return;
+        if (!CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, pixelMap)) {
+            return false;
         }
         shadowInfos.push_back(shadowInfo);
     }
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
-        return;
+        return false;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HideDragPreviewWindow(asyncCtx);
@@ -1036,17 +1035,19 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
     NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     LogDragInfoInner(asyncCtx, dragData.value());
 #ifdef CROSS_PLATFORM
-    ret = StartDrag(asyncCtx, dragData.value(), true);
+    auto ret = StartDrag(asyncCtx, dragData.value(), true);
 #else
-    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
+    auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
-    if (ret == 0) {
-        asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
-        if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
-            asyncCtx->isSwitchedToSubWindow = true;
-        }
+    if (ret) {
+        return false;
     }
+    asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
+    if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
+        asyncCtx->isSwitchedToSubWindow = true;
+    }
+    return true;
 }
 
 void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
@@ -1077,9 +1078,8 @@ void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
-            int32_t ret = 0;
-            StartDragService(asyncCtx, ret);
-            if (ret != 0) {
+            bool ret = StartDragService(asyncCtx);
+            if (!ret) {
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "msdp start drag failed.");
