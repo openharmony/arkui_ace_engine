@@ -604,6 +604,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             auto touchGlobalLocation = info.GetTouches().front().GetGlobalLocation();
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, position is %{public}s.", position.ToString().c_str());
             HideMenu(true, position, HideMenuType::MENU_TOUCH_UP);
         }
         lastTouchOffset_.reset();
@@ -994,7 +995,6 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
 }

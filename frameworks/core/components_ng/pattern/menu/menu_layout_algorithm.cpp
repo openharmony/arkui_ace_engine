@@ -371,7 +371,6 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     auto menuNode = layoutWrapper->GetHostNode();
@@ -410,7 +409,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
-    if (menuPattern->IsSelectOverlayExtensionMenu() && menuPattern->IsSubMenu() &&
+    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSubMenu()) &&
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
     }
@@ -576,15 +575,14 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     dumpInfo_.bottom = bottom_;
     dumpInfo_.left = left_;
     dumpInfo_.right = right_;
-    width_ = wrapperRect_.Width();
-    height_ = wrapperRect_.Height();
+    width_ = param_.menuWindowRect.Width();
+    height_ = param_.menuWindowRect.Height();
     TAG_LOGI(AceLogTag::ACE_MENU,
         "safeAreaInsets: (top: %{public}f, bottom: %{public}f, left: %{public}f, right: %{public}f)", top_, bottom_,
         left_, right_);
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_, menuPattern);
