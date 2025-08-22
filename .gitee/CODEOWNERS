@@ -3151,6 +3151,23 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkuiframework
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkuiframework
 
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuiframework
+frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkuiframework
+frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkuiframework
+frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkuiframework
+frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkuiframework
+frameworks/bridge/arkts_frontend/arkts_frontend.h @arkuiframework
+
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.h @arkuievent
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @arkuievent
