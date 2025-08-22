@@ -290,10 +290,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTest, TestSize.Level1)
     textSpanOptions.offset = TEST_OFFSET;
     textSpanOptions.value = TEST_VALUE;
     Converter::ConvContext ctx;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEST_VALUE, &ctx);
+    auto value = Converter::ArkValue<Ark_String>(TEST_VALUE, &ctx);
+    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value);
     auto options = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
-    accessor_->addTextSpan(peer_, &value, &options);
+    accessor_->addTextSpan(peer_, &res, &options);
     const TextSpanOptions& result = mockRichEditorController_->textSpanOptions_;
 
     ASSERT_TRUE(result.offset);
@@ -605,6 +606,7 @@ HWTEST_F(RichEditorControllerAccessorTest, toStyledStringTest, TestSize.Level1)
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.Level1)
 {
     Ark_String inputValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
+    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -627,7 +629,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.L
     WriteToUnion<Ark_ShadowOptions>(WriteTo(textShadow)) = shadow;
 
     WriteTo(WriteTo(inputValueOptions).style).textShadow = textShadow;
-    accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+    accessor_->addTextSpan(peer_, &res, &inputValueOptions);
     const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
     ASSERT_TRUE(options.style);
     auto resultVec = options.style->GetTextShadows();
@@ -661,10 +663,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLetterSpacing, TestSiz
     auto checkValue = [this, &initValueValue, &initValueOptions](
         const std::string& input, const std::string& expected, const Opt_Union_Number_String& value) {
         Ark_String inputValueValue = initValueValue;
+        auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
         Opt_RichEditorTextSpanOptions inputValueOptions = initValueOptions;
 
         WriteTo(WriteTo(inputValueOptions).style).letterSpacing = value;
-        accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+        accessor_->addTextSpan(peer_, &res, &inputValueOptions);
         const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
         ASSERT_TRUE(options.style);
         EXPECT_EQ(options.style->GetLetterSpacing().ToString(), expected) << "Input value is: " << input <<
@@ -699,10 +702,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestLineHeight, TestSize.L
     auto checkValue = [this, &initValueValue, &initValueOptions](
         const std::string& input, const std::string& expected, const Opt_Union_Number_String_Resource& value) {
         Ark_String inputValueValue = initValueValue;
+        auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
         Opt_RichEditorTextSpanOptions inputValueOptions = initValueOptions;
 
         WriteTo(WriteTo(inputValueOptions).style).lineHeight = value;
-        accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+        accessor_->addTextSpan(peer_, &res, &inputValueOptions);
         const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
         ASSERT_TRUE(options.style);
         EXPECT_EQ(options.style->GetLineHeight().ToString(), expected) << "Input value is: " << input <<
@@ -737,10 +741,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestHalfLeading, TestSize.
     auto checkValue = [this, &initValueValue, &initValueOptions](
         const std::string& input, bool expected, const Opt_Boolean& value) {
         Ark_String inputValueValue = initValueValue;
+        auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
         Opt_RichEditorTextSpanOptions inputValueOptions = initValueOptions;
 
         WriteTo(WriteTo(inputValueOptions).style).halfLeading = value;
-        accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+        accessor_->addTextSpan(peer_, &res, &inputValueOptions);
         const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
         ASSERT_TRUE(options.style);
         EXPECT_EQ(options.style->GetHalfLeading(), expected) <<
@@ -772,10 +777,11 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestFontFeature, TestSize.
     auto checkValue = [this, &initValueValue, &initValueOptions](
         const std::string& input, const std::string& expected, const Opt_String& value) {
         Ark_String inputValueValue = initValueValue;
+        auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
         Opt_RichEditorTextSpanOptions inputValueOptions = initValueOptions;
 
         WriteTo(WriteTo(inputValueOptions).style).fontFeature = value;
-        accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+        accessor_->addTextSpan(peer_, &res, &inputValueOptions);
         const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
         ASSERT_TRUE(options.style);
         EXPECT_EQ(UnParseFontFeatureSetting(options.style->GetFontFeatures()), expected) <<
@@ -795,6 +801,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestFontFeature, TestSize.
 HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextBackgroundStyle, TestSize.Level1)
 {
     Ark_String inputValueValue = std::get<1>(AccessorTestFixtures::testFixtureStringValidValues.front());
+    auto res = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(inputValueValue);
 
     Ark_RichEditorTextSpanOptions textSpanOptions = {
         .offset = Converter::ArkValue<Opt_Number>(),
@@ -811,7 +818,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextBackgroundStyle, T
         Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(12.5_vp);
 
     WriteTo(WriteTo(inputValueOptions).style).textBackgroundStyle = textBackgroundStyle;
-    accessor_->addTextSpan(peer_, &inputValueValue, &inputValueOptions);
+    accessor_->addTextSpan(peer_, &res, &inputValueOptions);
     const TextSpanOptions& options = mockRichEditorController_->textSpanOptions_;
     ASSERT_TRUE(options.style);
     auto result = options.style->GetTextBackgroundStyle();

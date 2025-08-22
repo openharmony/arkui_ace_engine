@@ -3354,23 +3354,6 @@ void UseEffect0Impl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     ViewAbstractModelStatic::SetUseEffect(frameNode, convValue, std::nullopt);
 }
-void UseEffect1Impl(Ark_NativePointer node,
-                    const Opt_Boolean* useEffect,
-                    const Opt_EffectType* effectType)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvertPtr<bool>(useEffect);
-    auto effectTypeOpt = Converter::OptConvertPtr<EffectType>(effectType);
-    ViewAbstractModelStatic::SetUseEffect(frameNode, valueOpt, effectTypeOpt);
-}
-void UseEffect2Impl(Ark_NativePointer node,
-                    const Opt_Boolean* useEffect,
-                    const Opt_EffectType* effectType)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-}
 void RenderGroup0Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
@@ -5262,6 +5245,24 @@ void SystemBarEffectImpl(Ark_NativePointer node)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemBarEffect(frameNode, true);
+}
+void UseEffect1Impl(Ark_NativePointer node,
+                    const Opt_Boolean* useEffect,
+                    const Opt_EffectType* effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvertPtr<bool>(useEffect);
+    auto effectTypeOpt = Converter::OptConvertPtr<EffectType>(effectType);
+    ViewAbstractModelStatic::SetUseEffect(frameNode, valueOpt, effectTypeOpt);
+}
+void UseEffect2Impl(Ark_NativePointer node,
+                    const Opt_Boolean* useEffect,
+                    const Opt_EffectType* effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    UseEffect1Impl(node, useEffect, effectType);
 }
 void BackdropBlur0Impl(Ark_NativePointer node,
                        const Opt_Number* value,

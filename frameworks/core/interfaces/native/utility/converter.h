@@ -764,6 +764,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src);
+    template<> void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
     template<> void AssignCast(std::optional<OHOS::Ace::ScopeType>& dst, const Ark_EffectScope& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
