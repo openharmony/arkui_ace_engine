@@ -42,7 +42,7 @@ export default function Stepper0() {
     /**
      * 测试组件'stepperItem.status.skip'支持设置包含单个子组件为'true'且获取属性正确
      */
-    it('ArkUI_Stepper_001', 0, async (done: Function) => {      //獲取不到斷言參數
+    it('ArkUI_Stepper_001', 0, async (done: Function) => {      //获取不到断言参数
       await titleSearch('参数列表', 'stepperItem.status.skip')
       await radioClick({
         radioClickObj: 0,
@@ -57,7 +57,7 @@ export default function Stepper0() {
      * 测试组件'stepperItem.status.skip'支持设置包含单个子组件为'false'且获取属性正确
      */
     it('ArkUI_Stepper_002', 0, async (done: Function) => {
-      //獲取不到斷言參數
+      //获取不到断言参数
       await titleSearch('参数列表', 'stepperItem.status.skip')
       await radioClick({
         radioClickObj: 1,

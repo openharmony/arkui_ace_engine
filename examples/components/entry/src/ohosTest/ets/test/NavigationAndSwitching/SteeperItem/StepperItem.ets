@@ -33,7 +33,7 @@ export async function SteeperItemStart(done: Function) {
   let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
   let width: Point = await ListItems[0].getBoundsCenter()
   let width2: Point = await ListItems[2].getBoundsCenter()
-  await driver.swipe(width.x, width2.y, width.x, width.y)
+  await driver.swipe(width.x, width2.y, width.x, width.y);
   await driver.delayMs(3500);
 
   let scrollSearch: Component = await driver.findComponent(ON.text('步骤导航项/StepperItem'))
