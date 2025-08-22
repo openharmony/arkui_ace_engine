@@ -220,7 +220,7 @@ export interface ContentModifier<T> {
 
 export interface CommonConfiguration<T> {
     enabled: boolean;
-    contentModifier: ContentModifier<T>;
+    contentModifier?: ContentModifier<T>;
 }
 
 export class KeyEventTransfer {
