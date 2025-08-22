@@ -27,7 +27,7 @@ void DragDropSpringLoadingStateIdle::OnEnter(std::string_view extraInfo)
     auto relatedConfigurations = frameNode->GetOrCreateDragDropRelatedConfigurations();
     CHECK_NULL_VOID(relatedConfigurations);
     const auto& config = relatedConfigurations->GetOrCreateDragSpringLoadingConfiguration();
-    auto weak = AceType::WeakClaim(AceType::RawPtr(stateMachine));
+    auto weak = WeakPtr<DragDropSpringLoadingStateMachine>(stateMachine);
     stateMachine->PostDelayedTask(
         [weak, extraInfoStr = std::string(extraInfo)]() {
             auto stateMachine = weak.Upgrade();
