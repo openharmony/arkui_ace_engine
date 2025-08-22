@@ -70,14 +70,14 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         if (oldValue === newValue) {
             return;
         }
+        let value: T = uiUtils.makeObserved(newValue);
         // for interop
-        if (isDynamicObject(newValue)) {
-            newValue = getObservedObject(newValue, this);
+        if (isDynamicObject(value)) {
+            value = getObservedObject(value, this);
         }
-        const value = uiUtils.makeObserved(newValue);
         this.backing_.setNoCheck(value);
         if (this.setProxyValue) {
-            this.setProxyValue!(newValue);
+            this.setProxyValue!(value);
         }
         // @Watch
         // if new value is object, register so that property changes trigger
