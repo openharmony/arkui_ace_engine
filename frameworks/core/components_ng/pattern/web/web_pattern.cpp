@@ -108,7 +108,8 @@ const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
 const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
-const std::string WEB_SNAPSHOT_PATH_SUFFIX = ".png";
+const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
+const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
@@ -365,9 +366,14 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless canonical failed:%{public}s", ec.message().c_str());
         return false;
     }
-    // 4为后缀".png"的长度
+    
     if (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PREFIX, 0) != 0 ||
-        snapshotPath.length() <= 4 || snapshotPath.rfind(WEB_SNAPSHOT_PATH_SUFFIX) != snapshotPath.length() - 4) {
+        // 4为后缀".png"的长度
+        snapshotPath.length() <= 4 ||
+        // 4为后缀".png"的长度
+        (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PNG_SUFFIX) != snapshotPath.length() - 4 &&
+        // 5为后缀".heic"的长度
+         snapshotPath.rfind(WEB_SNAPSHOT_PATH_HEIC_SUFFIX) != snapshotPath.length() - 5)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless the path or the format is wrong:%{public}s", snapshotPath.c_str());
         return false;
     }
