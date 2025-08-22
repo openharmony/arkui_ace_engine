@@ -11816,7 +11816,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result, contentModifier: cttModifier!} as RadioConfiguration)
+        let value : RadioConfiguration = ({ enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result } as RadioConfiguration)
         return value
     }
     readButtonConfiguration(cttModifier?: ContentModifier<ButtonConfiguration>): ButtonConfiguration {
@@ -11838,7 +11838,7 @@ export class Deserializer extends DeserializerBase {
             triggerClick_buf_argsSerializer.release();
             return;
         }
-        let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result, contentModifier: cttModifier! } as ButtonConfiguration)
+        let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result } as ButtonConfiguration)
         return value
     }
     readCheckBoxConfiguration(cttModifier?: ContentModifier<CheckBoxConfiguration>): CheckBoxConfiguration {
@@ -11859,7 +11859,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: CheckBoxConfiguration = ({ enabled: enabled_result, name: name_result, selected: selected_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as CheckBoxConfiguration)
+        let value: CheckBoxConfiguration = ({ enabled: enabled_result, name: name_result, selected: selected_result, triggerChange: triggerChange_result } as CheckBoxConfiguration)
         return value
     }
 
@@ -11880,7 +11880,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as ToggleConfiguration)
+        let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result } as ToggleConfiguration)
         return value
     }
     readRatingConfiguration(cttModifier?: ContentModifier<RatingConfiguration>): RatingConfiguration {
@@ -11903,7 +11903,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: RatingConfiguration = ({ enabled: enabled_result, rating: rating_result, indicator: indicator_result, stars: stars_result, stepSize: stepSize_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as RatingConfiguration)
+        let value: RatingConfiguration = ({ enabled: enabled_result, rating: rating_result, indicator: indicator_result, stars: stars_result, stepSize: stepSize_result, triggerChange: triggerChange_result } as RatingConfiguration)
         return value
     }
 
@@ -11928,7 +11928,7 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value: SliderConfiguration = ({ enabled: enabled_result, value: value_result, min: min_result, max: max_result, step: step_result, triggerChange: triggerChange_result, contentModifier: cttModifier! } as SliderConfiguration)
+        let value: SliderConfiguration = ({ enabled: enabled_result, value: value_result, min: min_result, max: max_result, step: step_result, triggerChange: triggerChange_result } as SliderConfiguration)
         return value
     }
     readSweepGradientOptions(): SweepGradientOptions {
