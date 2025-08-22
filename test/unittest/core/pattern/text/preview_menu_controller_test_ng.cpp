@@ -80,17 +80,17 @@ void PreviewMenuControllerTest::VerifyContactAndAddressNodeProperties(
     auto&& calcLayoutConstraint = flexLayoutProperty->GetCalcLayoutConstraint();
     // Verify size constraints
     auto calcMinSize = calcLayoutConstraint->minSize;
-    EXPECT_EQ(calcMinSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+    EXPECT_EQ(calcMinSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
 
     auto calcMaxSize = calcLayoutConstraint->maxSize;
-    EXPECT_EQ(calcMaxSize->Width(), CalcLength(PREVIEW_MAX_WIDTH));
-    EXPECT_EQ(calcMaxSize->Height(), CalcLength(PREVIEW_MAX_WIDTH));
+    EXPECT_EQ(calcMaxSize->Width(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+    EXPECT_EQ(calcMaxSize->Height(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
 
     // Verify special handling for phone/email types
     if (type == TextDataDetectType::EMAIL || type == TextDataDetectType::PHONE_NUMBER) {
         auto idealSize = calcLayoutConstraint->selfIdealSize;
         ASSERT_TRUE(idealSize.has_value());
-        EXPECT_EQ(idealSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+        EXPECT_EQ(idealSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
     } else {
         auto idealSize = calcLayoutConstraint->selfIdealSize;
         EXPECT_FALSE(idealSize.has_value());
@@ -437,13 +437,13 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingPreviewNodeTest001, TestSize.Le
     EXPECT_TRUE(maxSize.has_value());
     EXPECT_TRUE(maxSize->Width().has_value());
     EXPECT_TRUE(maxSize->Height().has_value());
-    EXPECT_EQ(maxSize->Height(), CalcLength(PREVIEW_MAX_WIDTH));
-    EXPECT_EQ(maxSize->Width(), CalcLength(PREVIEW_MAX_WIDTH));
+    EXPECT_EQ(maxSize->Height(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
+    EXPECT_EQ(maxSize->Width(), CalcLength(Dimension(PREVIEW_MAX_WIDTH.ConvertToPx())));
 
     auto minSize = calcLayoutConstraint->minSize;
     EXPECT_TRUE(minSize.has_value());
     EXPECT_TRUE(minSize->Height().has_value());
-    EXPECT_EQ(minSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+    EXPECT_EQ(minSize->Height(), CalcLength(Dimension(PREVIEW_MIN_HEIGHT.ConvertToPx())));
 
     // Verify ideal size
     auto idealSize = calcLayoutConstraint->selfIdealSize;
