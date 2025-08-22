@@ -501,7 +501,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     if (nodeType != ARKUI_CUSTOM) {
         HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
-    const char* keys[] = { "nodeId", "nativeStrongRef", "nodePtr_" };
+    const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
     int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
         panda::NumberRef::New(vm, rawPtr) };
@@ -524,7 +524,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTransTypedFrameNode(ArkUIRuntimeCa
     if (nodeType != ARKUI_CUSTOM) {
         HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
-    const char* keys[] = { "nodeId", "nativeStrongRef", "nodePtr_" };
+    const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
     int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
         panda::NumberRef::New(vm, rawPtr) };
