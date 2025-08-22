@@ -265,6 +265,7 @@ private:
 
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
+    int32_t cacheEnd_ = 0;
     bool isChildrenUpdated_ = false;
 
     bool expandSafeArea_ = false;

@@ -90,6 +90,11 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize_.SetWidth(round(frameSize_.Width()));
             frameSize_.SetHeight(round(frameSize_.Height()));
         }
+        // fix layout bug when children are not GridItems
+        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+            currentItemRowSpan_ = 1;
+            currentItemColSpan_ = 1;
+        }
     }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount());
@@ -110,8 +115,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update layout info.
     info_.prevOffset_ = info_.currentOffset_;
     // update cache info.
-    const int32_t cacheCnt =
-        static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
+    auto cache = CalculateCachedCount(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_));
+    const int32_t cacheCnt = std::max(cache.first, cache.second);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -133,7 +138,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
 
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
-        AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
+        AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cache.first, predictBuildList_);
         if (!predictBuildList_.empty()) {
             PreloadItems(layoutWrapper);
             predictBuildList_.clear();
@@ -2084,7 +2089,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
-                    for (uint32_t y = i; y < crossCount_ && currentIndex < childrenCount; y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < cacheEnd_; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
@@ -2359,7 +2364,8 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* lay
     CHECK_NULL_RETURN(host, res);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, res);
-    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false)) // avoid reset during overScroll
+    // avoid reset during overScroll
+    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false))
         || updateIdx == -1) {
         return res;
     }
