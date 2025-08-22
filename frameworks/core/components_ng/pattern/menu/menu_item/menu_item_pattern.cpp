@@ -217,6 +217,7 @@ void MenuItemPattern::OnAttachToMainTree()
 {
     auto menuPattern = GetMenuPattern();
     CHECK_NULL_VOID(menuPattern);
+    // flush divider render when new item mount to tree
     menuPattern->AddBuildDividerTask();
 }
 
