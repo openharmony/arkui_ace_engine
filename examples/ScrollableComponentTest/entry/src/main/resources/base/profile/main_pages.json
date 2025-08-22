@@ -38,6 +38,7 @@
     "pages/Swiper/SwiperNestList",
     "pages/Swiper/SwiperHeightChangeDemo",
     "pages/Swiper/SwiperKeyEvent",
+    "pages/Swiper/IndicatorCaseTest",
     "pages/List/ListMainPage",
     "pages/List/childrenMainSize/ListItemGroupScenario",
     "pages/List/RepeatList/RepeatList1",
