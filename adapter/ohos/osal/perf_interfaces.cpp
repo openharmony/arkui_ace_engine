@@ -152,4 +152,9 @@ void PerfInterfaces::SetApplicationInfo()
     PerfMonitorAdapter::GetInstance().SetAppInfo(appInfo);
 }
 
+void PerfInterfaces::ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+    const std::string& componentName, const std::string& bundleName, const int32_t pid)
+{
+    PerfMonitorAdapter::GetInstance().ReportSurface(uniqueId, surfaceName, componentName, bundleName, pid);
+}
 } // namespace OHOS::Ace

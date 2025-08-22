@@ -27,6 +27,7 @@
 #include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/multi_thread.h"
@@ -298,6 +299,13 @@ void XComponentPattern::OnAttachToMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId());
+    auto customNode = host->GetParentCustomNode();
+    CHECK_NULL_VOID(customNode);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto bundleName = pipelineContext->GetBundleName();
+    PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
+        customNode->GetJSViewName(), bundleName.c_str(), getpid());
 }
 
 void XComponentPattern::OnDetachFromMainTree()
