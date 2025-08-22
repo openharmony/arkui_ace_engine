@@ -1447,18 +1447,7 @@ RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 12
 
 function getResourceValue(resourceName: string): number {
   if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {
-    let value = (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue;
-    return value;
-    // ToDo
-    let resourceValue: number | undefined = (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue;
-    if (typeof resourceValue === 'number') {
-      return resourceValue as number;
-    } else {
-      resourceValue = Util.getNumberByResource((RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceId,
-        (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue);
-      (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue = resourceValue;
-      return resourceValue;
-    }
+    return (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue;
   }
   return 0;
 }
