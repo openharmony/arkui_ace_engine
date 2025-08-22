@@ -2891,6 +2891,11 @@ void SheetPresentationPattern::OnScrollEndRecursive(const std::optional<float>& 
     sheetObject_->OnScrollEndRecursive(velocity);
 }
 
+void SheetPresentationPattern::OnScrollDragEndRecursive()
+{
+    sheetObject_->OnScrollDragEndRecursive();
+}
+
 bool SheetPresentationPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     return sheetObject_->HandleScrollVelocity(velocity);

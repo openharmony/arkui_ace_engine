@@ -62,6 +62,7 @@ public:
         NestedState state, float velocity = 0.f);
     virtual void OnScrollStartRecursive(float position, float dragVelocity = 0.0f);
     virtual void OnScrollEndRecursive (const std::optional<float>& velocity);
+    virtual void OnScrollDragEndRecursive();
     virtual bool HandleScrollVelocity(float velocity);
     virtual void InitScrollProps();
     ScrollResult HandleScrollWithSheet(float scrollOffset);
@@ -148,6 +149,7 @@ protected:
     // not need copy. Data that is not unique to the side style
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
+    float dragVelocity_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
