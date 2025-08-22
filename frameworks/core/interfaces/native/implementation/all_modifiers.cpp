@@ -118,7 +118,9 @@ const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
 const GENERATED_ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier();
 const GENERATED_ArkUIFlexModifier* GetFlexModifier();
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier();
+#ifndef ARKUI_WEARABLE
 const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier();
+#endif
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier();
 const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier();
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier();
@@ -449,7 +451,9 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetEmbeddedComponentModifier,
         GetFlexModifier,
         GetFlowItemModifier,
+    #ifndef ARKUI_WEARABLE
         GetFolderStackModifier,
+    #endif
         GetFormComponentModifier,
         GetFormLinkModifier,
         GetGaugeModifier,
