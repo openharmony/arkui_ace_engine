@@ -807,9 +807,12 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     EXPECT_TRUE(formRenderer->uiContent_);
 
     OHOS::AppExecFwk::FormJsInfo newFormJsInfo;
-    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-                               const OHOS::AppExecFwk::FormJsInfo& info,
-                               const AAFwk::Want& /* want */) { newFormJsInfo = info; };
+    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo &info,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        newFormJsInfo = info;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
 
     formJsInfo.uiSyntax = OHOS::AppExecFwk::FormType::ETS;
