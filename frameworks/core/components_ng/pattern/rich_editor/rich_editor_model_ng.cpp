@@ -667,6 +667,13 @@ void RichEditorModelNG::SetSupportStyledUndo(bool enabled)
     richEditorPattern->SetSupportStyledUndo(enabled);
 }
 
+void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->UpdateScrollBarColor(value, true);
+}
+
 void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -689,5 +696,13 @@ void RichEditorModelNG::SetSupportStyledUndo(FrameNode* frameNode, bool enabled)
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSupportStyledUndo(enabled);
+}
+
+void RichEditorModelNG::SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->UpdateScrollBarColor(value, true);
 }
 } // namespace OHOS::Ace::NG

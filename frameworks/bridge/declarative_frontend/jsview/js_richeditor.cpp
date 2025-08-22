@@ -1435,6 +1435,17 @@ void JSRichEditor::SetUndoStyle(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetSupportStyledUndo(enable);
 }
 
+void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    std::optional<Color> scrollBarColor = std::nullopt;
+    if (Color color; JSContainerBase::ParseColorMetricsToColor(jsValue, color)) {
+        scrollBarColor = color;
+    }
+    RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+}
+
 void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsNumber()) {
@@ -1500,6 +1511,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
+    JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

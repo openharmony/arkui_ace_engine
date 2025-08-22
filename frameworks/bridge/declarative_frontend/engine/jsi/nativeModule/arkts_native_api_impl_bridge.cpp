@@ -2220,6 +2220,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetUndoStyle));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUndoStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetUndoStyle));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetScrollBarColor));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetScrollBarColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);

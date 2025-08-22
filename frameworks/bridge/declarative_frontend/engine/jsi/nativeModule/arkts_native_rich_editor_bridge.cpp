@@ -2047,4 +2047,39 @@ ArkUINativeModuleValue RichEditorBridge::ResetUndoStyle(ArkUIRuntimeCallInfo* ru
     nodeModifiers->getRichEditorModifier()->resetRichEditorUndoStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RichEditorBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseColorMetricsToColor(vm, secondArg, color, resObj)) {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorScrollBarColor(nativeNode);
+    } else {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
+        nodeModifiers->getRichEditorModifier()->setRichEditorScrollBarColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorScrollBarColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

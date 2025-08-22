@@ -5527,11 +5527,7 @@ void RichEditorPattern::OnCommonColorChange()
     IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
-    auto scrollBar = GetScrollBar();
-    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(scrollBar && scrollbarTheme);
-    scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
-    scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
+    UpdateScrollBarColor(GetScrollBarColor());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
@@ -9660,6 +9656,7 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
             scrollBarModifier->SetRect(scrollBar->GetActiveRect());
             scrollBarModifier->SetPositionMode(scrollBar->GetPositionMode());
             SetScrollBarOverlayModifier(scrollBarModifier);
+            UpdateScrollBarColor(GetScrollBarColor());
         }
         SetEdgeEffect(EdgeEffect::FADE, GetAlwaysEnabled());
         SetEdgeEffect();
@@ -9814,6 +9811,7 @@ void RichEditorPattern::InitScrollablePattern()
     }
     SetScrollBar(barState);
     auto scrollBar = GetScrollBar();
+    UpdateScrollBarColor(GetScrollBarColor());
     if (scrollBar) {
         auto richEditorTheme = GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(richEditorTheme);
@@ -10653,6 +10651,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto undoStyle = isStyledUndoSupported_ ? OHOS::Ace::UndoStyle::KEEP_STYLE : OHOS::Ace::UndoStyle::CLEAR_STYLE;
     json->PutExtAttr("undoStyle", static_cast<int32_t>(undoStyle), filter);
     json->PutExtAttr("enableAutoSpacing", isEnableAutoSpacing_ ? "true" : "false", filter);
+    json->PutExtAttr("scrollBarColor", GetScrollBarColor().ColorToString().c_str(), filter);
 }
 
 std::string RichEditorPattern::GetCustomKeyboardInJson() const
@@ -13224,5 +13223,28 @@ void RichEditorPattern::ReportComponentChangeEvent() {
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}zu",
         frameId_, str.length());
 #endif
+}
+
+void RichEditorPattern::UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty)
+{
+    auto property = GetLayoutProperty<RichEditorLayoutProperty>();
+    IF_TRUE(isUpdateProperty && property, property->UpdateScrollBarColor(color));
+    auto scrollBar = GetScrollBar();
+    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollBar && scrollbarTheme);
+    scrollBar->SetForegroundColor(color.value_or(scrollbarTheme->GetForegroundColor()));
+    scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
+}
+
+Color RichEditorPattern::GetScrollBarColor() const
+{
+    auto property = GetLayoutProperty<RichEditorLayoutProperty>();
+    if (property) {
+        auto color = property->GetScrollBarColor();
+        CHECK_NULL_RETURN(!color.has_value(), color.value());
+    }
+    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
+    CHECK_NULL_RETURN(scrollbarTheme, Color());
+    return scrollbarTheme->GetForegroundColor();
 }
 } // namespace OHOS::Ace::NG

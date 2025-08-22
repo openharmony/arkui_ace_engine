@@ -1400,6 +1400,7 @@ public:
     }
 
     bool IsShortCutBlocked() override { return IsDragging(); }
+    void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
 
 protected:
     bool CanStartAITask() const override;
@@ -1418,6 +1419,7 @@ private:
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
+    Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertGlobalToTextOffset(const Offset& globalOffset);

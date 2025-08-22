@@ -752,4 +752,48 @@ HWTEST_F(RichEditorScrollTestOneNg, PageScrollTest001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
 }
 
+/**
+ * @tc.name: UpdateScrollBarColor001
+ * @tc.desc: test richEditor UpdateScrollBarColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateLayoutProperty();
+    richEditorPattern->InitScrollablePattern();
+    auto color = Color::GREEN;
+    richEditorPattern->UpdateScrollBarColor(color, true);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto scrollBarColor = property->GetScrollBarColorValue(Color());
+    EXPECT_EQ(color, scrollBarColor);
+    richEditorPattern->UpdateScrollBarColor(std::nullopt, true);
+    property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    scrollBarColor = property->GetScrollBarColorValue(Color());
+    EXPECT_NE(color, scrollBarColor);
+}
+
+/**
+ * @tc.name: GetScrollBarColor001
+ * @tc.desc: test richEditor GetScrollBarColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateLayoutProperty();
+    richEditorPattern->InitScrollablePattern();
+    richEditorPattern->UpdateScrollBarColor(Color::GREEN, true);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto color = property->GetScrollBarColorValue(Color());
+    auto scrollBarColor = richEditorPattern->GetScrollBarColor();
+    EXPECT_EQ(color, scrollBarColor);
+}
 }

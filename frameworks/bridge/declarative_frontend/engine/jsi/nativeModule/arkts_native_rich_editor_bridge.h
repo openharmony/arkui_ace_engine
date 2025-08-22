@@ -113,6 +113,10 @@ public:
 
     static ArkUINativeModuleValue SetUndoStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetUndoStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+    static ArkUINativeModuleValue SetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
     static void ParseAIEntityColor(
         ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig);
