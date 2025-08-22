@@ -33,14 +33,16 @@ class __RepeatImpl<T> {
 
     /**/
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
-        this.arr_ = config.arr;
+        if (this.arr_ !== config.arr) {
+            this.arr_ = config.arr;
+            isInitialRender = true;
+        }
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.ttypeGenFunc_ = config.ttypeGenFunc;
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
         this.itemDragEventHandler = config.itemDragEventHandler;
-
         isInitialRender ? this.initialRender() : this.reRender();
     }
 
@@ -126,6 +128,7 @@ class __RepeatImpl<T> {
                 itemInfo.repeatItem = oldRepeatItem;
                 stateMgmtConsole.debug(`__RepeatImpl: new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`);
 
+                RepeatNative.recycle(oldKeyIndex);
                 itemInfo.repeatItem.updateItem(item);
                 itemInfo.repeatItem.updateIndex(index);
 
@@ -135,6 +138,7 @@ class __RepeatImpl<T> {
                 // TBD moveChild() only when item types are same
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
+                RepeatNative.reuse(oldKeyIndex);
             } else {
                 // case #3:
                 // new array item, there are no deleted array items
