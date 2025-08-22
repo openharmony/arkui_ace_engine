@@ -42,6 +42,7 @@
 #include "system_ability_definition.h"
 #include "ui_extension_context.h"
 #include "wm_common.h"
+#include "form_ashmem.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -1096,6 +1097,14 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
     auto context = context_.lock();
     CHECK_NULL_VOID(context);
     StoreConfiguration(context->GetConfiguration());
+}
+
+UIContentImpl::~UIContentImpl()
+{
+    UnSubscribeEventsPassThroughMode();
+    ProcessDestructCallbacks();
+    DestroyUIDirector();
+    DestroyCallback();
 }
 
 void UIContentImpl::DestroyUIDirector()
