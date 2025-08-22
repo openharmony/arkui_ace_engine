@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
       "composeListItem:composeListItem",
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
+      "fullscreenlaunchcomponent:fullScreenLaunch",
     ]
   }
 }
