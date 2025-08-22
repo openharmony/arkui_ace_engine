@@ -21,9 +21,8 @@ import {
   BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType, Button, ButtonType, SymbolGlyph, SymbolEffectStrategy,
   SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, px2vp, $r, Margin,
   Padding, ButtonOptions, SymbolGlyphModifier, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
-  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout
+  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback, ClassCastError
 } from '@ohos.arkui.component';
-import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
@@ -43,8 +42,9 @@ export enum EditableLeftIconType {
   Back,
   Cancel,
 }
-export interface EditableTitleBarMenuItem {
-  value: ResourceStr;
+
+export class EditableTitleBarMenuItem {
+  value: ResourceStr = '';
   symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   label?: ResourceStr;
@@ -69,14 +69,6 @@ enum ItemType {
   Icon,
   LeftIcon,
 }
-
-const PUBLIC_CANCEL = $r('sys.symbol.xmark');
-
-const PUBLIC_OK = $r('sys.symbol.checkmark');
-
-const PUBLIC_BACK = $r('sys.symbol.chevron_backward');
-
-const PUBLIC_IMAGE_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 const DEFAULT_TITLE_BAR_HEIGHT: number = 56;
 const DEFAULT_TITLE_PADDING: number = 2;
@@ -142,31 +134,38 @@ class ButtonGestureModifier implements GestureModifier {
 }
 
 class EnvironmentCallbackEntry implements EnvironmentCallback {
-  private index: ImageMenuItem;
-  constructor(index: ImageMenuItem) {
-    this.index = index;
+  ImageMenuItem: ImageMenuItem;
+
+  constructor(ImageMenuItem: ImageMenuItem) {
+    this.ImageMenuItem = ImageMenuItem;
   }
+
   onConfigurationUpdated(config: Configuration) {
 
-    if (config === undefined || !this.index.isFollowingSystemFontScale) {
-      this.index.fontSize = 100;
+    if (config === undefined || !this.ImageMenuItem.isFollowingSystemFontScale) {
+      this.ImageMenuItem.fontSize = 1;
       return;
     }
     try {
-      this.index.fontSize = 50
+      this.ImageMenuItem.fontSize = Math.min(
+        this.ImageMenuItem.maxFontScale, config.fontSizeScale ?? 1);
+      this.ImageMenuItem.buttonGestureModifier.fontSize = this.ImageMenuItem.fontSize;
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError)?.code;
+      let message = (paramError as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `EditableTitleBar environmentCallback error: ${code}, ${message}`);
     }
   }
+
   onMemoryLevel(level: AbilityConstant.MemoryLevel) {
   }
 }
 
 @Component
 export struct EditableTitleBar {
+  PUBLIC_BACK: ResourceStr = $r('sys.symbol.chevron_backward');
+  PUBLIC_CANCEL: ResourceStr = $r('sys.symbol.xmark');
   leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
   title: ResourceStr = '';
   subtitle?: ResourceStr = '';
@@ -189,7 +188,7 @@ export struct EditableTitleBar {
   public static readonly defaultTitlePadding: number = getNumberByResource(125830920, DEFAULT_TITLE_PADDING);
   public static readonly totalHeight: number =
     EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ? DEFAULT_TITLE_BAR_HEIGHT :
-    EditableTitleBar.defaultHeight;
+      EditableTitleBar.defaultHeight;
   static readonly titlePadding: number =
     EditableTitleBar.defaultTitlePadding === EditableTitleBar.commonZero ?
       DEFAULT_TITLE_PADDING : EditableTitleBar.defaultTitlePadding;
@@ -203,8 +202,7 @@ export struct EditableTitleBar {
   @Observed
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
   @Observed
-   @PropRef contentMargin?: LocalizedMargin;
-
+  @PropRef contentMargin?: LocalizedMargin;
   @Observed
   @State titleBarMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
@@ -224,20 +222,20 @@ export struct EditableTitleBar {
   aboutToAppear(): void {
     try {
       let uiContent: UIContext = this.getUIContext();
-      if(uiContent.getHostContext() !==undefined) {
+      if (uiContent.getHostContext() !== undefined) {
         this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
         this.maxFontScale = uiContent.getMaxFontScale();
       }
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
   }
 
   decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    if(uiContent.getHostContext() !==undefined) {
+    if (uiContent.getHostContext() !== undefined) {
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     }
     if (!this.isFollowingSystemFontScale) {
@@ -273,6 +271,8 @@ export struct EditableTitleBar {
         }
         .width('100%')
         .flexShrink(1)
+        .accessibilityGroup(true)
+        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
 
         Row() {
           this.rightMenuItemsLayout();
@@ -305,10 +305,10 @@ export struct EditableTitleBar {
     if (this.leftIconStyle === EditableLeftIconType.Back) {
       ImageMenuItem({
         item: {
-          value: PUBLIC_BACK,
+          value: this.PUBLIC_BACK,
           isEnabled: true,
           action: () => {
-            if(this.onCancel) {
+            if (this.onCancel) {
               this.onCancel?.()
             } else {
               this.getUIContext()?.getRouter()?.back()
@@ -323,10 +323,10 @@ export struct EditableTitleBar {
     } else {
       ImageMenuItem({
         item: {
-          value: PUBLIC_CANCEL,
+          value: this.PUBLIC_CANCEL,
           isEnabled: true,
           action: () => {
-            if(this.onCancel) {
+            if (this.onCancel) {
               this.onCancel?.()
             }
           },
@@ -352,7 +352,7 @@ export struct EditableTitleBar {
           .textAlign(TextAlign.Start)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .heightAdaptivePolicy(this.subtitle ?
-          TextHeightAdaptivePolicy.MAX_LINES_FIRST : TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+            TextHeightAdaptivePolicy.MAX_LINES_FIRST : TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .constraintSize({
             maxHeight: this.subtitle ? EditableTitleBar.maxMainTitleHeight : EditableTitleBar.totalHeight,
           })
@@ -420,6 +420,7 @@ export struct EditableTitleBar {
 
 @Component
 struct EditableTitleBarMenuSection {
+  PUBLIC_OK: ResourceStr = $r('sys.symbol.checkmark');
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
@@ -430,11 +431,10 @@ struct EditableTitleBarMenuSection {
   build() {
     Column() {
       Row() {
-        if (this.menuItems !== undefined && this.menuItems !== null &&
-          this.menuItems!.length > EditableTitleBar.commonZero) {
+        if (this.menuItems) {
           ForEach((this.menuItems as EditableTitleBarMenuItem[]).slice(EditableTitleBar.commonZero,
-            this.isSaveEnabled ?
-            EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
+              this.isSaveEnabled ?
+              EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
             (item: EditableTitleBarMenuItem, index: number) => {
               ImageMenuItem({
                 item: item,
@@ -446,10 +446,10 @@ struct EditableTitleBarMenuSection {
         if (this.isSaveEnabled) {
           ImageMenuItem({
             item: {
-              value: PUBLIC_OK,
+              value: this.PUBLIC_OK,
               isEnabled: true,
               action: () => {
-                if(this.onSave) {
+                if (this.onSave) {
                   this.onSave?.()
                 }
               },
@@ -467,9 +467,12 @@ struct EditableTitleBarMenuSection {
 }
 
 
-
 @Component
 struct ImageMenuItem {
+  PUBLIC_BACK: ResourceStr = $r('sys.symbol.chevron_backward');
+  PUBLIC_OK: ResourceStr = $r('sys.symbol.checkmark');
+  PUBLIC_CANCEL: ResourceStr = $r('sys.symbol.xmark');
+  PUBLIC_IMAGE_BACK: ResourceStr = $r('sys.media.ohos_ic_compnent_titlebar_back');
   item: EditableTitleBarMenuItem = {
     value: '',
     isEnabled: true,
@@ -508,16 +511,16 @@ struct ImageMenuItem {
     isModal: true,
     customStyle: true,
   });
-   private envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
+  private envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   @Observed
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_OK) {
+    if (this.item.value === this.PUBLIC_OK) {
       return $r('sys.string.icon_save');
-    } else if (this.item.value === PUBLIC_CANCEL) {
+    } else if (this.item.value === this.PUBLIC_CANCEL) {
       return $r('sys.string.icon_cancel');
-    } else if (this.item.value === PUBLIC_BACK) {
+    } else if (this.item.value === this.PUBLIC_BACK) {
       return $r('sys.string.icon_back');
     } else {
       return this.item.label ? this.item.label as ResourceStr : '' as ResourceStr;
@@ -527,9 +530,19 @@ struct ImageMenuItem {
   aboutToAppear() {
     try {
       let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
+        this.applicationContext = hostContext.getApplicationContext();
+        try {
+          this.callbackId = this.applicationContext.on('environment', this.envCallback);
+        } catch (paramError) {
+          hilog.error(0x3900, 'Ace',
+            `EditableTitleBar Faild to get environment param error `);
+        }
+      }
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as ClassCastError)?.code;
+      let message = (paramError as ClassCastError)?.message;
       hilog.error(0x3900, 'Ace',
         `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
     }
@@ -540,7 +553,7 @@ struct ImageMenuItem {
   decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      if(uiContent.getHostContext() != undefined) {
+      if (uiContent.getHostContext() != undefined) {
         this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       }
       if (!this.isFollowingSystemFontScale) {
@@ -548,19 +561,11 @@ struct ImageMenuItem {
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | String = (exception as ClassCastError)?.message;
       hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
-  }
-
-  buttonStateStyles(instance: CommonMethod) {
-    instance.stateStyles({
-      focused: this.focusedStyle,
-      normal: this.notInFocusedStyle,
-      pressed: this.notInFocusedStyle,
-    })
   }
 
   focusedStyle(instance: CommonMethod) {
@@ -577,71 +582,6 @@ struct ImageMenuItem {
       radius: $r('sys.float.titlebar_icon_background_shape'),
       width: EditableTitleBar.commonZero,
     })
-  }
-
-  private touchEventAction(event: TouchEvent): void {
-    if (!this.item.isEnabled) {
-      return;
-    }
-    if (event.type === TouchType.Down) {
-      this.isOnClick = true;
-    }
-    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-      if (this.fontSize >= this.minFontSize) {
-        this.dialogController?.close()
-      }
-      this.isOnClick = false;
-    }
-  }
-
-  private keyEventAction(event: KeyEvent): void {
-    if (!this.item.isEnabled) {
-      return;
-    }
-    if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-      return;
-    }
-    if (event.type === KeyType.Down) {
-      this.isOnClick = true;
-    }
-    if (event.type === KeyType.Up) {
-      this.isOnClick = false;
-    }
-  }
-
-  buttonEventStyle(instance: CommonMethod) {
-    instance.onFocus(() => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      this.isOnFocus = true;
-    })
-    instance.onBlur(() => {this.isOnFocus = false})
-    instance.onHover((isOn: boolean, event?: HoverEvent) => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      this.isOnHover = isOn;
-    })
-    instance.onKeyEvent((event: KeyEvent) => {
-      this.keyEventAction(event);
-    })
-    instance.onTouch((event: TouchEvent) => {
-      this.touchEventAction(event);
-    })
-    instance.onClick((event?: ClickEvent) => {
-      if ((this.item.isEnabled as boolean | undefined) === undefined) {
-        this.item.isEnabled = true;
-      }
-      this.item.isEnabled && this.item.action?.()
-    })
-  }
-
-  backgroundButtonStyle(instance: CommonMethod) {
-    instance.width($r('sys.float.titlebar_icon_background_width'))
-    instance.height($r('sys.float.titlebar_icon_background_height'))
-    instance.focusable(this.item.isEnabled)
-    instance.enabled(this.item.isEnabled)
   }
 
   getBgColor(): ResourceColor {
@@ -664,6 +604,22 @@ struct ImageMenuItem {
     }
   }
 
+  getStringByNameSync(contextName: string): undefined | String {
+    let uiContext: undefined | String = '';
+    try {
+      let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
+        uiContext = hostContext?.resourceManager?.getStringByNameSync(contextName);
+      }
+    } catch (exception) {
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | String = (exception as ClassCastError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to getStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
+    return uiContext;
+  }
+
   private toStringFormat(resource: ResourceStr | undefined | Long): string | undefined {
     if (typeof resource === 'string' || typeof resource === 'undefined') {
       if (typeof resource === 'string') {
@@ -683,8 +639,8 @@ struct ImageMenuItem {
           resourceString = context?.resourceManager?.getStringSync(resource as Long);
         }
       } catch (err) {
-        let code: number = (err as BusinessError)!.code;
-        let message: string = (err as BusinessError)!.message;
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | String = (err as ClassCastError)?.message;
         hilog.error(0x3900, 'Ace', `Faild to EditableTitleBar toStringFormat, code: ${code}, message: ${message}`)
       }
       return resourceString;
@@ -693,17 +649,16 @@ struct ImageMenuItem {
   }
 
   private getAccessibilityReadText(): string | undefined {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    if (this.item.value === PUBLIC_OK) {
-      return context?.resourceManager?.getStringByNameSync('icon_save');
-    } else if (this.item.value === PUBLIC_CANCEL) {
-      return context?.resourceManager?.getStringByNameSync('icon_cancel');
-    } else if (this.item.value === PUBLIC_BACK) {
-      return context?.resourceManager?.getStringByNameSync('icon_back');
+    if (this.item.value === this.PUBLIC_OK) {
+      return this.getStringByNameSync('icon_save');
+    } else if (this.item.value === this.PUBLIC_CANCEL) {
+      return this.getStringByNameSync('icon_cancel');
+    } else if (this.item.value === this.PUBLIC_BACK) {
+      return this.getStringByNameSync('icon_back');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.toStringFormat(this.item.accessibilityText) as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -716,8 +671,11 @@ struct ImageMenuItem {
   }
 
   private getAccessibilityDescription(): string | undefined {
-    if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
-      return this.toStringFormat(this.item.accessibilityDescription);
+    if (Util.isResourceType(this.item.accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.item.accessibilityDescription as Resource).id);
+    } else if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
+      return this.item.accessibilityDescription as string;
     }
     return '';
   }
@@ -732,6 +690,7 @@ struct ImageMenuItem {
           .focusable(this.item.isEnabled)
           .enabled(this.item.isEnabled)
           .draggable(false)
+          .accessibilityText(this.getAccessibilityReadText())
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .fontSize(SYMBOL_SIZE)
@@ -744,36 +703,94 @@ struct ImageMenuItem {
             .focusable(this.item.isEnabled)
             .enabled(this.item.isEnabled)
             .draggable(false)
+            .accessibilityText(this.getAccessibilityReadText())
             .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
-            .matchTextDirection(this.item.value === PUBLIC_IMAGE_BACK ? true : false)
+            .matchTextDirection(this.item.value === this.PUBLIC_IMAGE_BACK ? true : false)
             .width($r('sys.float.titlebar_icon_width'))
             .height($r('sys.float.titlebar_icon_height'))
             .focusable(this.item.isEnabled)
             .enabled(this.item.isEnabled)
             .draggable(false)
+            .accessibilityText(this.getAccessibilityReadText() as string)
             .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         }
       }
     }
     .id(this.imageMenuItemId)
-    .applyStyles(this.backgroundButtonStyle)
-    .padding(0)
+    .width($r('sys.float.titlebar_icon_background_width'))
+    .height($r('sys.float.titlebar_icon_background_height'))
+    .focusable(this.item.isEnabled)
+    .enabled(this.item.isEnabled)
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
     .margin({
       start: this.attribute === ItemType.LeftIcon ? LengthMetrics.vp(EditableTitleBar.commonZero) :
-      LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
+        LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     } as LocalizedMargin)
     .focusOnTouch(true)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .applyStyles(this.buttonStateStyles)
-    .applyStyles(this.buttonEventStyle)
-
+    .stateStyles({
+      focused: this.focusedStyle,
+      normal: this.notInFocusedStyle,
+      pressed: this.notInFocusedStyle,
+    })
+    .onFocus(() => {
+      if (!this.item.isEnabled) {
+        return;
+      }
+      this.isOnFocus = true;
+    })
+    .onBlur(() => {
+      this.isOnFocus = false
+    })
+    .onHover((isOn: boolean, event?: HoverEvent) => {
+      if (!this.item.isEnabled) {
+        return;
+      }
+      this.isOnHover = isOn;
+    })
+    .onKeyEvent((event: KeyEvent): boolean => {
+      if (!this.item.isEnabled) {
+        return false;
+      }
+      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+        return false;
+      }
+      if (event.type === KeyType.Down) {
+        this.isOnClick = true;
+      }
+      if (event.type === KeyType.Up) {
+        this.isOnClick = false;
+      }
+      return true;
+    } as Callback<KeyEvent, boolean>)
+    .onTouch((event: TouchEvent) => {
+      if (!this.item.isEnabled) {
+        return;
+      }
+      if (event.type === TouchType.Down) {
+        this.isOnClick = true;
+      }
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        if (this.fontSize >= this.minFontSize) {
+          this.dialogController?.close();
+        }
+        this.isOnClick = false;
+      }
+    })
+    .onClick((event?: ClickEvent) => {
+      if ((this.item.isEnabled as boolean | undefined) === undefined) {
+        this.item.isEnabled = true;
+      }
+      this.item.isEnabled && this.item.action?.()
+    })
     .gestureModifier(this.buttonGestureModifier)
     .accessibilityLevel(this.getRightIconAccessibilityLevel())
+
+    .accessibilityDescription(this.getAccessibilityDescription() as string)
   }
 
   @Builder
@@ -787,11 +804,67 @@ struct ImageMenuItem {
         .enabled(this.item.isEnabled)
         .objectFit(ImageFit.Cover)
       Button({ type: ButtonType.Circle } as ButtonOptions)
-        .applyStyles(this.backgroundButtonStyle)
+        .width($r('sys.float.titlebar_icon_background_width'))
+        .height($r('sys.float.titlebar_icon_background_height'))
+        .focusable(this.item.isEnabled)
+        .enabled(this.item.isEnabled)
         .foregroundColor(this.getFgColor())
         .backgroundColor(EditableTitleBar.noneColor)
-         .applyStyles(this.buttonStateStyles)
-        .applyStyles(this.buttonEventStyle)
+        .stateStyles({
+          focused: this.focusedStyle,
+          normal: this.notInFocusedStyle,
+          pressed: this.notInFocusedStyle,
+        })
+        .onFocus(() => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnFocus = true;
+        })
+        .onBlur(() => {
+          this.isOnFocus = false
+        })
+        .onHover((isOn: boolean, event?: HoverEvent) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          this.isOnHover = isOn;
+        })
+        .onKeyEvent((event: KeyEvent): boolean => {
+          if (!this.item.isEnabled) {
+            return false;
+          }
+          if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+            return false;
+          }
+          if (event.type === KeyType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === KeyType.Up) {
+            this.isOnClick = false;
+          }
+          return true;
+        } as Callback<KeyEvent, boolean>)
+        .onTouch((event: TouchEvent) => {
+          if (!this.item.isEnabled) {
+            return;
+          }
+          if (event.type === TouchType.Down) {
+            this.isOnClick = true;
+          }
+          if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+            if (this.fontSize >= this.minFontSize) {
+              this.dialogController?.close();
+            }
+            this.isOnClick = false;
+          }
+        })
+        .onClick((event?: ClickEvent) => {
+          if ((this.item.isEnabled as boolean | undefined) === undefined) {
+            this.item.isEnabled = true;
+          }
+          this.item.isEnabled && this.item.action?.()
+        })
         .gestureModifier(this.buttonGestureModifier)
         .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
     }
@@ -833,7 +906,6 @@ struct EditableTitleBarDialog {
   }
   confirm: () => void = () => {
   }
-
   @Prop fontSize: number = 1;
   @State maxLines: number = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
@@ -928,21 +1000,27 @@ struct EditableTitleBarDialog {
     }
   }
 
-   aboutToAppear(): void {
-       let context: UIContext = this.getUIContext();
-       if(context.getHostContext() !==undefined) {
-         let hostContext : common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
-         this.mainWindowStage = hostContext?.windowStage.getMainWindowSync();
-           let properties: window.WindowProperties =
-             this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
-           let rect = properties.windowRect;
-           if (px2vp(rect.height) > this.screenWidth) {
-             this.maxLines = this.verticalScreenLines;
-           } else {
-             this.maxLines = this.horizontalsScreenLines;
-           }
-       }
-   }
+  aboutToAppear(): void {
+    try {
+      let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
+        this.mainWindowStage = hostContext?.windowStage.getMainWindowSync();
+      }
+    } catch (error) {
+      let code: undefined | number = (error as ClassCastError)?.code;
+      let message: undefined | String = (error as ClassCastError)?.message;
+      hilog.error(0x3900, 'Ace', `EditableTitleBar getMainWindowStage error, code: ${code},message:${message}`);
+    }
+    let properties: window.WindowProperties =
+      this.mainWindowStage?.getWindowProperties() as window.WindowProperties;
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    } else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
+  }
 }
 
 /**
@@ -960,8 +1038,8 @@ function getNumberByResource(resourceId: number, defaultNumber: number): number 
       return resourceNumber;
     }
   } catch (error) {
-    let code: number = (error as BusinessError).code;
-    let message: string = (error as BusinessError).message;
+    let code: number = (error as ClassCastError).code;
+    let message: string = (error as ClassCastError).message;
     hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
     return 0;
   }
