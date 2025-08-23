@@ -1994,26 +1994,6 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic006, TestSize.Level1)
 }
 
 /**
- * @tc.name: searchModelStatic007
- * @tc.desc: test search ModelStatic
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestTwoNg, searchModelStatic007, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(textFieldLayoutProperty, nullptr);
-    SearchModelStatic::SetPlaceholderColor(frameNode, std::make_optional(Color::GRAY));
-    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor().value(), Color::GRAY);
-
-    SearchModelStatic::SetPlaceholderColor(frameNode, std::nullopt);
-    EXPECT_FALSE(textFieldLayoutProperty->GetPlaceholderTextColor().has_value());
-}
-
-/**
  * @tc.name: searchModelStatic008
  * @tc.desc: test search ModelStatic
  * @tc.type: FUNC

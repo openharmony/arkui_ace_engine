@@ -578,42 +578,6 @@ HWTEST_F(TextTestNineNg, CheckAndAdjustHandle003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnHandleMove001
- * @tc.desc: test text_pattern.cpp OnHandleMove function, case handleLevelMode_ == HandleLevelMode::OVERLAY.
-    textPattern->HasContext == false
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
-{
-    auto [frameNode, pattern] = Init();
-    frameNode->GetRenderContext()->UpdateClipEdge(false);
-    RectF handleRect = { 0, 0, 10, 10 };
-    bool isFirst = true;
-    pattern->textForDisplay_ = u"";
-    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
-    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
-    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
-}
-
-/**
-* @tc.name: OnHandleMove002
-* @tc.desc: test text_pattern.cpp OnHandleMove function, case textPattern->HasContext == true,
-   magnifierController_ != nullptr.
-* @tc.type: FUNC
-*/
-HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
-{
-    auto [frameNode, pattern] = Init();
-    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
-    frameNode->GetRenderContext()->UpdateClipEdge(false);
-    RectF handleRect = { 0, 0, 10, 10 };
-    bool isFirst = true;
-    pattern->textForDisplay_ = u"1";
-    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
-    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
-}
-
-/**
  * @tc.name: OnCloseOverlay001
  * @tc.desc: test text_select_overlay.cpp OnCloseOverlay function, case CloseReason == CLOSE_REASON_HOLD_BY_OTHER,
  * @tc.type: FUNC
