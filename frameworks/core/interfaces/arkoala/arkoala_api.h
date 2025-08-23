@@ -3324,7 +3324,7 @@ struct ArkUIListModifier {
     ArkUI_Int32 (*getSticky)(ArkUINodeHandle node);
     void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
     void (*resetSticky)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
+    ArkUI_Int32 (*getListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setListEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetListEdgeEffect)(ArkUINodeHandle node);
@@ -3867,7 +3867,7 @@ struct ArkUIScrollableModifier {
     void (*setContentClip)(ArkUINodeHandle node, ArkUI_Int32 mode);
     /* setContentClip by custom rect not available */
     void (*resetContentClip)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
+    ArkUI_Int32 (*getEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
@@ -3928,7 +3928,7 @@ struct ArkUIScrollModifier {
     ArkUI_Float32 (*getScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
+    ArkUI_Int32 (*getScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setScrollEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
@@ -5342,7 +5342,7 @@ struct ArkUIWaterFlowModifier {
     void (*setWaterFlowScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWaterFlowScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getWaterFlowScrollBarColor)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
+    ArkUI_Int32 (*getEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setSectionOption)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWaterFlowSectionOption option);
     void (*resetSectionOption)(ArkUINodeHandle node);
     ArkUI_WaterFlowSectionOption (*getSectionOption)(ArkUINodeHandle node);

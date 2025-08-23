@@ -133,6 +133,7 @@ public:
     static float GetListSpace(FrameNode* frameNode);
     static void SetListSpace(FrameNode* frameNode, const Dimension& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
     static int32_t GetScrollSnapAlign(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
