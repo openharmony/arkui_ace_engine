@@ -41,7 +41,7 @@ HWTEST_F(TextFieldAutoFillControllerTest, StartAutoFillAnimation001, TestSize.Le
     pattern_->autoFillController_ = autoFillController;
 
     /**
-     * @tc.steps: step2. Set the paragraph_ property to null so that the InitAutoFillParagraph method returns false
+     * @tc.steps: step2. Set the paragraph_ property to null so that the InitAutoFillParagraph method returns false.
      */
     pattern_->paragraph_ = nullptr;
 
