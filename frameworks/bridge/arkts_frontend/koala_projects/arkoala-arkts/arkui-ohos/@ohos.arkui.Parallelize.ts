@@ -33,9 +33,22 @@ export class ParallelNode {
     /** @memo */
     build(
         /** @memo */
-        builder: () => void) {
+        builder: () => void, updateUseParallel: boolean = false) {
         if (this.needAttach && this.status == 2) {
             this.manager!.merge(__context(), this.rootState!, () => {
+                if (updateUseParallel) {
+                    const task = () => {
+                        this.manager!.syncChanges()
+                        this.manager!.updateSnapshot()
+                        this.rootState!.value
+                    }
+                    //@ts-ignore
+                    taskpool.execute(task).then(() => { }).catch((err: Error) => {
+                        console.error('update use Parallel in taskpool error :', err);
+                        console.error(err.stack);
+                    })
+                    return;
+                }
                 this.manager!.syncChanges()
                 this.manager!.updateSnapshot()
                 this.rootState!.value
@@ -76,6 +89,19 @@ export class ParallelNode {
             return;
         }
         this.manager!.merge(__context(), this.rootState!, () => {
+            if (updateUseParallel) {
+                const task = () => {
+                    this.manager!.syncChanges()
+                    this.manager!.updateSnapshot()
+                    this.rootState!.value
+                }
+                //@ts-ignore
+                taskpool.execute(task).then(() => { }).catch((err: Error) => {
+                    console.error('update use Parallel in taskpool error :', err);
+                    console.error(err.stack);
+                })
+                return;
+            }
             this.manager!.syncChanges()
             this.manager!.updateSnapshot()
             this.rootState!.value
@@ -93,6 +119,7 @@ export interface ParallelOption {
     enable?: boolean,
     initlize?: () => void,
     completed?: () => void,
+    updateUseParallel?: boolean,
 }
 
 /** @memo:stable */
@@ -107,10 +134,10 @@ export function ParallelizeUI(
     /** @memo */
     content_?: () => void,
 ) {
-    const enable = rememberDisposable<ParallelOption | undefined>(() => {
+    const option = rememberDisposable<ParallelOption | undefined>(() => {
         return options;
     }, () => { })
-    if (options?.enable === false) {
+    if (option?.enable === false) {
         content_?.()
         return;
     }
@@ -121,6 +148,6 @@ export function ParallelizeUI(
         parallelNode?.dispose()
     })
     if (content_ !== undefined) {
-        receiver.build(content_!)
+        receiver.build(content_!, options?.updateUseParallel);
     }
 }
