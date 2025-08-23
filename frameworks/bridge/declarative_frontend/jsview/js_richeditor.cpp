@@ -2780,7 +2780,7 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         tyingStyleObj->SetPropertyObject("decoration", CreateJsDecorationObj(typingStyle));
     }
     if (typingStyle.updateTextShadows.has_value()) {
-        tyingStyleObj->SetPropertyObject("textShadows",
+        tyingStyleObj->SetPropertyObject("textShadow",
             JSRichEditor::CreateJsTextShadowObjectArray(typingStyle.updateTextShadows.value()));
     }
     if (typingStyle.updateLineHeight.has_value()) {

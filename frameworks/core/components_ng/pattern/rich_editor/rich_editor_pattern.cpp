@@ -8767,7 +8767,7 @@ void RichEditorPattern::HandleOnPaste()
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
     OnReportRichEditorEvent("onPasteComplete");
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
     if (event.IsPreventDefault()) {
         CloseSelectOverlay();
         ResetSelection();
