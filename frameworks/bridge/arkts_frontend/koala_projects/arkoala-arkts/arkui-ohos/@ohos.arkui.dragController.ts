@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
+import { TypeChecker } from "#components"
 import { DragEvent, DragPreviewOptions, ICurve, CustomBuilder, Callback, DragItemInfo } from 'arkui/component/common';
 import { TouchPoint, ResourceColor } from 'arkui/component/units';
-import { Curve } from 'arkui/component/enums';
+import { Curve, Color } from 'arkui/component/enums';
 import { UnifiedData, PixelMap } from "#external";
-import { ArkUIAniModule } from "arkui.ani"
-import { KPointer } from '@koalaui/interop';
+import { ArkUIAniModule } from "arkui.ani";
+import { Serializer } from 'arkui/component';
+import { int32 } from "@koalaui/common";
+import { KPointer, runtimeType, RuntimeType } from '@koalaui/interop';
+import { Resource } from "global.resource";
 export namespace dragController {
 
     export enum DragStatus {
@@ -72,7 +76,32 @@ export namespace dragController {
             this.registerCleaner(this.dragPreview)
         }
         public setForegroundColor(color: ResourceColor) {
-            ArkUIAniModule._DragController_setForegroundColor(color, this.dragPreview);
+            const thisSerializer : Serializer = Serializer.hold()
+            let color_type : int32 = RuntimeType.UNDEFINED
+            color_type = runtimeType(color)
+            if (TypeChecker.isColor(color)) {
+                thisSerializer.writeInt8(0 as int32)
+                const color_0  = color as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(color_0))
+            }
+            else if (RuntimeType.NUMBER == color_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const color_1  = color as number
+                thisSerializer.writeNumber(color_1)
+            }
+            else if (RuntimeType.STRING == color_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const color_2  = color as string
+                thisSerializer.writeString(color_2)
+            }
+            else if (RuntimeType.OBJECT == color_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const color_3  = color as Resource
+                thisSerializer.writeResource(color_3)
+            }
+            ArkUIAniModule._DragController_setForegroundColor(
+                thisSerializer.asBuffer(), thisSerializer.length(), this.dragPreview);
+            thisSerializer.release()
         }
         public animate(options: AnimationOptions, handler: () =>void) {
             ArkUIAniModule._DragController_animate(options, handler, this.dragPreview);

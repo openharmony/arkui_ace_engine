@@ -140,6 +140,13 @@ enum ArkUISnapshotRegionMode {
 enum class ArkUIAniRouteType { NONE, PUSH, POP };
 enum class ArkUIAniSlideEffect { NONE, LEFT, RIGHT, TOP, BOTTOM, START, END };
 
+enum class ArkUIPreviewType {
+    FOREGROUND_COLOR = 0,
+    OPACITY = 1,
+    RADIUS = 2,
+    SCALE = 3
+};
+
 typedef struct ArkUIAniNumberString {
     int32_t selector = -1;
     union {
@@ -249,6 +256,26 @@ struct ArkUIDragControllerAsync {
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
     OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+};
+
+struct ArkUIPreviewStyle {
+    std::vector<ArkUIPreviewType> types;
+    uint32_t foregroundColor = 0;
+    int32_t opacity = -1;
+    int32_t radius = -1;
+    float scale = -1;
+};
+
+struct ArkUIPreviewAnimation {
+    int32_t duration { -1 };
+    std::string curveName;
+    std::vector<float> curve;
+};
+
+struct ArkUIDragPreviewAsync {
+    ArkUIPreviewStyle previewStyle;
+    ArkUIPreviewAnimation previewAnimation;
+    bool hasAnimation = false;
 };
 
 struct ArkUILocalizedSnapshotRegion {
@@ -549,21 +576,12 @@ struct ArkUIAniDragControllerModifier {
     bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
-    void (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer);
-    ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
-    void (*aniDragPreviewSetForegroundColor)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object color, ani_long dragPreviewPtr);
-    void (*aniDragPreviewAnimate)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options, ani_object handler,
-        ani_long dragPreviewPtr);
-    void (*aniCleanDragPreview)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr);
-    void (*aniDragActionSetDragEventStrictReportingEnabled)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
-    void (*aniDragActionCancelDataLoading)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
-    void (*aniDragActionNotifyDragStartReques)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus);
+    void* (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg);
+    void (*aniDragPreviewSetForegroundColor)(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx);
+    void (*aniDragPreviewAnimate)(ArkUIDragPreviewAsync& asyncCtx);
+    void (*aniDragActionSetDragEventStrictReportingEnabled)(bool enable);
+    void (*aniDragActionCancelDataLoading)(const char* key);
+    void (*aniDragActionNotifyDragStartReques)(int requestStatus);
 };
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);

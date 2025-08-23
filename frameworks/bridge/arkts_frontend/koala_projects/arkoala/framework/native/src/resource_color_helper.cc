@@ -21,6 +21,13 @@
 #include "interop-logging.h"
 
 namespace OHOS::Ace {
+Ark_ResourceColor GetResourceColor(int64_t arrayBuff, int32_t length)
+{
+    Deserializer thisDeserializer(reinterpret_cast<KSerializerBuffer>(arrayBuff), static_cast<int32_t>(length));
+    Ark_ResourceColor value_buf = DeserializerResourceColor(thisDeserializer);
+    return value_buf;
+}
+
 std::vector<Ark_ResourceColor> GetResourceColorArray(int64_t thisArray, int32_t thisLength)
 {
     Deserializer thisDeserializer(reinterpret_cast<KSerializerBuffer>(thisArray), static_cast<int32_t>(thisLength));

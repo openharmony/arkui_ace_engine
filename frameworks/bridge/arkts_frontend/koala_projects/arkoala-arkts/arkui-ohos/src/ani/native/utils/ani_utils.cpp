@@ -168,6 +168,19 @@ bool AniUtils::IsNumber(ani_env* env, ani_object obj)
     return isNumber;
 }
 
+bool AniUtils::IsFunction(ani_env* env, ani_object obj)
+{
+    ani_class funcClass;
+    if ((ANI_OK != env->FindClass("Lstd/core/Function0;", &funcClass))) {
+        return false;
+    }
+    ani_boolean result;
+    if ((ANI_OK != env->Object_InstanceOf(obj, funcClass, &result))) {
+        return false;
+    }
+    return static_cast<bool>(result);
+}
+
 bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
 {
     CHECK_NULL_RETURN(env, false);
@@ -271,6 +284,9 @@ void AniUtils::AniThrow(ani_env* env, const char *errMsg, int32_t code)
 bool AniUtils::IsClassObject(ani_env *env, ani_ref object_ref, const char *class_descriptor)
 {
     CHECK_NULL_RETURN(env, false);
+    if (IsUndefined(env, static_cast<ani_object>(object_ref))) {
+        return false;
+    }
     ani_class objectClass;
     ani_status status = env->FindClass(class_descriptor, &objectClass);
     if (status != ANI_OK) {
