@@ -293,7 +293,6 @@ HWTEST_F(WebPatternWindowTestNg, UpdateLocaleTest001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateLocale();
-    EXPECT_EQ(webPattern->delegate_, nullptr);
 }
 
 /**

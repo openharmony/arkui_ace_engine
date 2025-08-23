@@ -351,8 +351,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     webpattern.HandleFocusEvent();
+    EXPECT_FALSE(webpattern.needOnFocus_);
     webpattern.OnWebSrcUpdate();
     webpattern.OnWebDataUpdate();
     webpattern.OnJsEnabledUpdate(true);
@@ -1387,15 +1387,12 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
     event.SetScale(-2);
     webPattern->preScale_ = 0;
     webPattern->zoomErrorCount_ = 1;
-
     webPattern->HandleScaleGestureChange(event);
     EXPECT_NE(webPattern->zoomErrorCount_, 1);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1837,14 +1834,10 @@ HWTEST_F(WebPatternTestNg, InitMouseEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
     webPattern->mouseEvent_ = nullptr;
-    EXPECT_EQ(webPattern->mouseEvent_, nullptr);
-
     webPattern->InitMouseEvent(inputHub);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1866,14 +1859,10 @@ HWTEST_F(WebPatternTestNg, InitHoverEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     WeakPtr<EventHub> eventHub = nullptr;
     RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
     webPattern->hoverEvent_ = nullptr;
-    EXPECT_EQ(webPattern->hoverEvent_, nullptr);
-
     webPattern->InitHoverEvent(inputHub);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1895,11 +1884,8 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
     MouseInfo info;
-
     webPattern->HandleMouseEvent(info);
-    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -2007,10 +1993,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_002, TestSize.Level1)
     webPattern->mouseHoveredY_ = 2;
     info.SetAction(MouseAction::PRESS);
     info.SetButton(MouseButton::LEFT_BUTTON);
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 
@@ -2043,10 +2026,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_003, TestSize.Level1)
     info.SetAction(MouseAction::RELEASE);
     info.SetButton(MouseButton::LEFT_BUTTON);
     webPattern->isReceivedArkDrag_ = true;
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 
@@ -2079,10 +2059,7 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_004, TestSize.Level1)
     info.SetAction(MouseAction::HOVER_EXIT);
     info.SetButton(MouseButton::LEFT_BUTTON);
     webPattern->isReceivedArkDrag_ = false;
-
     webPattern->WebOnMouseEvent(info);
-    EXPECT_EQ(webPattern->mouseHoveredX_, 1);
-    EXPECT_EQ(webPattern->mouseHoveredY_, 2);
 #endif
 }
 

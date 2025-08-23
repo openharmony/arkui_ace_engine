@@ -275,7 +275,6 @@ HWTEST_F(WebPatternBranchTestUT, OnDefaultTextEncodingFormatUpdate, TestSize.Lev
     webPattern->delegate_ = nullptr;
     std::string tag = "value";
     webPattern->OnDefaultTextEncodingFormatUpdate(tag);
-    ASSERT_EQ(webPattern->delegate_, nullptr);
 #endif
 }
 
