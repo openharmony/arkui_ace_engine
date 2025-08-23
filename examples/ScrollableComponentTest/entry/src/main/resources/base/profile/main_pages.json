@@ -43,6 +43,8 @@
     "pages/List/childrenMainSize/ListItemGroupScenario",
     "pages/List/RepeatList/RepeatList1",
     "pages/List/AutoSort/AutoSort",
+    "pages/List/CAPI/ListCAPILazy",
+    "pages/List/CAPI/ListCAPIGroup",
     "pages/List/DeleteAndShift/DeleteAndShift",
     "pages/List/DragAndDropSorting/DragAndDropSorting",
     "pages/List/DragAndDropSorting/ListItemGroup",

@@ -28,7 +28,9 @@ namespace NativeModule {
 class ArkUIBaseNode {
 public:
     explicit ArkUIBaseNode(ArkUI_NodeHandle handle)
-        : handle_(handle), nativeModule_(NativeModuleInstance::GetInstance()->GetNativeNodeAPI()) {}
+        : handle_(handle), nativeModule_(NativeModuleInstance::GetInstance()->GetNativeNodeAPI())
+    {
+    }
 
     virtual ~ArkUIBaseNode()
     {
@@ -67,7 +69,25 @@ public:
         }
     }
 
-    ArkUI_NodeHandle GetHandle() const { return handle_; }
+    std::list<std::shared_ptr<ArkUIBaseNode>> &GetChildren()
+    {
+        return children_;
+    }
+
+    ArkUI_NodeHandle GetChildAt(int32_t index)
+    {
+        return nativeModule_->getChildAt(handle_, index);
+    }
+
+    ArkUI_NodeHandle GetFirstChild()
+    {
+        return nativeModule_->getFirstChild(handle_);
+    }
+
+    ArkUI_NodeHandle GetHandle() const
+    {
+        return handle_;
+    }
 
 protected:
     // 针对父容器子类需要重载下面的函数，实现组件挂载和卸载。
