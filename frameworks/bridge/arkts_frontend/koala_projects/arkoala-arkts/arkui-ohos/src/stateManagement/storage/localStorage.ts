@@ -19,6 +19,8 @@ import { WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { ExtendableComponent } from '../../component/extendableComponent';
 
+type RecordData = undefined | null | Object | Record<string, RecordData> | Array<RecordData>;
+
 /**
  * LocalStorage
  * LocalStorage can be understood as a mutable database organized by unique property names (keys)
@@ -51,16 +53,28 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public constructor(initializingProperties?: Record<string, Any>) {
+    public constructor(initializingProperties?: RecordData) {
         if (!initializingProperties) {
             return;
         }
-        const initializingObj = initializingProperties as Record<string, Any>;
-        for (const propName of initializingObj.keys()) {
-            const propValue = initializingObj[propName];
-            if (propValue != null) {
-                this.store_.createAndSet(propName, propValue);
+        try {
+            if (initializingProperties instanceof Record) {
+                const initializingObj = initializingProperties as Any as Record<string, Any>;
+                for (const propName of initializingObj.keys()) {
+                    const propValue = initializingObj[propName];
+                    if (propValue != null) {
+                        this.setOrCreate(propName, propValue);
+                    }
+                }
+            } else {
+                for (const entry of Object.entries(initializingProperties)) {
+                    if (entry && entry[1]) {
+                        this.setOrCreate(entry[0], entry[1]);
+                    }
+                }
             }
+        } catch (error) {
+            console.error('bad constructor parameter:', error);
         }
     }
 
