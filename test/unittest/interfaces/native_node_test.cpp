@@ -8197,12 +8197,14 @@ HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest001, TestSize.Level1)
     auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     EXPECT_EQ(NodeModel::IsValidArkUINode(notThreadSafeNode), true);
     nodeAPI->disposeNode(notThreadSafeNode);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(notThreadSafeNode), false);
 
     auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
     auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
     EXPECT_EQ(NodeModel::IsValidArkUINode(threadSafeNode), true);
     nodeAPI2->disposeNode(threadSafeNode);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(threadSafeNode), false);
 }
 
 /**

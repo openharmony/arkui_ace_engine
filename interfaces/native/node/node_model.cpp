@@ -130,11 +130,10 @@ bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
     if (!nodePtr) {
         return false;
     }
-    if (nodePtr->threadSafeNode) {
-        return IsValidArkUINodeMultiThread(nodePtr);
-    } else {
-        return g_nodeSet.count(nodePtr) > 0;
+    if (g_nodeSet.count(nodePtr) > 0) {
+        return true;
     }
+    return IsValidArkUINodeMultiThread(nodePtr);
 }
 
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
