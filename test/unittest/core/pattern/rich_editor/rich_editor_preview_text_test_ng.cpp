@@ -762,4 +762,21 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetResultObjectText001, TestSize.Level0)
     EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
 }
 
+/**
+ * @tc.name: MergeAdjacentSpansTest
+ * @tc.desc: test SetResultObjectText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, MergeAdjacentSpansTest, TestSize.Level0)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextSpanOptions options = { .value = u"abc", .style = TEXT_STYLE_1 };
+    pattern->AddTextSpan(options);
+    pattern->AddTextSpan(options);
+    ASSERT_EQ(pattern->spans_.size(), 2);
+    pattern->MergeAdjacentSpans(3);
+    EXPECT_EQ(pattern->spans_.size(), 1);
+}
+
 } // namespace OHOS::Ace::NG

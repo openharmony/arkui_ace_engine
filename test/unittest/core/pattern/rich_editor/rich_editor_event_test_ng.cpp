@@ -648,4 +648,52 @@ HWTEST_F(RichEditorEventTestNg, HandleUserTouchEvent001, TestSize.Level1)
     EXPECT_TRUE(isTouchTrigger);
 }
 
+HWTEST_F(RichEditorEventTestNg, HandleLongPressTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    GestureEvent info;
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->touchedFingerCount_ = 0;
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::LONG_PRESSED);
+}
+
+HWTEST_F(RichEditorEventTestNg, HandleLongPressTest002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    GestureEvent info;
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->touchedFingerCount_ = 1;
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    std::list<FingerInfo> fingetList;
+    fingetList.push_back(FingerInfo());
+    info.SetFingerList(fingetList);
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
+}
+
 }
