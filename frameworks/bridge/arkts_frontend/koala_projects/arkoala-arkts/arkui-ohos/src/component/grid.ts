@@ -604,6 +604,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     rowsTemplate(value: string | undefined): this { return this; }
     columnsGap(value: Length | undefined): this { return this; }
     rowsGap(value: Length | undefined): this { return this; }
+    scrollBarWidth(value: number | string | undefined): this { return this; }
+    scrollBarColor(value: Color | number | string | undefined): this { return this; }
+    scrollBar(value: BarState | undefined): this { return this; }
     onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this { return this;}
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this { return this; }
     cachedCount(value: number | undefined):this { return this; }
@@ -620,10 +623,19 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this { return this; }
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this { return this; }
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
     alignItems(value: GridItemAlignment | undefined): this { return this; }
+    onScroll(value: ((first: number,last: number) => void) | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
+    onScrollStart(value: (() => void) | undefined): this { return this; }
+    onScrollStop(value: (() => void) | undefined): this { return this; }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
     onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
     onDidScroll(value: OnScrollCallback | undefined): this { return this; }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this { return this; }
     attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {

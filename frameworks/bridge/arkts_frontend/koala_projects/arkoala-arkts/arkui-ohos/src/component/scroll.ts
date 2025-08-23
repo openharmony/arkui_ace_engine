@@ -605,6 +605,7 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
         return this
     }
     scrollable(value: ScrollDirection | undefined): this { return this; }
+    onScroll(value: ((first: number,last: number) => void) | undefined): this { return this; }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this { return this; }
     onDidScroll(value: ScrollOnScrollCallback | undefined): this { return this; }
     onScrollEdge(value: OnScrollEdgeCallback | undefined): this { return this; }

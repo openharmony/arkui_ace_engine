@@ -650,6 +650,7 @@ export interface ListAttribute extends ScrollableCommonMethod {
     }
     alignListItem(value: ListItemAlign | undefined): this { return this; }
     listDirection(value: Axis | undefined): this { return this; }
+    scrollBar(value: BarState | undefined): this { return this; }
     contentStartOffset(value: number | undefined): this { return this; }
     contentEndOffset(value: number | undefined): this { return this; }
     divider(value: ListDividerOptions | null | undefined): this { return this; }
@@ -661,11 +662,19 @@ export interface ListAttribute extends ScrollableCommonMethod {
     chainAnimationOptions(value: ChainAnimationOptions | undefined): this { return this; }
     sticky(value: StickyStyle | undefined): this { return this; }
     scrollSnapAlign(value: ScrollSnapAlign | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
     childrenMainSize(value: ChildrenMainSize | undefined): this { return this; }
     maintainVisibleContentPosition(value: boolean | undefined): this { return this; }
     stackFromEnd(value: boolean | undefined): this { return this; }
+    onScroll(value: ((first: number,last: number) => void) | undefined): this { return this; }
     onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this { return this; }
     onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
+    onScrollStart(value: (() => void) | undefined): this { return this; }
+    onScrollStop(value: (() => void) | undefined): this { return this; }
     onItemDelete(value: ((index: number) => boolean) | undefined): this { return this; }
     onItemMove(value: ((from: number,to: number) => boolean) | undefined): this { return this; }
     onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this { return this; }
@@ -677,6 +686,7 @@ export interface ListAttribute extends ScrollableCommonMethod {
     onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
     onDidScroll(value: OnScrollCallback | undefined): this { return this; }
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this { return this; }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this { return this; }
     attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {

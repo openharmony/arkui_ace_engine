@@ -315,8 +315,13 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     columnsGap(value: Length | undefined): this { return this; }
     rowsGap(value: Length | undefined): this { return this; }
     layoutDirection(value: FlexDirection | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
     cachedCount(count: number | undefined, show?: boolean): this { return this; }
     cachedCount(value: number | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this { return this; }
     onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
