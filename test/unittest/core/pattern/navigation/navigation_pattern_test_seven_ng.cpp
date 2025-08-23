@@ -453,7 +453,7 @@ HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded005, Test
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto eventHub = dest->GetOrCreateEventHub<EventHub>();
+    auto eventHub = dest->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(false);
     pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
@@ -1141,7 +1141,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnWillDisappear001, Te
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1173,7 +1173,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnWillDisappear002, Te
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1205,7 +1205,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnHide001, TestSize.Le
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     dest->SetIsShowInPrimaryPartition(false);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1237,7 +1237,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnHide002, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1283,7 +1283,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnHide003, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1315,7 +1315,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrePrimaryNodesOnHide004, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1347,7 +1347,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded001,
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1378,7 +1378,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded002,
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1414,7 +1414,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded003,
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1456,7 +1456,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded004,
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1499,7 +1499,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded005,
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1541,7 +1541,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePreTopPrimaryNodeInactiveIfNeeded006,
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
@@ -1580,7 +1580,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle001, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     // unchanged, just for Branch Coverage
     destEventHub->state_ = NavDestinationState::ON_SHOWN;
@@ -1609,7 +1609,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle002, TestSize.Le
         V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     dest->index_ = 1;
     navNode->lastStandardIndex_ = 0;
@@ -1646,7 +1646,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle003, TestSize.Le
     pattern->homeNode_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     dest->index_ = 0;
     navNode->lastStandardIndex_ = 1;
@@ -1690,7 +1690,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle004, TestSize.Le
     pattern->homeNode_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     dest->index_ = 0;
     navNode->lastStandardIndex_ = 1;
@@ -1734,7 +1734,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle005, TestSize.Le
     pattern->homeNode_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     dest->index_ = 0;
     navNode->lastStandardIndex_ = 1;
@@ -1776,7 +1776,7 @@ HWTEST_F(NavigationPatternTestSevenNg, FirePrimaryNodesLifecycle006, TestSize.Le
     pattern->homeNode_ = WeakPtr(dest);
     auto destPattern = dest->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destPattern, nullptr);
-    auto destEventHub = dest->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto destEventHub = dest->GetEventHub<NavDestinationEventHub>();
     ASSERT_NE(destEventHub, nullptr);
     dest->index_ = 0;
     navNode->lastStandardIndex_ = 1;

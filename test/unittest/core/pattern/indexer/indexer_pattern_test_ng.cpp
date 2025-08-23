@@ -2033,7 +2033,7 @@ HWTEST_F(IndexerPatternTestNg, UpdatePopupListGradientViewTest003, TestSize.Leve
     childNode->AddChild(listNode);
     pattern->popupNode_->AddChild(childNode);
 
-    auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto listEventHub = listNode->GetEventHub<ListEventHub>();
     ASSERT_NE(listEventHub, nullptr);
 
     int32_t count = 0;

@@ -880,7 +880,7 @@ HWTEST_F(ScrollBarEventTestNg, OnScrollStartStop001, TestSize.Level1)
         }
         isScrollStopCalled++;
     };
-    auto eventHub = scrollNode_->GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = scrollNode_->GetEventHub<ScrollEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->SetOnScrollStart(std::move(scrollStart));
     eventHub->SetOnScrollStop(std::move(scrollStop));

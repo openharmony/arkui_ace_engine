@@ -1781,7 +1781,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     ASSERT_NE(gridNode, nullptr);
     auto gestureEventHub = gridNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
-    auto eventHub = gridNode->GetOrCreateEventHub<GridEventHub>();
+    auto eventHub = gridNode->GetEventHub<GridEventHub>();
 
     /**
      * @tc.steps: step2. create taskExecutor to fire task callBack.

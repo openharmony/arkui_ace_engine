@@ -238,7 +238,7 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
     /**
      * @tc.steps: step2. create richEditorEventHub and SetEnabled false.
      */
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
 

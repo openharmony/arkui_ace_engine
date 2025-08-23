@@ -709,7 +709,7 @@ void TextSelectController::FireSelectEvent()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
-    auto eventHub = textField->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textField->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     if (needReport && textField->IsModifyDone() && (textField->HasFocus()

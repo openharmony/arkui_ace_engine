@@ -1506,7 +1506,7 @@ void ArcIndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto actualIndex = selectIndex;
     if (fromPress) {

@@ -229,7 +229,7 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     auto onFocusAxisCallback = GetOnFocusAxisCallback();
     CHECK_NULL_RETURN(onFocusAxisCallback, false);
     auto info = FocusAxisEventInfo(event);
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     if (eventHub) {
         auto targetImpl = eventHub->CreateGetEventTargetImpl();
         info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -325,7 +325,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
         info.SetPatternName(node->GetTag().c_str());
-        auto eventHub = node->GetOrCreateEventHub<EventHub>();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));

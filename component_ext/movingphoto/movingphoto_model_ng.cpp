@@ -130,7 +130,7 @@ void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(onComplete));
 }
@@ -139,7 +139,7 @@ void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onStart));
 }
@@ -148,7 +148,7 @@ void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
 }
@@ -157,7 +157,7 @@ void MovingPhotoModelNG::SetOnPause(MovingPhotoEventFunc&& onPause)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPause(std::move(onPause));
 }
@@ -166,7 +166,7 @@ void MovingPhotoModelNG::SetOnFinish(MovingPhotoEventFunc&& onFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onFinish));
 }
@@ -175,7 +175,7 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -184,7 +184,7 @@ void MovingPhotoModelNG::SetOnPrepared(MovingPhotoEventFunc&& onPrepared)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPrepared(std::move(onPrepared));
 }

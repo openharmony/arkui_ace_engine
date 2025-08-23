@@ -1082,7 +1082,7 @@ HWTEST_F(SelectOverlayTestTwoNg, OnCustomSelectMenuAppear, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    auto overlayEventHub = selectOverlayNode->GetOrCreateEventHub<SelectOverlayEventHub>();
+    auto overlayEventHub = selectOverlayNode->GetEventHub<SelectOverlayEventHub>();
     EXPECT_NE(overlayEventHub, nullptr);
     bool isAppear = false;
     bool isMenuShow = false;
@@ -1135,7 +1135,7 @@ HWTEST_F(SelectOverlayTestTwoNg, FireCustomMenuChangeEvent, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    auto overlayEventHub = selectOverlayNode->GetOrCreateEventHub<SelectOverlayEventHub>();
+    auto overlayEventHub = selectOverlayNode->GetEventHub<SelectOverlayEventHub>();
     EXPECT_NE(overlayEventHub, nullptr);
     bool isMenuShow = false;
     bool isMenuHide = false;

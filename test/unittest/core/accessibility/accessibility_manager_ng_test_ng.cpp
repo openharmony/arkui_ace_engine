@@ -256,7 +256,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     accessibilityManagerNg.HoverTestDebug(frameNode, hoverPoint, summary, detail);
     accessibilityManagerNg.IgnoreCurrentHoveringNode(frameNode);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->SetEnabled(false);
     accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);

@@ -128,7 +128,7 @@ void ImageAnimatorTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ImageAnimatorPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<ImageAnimatorEventHub>();
+    eventHub_ = frameNode_->GetEventHub<ImageAnimatorEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty();
 }
 
@@ -384,7 +384,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -478,7 +478,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest005, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -539,7 +539,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest006, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -621,7 +621,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest007, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -692,7 +692,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest008, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     auto repeatCallback = eventHub->GetRepeatEvent();
     EXPECT_NE(repeatCallback, nullptr);
@@ -741,7 +741,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest009, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
@@ -790,7 +790,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
@@ -2771,7 +2771,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageAnimatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**

@@ -868,7 +868,7 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
-    auto ratingEventHub = frameNode->GetOrCreateEventHub<NG::RatingEventHub>();
+    auto ratingEventHub = frameNode->GetEventHub<NG::RatingEventHub>();
     ASSERT_NE(ratingEventHub, nullptr);
     ratingEventHub->SetOnChangeEvent(onChange);
     ratingEventHub->FireChangeEvent("1");
@@ -2251,7 +2251,7 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
     rating.Create();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string unknownRatingScore;
     auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };

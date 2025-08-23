@@ -253,7 +253,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->GetValue().empty());
     EXPECT_TRUE(eventHub->GetGroup().empty());
@@ -264,7 +264,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
     radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub2 = frameNode2->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub2 = frameNode2->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub2, nullptr);
     EXPECT_EQ(eventHub2->GetValue(), NAME);
     EXPECT_EQ(eventHub2->GetGroup(), GROUP_NAME);
@@ -281,7 +281,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
     radioModelNG.Create(std::nullopt, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetValue(), "");
     EXPECT_EQ(eventHub->GetGroup(), GROUP_NAME);
@@ -298,7 +298,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
     radioModelNG.Create(NAME, std::nullopt, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetValue(), NAME);
     EXPECT_EQ(eventHub->GetGroup(), "");
@@ -318,7 +318,7 @@ HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
     radioModelNG.SetOnChange(onChange);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(isChecked, true);
@@ -448,7 +448,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     auto frameNode0 =
         FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode0);
-    auto eventHub0 = frameNode0->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub0 = frameNode0->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub0);
     eventHub0->SetValue(NAME);
     eventHub0->SetGroup(GROUP_NAME);
@@ -465,7 +465,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     auto frameNode1 =
         FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode1);
-    auto eventHub1 = frameNode1->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub1 = frameNode1->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub1);
     eventHub1->SetValue(NAME1);
     eventHub1->SetGroup(GROUP_NAME1);
@@ -1369,7 +1369,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
-    auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(radioEventHub, nullptr);
     radioEventHub->SetValue(VALUE);
 
@@ -1532,7 +1532,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     /**
      * fire mouse event
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEventActuator = inputHub->hoverEventActuator_;
     ASSERT_NE(hoverEventActuator, nullptr);
@@ -1605,7 +1605,7 @@ HWTEST_F(RadioTestNg, RadioEventHubChangeEventTest001, TestSize.Level1)
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onChange = [](const bool check) { EXPECT_TRUE(check); };
     radioModelNG.SetOnChangeEvent(onChange);
@@ -1822,7 +1822,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest034, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetRadioChecked(true);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
@@ -1855,7 +1855,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest035, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetRadioChecked(false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
 
@@ -1920,7 +1920,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetRadioChecked(false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {

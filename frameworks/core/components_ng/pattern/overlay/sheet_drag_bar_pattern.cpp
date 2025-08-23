@@ -47,7 +47,7 @@ void SheetDragBarPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     dragOffsetX_ = MAX_DRAG_X.ConvertToPx();
     dragOffsetY_ = MAX_DRAG_Y.ConvertToPx();
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

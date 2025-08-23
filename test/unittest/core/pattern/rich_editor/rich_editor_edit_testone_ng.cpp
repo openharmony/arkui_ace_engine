@@ -206,7 +206,7 @@ HWTEST_F(RichEditorEditTestOneNg, BeforeAddImage001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorChangeValue changeValue;
     ImageSpanOptions options;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
     auto ret = richEditorPattern->BeforeAddImage(changeValue, options, 100);
     EXPECT_TRUE(ret);

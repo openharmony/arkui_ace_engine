@@ -169,7 +169,7 @@ void CheckBoxPaintMethod::SetHoverEffectType(const RefPtr<CheckBoxPaintProperty>
 {
     auto host = checkBoxPaintProperty->GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetInputEventHub();
     HoverEffectType hoverEffectType = HoverEffectType::AUTO;

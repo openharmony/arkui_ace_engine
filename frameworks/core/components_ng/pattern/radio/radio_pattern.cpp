@@ -54,7 +54,7 @@ void RadioPattern::UpdateGroupStatus(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
 }
@@ -347,7 +347,7 @@ void RadioPattern::MarkIsSelected(bool isSelected)
         return;
     }
     preCheck_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -371,7 +371,7 @@ void RadioPattern::OnAfterModifyDone()
     if (inspectorId.empty()) {
         return;
     }
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetValue(), preCheck_);
 }
@@ -436,7 +436,7 @@ void RadioPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -538,7 +538,7 @@ void RadioPattern::CheckPageNode()
     auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_VOID(pageNode);
     if (pageNode->GetId() != prePageId) {
-        auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+        auto eventHub = host->GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto groupManager = GetGroupManager();
         CHECK_NULL_VOID(groupManager);
@@ -558,7 +558,7 @@ void RadioPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -629,7 +629,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
         startExitAnimation();
     }
     if (preCheck_) {
-        auto radioEventHub = GetOrCreateEventHub<RadioEventHub>();
+        auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
         TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
         radioEventHub->UpdateChangeEvent(false);
@@ -666,7 +666,7 @@ void RadioPattern::startEnterAnimation()
     auto layoutProperty = builderChildNode_->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    auto eventHub = builderChildNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = builderChildNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(true);
     }
@@ -708,7 +708,7 @@ void RadioPattern::startExitAnimation()
             renderContext->UpdateOpacity(INDICATOR_MIN_OPACITY);
         },
         nullptr, nullptr, pipeline);
-    auto eventHub = builderChildNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = builderChildNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -818,7 +818,7 @@ void RadioPattern::UpdateGroupCheckStatus(
         }
     }
 
-    auto radioEventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     if (check) {
         groupManager->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
@@ -979,7 +979,7 @@ void RadioPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
@@ -1003,7 +1003,7 @@ void RadioPattern::SetRadioChecked(bool check)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -1018,7 +1018,7 @@ void RadioPattern::SetRadioChecked(bool check)
 
 void RadioPattern::DumpInfo ()
 {
-    auto eventHub = GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("Value: " + eventHub->GetValue());
     DumpLog::GetInstance().AddDesc("Group: " + eventHub->GetGroup());
@@ -1097,7 +1097,7 @@ RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
     CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto value = eventHub->GetValue();
     auto enabled = eventHub->IsEnabled();

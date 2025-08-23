@@ -206,7 +206,7 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan003, TestSize.Level1
     EXPECT_EQ(contentNode->GetChildren().size(), 2);
     auto builderSpanChildren = contentNode->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto eventHub = builderNode1->GetOrCreateEventHub<EventHub>();
+    auto eventHub = builderNode1->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
 }
 

@@ -312,7 +312,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      * @tc.steps2: Init a frameNode and SetFocusType with Node, Add dirty focus and call FlushFocus
      * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
      */
-    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -330,7 +330,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      */
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     frameNode_ = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -522,7 +522,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg011, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1728,7 +1728,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg043, TestSize.Level1)
     CHECK_NULL_VOID(titleNode);
     auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
     CHECK_NULL_VOID(closeButton);
-    auto buttonEvent = closeButton->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     /**
      * @tc.steps2: call SetCloseButtonStatus with params true.

@@ -322,7 +322,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto preTopNavDestinationEventHub = preTopNavDestinationNode->GetOrCreateEventHub<EventHub>();
+    auto preTopNavDestinationEventHub = preTopNavDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(preTopNavDestinationEventHub, nullptr);
     preTopNavDestinationEventHub->SetEnabledInternal(false);
 
@@ -354,10 +354,10 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation002, TestSize.Level1)
     auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto newTopNavDestinationNode = nullptr;
-    auto preTopNavDestinationEventHub = preTopNavDestinationNode->GetOrCreateEventHub<EventHub>();
+    auto preTopNavDestinationEventHub = preTopNavDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(preTopNavDestinationEventHub, nullptr);
     preTopNavDestinationEventHub->SetEnabledInternal(false);
-    auto navBarEventHub = navBarNode->GetOrCreateEventHub<EventHub>();
+    auto navBarEventHub = navBarNode->GetEventHub<EventHub>();
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 
@@ -391,7 +391,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation003, TestSize.Level1)
     auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-    auto navBarEventHub = navBarNode->GetOrCreateEventHub<EventHub>();
+    auto navBarEventHub = navBarNode->GetEventHub<EventHub>();
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 
@@ -424,7 +424,7 @@ HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation004, TestSize.Level1)
     auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationPattern->navigationMode_ = NavigationMode::STACK;
-    auto navBarEventHub = navBarNode->GetOrCreateEventHub<EventHub>();
+    auto navBarEventHub = navBarNode->GetEventHub<EventHub>();
     ASSERT_NE(navBarEventHub, nullptr);
     navBarEventHub->SetEnabledInternal(false);
 

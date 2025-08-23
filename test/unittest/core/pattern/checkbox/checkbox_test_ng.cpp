@@ -207,7 +207,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest002, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetName(), NAME);
     EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
@@ -239,7 +239,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxEventTest003, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(isSelected, true);
@@ -563,7 +563,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest012, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetName(), NAME);
     EXPECT_EQ(eventHub->GetGroupName(), "");
@@ -588,7 +588,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest013, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetName(), "");
     EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
@@ -1476,7 +1476,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
     checkBoxModelNG.SetChangeEvent(changeEvent);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(isSelected, true);
@@ -1857,7 +1857,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest008, TestSize.Level1)
     /**
      * @tc.steps: Get EventHub and Set hover effect
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     inputEventHub->SetHoverEffect(HoverEffectType::UNKNOWN);
@@ -2620,7 +2620,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0123, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetCheckBoxSelect(SELECTED);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
@@ -2653,7 +2653,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0124, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetCheckBoxSelect(false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
 
@@ -2718,7 +2718,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0126, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->SetCheckBoxSelect(false);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetName(NAME);
     auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
@@ -2868,7 +2868,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0131, TestSize.Level1)
     /**
      * @tc.steps: step3. assert Name and GroupName
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetName(), "testName");
     EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");

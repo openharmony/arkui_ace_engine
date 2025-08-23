@@ -96,7 +96,7 @@ void TextClockModelNG::SetOnDateChange(std::function<void(const std::string)>&& 
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }
@@ -347,7 +347,7 @@ RefPtr<Referenced> TextClockModelNG::GetJSTextClockController(FrameNode* frameNo
 void TextClockModelNG::SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TextClockEventHub>();
+    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDateChange(std::move(onChange));
 }

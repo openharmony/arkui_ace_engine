@@ -35,7 +35,7 @@ void NavDestinationEventHub::FireOnDisappear()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
-        auto eventHub = destination->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = destination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);

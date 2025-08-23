@@ -309,7 +309,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level0)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
-    RefPtr<TextTimerEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextTimerEventHub>();
+    RefPtr<TextTimerEventHub> eventHub = frameNode->GetEventHub<NG::TextTimerEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**

@@ -396,7 +396,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest005, TestSize.Level1)
      */
     auto layoutProperty = pattern->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     EXPECT_EQ(buttonEventHub->GetStateEffect(), STATE_EFFECT);
@@ -430,7 +430,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest006, TestSize.Level1)
      */
     auto layoutProperty = pattern->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     EXPECT_EQ(buttonEventHub->GetStateEffect(), STATE_EFFECT);

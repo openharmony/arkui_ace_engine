@@ -166,7 +166,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
         return;
     }
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -233,7 +233,7 @@ void RefreshPattern::InitProgressNode(const RefPtr<FrameNode>& host)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);
-    auto gestureHub = progressChild_->GetOrCreateEventHub<EventHub>();
+    auto gestureHub = progressChild_->GetEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
@@ -564,7 +564,7 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
-        auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
+        auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
@@ -573,7 +573,7 @@ void RefreshPattern::FireOnOffsetChange(float value)
 
 void RefreshPattern::FireOnStepOffsetChange(float value)
 {
-    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStepOffsetChange(value);
 }
@@ -673,7 +673,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
     isRefreshing_ = (refreshStatus_ == RefreshStatus::REFRESH);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto refreshEventHub = host->GetOrCreateEventHub<RefreshEventHub>();
+    auto refreshEventHub = host->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     if (refreshStatus_ == RefreshStatus::REFRESH) {
         // the two-way binding of 'refreshing' variable need to be changed before 'onRefreshing' function is triggered

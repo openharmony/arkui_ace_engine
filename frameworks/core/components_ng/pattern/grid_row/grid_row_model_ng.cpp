@@ -71,7 +71,7 @@ void GridRowModelNG::SetOnBreakPointChange(std::function<void(const std::string)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBreakpointChange(std::move(onChange));
 }
@@ -118,7 +118,7 @@ void GridRowModelNG::SetDirection(FrameNode* frameNode, V2::GridRowDirection dir
 void GridRowModelNG::SetOnBreakPointChange(FrameNode* frameNode,
     std::function<void(const std::string)>&& onBreakPointChange)
 {
-    auto eventHub = frameNode->GetOrCreateEventHub<GridRowEventHub>();
+    auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBreakpointChange(std::move(onBreakPointChange));
 }
