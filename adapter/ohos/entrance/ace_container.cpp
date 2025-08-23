@@ -436,12 +436,10 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
 {
-    auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
-    taskExecutorImpl->InitPlatformThread(true);
-    taskExecutor_ = taskExecutorImpl;
-    GetSettings().useUIAsJSThread = true;
+    SetUseNewPipeline();
+    InitializeTask();
     GetSettings().usePlatformAsUIThread = true;
-    GetSettings().usingSharedRuntime = true;
+    GetSettings().usingSharedRuntime = false;
 }
 
 AceContainer::~AceContainer()
@@ -610,16 +608,17 @@ void AceContainer::InitializeFrontend()
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
 #endif
-            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
-            RefPtr<Framework::JsEngine> jsEngine;
-            if (GetSettings().usingSharedRuntime) {
-                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-            } else {
-                jsEngine = loader.CreateJsEngine(instanceId_);
-            }
-            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-            auto pageUrlCheckFunc =
-                [id = instanceId_](const std::string& url, const std::function<void()>& callback,
+            if (!IsDialogContainer()) {
+                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+                RefPtr<Framework::JsEngine> jsEngine;
+                if (GetSettings().usingSharedRuntime) {
+                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                } else {
+                    jsEngine = loader.CreateJsEngine(instanceId_);
+                }
+                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+                auto pageUrlCheckFunc = [id = instanceId_](
+                    const std::string& url, const std::function<void()>& callback,
                     const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) {
                     ContainerScope scope(id);
                     auto container = Container::Current();
@@ -628,12 +627,13 @@ void AceContainer::InitializeFrontend()
                     CHECK_NULL_VOID(pageUrlChecker);
                     pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
                 };
-            jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
-            EngineHelper::AddEngine(instanceId_, jsEngine);
-            declarativeFrontend->SetJsEngine(jsEngine);
-            declarativeFrontend->SetPageProfile(pageProfile_);
-            declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-            declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+                jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
+                EngineHelper::AddEngine(instanceId_, jsEngine);
+                declarativeFrontend->SetJsEngine(jsEngine);
+                declarativeFrontend->SetPageProfile(pageProfile_);
+                declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+                declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+            }
         } else {
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
