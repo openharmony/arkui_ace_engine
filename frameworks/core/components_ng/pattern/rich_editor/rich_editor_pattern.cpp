@@ -2404,7 +2404,14 @@ void RichEditorPattern::UpdateSymbolStyle(
 bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
 {
     auto spanItem = spanNode->GetSpanItem();
+    return HasSameTypingStyle(spanItem);
+}
+ 
+bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanItem>& spanItem)
+{
     CHECK_NULL_RETURN(spanItem, false);
+    auto spanType = spanItem->spanItemType;
+    CHECK_NULL_RETURN(spanType == SpanItemType::NORMAL || spanType == SpanItemType::SYMBOL, false);
     auto spanTextStyle = spanItem->GetTextStyle();
     if (spanTextStyle.has_value() && typingTextStyle_.has_value()) {
         return spanTextStyle.value() == typingTextStyle_.value();
@@ -11248,6 +11255,49 @@ void RichEditorPattern::GetChangeSpanStyle(RichEditorChangeValue& changeValue, s
     }
 }
 
+std::tuple<int32_t, int32_t, RefPtr<SpanItem>> RichEditorPattern::GetTargetSpanInfo(
+    const RichEditorChangeValue& changeValue, int32_t textIndex, bool isCreate,
+    const std::unordered_set<SpanItem*>& allDelSpanSet) {
+    TextInsertValueInfo info;
+    CalcInsertValueObj(info, textIndex, isCreate);
+    int32_t spanIndex = info.GetSpanIndex();
+    int32_t offsetInSpan = info.GetOffsetInSpan();
+    auto spanIt = std::next(spans_.begin(), spanIndex);
+    if (spanIt == spans_.end()) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "spanIndex error, return");
+        return std::make_tuple(spanIndex, offsetInSpan, nullptr);
+    }
+    auto targetSpanItem = spanIt == spans_.end() ? nullptr : *spanIt;
+ 
+    // if need to insert into index right span, need to skip all deleted span
+    bool moveRight = false;
+    if (textIndex == 0) {
+        // has get index right span info
+        moveRight = true;
+    } else if (targetSpanItem && targetSpanItem->spanItemType != SpanItemType::NORMAL) {
+        // index left cannot insert, get index right span info
+        ++spanIndex;
+        offsetInSpan = 0;
+        moveRight = true;
+        spanIt = std::next(spans_.begin(), spanIndex); // update spanItem
+        targetSpanItem = spanIt == spans_.end() ? nullptr : *spanIt;
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "target cannot insert, move right, spanIndex=%{public}d", spanIndex);
+    }
+    bool replaceInsert = textSelector_.IsValid() && changeValue.GetChangeReason() == TextChangeReason::INPUT;
+    if (replaceInsert && moveRight && targetSpanItem) { // is replace & left side cannot insert & right side can insert
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "replaceInsert, moveRight");
+        while (targetSpanItem && allDelSpanSet.count(RawPtr(targetSpanItem)) != 0) { // current span is all deleted
+            ++spanIndex;
+            offsetInSpan = 0;
+            spanIt = std::next(spans_.begin(), spanIndex);
+            targetSpanItem = spanIt == spans_.end() ? nullptr : *spanIt;
+        }
+        spanIndex -= static_cast<int32_t>(allDelSpanSet.size());
+    }
+    IF_TRUE(targetSpanItem && targetSpanItem->spanItemType != SpanItemType::NORMAL, targetSpanItem = nullptr);
+    return std::make_tuple(spanIndex, offsetInSpan, targetSpanItem);
+}
+
 void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition,
     const std::u16string& insertValue, int32_t textIndex, std::optional<TextStyle> textStyle,
     std::optional<struct UpdateParagraphStyle> paraStyle, std::optional<std::u16string> urlAddress,
@@ -11258,34 +11308,28 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
 
     std::u16string originalStr;
     int32_t originalPos = 0;
-    RefPtr<SpanItem> spanItem = fixDel ? GetDelPartiallySpanItem(changeValue, originalStr, originalPos) : nullptr;
-    TextInsertValueInfo info;
-    CalcInsertValueObj(info, textIndex, isCreate);
-    int32_t spanIndex = info.GetSpanIndex();
-    int32_t offsetInSpan = info.GetOffsetInSpan();
-    auto host = GetContentHost();
-    CHECK_NULL_VOID(host);
-    auto uiNode = host->GetChildAtIndex(spanIndex);
-    RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(uiNode);
-    if (!isCreate && textIndex && uiNode && uiNode->GetTag() != V2::SPAN_ETS_TAG) {
-        spanNode = nullptr;
-        ++spanIndex; // select/create a new span When the span is not a textSpan(Image/Symbol/other)
-        offsetInSpan = 0;
-        spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(spanIndex));
-    }
+    auto [partDelspanItem, allDelSpan] = fixDel ? GetDelPartiallySpanItem(changeValue, originalStr, originalPos)
+        : std::make_pair(nullptr, std::unordered_set<SpanItem*>());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "partDelspan=%{public}d, allDelSize=%{public}zu",
+        !!partDelspanItem, allDelSpan.size());
 
+    auto [spanIndex, offsetInSpan, targetSpanItem] = GetTargetSpanInfo(changeValue, textIndex, isCreate, allDelSpan);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spanIndex=%{public}d, offsetInSpan=%{public}d, span=%{public}d",
+        spanIndex, offsetInSpan, !!targetSpanItem);
     changeValue.SetRangeAfter({ innerPosition, innerPosition + insertValue.length()});
     std::u16string textTemp = insertValue;
-    if (!textStyle && !isCreate && spanNode) {
-        if (typingStyle_ && !HasSameTypingStyle(spanNode)) {
+    if (!textStyle && !isCreate && targetSpanItem) {
+        if (typingStyle_ && !HasSameTypingStyle(targetSpanItem)) {
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "useTypingStyle");
             textStyle = typingTextStyle_; // create a new span When have a different typingStyle
             bool insertInSpan = textIndex && offsetInSpan;
             spanIndex = insertInSpan ? spanIndex + 1 : spanIndex;
             offsetInSpan = 0;
         } else {
-            textTemp = spanNode->GetSpanItem()->content;
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert in target span");
+            textTemp = targetSpanItem->content;
             textTemp.insert(offsetInSpan, insertValue);
-            urlAddress = spanNode->GetSpanItem()->urlAddress;
+            urlAddress = targetSpanItem->urlAddress;
         }
     }
 
@@ -11293,20 +11337,23 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     bool containNextLine = it != std::u16string::npos && it != textTemp.size() - 1;
 
     if (textStyle || containNextLine) { // SpanNode Fission
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Span Fission");
         GetReplacedSpanFission(changeValue, innerPosition, textTemp, spanIndex, offsetInSpan, textStyle, paraStyle,
             urlAddress);
     } else {
+        RefPtr<SpanNode> spanNode = nullptr;
+        if (targetSpanItem) {
+            spanNode = AceType::MakeRefPtr<SpanNode>(ElementRegister::GetInstance()->MakeUniqueId());
+            spanNode->SetSpanItem(targetSpanItem);
+        }
         std::optional<TextStyle> spanTextStyle = textStyle ? textStyle : typingTextStyle_;
         GetChangeSpanStyle(changeValue, spanTextStyle, paraStyle, urlAddress, spanNode, spanIndex, useTypingParaStyle);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + insertValue.length(),
             textTemp, spanTextStyle, paraStyle, urlAddress);
         innerPosition += static_cast<int32_t>(insertValue.length());
     }
-
-    if (spanItem) {
-        spanItem->content = originalStr;
-        spanItem->position = originalPos;
-    }
+    IF_TRUE(partDelspanItem, partDelspanItem->content = originalStr);
+    IF_TRUE(partDelspanItem, partDelspanItem->position = originalPos);
 }
 
 void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition,
@@ -11490,68 +11537,69 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
         changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
         changeValue.SetRangeAfter({ innerPosition, innerPosition });
     }
-    const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
+    std::list<RichEditorAbstractSpanResult> resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
-        if (it.GetType() == SpanResultType::TEXT) {
-            changeValue.SetRichEditorOriginalSpans(it);
-        } else if (it.GetType() == SpanResultType::SYMBOL && textSelector_.SelectNothing() &&
+        if (it.GetType() == SpanResultType::IMAGE) {
+            it.SetValue(u" ");
+        } else if (it.GetType() == SpanResultType::SYMBOL) {
+            it.SetValue(u"  ");
+        }
+        changeValue.SetRichEditorOriginalSpans(it);
+        if (it.GetType() == SpanResultType::SYMBOL && textSelector_.SelectNothing() &&
             previewTextRecord_.previewContent.empty()) {
             int32_t symbolStart = it.GetSpanRangeStart();
-            changeValue.SetRichEditorOriginalSpans(it);
             changeValue.SetRangeBefore({ symbolStart, symbolStart + SYMBOL_SPAN_LENGTH });
             changeValue.SetRangeAfter({ symbolStart, symbolStart });
         }
     }
 }
 
-RefPtr<SpanItem> RichEditorPattern::GetDelPartiallySpanItem(
-    RichEditorChangeValue& changeValue, std::u16string& originalStr, int32_t& originalPos)
+std::pair<RefPtr<SpanItem>, std::unordered_set<SpanItem*>> RichEditorPattern::GetDelPartiallySpanItem(
+    const RichEditorChangeValue& changeValue, std::u16string& originalStr, int32_t& originalPos)
 {
     RefPtr<SpanItem> retItem = nullptr;
+    std::unordered_set<SpanItem*> allDelSpanSet;
+
     if (changeValue.GetRichEditorOriginalSpans().size() == 0) {
-        return retItem;
+        return { retItem, std::move(allDelSpanSet) };
     }
     std::u16string textTemp;
-    auto originalSpans = changeValue.GetRichEditorOriginalSpans();
-    const RichEditorAbstractSpanResult& firstResult = originalSpans.front();
-    auto it = spans_.begin();
-    std::advance(it, firstResult.GetSpanIndex());
-    retItem = *it;
-    originalStr = retItem->content;
-    originalPos = retItem->position;
-    retItem->content.erase(firstResult.OffsetInSpan(), firstResult.GetEraseLength());
-    retItem->position -= firstResult.GetEraseLength();
-    if (firstResult.GetEraseLength() != static_cast<int32_t>(firstResult.GetValue().length())) {
-        return retItem;
-    }
+    const auto& originalSpans = changeValue.GetRichEditorOriginalSpans();
+    const auto& firstResult = originalSpans.front();
 
-    if (firstResult.GetSpanIndex() == 0) {
-        int32_t spanIndex = 0;
-        for (auto& orgIt : originalSpans) {
-            spanIndex = orgIt.GetSpanIndex();
-            if (orgIt.GetEraseLength() != static_cast<int32_t>(orgIt.GetValue().length())) {
-                // find the deleted(Partially) spanItem
-                auto findIt = spans_.begin();
-                std::advance(findIt, spanIndex);
-                textTemp = (*findIt)->content;
-                textTemp.erase(orgIt.OffsetInSpan(), orgIt.GetEraseLength());
-                retItem->content = textTemp;
-                retItem->position = textTemp.length();
-                return retItem;
-            }
-        }
-        if (spans_.size() == originalSpans.size() || static_cast<int32_t>(spans_.size()) == (spanIndex + 1)) {
-            return retItem; // all spanNode be deleted
-        }
-        auto nextIt = spans_.begin();
-        std::advance(nextIt, spanIndex + 1);
-        if ((*nextIt)->unicode != 0 || DynamicCast<PlaceholderSpanItem>(*nextIt)) {
-            return retItem; // is not a textSpan(Image/Symbol/other)
-        }
-        retItem->content = (*nextIt)->content;
-        retItem->position = static_cast<int32_t>(retItem->content.length());
+    if (firstResult.GetEraseLength() != static_cast<int32_t>(firstResult.GetValue().length())) {
+        auto it = std::next(spans_.begin(), firstResult.GetSpanIndex());
+        retItem = *it;
+        originalStr = retItem->content;
+        originalPos = retItem->position;
+        retItem->content.erase(firstResult.OffsetInSpan(), firstResult.GetEraseLength());
+        retItem->position -= firstResult.GetEraseLength();
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "firstResult is partialDel");
+        return { retItem, std::move(allDelSpanSet) };
     }
-    return retItem;
+    int32_t spanIndex = 0;
+    for (const auto& orgIt : originalSpans) {
+        spanIndex = orgIt.GetSpanIndex();
+        auto findIt = spans_.begin();
+        std::advance(findIt, spanIndex);
+        if (findIt == spans_.end()) {
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spanIndex error");
+            return { retItem, std::move(allDelSpanSet) };
+        }
+        // find all del span
+        if (orgIt.GetEraseLength() == static_cast<int32_t>(orgIt.GetValue().length())) {
+            allDelSpanSet.insert(RawPtr(*findIt));
+            continue;
+        }
+        retItem = *findIt;
+        originalStr = retItem->content;
+        originalPos = retItem->position;
+        retItem->content.erase(orgIt.OffsetInSpan(), orgIt.GetEraseLength());
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "find partialDel span, index=%{public}d", spanIndex);
+        return { retItem, std::move(allDelSpanSet) };
+    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriSpan is all del");
+    return { nullptr, allDelSpanSet };
 }
 
 bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, const TextSpanOptions& options)
@@ -11899,7 +11947,8 @@ bool RichEditorPattern::BeforeChangeText(
         BeforeDrag(changeValue, innerPosition, record);
     }
     bool isDelete = RecordType::DEL_FORWARD == type || RecordType::DEL_BACKWARD == type;
-    if (changeValue.GetRichEditorOriginalSpans().empty() && !isDelete) {
+    bool replaceInsert = RecordType::INSERT == type && textSelector_.IsValid();
+    if (!replaceInsert && changeValue.GetRichEditorOriginalSpans().empty() && !isDelete) {
         // only add, do not delete
         changeValue.SetRangeBefore({ caretPosition_, caretPosition_ });
     }

@@ -172,9 +172,9 @@ std::pair<InputInfo, ReplacedSpanInfo> REPLACE_INSERT_CASES[] = {
     {{ .spans = "[IMAGE][IMAGE][IMAGE]", .selector = { 0, 1 }}, /* 71 */
         {.rangeBefore = { 0, 1 }, .spanIndex = 0, .rangeInSpan = { 0, 1 }, .spanRange = { 0, 1 }, .value = u"A"}},
     {{ .spans = "[IMAGE][IMAGE][IMAGE]", .selector = { 1, 2 }}, /* 72 */
-        {.rangeBefore = { 1, 2 }, .spanIndex = 0, .rangeInSpan = { 0, 1 }, .spanRange = { 1, 2 }, .value = u"A"}},
+        {.rangeBefore = { 1, 2 }, .spanIndex = 1, .rangeInSpan = { 0, 1 }, .spanRange = { 1, 2 }, .value = u"A"}},
     {{ .spans = "[IMAGE][IMAGE][IMAGE]", .selector = { 2, 3 }}, /* 73 */
-        {.rangeBefore = { 2, 3 }, .spanIndex = 0, .rangeInSpan = { 0, 1 }, .spanRange = { 2, 3 }, .value = u"A"}},
+        {.rangeBefore = { 2, 3 }, .spanIndex = 2, .rangeInSpan = { 0, 1 }, .spanRange = { 2, 3 }, .value = u"A"}},
 
     {{ .spans = "[IMAGE][SYMBOL][IMAGE]", .selector = { 0, 1 }}, /* 74 */
         {.rangeBefore = { 0, 1 }, .spanIndex = 0, .rangeInSpan = { 0, 1 }, .spanRange = { 0, 1 }, .value = u"A"}},
