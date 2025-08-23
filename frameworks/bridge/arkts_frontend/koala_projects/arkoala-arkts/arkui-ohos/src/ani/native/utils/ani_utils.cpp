@@ -200,7 +200,7 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = WrapBusinessError(env, msg, code);
@@ -208,8 +208,7 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
         return nullptr;
     }
     ani_object obj = nullptr;
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, ctor, &obj, dCode, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, ctor, &obj, code, error)) != ANI_OK) {
         return nullptr;
     }
     return reinterpret_cast<ani_ref>(obj);

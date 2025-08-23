@@ -463,7 +463,10 @@ bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, an
                                     : extraParamsStr;
         asyncCtx.extraParams = extraInfoLimited.c_str();
     }
-    if (!AniUtils::IsUndefined(env, static_cast<ani_object>(pixelMapAni))) {
+    if (AniUtils::IsUndefined(env, static_cast<ani_object>(pixelMapAni))) {
+        HILOGI("AceDrag, failed to parse pixelMap from the first argument");
+        return false;
+    } else {
         auto nativePixelMap =
             OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, reinterpret_cast<ani_object>(pixelMapAni));
         if (nativePixelMap) {
@@ -538,14 +541,14 @@ bool ParseDragItemListInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx
     ani_object builderObj)
 {
     CHECK_NULL_RETURN(env, false);
-    ani_double builderArrayLength;
-    ani_double dragItemInfoArrayLength;
+    ani_int builderArrayLength;
+    ani_int dragItemInfoArrayLength;
     ani_status status = ANI_OK;
-    if ((status = env->Object_GetPropertyByName_Double(builderObj, "length", &builderArrayLength)) != ANI_OK) {
+    if ((status = env->Object_GetPropertyByName_Int(builderObj, "length", &builderArrayLength)) != ANI_OK) {
         HILOGE("AceDrag, get builder array length fail. status = %{public}d", status);
         return false;
     }
-    if ((status = env->Object_GetPropertyByName_Double(dragItemInfo, "length", &dragItemInfoArrayLength)) != ANI_OK) {
+    if ((status = env->Object_GetPropertyByName_Int(dragItemInfo, "length", &dragItemInfoArrayLength)) != ANI_OK) {
         HILOGE("AceDrag, get dragItemInfo array length fail. status = %{public}d", status);
         return false;
     }
@@ -898,6 +901,7 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
         return result;
     }
     if (!modifier->getDragControllerAniModifier()->aniHandleExecuteDrag(dragAsyncContext)) {
+        AniUtils::AniThrow(env, "handle drag action failed.", ERROR_CODE_INTERNAL_ERROR);
         HILOGE("AceDrag, ani HandleExecuteDrag fail.");
         env->DestroyEscapeLocalScope(result, &escapedObj);
         return result;
@@ -945,8 +949,10 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return dragActionObj;
     }
     if (!modifier->getDragControllerAniModifier()->aniHandleDragAction(dragAsyncContext)) {
+        AniUtils::AniThrow(env, "handle drag action failed.", ERROR_CODE_INTERNAL_ERROR);
         HILOGE("AceDrag, ani HandleCreateDragAction fail.");
         env->DestroyEscapeLocalScope(dragActionObj, &escapedObj);
+        return nullptr;
     }
     DragAction* dragAction = new DragAction(dragAsyncContext);
     CHECK_NULL_RETURN(dragAction, nullptr);
