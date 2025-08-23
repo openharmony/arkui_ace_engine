@@ -182,7 +182,8 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
 
     while (currentIndex_ < lazyEndIndex) {
         if (currentIndex_ < startIndex_) {
-            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, startIndex_ - 1)) {
+            int32_t jumpTarget = (startIndex_ - 1 < lazyEndIndex) ? startIndex_ - 1 : lazyEndIndex - 1;
+            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, jumpTarget)) {
                 CalculatePosMapNode();
             }
         } else if (currentIndex_ <= endIndex_) {
@@ -204,7 +205,8 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
                 hasGroup = true;
             }
         } else if (currentIndex_ <= GetPosMapEndIndex()) {
-            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, GetPosMapEndIndex())) {
+            int32_t jumpTarget = (GetPosMapEndIndex() < lazyEndIndex) ? GetPosMapEndIndex() : lazyEndIndex - 1;
+            if (hasGroup_ || !CalculateRangeWithPosMap(currentIndex_, jumpTarget)) {
                 CalculatePosMapNode();
             }
         } else if (currentIndex_ < lazyEndIndex) {
