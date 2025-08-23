@@ -2528,7 +2528,8 @@ void MovingPhotoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& 
         auto padding  = layoutProperty->CreatePaddingAndBorder();
         OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
                                   contentRect_.Top() - padding.top.value_or(0) };
-        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(), contentOffset };
+        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(),
+            { contentOffset.GetX(), contentOffset.GetY() } };
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }

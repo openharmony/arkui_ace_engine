@@ -2098,4 +2098,20 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
 }
+
+/**
+ * @tc.name: Matrix 001
+ * @tc.desc: Test Matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, Matrix001, TestSize.Level1)
+{
+    Matrix4 value1 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    Matrix4 value2 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    EXPECT_TRUE(value1 == value2.matrix4x4_);
+    Matrix4 value3 = Matrix4(1.0f, 0, 1.0f, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    double matrix[4][4] = {};
+    value3.CopyMatrix(matrix);
+    EXPECT_TRUE(value3 == matrix);
+}
 } // namespace OHOS::Ace::NG
