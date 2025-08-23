@@ -913,7 +913,7 @@ ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
         NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void**)&ability));
     }
 
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafelyWithCheck();
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new (std::nothrow) ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,
