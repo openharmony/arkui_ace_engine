@@ -62,7 +62,7 @@ bool ParseFormId(RequestFormInfo formInfo, JSRef<JSVal> id)
         int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
         if (inputFormId == -1) {
             TAG_LOGE(
-                AceLogTag::ACE_FORM, "StringToLongInt failed, invalid form id : %{public}s", id->ToString().c_str());
+                AceLogTag::ACE_FORM, "StringToLongInt failed, invalid formId : %{public}s", id->ToString().c_str());
             return false;
         }
         formInfo.id = inputFormId;
