@@ -21,7 +21,6 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
-#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace {
 

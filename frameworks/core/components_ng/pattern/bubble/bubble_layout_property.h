@@ -46,8 +46,8 @@ public:
         value->propArrowWidth_ = CloneArrowWidth();
         value->propRadius_ = CloneRadius();
         value->propIsCaretMode_ = CloneIsCaretMode();
-        value->propEnableHoverMode_ = CloneEnableHoverMode();
         value->propFollowTransformOfTarget_ = CloneFollowTransformOfTarget();
+        value->propEnableHoverMode_ = CloneEnableHoverMode();
         value->propShowAtAnchor_ = CloneShowAtAnchor();
         return value;
     }
@@ -68,8 +68,8 @@ public:
         ResetArrowWidth();
         ResetRadius();
         ResetIsCaretMode();
-        ResetEnableHoverMode();
         ResetFollowTransformOfTarget();
+        ResetEnableHoverMode();
         ResetShowAtAnchor();
     }
 
@@ -86,8 +86,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Radius, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCaretMode, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FollowTransformOfTarget, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowAtAnchor, TipsAnchorType, PROPERTY_UPDATE_MEASURE);
 
 private:
