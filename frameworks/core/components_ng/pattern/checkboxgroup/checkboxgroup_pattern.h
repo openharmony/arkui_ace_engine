@@ -241,6 +241,7 @@ private:
     SizeF hotZoneSize_;
     bool initSelected_ = false;
     std::optional<std::string> currentNavId_ = std::nullopt;
+
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };
 } // namespace OHOS::Ace::NG

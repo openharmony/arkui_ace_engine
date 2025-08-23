@@ -210,6 +210,7 @@ public:
     {
         return indicatorColorByJSRadioTheme_;
     }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -295,6 +296,7 @@ private:
     bool enabled_ = true;
     bool isUserSetMargin_ = false;
     std::optional<RadioMakeCallback> makeFunc_;
+
     RefPtr<RadioModifier> radioModifier_;
     bool focusEventInitialized_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
