@@ -86,6 +86,7 @@
     "pages/refresh/ListLanesRefreshLoad",
     "pages/grid/GridBindSheetDrag",
     "pages/grid/GridCalculator",
+    "pages/grid/GridCAPI",
     "pages/grid/GridDragAnimation",
     "pages/grid/GridMainPage",
     "pages/grid/GridObjectSort",
