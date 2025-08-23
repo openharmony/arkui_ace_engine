@@ -53,8 +53,6 @@ RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
-constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
-constexpr char APP_LOCKED_RESOURCE_NAME[] = "form_disable_app_locked";
 }
 class FormPatternTest : public testing::Test {
 public:
