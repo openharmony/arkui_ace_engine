@@ -2560,6 +2560,17 @@ Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
 }
 
+Local<JSValueRef> ArkTSUtils::JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetPinchAxisScale());
+}
+
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (!jsValue->IsObject(vm)) {

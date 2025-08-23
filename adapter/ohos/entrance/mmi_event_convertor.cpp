@@ -900,6 +900,31 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     GetPointerEventAction(orgAction, event);
 }
 
+void LogPointAxisInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    int32_t toolType = MMI::PointerEvent::TOOL_TYPE_MOUSE;
+    if (!GetPointerEventToolType(pointerEvent, toolType)) {
+        return;
+    }
+    if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+        (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+        (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && pointerEvent->GetAxes() != 0)) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "all axis info: horizontalAxis: %{public}f, verticalAxis: %{public}f, pinchAxisScale:%{public}f, "
+            "rotateAxisAngle:%{public}f, scrollStep:%{public}d",
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH),
+            pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE),
+            pointerEvent->GetScrollRows());
+    }
+}
+
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
 {
     if (pointerEvent->GetSourceType() != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
@@ -930,6 +955,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
                 "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
                 pointerEvent->GetId(), actionId, pointerEvent->GetPointerAction(),
                 item.GetPressure(), item.GetTiltX(), item.GetTiltY());
+        }
+        if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+            LogPointAxisInfo(pointerEvent);
         }
         auto ids = pointerEvent->GetPointerIds();
         for (auto&& id : ids) {
