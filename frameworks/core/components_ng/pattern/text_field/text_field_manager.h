@@ -295,6 +295,16 @@ public:
     FillContentMap GetFillContentMap(int32_t id);
     void RemoveFillContentMap(int32_t id);
 
+    int32_t GetAttachInputId() const
+    {
+        return attachInputId_;
+    }
+
+    void SetAttachInputId(int32_t attachInputId)
+    {
+        attachInputId_ = attachInputId;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
@@ -333,6 +343,7 @@ private:
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
     std::unordered_map<int32_t, FillContentMap> textFieldFillContentMaps_;
+    int32_t attachInputId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG
