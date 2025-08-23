@@ -1573,6 +1573,8 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Leve
     webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
+    snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.heic";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
     ASSERT_NE(webPattern, nullptr);
