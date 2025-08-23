@@ -105,6 +105,7 @@ public:
     static float GetScrollBarWidth(FrameNode* frameNode);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static Dimension GetItemMinWidth(FrameNode* frameNode);
     static Dimension GetItemMaxWidth(FrameNode* frameNode);
     static Dimension GetItemMinHeight(FrameNode* frameNode);
