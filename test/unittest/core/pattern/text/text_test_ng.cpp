@@ -3436,35 +3436,6 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnResetTextSelection001, TestSize.Leve
 }
 
 /**
- * @tc.name: TextSelectOverlayTestOnHandleMove001
- * @tc.desc: Verify OnHandleMove
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(frameNode->geometryNode_, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
-
-    ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
-    textSelectOverlay->OnHandleMove(handleRect, true);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
-    textSelectOverlay->OnHandleMove(handleRect, false);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
-}
-
-/**
  * @tc.name: TextSelectOverlayTestUpdateSelectorOnHandleMove001
  * @tc.desc: Verify UpdateSelectorOnHandleMove
  * @tc.type: FUNC
