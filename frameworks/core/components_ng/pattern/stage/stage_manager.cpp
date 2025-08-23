@@ -461,7 +461,8 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if (children.empty()) {
         return false;
     }
-    const auto& lastPage = children.back();
+    // srcPageNode_ is last page in pageRouterStack.
+    const auto& lastPage = srcPageNode_.Upgrade();
     if (lastPage == node) {
         return true;
     }

@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "test/mock/adapter/mock_uisession_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -37,8 +38,6 @@
 #include "core/components_ng/pattern/stage/stage_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/base/element_register.h"
-
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #undef private
 #undef protected
@@ -1634,8 +1633,8 @@ HWTEST_F(StageTestNg, GetTopPagesWithTransition001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPages = stageManager->GetTopPagesWithTransition();
@@ -1685,13 +1684,49 @@ HWTEST_F(StageTestNg, GetTopPagePaths001, TestSize.Level1)
     ASSERT_NE(pageInfo, nullptr);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(pageInfo);
     ASSERT_NE(pagePattern, nullptr);
-    auto pageNode = FrameNode::CreateFrameNode(
-        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     ASSERT_NE(pageNode, nullptr);
     stageNode->AddChild(pageNode);
     topPagePaths = stageManager->GetTopPagePaths();
     ASSERT_EQ(topPagePaths.size(), 1);
     ASSERT_EQ(topPagePaths[0], TEST_PATH);
     ASSERT_EQ(pageUrl, "myUrl");
+}
+
+/**
+ * @tc.name: MovePageToFront
+ * @tc.desc: test animationPage equal srcPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, MovePageToFront, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+    stageManager.PushPage(firstNode);
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    stageManager.srcPageNode_ = thirdNode;
+
+    stageManager.MovePageToFront(firstNode);
+    EXPECT_EQ(stageManager.animationSrcPage_, stageManager.srcPageNode_);
 }
 } // namespace OHOS::Ace::NG
