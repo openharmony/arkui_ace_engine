@@ -134,6 +134,20 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     applyDisabledAttribute(instance: TextAttribute): void { }
     applySelectedAttribute(instance: TextAttribute): void { }
 
+    onlyHaveNormalFunc(): boolean {
+        const applyPressedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyPressedAttribute");
+        const applyPressedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyPressedAttribute");
+        const applyFocusedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyFocusedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyDisabledAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyDisabledAttribute");
+        const applyDisabledAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyDisabledAttribute");
+        const applySelectedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applySelectedAttribute");
+        const applySelectedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applySelectedAttribute");
+        return applyPressedAttributeBase.toString() === applyPressedAttributeDerived.toString() &&
+            applyFocusedAttributeBase.toString() === applyFocusedAttributeDerived.toString() &&
+            applyDisabledAttributeBase.toString() === applyDisabledAttributeDerived.toString() &&
+            applySelectedAttributeBase.toString() === applySelectedAttributeDerived.toString();
+    }
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
         const peer: ArkTextPeer = value as ArkTextPeer

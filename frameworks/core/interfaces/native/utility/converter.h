@@ -207,6 +207,9 @@ namespace Converter {
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
+    std::optional<Dimension> OptConvertTextFromArkLength(const Ark_Length& src,
+        DimensionUnit defaultUnit = DimensionUnit::FP);
+
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
     {
