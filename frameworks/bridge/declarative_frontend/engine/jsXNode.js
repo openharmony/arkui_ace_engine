@@ -875,6 +875,9 @@ var UIState;
 function createFrameNodeByTrans(point, uiContext, nodeType) {
    return new TransFrameNode(uiContext, nodeType, null, point);
 }
+function getFrameNodeRawPtr(frameNode) {
+    return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+}
 class FrameNode extends Disposable {
     constructor(uiContext, type, options, point) {
         super();
@@ -922,7 +925,6 @@ class FrameNode extends Disposable {
         this.renderNode_?.setNodePtr(result?.nativeStrongRef);
         this.renderNode_?.setFrameNode(new WeakRef(this));
         this.type_ = type;
-        this.rawPtr_= result?.rawPtr_;
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -3302,7 +3304,7 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     getNodePtrValue, nodeDeref, edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState, createFrameNodeByTrans
+    typeNode, NodeAdapter, ExpandMode, UIState, createFrameNodeByTrans, getFrameNodeRawPtr
 };
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
