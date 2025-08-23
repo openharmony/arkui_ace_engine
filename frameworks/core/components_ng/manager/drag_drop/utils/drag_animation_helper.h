@@ -98,6 +98,7 @@ public:
     static void MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
         PreparedInfoForDrag& data, bool isDragPixelMap);
     static void MountPixelMapSizeContentTransition(PreparedInfoForDrag& data, const RefPtr<FrameNode>& columnNode);
+    static void MountMenuNode(PreparedInfoForDrag& data);
     static RefPtr<RenderContext> GetMenuRenderContextFromMenuWrapper(const RefPtr<FrameNode>& menuWrapperNode);
     static RefPtr<FrameNode> GetMenuWrapperNodeFromDrag();
     static void UpdateStartAnimation(const RefPtr<OverlayManager>& overlayManager,
