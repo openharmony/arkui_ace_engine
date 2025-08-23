@@ -469,9 +469,7 @@ ArkUINativeModuleValue TextAreaBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo *
     int32_t style = -1;
     if (fontStyleArg->IsNumber()) {
         style = fontStyleArg->Int32Value(vm);
-        if (style <= 0 || style > static_cast<int32_t>(FONT_STYLES.size())) {
-            style = -1;
-        }
+        style = (style <= 0 || style > static_cast<int32_t>(FONT_STYLES.size())) ? -1 : style;
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderFont(nativeNode, &fontSize,
         fontWeight.c_str(), family.c_str(), style, AceType::RawPtr(fontSizeObject), AceType::RawPtr(fontFamiliesObj));
@@ -1964,7 +1962,8 @@ ArkUINativeModuleValue TextAreaBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtime
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
-        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { panda::IntegerRef::New(vm, key), eventObject };
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::IntegerRef::New(vm, key), eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnSubmitWithEvent(
@@ -2730,27 +2729,7 @@ ArkUINativeModuleValue TextAreaBridge::SetTextAreaInitialize(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaTextString(nativeNode, value.c_str());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    if (!controllerVal->IsUndefined() && !controllerVal->IsNull()) {
-        auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
-                                 ->Unwrap<Framework::JSTextEditableController>();
-        if (jsController) {
-            auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
-            auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
-            if (preController) {
-                preController->SetController(nullptr);
-            }
-            TextFieldModelNG::SetJSTextEditableController(frameNode, Referenced::Claim((Referenced*)jsController));
-            auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
-            jsController->SetController(controller);
-        }
-    } else {
-        auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
-        auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
-        if (preController) {
-            preController->SetController(nullptr);
-        }
-        TextFieldModelNG::SetJSTextEditableController(frameNode, nullptr);
-    }
+    SetControllerInternal(frameNode, controllerVal, vm);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2771,7 +2750,8 @@ ArkUINativeModuleValue TextAreaBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCal
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaWidth(nativeNode, value.c_str());
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaWidth(
+        nativeNode, value.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2967,6 +2947,12 @@ ArkUINativeModuleValue TextAreaBridge::SetController(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    SetControllerInternal(frameNode, controllerVal, vm);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void TextAreaBridge::SetControllerInternal(FrameNode* frameNode, Local<JSValueRef> controllerVal, EcmaVM* vm)
+{
     if (!controllerVal->IsUndefined() && !controllerVal->IsNull()) {
         auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
                                  ->Unwrap<Framework::JSTextEditableController>();
@@ -2988,6 +2974,5 @@ ArkUINativeModuleValue TextAreaBridge::SetController(ArkUIRuntimeCallInfo* runti
         }
         TextFieldModelNG::SetJSTextEditableController(frameNode, nullptr);
     }
-    return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
