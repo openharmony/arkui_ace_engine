@@ -42,7 +42,9 @@ export class FrameNodeTransfer {
             nodeType = nodeTypeESValue.toString();
         }
         let uiContext = new UIContextImpl(instanceId as int32);
-        const pointStr = ESValue.wrap(input).getProperty("rawPtr_").toNumber();
+        let arkUINode = ESValue.load('@ohos.arkui.node');
+        let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
+        const pointStr = frameNodeTrans.invoke(input! as Object).toNumber();
         let frameNodePeerPont = ArkUIGeneratedNativeModule._FrameNode_createByRawPtr(pointStr as KPointer);
         let node: FrameNode = new TransFrameNode(uiContext, nodeType, frameNodePeerPont);
         return node;
