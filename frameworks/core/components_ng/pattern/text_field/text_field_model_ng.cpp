@@ -1558,6 +1558,7 @@ void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::u16stri
     auto textValue = pattern->GetTextUtf16Value();
     if (value != textValue) {
         pattern->InitEditingValueText(value);
+        pattern->SetTextChangedAtCreation(true);
     }
 }
 
