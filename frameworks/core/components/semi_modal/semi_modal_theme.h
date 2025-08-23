@@ -38,7 +38,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->bgColor_ = themeConstants->GetColor(THEME_SEMI_MODAL_BACKGROUND_COLOR);
+            theme->bgColor_ = Color(0xfff7f7f7);
             ParsePattern(themeConstants, theme);
             return theme;
         }
