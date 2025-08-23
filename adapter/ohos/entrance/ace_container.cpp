@@ -3469,6 +3469,9 @@ void AceContainer::UpdateConfiguration(
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
     NG::ImageDecoder::ClearPixelMapCache();
+
+    // For arkts 1.2
+    NotifyArkoalaConfigurationChange(configurationChange);
 }
 
 void AceContainer::UpdateConfigurationSyncForAll(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -4843,5 +4846,17 @@ UIContentErrorCode AceContainer::RunIntentPage()
     auto front = GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     return front->RunIntentPage();
+}
+
+void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange)
+{
+    auto frontend = GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto frontendType = frontend->GetType();
+    if ((frontendType == FrontendType::ARK_TS || frontendType == FrontendType::DYNAMIC_HYBRID_STATIC ||
+            frontendType == FrontendType::STATIC_HYBRID_DYNAMIC) &&
+        configurationChange.IsNeedUpdate()) {
+        frontend->NotifyArkoalaConfigurationChange();
+    }
 }
 } // namespace OHOS::Ace::Platform
