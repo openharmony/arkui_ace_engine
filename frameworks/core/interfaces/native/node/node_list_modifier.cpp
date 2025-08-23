@@ -273,7 +273,17 @@ void ResetListSpace(ArkUINodeHandle node)
     ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
 }
 
-ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(ListModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(ListModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetListEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -1061,7 +1071,7 @@ const CJUIListModifier* GetCJUIListModifier()
         .getSticky = GetSticky,
         .setSticky = SetSticky,
         .resetSticky = ResetSticky,
-        .getListEdgeEffect = GetListEdgeEffect,
+        .getListEdgeEffect = GetListEdgeEffectCJ,
         .setListEdgeEffect = SetListEdgeEffect,
         .resetListEdgeEffect = ResetListEdgeEffect,
         .getListDirection = GetListDirection,
