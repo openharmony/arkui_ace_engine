@@ -154,6 +154,9 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (impl == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
 

@@ -215,6 +215,11 @@ public:
     {
         isModal_ = isModal;
     }
+
+    void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
+    {
+        needCheckWindowSceneId_ = needCheckWindowSceneId;
+    }
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
@@ -451,6 +456,7 @@ private:
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
+    bool needCheckWindowSceneId_ = false;
     bool needReDispatchDisplayArea_ = false;
     bool curVisible_ = false; // HandleVisibleArea visible
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;

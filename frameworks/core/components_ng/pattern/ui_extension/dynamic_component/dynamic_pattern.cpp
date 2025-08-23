@@ -220,7 +220,7 @@ void DynamicPattern::InitializeRender(void* runtime)
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
         SetContainerHostPattern(WeakClaim(this));
-        auto eventHub = host->GetOrCreateEventHub<EventHub>();
+        auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         OnAreaChangedFunc onAreaChangedFunc = [renderer = dynamicComponentRenderer_](
             const RectF& oldRect,
@@ -739,6 +739,9 @@ bool DynamicPattern::HandleTouchEvent(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, false);
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return false;
+    }
     auto originAction = pointerEvent->GetPointerAction();
     if (originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
         originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP) {

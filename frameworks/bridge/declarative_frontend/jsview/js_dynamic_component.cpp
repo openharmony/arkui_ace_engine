@@ -137,8 +137,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
                 CHECK_NULL_VOID(frameNode);
                 NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
                     frameNode, "", "", entryPoint, env);
-            },
-            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
+            }, TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
 }
 
@@ -155,7 +154,7 @@ void JSDynamicComponent::SetIsReportFrameEvent(const JSCallbackInfo& info)
 void JSDynamicComponent::JsOnError(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "onError argument is invalid");
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "onError argument is invalid");
         return;
     }
 
