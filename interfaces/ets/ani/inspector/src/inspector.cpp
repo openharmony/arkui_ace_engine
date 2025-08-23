@@ -211,7 +211,7 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
     observer->RemoveCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
 }
 
-static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_double action, ani_string params)
+static ani_boolean AniSendEventByKey(ani_env *env, ani_string id, ani_int action, ani_string params)
 {
     std::string keyStr;
     ani_status status = ANIUtils_ANIStringToStdString(env, id, keyStr);
