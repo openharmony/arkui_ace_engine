@@ -182,7 +182,6 @@ ohos_unittest("form_special_style_test") {
   ]
 }
 
-
 group("ace_form_test") {
   testonly = true
   deps = [

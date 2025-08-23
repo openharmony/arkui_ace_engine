@@ -70,7 +70,7 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
     if (!uiContent_->GetFormRootNode()) {
-        HILOG_WARN("PreInitUIContent failed to PreInitializeForm, rsSurfaceNode is null");
+        HILOG_ERROR("PreInitUIContent failed to PreInitializeForm, rsSurfaceNode is null");
         AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::FORM_NODE_ERROR,
             formJsInfo.formId,
             formJsInfo.bundleName,
