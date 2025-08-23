@@ -184,6 +184,7 @@ public:
         testProperty.surfaceChangedEvent = std::nullopt;
         testProperty.surfaceDestroyedEvent = std::nullopt;
         g_isDestroyed = false;
+        isAxis = false;
     }
 
 protected:

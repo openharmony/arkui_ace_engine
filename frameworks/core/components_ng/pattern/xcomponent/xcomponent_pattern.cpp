@@ -299,6 +299,7 @@ void XComponentPattern::OnAttachToMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId());
+    CHECK_NULL_VOID(renderSurface_);
     auto customNode = host->GetParentCustomNode();
     CHECK_NULL_VOID(customNode);
     auto pipelineContext = host->GetContextRefPtr();
