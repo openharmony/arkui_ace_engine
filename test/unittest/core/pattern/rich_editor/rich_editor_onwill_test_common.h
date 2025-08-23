@@ -77,12 +77,6 @@ struct InputInfo {
     TextRange selector;
 };
 namespace {
-bool isOnWillChangeCalled = false;
-bool isOnDidChangeCalled = false;
-RichEditorChangeValue onWillChangeValue;
-RichEditorChangeValue onDidChangeValue;
-auto& onWillRangeBefore = onWillChangeValue.rangeBefore_;
-auto& onWillReplacedSpans = onWillChangeValue.replacedSpans_;
 
 std::u16string INSERT_VALUE = u"A";
 const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
@@ -211,14 +205,14 @@ protected:
     void InitContentChangeCallback()
     {
         ResetContentChangeCallbackState();
-        auto onWillChange = [](const RichEditorChangeValue& changeValue) {
+        auto onWillChange = [this](const RichEditorChangeValue& changeValue) {
             isOnWillChangeCalled = true;
             onWillChangeValue = changeValue;
             return true;
         };
         RichEditorModelNG::SetOnWillChange(AceType::RawPtr(richEditorNode_), std::move(onWillChange));
 
-        auto onDidChange = [](const RichEditorChangeValue& changeValue) {
+        auto onDidChange = [this](const RichEditorChangeValue& changeValue) {
             isOnDidChangeCalled = true;
             onDidChangeValue = changeValue;
         };
@@ -250,6 +244,12 @@ protected:
             pattern->AddTextSpan(options);
         }
     }
+    bool isOnWillChangeCalled = false;
+    bool isOnDidChangeCalled = false;
+    RichEditorChangeValue onWillChangeValue;
+    RichEditorChangeValue onDidChangeValue;
+    TextRange& onWillRangeBefore = onWillChangeValue.rangeBefore_;
+    std::vector<RichEditorAbstractSpanResult>& onWillReplacedSpans = onWillChangeValue.replacedSpans_;
 };
 
 } // namespace OHOS::Ace

@@ -1178,7 +1178,7 @@ HWTEST_F(RichEditorSpanTest, GetDelPartiallySpanItem001, TestSize.Level1)
     int32_t originalPos = 0;
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
     auto it = richEditorPattern->spans_.front();
-    EXPECT_NE(ret, nullptr);
+    EXPECT_NE(ret.first, nullptr);
     /**
      * @tc.steps: step2. change parameter and call function.
      */
@@ -1187,7 +1187,7 @@ HWTEST_F(RichEditorSpanTest, GetDelPartiallySpanItem001, TestSize.Level1)
     lastLength = static_cast<int32_t>(lastInfo.GetValue().length());
     lastInfo.SetEraseLength(lastLength);
     ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
 }
 
 /**
