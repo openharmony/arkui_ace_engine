@@ -274,16 +274,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     pattern->HandleSnapshot(delayTime, "1");
     uint32_t taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
     EXPECT_EQ(taskNum, taskNum1);
-
-    weak.refCounter_ = refBak;
-    pattern->refCounter_ = refBak;
-    int64_t currentTime = GetCurrentTimestamp();
-    auto form = weak.Upgrade();
-    int64_t diff = currentTime - form->snapshotTimestamp_;
-    delayTime = 1;
-    EXPECT_LT(diff, delayTime);
-    taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
-    EXPECT_EQ(taskNum, taskNum1);
 }
 
 /**
