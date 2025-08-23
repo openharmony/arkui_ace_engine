@@ -588,7 +588,7 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
     return true;
 }
 
