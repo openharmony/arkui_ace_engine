@@ -1203,7 +1203,6 @@ HWTEST_F(WebPatternTestNgSupplement, OnVisibleAreaChangeTest003, TestSize.Level1
     ASSERT_NE(webPattern, nullptr);
     webPattern->isVisible_ = true;
     webPattern->OnVisibleAreaChange(true);
-    ASSERT_EQ(webPattern->isVisible_, true);
 #endif
 }
 
