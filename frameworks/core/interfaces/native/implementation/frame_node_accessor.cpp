@@ -51,8 +51,9 @@ typedef enum {
     ARKUI_DIRTY_FLAG_RENDER = 0b1000000,
     ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
 } ArkUIDirtyFlag;
-}
+} // namespace OHOS::Ace::NG
 std::map<int32_t, std::shared_ptr<FrameNodePeer>> FrameNodePeer::peerMap_;
+std::mutex FrameNodePeer::peerMapMutex_;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {

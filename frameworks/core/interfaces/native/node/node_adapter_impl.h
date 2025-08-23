@@ -201,7 +201,7 @@ public:
         disposeChildFunc_ = func;
     }
 
-    void SetOnUpdateChind(std::function<void(ArkUINodeHandle, int32_t)>&& func)
+    void SetOnUpdateChild(std::function<void(ArkUINodeHandle, int32_t)>&& func)
     {
         updateChildFunc_ = func;
     }

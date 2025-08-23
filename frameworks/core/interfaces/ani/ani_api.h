@@ -95,8 +95,8 @@ typedef struct NodeAdapterInfo {
 } NodeAdapterInfo;
 
 typedef struct AniDoubleArray {
-    ani_double* data;
-    ani_size size;
+    std::unique_ptr<ani_double[]> data;
+    ani_size size = 0;
 } AniDoubleArray;
 
 typedef ani_object (*ArkUIAniArithmeticAddFunction)(ani_env*, ani_object, ani_object);

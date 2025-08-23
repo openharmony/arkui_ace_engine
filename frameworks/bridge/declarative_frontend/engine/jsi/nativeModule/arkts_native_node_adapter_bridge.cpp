@@ -172,7 +172,7 @@ void SetUpdateChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Loc
             FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
         function->Call(vm, thisRef.Lock().ToLocal(), params, 2);
     };
-    adapter->SetOnUpdateChind(std::move(onUpdateChild));
+    adapter->SetOnUpdateChild(std::move(onUpdateChild));
 }
 
 ArkUINativeModuleValue NodeAdapterBridge::CreateNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo)

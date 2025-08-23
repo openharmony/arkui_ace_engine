@@ -16,6 +16,7 @@
 #include "node_adapter_ani_modifier.h"
 
 #include <array>
+#include <memory>
 
 #include "ui/base/utils/utils.h"
 
@@ -70,7 +71,7 @@ ani_long NodeAdapterConstruct(NodeAdapterInfo&& info)
         ani_double index = id;
         func(nodeId, index);
     };
-    ref->SetOnUpdateChind(std::move(onUpdateChild));
+    ref->SetOnUpdateChild(std::move(onUpdateChild));
     return reinterpret_cast<ani_long>(AceType::RawPtr(ref));
 }
 
@@ -96,7 +97,7 @@ ani_boolean NodeAdapterAttachNodeAdapter(ani_long ptr, ani_long node)
 void NodeAdapterDispose(ani_long ptr)
 {
     auto adapter = reinterpret_cast<UINodeAdapter*>(ptr);
-    CHECK_NULL_VOID(ptr);
+    CHECK_NULL_VOID(adapter);
     adapter->DecRefCount();
 }
 
@@ -147,7 +148,7 @@ AniDoubleArray NodeAdapterGetAllItems(ani_long ptr)
     auto adapter = reinterpret_cast<UINodeAdapter*>(ptr);
     CHECK_NULL_RETURN(adapter, {});
     auto items = adapter->GetAllItems();
-    ani_double* result = new ani_double[items.size()];
+    std::unique_ptr<ani_double[]> result = std::make_unique<ani_double[]>(items.size());
     for (uint32_t i = 0; i < items.size(); i++) {
         auto node = reinterpret_cast<UINode*>(items[i]);
         if (!node) {
@@ -156,7 +157,7 @@ AniDoubleArray NodeAdapterGetAllItems(ani_long ptr)
         ani_double nodeId = reinterpret_cast<UINode*>(items[i])->GetId();
         result[i] = nodeId;
     }
-    AniDoubleArray array = { .data = result, .size = items.size() };
+    AniDoubleArray array = { .data = std::move(result), .size = items.size() };
     return array;
 }
 
