@@ -44,7 +44,7 @@ public:
  * @tc.desc: NormalizeToPx method test
  * @tc.type: FUNC
  */
-HWTEST_F(CalcLengthTestNg, calcLengthTest001, TestSize.Level1)
+HWTEST_F(CalcLengthTestNg, calcLengthTest001, TestSize.Level0)
 {
     CalcLength calc;
     double result = 0.0;

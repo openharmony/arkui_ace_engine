@@ -104,7 +104,7 @@ void LinearSplitTestNg::SetUp()
  * @tc.desc: Test all the property of split
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -134,7 +134,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitCreatorTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -194,7 +194,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest001, TestSize.Level1)
  * @tc.desc: Test linearSplit pattern OnModifyDone function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -227,7 +227,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest002, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -259,7 +259,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest003, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is false.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level0)
 {
     std::vector<int32_t> platformVersions = { PLATFORM_VERSION_10, PLATFORM_VERSION_9 };
     for (int32_t turn = 0; turn < platformVersions.size(); turn++) {
@@ -303,7 +303,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest004, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandlePanEvent  when resizable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create split and initialize related properties.
@@ -340,7 +340,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest005, TestSize.Level1)
  * @tc.desc: Test LinearSplit Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level0)
 {
     std::vector<SplitType> splitType = { SplitType::COLUMN_SPLIT, SplitType::ROW_SPLIT };
     for (int turn = 0; turn < splitType.size(); turn++) {
@@ -393,7 +393,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest006, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -587,7 +587,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest007, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -770,7 +770,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest008, TestSize.Level1)
  * @tc.desc: Test linerSplit pattern HandleMouseEvent  when resizable is true.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -812,7 +812,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest009, TestSize.Level1)
  * @tc.desc: Test RowSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
@@ -992,7 +992,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest010, TestSize.Level1)
  * @tc.desc: Test ColumnSplit Layout with children nodes with API9.
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -1183,7 +1183,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
  * @tc.desc: Test FRC callback
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
@@ -1210,7 +1210,7 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
  * @tc.desc: Test MeasureSelfByLayoutPolicy function
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level0)
 {
     auto frameNode = CreateLinearSplit(SplitType::ROW_SPLIT, [this](LinearSplitModelNG model) {});
     ASSERT_NE(frameNode, nullptr);
@@ -1255,7 +1255,7 @@ HWTEST_F(LinearSplitTestNg, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
  * @tc.desc: Test MeasureSelfByLayoutPolicy function
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1293,7 +1293,7 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
  * @tc.desc: Test MeasureSelfByLayoutPolicy function
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -1333,7 +1333,7 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
  * @tc.desc: Test RegisterResObj of linear_split
  * @tc.type: FUNC
  */
-HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level1)
+HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level0)
 {
     g_isConfigChangePerform = true;
     std::string bundleName = "com.example.test";

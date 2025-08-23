@@ -15,6 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("layout_property_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "layout"
   sources = [
     "layout_property_test_ng.cpp",
@@ -24,6 +25,7 @@ ace_unittest("layout_property_test_ng") {
 
 ace_unittest("layout_wrapper_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "layout"
   sources = [
     "layout_wrapper_test_ng.cpp",
@@ -33,6 +35,7 @@ ace_unittest("layout_wrapper_test_ng") {
 
 ace_unittest("layout_algorithm_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "layout"
   sources = [
     "layout_algorithm_test_ng.cpp",
@@ -41,12 +44,14 @@ ace_unittest("layout_algorithm_test_ng") {
 
 ace_unittest("layout_wrapper_build_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "layout"
   sources = [ "layout_wrapper_build_test_ng.cpp" ]
 }
 
 ace_unittest("layout_wrapper_node_test_ng") {
   type = "new"
+  module_name = "Component-layout"
   module_output = "layout"
   sources = [ "layout_wrapper_node_test_ng.cpp" ]
 }

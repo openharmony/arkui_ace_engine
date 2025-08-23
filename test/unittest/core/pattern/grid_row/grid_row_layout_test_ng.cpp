@@ -61,7 +61,7 @@ public:
  *           gutter.x = 10, gutter.y = 10
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, LayoutTest01, TestSize.Level1)
+HWTEST_F(GridRowLayoutTestNG, LayoutTest01, TestSize.Level0)
 {
     RefPtr<FrameNode> gridCol1, gridCol2;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2](GridRowModelNG model) {
@@ -121,7 +121,7 @@ HWTEST_F(GridRowLayoutTestNG, LayoutTest01, TestSize.Level1)
  *           gutter.x = 10, gutter.y = 10, direction = RowReverse
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, LayoutTest02, TestSize.Level1)
+HWTEST_F(GridRowLayoutTestNG, LayoutTest02, TestSize.Level0)
 {
     RefPtr<FrameNode> gridCol1, gridCol2;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2](GridRowModelNG model) {
@@ -182,7 +182,7 @@ HWTEST_F(GridRowLayoutTestNG, LayoutTest02, TestSize.Level1)
  * @tc.desc: Test the layout direction of gridrow
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, IsRightToLeftTest, TestSize.Level1)
+HWTEST_F(GridRowLayoutTestNG, IsRightToLeftTest, TestSize.Level0)
 {
     auto gridRow1 = CreateGridRow([this](GridRowModelNG model) {});
     GridRowLayoutAlgorithm algorithm;
@@ -204,7 +204,7 @@ HWTEST_F(GridRowLayoutTestNG, IsRightToLeftTest, TestSize.Level1)
  * @tc.desc: Test LayoutWithMatchParentInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest01, TestSize.Level1) {
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest01, TestSize.Level0) {
     RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
         ViewAbstract::SetWidth(CalcLength(370.0f));
@@ -242,7 +242,7 @@ HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest01, TestSize.Level1) 
         << "gridcol5:" << gridCol5->GetGeometryNode()->GetMarginFrameRect().ToString();
 }
 
-HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest02, TestSize.Level1) {
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest02, TestSize.Level0) {
     RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
         ViewAbstract::SetWidth(CalcLength(370.0f));
@@ -283,7 +283,7 @@ HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest02, TestSize.Level1) 
  * @tc.desc: Test LayoutWithMatchParentInfo func
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest03, TestSize.Level1) {
+HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest03, TestSize.Level0) {
     RefPtr<FrameNode> gridCol1, gridCol2, gridCol3, gridCol4, gridCol5;
     auto gridRow = CreateGridRow([this, &gridCol1, &gridCol2, &gridCol3, &gridCol4, &gridCol5](GridRowModelNG model) {
         ViewAbstract::SetWidth(CalcLength(370.0f));
@@ -326,7 +326,7 @@ HWTEST_F(GridRowLayoutTestNG, LayoutWithMatchParentInfoTest03, TestSize.Level1) 
  * @tc.desc: Test GetPaddingOffset func
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowLayoutTestNG, GetPaddingOffsetTest, TestSize.Level1)
+HWTEST_F(GridRowLayoutTestNG, GetPaddingOffsetTest, TestSize.Level0)
 {
     auto gridRow = CreateGridRow([this](GridRowModelNG model) {
         PaddingProperty padding = {

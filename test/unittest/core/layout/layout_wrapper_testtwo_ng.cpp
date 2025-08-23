@@ -218,7 +218,7 @@ void LayoutWrapperTestTwoNg::TearDownTestSuite()
  * @tc.desc: Test GetParentGlobalOffsetWithSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest001, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest001, TestSize.Level0)
 {
     auto parent = FrameNode::CreateFrameNode(V2::NODE_CONTAINER_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     auto child0 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
@@ -274,7 +274,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest001, TestSize.Level1)
  * @tc.desc: Test GetFrameRectWithoutSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest002, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest002, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
@@ -289,7 +289,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest002, TestSize.Level1)
  * @tc.desc: Test OffsetNodeToSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest003, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest003, TestSize.Level0)
 {
     auto [frameNode, layoutWrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
     frameNode->layoutProperty_->UpdateSafeAreaInsets(
@@ -335,7 +335,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest003, TestSize.Level1)
  * @tc.desc: Test CreateRootConstraint.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest004, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest004, TestSize.Level0)
 {
     auto context = PipelineContext::GetCurrentContext();
     context->rootHeight_ = RK356_HEIGHT;
@@ -358,7 +358,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest004, TestSize.Level1)
  * @tc.desc: Test ApplyConstraintWithoutMeasure.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest005, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest005, TestSize.Level0)
 {
     auto context = PipelineContext::GetCurrentContext();
     context->rootHeight_ = RK356_HEIGHT;
@@ -382,7 +382,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest005, TestSize.Level1)
  * @tc.desc: Test GetPageCurrentOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level0)
 {
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::PAGE_ETS_TAG, NODE_ID_0);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -417,7 +417,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level1)
  * @tc.desc: Test ExpandIntoKeyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -467,7 +467,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level1)
  * @tc.desc: Test CheckValidSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest008, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest008, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -518,7 +518,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest008, TestSize.Level1)
  * @tc.desc: Test AdjustNotExpandNode.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -544,7 +544,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
  * @tc.desc: Test ExpandSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest010, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest010, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -598,7 +598,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest010, TestSize.Level1)
  * @tc.desc: Test AdjustFixedSizeNode.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest011, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest011, TestSize.Level0)
 {
     RectF frame;
     auto node = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
@@ -625,7 +625,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest011, TestSize.Level1)
  * @tc.desc: Test AvoidKeyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
@@ -656,7 +656,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
  * @tc.desc: Test GetFrameRectWithSafeArea.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest016, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest016, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -708,7 +708,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest016, TestSize.Level1)
  * @tc.desc: Test ExpandHelper.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest018, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest018, TestSize.Level0)
 {
     std::unique_ptr<SafeAreaExpandOpts> opts = nullptr;
     RectF tmpFrame = RectF{20.0f, 30.0f, 670.0f, 1220.0f};
@@ -746,7 +746,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest018, TestSize.Level1)
  * @tc.desc: Test IsSyntaxNode
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest019, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest019, TestSize.Level0)
 {
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
 
@@ -781,7 +781,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest019, TestSize.Level1)
  * @tc.desc: Test AdjustChildren
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
 {
     auto [parent0, layoutWrapper0] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
     layoutWrapper0->hostNode_ = nullptr;
@@ -832,7 +832,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level1)
  * @tc.desc: Test AvoidKeyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level0)
 {
     auto node = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     auto layoutWrapper = AceType::DynamicCast<LayoutWrapper>(node);
@@ -877,7 +877,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, IgnoreLayoutProcessTagFuncs, TestSize.Level0)
  * @tc.desc: Test SetHasPreMeasured, GetHasPreMeasured and CheckHasPreMeasured
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, HasPreMeasuredTest, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, HasPreMeasuredTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -895,7 +895,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, HasPreMeasuredTest, TestSize.Level1)
  * @tc.desc: Test SetDelaySelfLayoutForIgnore and GetDelaySelfLayoutForIgnore
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, DelaySelfLayoutForIgnoreTest, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, DelaySelfLayoutForIgnoreTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -910,7 +910,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, DelaySelfLayoutForIgnoreTest, TestSize.Level1)
  * @tc.desc: Test SetEscapeDelayForIgnore and GetEscapeDelayForIgnore
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, EscapeDelayForIgnoreTest, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, EscapeDelayForIgnoreTest, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
@@ -926,7 +926,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, EscapeDelayForIgnoreTest, TestSize.Level1)
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with edges options
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, EdgeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, EdgeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node0, layoutWrapper0] =
@@ -961,7 +961,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, EdgeControlOnGetAccumulatedSafeAreaExpand, Test
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with Types options
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, TypeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, TypeControlOnGetAccumulatedSafeAreaExpand, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, parentWrapper] =
@@ -1013,7 +1013,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, TypeControlOnGetAccumulatedSafeAreaExpand, Test
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand001, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand001, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node0, layoutWrapper0] =
@@ -1058,7 +1058,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand00
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand002, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand002, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node0, layoutWrapper0] =
@@ -1096,7 +1096,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand00
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with Strategy options
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand003, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand003, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [node0, layoutWrapper0] =
@@ -1153,7 +1153,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, StrategyControlOnGetAccumulatedSafeAreaExpand00
  * @tc.desc: Test GetAccumulatedSafeAreaExpand over borderPadding
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperTestTwoNg, OverBorderPaddingOnGetAccumulatedSafeAreaExpand, TestSize.Level1)
+HWTEST_F(LayoutWrapperTestTwoNg, OverBorderPaddingOnGetAccumulatedSafeAreaExpand, TestSize.Level0)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto [parent, parentWrapper] =

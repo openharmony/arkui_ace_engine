@@ -69,7 +69,7 @@ RefPtr<FrameNode> BlankNewTestNg::CreateFlexRow(const std::function<void(FlexMod
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest001, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
@@ -117,7 +117,7 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest001, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and parent has padding.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest002, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
@@ -167,7 +167,7 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest002, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest003, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
@@ -215,7 +215,7 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest003, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest004, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
@@ -263,7 +263,7 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest004, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest005, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
@@ -316,7 +316,7 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest005, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and constraintSize.
  * @tc.type: FUNC
  */
-HWTEST_F(BlankNewTestNg, LayoutPolicyTest006, TestSize.Level1)
+HWTEST_F(BlankNewTestNg, LayoutPolicyTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> blank;
     auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
