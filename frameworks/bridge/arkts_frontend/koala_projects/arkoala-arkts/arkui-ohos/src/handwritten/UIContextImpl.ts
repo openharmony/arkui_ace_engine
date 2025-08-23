@@ -624,7 +624,7 @@ export class UIInspectorImpl extends UIInspector {
         super()
         this.instanceId_ = instanceId;
     }
-    public createComponentObserver(id: string): inspector.ComponentObserver {
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let componentObserver = inspector.createComponentObserver(id);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1641,5 +1641,13 @@ export class UIContextImpl extends UIContext {
 
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
+    }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTree(filters);
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTreeById(id, depth, filters);
     }
 }
