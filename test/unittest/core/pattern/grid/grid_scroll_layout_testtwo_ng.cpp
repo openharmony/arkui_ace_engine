@@ -109,20 +109,16 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
     auto algo = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     ASSERT_TRUE(algo);
     algo->Measure(AceType::RawPtr(frameNode_));
-    std::set<int32_t> measuredItems = { 0, 1, 2, 3, 4, 5, 6, 7 };
-    EXPECT_EQ(measuredItems, algo->measuredItems_);
+    EXPECT_TRUE(algo->unLayoutedItems_.empty());
     EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT);
 
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode_->GetLayoutProperty());
-    layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT + 100);
+    layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT - 100);
     algo->Measure(AceType::RawPtr(frameNode_));
-    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT + 100);
-    measuredItems.emplace(8);
-    measuredItems.emplace(9);
-    EXPECT_EQ(measuredItems, algo->measuredItems_);
-
-    algo->Layout(AceType::RawPtr(frameNode_));
-    EXPECT_TRUE(algo->measuredItems_.empty());
+    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT - 100);
+    EXPECT_EQ(algo->unLayoutedItems_.size(), 2);
+    EXPECT_EQ(algo->unLayoutedItems_.count(7), 1);
+    EXPECT_EQ(algo->unLayoutedItems_.count(6), 1);
 }
 
 /**
