@@ -21,7 +21,7 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
@@ -135,6 +135,7 @@ export class ArkUIAniModule {
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+    native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer
