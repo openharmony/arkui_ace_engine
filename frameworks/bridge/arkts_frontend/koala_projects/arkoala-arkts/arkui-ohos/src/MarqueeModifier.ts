@@ -201,7 +201,6 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
                 }
                 default: {
                     this._setMarqueeOptions_0_flag = AttributeUpdaterFlag.INITIAL
-                    // peer.setMarqueeOptionsAttribute(undefined)
                 }
             }
         }

@@ -21,6 +21,14 @@ export { TabsModifier } from './TabsModifier';
 
 export { TabContentModifier } from './TabContentModifier';
 
+export { SpanModifier } from './SpanModifier';
+
+export { ContainerSpanModifier } from './ContainerSpanModifier';
+
+export { ImageSpanModifier } from './ImageSpanModifier';
+
+export { SymbolSpanModifier } from './SymbolSpanModifier';
+
 export { CommonModifier } from './CommonModifier'
 
 export { DividerModifier } from './DividerModifier';

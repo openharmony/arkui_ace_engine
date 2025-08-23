@@ -34,6 +34,8 @@ import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { InteropNativeModule } from '@koalaui/interop';
 import { CommonMethodModifier } from '../../CommonMethodModifier';
+import { ComponentBase } from '../../ComponentBase';
+
 export enum ModifierType {
    ORIGIN = 0,
    STATE = 1,
@@ -106,7 +108,7 @@ const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-export function applyUIAttributes<T>(modifier: AttributeModifier<T>, attributeSet: CommonMethodModifier, state: int32 = 0): void {     
+export function applyUIAttributes<T, MethodSet extends T>(modifier: AttributeModifier<T>, attributeSet: MethodSet, state: int32 = 0): void {     
     modifier.applyNormalAttribute(attributeSet as T);
     if (state & UI_STATE_PRESSED) {
         modifier.applyPressedAttribute(attributeSet as T);
@@ -122,7 +124,7 @@ export function applyUIAttributes<T>(modifier: AttributeModifier<T>, attributeSe
     }
 }
 
-export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, attributeSet: CommonMethodModifier, state: int32 = 0, isInit:boolean = true): void {
+export function applyUIAttributesUpdate<T, MethodSet extends T>(modifier: AttributeModifier<T>, attributeSet: MethodSet, state: int32 = 0, isInit:boolean = true): void {
     if (state == UI_STATE_NORMAL && !isInit) {
         modifier.applyNormalAttribute(attributeSet as T);
     }
@@ -2009,8 +2011,9 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     }
 }
 
-export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier, MethodComponent extends ArkCommonMethodComponent>
-    (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer): void {
+export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, MethodComponent extends ComponentBase>
+    (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: PeerNode,
+    isStateStyle: boolean = true): MethodSet {
     let attributeSet_ = attributeSet();
     let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
     if (isAttributeUpdater) {
@@ -2036,18 +2039,32 @@ export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModi
         }
     }
     let isInit: boolean = true;
+    let stateValue = 0;
     let currentState = node.getStateStyleMutable();
     if (currentState === undefined) {
-        currentState = node.getOrCreateStateStyleMutable()!;
+        if (isStateStyle) {
+            currentState = node.getOrCreateStateStyleMutable()!;
+            stateValue = currentState.value
+        } else {
+            stateValue = 0
+        }
     } else {
+        stateValue = currentState.value
         isInit = false;
     }
     if (isAttributeUpdater) {
-        applyUIAttributesUpdate(modifier, attributeSet_, currentState.value, isInit);
+        applyUIAttributesUpdate(modifier, attributeSet_, stateValue, isInit);
     } else {
-        applyUIAttributes(modifier, attributeSet_, currentState.value);
+        applyUIAttributes(modifier, attributeSet_, stateValue);
     }
-    attributeSet_.applyModifierPatch(node);
+    return attributeSet_;
+}
+
+export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier, MethodComponent extends ArkCommonMethodComponent>
+    (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer,
+    isStateStyle: boolean = true): void {
+    let attributeSet_ = applyAttributeModifierNoCommonMethod(modifier, attributeSet, func, updaterReceiver, node, isStateStyle) as CommonMethodModifier;
+    attributeSet_!.applyModifierPatch(node);
 }
 
 export function applyCommonModifier(peerNode: ArkCommonMethodPeer, modifier: AttributeModifier<CommonMethod>) {
