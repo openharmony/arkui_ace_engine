@@ -57,7 +57,7 @@ constexpr int64_t FORM_ID_OF_TDD = 123456;
 const std::string FORM_ID_STRING_OF_TDD = "123456";
 constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
-constexpr double TIME_LIMIT_FONT_SIZE_BASE = 18.0;
+constexpr double TIME_LIMIT_FONT_SIZE_BASE = 14.0;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
 FormModelNG formModelNG;

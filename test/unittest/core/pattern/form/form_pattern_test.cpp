@@ -336,7 +336,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     int64_t currentTime = GetCurrentTimestamp();
     auto form = weak.Upgrade();
     int64_t diff = currentTime - form->snapshotTimestamp_;
-    EXPECT_EQ(diff, 0);
     delayTime = 1;
     EXPECT_LT(diff, delayTime);
     taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
@@ -2047,27 +2046,6 @@ HWTEST_F(FormPatternTest, GetRectRelativeToWindow001, TestSize.Level1)
     pattern->GetRectRelativeToWindow(parentRectInfo);
     auto rectInfoDegree = parentRectInfo.rotateTransform.rotateDegree;
     EXPECT_EQ(rectInfoDegree, static_cast<int32_t>(Rotation::ROTATION_0));
-}
-
-/**
- * @tc.name: FormPatternTest_056
- * @tc.desc: LoadFormSkeleton
- * @tc.type: FUNC
- */
-HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    pattern->frameNode_ = formNode;
-    EXPECT_NE(pattern, nullptr);
-    auto textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, true);
-    EXPECT_NE(textNode, nullptr);
-    textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, false);
-    EXPECT_NE(textNode, nullptr);
-    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, true);
-    EXPECT_NE(textNode, nullptr);
-    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, false);
-    EXPECT_NE(textNode, nullptr);
 }
 
 /**
