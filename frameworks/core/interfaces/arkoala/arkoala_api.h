@@ -2091,6 +2091,11 @@ struct ArkUINavigationTitlebarOptions {
     }
 };
 
+struct ArkUIIgnoreLayoutSafeAreaOpts {
+    ArkUI_Int32 type = 0;
+    ArkUI_Int32 edges = 0;
+};
+
 struct ArkUIBarItem {
     ArkUIOptionalCommonCharPtr text;
     ArkUIOptionalCommonCharPtr icon;
@@ -2816,6 +2821,7 @@ struct ArkUICommonModifier {
     void (*resetCompositingFilter)(ArkUINodeHandle node);
     void (*setFreeze)(ArkUINodeHandle node, ArkUI_Bool freeze);
     void (*resetFreeze)(ArkUINodeHandle node);
+    ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeArea)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -4447,10 +4453,13 @@ struct ArkUINavDestinationModifier {
     void (*setNavDestinationTitlebarOptions)(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts);
     void (*setNavDestinationOnCoordScrollStartAction)(ArkUINodeHandle node,
         void (*onCoordScrollStartAction)(ArkUINodeHandle node));
+    void (*resetNavDestinationOnCoordScrollStartAction)(ArkUINodeHandle node);
     void (*setNavDestinationOnCoordScrollUpdateAction)(ArkUINodeHandle node,
-        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
+        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 offset, ArkUI_Float32 currentOffset));
+    void (*resetNavDestinationOnCoordScrollUpdateAction)(ArkUINodeHandle node);
     void (*setNavDestinationOnCoordScrollEndAction)(ArkUINodeHandle node,
         void (*onCoordScrollEndAction)(ArkUINodeHandle node));
+    void (*resetNavDestinationOnCoordScrollEndAction)(ArkUINodeHandle node);
     void (*setNavDestinationSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetNavDestinationSystemBarStyle)(ArkUINodeHandle node);
     void (*setCustomBackButtonNode)(ArkUINodeHandle node, ArkUINodeHandle backButtonNode);
@@ -5491,9 +5500,12 @@ struct ArkUINavigationModifier {
     void (*setTitleHeight)(ArkUINodeHandle node, const struct ArkUIDimensionType height);
     void (*setTitlebarOptions)(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts);
     void (*setOnCoordScrollStartAction)(ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node));
+    void (*resetOnCoordScrollStartAction)(ArkUINodeHandle node);
     void (*setOnCoordScrollUpdateAction)(ArkUINodeHandle node,
-        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
+        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 offset, ArkUI_Float32 currentOffset));
+    void (*resetOnCoordScrollUpdateAction)(ArkUINodeHandle node);
     void (*setOnCoordScrollEndAction)(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node));
+    void (*resetOnCoordScrollEndAction)(ArkUINodeHandle node);
     void (*setSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSystemBarStyle)(ArkUINodeHandle node);
     void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);

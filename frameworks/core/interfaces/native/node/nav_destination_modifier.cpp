@@ -484,24 +484,42 @@ void SetNavDestinationOnCoordScrollStartAction(
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollStartAction);
         onCoordScrollStartAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
 }
 
+void ResetNavDestinationOnCoordScrollStartAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, nullptr);
+}
+
 void SetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node,
-    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 offset, ArkUI_Float32 currentOffset))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
-        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float offset, float currentOffset)->void {
             auto frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
             auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-                onCoordScrollUpdateAction(nodeHandle, currentOffset);
+            CHECK_NULL_VOID(onCoordScrollUpdateAction);
+            onCoordScrollUpdateAction(nodeHandle, offset, currentOffset);
         };
     NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void ResetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, nullptr);
 }
 
 void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
@@ -510,10 +528,19 @@ void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoor
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollEndAction);
         onCoordScrollEndAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void ResetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, nullptr);
 }
 
 void SetNavDestinationSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -820,8 +847,11 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setNavDestinationTitleHeight = SetNavDestinationTitleHeight,
         .setNavDestinationTitlebarOptions = SetNavDestinationTitlebarOptions,
         .setNavDestinationOnCoordScrollStartAction = SetNavDestinationOnCoordScrollStartAction,
+        .resetNavDestinationOnCoordScrollStartAction = ResetNavDestinationOnCoordScrollStartAction,
         .setNavDestinationOnCoordScrollUpdateAction = SetNavDestinationOnCoordScrollUpdateAction,
+        .resetNavDestinationOnCoordScrollUpdateAction = ResetNavDestinationOnCoordScrollUpdateAction,
         .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
+        .resetNavDestinationOnCoordScrollEndAction = ResetNavDestinationOnCoordScrollEndAction,
         .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
         .resetNavDestinationSystemBarStyle = ResetNavDestinationSystemBarStyle,
         .setCustomBackButtonNode = SetCustomBackButtonNode,

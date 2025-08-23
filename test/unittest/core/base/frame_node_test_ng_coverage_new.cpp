@@ -1435,4 +1435,35 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetFocusDependenceTestMode001, TestSize.Level
      */
     EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::SELF);
 }
+
+/**
+ * @tc.name: FrameNodeGetIgnoreLayoutSafeAreaOptsTest001
+ * @tc.desc: Test the function GetIgnoreLayoutSafeAreaOpts
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetIgnoreLayoutSafeAreaOptsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. call the function UpdateIgnoreLayoutSafeAreaOpts.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    NG::IgnoreLayoutSafeAreaOpts ignoreOpts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    layoutProperty->UpdateIgnoreLayoutSafeAreaOpts(ignoreOpts);
+    auto isIgnoreOptsValid = layoutProperty->IsIgnoreOptsValid();
+    EXPECT_EQ(isIgnoreOptsValid, true);
+
+    /**
+     * @tc.steps: step3. GetIgnoreLayoutSafeAreaOpts.
+     * @tc.expected: expect The function return value is valid.
+     */
+    NG::IgnoreLayoutSafeAreaOpts& opts = *(layoutProperty->GetIgnoreLayoutSafeAreaOpts());
+    EXPECT_EQ(opts.type, NG::SAFE_AREA_TYPE_SYSTEM);
+    EXPECT_EQ(opts.edges, NG::SAFE_AREA_EDGE_ALL);
+}
 } // namespace OHOS::Ace::NG

@@ -3054,7 +3054,6 @@ void NavigationModelNG::SetTitleHeight(FrameNode* frameNode, const Dimension& he
 
 void NavigationModelNG::SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart)
 {
-    CHECK_NULL_VOID(onCoordScrollStart);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -3067,9 +3066,8 @@ void NavigationModelNG::SetOnCoordScrollStartAction(FrameNode* frameNode, std::f
 }
 
 void NavigationModelNG::SetOnCoordScrollUpdateAction(
-    FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate)
+    FrameNode* frameNode, std::function<void(float, float)>&& onCoordScrollUpdate)
 {
-    CHECK_NULL_VOID(onCoordScrollUpdate);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -3083,7 +3081,6 @@ void NavigationModelNG::SetOnCoordScrollUpdateAction(
 
 void NavigationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd)
 {
-    CHECK_NULL_VOID(onCoordScrollEnd);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
