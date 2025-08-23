@@ -566,7 +566,8 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
                                            const AAFwk::Want &want) -> int32_t {
         auto formManagerDelegate = weak.Upgrade();
         if (!formManagerDelegate) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "SurfaceCreateEventHandle - formManagerDelegate is null");
+            TAG_LOGE(AceLogTag::ACE_FORM,
+                "SurfaceCreateEventHandle - formManagerDelegate is null, formId:%{public}" PRId64, formInfo.formId);
             return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
         }
         return formManagerDelegate->OnSurfaceCreate(formInfo, surfaceNode, want);
