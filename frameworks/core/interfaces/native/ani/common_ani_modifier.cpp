@@ -286,7 +286,9 @@ static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandl
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
     }
-    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+    CHECK_NULL_RETURN(frameNodePeer, std::nullopt);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
     CHECK_NULL_RETURN(frameNode, std::nullopt);
 
     std::string capiCustomProperty;
