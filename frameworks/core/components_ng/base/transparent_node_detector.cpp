@@ -52,7 +52,7 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     CHECK_NULL_VOID(container);
     bool isUECWindow = container->IsUIExtensionWindow();
     if (!(isUECWindow || container->IsHostSubWindow() ||
-        container->IsHostDialogWindow()) || !pipelineContext->GetOnFoucs()) {
+        container->IsHostDialogWindow()) || !pipelineContext->GetOnFocus()) {
         return;
     }
     detectCount--;
