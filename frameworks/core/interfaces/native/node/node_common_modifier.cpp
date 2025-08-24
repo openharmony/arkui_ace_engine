@@ -8223,8 +8223,8 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
     touchEvent.globalDisplayY = arkUITouchEvent->actionTouchPoint.globalDisplayY * density;
     touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
-    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
-    NG::SetPostPointerEvent(pointerEvent, touchEvent);
+    ArkUITouchEvent* arkUITouchEventCloned = const_cast<ArkUITouchEvent*>(arkUITouchEvent);
+    NG::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
     return PostTouchEventToFrameNode(node, touchEvent);
 }
 
@@ -8298,6 +8298,14 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
         arkUITouchEventCloned->historyEvents = nullptr;
         arkUITouchEventCloned->historySize = 0;
     }
+}
+
+void DestroyTouchEvent(ArkUITouchEvent* arkUITouchEvent)
+{
+    CHECK_NULL_VOID(arkUITouchEvent);
+    NG::DestroyRawPointerEvent(arkUITouchEvent);
+    delete arkUITouchEvent;
+    arkUITouchEvent = nullptr;
 }
 
 void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
@@ -9117,6 +9125,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .dispatchKeyEvent = DispatchKeyEvent,
         .postTouchEvent = PostTouchEvent,
         .createClonedTouchEvent = CreateClonedTouchEvent,
+        .destroyTouchEvent = DestroyTouchEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
