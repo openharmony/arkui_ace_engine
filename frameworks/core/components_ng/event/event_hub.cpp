@@ -377,7 +377,7 @@ void EventHub::FireOnSizeChanged(const RectF& oldRect, const RectF& rect)
     }
 }
 
-void EventHub::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
+void EventHub::SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged)
 {
     onJsFrameNodeSizeChanged_ = std::move(onSizeChanged);
 }
@@ -462,7 +462,7 @@ void EventHub::ClearCustomerOnDragEnd()
     customerOnDragEnd_ = nullptr;
 }
 
-void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)
+void EventHub::SetFrameNodeCommonOnAppear(std::function<void()>&& onAppear)
 {
     onJSFrameNodeAppear_ = std::move(onAppear);
 }
@@ -474,7 +474,7 @@ void EventHub::ClearJSFrameNodeOnAppear()
     }
 }
 
-void EventHub::SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear)
+void EventHub::SetFrameNodeCommonOnDisappear(std::function<void()>&& onDisappear)
 {
     onJSFrameNodeDisappear_ = std::move(onDisappear);
 }

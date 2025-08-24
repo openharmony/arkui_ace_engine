@@ -4070,5 +4070,13 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_RegisterCommonEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_UnregisterCommonEvent"
     }
 ]

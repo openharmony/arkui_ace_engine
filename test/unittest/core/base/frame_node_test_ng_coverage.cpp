@@ -1104,11 +1104,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddInnerOnSizeChangeCallback02, TestSize.Leve
 }
 
 /**
- * @tc.name: FrameNodeSetJSFrameNodeOnSizeChangeCallback01
- * @tc.desc: Test the function SetJSFrameNodeOnSizeChangeCallback
+ * @tc.name: FrameNodeSetFrameNodeCommonOnSizeChangeCallback01
+ * @tc.desc: Test the function SetFrameNodeCommonOnSizeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeSetJSFrameNodeOnSizeChangeCallback01, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeSetFrameNodeCommonOnSizeChangeCallback01, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1118,17 +1118,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSFrameNodeOnSizeChangeCallback01, TestSiz
     OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
     frameNode->lastFrameNodeRect_ = std::make_unique<RectF>(RectF(OffsetF(1.0f, 1.0f), SizeF(1.0f, 1.0f)));
     /**
-     * @tc.steps: step3. call the function SetJSFrameNodeOnSizeChangeCallback.
+     * @tc.steps: step3. call the function SetFrameNodeCommonOnSizeChangeCallback.
      */
-    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+    frameNode->SetFrameNodeCommonOnSizeChangeCallback(std::move(callback));
 }
 
 /**
- * @tc.name: FrameNodeSetJSFrameNodeOnSizeChangeCallback02
- * @tc.desc: Test the function SetJSFrameNodeOnSizeChangeCallback
+ * @tc.name: FrameNodeSetFrameNodeCommonOnSizeChangeCallback02
+ * @tc.desc: Test the function SetFrameNodeCommonOnSizeChangeCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeSetJSFrameNodeOnSizeChangeCallback02, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeSetFrameNodeCommonOnSizeChangeCallback02, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode.
@@ -1137,9 +1137,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetJSFrameNodeOnSizeChangeCallback02, TestSiz
     EXPECT_NE(frameNode->pattern_, nullptr);
     OnSizeChangedFunc callback = [](const RectF& oldRect, const RectF& rect) {};
     /**
-     * @tc.steps: step3. call the function SetJSFrameNodeOnSizeChangeCallback.
+     * @tc.steps: step3. call the function SetFrameNodeCommonOnSizeChangeCallback.
      */
-    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+    frameNode->SetFrameNodeCommonOnSizeChangeCallback(std::move(callback));
 }
 
 /**

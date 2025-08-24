@@ -186,7 +186,7 @@ public:
     // Set by node container.
     void SetOnTouchEvent(TouchEventFunc&& touchEventFunc);
     // Set by JS FrameNode.
-    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc);
+    void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc);
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
@@ -204,7 +204,7 @@ public:
     void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
-    void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
+    void SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent);
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
     void SetOnTouchIntercept(TouchInterceptFunc&& touchInterceptFunc);
     TouchInterceptFunc GetOnTouchIntercept() const;

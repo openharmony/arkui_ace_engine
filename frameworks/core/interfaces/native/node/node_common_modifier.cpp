@@ -8615,6 +8615,645 @@ void ResetFreeze(ArkUINodeHandle node)
     ViewAbstractModelNG::SetFreeze(frameNode, false);
 }
 
+void SetCommonOnClickInfo(ArkUINodeEvent& event, GestureEvent& info)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.clickEvent.targetPositionX = targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetPositionY = targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.targetGlobalPositionX =
+        targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetGlobalPositionY =
+        targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.width = info.GetTarget().area.GetWidth().ConvertToVp();
+    event.clickEvent.height = info.GetTarget().area.GetHeight().ConvertToVp();
+    // tiltX tiltY
+    event.clickEvent.tiltX = PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
+    event.clickEvent.tiltY = PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
+    //pressure
+    event.clickEvent.pressure = info.GetForce();
+    // sourcetool
+    event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // deviceid
+    event.clickEvent.deviceId = info.GetDeviceId();
+    // targetDisplayId
+    event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
+    // modifierkeystates
+    event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    if (!info.GetFingerList().empty()) {
+        event.clickEvent.clickPointSize =
+            info.GetFingerList().size() < MAX_POINTS ? info.GetFingerList().size() : MAX_POINTS;
+    } else {
+        event.clickEvent.clickPointSize = 0;
+    }
+}
+
+void TriggerCommonOnClickEvent(ArkUINodeEvent& event, int32_t nodeId, GestureEvent& info)
+{
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.nodeId = nodeId;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.localX = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+    event.clickEvent.localY = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+    event.clickEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+    event.clickEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    event.clickEvent.windowX = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+    event.clickEvent.windowY = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+    event.clickEvent.displayX = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+    event.clickEvent.displayY = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+    event.clickEvent.globalDisplayX = PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX());
+    event.clickEvent.globalDisplayY = PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY());
+    SetCommonOnClickInfo(event, info);
+}
+
+void SetCommonOnClick(ArkUINodeHandle node, void* extraParam)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onClick = [node = AceType::WeakClaim(frameNode), nodeId, extraParam](GestureEvent& info) {
+        ArkUINodeEvent event;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        auto target = info.GetTarget();
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
+        TriggerCommonOnClickEvent(event, nodeId, info);
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+}
+
+void UnregisterCommonOnClick(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnClick(frameNode);
+}
+
+void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)
+{
+    const OHOS::Ace::Offset& globalLocation = locationInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = locationInfo.GetLocalLocation();
+    const OHOS::Ace::Offset& screenLocation = locationInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = locationInfo.GetGlobalDisplayLocation();
+    touchPoint.id = locationInfo.GetFingerId();
+    double density = usePx ? 1.0 : PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        density = 1.0;
+    }
+    touchPoint.nodeX = localLocation.GetX() / density;
+    touchPoint.nodeY = localLocation.GetY() / density;
+    touchPoint.windowX = globalLocation.GetX() / density;
+    touchPoint.windowY = globalLocation.GetY() / density;
+    touchPoint.screenX = screenLocation.GetX() / density;
+    touchPoint.screenY = screenLocation.GetY() / density;
+    touchPoint.globalDisplayX = globalDisplayLocation.GetX() / density;
+    touchPoint.globalDisplayY = globalDisplayLocation.GetY() / density;
+    touchPoint.pressure = locationInfo.GetForce();
+    touchPoint.contactAreaWidth = locationInfo.GetSize();
+    touchPoint.contactAreaHeight = locationInfo.GetSize();
+    touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
+    touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
+    touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
+    touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
+}
+
+void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points, const TouchLocationInfo& historyLoaction, bool usePx)
+{
+    if (touchPointes.empty()) {
+        return;
+    }
+    size_t i = 0;
+    for (auto& touchPoint : touchPointes) {
+        if (i >= MAX_POINTS) {
+            break;
+        }
+        double density = usePx ? 1.0 : PipelineBase::GetCurrentDensity();
+        if (NearZero(density)) {
+            density = 1.0;
+        }
+        points[i].id = touchPoint.id;
+        points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetLocalLocation().GetX() / density;
+        points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetLocalLocation().GetY() / density;
+        points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetGlobalLocation().GetX() / density;
+        points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetGlobalLocation().GetY() / density;
+        points[i].screenX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetScreenLocation().GetX() / density;
+        points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetScreenLocation().GetY() / density;
+        points[i].globalDisplayX = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetX() / density;
+        points[i].globalDisplayY = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetY() / density;
+        points[i].contactAreaWidth = touchPoint.size;
+        points[i].contactAreaHeight = touchPoint.size;
+        points[i].pressure = touchPoint.force;
+        points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
+        points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
+        points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
+        points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
+        i++;
+    }
+}
+
+void SetCommonOnTouch(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    int32_t nodeId = uiNode->GetId();
+    auto onTouch = [nodeId, userData](TouchEventInfo& eventInfo) {
+        ArkUINodeEvent event;
+        event.kind = TOUCH_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        const auto& targetLocalOffset = eventInfo.GetTarget().area.GetOffset();
+        const auto& targetOrigin = eventInfo.GetTarget().origin;
+        // width height x y globalx globaly
+        event.touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.targetGlobalPositionX =
+            targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetGlobalPositionY =
+            targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.width = eventInfo.GetTarget().area.GetWidth().ConvertToVp();
+        event.touchEvent.height = eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
+        // deviceid
+        event.touchEvent.deviceId = eventInfo.GetDeviceId();
+        //modifierkeystates
+        event.touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(eventInfo.GetPressedKeyCodes());
+        event.touchEvent.target.area = {
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
+        };
+        event.touchEvent.target.origin = {
+            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
+        };
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
+            ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, false);
+        }
+        event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
+        event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
+        event.touchEvent.rawPointerEvent = eventInfo.GetPointerEvent().get();
+
+        std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+        if (!eventInfo.GetTouches().empty()) {
+            size_t index = 0;
+            for (auto& touchLocationInfo : eventInfo.GetTouches()) {
+                if (index >= MAX_POINTS) {
+                    break;
+                }
+                ConvertTouchLocationInfoToPoint(touchLocationInfo, touchPoints[index++], false);
+            }
+            event.touchEvent.touchPointes = &touchPoints[0];
+            event.touchEvent.touchPointSize =
+                eventInfo.GetTouches().size() < MAX_POINTS ? eventInfo.GetTouches().size() : MAX_POINTS;
+        } else {
+            event.touchEvent.touchPointes = nullptr;
+            event.touchEvent.touchPointSize = 0;
+        }
+        event.touchEvent.subKind = ON_TOUCH;
+        std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+        std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+        if (!eventInfo.GetHistoryPointerEvent().empty() &&
+            eventInfo.GetHistoryPointerEvent().size() == eventInfo.GetHistory().size()) {
+            auto historyLoacationIterator = std::begin(eventInfo.GetHistory());
+            auto historyMMIPointerEventIterator = std::begin(eventInfo.GetHistoryPointerEvent());
+            for (size_t i = 0; i < eventInfo.GetHistory().size() && i < MAX_HISTORY_EVENT_COUNT; i++) {
+                if (!(*historyMMIPointerEventIterator)) {
+                    historyLoacationIterator++;
+                    historyMMIPointerEventIterator++;
+                    continue;
+                }
+                auto tempTouchEvent = NG::ConvertToTouchEvent((*historyMMIPointerEventIterator));
+                allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
+                allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+                allHistoryEvents[i].timeStamp = tempTouchEvent.time.time_since_epoch().count();
+                double density = PipelineBase::GetCurrentDensity();
+                allHistoryEvents[i].actionTouchPoint.nodeX =
+                    NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetLocalLocation().GetX() / density;
+                allHistoryEvents[i].actionTouchPoint.nodeY =
+                    NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetLocalLocation().GetY() / density;
+                allHistoryEvents[i].actionTouchPoint.windowX =
+                    NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetGlobalLocation().GetX() / density;
+                allHistoryEvents[i].actionTouchPoint.windowY =
+                    NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetGlobalLocation().GetY() / density;
+                allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
+                allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayX = tempTouchEvent.globalDisplayX;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayY = tempTouchEvent.globalDisplayY;
+                allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
+                ConvertTouchPointsToPoints(
+                    tempTouchEvent.pointers, allHistoryPoints[i], *historyLoacationIterator, false);
+                if (tempTouchEvent.pointers.size() > 0) {
+                    allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+                }
+                allHistoryEvents[i].touchPointSize =
+                    tempTouchEvent.pointers.size() < MAX_POINTS ? tempTouchEvent.pointers.size() : MAX_POINTS;
+                historyLoacationIterator++;
+                historyMMIPointerEventIterator++;
+            }
+            event.touchEvent.historyEvents = &allHistoryEvents[0];
+            event.touchEvent.historySize = eventInfo.GetHistoryPointerEvent().size() < MAX_HISTORY_EVENT_COUNT
+                                               ? eventInfo.GetHistoryPointerEvent().size()
+                                               : MAX_HISTORY_EVENT_COUNT;
+        } else {
+            event.touchEvent.historyEvents = nullptr;
+            event.touchEvent.historySize = 0;
+        }
+        // deviceid
+        event.touchEvent.deviceId = eventInfo.GetDeviceId();
+        event.touchEvent.stopPropagation = false;
+        SendArkUIAsyncCommonEvent(&event);
+        eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
+    };
+    ViewAbstract::SetFrameNodeCommonOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
+}
+
+void UnregisterCommonOnTouch(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnTouch(frameNode);
+}
+
+void SetCommonOnAppear(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onAppear = [node = AceType::WeakClaim(frameNode), nodeId, userData]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_APPEAR;
+        PipelineContext::SetCallBackNode(node);
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnAppear(frameNode, std::move(onAppear));
+}
+
+void UnregisterCommonOnAppear(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnAppear(frameNode);
+}
+
+void SetCommonOnDisappear(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDisappear = [node = AceType::WeakClaim(frameNode), nodeId, userData]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_DISAPPEAR;
+        PipelineContext::SetCallBackNode(node);
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnDisappear(frameNode, std::move(onDisappear));
+}
+
+void UnregisterCommonOnDisappear(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnDisappear(frameNode);
+}
+
+void SetCommonOnKeyEvent(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, userData](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        std::string text = info.GetKeyText();
+        std::size_t maxLen  = sizeof(event.keyEvent.keyText);
+        std::size_t copyLen = std::min(text.size(), maxLen - 1);
+        errno_t ret = strncpy_s(event.keyEvent.keyText, maxLen, text.c_str(), copyLen);
+        if (ret != EOK) {
+            return false;
+        }
+        event.keyEvent.keyText[copyLen] = '\0';
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // modifierkeystates
+        event.keyEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+        event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncCommonEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetJSFrameNodeOnKeyCallback(frameNode, onKeyEvent);
+}
+
+void UnregisterCommonOnKeyEvent(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnKeyCallback(frameNode);
+}
+
+void SetCommonOnFocus(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, userData]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_FOCUS;
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetJSFrameNodeOnFocusCallback(frameNode, std::move(onEvent));
+}
+
+void UnregisterCommonOnFocus(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnFocusCallback(frameNode);
+}
+
+void SetCommonOnBlur(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, userData]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_BLUR;
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetJSFrameNodeOnBlurCallback(frameNode, std::move(onEvent));
+}
+
+void UnregisterCommonOnBlur(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnBlurCallback(frameNode);
+}
+
+void SetCommonOnHover(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, userData](bool isHover, HoverInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_HOVER;
+        event.componentAsyncEvent.data[0].i32 = isHover;
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnHover(frameNode, onEvent);
+}
+
+void UnregisterCommonOnHover(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnHover(frameNode);
+}
+
+void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.mouseEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.mouseEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // deviceid
+    event.mouseEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // pressure
+    event.mouseEvent.actionTouchPoint.pressure = info.GetForce();
+    // toolType
+    event.mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // source
+    event.mouseEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    // stoppropagation
+    event.mouseEvent.stopPropagation = false;
+}
+
+void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, userData](MouseInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = MOUSE_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        double density = PipelineBase::GetCurrentDensity();
+        if (NearZero(density)) {
+            density = 1;
+        }
+        event.mouseEvent.subKind = ON_MOUSE;
+        event.mouseEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
+        event.mouseEvent.button = static_cast<int32_t>(info.GetButton());
+        event.mouseEvent.action = static_cast<int32_t>(info.GetAction());
+        event.mouseEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.mouseEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        std::vector<int32_t> pressedButtonList;
+        auto pressedButtons = info.GetPressedButtons();
+        event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());
+        for (auto it = pressedButtons.begin(); it != pressedButtons.end(); it++) {
+            pressedButtonList.push_back(static_cast<int32_t>(*it));
+        }
+        event.mouseEvent.pressedButtons = pressedButtonList.data();
+        SetOnMouseInfo(event, info, false);
+        SendArkUIAsyncCommonEvent(&event);
+        info.SetStopPropagation(event.mouseEvent.stopPropagation);
+    };
+    ViewAbstract::SetFrameNodeCommonOnMouse(frameNode, onEvent);
+}
+
+void UnregisterCommonOnMouse(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnMouse(frameNode);
+}
+
+void SetCommonOnSizeChange(ArkUINodeHandle node, void* userData)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onSizeChange = [nodeId, userData](const NG::RectF& oldRect, const NG::RectF& rect) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_SIZE_CHANGE;
+        auto oldLocalOffset = oldRect.GetOffset();
+        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+        event.componentAsyncEvent.data[2].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetX());
+        event.componentAsyncEvent.data[3].f32 = PipelineBase::Px2VpWithCurrentDensity(oldLocalOffset.GetY());
+
+        auto localOffset = rect.GetOffset();
+        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnSizeChange(frameNode, onSizeChange);
+}
+
+void UnregisterCommonOnSizeChange(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnSizeChange(frameNode);
+}
+
+void SetCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node, void* userData,
+    ArkUI_Float32* values, ArkUI_Int32 size)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    std::vector<double> ratioList(values, values + size);
+    auto onEvent = [nodeId, userData](bool visible, double ratio) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(userData);
+        event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = visible;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
+        SendArkUIAsyncCommonEvent(&event);
+    };
+    ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, 0);
+}
+
+void UnregisterCommonOnVisibleAreaApproximateChangeEvent(ArkUINodeHandle node)
+{
+    ViewAbstract::CheckMainThread();
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(frameNode);
+}
+
+
 ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
     void (*touchTestDone)(
         ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers, int32_t count, void* userData))
@@ -9144,6 +9783,28 @@ const ArkUICommonModifier* GetCommonModifier()
         .setFreeze = SetFreeze,
         .resetFreeze = ResetFreeze,
         .getIgnoreLayoutSafeArea = GetIgnoreLayoutSafeArea,
+        .setCommonOnClick = SetCommonOnClick,
+        .unregisterCommonOnClick = UnregisterCommonOnClick,
+        .setCommonOnTouch = SetCommonOnTouch,
+        .unregisterCommonOnTouch = UnregisterCommonOnTouch,
+        .setCommonOnAppear = SetCommonOnAppear,
+        .unregisterCommonOnAppear = UnregisterCommonOnAppear,
+        .setCommonOnDisappear = SetCommonOnDisappear,
+        .unregisterCommonOnDisappear = UnregisterCommonOnDisappear,
+        .setCommonOnKeyEvent = SetCommonOnKeyEvent,
+        .unregisterCommonOnKeyEvent = UnregisterCommonOnKeyEvent,
+        .setCommonOnFocus = SetCommonOnFocus,
+        .unregisterCommonOnFocus = UnregisterCommonOnFocus,
+        .setCommonOnBlur = SetCommonOnBlur,
+        .unregisterCommonOnBlur = UnregisterCommonOnBlur,
+        .setCommonOnHover = SetCommonOnHover,
+        .unregisterCommonOnHover = UnregisterCommonOnHover,
+        .setCommonOnMouse = SetCommonOnMouse,
+        .unregisterCommonOnMouse = UnregisterCommonOnMouse,
+        .setCommonOnSizeChange = SetCommonOnSizeChange,
+        .unregisterCommonOnSizeChange = UnregisterCommonOnSizeChange,
+        .setCommonOnVisibleAreaApproximateChangeEvent = SetCommonOnVisibleAreaApproximateChangeEvent,
+        .unregisterCommonOnVisibleAreaApproximateChangeEvent = UnregisterCommonOnVisibleAreaApproximateChangeEvent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

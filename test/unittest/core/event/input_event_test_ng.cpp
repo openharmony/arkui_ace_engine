@@ -82,7 +82,7 @@ HWTEST_F(InputEventTestNg, InputEventTest001, TestSize.Level1)
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     OnMouseEventFunc onMouse1 = onMouse;
-    inputEventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouse1));
+    inputEventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouse1));
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse2));
 
@@ -109,7 +109,7 @@ HWTEST_F(InputEventTestNg, InputEventTest002, TestSize.Level1)
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
     OnHoverFunc onHoverEventFunc2;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     inputEventHub->SetHoverEvent(std::move(onHoverEventFunc2));
 
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
@@ -164,7 +164,7 @@ HWTEST_F(InputEventTestNg, InputEventTest004, TestSize.Level1)
     inputEventHub->hoverEventActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -383,7 +383,7 @@ HWTEST_F(InputEventTestNg, OnCollectPenHoverEventTest002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -450,7 +450,7 @@ HWTEST_F(InputEventTestNg, OnCollectPenHoverMoveEvent002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
@@ -539,7 +539,7 @@ HWTEST_F(InputEventTestNg, OnCollectAccessibilityHoverEvent002, TestSize.Level1)
     auto hoverEventActuator =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
     OnHoverFunc onHoverEventFunc;
-    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    inputEventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
     
     TouchTestResult hoverResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();

@@ -935,19 +935,19 @@ public:
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
     static void SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled);
     // used in JS FrameNode
-    static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
-    static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
-    static void SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
-    static void SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
+    static void SetFrameNodeCommonOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
+    static void SetFrameNodeCommonOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
+    static void SetFrameNodeCommonOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
+    static void SetFrameNodeCommonOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
     static void SetJSFrameNodeOnKeyCallback(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback);
     static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
-    static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
-    static void SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
-    static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
-    static void SetJSFrameNodeOnSizeChange(
+    static void SetFrameNodeCommonOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetFrameNodeCommonOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
+    static void SetFrameNodeCommonOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
+    static void SetFrameNodeCommonOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
-    static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    static void SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
         int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
@@ -1084,6 +1084,8 @@ public:
     // Get property value from rsNode
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
     static void UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
+    static void CheckMainThread();
+
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,

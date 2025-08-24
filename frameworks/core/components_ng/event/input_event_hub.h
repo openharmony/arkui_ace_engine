@@ -42,7 +42,7 @@ public:
         }
         mouseEventActuator_->ReplaceInputEvent(std::move(onMouseEventFunc));
     }
-    void SetJSFrameNodeOnMouseEvent(OnMouseEventFunc&& onMouseEventFunc)
+    void SetFrameNodeCommonOnMouseEvent(OnMouseEventFunc&& onMouseEventFunc)
     {
         if (!mouseEventActuator_) {
             mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
@@ -128,7 +128,7 @@ public:
         return false;
     }
 
-    void SetJSFrameNodeOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
+    void SetFrameNodeCommonOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {
             hoverEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
@@ -136,7 +136,7 @@ public:
         hoverEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverEventFunc));
     }
 
-    void SetJSFrameNodeOnHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
+    void SetFrameNodeCommonOnHoverMoveEvent(OnHoverMoveFunc&& onHoverMoveEventFunc)
     {
         if (!hoverMoveEventActuator_) {
             hoverMoveEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));

@@ -99,6 +99,7 @@ bool InitialFullNodeImpl(int version)
 
     impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
     impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
+    impl->getBasicAPI()->registerNodeAsyncCommonEventReceiver(OHOS::Ace::NodeModel::HandleInnerNodeCommonEvent);
     return true;
 }
 } // namespace
@@ -112,16 +113,6 @@ bool InitialFullImpl()
 {
     return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
 }
-
-struct InnerEventExtraParam {
-    int32_t targetId;
-    ArkUI_NodeHandle nodePtr;
-    void* userData;
-};
-
-struct ExtraData {
-    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
-};
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
 
@@ -194,6 +185,15 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
         delete[] nativePtr->areaChangeRadio->value;
         delete nativePtr->areaChangeRadio;
         nativePtr->areaChangeRadio = nullptr;
+    }
+    if (nativePtr->commonEventListeners) {
+        auto commonEventListenersSet =
+            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(nativePtr->eventListeners);
+        if (commonEventListenersSet) {
+            commonEventListenersSet->clear();
+        }
+        delete commonEventListenersSet;
+        nativePtr->commonEventListeners = nullptr;
     }
 }
 
@@ -526,7 +526,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if (!innerEvent) {
         return;
     }
-    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent, false);
     if (nativeNodeEventType == -1) {
         return;
     }
@@ -587,17 +587,17 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     }
 }
 
-int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
 {
     int32_t invalidType = -1;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    if (!IsValidArkUINode(nodePtr)) {
+    if (!IsValidArkUINode(nodePtr) && !(isCommonEvent && nodePtr)) {
         return invalidType;
     }
-    if (!nodePtr->extraData) {
+    if (isCommonEvent ? !nodePtr->extraCommonData : !nodePtr->extraData) {
         return invalidType;
     }
-    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    auto extraData = reinterpret_cast<ExtraData*>(isCommonEvent ? nodePtr->extraCommonData : nodePtr->extraData);
     ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(-1);
     switch (innerEvent->kind) {
         case COMPONENT_ASYNC_EVENT:
@@ -677,6 +677,90 @@ void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*
                 break;
             }
         }
+    }
+}
+
+void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent)
+{
+    if (!innerEvent) {
+        return;
+    }
+    
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent, true);
+    if (nativeNodeEventType == -1) {
+        return;
+    }
+    
+    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    auto extraCommonData = reinterpret_cast<ExtraData*>(nodePtr->extraCommonData);
+    if (!extraCommonData) {
+        return;
+    }
+    
+    auto innerEventExtraParam = extraCommonData->eventMap.find(eventType);
+    if (innerEventExtraParam == extraCommonData->eventMap.end()) {
+        return;
+    }
+    ArkUI_NodeEvent event;
+    event.node = nodePtr;
+    event.eventId = innerEventExtraParam->second->targetId;
+    event.userData = innerEventExtraParam->second->userData;
+    if (event.node && !event.node->commonEventListeners) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Common event receiver is not register");
+        return;
+    }
+    if ((event.node && event.node->commonEventListeners) && ConvertEvent(innerEvent, &event)) {
+        event.targetId = innerEvent->nodeId;
+        ArkUI_UIInputEvent uiEvent;
+        std::map<ArkUI_NodeEventType, std::function<void(ArkUI_UIInputEvent&, ArkUINodeEvent*)>> eventHandlers = {
+            {NODE_TOUCH_EVENT, HandleTouchEvent},
+            {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
+            {NODE_ON_MOUSE, HandleMouseEvent},
+            {NODE_ON_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
+            {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_AXIS, HandleAxisEvent},
+            {NODE_ON_CLICK_EVENT, HandleClickEvent},
+            {NODE_ON_HOVER_EVENT, HandleHoverEvent},
+            {NODE_ON_HOVER_MOVE, HandleTouchEvent},
+        };
+
+        auto it = eventHandlers.find(eventType);
+        if (it != eventHandlers.end()) {
+            it->second(uiEvent, innerEvent);
+            uiEvent.apiVersion = innerEvent->apiVersion;
+            event.origin = &uiEvent;
+        } else {
+            event.origin = innerEvent;
+        }
+        HandleNodeCommonEvent(&event, nativeNodeEventType);
+    }
+}
+
+void HandleNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType)
+{
+    if (!event) {
+        return;
+    }
+    if (event->node && event->node->commonEventListeners) {
+        auto commonEventListenersMap =
+            reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(event->node->commonEventListeners);
+        TriggerNodeCommonEvent(event, eventType, commonEventListenersMap);
+    }
+}
+
+void TriggerNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType,
+    std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>* commonEventListenersMap)
+{
+    if (!commonEventListenersMap) {
+        return;
+    }
+    auto it = commonEventListenersMap->find(eventType);
+    if (it != commonEventListenersMap->end()) {
+        const auto& eventListener = it->second;
+        (*eventListener)(event);
     }
 }
 

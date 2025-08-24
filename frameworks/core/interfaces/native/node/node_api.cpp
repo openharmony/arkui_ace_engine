@@ -218,6 +218,17 @@ void SendArkUISyncEvent(ArkUICustomNodeEvent* event)
 }
 } // namespace CustomNodeEvent
 
+namespace NodeCommonEvent {
+
+static EventReceiver globalCommonEventReceiver = nullptr;
+void SendArkUISyncCommonEvent(ArkUINodeEvent* event)
+{
+    if (globalCommonEventReceiver) {
+        globalCommonEventReceiver(event);
+    }
+}
+} // namespace NodeCommonEvent
+
 namespace {
 
 void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32 callback)
@@ -1886,6 +1897,16 @@ ArkUI_Int32 GreatOrEqualTargetAPIVersion(ArkUI_Int32 version)
     return AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(platformVersion);
 }
 
+void RegisterNodeAsyncCommonEventReceiver(EventReceiver eventReceiver)
+{
+    NodeCommonEvent::globalCommonEventReceiver = eventReceiver;
+}
+
+void UnRegisterNodeAsyncCommonEventReceiver()
+{
+    NodeCommonEvent::globalCommonEventReceiver = nullptr;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -1917,6 +1938,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         .postFrameCallback = PostFrameCallback,
         .postIdleCallback = PostIdleCallback,
         .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
+        .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
+        .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2890,6 +2913,11 @@ void SendArkUISyncEvent(ArkUINodeEvent* event)
 void SendArkUIAsyncCustomEvent(ArkUICustomNodeEvent* event)
 {
     OHOS::Ace::NG::CustomNodeEvent::SendArkUISyncEvent(event);
+}
+
+void SendArkUIAsyncCommonEvent(ArkUINodeEvent* event)
+{
+    OHOS::Ace::NG::NodeCommonEvent::SendArkUISyncCommonEvent(event);
 }
 
 ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)

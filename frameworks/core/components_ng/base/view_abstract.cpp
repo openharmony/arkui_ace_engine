@@ -8681,12 +8681,12 @@ float ViewAbstract::GetAspectRatio(FrameNode* frameNode)
     return aspectRatio;
 }
 
-void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    gestureHub->SetFrameNodeCommonOnClick(std::move(clickEventFunc));
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
@@ -8706,12 +8706,12 @@ void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)
     uiNode->SetNodeEventRegistrationState(false);
 }
 
-void ViewAbstract::SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    gestureHub->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnTouch(FrameNode* frameNode)
@@ -8722,12 +8722,12 @@ void ViewAbstract::ClearJSFrameNodeOnTouch(FrameNode* frameNode)
     gestureHub->ClearJSFrameNodeOnTouch();
 }
 
-void ViewAbstract::SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
+void ViewAbstract::SetFrameNodeCommonOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnAppear(std::move(onAppear));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(onAppear));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnAppear(FrameNode* frameNode)
@@ -8738,12 +8738,12 @@ void ViewAbstract::ClearJSFrameNodeOnAppear(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnAppear();
 }
 
-void ViewAbstract::SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
+void ViewAbstract::SetFrameNodeCommonOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnDisappear(std::move(onDisappear));
+    eventHub->SetFrameNodeCommonOnDisappear(std::move(onDisappear));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnDisappear(FrameNode* frameNode)
@@ -8802,12 +8802,12 @@ void ViewAbstract::ClearJSFrameNodeOnBlurCallback(FrameNode* frameNode)
     focusHub->ClearJSFrameNodeOnBlurCallback();
 }
 
-void ViewAbstract::SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+    eventHub->SetFrameNodeCommonOnHoverEvent(std::move(onHoverEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
@@ -8818,12 +8818,12 @@ void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnHover();
 }
 
-void ViewAbstract::SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
+    eventHub->SetFrameNodeCommonOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
@@ -8834,12 +8834,12 @@ void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnHoverMove();
 }
 
-void ViewAbstract::SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
+void ViewAbstract::SetFrameNodeCommonOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouseEventFunc));
+    eventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouseEventFunc));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
@@ -8858,11 +8858,11 @@ BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
     return target->GetBackBlendApplyTypeValue(value);
 }
 
-void ViewAbstract::SetJSFrameNodeOnSizeChange(
+void ViewAbstract::SetFrameNodeCommonOnSizeChange(
     FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    frameNode->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
 void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
@@ -8873,7 +8873,7 @@ void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnSizeChange();
 }
 
-void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+void ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
     int32_t interval)
 {
@@ -9831,4 +9831,13 @@ void ViewAbstract::ResetResObj(const std::string& key)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
 }
+
+void ViewAbstract::CheckMainThread()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("UI function doesn't run on UI thread.");
+    }
+}
+
 } // namespace OHOS::Ace::NG

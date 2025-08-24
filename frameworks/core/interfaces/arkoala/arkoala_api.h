@@ -1186,6 +1186,7 @@ enum ArkUIEventSubKind {
     ON_CLICK_EVENT,
     ON_HOVER_EVENT,
     ON_HOVER_MOVE,
+    ON_SIZE_CHANGE,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
@@ -2822,6 +2823,29 @@ struct ArkUICommonModifier {
     void (*setFreeze)(ArkUINodeHandle node, ArkUI_Bool freeze);
     void (*resetFreeze)(ArkUINodeHandle node);
     ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setCommonOnClick)(ArkUINodeHandle node, void* extraParam);
+    void (*unregisterCommonOnClick)(ArkUINodeHandle node);
+    void (*setCommonOnTouch)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnTouch)(ArkUINodeHandle node);
+    void (*setCommonOnAppear)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnAppear)(ArkUINodeHandle node);
+    void (*setCommonOnDisappear)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnDisappear)(ArkUINodeHandle node);
+    void (*setCommonOnKeyEvent)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnKeyEvent)(ArkUINodeHandle node);
+    void (*setCommonOnFocus)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnFocus)(ArkUINodeHandle node);
+    void (*setCommonOnBlur)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnBlur)(ArkUINodeHandle node);
+    void (*setCommonOnHover)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnHover)(ArkUINodeHandle node);
+    void (*setCommonOnMouse)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnMouse)(ArkUINodeHandle node);
+    void (*setCommonOnSizeChange)(ArkUINodeHandle node, void* userData);
+    void (*unregisterCommonOnSizeChange)(ArkUINodeHandle node);
+    void (*setCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
+        ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*unregisterCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -7412,6 +7436,8 @@ struct ArkUIBasicAPI {
     void (*callback)(uint64_t nanoTimeLeft, uint32_t frameCount, void* userData));
 
     ArkUI_Int32 (*greatOrEqualTargetAPIVersion)(ArkUI_Int32 version);
+    void (*registerNodeAsyncCommonEventReceiver)(EventReceiver eventReceiver);
+    void (*unRegisterNodeAsyncCommonEventReceiver)();
 };
 
 struct ArkUIMultiThreadManagerAPI {
