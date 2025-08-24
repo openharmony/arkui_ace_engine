@@ -32,7 +32,7 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RADIO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RadioPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (value.has_value()) {
         eventHub->SetValue(value.value());
@@ -78,7 +78,7 @@ void RadioModelNG::SetChecked(bool isChecked)
     CHECK_NULL_VOID(frameNode);
     TAG_LOGD(
         AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
 
@@ -89,7 +89,7 @@ void RadioModelNG::SetOnChange(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -97,7 +97,7 @@ void RadioModelNG::SetOnChange(ChangeEvent&& onChange)
 void RadioModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -151,7 +151,7 @@ void RadioModelNG::SetOnChangeEvent(ChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -179,7 +179,7 @@ void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
 void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
         "radio frame node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     CHECK_NULL_VOID(eventHub);
@@ -298,7 +298,7 @@ Color RadioModelNG::GetIndicatorColor(FrameNode* frameNode)
 void RadioModelNG::SetRadioValue(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!value.empty()) {
         eventHub->SetValue(value);
@@ -308,7 +308,7 @@ void RadioModelNG::SetRadioValue(FrameNode* frameNode, const std::string& value)
 std::string RadioModelNG::GetRadioValue(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     return eventHub->GetValue();
 }
@@ -316,7 +316,7 @@ std::string RadioModelNG::GetRadioValue(FrameNode* frameNode)
 void RadioModelNG::SetRadioGroup(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!value.empty()) {
         eventHub->SetGroup(value);
@@ -326,7 +326,7 @@ void RadioModelNG::SetRadioGroup(FrameNode* frameNode, const std::string& value)
 std::string RadioModelNG::GetRadioGroup(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     return eventHub->GetGroup();
 }
@@ -335,7 +335,7 @@ void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& valu
     const std::string& group, int32_t indicator)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(value);
     eventHub->SetGroup(group);

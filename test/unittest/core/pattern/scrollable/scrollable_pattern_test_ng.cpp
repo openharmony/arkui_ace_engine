@@ -1068,7 +1068,7 @@ HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo001, TestSize.Level1)
     RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
     ASSERT_NE(frameNode, nullptr);
-    frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    frameNode->GetEventHub<ScrollableEventHub>();
     scrollablePattern->frameNode_ = frameNode;
     auto json = JsonUtil::Create(true);
     scrollablePattern->GetEventDumpInfo(json);
@@ -1118,7 +1118,7 @@ HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo002, TestSize.Level1)
     ScrollableModelNG::SetOnReachStart(AceType::RawPtr(frameNode), std::move(onReachStart));
     ScrollableModelNG::SetOnReachEnd(AceType::RawPtr(frameNode), std::move(onReachEnd));
 
-    auto eventHub = frameNode->GetOrCreateEventHub<ScrollableEventHub>();
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetJSFrameNodeOnScrollStart(scrollStart);
     eventHub->SetJSFrameNodeOnScrollStop(scrollStop);

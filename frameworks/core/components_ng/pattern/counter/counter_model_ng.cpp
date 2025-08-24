@@ -70,7 +70,7 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
 {
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    buttonNode->GetOrCreateEventHub<ButtonEventHub>()->SetStateEffect(true);
+    buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -123,7 +123,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
-    auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = subNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
@@ -145,7 +145,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
-    auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = addNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {
@@ -251,7 +251,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
-    auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = subNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableDec);
     if (!eventHub->IsEnabled()) {
@@ -271,7 +271,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
-    auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = addNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(enableInc);
     if (!eventHub->IsEnabled()) {

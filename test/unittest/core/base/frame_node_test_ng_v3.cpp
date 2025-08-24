@@ -499,7 +499,7 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback100, TestSize.Level1)
     RectF rect = RectF(0, 0, 100, 100);
     child->renderContext_->UpdatePaintRect(rect);
     frameNode->renderContext_->UpdatePaintRect(rect);
-    auto eventHub = child->GetOrCreateEventHub<EventHub>();
+    auto eventHub = child->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto onVisibleChange = [](bool visible, double ratio) {};
     std::vector<double> ratioList = { 0.0, 1.0 };

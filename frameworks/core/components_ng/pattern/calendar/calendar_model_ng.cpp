@@ -199,7 +199,7 @@ void CalendarModelNG::SetSelectedChangeEvent(std::function<void(const std::strin
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
         CHECK_NULL_VOID(calendarFrameNode);
         auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
-        auto calendarEventHub = pattern->GetOrCreateEventHub<CalendarEventHub>();
+        auto calendarEventHub = pattern->GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         calendarEventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
     }
@@ -209,7 +209,7 @@ void CalendarModelNG::SetOnRequestDataEvent(std::function<void(const std::string
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestDataEvent(std::move(requestData));
 }

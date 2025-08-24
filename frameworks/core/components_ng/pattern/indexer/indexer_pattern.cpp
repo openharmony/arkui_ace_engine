@@ -1020,7 +1020,7 @@ void IndexerPattern::UpdateBubbleList()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
@@ -1397,7 +1397,7 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
     CHECK_NULL_VOID(listNode);
     if (popupSize > maxItemsSize) {
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
-        auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+        auto listEventHub = listNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
         auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
             auto pattern = weak.Upgrade();
@@ -1685,7 +1685,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     ReportPoupSelectEvent();
@@ -2024,7 +2024,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto indexerEventHub = host->GetOrCreateEventHub<IndexerEventHub>();
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = GetActualIndex(selectIndex);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {

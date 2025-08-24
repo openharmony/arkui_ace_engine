@@ -271,7 +271,7 @@ void IndexerModelNG::SetOnSelected(std::function<void(const int32_t selected)>&&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelected(std::move(onSelect));
 }
@@ -281,7 +281,7 @@ void IndexerModelNG::SetOnRequestPopupData(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
 }
@@ -290,7 +290,7 @@ void IndexerModelNG::SetOnPopupSelected(std::function<void(const int32_t selecte
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
 }
@@ -299,7 +299,7 @@ void IndexerModelNG::SetChangeEvent(std::function<void(const int32_t selected)>&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -308,7 +308,7 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
@@ -963,7 +963,7 @@ void IndexerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
 void IndexerModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelected(std::move(onSelect));
 }
@@ -972,7 +972,7 @@ void IndexerModelNG::SetOnRequestPopupData(FrameNode* frameNode,
     std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
 }
@@ -981,7 +981,7 @@ void IndexerModelNG::SetOnPopupSelected(FrameNode* frameNode,
     std::function<void(const int32_t selected)>&& onPopupSelected)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
 }
@@ -989,7 +989,7 @@ void IndexerModelNG::SetOnPopupSelected(FrameNode* frameNode,
 void IndexerModelNG::SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -998,7 +998,7 @@ void IndexerModelNG::SetCreatChangeEvent(FrameNode* frameNode,
     std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }

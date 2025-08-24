@@ -310,7 +310,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto event = UpdateTimePickerSwitchEvent(timeNode, textNextPrevNode, dialogTheme, nextPrevButtonNode,
         timePickerSwitchEvent);
     eventNextPrevHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(event)));
-    auto buttonNextPrevEventHub = nextPrevButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonNextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonNextPrevEventHub, nullptr);
     buttonNextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -354,7 +354,7 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         CHECK_NULL_VOID(textLayoutProperty);
         auto pickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto timePickerEventHub = pickerPattern->GetOrCreateEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         auto nextPrevButtonNode = nextPrevButtonNodeWeak.Upgrade();
         CHECK_NULL_VOID(nextPrevButtonNode);
@@ -669,7 +669,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     columnPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
@@ -691,7 +691,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto timePickerEventHub = pickerPattern->GetOrCreateEventHub<TimePickerEventHub>();
+        auto timePickerEventHub = pickerPattern->GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
     };
@@ -793,7 +793,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    auto buttonCancelEventHub = buttonCancelNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
@@ -943,7 +943,7 @@ void TimePickerDialogView::SetHour24(const RefPtr<TimePickerRowPattern>& timePic
 void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -952,7 +952,7 @@ void TimePickerDialogView::SetDialogEnterSelectedArea(
     const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -960,7 +960,7 @@ void TimePickerDialogView::SetDialogEnterSelectedArea(
 void TimePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }

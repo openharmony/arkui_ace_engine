@@ -123,7 +123,7 @@ void DragEventTestNgBase::InitTestFrameNodeStatus(
             dragDropInfo.extraInfo = dragStartInfo.extraInfo;
             return dragDropInfo;
         };
-        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = frameNode->GetEventHub<EventHub>();
         ASSERT_NE(eventHub, nullptr);
         eventHub->SetOnDragStart(std::move(onDragStart));
     }
@@ -176,7 +176,7 @@ void DragEventTestNgBase::MockTouchDown(const RefPtr<DragEventActuator>& actuato
     ASSERT_NE(gestureHub, nullptr);
     auto frameNode = gestureHub->GetFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     ASSERT_NE(getEventTargetImpl, nullptr);
@@ -439,7 +439,7 @@ HWTEST_F(DragEventTestNgBase, DragEventTestNGBase004, TestSize.Level1)
     auto onDragEnd = [&dragStartInfo](const RefPtr<OHOS::Ace::DragEvent>& info) {
         dragStartInfo.dragResult = info->GetResult();
     };
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 

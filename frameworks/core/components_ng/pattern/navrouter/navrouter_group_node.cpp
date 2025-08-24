@@ -38,9 +38,9 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t sl
         auto navDestinationNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(navDestinationNode);
         auto navDestinationEventHub =
-            AceType::DynamicCast<NavDestinationEventHub>(navDestinationNode->GetOrCreateEventHub<EventHub>());
+            AceType::DynamicCast<NavDestinationEventHub>(navDestinationNode->GetEventHub<EventHub>());
         CHECK_NULL_VOID(navDestinationEventHub);
-        auto eventHub = GetOrCreateEventHub<NavRouterEventHub>();
+        auto eventHub = GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         navDestinationEventHub->SetOnStateChange(eventHub->GetOnStateChange());
         return;
@@ -106,7 +106,7 @@ void NavRouterGroupNode::ProcessDestinationChangeEvent()
         CHECK_NULL_VOID(navRouter);
         navRouter->AddNavDestinationToNavigation();
     };
-    auto eventHub = GetOrCreateEventHub<NavRouterEventHub>();
+    auto eventHub = GetEventHub<NavRouterEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 }
@@ -149,7 +149,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         }
 
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
-        auto navRouterEventHub = GetOrCreateEventHub<NavRouterEventHub>();
+        auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(navRouterEventHub);
         if (uiNode) {
             navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());

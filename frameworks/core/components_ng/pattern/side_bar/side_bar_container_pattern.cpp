@@ -404,7 +404,7 @@ void SideBarContainerPattern::OnModifyDone()
 
     CreateAndMountNodes();
 
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -548,7 +548,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
-    auto dividerHub = dividerNode->GetOrCreateEventHub<EventHub>();
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
     auto inputHub = dividerHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -593,7 +593,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
     auto imgNode = CreateControlImage(sideBarTheme, parentNode);
     CHECK_NULL_VOID(imgNode);
 
-    auto buttonHub = buttonNode->GetOrCreateEventHub<EventHub>();
+    auto buttonHub = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonHub);
     auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -875,7 +875,7 @@ void SideBarContainerPattern::UpdateSideBarPosition(float value)
 
 void SideBarContainerPattern::FireChangeEvent(bool isShow)
 {
-    auto sideBarContainerEventHub = GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto sideBarContainerEventHub = GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(sideBarContainerEventHub);
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
@@ -1112,7 +1112,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     bool isPercent = realSideBarWidth_.Unit() == DimensionUnit::PERCENT;
     auto preSidebarWidthPx = DimensionConvertToPx(preSidebarWidth_).value_or(0.0);
     auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? xOffset : -xOffset);
-    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
@@ -1162,7 +1162,7 @@ void SideBarContainerPattern::FireSideBarWidthChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1316,7 +1316,7 @@ void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& button
         return;
     }
 
-    auto buttonHub = buttonNode->GetOrCreateEventHub<EventHub>();
+    auto buttonHub = buttonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonHub);
     auto gestureHub = buttonHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1396,7 +1396,7 @@ void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height,
     MarkNeedInitRealSideBarWidth(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SideBarContainerEventHub>();
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     FireSideBarWidthChangeEvent();
 }
@@ -1429,7 +1429,7 @@ void SideBarContainerPattern::SetAccessibilityEvent()
 void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,
     const RefPtr<FrameNode>& imgNode)
 {
-    auto eventHub = imgNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = imgNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto errorCallback = [weakPattern = WeakClaim(this), weakNode = WeakClaim(RawPtr(imgNode)),
         weakTheme = WeakClaim(RawPtr(sideBarTheme))] (const LoadImageFailEvent& info) {

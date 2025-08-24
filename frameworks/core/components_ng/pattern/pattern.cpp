@@ -27,7 +27,7 @@ int32_t Pattern::OnRecvCommand(const std::string& command)
     if (event.compare("click") == 0) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, RET_FAILED);
-        auto eventHub = host->GetOrCreateEventHub<EventHub>();
+        auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, RET_FAILED);
         if (!eventHub->IsEnabled()) {
             return RET_FAILED;

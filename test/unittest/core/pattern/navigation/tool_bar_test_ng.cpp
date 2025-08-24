@@ -287,7 +287,7 @@ void ToolBarTestNg::UpdateBarItemNodeWithItem(const RefPtr<NavToolbarNode>& tool
             barItemNode->AddChild(iconNode);
         }
         if (barItem.action) {
-            auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+            auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->SetItemAction(barItem.action);
         }

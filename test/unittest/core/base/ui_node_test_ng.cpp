@@ -3508,7 +3508,7 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
     ASSERT_NE(topUINode, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_TRUE(eventHub);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);

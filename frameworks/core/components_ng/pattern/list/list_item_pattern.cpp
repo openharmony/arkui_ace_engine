@@ -106,7 +106,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_RETURN(listItemEventHub, nullptr);
     if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
         !listItemEventHub->GetEndOnDelete()) {
@@ -316,7 +316,7 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     listItemEventHub->SetOnOffsetChangeOffset(std::move(offsetChangeCallback));
 }
@@ -331,7 +331,7 @@ void ListItemPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     InitOnFocusEvent();
     Pattern::OnModifyDone();
@@ -378,7 +378,7 @@ void ListItemPattern::ChangeAxis(Axis axis)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     axis_ = axis;
     if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
@@ -450,7 +450,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
     if (isPanInit || axisChanged) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -528,7 +528,7 @@ void ListItemPattern::ChangeDeleteAreaStage()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto enterStartDeleteArea = listItemEventHub->GetOnEnterStartDeleteArea();
     auto enterEndDeleteArea = listItemEventHub->GetOnEnterEndDeleteArea();
@@ -574,7 +574,7 @@ void ListItemPattern::UpdatePostion(float delta)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto offset = curOffset_;
     IsRTLAndVertical() ? curOffset_ -= delta : curOffset_ += delta;
@@ -739,7 +739,7 @@ void ListItemPattern::FireSwipeActionOffsetChange(float oldOffset, float newOffs
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     listItemEventHub->FireOffsetChangeEvent(Dimension(newOffset).ConvertToVp());
 }
@@ -754,7 +754,7 @@ void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperInd
         return;
     }
     auto oldState = swipeActionState_;
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
     bool trigStart = GreatNotEqual(curOffset_, 0.0f);
@@ -825,7 +825,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto startOnDelete = listItemEventHub->GetStartOnDelete();
     auto endOnDelete = listItemEventHub->GetEndOnDelete();
@@ -931,7 +931,7 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
-        auto eventHub = GetOrCreateEventHub<ListItemEventHub>();
+        auto eventHub = GetEventHub<ListItemEventHub>();
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1093,7 +1093,7 @@ Color ListItemPattern::GetBlendGgColor()
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_RETURN(theme, color);
     if (isSelected_) {
-        auto eventHub = GetOrCreateEventHub<ListItemEventHub>();
+        auto eventHub = GetEventHub<ListItemEventHub>();
         CHECK_NULL_RETURN(eventHub, color);
         if (!eventHub->HasStateStyle(UI_STATE_SELECTED)) {
             color = theme->GetItemSelectedColor();
@@ -1114,7 +1114,7 @@ void ListItemPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1182,7 +1182,7 @@ void ListItemPattern::InitDisableEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

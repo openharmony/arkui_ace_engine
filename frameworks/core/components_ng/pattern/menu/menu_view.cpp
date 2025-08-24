@@ -750,7 +750,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(target);
-    auto eventHub = target->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = target->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -769,7 +769,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
-    auto hub = imageNode->GetOrCreateEventHub<EventHub>();
+    auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
@@ -910,7 +910,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1846,7 +1846,7 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     pattern->SetTextNode(textNode);
     pattern->SetBlockClick(params[index].disableSystemClick);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(params[index].action);
 }
@@ -1866,7 +1866,7 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(onClickFunc);
 }
@@ -1966,7 +1966,7 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         CHECK_NULL_VOID(menuPattern);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = optionNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetEnabled(params[i].enabled);
         auto focusHub = optionNode->GetFocusHub();
@@ -2026,7 +2026,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteNode->MarkModifyDone();
     row->MountToParent(option);
     row->MarkModifyDone();
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
         if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {

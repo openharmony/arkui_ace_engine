@@ -494,7 +494,7 @@ void TabBarPattern::AddTabBarItemClickAndTouchEvent(const RefPtr<FrameNode>& tab
     if (clickEvents_.find(tabBarItemId) != clickEvents_.end()) {
         return;
     }
-    auto eventHub = tabBarItem->GetOrCreateEventHub<EventHub>();
+    auto eventHub = tabBarItem->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -561,7 +561,7 @@ void TabBarPattern::AddMaskItemClickEvent()
             continue;
         }
 
-        auto eventHub = maskNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = maskNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto gestureHub = eventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -791,7 +791,7 @@ void TabBarPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
@@ -811,7 +811,7 @@ void TabBarPattern::InitMouseEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
         auto pattern = weak.Upgrade();
@@ -1077,7 +1077,7 @@ void TabBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1174,7 +1174,7 @@ void TabBarPattern::RemoveTabBarEventCallback()
         CHECK_NULL_VOID(tabBarPattern);
         auto host = tabBarPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -1194,7 +1194,7 @@ void TabBarPattern::RemoveTabBarEventCallback()
             CHECK_NULL_VOID(childNode);
             auto frameNode = AceType::DynamicCast<FrameNode>(childNode);
             CHECK_NULL_VOID(frameNode);
-            auto childHub = frameNode->GetOrCreateEventHub<EventHub>();
+            auto childHub = frameNode->GetEventHub<EventHub>();
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
@@ -1219,7 +1219,7 @@ void TabBarPattern::AddTabBarEventCallback()
         CHECK_NULL_VOID(tabBarPattern);
         auto host = tabBarPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -1232,7 +1232,7 @@ void TabBarPattern::AddTabBarEventCallback()
             CHECK_NULL_VOID(childNode);
             auto frameNode = AceType::DynamicCast<FrameNode>(childNode);
             CHECK_NULL_VOID(frameNode);
-            auto childHub = frameNode->GetOrCreateEventHub<EventHub>();
+            auto childHub = frameNode->GetEventHub<EventHub>();
             CHECK_NULL_VOID(childHub);
             auto childGestureHub = childHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(childGestureHub);
@@ -1430,7 +1430,7 @@ void TabBarPattern::InitLongPressAndDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -3261,7 +3261,7 @@ void TabBarPattern::InitTurnPageRateEvent()
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!animationStartEvent_) {
         AnimationStartEvent animationStartEvent =

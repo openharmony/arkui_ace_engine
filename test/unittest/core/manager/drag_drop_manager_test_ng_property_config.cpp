@@ -283,7 +283,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFindTargetInChildNodesTest006,
     customNode->children_ = child;
 
     auto frameNode4 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode4->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode4->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -291,7 +291,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFindTargetInChildNodesTest006,
     eventHub->SetOnDrop(std::move(onDrop));
 
     auto frameNode5 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto gridEvent = frameNode5->GetOrCreateEventHub<GridEventHub>();
+    auto gridEvent = frameNode5->GetEventHub<GridEventHub>();
     std::string onItemDropInfo;
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
@@ -419,7 +419,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnDragEventTest001, TestSi
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -482,7 +482,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest003, Te
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -571,7 +571,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest001, Te
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -613,7 +613,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest002, Te
      * @tc.steps: step2. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
     // Set OnItemDragLeave callback
     std::string itemInfoLeave;
@@ -765,7 +765,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest002, TestSize.
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -784,14 +784,14 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest002, TestSize.
      */
     ItemDragInfo itemDragInfo;
     auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto gridEvent = gridNode->GetOrCreateEventHub<GridEventHub>();
+    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
     std::string onItemDropInfo;
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
     gridEvent->SetOnItemDrop(std::move(onItemDrop));
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0.0, 0.0);
     auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto listEvent = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto listEvent = listNode->GetEventHub<ListEventHub>();
     std::string onItemDropInfoList;
     ItemDropFunc onItemDropList = [&onItemDropInfoList](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                       int32_t /* insertIndex */,
@@ -835,7 +835,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -854,7 +854,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
      */
     ItemDragInfo itemDragInfo;
     auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto gridEvent = gridNode->GetOrCreateEventHub<GridEventHub>();
+    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
     std::string onItemDropInfo;
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
@@ -862,7 +862,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
     dragDropManager->draggedGridFrameNode_ = gridNode;
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0.0, 0.0);
     auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto listEvent = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto listEvent = listNode->GetEventHub<ListEventHub>();
     std::string onItemDropInfoList;
     ItemDropFunc onItemDropList = [&onItemDropInfoList](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                       int32_t /* insertIndex */,
@@ -1479,7 +1479,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest050, TestSize.Level1)
 
     RefPtr<FrameNode> frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -1852,7 +1852,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest063, TestSize.Level1)
      * @tc.steps: step2. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
 
     // Set OnItemDragLeave callback
     std::string itemInfoLeave;
@@ -2220,7 +2220,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest075, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     renderContext->paintRect_ = RectF(0.0f, 0.0f, 15.0f, 15.0f);
     frameNode->isActive_ = true;
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;

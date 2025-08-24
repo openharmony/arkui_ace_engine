@@ -333,21 +333,21 @@ void MarqueePattern::PropertyCancelAnimationFinish()
 
 void MarqueePattern::FireStartEvent() const
 {
-    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireStartEvent();
 }
 
 void MarqueePattern::FireBounceEvent() const
 {
-    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireBounceEvent();
 }
 
 void MarqueePattern::FireFinishEvent() const
 {
-    auto marqueeEventHub = GetOrCreateEventHub<MarqueeEventHub>();
+    auto marqueeEventHub = GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(marqueeEventHub);
     marqueeEventHub->FireFinishEvent();
 }

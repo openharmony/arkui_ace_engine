@@ -446,7 +446,7 @@ void SwiperPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     swiperId_ = host->GetId();
-    auto hub = host->GetOrCreateEventHub<SwiperEventHub>();
+    auto hub = host->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(hub);
     hub->SetSwiperId(swiperId_);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1600,7 +1600,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
     if (jumpOnChange_) {
         return;
     }
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireChangeEvent(preIndex, currentIndex, isInLayout);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
@@ -1621,7 +1621,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
     auto host = GetHost();
@@ -1635,7 +1635,7 @@ void SwiperPattern::FireAnimationEndEvent(
     if (currentIndex == -1) {
         return;
     }
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
                 : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
@@ -1647,7 +1647,7 @@ void SwiperPattern::FireAnimationEndEvent(
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireGestureSwipeEvent(currentIndex, info);
 }
@@ -1661,7 +1661,7 @@ void SwiperPattern::FireSelectedEvent(int32_t currentIndex, int32_t targetIndex)
         return;
     }
 
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (selectedIndex_ != GetLoopIndex(targetIndex)) {
         selectedIndex_ = GetLoopIndex(targetIndex);
@@ -1674,7 +1674,7 @@ void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetInde
     if (currentIndex == targetIndex || currentIndex != GetLoopIndex(currentIndex)) {
         return;
     }
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (unselectedIndex_ != GetLoopIndex(currentIndex)) {
         unselectedIndex_ = GetLoopIndex(currentIndex);
@@ -1684,7 +1684,7 @@ void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetInde
 
 void SwiperPattern::FireScrollStateEvent(ScrollState scrollState)
 {
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     if (scrollState_ != scrollState) {
         scrollState_ = scrollState;
@@ -2118,7 +2118,7 @@ void SwiperPattern::ShowNext(bool needCheckWillScroll)
     } else {
         SwipeToWithoutAnimation(nextIndex);
     }
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireIndicatorChangeEvent(GetLoopIndex(currentIndex_));
 }
@@ -2177,7 +2177,7 @@ void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
     } else {
         SwipeToWithoutAnimation(prevIndex);
     }
-    auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireIndicatorChangeEvent(GetLoopIndex(currentIndex_));
 }
@@ -2737,7 +2737,7 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
             std::abs(velocity) > MIN_DUMP_VELOCITY_THRESHOLD) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto eventHub = host->GetOrCreateEventHub<EventHub>();
+            auto eventHub = host->GetEventHub<EventHub>();
             CHECK_NULL_VOID(eventHub);
             auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gestureEventHub);
@@ -3177,7 +3177,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if (GetLoopIndex(currentIndex_) != currentFirstIndex_) {
-        auto swiperEventHub = GetOrCreateEventHub<SwiperEventHub>();
+        auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireIndicatorChangeEvent(currentFirstIndex_);
     }
@@ -5807,7 +5807,7 @@ void SwiperPattern::InitHoverMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -6479,7 +6479,7 @@ void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -6495,7 +6495,7 @@ void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetOrCreateEventHub<EventHub>();
+        auto hub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -6513,7 +6513,7 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -7058,7 +7058,7 @@ void SwiperPattern::FireWillHideEvent(int32_t willHideIndex) const
     CHECK_NULL_VOID(host);
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willHideIndex));
     CHECK_NULL_VOID(tabContentNode);
-    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->FireWillHideEvent();
 }
@@ -7072,7 +7072,7 @@ void SwiperPattern::FireWillShowEvent(int32_t willShowIndex) const
     CHECK_NULL_VOID(host);
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(host->GetChildByIndex(willShowIndex));
     CHECK_NULL_VOID(tabContentNode);
-    auto tabContentEventHub = tabContentNode->GetOrCreateEventHub<TabContentEventHub>();
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
     CHECK_NULL_VOID(tabContentEventHub);
     tabContentEventHub->FireWillShowEvent();
 }
@@ -7111,7 +7111,7 @@ void SwiperPattern::SetOnHiddenChangeForParent()
     if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationePattern);
-        auto navDestinationEventHub = navDestinationePattern->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
         navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
@@ -7138,7 +7138,7 @@ void SwiperPattern::RemoveOnHiddenChange()
     if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationePattern = parent->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationePattern);
-        auto navDestinationEventHub = navDestinationePattern->GetOrCreateEventHub<NavDestinationEventHub>();
+        auto navDestinationEventHub = navDestinationePattern->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(navDestinationEventHub);
         navDestinationEventHub->RemoveOnHiddenChange(host->GetId());
     }

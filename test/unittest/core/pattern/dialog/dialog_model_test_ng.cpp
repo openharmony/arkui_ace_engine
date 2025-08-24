@@ -123,19 +123,19 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
      * @tc.steps: step2. Create EventHub.
      * @tc.expected: EventHub created successfully.
      */
-    auto eventHub = pattern->GetOrCreateEventHub<DialogEventHub>();
+    auto eventHub = pattern->GetEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->MarkModifyDone();
     /**
      * @tc.steps: step3. Get EventHub's properties.
-     * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
+     * @tc.expected: These properties are null when GetEventHub functions have not been invoked.
      */
     EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetOnDragStart(), nullptr);
 
     /**
-     * @tc.steps: step4. Invoke GetOrCreateEventHub functions.
+     * @tc.steps: step4. Invoke GetEventHub functions.
      * @tc.expected: These eventHub properties are not null.
      */
     eventHub->GetOrCreateGestureEventHub();

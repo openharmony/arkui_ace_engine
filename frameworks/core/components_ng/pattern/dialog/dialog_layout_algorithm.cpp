@@ -606,7 +606,7 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
 {
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_VOID(dialogContext);
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();

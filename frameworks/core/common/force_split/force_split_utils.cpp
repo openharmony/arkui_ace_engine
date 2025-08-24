@@ -105,7 +105,7 @@ RefPtr<NavDestinationGroupNode> ForceSplitUtils::CreateNavDestinationProxyNode()
     auto pattern = proxyNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetName("__NavDestination_proxy__");
-    auto eventHub = proxyNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = proxyNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -215,7 +215,7 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
         .edges = SAFE_AREA_EDGE_ALL };
     property->UpdateSafeAreaExpandOpts(opts);
-    auto eventHub = phNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = phNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }

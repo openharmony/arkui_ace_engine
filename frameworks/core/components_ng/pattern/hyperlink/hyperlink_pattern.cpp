@@ -68,7 +68,7 @@ void HyperlinkPattern::EnableDrag()
         event->SetData(unifiedData);
         return info;
     };
-    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -78,7 +78,7 @@ void HyperlinkPattern::OnModifyDone()
     TextPattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
 
     auto gestureHub = hub->GetOrCreateGestureEventHub();

@@ -147,7 +147,7 @@ void HandleDefaultIconForNavDestination(
     CHECK_NULL_VOID(navDestinationNode);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(paintProperty);

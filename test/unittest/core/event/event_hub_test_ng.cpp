@@ -112,13 +112,13 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->MarkModifyDone();
     EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Get EventHub's properties.
-     * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
+     * @tc.expected: These properties are null when GetEventHub functions have not been invoked.
      */
     EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
@@ -137,7 +137,7 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
 
 /**
  * @tc.name: EventHubPropertyTest002
- * @tc.desc: Create EventHub and invoke GetOrCreateEventHub functions.
+ * @tc.desc: Create EventHub and invoke GetEventHub functions.
  * @tc.type: FUNC
  */
 HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
@@ -147,11 +147,11 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
-     * @tc.steps: step2. Invoke GetOrCreateEventHub functions.
+     * @tc.steps: step2. Invoke GetEventHub functions.
      * @tc.expected: These eventHub properties are not null.
      */
     eventHub->GetOrCreateGestureEventHub();
@@ -964,7 +964,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest005, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest006, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     RectF tempOldRect;
     OffsetF tempOldOrigin;
@@ -1004,7 +1004,7 @@ HWTEST_F(EventHubTestNg, EventHubTest006, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
 
     eventHub->GetOrCreateGestureEventHub();
     eventHub->GetOrCreateInputEventHub();
@@ -1034,7 +1034,7 @@ HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest008, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     RectF tempOldRect;
     OffsetF tempOldOrigin;
@@ -1074,7 +1074,7 @@ HWTEST_F(EventHubTestNg, EventHubTest008, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest009, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->GetOrCreateGestureEventHub();
     eventHub->GetOrCreateInputEventHub();
     eventHub->GetOrCreateFocusHub();

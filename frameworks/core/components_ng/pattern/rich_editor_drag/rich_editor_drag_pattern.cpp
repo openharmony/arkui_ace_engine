@@ -48,7 +48,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto hub = dragNode->GetOrCreateEventHub<EventHub>();
+    auto hub = dragNode->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, nullptr);

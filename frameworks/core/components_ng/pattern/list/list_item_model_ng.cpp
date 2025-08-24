@@ -135,7 +135,7 @@ void ListItemModelNG::SetSelected(bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -144,7 +144,7 @@ void ListItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEve
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetSelectChangeEvent(std::move(changeEvent));
 }
@@ -153,7 +153,7 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -172,7 +172,7 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -225,7 +225,7 @@ void ListItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(selected);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
@@ -243,7 +243,7 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -281,7 +281,7 @@ void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()
 void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
 }
@@ -300,7 +300,7 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     CHECK_NULL_VOID(node);
-    auto eventHub = node->GetOrCreateEventHub<ListItemEventHub>();
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);

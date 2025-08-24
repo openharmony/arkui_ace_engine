@@ -143,7 +143,7 @@ void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, in
     CHECK_NULL_VOID(cancelButtonRenderContext);
     auto cancelImageRenderContext = imageHost->GetRenderContext();
     CHECK_NULL_VOID(cancelImageRenderContext);
-    auto cancelButtonEvent = buttonHost->GetOrCreateEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     auto buttonLayoutProperty = buttonHost->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
@@ -164,7 +164,7 @@ void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, in
         imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     }
     if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageEvent = imageHost->GetOrCreateEventHub<ImageEventHub>();
+        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
         CHECK_NULL_VOID(imageEvent);
         imageEvent->SetEnabled(isEventEnabled);
     }
@@ -196,7 +196,7 @@ void SearchPattern::UpdateEnable(bool needToEnable)
     CHECK_NULL_VOID(frameNode);
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(searchButtonFrameNode);
-    auto buttonEventHub = searchButtonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (needToEnable) {
         buttonEventHub->SetEnabled(true);
@@ -242,7 +242,7 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     auto buttonNode = buttonLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
-    auto searchButtonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
 
     if (!searchButtonEvent->IsEnabled()) {
@@ -258,7 +258,7 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     auto cancelButtonNode = cancelButtonLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, true);
-    auto cancelButtonEvent = cancelButtonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, true);
     cancelButtonOffset_ = cancelButtonGeometryNode->GetFrameOffset();
     if (!cancelButtonEvent->IsEnabled()) {
@@ -316,7 +316,7 @@ void SearchPattern::OnModifyDone()
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
 
-    auto searchButtonEvent = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
     isSearchButtonEnabled_ = searchButtonEvent->IsEnabled();
 
     UpdateCancelButton();
@@ -474,11 +474,11 @@ void SearchPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->SetEnabled(searchEventHub->IsEnabled() ? true : false);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -492,7 +492,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto searchGestureHub = searchEventHub->GetGestureEventHub();
     CHECK_NULL_VOID(searchGestureHub);
@@ -505,7 +505,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
     for (int32_t childIndex = TEXTFIELD_INDEX; childIndex <= BUTTON_INDEX; childIndex++) {
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
-        auto childEventHub = childFrameNode->GetOrCreateEventHub<EventHub>();
+        auto childEventHub = childFrameNode->GetEventHub<EventHub>();
         auto childGestureHub = childEventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(childGestureHub);
         childGestureHub->SetTouchable(searchTouchable);
@@ -528,7 +528,7 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
         auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
@@ -545,11 +545,11 @@ void SearchPattern::InitTextFieldDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<EventHub>();
+    auto searchEventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldEventHub = textFieldFrameNode->GetOrCreateEventHub<EventHub>();
+    auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(textFieldEventHub);
 
     textFieldFrameNode->SetDragPreview(host->GetDragPreview());
@@ -813,7 +813,7 @@ void SearchPattern::OnClickButtonAndImage()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = host->GetOrCreateEventHub<SearchEventHub>();
+    auto searchEventHub = host->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
     CHECK_NULL_VOID(textFieldFrameNode);
@@ -1258,7 +1258,7 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
     CHECK_NULL_VOID(buttonFrameNode);
     auto gesture = buttonFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetStateEffect(false);
     auto touchTask = [weak = WeakClaim(this), childId](const TouchEventInfo& info) {
@@ -1285,7 +1285,7 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
     CHECK_NULL_VOID(host);
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto eventHub = buttonFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
@@ -1462,7 +1462,7 @@ void SearchPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = host->GetEventHub<SearchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -1479,7 +1479,7 @@ void SearchPattern::HandleHoverEvent(bool isHover)
     isSearchHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -1527,7 +1527,7 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
     isSearchPress_ = isDown;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto searchEventHub = GetOrCreateEventHub<SearchEventHub>();
+    auto searchEventHub = GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(searchEventHub);
     auto renderContext = host->GetRenderContext();
     auto searchTheme = GetTheme();
@@ -2322,7 +2322,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     if (isCreateNode) {
         iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = iconFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }
@@ -2354,7 +2354,7 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     if (isCreateNode) {
         iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = iconFrameNode->GetOrCreateEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }

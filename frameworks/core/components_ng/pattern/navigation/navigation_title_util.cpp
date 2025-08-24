@@ -176,7 +176,7 @@ uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
     const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam)
 {
-    auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
@@ -411,7 +411,7 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
     }
 
-    auto buttonEvent = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
     auto focusHub = buttonNode->GetFocusHub();
@@ -434,7 +434,7 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& b
         barItemNode->AddChild(iconNode);
     }
     if (barItem.action) {
-        auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
+        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetItemAction(barItem.action);
     }

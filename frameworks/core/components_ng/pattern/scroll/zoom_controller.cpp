@@ -73,7 +73,7 @@ void ZoomController::DeinitializePinchGesture()
 void ZoomController::HandleZoomStart(GestureEvent& info)
 {
     zoomScaleStart_ = pattern_.GetZoomScale();
-    auto hub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto hub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     hub->FireOnZoomStart();
 }
@@ -127,7 +127,7 @@ void ZoomController::HandleZoomEnd(GestureEvent& info)
             pipeline->FlushUITasks();
         });
     }
-    auto hub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto hub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     hub->FireOnZoomStop();
 }

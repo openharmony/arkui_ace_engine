@@ -504,7 +504,7 @@ HWTEST_F(IndexerPatternTestTwoNg, UpdatePopupListGradientView001, TestSize.Level
 
     auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto listEventHub = listNode->GetEventHub<ListEventHub>();
     ASSERT_NE(listEventHub, nullptr);
     bool scrollTriggered = false;
     auto scrollCallback = [&scrollTriggered](Dimension offset, ScrollState state) {
@@ -543,7 +543,7 @@ HWTEST_F(IndexerPatternTestTwoNg, UpdatePopupListGradientView002, TestSize.Level
 
     auto listNode = AceType::DynamicCast<FrameNode>(pattern->popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    auto listEventHub = listNode->GetOrCreateEventHub<ListEventHub>();
+    auto listEventHub = listNode->GetEventHub<ListEventHub>();
     ASSERT_NE(listEventHub, nullptr);
     bool scrollTriggered = false;
     auto scrollCallback = [&scrollTriggered](Dimension offset, ScrollState state) {
