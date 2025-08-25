@@ -407,6 +407,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     ASSERT_TRUE(titleBarLayoutProperty->GetNoPixMap());
     ASSERT_NE(titleBarLayoutProperty->GetBackIconSymbol(), nullptr);
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    EXPECT_TRUE(imageOption.isValidImage);
     ASSERT_EQ(imageSourceInfo.GetSrc(), imageSource);
 }
 

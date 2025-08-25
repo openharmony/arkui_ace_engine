@@ -593,6 +593,7 @@ void SideBarContainerModelNG::SetDividerEndMargin(const RefPtr<ResourceObject>& 
 
 void SideBarContainerModelNG::SetMinContentWidth(const Dimension& minContentWidth)
 {
+    MarkNeedInitRealSideBarWidth();
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth);
     } else {
@@ -1026,6 +1027,7 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dim
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
 {
+    MarkNeedInitRealSideBarWidth(frameNode);
     if (minContentWidth.IsNonNegative()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
     } else {
