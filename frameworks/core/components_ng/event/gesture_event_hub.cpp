@@ -632,7 +632,7 @@ void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
     }
 }
 
-void GestureEventHub::SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent)
+void GestureEventHub::SetFrameNodeCommonOnClick(GestureEventFunc&& clickEvent)
 {
     CheckClickActuator();
     if (parallelCombineClick) {
@@ -1046,12 +1046,12 @@ void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
     touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
 }
 
-void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc)
+void GestureEventHub::SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEventFunc)
 {
     if (!touchEventActuator_) {
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
-    touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    touchEventActuator_->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
 }
 
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)

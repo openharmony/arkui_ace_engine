@@ -268,7 +268,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      */
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     OnMouseEventFunc onMouse1 = onMouse;
-    inputEventHub->SetJSFrameNodeOnMouseEvent(std::move(onMouse1));
+    inputEventHub->SetFrameNodeCommonOnMouseEvent(std::move(onMouse1));
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**

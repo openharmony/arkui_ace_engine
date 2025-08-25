@@ -57,6 +57,8 @@ struct ArkUI_Node {
     void* progressLinearStyle = nullptr;
     void* visibleAreaEventOptions = nullptr;
     bool isBindNative = false;
+    void* commonEventListeners = nullptr;
+    void* extraCommonData = nullptr;
 };
 
 struct ArkUI_Context {
@@ -110,6 +112,16 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
+struct InnerEventExtraParam {
+    int32_t targetId;
+    ArkUI_NodeHandle nodePtr;
+    void* userData;
+};
+
+struct ExtraData {
+    std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
+};
+
 #ifdef __cplusplus
 };
 #endif
@@ -158,9 +170,13 @@ void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
-int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent);
 void HandleNodeEvent(ArkUI_NodeEvent* event);
 void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*)>* eventListenersSet);
+void HandleInnerNodeCommonEvent(ArkUINodeEvent* innerEvent);
+void HandleNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType);
+void TriggerNodeCommonEvent(ArkUI_NodeEvent* event, int32_t eventType,
+    std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>* commonEventListenersMap);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 

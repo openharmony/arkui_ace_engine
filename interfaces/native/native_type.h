@@ -2340,6 +2340,11 @@ typedef enum {
     ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
     /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
+    /**
+     * @error The node is not support event type.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE = 106110,
     /** The index value is invalid. */
     ARKUI_ERROR_CODE_NODE_INDEX_INVALID = 106200,
     /**  Failed to query route navigation information. */

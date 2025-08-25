@@ -323,7 +323,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCoverage007, TestSize
     ASSERT_NE(gestureEventHub, nullptr);
     gestureEventHub->parallelCombineClick = true;
     GestureEventFunc gestureEventFunc = [](GestureEvent& info) {};
-    gestureEventHub->SetJSFrameNodeOnClick(std::move(gestureEventFunc));
+    gestureEventHub->SetFrameNodeCommonOnClick(std::move(gestureEventFunc));
     gestureEventHub->CheckClickActuator();
     EXPECT_EQ(gestureEventHub->parallelCombineClick, true);
 }

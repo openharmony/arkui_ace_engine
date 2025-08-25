@@ -682,7 +682,7 @@ HWTEST_F(GestureEventHubTestNg, GetUnifiedData002, TestSize.Level1)
 
 /**
  * @tc.name: GestureEventHubNodeTest001
- * @tc.desc: Test SetJSFrameNodeOnClick and ClearJSFrameNodeOnClick.
+ * @tc.desc: Test SetFrameNodeCommonOnClick and ClearJSFrameNodeOnClick.
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest001, TestSize.Level1)
@@ -697,19 +697,19 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest001, TestSize.Level1)
     EXPECT_TRUE(gestureEventHub);
 
     /**
-     * @tc.steps: step2. Create GestureEventFunc and call SetJSFrameNodeOnClick.
+     * @tc.steps: step2. Create GestureEventFunc and call SetFrameNodeCommonOnClick.
      * @tc.expected: ClickEventActuator_ is not nullptr.
      */
     GestureEventFunc gestureEventFunc = [](GestureEvent& info) {};
-    gestureEventHub->SetJSFrameNodeOnClick(std::move(gestureEventFunc));
+    gestureEventHub->SetFrameNodeCommonOnClick(std::move(gestureEventFunc));
     EXPECT_NE(gestureEventHub->clickEventActuator_, nullptr);
 
     /**
-     * @tc.steps: step3. Set parallelCombineClick and call SetJSFrameNodeOnClick.
+     * @tc.steps: step3. Set parallelCombineClick and call SetFrameNodeCommonOnClick.
      * @tc.expected: userParallelClickEventActuator_ is not nullptr.
      */
     gestureEventHub->parallelCombineClick = true;
-    gestureEventHub->SetJSFrameNodeOnClick(std::move(gestureEventFunc));
+    gestureEventHub->SetFrameNodeCommonOnClick(std::move(gestureEventFunc));
     EXPECT_NE(gestureEventHub->userParallelClickEventActuator_, nullptr);
 
     /**
@@ -722,7 +722,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest001, TestSize.Level1)
 
 /**
  * @tc.name: GestureEventHubNodeTest002
- * @tc.desc: Test SetOnTouchEvent, SetJSFrameNodeOnTouchEvent and ClearJSFrameNodeOnClick.
+ * @tc.desc: Test SetOnTouchEvent, SetFrameNodeCommonOnTouchEvent and ClearJSFrameNodeOnClick.
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest002, TestSize.Level1)
@@ -742,7 +742,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest002, TestSize.Level1)
      */
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
     gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
-    gestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
     EXPECT_NE(gestureEventHub->touchEventActuator_, nullptr);
 
     /**
@@ -1220,7 +1220,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetSelectItemSizeTest001, TestSiz
 
 /**
  * @tc.name: GestureEventHubNodeTest003
- * @tc.desc: Test SetOnTouchEvent, SetJSFrameNodeOnTouchEvent and ClearJSFrameNodeOnTouch.
+ * @tc.desc: Test SetOnTouchEvent, SetFrameNodeCommonOnTouchEvent and ClearJSFrameNodeOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest003, TestSize.Level1)
@@ -1243,7 +1243,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest003, TestSize.Level1)
     gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
     gestureEventHub->touchEventActuator_ = nullptr;
     gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
-    gestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
     gestureEventHub->ClearJSFrameNodeOnTouch();
     EXPECT_NE(gestureEventHub->touchEventActuator_, nullptr);
 }

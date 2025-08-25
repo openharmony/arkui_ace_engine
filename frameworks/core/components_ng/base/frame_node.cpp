@@ -1799,14 +1799,14 @@ void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& cal
     eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
 }
 
-void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+void FrameNode::SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 {
     if (!lastFrameNodeRect_) {
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
     CHECK_NULL_VOID(eventHub_);
-    eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+    eventHub_->SetFrameNodeCommonOnSizeChangeCallback(std::move(callback));
 }
 
 RectF FrameNode::GetRectWithRender()

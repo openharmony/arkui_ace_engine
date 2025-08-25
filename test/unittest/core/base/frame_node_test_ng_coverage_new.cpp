@@ -1060,7 +1060,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
     OnSizeChangedFunc onJsFrameNodeSizeChanged = [node = frameNode](const RectF& oldRect, const RectF& rect) {
         node->lastFrameNodeRect_ = nullptr;
     };
-    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onJsFrameNodeSizeChanged));
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onJsFrameNodeSizeChanged));
     /**
      * @tc.steps: step3. call the function TriggerOnSizeChangeCallback.
      */

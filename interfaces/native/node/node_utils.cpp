@@ -617,6 +617,192 @@ int32_t OH_ArkUI_SetForceDarkConfig(
     return errorCode;
 }
 
+static std::set<uint32_t> NDKCommonEventList = {
+    NODE_ON_CLICK_EVENT,
+    NODE_TOUCH_EVENT,
+    NODE_EVENT_ON_APPEAR,
+    NODE_EVENT_ON_DISAPPEAR,
+    NODE_ON_KEY_EVENT,
+    NODE_ON_FOCUS,
+    NODE_ON_BLUR,
+    NODE_ON_HOVER,
+    NODE_ON_MOUSE,
+    NODE_ON_SIZE_CHANGE,
+    NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT,
+};
+
+int32_t OH_ArkUI_NativeModule_RegisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType,
+    void* userData, void (*callback)(ArkUI_NodeEvent* event))
+{
+    if (!node || !callback) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    // Check event type.
+    if (NDKCommonEventList.find(eventType) == NDKCommonEventList.end()) {
+        return ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE;
+    }
+    if (!node->commonEventListeners) {
+        node->commonEventListeners = new std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>();
+    }
+    auto eventListenersMap =
+        reinterpret_cast<std::map<uint32_t, void (*)(ArkUI_NodeEvent*)>*>(node->commonEventListeners);
+    if (!eventListenersMap) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* extraParam = new InnerEventExtraParam({ 0, node, userData });
+    if (node->extraCommonData) {
+        auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+        auto result = extraData->eventMap.try_emplace(eventType, extraParam);
+        if (!result.second) {
+            result.first->second->targetId = 0;
+            result.first->second->userData = userData;
+            delete extraParam;
+        }
+    } else {
+        node->extraCommonData = new ExtraData();
+        auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+        extraData->eventMap[eventType] = extraParam;
+    }
+    switch (eventType) {
+        case NODE_ON_CLICK_EVENT:
+            eventListenersMap->insert({NODE_ON_CLICK_EVENT, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnClick(node->uiNodeHandle, node);
+            break;
+        case NODE_TOUCH_EVENT:
+            eventListenersMap->insert({NODE_TOUCH_EVENT, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnTouch(node->uiNodeHandle, node);
+            break;
+        case NODE_EVENT_ON_APPEAR:
+            eventListenersMap->insert({NODE_EVENT_ON_APPEAR, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnAppear(node->uiNodeHandle, node);
+            break;
+        case NODE_EVENT_ON_DISAPPEAR:
+            eventListenersMap->insert({NODE_EVENT_ON_DISAPPEAR, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnDisappear(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_KEY_EVENT:
+            eventListenersMap->insert({NODE_ON_KEY_EVENT, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnKeyEvent(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_FOCUS:
+            eventListenersMap->insert({NODE_ON_FOCUS, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnFocus(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_BLUR:
+            eventListenersMap->insert({NODE_ON_BLUR, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnBlur(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_HOVER:
+            eventListenersMap->insert({NODE_ON_HOVER, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnHover(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_MOUSE:
+            eventListenersMap->insert({NODE_ON_MOUSE, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnMouse(node->uiNodeHandle, node);
+            break;
+        case NODE_ON_SIZE_CHANGE:
+            eventListenersMap->insert({NODE_ON_SIZE_CHANGE, callback});
+            impl->getNodeModifiers()->getCommonModifier()->setCommonOnSizeChange(node->uiNodeHandle, node);
+            break;
+        case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
+            {
+                eventListenersMap->insert({NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT, callback});
+                if (!node->areaChangeRadio) {
+                    return ARKUI_ERROR_CODE_PARAM_INVALID;
+                }
+                ArkUI_AttributeItem* radio = node->areaChangeRadio;
+                if (!radio) {
+                    return ARKUI_ERROR_CODE_PARAM_INVALID;
+                }
+                ArkUI_Int32 radioLength = radio->size;
+                if (radioLength <= 0) {
+                    return ARKUI_ERROR_CODE_PARAM_INVALID;
+                }
+                ArkUI_Float32 radioList[radioLength];
+                for (int i = 0; i < radioLength; ++i) {
+                    if (OHOS::Ace::LessNotEqual(radio->value[i].f32, 0.0f)
+                        || OHOS::Ace::GreatNotEqual(radio->value[i].f32, 1.0f)) {
+                        return ARKUI_ERROR_CODE_PARAM_INVALID;
+                    }
+                    radioList[i] = radio->value[i].f32;
+                }
+                impl->getNodeModifiers()->getCommonModifier()->setCommonOnVisibleAreaApproximateChangeEvent(
+                    node->uiNodeHandle, node, radioList, radioLength);
+                break;
+            }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_UnregisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    // Check event type.
+    if (NDKCommonEventList.find(eventType) == NDKCommonEventList.end()) {
+        return ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE;
+    }
+    if (!node->extraCommonData) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+    auto& eventMap = extraData->eventMap;
+    auto innerEventExtraParam = eventMap.find(eventType);
+    if (innerEventExtraParam == eventMap.end()) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    delete innerEventExtraParam->second;
+    eventMap.erase(innerEventExtraParam);
+    if (eventMap.empty()) {
+        delete extraData;
+        node->extraCommonData = nullptr;
+    }
+    switch (eventType) {
+        case NODE_ON_CLICK:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnClick(node->uiNodeHandle);
+            break;
+        case NODE_TOUCH_EVENT:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnTouch(node->uiNodeHandle);
+            break;
+        case NODE_EVENT_ON_APPEAR:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnAppear(node->uiNodeHandle);
+            break;
+        case NODE_EVENT_ON_DISAPPEAR:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnDisappear(node->uiNodeHandle);
+            break;
+        case NODE_ON_KEY_EVENT:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnKeyEvent(node->uiNodeHandle);
+            break;
+        case NODE_ON_FOCUS:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnFocus(node->uiNodeHandle);
+            break;
+        case NODE_ON_BLUR:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnBlur(node->uiNodeHandle);
+            break;
+        case NODE_ON_HOVER:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnHover(node->uiNodeHandle);
+            break;
+        case NODE_ON_MOUSE:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnMouse(node->uiNodeHandle);
+            break;
+        case NODE_ON_SIZE_CHANGE:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnSizeChange(node->uiNodeHandle);
+            break;
+        case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
+            impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnVisibleAreaApproximateChangeEvent(
+                node->uiNodeHandle);
+            break;
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

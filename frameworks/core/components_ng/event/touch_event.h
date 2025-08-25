@@ -138,7 +138,7 @@ public:
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
-    void SetJSFrameNodeOnTouchEvent(TouchEventFunc&& callback)
+    void SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& callback)
     {
         if (commonTouchEventCallback_) {
             commonTouchEventCallback_.Reset();

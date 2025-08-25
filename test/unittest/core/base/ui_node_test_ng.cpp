@@ -3473,7 +3473,7 @@ HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo004, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
     ASSERT_NE(frameNode, nullptr);
     GestureEventFunc tapEventFunc;
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
     EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
     EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);

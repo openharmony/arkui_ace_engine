@@ -897,7 +897,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
      */
     OnMouseEventFunc onMouseEventFunc2;
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc2));
-    ViewAbstract::SetJSFrameNodeOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onMouseEventFunc2));
+    ViewAbstract::SetFrameNodeCommonOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onMouseEventFunc2));
     ViewAbstract::ClearJSFrameNodeOnMouse(AceType::RawPtr(FRAME_NODE_REGISTER));
     EXPECT_NE(callback, nullptr);
     ViewStackProcessor::GetInstance()->instance = nullptr;

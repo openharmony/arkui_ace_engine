@@ -95,12 +95,12 @@ public:
     void OnContextAttached();
     void ClearUserOnAppear();
     void SetOnAppear(std::function<void()>&& onAppear);
-    void SetJSFrameNodeOnAppear(std::function<void()>&& onAppear);
+    void SetFrameNodeCommonOnAppear(std::function<void()>&& onAppear);
     void ClearJSFrameNodeOnAppear();
     virtual void FireOnAppear();
     void ClearUserOnDisAppear();
     void SetOnDisappear(std::function<void()>&& onDisappear);
-    void SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear);
+    void SetFrameNodeCommonOnDisappear(std::function<void()>&& onDisappear);
     void ClearJSFrameNodeOnDisappear();
     virtual void FireOnDisappear();
     void ClearUserOnAreaChanged();
@@ -117,7 +117,7 @@ public:
     void FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasInnerOnSizeChanged() const;
     void ClearInnerOnSizeChanged();
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
+    void SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
     void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
     void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;

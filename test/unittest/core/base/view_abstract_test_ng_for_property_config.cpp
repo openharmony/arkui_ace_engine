@@ -1789,14 +1789,14 @@ HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
 HWTEST_F(ViewAbstractTestNg, ViewAbstractClearJSFrameNodeOnClickTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Create a FrameNode and set a native onClick event via SetJSFrameNodeOnClick.
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetFrameNodeCommonOnClick.
      * @tc.expected: The nodeEventRegistered should be true.
      */
     auto frameNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(frameNode, nullptr);
     GestureEventFunc onClick = [](GestureEvent&) {};
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(onClick));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(frameNode), std::move(onClick));
 
     auto* uiNode = reinterpret_cast<UINode*>(AceType::RawPtr(frameNode));
     ASSERT_NE(uiNode, nullptr);

@@ -1965,17 +1965,17 @@ HWTEST_F(GestureEventHubTestNg, RemoveLastResponseRect001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetJSFrameNodeOnTouchEvent001
- * @tc.desc: Test SetJSFrameNodeOnTouchEvent
+ * @tc.name: SetFrameNodeCommonOnTouchEvent001
+ * @tc.desc: Test SetFrameNodeCommonOnTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
+HWTEST_F(GestureEventHubTestNg, SetFrameNodeCommonOnTouchEvent001, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     guestureEventHub->touchEventActuator_ = nullptr;
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
-    guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    guestureEventHub->SetFrameNodeCommonOnTouchEvent(std::move(touchEventFunc));
     EXPECT_NE(guestureEventHub->touchEventActuator_, nullptr);
 }
 
