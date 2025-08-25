@@ -4634,7 +4634,8 @@ bool ScrollablePattern::AccumulatingTerminateHelper(
         return false;
     }
     auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,
-        { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+        { .type = ignoreType,
+          .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();

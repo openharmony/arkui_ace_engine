@@ -282,4 +282,34 @@ HWTEST_F(ScrollBarLayoutTestNg, SetScrollBar002, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default ScrollBar
+     */
+    CreateStack();
+    CreateScroll(SCROLL_HEIGHT);
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    ViewAbstractModelNG model1;
+    model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    CreateScrollBarChild();
+    CreateDone();
+
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(480.0f, 800.0f));
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode_->GetLayoutProperty();
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    FlushUITasks();
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(20.0f, 800.0f));
+}
 } // namespace OHOS::Ace::NG
