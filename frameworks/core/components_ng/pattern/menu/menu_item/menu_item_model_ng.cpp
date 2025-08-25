@@ -366,7 +366,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    SetupMenuItemProperties(menuItem, theme); 
+    SetupMenuItemProperties(menuItem, theme);
 
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
@@ -472,9 +472,7 @@ void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, 
             CHECK_NULL_VOID(menuProperty);
             MenuItemProperties& menuItemPropsValue = const_cast<MenuItemProperties&>(menuItemProps);
             menuItemPropsValue.ReloadResources(menuItemPropsValue);
-            menuProperty->UpdateStartIcon(menuItemPropsValue.startIcon.value_or(ImageSourceInfo("")));
             menuProperty->UpdateContent(menuItemPropsValue.content);
-            menuProperty->UpdateEndIcon(menuItemPropsValue.endIcon.value_or(ImageSourceInfo("")));
             menuProperty->UpdateLabel(menuItemPropsValue.labelInfo.value_or(""));
             frameNode->MarkModifyDone();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
