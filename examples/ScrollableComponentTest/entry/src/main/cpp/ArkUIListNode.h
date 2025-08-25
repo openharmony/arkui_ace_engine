@@ -18,6 +18,7 @@
 #ifndef SCROLLABLE_COMPONENT_ARKUILISTNODE_H
 #define SCROLLABLE_COMPONENT_ARKUILISTNODE_H
 
+#include "ArkUIListItemAdapter.h"
 #include "ArkUINode.h"
 
 namespace NativeModule {
@@ -25,7 +26,8 @@ class ArkUIListNode : public ArkUINode {
 public:
     // 创建ArkUI的列表组件。
     ArkUIListNode() : ArkUINode((NativeModuleInstance::GetInstance()->GetNativeNodeAPI())->createNode(ARKUI_NODE_LIST))
-    {}
+    {
+    }
 
     ~ArkUIListNode() override {}
     // List组件的属性C API接口封装。
@@ -37,6 +39,21 @@ public:
         ArkUI_AttributeItem item = {value, 1};
         nativeModule_->setAttribute(handle_, NODE_SCROLL_BAR_DISPLAY_MODE, &item);
     }
+    void SetSticky(ArkUI_StickyStyle style)
+    {
+        ArkUI_NumberValue value[] = {{.i32 = style}};
+        ArkUI_AttributeItem item = {value, 1};
+        nativeModule_->setAttribute(handle_, NODE_LIST_STICKY, &item);
+    }
+    // 引入懒加载模块。
+    void SetLazyAdapter(const std::shared_ptr<ArkUIListItemAdapter> &adapter)
+    {
+        ArkUI_AttributeItem item{nullptr, 0, nullptr, adapter->GetHandle()};
+        nativeModule_->setAttribute(handle_, NODE_LIST_NODE_ADAPTER, &item);
+        adapter_ = adapter;
+    }
+private:
+    std::shared_ptr<ArkUIListItemAdapter> adapter_;
 };
 } // namespace NativeModule
 

@@ -13,5 +13,21 @@
  * limitations under the License.
  */
 
-export const createNativeRoot: (content: Object, page: number) => void;
-export const destroyNativeRoot: () => void;
+// 提供按钮组件的封装类。
+
+#ifndef SCROLLABLE_COMPONENT_ARKUICOLUMNNODE_H
+#define SCROLLABLE_COMPONENT_ARKUICOLUMNNODE_H
+
+#include "ArkUINode.h"
+
+namespace NativeModule {
+class ArkUIColumnNode : public ArkUINode {
+public:
+    ArkUIColumnNode()
+        : ArkUINode((NativeModuleInstance::GetInstance()->GetNativeNodeAPI())->createNode(ARKUI_NODE_COLUMN))
+    {
+    }
+};
+} // namespace NativeModule
+
+#endif // SCROLLABLE_COMPONENT_ARKUICOLUMNNODE_H

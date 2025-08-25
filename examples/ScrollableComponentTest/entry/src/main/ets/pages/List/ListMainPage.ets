@@ -63,7 +63,9 @@ struct IndexPage {
     new TextList(29, 'dividerColor', 'pages/List/ListItemGroup/dividerColor'),
     new TextList(30, 'dividerEndMargin', 'pages/List/ListItemGroup/dividerEndMargin'),
     new TextList(31, 'dividerStartMargin', 'pages/List/ListItemGroup/dividerStartMargin'),
-    new TextList(32, 'dividerStrokeWidth', 'pages/List/ListItemGroup/dividerStrokeWidth')
+    new TextList(32, 'dividerStrokeWidth', 'pages/List/ListItemGroup/dividerStrokeWidth'),
+    new TextList(33, 'listCAPILazy', 'pages/List/CAPI/ListCAPILazy'),
+    new TextList(34, 'listCAPIGroup', 'pages/List/CAPI/ListCAPIGroup')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
