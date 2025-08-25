@@ -14,8 +14,10 @@
  */
 #include "form_renderer_delegate_proxy.h"
 
-#include "form_renderer_hilog.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "appexecfwk_errors.h"
+#include "form_mgr_errors.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -29,23 +31,23 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(const std::shared_ptr<Rosen::
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (surfaceNode == nullptr) {
         HILOG_ERROR("%{public}s fail, surfaceNode is nullptr", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (!surfaceNode->Marshalling(data)) {
         HILOG_ERROR("%{public}s fail, write surfaceNode error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (!data.WriteParcelable(&formJsInfo)) {
         HILOG_ERROR("%{public}s fail, write formJsInfo error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (!data.WriteParcelable(&want)) {
         HILOG_ERROR("%{public}s fail, write want error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     HILOG_INFO("Proxy create surfaceNode:%{public}s", std::to_string(surfaceNode->GetId()).c_str());
 
@@ -67,16 +69,16 @@ int32_t FormRendererDelegateProxy::OnSurfaceReuse(
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     data.WriteUint64(surfaceId);
     if (!data.WriteParcelable(&formJsInfo)) {
         HILOG_ERROR("%{public}s fail, write formJsInfo error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (!data.WriteParcelable(&want)) {
         HILOG_ERROR("%{public}s fail, write want error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     HILOG_INFO("Proxy reuse surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
 
@@ -97,7 +99,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceDetach(uint64_t surfaceId)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     data.WriteUint64(surfaceId);
     HILOG_INFO("Proxy detach surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
@@ -119,7 +121,7 @@ int32_t FormRendererDelegateProxy::OnSurfaceRelease(uint64_t surfaceId)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     data.WriteUint64(surfaceId);
     HILOG_INFO("Proxy release surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
@@ -166,17 +168,17 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     if (!data.WriteString(code)) {
         HILOG_ERROR("%{public}s, write code error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     if (!data.WriteString(msg)) {
         HILOG_ERROR("%{public}s, write msg error", __func__);
-        return ERR_INVALID_VALUE;
+        return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
     MessageParcel reply;
@@ -322,7 +324,7 @@ int32_t FormRendererDelegateProxy::SendRequest(uint32_t code, MessageParcel &dat
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("remote is null");
-        return IPC_PROXY_ERR;
+        return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
     }
     return remote->SendRequest(code, data, reply, option);
 }

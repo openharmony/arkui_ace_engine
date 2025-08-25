@@ -80,9 +80,12 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_001, TestSize.Le
     EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_INVALID_DATA);
 
     std::string onSurfaceCreateKey;
-    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-        const OHOS::AppExecFwk::FormJsInfo& /* info */,
-        const AAFwk::Want& /* want */) { onSurfaceCreateKey = CHECK_KEY; };
+    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo & /* info */,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        onSurfaceCreateKey = CHECK_KEY;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
     EXPECT_EQ(renderDelegate->OnSurfaceCreate(rsNode, formJsInfo, want), ERR_OK);
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_001 end";

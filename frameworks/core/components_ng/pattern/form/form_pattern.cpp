@@ -512,7 +512,7 @@ void FormPattern::SetNonTransparentAfterRecover()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
@@ -598,6 +598,7 @@ void FormPattern::UpdateImageNode()
     externalContext->SetVisible(true);
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         != formChildrenNodeMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "imageNode SetOpacity:0");
         externalContext->SetOpacity(TRANSPARENT_VAL);
     }
     imageNode->MarkModifyDone();
@@ -1597,8 +1598,14 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
     }
     TAG_LOGI(AceLogTag::ACE_FORM,
-        "attach rs node, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
-        cardInfo_.id, boundWidth, boundHeight, cardInfo_.borderWidth);
+        "attach rs node, id: %{public}" PRId64
+        " width: %{public}f height: %{public}f borderWidth: %{public}f boundWidth: %{public}f boundHeight: %{public}f",
+        cardInfo_.id,
+        cardInfo_.width.Value(),
+        cardInfo_.height.Value(),
+        cardInfo_.borderWidth,
+        boundWidth,
+        boundHeight);
     externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
         round(boundWidth), round(boundHeight));
 

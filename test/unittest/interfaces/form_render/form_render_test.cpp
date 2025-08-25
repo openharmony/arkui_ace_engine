@@ -23,7 +23,6 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
-#include "interfaces/inner_api/form_render/include/form_renderer_event_report.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -228,9 +227,12 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
      * @tc.steps: step2. register callback for rendererDelegate
      */
     std::string onSurfaceCreateKey;
-    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-                               const OHOS::AppExecFwk::FormJsInfo& /* info */,
-                               const AAFwk::Want& /* want */) { onSurfaceCreateKey = CHECK_KEY; };
+    auto onSurfaceCreate = [&onSurfaceCreateKey](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo & /* info */,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        onSurfaceCreateKey = CHECK_KEY;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
 
     std::string onActionEventKey;
@@ -784,32 +786,6 @@ HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
     EXPECT_EQ(res, true);
 }
 
-HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
-{
-    int64_t formId = 100;
-    std::string bundleName = "testBundleName";
-    std::string formName = "testFormName";
-    FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(formId, bundleName, formName);
-    EXPECT_NE(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-
-    FormRenderEventReport::StopTimer(formId);
-    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-}
-
-HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
-{
-    int64_t formId = 100;
-    std::string bundleName = "testBundleName";
-    std::string formName = "testFormName";
-
-    FormRenderEventReport::waitSurfaceNodeTimerMap_[formId] = 100;
-    FormRenderEventReport::StopTimer(formId);
-    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
-        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
-}
-
 HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
 {
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest033");
@@ -831,9 +807,12 @@ HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
     EXPECT_TRUE(formRenderer->uiContent_);
 
     OHOS::AppExecFwk::FormJsInfo newFormJsInfo;
-    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode>& /* surfaceNode */,
-                               const OHOS::AppExecFwk::FormJsInfo& info,
-                               const AAFwk::Want& /* want */) { newFormJsInfo = info; };
+    auto onSurfaceCreate = [&newFormJsInfo](const std::shared_ptr<Rosen::RSSurfaceNode> & /* surfaceNode */,
+                               const OHOS::AppExecFwk::FormJsInfo &info,
+                               const AAFwk::Want & /* want */) -> int32_t {
+        newFormJsInfo = info;
+        return ERR_OK;
+    };
     renderDelegate->SetSurfaceCreateEventHandler(std::move(onSurfaceCreate));
 
     formJsInfo.uiSyntax = OHOS::AppExecFwk::FormType::ETS;
