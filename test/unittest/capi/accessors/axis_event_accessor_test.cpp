@@ -143,12 +143,13 @@ HWTEST_F(AxisEventAccessorTest, getXTestValidValues, TestSize.Level1)
 HWTEST_F(AxisEventAccessorTest, getXTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getX, nullptr);
+    const auto defaultValue = Converter::ArkValue<Ark_Number>(0);
     auto result = Converter::Convert<double>(accessor_->getX(nullptr));
-    EXPECT_FLOAT_EQ(result, 0.0);
+    EXPECT_FLOAT_EQ(result, Converter::Convert<double>(defaultValue));
 
     peer_->SetEventInfo(nullptr);
     result = Converter::Convert<double>(accessor_->getX(peer_));
-    EXPECT_FLOAT_EQ(result, 0.0);
+    EXPECT_FLOAT_EQ(result, Converter::Convert<double>(defaultValue));
 }
 
 /**
@@ -182,15 +183,15 @@ HWTEST_F(AxisEventAccessorTest, setYTestInvalidValues, TestSize.Level1)
     accessor_->setY(peer_, &value);
     auto location = eventInfo_->GetLocalLocation();
     auto result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_FLOAT_EQ(result, expected);
+    EXPECT_FLOAT_EQ(result, expected) << "Input value is: 5.0";
     accessor_->setY(nullptr, &value2);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_FLOAT_EQ(result, expected);
+    EXPECT_FLOAT_EQ(result, expected) << "Input value is: 3.0";
     accessor_->setY(peer_, nullptr);
     location = eventInfo_->GetLocalLocation();
     result = PipelineBase::Px2VpWithCurrentDensity(location.GetY());
-    EXPECT_FLOAT_EQ(result, expected);
+    EXPECT_FLOAT_EQ(result, expected) << "Input value is: nullptr";
 }
 
 /**
@@ -221,12 +222,13 @@ HWTEST_F(AxisEventAccessorTest, getYTestValidValues, TestSize.Level1)
 HWTEST_F(AxisEventAccessorTest, getYTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getY, nullptr);
+    const auto defaultValue = Converter::ArkValue<Ark_Number>(0);
     auto result = Converter::Convert<double>(accessor_->getY(nullptr));
-    EXPECT_FLOAT_EQ(result, 0.0);
+    EXPECT_FLOAT_EQ(result, Converter::Convert<double>(defaultValue));
 
     peer_->SetEventInfo(nullptr);
     result = Converter::Convert<double>(accessor_->getY(peer_));
-    EXPECT_FLOAT_EQ(result, 0.0);
+    EXPECT_FLOAT_EQ(result, Converter::Convert<double>(defaultValue));
 }
 
 /**
@@ -736,7 +738,8 @@ HWTEST_F(AxisEventAccessorTest, getActionTestValidValues, TestSize.Level1)
 HWTEST_F(AxisEventAccessorTest, getActionTestInvalidValues, TestSize.Level1)
 {
     auto expected = static_cast<Ark_AxisAction>(-1);
-    eventInfo_->SetAction(static_cast<AxisAction>(1000));
+    auto invalidEnumValue = static_cast<AxisAction>(1000);
+    eventInfo_->SetAction(invalidEnumValue);
     ASSERT_NE(accessor_->getAction, nullptr);
     auto result = accessor_->getAction(peer_);
     EXPECT_EQ(result, expected);
