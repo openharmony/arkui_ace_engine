@@ -185,7 +185,7 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   menuOutline(outline: MenuOutlineOptions): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
-      return this;
+    return this;
   }
 }
 
@@ -694,6 +694,23 @@ class SelectDirectionModifier extends ModifierWithKey<number> {
   }
 }
 
+class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
+  constructor(value: AvoidanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectAvoidance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class MenuOutlineModifier extends ModifierWithKey<MenuOutlineOptions> {
   constructor(value: MenuOutlineOptions) {
     super(value);
@@ -745,23 +762,6 @@ class MenuOutlineModifier extends ModifierWithKey<MenuOutlineOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
       !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
-  }
-}
-
-class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
-  constructor(value: AvoidanceMode) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('selectAvoidance');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().select.resetAvoidance(node);
-    } else {
-      getUINativeModule().select.setAvoidance(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
   }
 }
 
