@@ -1894,6 +1894,10 @@ ArkUINativeModuleValue TextBridge::SetTextContentTransition(ArkUIRuntimeCallInfo
     auto enableBlur = false;
     if (directionArg->IsNumber()) {
         direction = static_cast<int32_t>(directionArg->Int32Value(vm));
+        if (direction < static_cast<int32_t>(OHOS::Ace::TextFlipDirection::DOWN) ||
+            direction > static_cast<int32_t>(OHOS::Ace::TextFlipDirection::UP)) {
+            direction = static_cast<int32_t>(OHOS::Ace::TextFlipDirection::DOWN);
+        }
     }
     if (enableArg->IsBoolean()) {
         enableBlur = enableArg->BooleaValue(vm);

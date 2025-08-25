@@ -486,7 +486,7 @@ HWTEST_F(TextTestSixNg, RelayoutResetOrUpdateTextEffect001, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    // Set up textEffect_ with initial values
+    // Set up textEffect_ with initial values.
     textPattern->textEffect_ = TextEffect::CreateTextEffect();
     auto textEffect = AceType::DynamicCast<MockTextEffect>(textPattern->textEffect_);
     ASSERT_NE(textEffect, nullptr);

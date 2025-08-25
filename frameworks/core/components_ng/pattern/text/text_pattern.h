@@ -189,6 +189,7 @@ public:
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
+    void DumpTextStyleInfo5();
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
