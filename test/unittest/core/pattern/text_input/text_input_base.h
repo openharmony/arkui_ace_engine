@@ -111,6 +111,16 @@ protected:
     RefPtr<TextFieldLayoutProperty> layoutProperty_;
     RefPtr<TextFieldAccessibilityProperty> accessibilityProperty_;
 };
+
+class TextSelectControllerTest : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class TextFieldPatternTestten : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H
