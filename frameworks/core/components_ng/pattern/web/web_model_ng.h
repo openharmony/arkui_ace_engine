@@ -366,6 +366,8 @@ public:
     static void SetOnSslErrorEvent(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnDataResubmitted(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
+    static void SetEnableDataDetector(FrameNode* frameNode, bool isEnabled);
+    static void SetDataDetectorConfig(FrameNode* frameNode, const TextDetectConfig& config);
     static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
     static void SetOnSslErrorRequest(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnClientAuthenticationRequest(
