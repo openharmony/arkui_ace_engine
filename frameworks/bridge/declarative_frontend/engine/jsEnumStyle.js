@@ -4093,11 +4093,13 @@ let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType.IMAGE = 1] = 'IMAGE';
   WebElementType[WebElementType.LINK = 2] = 'LINK';
+  WebElementType[WebElementType.TEXT = 3] = 'TEXT';
 })(WebElementType || (WebElementType = {}));
 
 let WebResponseType;
 (function (WebResponseType) {
   WebResponseType[WebResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
+  WebResponseType[WebResponseType.RIGHT_CLICK = 2] = 'RIGHT_CLICK';
 })(WebResponseType || (WebResponseType = {}));
 
 class ImageAnalyzerController {

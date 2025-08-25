@@ -855,6 +855,8 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
 {
     return false;
 }
+void WebDelegate::OnContextMenuDismissed()
+{}
 bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 {
     return false;

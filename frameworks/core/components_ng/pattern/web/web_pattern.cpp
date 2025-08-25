@@ -703,12 +703,36 @@ bool WebPattern::IsPreviewMenuNotNeedShowPreview()
     return isNotNeedShowPreview;
 }
 
-void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+bool IsLongPreviewMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
-    CHECK_NULL_VOID(param);
+    if (param->previewBuilder && param->responseType == ResponseType::LONG_PRESS &&
+        param->type != WebElementType::TEXT) {
+        return true;
+    }
+    return false;
+}
+
+void WebPattern::ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    auto onPreviewMenuAppear = [onAppear = std::move(param->menuParam.onDisappear),
+                                onMenuShow = param->onMenuShow]() {
+        TAG_LOGD(AceLogTag::ACE_WEB, "onLongPreviewMenuAppear");
+        if (onAppear) {
+            onAppear();
+        }
+        if (onMenuShow) {
+            onMenuShow();
+        }
+    };
+    param->menuParam.onAppear = std::move(onPreviewMenuAppear);
+
     auto onPreviewMenuDisappear = [weak = AceType::WeakClaim(this),
-                                      onDisappear = std::move(param->menuParam.onDisappear)]() {
-        TAG_LOGD(AceLogTag::ACE_WEB, "onPreviewMenuDisappear");
+                                   onDisappear = std::move(param->menuParam.onDisappear),
+                                   onMenuHide = param->onMenuHide]() {
+        TAG_LOGD(AceLogTag::ACE_WEB, "onLongPreviewMenuDisappear");
+        if (onMenuHide) {
+            onMenuHide();
+        }
         if (onDisappear) {
             onDisappear();
         }
@@ -720,6 +744,29 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         webPattern->SetAILinkMenuShow(false);
     };
     param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
+}
+
+void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    CHECK_NULL_VOID(param);
+    if (IsLongPreviewMenu(param)) {
+        ConfigLongPreviewMenuParam(param);
+    } else {
+        auto onPreviewMenuDisappear = [weak = AceType::WeakClaim(this),
+                                       onDisappear = std::move(param->menuParam.onDisappear)]() {
+            TAG_LOGD(AceLogTag::ACE_WEB, "onPreviewMenuDisappear");
+            if (onDisappear) {
+                onDisappear();
+            }
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->RemovePreviewMenuNode();
+            CHECK_NULL_VOID(webPattern->contextMenuResult_);
+            webPattern->contextMenuResult_->Cancel();
+            webPattern->SetAILinkMenuShow(false);
+        };
+        param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
+    }
     auto key = std::make_pair(param->type, param->responseType);
     auto it = previewSelectionMenuMap_.find(key);
     if (it != previewSelectionMenuMap_.end()) {
@@ -940,16 +987,19 @@ void WebPattern::UpdateImagePreviewParam()
 }
 
 void WebPattern::ShowPreviewMenu(WebElementType type) {
-    auto sourceType = contextMenuParam_->GetSourceType();
+    auto sourceType = contextMenuParam_->GetSourceTypeV2();
     if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
         curResponseType_ = ResponseType::RIGHT_CLICK;
-    } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS) {
+    } else if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_PRESS ||
+        sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_LONG_TAP) {
         curResponseType_ = ResponseType::LONG_PRESS;
     } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "GetSourceType unknown, type: %{public}d", sourceType);
         return;
     }
     curElementType_ = type;
-    CHECK_NULL_VOID(GetPreviewSelectionMenuParams(curElementType_, curResponseType_));
+    auto params = GetPreviewSelectionMenuParams(curElementType_, curResponseType_);
+    CHECK_NULL_VOID(params);
     auto host = GetHost();
     if (!host) {
         TAG_LOGE(AceLogTag::ACE_WEB, "GetHost failed");
@@ -957,6 +1007,20 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
         delegate_->OnContextMenuHide("");
         return;
     }
+
+    if (!IsLongPreviewMenu(params)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Show web context menu");
+        if (!contextSelectOverlay_) {
+            contextSelectOverlay_ = AceType::MakeRefPtr<WebContextSelectOverlay>(WeakClaim(this));
+        }
+        CHECK_NULL_VOID(contextSelectOverlay_);
+        contextSelectOverlay_->SetElementType(curElementType_);
+        contextSelectOverlay_->SetResponseType(curResponseType_);
+        ShowContextSelectOverlay(RectF(), RectF());
+        return;
+    }
+
+    CHECK_NULL_VOID(isNewDragStyle_ || (type == WebElementType::AILINK));
     auto previewNode = CreatePreviewImageFrameNode(type == WebElementType::IMAGE);
     if (!previewNode) {
         TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
@@ -974,6 +1038,21 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
     host->MarkModifyDone();
 }
 
+bool WebPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
+    const WebElementType& elementType, const ResponseType& responseType)
+{
+    auto selectMenuParams = GetPreviewSelectionMenuParams(elementType, responseType);
+    CHECK_NULL_RETURN(selectMenuParams, false);
+    CHECK_NULL_RETURN(selectMenuParams->menuBuilder, false);
+
+    selectInfo.menuInfo.menuBuilder = selectMenuParams->menuBuilder;
+    selectInfo.menuCallback.onAppear = selectMenuParams->menuParam.onAppear;
+    selectInfo.menuCallback.onDisappear = selectMenuParams->menuParam.onDisappear;
+    selectInfo.menuCallback.onMenuShow = selectMenuParams->onMenuShow;
+    selectInfo.menuCallback.onMenuHide = selectMenuParams->onMenuHide;
+    return true;
+}
+
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -987,6 +1066,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuResult_);
     bool isImage = false;
     bool isHyperLink = false;
+    bool isText = false;
     bool isAILink = !contextMenuParam_->GetLinkUrl().empty() && contextMenuParam_->IsAILink() &&
                 GetDataDetectorEnable() && webDataDetectorAdapter_->GetDataDetectorEnablePrewiew();
     auto copyOption =
@@ -997,6 +1077,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         int hitTestResult = delegate_->GetLastHitTestResult();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
             contextMenuParam_->IsAILink());
+        bool isEdit = false;
         switch (static_cast<WebHitTestType>(hitTestResult)) {
             case WebHitTestType::IMG:
                 isImage = true;
@@ -1008,15 +1089,20 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
             case WebHitTestType::HTTP:
                 isHyperLink = true;
                 break;
+            case WebHitTestType::EDIT:
+                isEdit = true;
+                break;
             default:
                 break;
         }
 
         // since async hittest, reconfirm
-        isImage = isImage && contextMenuParam_->GetMediaType() ==
+        isImage = isImage && contextMenuParam_->GetMediaTypeV2() ==
                                  OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE;
         isHyperLink =
             isHyperLink && !isImage && !contextMenuParam_->GetLinkUrl().empty() && !contextMenuParam_->IsAILink();
+        isText = (isEdit || contextMenuParam_->GetMediaTypeV2() ==
+            OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_TEXT) && !contextMenuParam_->IsAILink();
     } else {
         isImage = (contextMenuParam_->GetLinkUrl().empty() &&
                    (contextMenuParam_->GetMediaType() ==
@@ -1026,15 +1112,21 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         if (!contextSelectOverlay_) {
             contextSelectOverlay_ = AceType::MakeRefPtr<WebContextSelectOverlay>(WeakClaim(this));
         }
+        CHECK_NULL_VOID(contextSelectOverlay_);
+        contextSelectOverlay_->SetElementType(WebElementType::NONE);
+        contextSelectOverlay_->SetResponseType(ResponseType::RIGHT_CLICK);
         ShowContextSelectOverlay(RectF(), RectF());
         return;
     }
-    CHECK_NULL_VOID((isNewDragStyle_ || isAILink) && result);
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d", isImage, isHyperLink);
+    CHECK_NULL_VOID(result);
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d, isText:%{public}d",
+        isImage, isHyperLink, isText);
     if (isImage) {
         ShowPreviewMenu(WebElementType::IMAGE);
     } else if (isHyperLink) {
         ShowPreviewMenu(WebElementType::LINK);
+    } else if (isText) {
+        ShowPreviewMenu(WebElementType::TEXT);
     } else if (isAILink) {
         CHECK_NULL_VOID(webDataDetectorAdapter_);
         if (!webDataDetectorAdapter_->SetPreviewMenuLink(contextMenuParam_->GetLinkUrl())) {
@@ -1044,18 +1136,20 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     }
 }
 
+void WebPattern::OnCloseContextMenu()
+{
+    isAILinkMenuShow_ = false;
+    CloseContextSelectionMenu();
+    RemovePreviewMenuNode();
+    curContextMenuResult_ = false;  
+}
+
 void WebPattern::OnContextMenuHide()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuHide");
-    isAILinkMenuShow_ = false;
-    if (webData_) {
-        CloseContextSelectionMenu();
-        return;
-    }
-    RemovePreviewMenuNode();
+    OnCloseContextMenu();
     CHECK_NULL_VOID(contextMenuResult_);
     contextMenuResult_->Cancel();
-    curContextMenuResult_ = false;
 }
 
 bool WebPattern::NeedSoftKeyboard() const

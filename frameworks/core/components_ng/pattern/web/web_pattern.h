@@ -803,6 +803,7 @@ public:
         return gestureFocusMode_ == GestureFocusMode::DEFAULT;
     }
 
+    void ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
     std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
@@ -881,6 +882,10 @@ public:
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
     bool IsShowHandle();
+
+    void OnCloseContextMenu();
+    bool CopySelectionMenuParams(SelectOverlayInfo& selectInfo,
+        const WebElementType& elementType, const ResponseType& responseType);
 
     bool IsShowAIWrite();
     int GetSelectStartIndex() const;
