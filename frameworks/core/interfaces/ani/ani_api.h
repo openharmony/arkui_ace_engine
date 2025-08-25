@@ -386,8 +386,8 @@ struct ArkUIAniInteropModifier {
     void (*deleteViewStackProcessor)(ani_long ptr);
 };
 struct ArkUIAniDragControllerModifier {
-    bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx);
-    bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx);
+    bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
+    bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
     void (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer);
     ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
