@@ -1008,6 +1008,7 @@ public:
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
+    bool CheckAttachInput();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();

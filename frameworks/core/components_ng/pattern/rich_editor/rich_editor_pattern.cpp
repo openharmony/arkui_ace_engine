@@ -5315,6 +5315,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         textFieldManager->SetIsImeAttached(true);
+        textFieldManager->SetAttachInputId(host->GetId());
     }
     UpdateCaretInfoToController();
     if (context) {
