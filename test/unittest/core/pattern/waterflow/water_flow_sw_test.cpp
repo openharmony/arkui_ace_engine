@@ -420,28 +420,41 @@ HWTEST_F(WaterFlowSWTest, InitialLoadOrderBug001, TestSize.Level1)
     // Initialize waterflow model and set basic properties
     WaterFlowModelNG model = CreateWaterFlow();
     ViewAbstract::SetWidth(CalcLength(400.0f));
-    ViewAbstract::SetHeight(CalcLength(600.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetFooter(GetDefaultHeaderBuilder());
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScrollIndex(onScrollIndex);
 
-    // Use LazyForEach to simulate real data transition from empty to populated
-    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(0, [](int32_t) { return 100.0f; });
+    // Start with some data, then test transition
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(10, [](int32_t) { return 100.0f; });
     CreateDone();
+
+    // Test transition to empty
+    mockLazy->SetTotalCount(0);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
+    lazyForEachNode->OnDataReloaded();
     FlushUITasks();
 
     // Verify empty state
     EXPECT_EQ(firstIndex, Infinity<int32_t>());
     EXPECT_EQ(lastIndex, -1);
 
-    // Simulate data transition from 0 to 26 items
+    // Test transition back to populated - trigger CheckReset branch
     mockLazy->SetTotalCount(26);
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
     lazyForEachNode->OnDataReloaded();
+
+    // Manually trigger measure to call CheckReset() instead of immediate FlushUITasks()
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
 
     // Verify fixed state after transition
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_GE(info_->endIndex_, 0);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(mockLazy->GetHistoryTotalCount(), 26);
+    EXPECT_EQ(lazyForEachNode->FrameCount(), 26);
+
+    // Verify that the first item is at index 0 position
+    ASSERT_TRUE(GetItem(0, true));
+    EXPECT_EQ(pattern_->GetItemIndex(0, 0), 0);
 }
 } // namespace OHOS::Ace::NG
