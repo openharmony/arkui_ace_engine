@@ -1457,7 +1457,6 @@ HWTEST_F(WebPatternPartOneTest, InitEnhanceSurfaceFlag_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     SystemProperties::SetExtSurfaceEnabled(true);
     webpattern.InitEnhanceSurfaceFlag();
     ASSERT_EQ(webpattern.isEnhanceSurface_, true);
@@ -1474,7 +1473,6 @@ HWTEST_F(WebPatternPartOneTest, InitEnhanceSurfaceFlag_002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     SystemProperties::SetExtSurfaceEnabled(false);
     webpattern.InitEnhanceSurfaceFlag();
     ASSERT_EQ(webpattern.isEnhanceSurface_, false);

@@ -1497,7 +1497,6 @@ HWTEST_F(WebPatternSelectTestNg, InitRotationEventCallback_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->touchEventListener_ = nullptr;
-    ASSERT_EQ(webPattern->touchEventListener_, nullptr);
     webPattern->InitRotationEventCallback();
 #endif
 }
@@ -1521,7 +1520,6 @@ HWTEST_F(WebPatternSelectTestNg, InitRotationEventCallback_002, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->rotationEndCallbackId_ = 0;
-    ASSERT_EQ(webPattern->rotationEndCallbackId_, 0);
     webPattern->InitRotationEventCallback();
 #endif
 }
