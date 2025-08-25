@@ -41976,6 +41976,19 @@ KOALA_INTEROP_DIRECT_0(RichEditorController_getFinalizer, Ark_NativePointer)
 Ark_Number impl_RichEditorController_addTextSpan(Ark_NativePointer thisPtr, const KStringPtr& value, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_RichEditorController self = reinterpret_cast<Ark_RichEditorController>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 contentValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
+        Ark_ResourceStr contentValueTempTmpBuf = {};
+        contentValueTempTmpBuf.selector = contentValueTempTmpBufUnionSelector;
+        if (contentValueTempTmpBufUnionSelector == 0) {
+            contentValueTempTmpBuf.selector = 0;
+            contentValueTempTmpBuf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        } else if (contentValueTempTmpBufUnionSelector == 1) {
+            contentValueTempTmpBuf.selector = 1;
+            contentValueTempTmpBuf.value1 = thisDeserializer.readResource();
+        } else {
+            INTEROP_FATAL("One of the branches for contentValueTempTmpBuf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceStr contentValueTemp = static_cast<Ark_ResourceStr>(contentValueTempTmpBuf);
         const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_RichEditorTextSpanOptions options_value_buf = {};
         options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -41984,7 +41997,7 @@ Ark_Number impl_RichEditorController_addTextSpan(Ark_NativePointer thisPtr, cons
             options_value_buf.value = thisDeserializer.readRichEditorTextSpanOptions();
         }
         Opt_RichEditorTextSpanOptions options_value = options_value_buf;;
-        return GetAccessors()->getRichEditorControllerAccessor()->addTextSpan(self, (const Ark_String*) (&value), (const Opt_RichEditorTextSpanOptions*)&options_value);
+        return GetAccessors()->getRichEditorControllerAccessor()->addTextSpan(self, (const Ark_ResourceStr*) (&contentValueTemp), (const Opt_RichEditorTextSpanOptions*)&options_value);
 }
 KOALA_INTEROP_4(RichEditorController_addTextSpan, KInteropNumber, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
 Ark_Number impl_RichEditorController_addImageSpan(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
