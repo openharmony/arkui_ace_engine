@@ -47,7 +47,7 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
         return ANI_ERROR;
     }
 
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {
             "_Dynamic_Set_Option",
             nullptr, reinterpret_cast<void*>(SetDynamicOption)},
@@ -59,9 +59,9 @@ ani_status NativeDynamicModule::BindNativeDynamicComponent(ani_env *env)
             nullptr, reinterpret_cast<void *>(SetIsReportFrameEvent)},
     };
 
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
-            "BindNativeDynamicComponent Class_BindNativeMethods failed,"
+            "BindNativeDynamicComponent Class_BindStaticNativeMethods failed,"
             " className: %{public}s", className);
         return ANI_ERROR;
     };

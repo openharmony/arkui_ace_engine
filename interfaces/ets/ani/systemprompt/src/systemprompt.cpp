@@ -27,13 +27,13 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
-   
+
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
 
     ani_size bytesWritten = 0;
     env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWritten);
-    
+
     utf8Buffer[bytesWritten] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
@@ -164,10 +164,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;
     }
-    std::array methods = {
+    std::array staticMethods = {
         ani_native_function {"showToast", nullptr, reinterpret_cast<void *>(showToast)},
     };
-    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
         return ANI_ERROR;
     };
     *result = ANI_VERSION_1;
