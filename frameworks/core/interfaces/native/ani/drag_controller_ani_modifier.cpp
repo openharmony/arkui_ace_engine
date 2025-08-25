@@ -873,7 +873,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     return dragAsyncContext;
 }
 
-bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -882,11 +882,13 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }
@@ -894,7 +896,7 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -903,11 +905,13 @@ bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }

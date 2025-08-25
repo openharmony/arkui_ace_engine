@@ -222,16 +222,16 @@ export class ComponentSnapshot {
 
 export class DragController {
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         throw Error("executeDrag with callback not implemented in DragController!")
     }
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
