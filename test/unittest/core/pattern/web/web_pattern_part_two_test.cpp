@@ -1873,4 +1873,27 @@ HWTEST_F(WebPatternPartTwoTest, SetActiveStatusInner_001, TestSize.Level1)
     EXPECT_FALSE(webPattern->isActive_);
 #endif
 }
+
+/**
+ * @tc.name: GetInspectorId_001
+ * @tc.desc: test Get InspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, GetInspectorId_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto inspectId = webPattern->GetInspectorId();
+    EXPECT_EQ(inspectId, std::to_string(host->GetId()));
+#endif
+}
 }

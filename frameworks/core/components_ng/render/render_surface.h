@@ -125,6 +125,8 @@ public:
 
     virtual void SetBufferUsage(const std::string& usage) {}
 
+    virtual void SetBufferTypeLeak(const std::string& bufferTypeLeak) {}
+
     virtual void SetSurfaceQueueSize(int32_t queueSize) {}
 
     virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) {};

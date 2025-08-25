@@ -743,6 +743,14 @@ public:
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
+
+    std::string GetInspectorId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        return host->GetInspectorId().value_or(std::to_string(host->GetId()));
+    }
+
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
