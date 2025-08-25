@@ -43,7 +43,6 @@ ohos_shared_library("ace_form_render") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
   ]
 
   configs = [
