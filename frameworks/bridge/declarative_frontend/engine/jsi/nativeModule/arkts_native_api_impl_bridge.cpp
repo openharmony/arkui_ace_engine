@@ -1459,6 +1459,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextAlign));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextAlign));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextContentAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextContentAlign));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextContentAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextContentAlign));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontWeight));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),

@@ -437,6 +437,18 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
     return TextAlign::START;
 }
 
+inline std::string ConvertWrapTextContentAlignToString(TextContentAlign textContentAlign)
+{
+    static const LinearEnumMapNode<TextContentAlign, std::string> textContentAlignTable[] = {
+        { TextContentAlign::TOP, "TextContentAlign.TOP" },
+        { TextContentAlign::CENTER, "TextContentAlign.CENTER" },
+        { TextContentAlign::BOTTOM, "TextContentAlign.BOTTOM" },
+    };
+
+    auto index = BinarySearchFindIndex(textContentAlignTable, ArraySize(textContentAlignTable), textContentAlign);
+    return index < 0 ? "TextContentAlign.CENTER" : textContentAlignTable[index].value;
+}
+
 inline std::string ConvertWrapTextVerticalAlignToString(TextVerticalAlign textVerticalAlign)
 {
     static const LinearEnumMapNode<TextVerticalAlign, std::string> textVerticalAlignTable[] = {

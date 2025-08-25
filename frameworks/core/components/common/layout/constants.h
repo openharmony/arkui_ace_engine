@@ -341,6 +341,12 @@ enum class TextVerticalAlign {
     TOP = 3,
 };
 
+enum class TextContentAlign {
+    TOP = 0,
+    CENTER,
+    BOTTOM,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextAlign& textAlign)
 {

@@ -47,6 +47,8 @@ public:
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetTextContentAlign(TextContentAlign value) override;
+    void ReSetTextContentAlign() override;
     void SetTextOverflow(TextOverflow value) override;
     void SetMaxLines(uint32_t value) override;
     void SetTextIndent(const Dimension& value) override;
@@ -109,6 +111,7 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextContentAlign(FrameNode* frameNode, Ace::TextContentAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
@@ -163,6 +166,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static TextAlign GetTextAlign(FrameNode* frameNode);
+    static TextContentAlign GetTextContentAlign(FrameNode* frameNode);
     static TextOverflow GetTextOverflow(FrameNode* frameNode);
     static Dimension GetTextIndent(FrameNode* frameNode);
 
@@ -212,6 +216,7 @@ public:
     static void SetContentTransition(
         FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur);
     static void ResetContentTransition(FrameNode* frameNode);
+    static void ReSetTextContentAlign(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
