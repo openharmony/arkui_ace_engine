@@ -6549,6 +6549,7 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     }
     isScrollStarted_ = false;
     SetIsNestedInterrupt(false);
+    expectedScrollAxis_ = Axis::FREE;
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
@@ -6559,6 +6560,10 @@ void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, boo
 
 void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
 {
+    float directVelocity = velocity;
+    if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
+        directVelocity = -velocity;
+    }
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second;
@@ -6567,10 +6572,10 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
     if (!isFling) {
         if (scrollState_) {
             if (CheckOverParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
-                result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+                result = HandleScroll(parent.Upgrade(), -directVelocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
                 remain = result.remain;
             } else if (CheckOverParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
-                remain = -velocity;
+                remain = -directVelocity;
             }
             if (!NearZero(remain)) {
                 HandleScroll(parent.Upgrade(), remain, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
@@ -6579,7 +6584,7 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
     } else {
         if (CheckParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
             if (isFirstFlingScrollVelocity_) {
-                HandleScrollVelocity(parent.Upgrade(), velocity);
+                HandleScrollVelocity(parent.Upgrade(), directVelocity);
                 isFirstFlingScrollVelocity_ = false;
             }
         }
@@ -6596,7 +6601,8 @@ void WebPattern::OnScrollState(bool scrollState)
 
 void WebPattern::OnScrollStart(const float x, const float y)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStart  x=%{public}f, y=%{public}f", x, y);
+    TAG_LOGI(
+        AceLogTag::ACE_WEB, "WebPattern::OnScrollStart  x=%{public}f, y=%{public}f, isRtl:%{public}d", x, y, IsRtl());
     scrollState_ = true;
     GetParentAxis();
     expectedScrollAxis_ =(abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL);
@@ -6776,7 +6782,27 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
         }
     }
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::OnNestedScroll  x=%{public}f, y=%{public}f, xVelocity:%{public}f, yVelocity:%{public}f, "
+        "isConsumed:%{public}d",
+        x, y, xVelocity, yVelocity, isConsumed);
     return isConsumed;
+}
+
+bool WebPattern::IsRtl()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto dir = layoutProperty->GetLayoutDirection();
+    if (TextDirection::RTL == dir) {
+        return true;
+    } else if (TextDirection::LTR == dir) {
+        return false;
+    } else {
+        return AceApplicationInfo::GetInstance().IsRightToLeft();
+    }
 }
 
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
@@ -6784,23 +6810,32 @@ bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVe
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::FilterScrollEvent  x=%{public}f, y=%{public}f, xVelocity:%{public}f, yVelocity:%{public}f, "
+        "isConsumed:%{public}d",
+        x, y, xVelocity, yVelocity, isConsumed);
     return isConsumed;
 }
 
 bool WebPattern::FilterScrollEventHandleOffset(float offset)
 {
+    float directOffset = offset;
+    if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
+        directOffset = -offset;
+    }
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
-    if (parent.Upgrade() && !NearZero(offset)) {
-        auto res = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_CHECK_OVER_SCROLL);
+    if (parent.Upgrade() && !NearZero(directOffset)) {
+        auto res =
+            HandleScroll(parent.Upgrade(), directOffset, SCROLL_FROM_UPDATE, NestedState::CHILD_CHECK_OVER_SCROLL);
         if (NearZero(res.remain)) {
             return true;
         }
-        offset = res.remain;
+        directOffset = res.remain;
     }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
-        auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        auto result = HandleScroll(parent.Upgrade(), directOffset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         CHECK_EQUAL_RETURN(isParentReachEdge_ && result.reachEdge, true, false);
         isParentReachEdge_ = result.reachEdge;
         CHECK_NULL_RETURN(delegate_, false);
@@ -6808,10 +6843,7 @@ bool WebPattern::FilterScrollEventHandleOffset(float offset)
                                                 : delegate_->ScrollByRefScreen(0, -result.remain);
         return true;
     } else if (CheckParentScroll(offset, NestedScrollMode::PARALLEL)) {
-        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    } else if (CheckParentScroll(offset, NestedScrollMode::SELF_FIRST) && NestedScrollOutOfBoundary()) {
-        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-        return true;
+        HandleScroll(parent.Upgrade(), directOffset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
     return false;
 }
@@ -6844,19 +6876,23 @@ bool WebPattern::CheckOverParentScroll(const float &directValue, const NestedScr
 
 bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
 {
+    float directVelocity = velocity;
+    if (IsRtl() && expectedScrollAxis_ == Axis::HORIZONTAL) {
+        directVelocity = -velocity;
+    }
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
     if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
-        return HandleScrollVelocity(parent.Upgrade(), velocity);
+        return HandleScrollVelocity(parent.Upgrade(), directVelocity);
     }
     if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
         if (isParentReachEdge_) {
             return false;
         }
-        return HandleScrollVelocity(parent.Upgrade(), velocity);
+        return HandleScrollVelocity(parent.Upgrade(), directVelocity);
     } else if (CheckParentScroll(velocity, NestedScrollMode::PARALLEL)) {
-        HandleScrollVelocity(parent.Upgrade(), velocity);
+        HandleScrollVelocity(parent.Upgrade(), directVelocity);
     }
     return false;
 }
