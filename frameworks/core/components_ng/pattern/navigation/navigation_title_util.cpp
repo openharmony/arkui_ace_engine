@@ -927,7 +927,6 @@ bool NavigationTitleUtil::SetTitleAnimationElapsedTime(AnimationOption& option, 
         "will skip %{public}d ms animation for enter push NavDestination node", elapsedTime);
     // elapsed time is the TIME to skip
     option.SetDelay(option.GetDelay() - elapsedTime);
-    pushEnterNavDestination->MarkTitleConsumedElapsedTime();
     return true;
 }
 } // namespace OHOS::Ace::NG

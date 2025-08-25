@@ -32,6 +32,7 @@ constexpr int32_t OPACITY_TITLE_IN_DELAY = 33;
 constexpr int32_t OPACITY_TITLE_DURATION = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
+constexpr int32_t OPACITY_BACKBUTTON_DURATION_IN_SKIP_CASE = 150;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
 constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
@@ -679,6 +680,9 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
     opacityOption.SetDuration(OPACITY_TITLE_DURATION);
     if (isTransitionIn) {
         opacityOption.SetDelay(OPACITY_TITLE_IN_DELAY);
+        if (IsNeedHandleElapsedTime()) {
+            opacityOption.SetDelay(0);
+        }
         titleRenderContext->SetOpacity(0.0f);
         return AnimationUtils::StartAnimation(opacityOption,
             [weakRender = WeakPtr<RenderContext>(titleRenderContext)]() {
@@ -720,6 +724,11 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
     if (isTransitionIn) {
         transitionOption.SetDelay(OPACITY_BACKBUTTON_IN_DELAY);
         transitionOption.SetDuration(OPACITY_BACKBUTTON_IN_DURATION);
+        if (IsNeedHandleElapsedTime()) {
+            transitionOption.SetDelay(0);
+            transitionOption.SetDuration(OPACITY_BACKBUTTON_DURATION_IN_SKIP_CASE);
+            isTitleConsumedElapsedTime_ = true;
+        }
         backButtonNodeContext->SetOpacity(0.0f);
         return AnimationUtils::StartAnimation(transitionOption,
             [weakRender = WeakPtr<RenderContext>(backButtonNodeContext)]() {
