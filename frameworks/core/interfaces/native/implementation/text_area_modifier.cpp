@@ -157,7 +157,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void CaretStyleImpl(Ark_NativePointer node,

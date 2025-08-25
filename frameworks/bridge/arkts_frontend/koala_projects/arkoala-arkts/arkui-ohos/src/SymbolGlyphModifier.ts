@@ -47,6 +47,21 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
 
+    onlyHaveNormalFunc(): boolean {
+        const applyPressedAttributeBase = (Type.from<SymbolGlyphModifier>() as ClassType).getMethodByName("applyPressedAttribute");
+        const applyPressedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyPressedAttribute");
+        const applyFocusedAttributeBase = (Type.from<SymbolGlyphModifier>() as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyFocusedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyDisabledAttributeBase = (Type.from<SymbolGlyphModifier>() as ClassType).getMethodByName("applyDisabledAttribute");
+        const applyDisabledAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyDisabledAttribute");
+        const applySelectedAttributeBase = (Type.from<SymbolGlyphModifier>() as ClassType).getMethodByName("applySelectedAttribute");
+        const applySelectedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applySelectedAttribute");
+        return applyPressedAttributeBase.toString() === applyPressedAttributeDerived.toString() &&
+            applyFocusedAttributeBase.toString() === applyFocusedAttributeDerived.toString() &&
+            applyDisabledAttributeBase.toString() === applyDisabledAttributeDerived.toString() &&
+            applySelectedAttributeBase.toString() === applySelectedAttributeDerived.toString();
+    }
+
     _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _setSymbolGlyphOptions0_value?: Resource | undefined
     _fontSize_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
