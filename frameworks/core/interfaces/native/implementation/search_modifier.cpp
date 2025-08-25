@@ -212,7 +212,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indentValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> indentValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        indentValue = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     SearchModelStatic::SetTextIndent(frameNode, indentValue);
 }
 void OnEditChangeImpl(Ark_NativePointer node,
