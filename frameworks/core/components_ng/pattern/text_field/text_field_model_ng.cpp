@@ -145,6 +145,7 @@ void TextFieldModelNG::UpdateTextFieldPattern(
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+        pattern->SetTextChangedAtCreation(true);
         pattern->ClearOperationRecords();
     }
     if (!pattern->HasOperationRecords()) {
@@ -600,6 +601,9 @@ void TextFieldModelNG::SetShowPasswordIcon(bool value)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    if (pattern->IsInPasswordMode() && layoutProperty->GetShowPasswordIconValue(true) != true) {
+        pattern->SetTextChangedAtCreation(true);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value);
 }
 
@@ -885,11 +889,6 @@ void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge ol
         NG::ViewAbstract::SetPadding(newPadding);
         ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetDefaultPadding()
@@ -908,7 +907,6 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
-    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
@@ -985,7 +983,6 @@ void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
 }
-
 void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode);
@@ -1281,6 +1278,9 @@ void TextFieldModelNG::SetShowPasswordIcon(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    if (pattern->IsInPasswordMode() && layoutProperty-> GetShowPasswordIconValue(true) != value) {
+        pattern->SetTextChangedAtCreation(true);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
 }
 
@@ -2248,9 +2248,6 @@ void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& new
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetPadding(frameNode, newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsInitTextRect(false);
 }
 
 RefPtr<UINode> TextFieldModelNG::GetCustomKeyboard(FrameNode* frameNode)
@@ -2276,6 +2273,7 @@ void TextFieldModelNG::SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(pattern);
     pattern->SetShowKeyBoardOnFocus(value);
 }
+
 bool TextFieldModelNG::GetShowKeyBoardOnFocus(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
@@ -2311,9 +2309,6 @@ void TextFieldModelNG::SetBorderWidth(FrameNode* frameNode, NG::BorderWidthPrope
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderWidth(frameNode, borderWidth);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth, frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)

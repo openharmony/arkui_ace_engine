@@ -414,6 +414,7 @@ public:
     bool ActActionClearSelection();
 
     void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl);
+
     void ResetUserOnAccessibilityFocusCallback();
 
     void SetUserOnAccessibilityFocusCallback(
@@ -525,11 +526,9 @@ public:
 
     void SetAccessibilityLevel(const std::string& accessibilityLevel);
 
-
     struct HoverTestDebugTraceInfo {
         std::vector<std::unique_ptr<JsonValue>> trace;
     };
-
 
     /*
     * Get path from root to node which hit the hoverPoint.
@@ -734,8 +733,8 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
-    GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
+    GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityHoverConsumeCheckImpl accessibilityHoverConsumeCheckImpl_;
 
     bool isAccessibilityFocused_ = false;
@@ -770,6 +769,7 @@ protected:
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
     FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
+    
     // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
     // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
     int32_t accessibilityZIndex_ = -1;

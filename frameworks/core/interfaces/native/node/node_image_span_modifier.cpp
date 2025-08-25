@@ -199,24 +199,6 @@ void ResetImageSpanOnError(ArkUINodeHandle node)
     ImageSpanView::SetOnError(frameNode, nullptr);
 }
 
-void SetImageSpanColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
-{
-    CHECK_NULL_VOID(array);
-    if (length != COLOR_FILTER_MATRIX_SIZE) {
-        return;
-    }
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
-}
-
-void ResetImageSpanColorFilter(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
-}
-
 /**
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
@@ -249,6 +231,24 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
     ImageSpanView::ResetBorderRadius(frameNode);
 }
 
+void SetImageSpanColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
+{
+    CHECK_NULL_VOID(array);
+    if (length != COLOR_FILTER_MATRIX_SIZE) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
+}
+
+void ResetImageSpanColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+}
+
 void SetImageSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
     ArkUI_Bool isUriPureNumber)
 {
@@ -278,10 +278,10 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .resetImageSpanOnComplete = ResetImageSpanOnComplete,
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
-        .setImageSpanColorFilter = SetImageSpanColorFilter,
-        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
         .setImageSpanBorderRadius = SetImageSpanBorderRadius,
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
+        .setImageSpanColorFilter = SetImageSpanColorFilter,
+        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
         .setImageSpanSrc = SetImageSpanSrc,
     };
