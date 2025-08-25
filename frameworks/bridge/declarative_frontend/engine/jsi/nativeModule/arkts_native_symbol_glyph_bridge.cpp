@@ -221,6 +221,9 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* 
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info.Length() < NUM_1 || !info[NUM_1]->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     auto symbolEffectObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
     NG::SymbolEffectOptions symbolEffectOptions;
     Framework::JSSymbol::parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
