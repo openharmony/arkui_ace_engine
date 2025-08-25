@@ -169,6 +169,11 @@ public:
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool isTextArea);
+    static void UpdateTextFieldPattern(const RefPtr<FrameNode>& frameNode, const std::optional<std::u16string>& value);
+    static RefPtr<FrameNode> CreateTextInputNode(
+        int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value);
+    static RefPtr<FrameNode> CreateTextAreaNode(
+        int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetMinFontScale(FrameNode* frameNode, const float value);

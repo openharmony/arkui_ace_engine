@@ -116,13 +116,6 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
-void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
-{
-    dst.index = Converter::ArkValue<Ark_Number>(0);
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
-}
-
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     const auto peer = PeerUtils::CreatePeer<DragEventPeer>();
