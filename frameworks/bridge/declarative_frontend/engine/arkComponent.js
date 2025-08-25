@@ -10233,6 +10233,23 @@ class RichEditorUndoStyleModifier extends ModifierWithKey {
 }
 RichEditorUndoStyleModifier.identity= Symbol('richEditorUndoStyle');
 
+class RichEditorScrollBarColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetScrollBarColor(node);
+    } else {
+      getUINativeModule().richEditor.setScrollBarColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorScrollBarColorModifier.identity= Symbol('richEditorScrollBarColor');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10393,6 +10410,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   undoStyle(style) {
     modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
+    return this;
+  }
+  scrollBarColor(style) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorScrollBarColorModifier.identity, RichEditorScrollBarColorModifier, style);
     return this;
   }
 }
