@@ -27,6 +27,7 @@ import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { Theme } from '@ohos/arkui/theme';
 import { ArkThemeScopeManager } from "arkui/handwritten/theme/ArkThemeScopeManager";
+import { CustomDialogController } from './customDialogController';
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -283,6 +284,8 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         CustomDelegate._instantiate(
             () => createInstance(uiContext, factory, initializers), content, initializers);
     }
+
+    public __setDialogController__(controller: CustomDialogController): void {}
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options> {
