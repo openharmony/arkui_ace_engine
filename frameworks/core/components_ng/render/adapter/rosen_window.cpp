@@ -41,7 +41,8 @@ constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 } // namespace
 
 namespace OHOS::Ace::NG {
-RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
+RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
+    RefPtr<TaskExecutor> taskExecutor, int32_t id, bool isGlobalPipeline)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
@@ -97,13 +98,26 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         }
         rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
         rsUIDirector_->Init();
+        rsUIDirector_->SetUITaskRunner(
+            [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
+                ContainerScope scope(id);
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostDelayedTask(
+                    task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
+        },
+            id);
     } else {
         auto rsUIDirector = window->GetRSUIDirector();
+        // use rsUIDirector from Rosen::Window.
         if (rsUIDirector) {
             directorFromWindow_ = true;
             rsUIDirector_ = rsUIDirector;
         } else {
             directorFromWindow_ = false;
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+        }
+        // if globalpipeline create Rosen::Window, create new RSUIDirector.
+        if (isGlobalPipeline) {
             rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
         }
         if (window && window->GetSurfaceNode()) {
@@ -112,17 +126,18 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             LOGI("SetRSSurfaceNode %{public}llu with rs multi", static_cast<unsigned long long>(surfaceNode->GetId()));
         }
         rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-        rsUIDirector_->Init(true, true);
-    }
-
-    rsUIDirector_->SetUITaskRunner(
-        [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostDelayedTask(
-                task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
+        if (!rsUIDirector_->GetRSUIContext() || isGlobalPipeline) {
+            rsUIDirector_->Init(true, true);
+        }
+        rsUIDirector_->SetUITaskRunner(
+            [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
+                ContainerScope scope(id);
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostDelayedTask(
+                    task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
         },
-        id);
+            0, true);
+    }
 }
 
 void RosenWindow::Init()

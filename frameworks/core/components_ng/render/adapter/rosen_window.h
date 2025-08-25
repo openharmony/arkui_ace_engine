@@ -40,7 +40,8 @@ namespace OHOS::Ace::NG {
 
 class RosenWindow : public Window {
 public:
-    RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id);
+    RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
+        RefPtr<TaskExecutor> taskExecutor, int32_t id, bool isGlobalPipeline = false);
     ~RosenWindow() override = default;
 
     void RequestFrame() override;
