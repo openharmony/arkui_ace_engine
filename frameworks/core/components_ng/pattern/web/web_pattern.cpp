@@ -227,7 +227,7 @@ struct PipData {
     int childId = -1;
     int frameRoutingId = -1;
     int preStatus = -1;
-    RefPtr<WebPattern> pipWebPattern = nullptr;
+    WeakPtr<WebPattern> pipWebPattern = nullptr;
 };
 
 std::unordered_map<uint32_t, PipData> pipCallbackMap_;
@@ -409,8 +409,8 @@ void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surf
             TAG_LOGI(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId window is null");
             return;
         }
-        if (pip.pipWebPattern) {
-            pip.pipWebPattern->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
+        if (pip.pipWebPattern.Upgrade()) {
+            pip.pipWebPattern.Upgrade()->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
         }
     }
 }
@@ -445,8 +445,8 @@ void PipLifecycleCallback(uint32_t controllerId, PictureInPicture_PipState state
             }
             if (event != PIP_STATE_NONE) {
                 auto pip = it->second;
-                if (pip.pipWebPattern) {
-                    pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
+                if (pip.pipWebPattern.Upgrade()) {
+                    pip.pipWebPattern.Upgrade()->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
                 }
             }
             if (state != PictureInPicture_PipState::ABOUT_TO_STOP) {
@@ -484,8 +484,8 @@ void PipControlEventCallback(
         auto it = pipCallbackMap_.find(controllerId);
         if (it != pipCallbackMap_.end()) {
             auto pip = it->second;
-            if (pip.pipWebPattern) {
-                pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
+            if (pip.pipWebPattern.Upgrade()) {
+                pip.pipWebPattern.Upgrade()->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
             }
         }
     }
@@ -504,8 +504,8 @@ void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, d
     auto it = pipCallbackMap_.find(controllerId);
     if (it != pipCallbackMap_.end()) {
         auto pip = it->second;
-        if (pip.pipWebPattern) {
-            pip.pipWebPattern->SendPipEvent(
+        if (pip.pipWebPattern.Upgrade()) {
+            pip.pipWebPattern.Upgrade()->SendPipEvent(
                 pip.delegateId, pip.childId, pip.frameRoutingId, PIP_STATE_RESIZE);
         }
     }
@@ -652,6 +652,7 @@ WebPattern::~WebPattern()
     {
         std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
         for (auto& it: pipController_) {
+            OH_PictureInPicture_StopPip(it);
             OH_PictureInPicture_UnregisterAllResizeListeners(it);
             OH_PictureInPicture_DeletePip(it);
             pipCallbackMap_.erase(it);
@@ -8588,7 +8589,7 @@ bool WebPattern::Pip(int status,
     int delegateId, int childId, int frameRoutingId, int width, int height)
 {
     bool result = false;
-    uint32_t pipController;
+    uint32_t pipController = 0;
     bool init = false;
     switch (status) {
         case PIP_STATE_ENTER:
@@ -8671,7 +8672,7 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     }
     OH_PictureInPicture_DestroyPipConfig(&pipConfig);
     struct PipData pipData;
-    pipData.pipWebPattern = AceType::WeakClaim(this).Upgrade();
+    pipData.pipWebPattern = AceType::WeakClaim(this);
     pipData.delegateId = pipInfo.delegateId;
     pipData.childId = pipInfo.childId;
     pipData.mainWindowId = pipInfo.mainWindowId;
