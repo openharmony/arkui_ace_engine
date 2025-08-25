@@ -595,9 +595,9 @@ void CancelButton0Impl(Ark_NativePointer node,
     Validator::ValidateNonPercent(iconSize);
     TextFieldModelStatic::SetCancelIconSize(frameNode, iconSize);
     // set icon src
-    auto iconSrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(optIconOptions->src);
+    auto iconSrcOpt = Converter::OptConvert<Converter::SimpleResource>(optIconOptions->src);
     if (!iconSrcOpt) {
-        iconSrcOpt = Converter::Ark_Resource_Simple();
+        iconSrcOpt = Converter::SimpleResource();
     }
     TextFieldModelStatic::SetCanacelIconSrc(frameNode, iconSrcOpt->content, iconSrcOpt->bundleName,
         iconSrcOpt->moduleName);

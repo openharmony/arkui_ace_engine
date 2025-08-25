@@ -125,7 +125,7 @@ void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
 
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<DragEventPeer>();
     peer->dragInfo = info;
     dragEvent = peer;
 }
@@ -320,15 +320,6 @@ void AssignArkValue(Ark_Length& dst, const float& src)
 void AssignArkValue(Ark_Length& dst, const CalcLength& src)
 {
     dst = ArkValue<Ark_Length>(src.GetDimension());
-}
-
-void AssignArkValue(Ark_Int32& dst, const Ark_Number& src)
-{
-    if (src.tag == INTEROP_TAG_INT32) {
-        dst = src.i32;
-    } else {
-        dst = static_cast<Ark_Int32>(src.f32);
-    }
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
@@ -583,21 +574,6 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     }
 }
 
-void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)
-{
-    dst.id = ArkValue<Ark_Number>(-1);
-    dst.params = ArkValue<Opt_Array_String>();
-    if (auto name = std::get_if<std::string>(&src); name) {
-        CHECK_NULL_VOID(ctx);
-        std::vector<std::string> vecName { *name };
-        auto arkName = Converter::ArkValue<Array_String>(vecName, ctx);
-        dst.params = Converter::ArkValue<Opt_Array_String>(arkName, ctx);
-    } else if (auto id = std::get_if<int32_t>(&src); id) {
-        dst.id = ArkValue<Ark_Number>(*id);
-    }
-    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
-}
-
 void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src, ConvContext *ctx)
 {
     dst.path = ArkValue<Ark_String>(src.path, ctx);
@@ -693,7 +669,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
 
     dst.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     dst.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    
+
     dst.pressedTime = ArkValue<Opt_Number>(src.GetPressedTime().time_since_epoch().count());
     dst.pressure = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
@@ -766,8 +742,7 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
             paramsArray.push_back(*param.value);
         }
     }
-    auto arkArray = Converter::ArkValue<Array_String>(paramsArray, ctx);
-    dst.params = Converter::ArkValue<Opt_Array_String>(arkArray, ctx);
+    dst.params = Converter::ArkValue<Opt_Array_String>(paramsArray, ctx);
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
@@ -855,14 +830,14 @@ void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleRes
 
 void AssignArkValue(Ark_NavDestinationContext& dst, const RefPtr<NG::NavDestinationContext>& src)
 {
-    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavDestinationContextAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<NavDestinationContextPeer>();
     peer->SetHandler(src);
     dst = peer;
 }
 
 void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src)
 {
-    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavigationTransitionProxyAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<NavigationTransitionProxyPeer>();
     peer->SetHandler(src);
     dst = peer;
 }
@@ -906,5 +881,31 @@ void AssignArkValue(Ark_NavigationMode& dst, NG::NavigationMode& src)
 void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src)
 {
     dst = static_cast<Ark_NavigationOperation>(src);
+}
+
+
+template<>
+Ark_Resource ArkCreate(int64_t id, ResourceType type)
+{
+    return {
+        .id = ArkValue<Ark_Number>(id),
+        .type = ArkValue<Opt_Number>(static_cast<int32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(),
+    };
+}
+
+template<>
+Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
+{
+    std::vector<Ark_String> params = { ArkValue<Ark_String>(name, ctx) };
+    return {
+        .id = ArkValue<Ark_Number>(static_cast<int64_t>(-1)),
+        .type = ArkValue<Opt_Number>(static_cast<int32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(params, ctx),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter

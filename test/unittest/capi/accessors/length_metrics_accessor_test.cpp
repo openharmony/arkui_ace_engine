@@ -157,16 +157,14 @@ HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
         Converter::ConvContext ctx;
         auto expectPointer = std::get_if<Dimension>(&expected);
         ASSERT_TRUE(expectPointer);
-        std::variant<int32_t, std::string> resource = num_id;
-        auto resourceNum = Converter::ArkValue<Ark_Resource>(resource, &ctx);
+        auto resourceNum = Converter::ArkCreate<Ark_Resource>(num_id, Converter::ResourceType::FLOAT);
         auto pointerNum = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceNum));
         ASSERT_TRUE(pointerNum);
         EXPECT_EQ(pointerNum->value.ToString(), expectPointer->ToString())  <<
              "Input value is: " << num_id << ", method: resource";
         accessor_->destroyPeer(pointerNum);
 
-        resource = str_id;
-        auto resourceStr = Converter::ArkValue<Ark_Resource>(resource, &ctx);
+        auto resourceStr = Converter::ArkCreate<Ark_Resource>(str_id, Converter::ResourceType::FLOAT, &ctx);
         auto pointerStr = reinterpret_cast<LengthMetricsPeer*>(accessor_->resource(&resourceStr));
         ASSERT_TRUE(pointerStr);
         EXPECT_EQ(pointerStr->value.ToString(), expectPointer->ToString())  <<

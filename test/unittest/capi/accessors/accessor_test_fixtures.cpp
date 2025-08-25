@@ -201,7 +201,7 @@ const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDim
     { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), -0.8_pct }
 };
 
-const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable = {
+const std::vector<std::tuple<int64_t, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
     { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
     { DIMENSIONS_RES_NON_NEG_2_ID, DIMENSIONS_RES_NON_NEG_2_STR, 1.23_vp },
