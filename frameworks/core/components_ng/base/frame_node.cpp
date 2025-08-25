@@ -844,6 +844,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
     }
+    if (layoutProperty_->GetPixelRound() != 0) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("PixelRound flag: ").append(std::to_string(layoutProperty_->GetPixelRound())));
+    }
     if (!propInspectorId_->empty()) {
         DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     }
@@ -861,8 +865,11 @@ void FrameNode::DumpCommonInfo()
     }
     if (tag_ == V2::ROOT_ETS_TAG) {
         auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
+        if (pipeline) {
+            DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
+            DumpLog::GetInstance().AddDesc(std::string("PixelRoundMode: ")
+                    .append(std::to_string(static_cast<int32_t>(pipeline->GetPixelRoundMode()))));
+        }
     }
     auto layoutPolicy = layoutProperty_->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
