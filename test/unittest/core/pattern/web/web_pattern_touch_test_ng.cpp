@@ -1560,8 +1560,8 @@ HWTEST_F(WebPatternTouchTestNg, GetDragPixelMapSize_002, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
-    webpattern.GetDragPixelMapSize();
+    auto size = webpattern.GetDragPixelMapSize();
+    EXPECT_EQ(size.Width(), 0);
 #endif
 }
 

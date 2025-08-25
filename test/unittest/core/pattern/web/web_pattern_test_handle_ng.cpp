@@ -469,7 +469,7 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragEnter, TestSize.Level1)
     auto gestureHub = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webPattern->delegate_ = nullptr;
     webPattern->HandleOnDragEnter(gestureHub);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_FALSE(webPattern->isDragStartFromWeb_);
 #endif
 }
 
