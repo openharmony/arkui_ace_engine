@@ -1214,7 +1214,6 @@ HWTEST_F(WebPatternSelectTestNg, NotifyForNextTouchEvent_002, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->delegate_ = nullptr;
-    ASSERT_EQ(webPattern->delegate_, nullptr);
     webPattern->NotifyForNextTouchEvent();
 #endif
 }
@@ -1238,7 +1237,6 @@ HWTEST_F(WebPatternSelectTestNg, InitTouchEventListener_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->touchEventListener_ = nullptr;
-    ASSERT_EQ(webPattern->touchEventListener_, nullptr);
     webPattern->InitTouchEventListener();
 #endif
 }
