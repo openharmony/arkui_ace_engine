@@ -44,10 +44,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float
 void DynamicComponentRendererImpl::TransferPointerEvent(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
 
-bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
-{
-    return true;
-}
+bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event) { return true; }
 
 void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType) {}
 
