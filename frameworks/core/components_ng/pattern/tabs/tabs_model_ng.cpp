@@ -47,10 +47,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 
 constexpr int32_t SWIPER_Z_INDEX = 0;
 constexpr int32_t DIVIDER_Z_INDEX = 2;
