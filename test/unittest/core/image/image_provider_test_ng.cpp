@@ -2130,4 +2130,67 @@ HWTEST_F(ImageProviderTestNg, ImageFileSizeTest001, TestSize.Level1)
     EXPECT_EQ(imageObj->GetImageFileSize(), 100);
     EXPECT_EQ(imageObj->GetImageDataSize(), 0);
 }
+
+/**
+ * @tc.name: DownLoadSuccessCallbackTest001
+ * @tc.desc: Test DownLoadSuccessCallback caches image and notifies context
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownLoadSuccessCallbackTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo("test.jpg");
+    auto imageObj = AceType::MakeRefPtr<NG::StaticImageObject>(src, SizeF(100, 100), nullptr);
+
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    std::string key = "test_key";
+    bool res = ImageProvider::RegisterTask(key, WeakPtr<ImageLoadingContext>(ctx));
+    EXPECT_TRUE(res);
+    ImageProvider::DownLoadSuccessCallback(imageObj, key, true, 0);
+    ImageProvider::DownLoadSuccessCallback(imageObj, key, false, 0);
+}
+
+/**
+ * @tc.name: DownLoadOnProgressCallbackTest001
+ * @tc.desc: Test DownLoadOnProgressCallback notifies context progress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownLoadOnProgressCallbackTest001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo("test.jpg");
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    std::string key = "progress_key";
+    ImageProvider::RegisterTask(key, WeakPtr<ImageLoadingContext>(ctx));
+
+    uint32_t progressNow = 0;
+    uint32_t progressTotal = 0;
+    ctx->SetOnProgressCallback([&progressNow, &progressTotal](uint32_t now, uint32_t total) {
+        progressNow = now;
+        progressTotal = total;
+    });
+
+    ImageProvider::DownLoadOnProgressCallback(key, true, 50, 100, 0);
+
+    EXPECT_EQ(progressNow, 50);
+    EXPECT_EQ(progressTotal, 100);
+}
+
+/**
+ * @tc.name: QueryDataFromCacheTest001
+ * @tc.desc: Test QueryDataFromCache returns nullptr if no cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, QueryDataFromCacheTest001, TestSize.Level1)
+{
+    UriDownLoadConfig config;
+    config.src = ImageSourceInfo("cache_hit.jpg");
+    config.imageDfxConfig = ImageDfxConfig();
+    config.taskKey = "download_key";
+    config.sync = true;
+    config.hasProgressCallback = false;
+    ImageProvider::DownLoadImage(config);
+
+    ImageSourceInfo src("not_exist.jpg");
+    auto data = ImageProvider::QueryDataFromCache(src);
+    EXPECT_EQ(data, nullptr);
+}
 } // namespace OHOS::Ace::NG
