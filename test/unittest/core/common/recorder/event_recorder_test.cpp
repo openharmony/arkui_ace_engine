@@ -29,6 +29,7 @@
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -1450,5 +1451,19 @@ HWTEST_F(EventRecorderTest, EventRecorderTest016, TestSize.Level1)
     builder.eventType_ = Recorder::EventType::CLICK;
     builder.SetHost(pageNode);
     EXPECT_EQ(builder.params_->empty(), false);
+}
+
+/**
+ * @tc.name: SimplifiedInspectorTest01
+ * @tc.desc: Test GetInspector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SimplifiedInspectorTest01, TestSize.Level1)
+{
+    TreeParams params;
+    params.infoType = InspectorInfoType::WEB_LANG;
+    auto inspector = std::make_shared<NG::SimplifiedInspector>(0, params);
+    auto tree = inspector->GetInspector();
+    EXPECT_TRUE(tree.empty());
 }
 } // namespace OHOS::Ace
