@@ -392,7 +392,7 @@ public:
         bool needAppend = false, const std::string& target = "");
 #endif
 
-    bool GetPassThroughResult() const
+    bool GetPassThroughResult()
     {
         return passThroughResult_;
     }

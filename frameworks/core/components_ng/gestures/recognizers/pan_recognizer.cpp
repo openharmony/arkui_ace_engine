@@ -509,8 +509,8 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
     } else if (event.sourceTool == SourceTool::TOUCHPAD) {
         PointF originPoint(lastAxisEvent_.horizontalAxis, lastAxisEvent_.verticalAxis);
         PointF finalPoint(originPoint.GetX() + delta_.GetX(), originPoint.GetY() + delta_.GetY());
-        TransformForRecognizer(originPoint, GetAttachedNode(), false, false, -1);
-        TransformForRecognizer(finalPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(originPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(finalPoint, GetAttachedNode(), false, false, -1);
         delta_ = Offset(finalPoint.GetX(), finalPoint.GetY()) - Offset(originPoint.GetX(), originPoint.GetY());
     }
 }
@@ -737,7 +737,6 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         return IsPanGestureAcceptInAllDirection(judgeDistance);
     }
-
     if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
         return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
     }

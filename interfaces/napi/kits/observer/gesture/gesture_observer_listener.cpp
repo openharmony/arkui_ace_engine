@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"

@@ -88,8 +88,8 @@ public:
     RefPtr<FocusHub> GetOrCreateFocusHub(const FocusPattern& focusPattern);
     RefPtr<FocusHub> GetFocusHub() const;
     void AttachHost(const WeakPtr<FrameNode>& host);
-    void OnAttachContext(PipelineContext* context);
-    void OnDetachContext(PipelineContext* context);
+    void OnAttachContext(PipelineContext *context);
+    void OnDetachContext(PipelineContext *context);
     RefPtr<FrameNode> GetFrameNode() const;
     GetEventTargetImpl CreateGetEventTargetImpl() const;
     void OnContextAttached();
@@ -128,7 +128,6 @@ public:
     void SetOnDragStart(OnDragStartFunc&& onDragStart);
     void SetCustomerOnDragSpringLoading(OnDragDropSpringLoadingFunc&& onDragSpringLoading);
     const OnDragDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
-
     const OnDragStartFunc& GetOnDragStart() const
     {
         return onDragStart_;
@@ -148,10 +147,10 @@ public:
     {
         return onDragEnd_;
     }
+
     bool HasOnDragEnter() const;
     bool HasOnDragLeave() const;
     bool HasOnDragEnd() const;
-
     virtual bool HasOnItemDragMove()
     {
         return false;
@@ -236,7 +235,7 @@ public:
     }
 
     const OnNewDragFunc& GetCustomerOnDragEndFunc() const
-        {
+    {
         return customerOnDragEnd_;
     }
 
@@ -258,6 +257,13 @@ public:
     void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
     bool HasImmediatelyVisibleCallback();
+    std::vector<double>& GetThrottledVisibleAreaRatios();
+    VisibleCallbackInfo& GetThrottledVisibleAreaCallback();
+    std::vector<double>& GetVisibleAreaRatios(bool isUser);
+    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
+    void SetVisibleAreaRatiosAndCallback(
+        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
+    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart);
 
     const OnDragStartFunc& GetDefaultOnDragStart() const
@@ -266,13 +272,6 @@ public:
     }
 
     bool HasDefaultOnDragStart() const;
-    std::vector<double>& GetThrottledVisibleAreaRatios();
-    VisibleCallbackInfo& GetThrottledVisibleAreaCallback();
-    std::vector<double>& GetVisibleAreaRatios(bool isUser);
-    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
-    void SetVisibleAreaRatiosAndCallback(
-        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
-    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
     bool HasVisibleAreaCallback(bool isUser);
     bool HasThrottledVisibleAreaCallback() const;
     void SetOnAttach(std::function<void()>&& onAttach);
@@ -373,9 +372,9 @@ private:
     VisibleCallbackInfo visibleAreaInnerCallback_;
     std::vector<double> throttledVisibleAreaRatios_;
     VisibleCallbackInfo throttledVisibleAreaCallback_;
+    std::function<void()> enabledFunc_;
     std::function<void()> ndkDrawCompletedCallback_;
     std::function<void()> ndkLayoutCallback_;
-    std::function<void()> enabledFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

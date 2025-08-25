@@ -54,7 +54,16 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
         }
     }
-    TapGesture(int32_t count, int32_t fingers, Dimension distanceThreshold, bool isLimitFingerCount = false);
+    TapGesture(int32_t count, int32_t fingers, Dimension distanceThreshold, bool isLimitFingerCount = false)
+        : Gesture(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
+        }
+    }
     ~TapGesture() override = default;
 
     int32_t GetTapCount() const
