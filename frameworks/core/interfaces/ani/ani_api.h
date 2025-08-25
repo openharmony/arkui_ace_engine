@@ -644,6 +644,10 @@ struct ArkUIAniSyntaxNodeModifier {
     ani_long (*constructSyntaxNode)(ani_int);
 };
 
+struct ArkUIAniUINodeOnUpdateDoneAniModifier {
+    void (*onUpdateDone)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+};
+
 struct ArkUIAniNodeAdapterModifier {
     ani_long (*nodeAdapterConstruct)(NodeAdapterInfo&& info);
     void (*nodeAdapterDetachNodeAdapter)(ani_long node);
@@ -687,6 +691,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
     const ArkUIAniTraceModifier* (*getTraceAniModifier)();
     const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
+    const ArkUIAniUINodeOnUpdateDoneAniModifier* (*getUINodeOnUpdateDoneAniModifier)();
     const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
 };
 

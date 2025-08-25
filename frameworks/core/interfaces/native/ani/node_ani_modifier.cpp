@@ -40,6 +40,7 @@
 #include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "syntax_node_ani_modifier.h"
+#include "uinode_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -73,6 +74,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getCanvasAniModifier = OHOS::Ace::NG::GetCanvasAniModifier,
         .getTraceAniModifier = OHOS::Ace::NG::GetTraceAniModifier,
         .getSyntaxNodeAniModifier = OHOS::Ace::NG::GetSyntaxNodeAniModifier,
+        .getUINodeOnUpdateDoneAniModifier = OHOS::Ace::NG::GetUINodeOnUpdateDoneAniModifier,
         .getNodeAdapterAniModifier = OHOS::Ace::NG::GetNodeAdapterAniModifier,
     };
     return &impl;
