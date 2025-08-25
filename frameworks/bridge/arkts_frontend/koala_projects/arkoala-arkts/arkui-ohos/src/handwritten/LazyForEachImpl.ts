@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __id, NodeAttach, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime"
+import { __id, NodeAttach, ComputableState, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime"
 import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop"
 import { PeerNode } from "../PeerNode"
 import { InternalListener } from "../DataChangeListener"
@@ -47,8 +47,9 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
+    isRepeat: boolean = false
 ) {
-    const node = createLazyNode()
+    const node = createLazyNode(isRepeat)
 
     let pool = rememberDisposable(() => new LazyItemPool(node, CustomComponent.current), (pool?: LazyItemPool) => {
         pool?.dispose()
@@ -86,7 +87,7 @@ class NodeHolder {
 }
 
 /** @memo:intrinsic */
-function createLazyNode(): PeerNode {
+function createLazyNode(isRepeat: boolean): PeerNode {
     /**
      *  We don't want cache behavior with LazyForEach (to support Repeat's non-memo data updates),
      *  therefore LazyForEach implementation is outside NodeAttach, and LazyForEachNode is provided through a remembered NodeHolder.
@@ -97,9 +98,9 @@ function createLazyNode(): PeerNode {
             const peerId = PeerNode.nextId()
             const _peerPtr = ArkUIAniModule._LazyForEachNode_Construct(peerId)
             if (!_peerPtr) {
-                throw new Error("create LazyForEachNode failed")
+                throw new Error(`Failed to create LazyNodePeer with id: ${peerId}`)
             }
-            const _peer = new PeerNode(_peerPtr, peerId, "LazyForEach", 0)
+            const _peer = new PeerNode(_peerPtr, peerId, isRepeat ? "Repeat" : "LazyForEach", 0)
             return _peer
         },
         (node: PeerNode) => {

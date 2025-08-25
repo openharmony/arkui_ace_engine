@@ -18,7 +18,7 @@
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
 import { KPointer } from '@koalaui/interop';
-import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
+import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback, Repeat } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImplForOptions } from './LazyForEachImpl';
@@ -208,14 +208,29 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
-export class SyntaxNodePeer extends PeerNode {
-    public static create(): SyntaxNodePeer {
+export class SyntaxItemPeer extends PeerNode {
+    public static create(): SyntaxItemPeer {
         const peerId = PeerNode.nextId();
-        const _peerPtr = ArkUIAniModule._SyntaxNode_Construct(peerId);
+        const _peerPtr = ArkUIAniModule._SyntaxItem_Construct(peerId);
         if (!_peerPtr) {
-            throw new Error(`Failed to create SyntaxNodePeer with id: ${peerId}`);
+            throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`);
         }
-        return new SyntaxNodePeer(_peerPtr, peerId, 'SyntaxNode');
+        return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
+export class ForEachNodePeer extends PeerNode {
+    public static create(isRepeat: boolean = false): ForEachNodePeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._ForEachNode_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`);
+        }
+        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach');
     }
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -251,14 +266,14 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
+            NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 itemBuilder(ri);
             }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
     };
-    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_, true);
 }
 
 /** @memo */
@@ -272,10 +287,14 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     }
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
-    NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
-        RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
-            const ri = new RepeatItemImpl<T>(ele, (i as number));
+    /** @memo */
+    const action = (ele: T, i: int32) => {
+        const ri = new RepeatItemImpl<T>(ele, (i as number));
+        NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             itemGenerator(ri);
         });
+    };
+    NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
+        RepeatByArray<T>(arr, keyGen, action);
     });
 }

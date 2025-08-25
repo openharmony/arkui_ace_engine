@@ -640,9 +640,6 @@ struct ArkUIAniTraceModifier {
     void (*asyncTraceBegin)(const std::string& traceName, int taskId);
     void (*asyncTraceEnd)(const std::string& traceName, int taskId);
 };
-struct ArkUIAniSyntaxNodeModifier {
-    ani_long (*constructSyntaxNode)(ani_int);
-};
 
 struct ArkUIAniNodeAdapterModifier {
     ani_long (*nodeAdapterConstruct)(NodeAdapterInfo&& info);
@@ -656,6 +653,12 @@ struct ArkUIAniNodeAdapterModifier {
     void (*nodeAdapterNotifyItemInserted)(ani_long node, ani_double start, ani_double count);
     void (*nodeAdapterNotifyItemMoved)(ani_long node, ani_double from, ani_double to);
     AniDoubleArray (*nodeAdapterGetAllItems)(ani_long node);
+};
+struct ArkUIAniSyntaxItemModifier {
+    ani_long (*constructSyntaxItem)(ani_int);
+};
+struct ArkUIAniForEachNodeModifier {
+    ani_long (*constructForEachNode)(ani_int);
 };
 
 struct ArkUIAniModifiers {
@@ -686,8 +689,9 @@ struct ArkUIAniModifiers {
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
     const ArkUIAniTraceModifier* (*getTraceAniModifier)();
-    const ArkUIAniSyntaxNodeModifier* (*getSyntaxNodeAniModifier)();
     const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
+    const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
+    const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
