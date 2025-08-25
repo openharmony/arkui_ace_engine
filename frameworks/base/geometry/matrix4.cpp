@@ -103,7 +103,7 @@ Matrix4 Matrix4::Invert(const Matrix4& matrix)
     Matrix4 inverted = CreateInvert(matrix);
     double determinant = matrix(0, 0) * inverted(0, 0) + matrix(0, 1) * inverted(1, 0) + matrix(0, 2) * inverted(2, 0) +
                          matrix(0, 3) * inverted(3, 0);
-    if (!NearZero(determinant)) {
+    if (!NearZero(determinant, 1e-7f)) {
         inverted = inverted * (1.0f / determinant);
     } else {
         inverted = CreateIdentity();
