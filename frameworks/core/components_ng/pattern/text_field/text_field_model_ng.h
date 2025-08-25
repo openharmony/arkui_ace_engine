@@ -253,6 +253,7 @@ public:
     static Font GetPlaceholderFont(FrameNode* frameNode);
     static bool GetRequestKeyboardOnFocus(FrameNode* frameNode);
     static TextInputType GetType(FrameNode* frameNode);
+    static int32_t GetJSInputType(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static bool GetShowPasswordIcon(FrameNode* frameNode);
     static bool GetShowPassword(FrameNode* frameNode);

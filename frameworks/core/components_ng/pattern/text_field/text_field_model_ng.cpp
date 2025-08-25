@@ -1735,6 +1735,17 @@ TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
     return value;
 }
 
+int32_t TextFieldModelNG::GetJSInputType(FrameNode* frameNode)
+{
+    TextInputType value = TextInputType::UNSPECIFIED;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextInputType, value, frameNode, value);
+    auto result = static_cast<int32_t>(value);
+    if (result == static_cast<int32_t>(TextInputType::ONE_TIME_CODE)) {
+        result = static_cast<int32_t>(TextInputType::JS_ONE_TIME_CODE);
+    }
+    return result;
+}
+
 Color TextFieldModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
 {
     Color value;

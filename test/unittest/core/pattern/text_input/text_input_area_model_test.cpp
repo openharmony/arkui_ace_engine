@@ -1087,6 +1087,34 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testFieldModelNg012
+ * @tc.desc: test testInput ModelNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    /**
+     * @tc.step: step2. Set Type
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    TextInputType textInputType = TextInputType::ONE_TIME_CODE;
+    TextFieldModelNG::SetType(frameNode, textInputType);
+
+    /**
+     * @tc.steps: step3. Get.
+     */
+    auto type = TextFieldModelNG::GetJSInputType(frameNode);
+    EXPECT_EQ(type, static_cast<int32_t>(TextInputType::JS_ONE_TIME_CODE));
+}
+
+/**
  * @tc.name: accessibilityProperty001
  * @tc.desc: test testInput accessibilityProperty
  * @tc.type: FUNC
