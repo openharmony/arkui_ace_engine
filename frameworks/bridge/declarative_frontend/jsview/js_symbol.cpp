@@ -383,7 +383,8 @@ bool JSSymbol::ParseShaderStyle(const JSRef<JSObject>& shaderStyleObj, SymbolGra
         if (!angleProperty->IsEmpty() && !angleProperty->IsNull() && !angleProperty->IsUndefined()) {
             JSViewAbstract::GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), optionsObj,
                                                   gradient.angle, DEFAULT_GRADIENT_ANGLE);
-        } else {
+        }
+        if (!gradient.angle.has_value()) {
             auto directionValue = optionsObj->GetProperty("direction");
             gradient.angle = DirectionToAngle(JsiRef<JsiValue>(directionValue));
         }

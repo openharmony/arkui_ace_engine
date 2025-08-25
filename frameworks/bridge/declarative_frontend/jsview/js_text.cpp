@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -154,7 +153,7 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
-    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
+    if (!fontWeight->IsNull()) {
         int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
         ParseJsInt32(fontWeight, variableFontWeight);
         TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
@@ -166,7 +165,7 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
-    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+    if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
         UnRegisterResource("FontFamily");
@@ -179,7 +178,7 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         }
     }
     auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
-    if (!style->IsNull() && style->IsNumber()) {
+    if (!style->IsNull() || style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
 }
@@ -853,9 +852,8 @@ void JSText::Create(const JSCallbackInfo& info)
         return;
     }
 
-    JSRef<JSVal> args = info[0];
-    if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
-        auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>()) {
+        auto *spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
         if (spanString == nullptr) {
             return;
         }
@@ -985,6 +983,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto tmpInfo = info[0];
@@ -999,6 +998,7 @@ void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     JSRef<JSVal> args = info[0];
@@ -1130,9 +1130,11 @@ void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
 void JSText::SetOptimizeTrailingSpace(const JSCallbackInfo& info)
 {
     bool state = false;
+
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         state = info[0]->ToBoolean();
     }
+    
     TextModel::GetInstance()->SetOptimizeTrailingSpace(state);
 }
 
@@ -1232,8 +1234,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxFontScale", &JSText::SetMaxFontScale, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
-    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
+    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("textSelectable", &JSText::SetTextSelectableMode, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
@@ -1278,8 +1280,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
-    JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
+    JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
