@@ -36,7 +36,9 @@ void DestroyPeerImpl(Ark_WebResourceResponse peer)
 }
 Ark_WebResourceResponse CtorImpl()
 {
-    return new WebResourceResponsePeer();
+    Ark_WebResourceResponse peer = new WebResourceResponsePeer();
+    peer->handler = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::WebResponse>();
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
