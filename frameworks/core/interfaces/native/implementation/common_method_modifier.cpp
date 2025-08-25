@@ -1938,7 +1938,7 @@ void ResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetResponseRegion(frameNode, {});
     }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
