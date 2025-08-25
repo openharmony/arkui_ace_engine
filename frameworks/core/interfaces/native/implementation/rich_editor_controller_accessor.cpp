@@ -614,18 +614,18 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
-                           const Ark_String* value,
+                           const Ark_ResourceStr* content,
                            const Opt_RichEditorTextSpanOptions* options)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
+    CHECK_NULL_RETURN(content, Converter::ArkValue<Ark_Number>(0));
     TextSpanOptions locOptions;
     auto optionsOpt = options ? Converter::OptConvert<TextSpanOptions>(*options) : std::nullopt;
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
-    locOptions.value = Converter::Convert<std::u16string>(*value);
+    locOptions.value = Converter::OptConvert<std::u16string>(*content).value_or(u"");
     return Converter::ArkValue<Ark_Number>(peerImpl->AddTextSpanImpl(locOptions));
 }
 Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,

@@ -27153,7 +27153,7 @@ typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
     Ark_RichEditorController (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*addTextSpan)(Ark_RichEditorController peer,
-                              const Ark_String* value,
+                              const Ark_ResourceStr* content,
                               const Opt_RichEditorTextSpanOptions* options);
     Ark_Number (*addImageSpan)(Ark_RichEditorController peer,
                                const Ark_Union_PixelMap_ResourceStr* value,
