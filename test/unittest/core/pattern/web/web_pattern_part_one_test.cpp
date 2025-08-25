@@ -783,7 +783,7 @@ HWTEST_F(WebPatternPartOneTest, SetRotation_005, TestSize.Level1)
     webPattern->renderSurface_ = nullptr;
 
     webPattern->SetRotation(rotation);
-    EXPECT_EQ(webPattern->renderSurface_, nullptr);
+    EXPECT_EQ(webPattern->rotation_, rotation);
 #endif
 }
 

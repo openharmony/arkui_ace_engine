@@ -116,7 +116,6 @@ HWTEST_F(WebPatternTestNgSupplement, OnAttachToFrameNode_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->renderContextForSurface_ = nullptr;
-    webPattern->renderContextForPopupSurface_ = nullptr;
 
     webPattern->OnAttachToFrameNode();
     EXPECT_NE(webPattern->renderContextForSurface_, nullptr);
@@ -1255,7 +1254,6 @@ HWTEST_F(WebPatternTestNgSupplement, OnAttachToBuilderNodeTest001, TestSize.Leve
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
-    webPattern->offlineWebInited_ = false;
     webPattern->OnAttachToBuilderNode(NodeStatus::NORMAL_NODE);
     ASSERT_EQ(webPattern->offlineWebInited_, false);
 #endif
