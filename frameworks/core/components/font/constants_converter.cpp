@@ -495,9 +495,18 @@ void ConvertGradiantColor(
     }
 }
 
+template<typename Bitmap1, typename Bitmap2>
+inline void ConvertBitmap(const Bitmap1& source, Bitmap2& destination)
+{
+    const auto size = std::min(source.size(), destination.size());
+    for (size_t i = 0; i < size; ++i) {
+        destination.set(i, source.test(i));
+    }
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
-    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
     txtStyle.textStyleUid  = static_cast<unsigned long>(textStyle.GetTextStyleUid());
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
@@ -678,7 +687,7 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
         return;
     }
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());
-    txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
+    ConvertBitmap(textStyle.GetReLayoutTextStyleBitmap(), txtStyle.relayoutChangeBitmap);
     auto gradient = textStyle.GetGradient().value();
     GradientType type = gradient.GetType();
     if (type != GradientType::LINEAR && type != GradientType::RADIAL) {
