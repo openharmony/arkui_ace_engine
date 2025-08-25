@@ -503,7 +503,7 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level1)
  * @tc.desc: test NeedShowAIDetect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, InitAiselection001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -605,11 +605,11 @@ HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateAIStyle
+ * @tc.name: UpdateAIStyle001
  * @tc.desc: test UpdateAIStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -636,11 +636,11 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateAIEntityMenuTest
+ * @tc.name: CreateAIEntityMenuTest001
  * @tc.desc: Test CreateAIEntityMenu set preview menu nodes correctly
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest, TestSize.Level1)
+HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
