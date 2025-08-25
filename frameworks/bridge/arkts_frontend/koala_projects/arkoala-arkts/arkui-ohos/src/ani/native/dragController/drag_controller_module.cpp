@@ -770,8 +770,9 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return result;
     }
-    if (!modifier->getDragControllerAniModifier()->aniHandleExecuteDrag(dragAsyncContext)) {
-        AniUtils::AniThrow(env, "handle drag action failed.", ERROR_CODE_INTERNAL_ERROR);
+    std::string errMsg = "";
+    if (!modifier->getDragControllerAniModifier()->aniHandleExecuteDrag(dragAsyncContext, errMsg)) {
+        AniUtils::AniThrow(env, errMsg.c_str(), ERROR_CODE_INTERNAL_ERROR);
         HILOGE("AceDrag, ani HandleExecuteDrag fail.");
         env->DestroyEscapeLocalScope(result, &escapedObj);
         return result;
@@ -818,11 +819,12 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return dragActionObj;
     }
-    if (!modifier->getDragControllerAniModifier()->aniHandleDragAction(dragAsyncContext)) {
-        AniUtils::AniThrow(env, "handle drag action failed.", ERROR_CODE_INTERNAL_ERROR);
+    std::string errMsg = "";
+    if (!modifier->getDragControllerAniModifier()->aniHandleDragAction(dragAsyncContext, errMsg)) {
+        AniUtils::AniThrow(env, errMsg.c_str(), ERROR_CODE_INTERNAL_ERROR);
         HILOGE("AceDrag, ani HandleCreateDragAction fail.");
         env->DestroyEscapeLocalScope(dragActionObj, &escapedObj);
-        return nullptr;
+        return dragActionObj;
     }
     DragAction* dragAction = new DragAction(dragAsyncContext);
     CHECK_NULL_RETURN(dragAction, nullptr);
