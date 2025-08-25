@@ -180,6 +180,19 @@ RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionA
 void UIExtensionPattern::OnAttachToMainTree()
 {
     UIEXT_LOGI("OnAttachToMainTree, isMoving: %{public}d", IsMoving());
+    if (IsMoving()) {
+        return;
+    }
+    if (needReNotifyForeground_) {
+        auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
+        if (hostWindowNode) {
+            needReNotifyForeground_ = false;
+            UIEXT_LOGI("NotifyForeground OnAttachToMainTree.");
+            NotifyForeground();
+        } else {
+            UIEXT_LOGI("No WindowScene When OnAttachToMainTree, wait.");
+        }
+    }
 }
 
 void UIExtensionPattern::OnDetachFromMainTree()

@@ -2101,6 +2101,32 @@ HWTEST_F(UIExtensionComponentTestNg, ModalUIExtensionTestNgTestNg, TestSize.Leve
 }
 
 /**
+ * @tc.name: OnAttachToMainTree Test
+ * @tc.desc: Test UIExtension OnAttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, OnAttachToMainTreeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    uiExtNode->isMoving_ = true;
+    pattern->OnAttachToMainTree();
+    uiExtNode->isMoving_ = false;
+    pattern->OnAttachToMainTree();
+    pattern->needReNotifyForeground_ = false;
+    pattern->OnAttachToMainTree();
+    EXPECT_EQ(pattern->needReNotifyForeground_, false);
+    pattern->needReNotifyForeground_ = true;
+    pattern->OnAttachToMainTree();
+    EXPECT_EQ(pattern->needReNotifyForeground_, true);
+}
+
+/**
  * @tc.name: Visible Test
  * @tc.desc: Test UIExtension Visible
  * @tc.type: FUNC
