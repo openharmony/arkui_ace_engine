@@ -479,6 +479,11 @@ uint32_t ReadCanvasDebugMode()
     return system::GetUintParameter("persist.ace.canvas.debug.mode", 0u);
 }
 
+uint32_t ReadSafeRefactorMode()
+{
+    return system::GetUintParameter("persist.ace.safe.refactor.mode", 0u);
+}
+
 bool IsFaultInjectEnabled()
 {
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
@@ -742,6 +747,7 @@ bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
+uint32_t SystemProperties::safeRefactorMode_ = ReadSafeRefactorMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
@@ -907,6 +913,7 @@ void SystemProperties::InitDeviceInfo(
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
+    safeRefactorMode_ = ReadSafeRefactorMode();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
     debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";

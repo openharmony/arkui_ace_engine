@@ -462,6 +462,11 @@ public:
         return canvasDebugMode_;
     }
 
+    static uint32_t GetSafeRefactorMode()
+    {
+        return safeRefactorMode_;
+    }
+
     static bool GetDebugEnabled();
 
     static bool DetectContainerMultiThread()
@@ -848,6 +853,7 @@ private:
     static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
+    static uint32_t safeRefactorMode_;
     static bool isRound_;
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;
