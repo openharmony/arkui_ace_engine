@@ -283,12 +283,12 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
         .setMinFontScale = SetMinFontScale,
         .resetMinFontScale = ResetMinFontScale,
         .setMaxFontScale = SetMaxFontScale,
         .resetMaxFontScale = ResetMaxFontScale,
-        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
