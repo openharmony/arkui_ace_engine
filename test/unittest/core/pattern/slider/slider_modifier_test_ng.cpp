@@ -115,6 +115,9 @@ constexpr float SCALE_VALUE = 1.5f;
 constexpr float BLOCK_LINEAR_GRADIENT_COLOR_OFFSET_STARE = 0.0f;
 constexpr float BLOCK_LINEAR_GRADIENT_COLOR_OFFSET_BETWEEN = 0.5f;
 constexpr float BLOCK_LINEAR_GRADIENT_COLOR_OFFSET_END = 1.0f;
+constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension ARROW_WIDTH = 16.0_vp;
+constexpr Dimension CIRCULAR_HORIZON_OFFSET = 13.86_vp;
 } // namespace
 class SliderModifierTestNg : public testing::Test {
 public:
@@ -1604,6 +1607,9 @@ HWTEST_F(SliderModifierTestNg, SliderTipModifierTest002, TestSize.Level1)
     sliderTipModifier.SetParagraph(paragraph);
     sliderTipModifier.PaintTip(context);
     SizeF textSize = { 8, 8 };
+    sliderTipModifier.arrowWidth_ = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    sliderTipModifier.arrowHeight_ = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
+    sliderTipModifier.circularHorizontalOffset_ = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is VERTICAL and call PaintText function.
      */
@@ -1706,6 +1712,16 @@ HWTEST_F(SliderModifierTestNg, SliderTipModifierTest005, TestSize.Level1)
      */
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetFontScale(1.8f);
+    auto slidertheme = pipeline->GetTheme<SliderTheme>();
+    ASSERT_NE(slidertheme, nullptr);
+    slidertheme->bubbleLevel1HorizontalHeight_ = BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_HEIGHT;
+    slidertheme->bubbleLevel1HorizontalWidth_ = BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_1_WIDTH;
+    slidertheme->bubbleLevel1VerticalHeight_ = BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_HEIGHT;
+    slidertheme->bubbleLevel1VerticalWidth_ = BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_1_WIDTH;
+    slidertheme->bubbleLevel2HorizontalHeight_ = BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT;
+    slidertheme->bubbleLevel2HorizontalWidth_ = BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH;
+    slidertheme->bubbleLevel2VerticalHeight_ = BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_HEIGHT;
+    slidertheme->bubbleLevel2VerticalWidth_ = BUBBLE_VERTICAL_SUITABLEAGING_LEVEL_2_WIDTH;
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
     sliderTipModifier.UpdateBubbleSize();
