@@ -31,7 +31,6 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { MenuModifier } from "../MenuModifier"
 import { hookMenuAttributeModifier } from '../handwritten'
-import { applyAttributeModifierBase } from "src/handwritten/modifiers/ArkCommonModifier"
 
 export class ArkMenuPeer extends ArkCommonMethodPeer {
     _attributeSet?: MenuModifier;

@@ -35,7 +35,6 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { MenuItemOpsHandWritten } from "./../handwritten"
 import { MenuItemModifier } from '../MenuItemModifier'
 import { hookMenuItemAttributeModifier } from '../handwritten'
-import { applyAttributeModifierBase } from "src/handwritten/modifiers/ArkCommonModifier"
 
 export class ArkMenuItemPeer extends ArkCommonMethodPeer {
     _attributeSet?: MenuItemModifier;
@@ -375,7 +374,7 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
-    
+
     public attributeModifier(modifier: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         hookMenuItemAttributeModifier(this, modifier);
         return this
