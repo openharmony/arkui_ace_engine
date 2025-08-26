@@ -87,7 +87,8 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
         auto pattern = curFocusNode->GetPattern();
 #ifdef WINDOW_SCENE_SUPPORTED
-        auto needCloseKeyboard = !NG::WindowSceneHelper::IsWindowScene(curFocusNode) ||
+        auto needCloseKeyboard = !(curFocusNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG
+            || NG::WindowSceneHelper::IsWindowScene(curFocusNode)) ||
             !NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode);
 #else
         auto needCloseKeyboard = true;
@@ -111,7 +112,8 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto isWindowScene = NG::WindowSceneHelper::IsWindowScene(curFocusNode);
+    auto isWindowScene = curFocusNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG ||
+        NG::WindowSceneHelper::IsWindowScene(curFocusNode);
     if (isWindowScene) {
         ProcessKeyboardInWindowScene(curFocusNode);
     } else {
