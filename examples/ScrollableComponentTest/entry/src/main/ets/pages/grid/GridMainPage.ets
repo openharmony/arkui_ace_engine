@@ -41,6 +41,15 @@ struct WaterFlowMainPage {
     new TextList(7, 'GridCalculator', 'pages/grid/GridCalculator'),
     new TextList(8, 'friction', 'pages/grid/friction/friction'),
     new TextList(9, 'GridCAPI', 'pages/grid/GridCAPI'),
+    new TextList(10, 'GrdiDragSample', 'pages/grid/GrdiDragSample'),
+    new TextList(11, 'GridDragWithScroll', 'pages/grid/GridDragWithScroll'),
+    new TextList(12, 'cachedCount007', 'pages/grid/st/cachedCount007'),
+    new TextList(13, 'cachedCount008', 'pages/grid/st/cachedCount008'),
+    new TextList(14, 'GridDemo001', 'pages/grid/st/GridDemo001'),
+    new TextList(15, 'GridDemo002', 'pages/grid/st/GridDemo002'),
+    new TextList(16, 'GridDemo006', 'pages/grid/st/GridDemo006'),
+    new TextList(17, 'LazyVGridSample', 'pages/grid/st/LazyVGridSample'),
+    new TextList(18, 'NestedScroll001', 'pages/grid/st/NestedScroll001')
   ]
   @State fontSize: Resource | undefined = undefined
 
