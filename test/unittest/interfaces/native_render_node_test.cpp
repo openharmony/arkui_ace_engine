@@ -544,7 +544,8 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest113, TestSize.Level1)
 {
     auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
     ASSERT_NE(rectShape, nullptr);
-    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 10.0f, 0.0f, 0.0f, 20.0f);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 10.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 20.0f, ARKUI_EDGE_DIRECTION_LEFT);
     OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
 }
 
@@ -715,7 +716,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest126, TestSize.Level1)
 {
     auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
     ASSERT_NE(roundRectShape, nullptr);
-    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(roundRectShape, 100.0f, 0.0f, 0.0f, 0.0f);
+    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(roundRectShape, 100.0f, ARKUI_EDGE_DIRECTION_TOP);
     OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY(
         roundRectShape, 10.0f, 10.0f, ARKUI_CORNER_DIRECTION_TOP_LEFT);
     OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
@@ -920,7 +921,10 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest137, TestSize.Level1)
 
     auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
     ASSERT_NE(rectShape, nullptr);
-    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 100.0f, 200.0f, 200.0f, 100.0f);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 100.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 100.0f, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 200.0f, ARKUI_EDGE_DIRECTION_RIGHT);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 200.0f, ARKUI_EDGE_DIRECTION_BOTTOM);
 
     auto maskOption = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape(rectShape);
     ASSERT_NE(maskOption, nullptr);
