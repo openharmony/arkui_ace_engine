@@ -844,16 +844,24 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
     TouchEvent touchPoint;
 
     auto type = value->GetProperty("type");
-    touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
+    if (type->IsNumber()) {
+        touchPoint.type = static_cast<TouchType>(type->ToNumber<int32_t>());
+    }
 
     auto id = value->GetProperty("id");
-    touchPoint.id = id->ToNumber<int32_t>();
+    if (id->IsNumber()) {
+        touchPoint.id = id->ToNumber<int32_t>();
+    }
 
     auto x = value->GetProperty("x");
-    touchPoint.x = x->ToNumber<float>();
+    if (x->IsNumber()) {
+        touchPoint.x = x->ToNumber<float>();
+    }
 
     auto y = value->GetProperty("y");
-    touchPoint.y = y->ToNumber<float>();
+    if (y->IsNumber()) {
+        touchPoint.y = y->ToNumber<float>();
+    }
 
     touchPoint.time = std::chrono::high_resolution_clock::now();
 
@@ -892,25 +900,39 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
 static KeyEvent GetKeyEventFromJS(const JsiObject& value)
 {
     auto type = value->GetProperty("type");
-    auto action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+    auto action = KeyAction::UNKNOWN;
+    if (type->IsNumber()) {
+        action = static_cast<KeyAction>(type->ToNumber<int32_t>());
+    }
 
     auto jsKeyCode = value->GetProperty("keyCode");
-    auto code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+    auto code = KeyCode::KEY_UNKNOWN;
+    if (jsKeyCode->IsNumber()) {
+        code = static_cast<KeyCode>(jsKeyCode->ToNumber<int32_t>());
+    }
 
     KeyEvent keyEvent(code, action);
 
     auto jsKeySource = value->GetProperty("keySource");
-    keyEvent.sourceType = static_cast<SourceType>(jsKeySource->ToNumber<int32_t>());
+    if (jsKeySource->IsNumber()) {
+        keyEvent.sourceType = static_cast<SourceType>(jsKeySource->ToNumber<int32_t>());
+    }
 
     auto jsDeviceId = value->GetProperty("deviceId");
-    keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
+    if (jsDeviceId->IsNumber()) {
+        keyEvent.deviceId = jsDeviceId->ToNumber<int32_t>();
+    }
 
     auto jsMetaKey = value->GetProperty("metaKey");
-    keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
+    if (jsMetaKey->IsNumber()) {
+        keyEvent.metaKey = jsMetaKey->ToNumber<int32_t>();
+    }
 
     auto jsTimestamp = value->GetProperty("timestamp");
-    auto timeStamp = jsTimestamp->ToNumber<int64_t>();
-    keyEvent.SetTimeStamp(timeStamp);
+    if (jsTimestamp->IsNumber()) {
+        auto timeStamp = jsTimestamp->ToNumber<int64_t>();
+        keyEvent.SetTimeStamp(timeStamp);
+    }
 
     auto jsUnicode = value->GetProperty("unicode");
     keyEvent.unicode = jsUnicode->ToNumber<uint32_t>();
@@ -952,18 +974,26 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
     MouseEvent mouseEvent;
 
     auto action = value->GetProperty("action");
-    mouseEvent.action = static_cast<MouseAction>(action->ToNumber<int32_t>());
+    if (action->IsNumber()) {
+        mouseEvent.action = static_cast<MouseAction>(action->ToNumber<int32_t>());
+    }
 
     auto button = value->GetProperty("button");
-    mouseEvent.button = static_cast<MouseButton>(button->ToNumber<int32_t>());
+    if (button->IsNumber()) {
+        mouseEvent.button = static_cast<MouseButton>(button->ToNumber<int32_t>());
+    }
 
     auto x = value->GetProperty("x");
-    mouseEvent.x = x->ToNumber<float>();
-    mouseEvent.deltaX = mouseEvent.x;
+    if (x->IsNumber()) {
+        mouseEvent.x = x->ToNumber<float>();
+        mouseEvent.deltaX = mouseEvent.x;
+    }
 
     auto y = value->GetProperty("y");
-    mouseEvent.y = y->ToNumber<float>();
-    mouseEvent.deltaY = mouseEvent.y;
+    if (y->IsNumber()) {
+        mouseEvent.y = y->ToNumber<float>();
+        mouseEvent.deltaY = mouseEvent.y;
+    }
 
     mouseEvent.time = std::chrono::high_resolution_clock::now();
     mouseEvent.sourceType = SourceType::MOUSE;
