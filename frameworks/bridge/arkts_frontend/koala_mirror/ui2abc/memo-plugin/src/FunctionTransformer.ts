@@ -34,6 +34,7 @@ import {
     castParameters,
     getName,
     getParams,
+    getReturnTypeAnnotation,
     isMemo,
     isMemoizable,
     memoizableHasReceiver,
@@ -176,17 +177,6 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         return this
     }
 
-    fixObjectArg(arg: arkts.Expression, param: arkts.ETSParameterExpression) {
-        if (param.typeAnnotation && (arkts.isObjectExpression(arg) || hasWrapAnnotation(param))) {
-            return arkts.factory.createTSAsExpression(
-                arg,
-                param.typeAnnotation.clone(),
-                false
-            )
-        }
-        return arg
-    }
-
     updateScriptFunction(
         scriptFunction: arkts.ScriptFunction,
         hasReceiver: boolean,
@@ -209,6 +199,8 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
                 scriptFunction.modifierFlags,
                 scriptFunction.id,
                 scriptFunction.annotations,
+                scriptFunction.getSignaturePointer(),
+                scriptFunction.getPreferredReturnTypePointer(),
             )
         }
 
@@ -217,7 +209,7 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
         const [body, parameterIdentifiers, memoParametersDeclaration, syntheticReturnStatement] = updateFunctionBody(
             afterInternalsTransformer,
             castParameters(scriptFunction.params),
-            scriptFunction.returnTypeAnnotation,
+            getReturnTypeAnnotation(scriptFunction),
             hasReceiver,
             isStatic,
             isStableThis,
@@ -245,6 +237,8 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
             scriptFunction.modifierFlags,
             scriptFunction.id,
             scriptFunction.annotations,
+            scriptFunction.getSignaturePointer(),
+            scriptFunction.getPreferredReturnTypePointer(),
         )
     }
 
@@ -280,9 +274,9 @@ export class FunctionTransformer extends arkts.AbstractVisitor {
             // This code is too dependent on the availability of parameter declaration and its type
             // Most of the decisions should be taken basing on the fact that this is a memo call
             if (shouldWrap(params[index], index + 1 == params.length, this.trackContentParam, it)) {
-                return factory.createComputeExpression(this.positionalIdTracker.id(getName(decl)), this.fixObjectArg(it, params[index]))
+                return factory.createComputeExpression(this.positionalIdTracker.id(getName(decl)), it)
             }
-            return this.fixObjectArg(it, params[index])
+            return it
         })
         this.modified = true
 

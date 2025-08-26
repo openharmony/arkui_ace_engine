@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "common_ani_modifier.h"
 #include "ani_utils.h"
+#include "ui/properties/color.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
@@ -30,7 +33,11 @@
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/ani/ani_theme.h"
+#include "core/interfaces/native/ani/ani_theme_module.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
@@ -41,7 +48,10 @@
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
+#include "core/components_ng/token_theme/token_colors.h"
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -56,7 +66,20 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
+
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
 }
+} // namespace
+
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
@@ -102,7 +125,7 @@ ArkUI_Int32 GetCurrentInstanceId()
 
 ArkUI_Int32 GetFocusedInstanceId()
 {
-    auto container = Container::GetFoucsed();
+    auto container = Container::GetFocused();
     CHECK_NULL_RETURN(container, -1);
     auto currentInstance = container->GetInstanceId();
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -173,6 +196,40 @@ ArkUI_Int32 RequireArkoalaNodeId(ArkUI_Int32 capacity)
     return cursor;
 }
 
+ani_long GetNodePtrWithPeerPtr(ani_long peerPtr)
+{
+    RenderNodePeer* peer = reinterpret_cast<RenderNodePeer*>(peerPtr);
+    CHECK_NULL_RETURN(peer, -1);
+    RefPtr<FrameNode> node = peer->GetFrameNode();
+    ani_long ret = reinterpret_cast<ani_long>(node.GetRawPtr());
+    return ret;
+}
+
+ani_int GetNodeIdWithNodePtr(ani_long nodePtr)
+{
+    FrameNode* node = reinterpret_cast<FrameNode*>(nodePtr);
+    CHECK_NULL_RETURN(node, -1);
+    int32_t id = node->GetId();
+    return id;
+}
+
+ani_int GetNodeIdWithPeerPtr(ani_long ptr)
+{
+    RenderNodePeer* peer = reinterpret_cast<RenderNodePeer*>(ptr);
+    CHECK_NULL_RETURN(peer, -1);
+    RefPtr<FrameNode> node = peer->GetFrameNode();
+    int32_t id = node->GetId();
+    return id;
+}
+ani_long CreateRenderNodePeerWithNodePtr(ani_long ptr)
+{
+    FrameNode* node = reinterpret_cast<FrameNode*>(ptr);
+    auto nodePtr = AceType::Claim(node);
+    auto peerPtr = PeerUtils::CreatePeer<RenderNodePeer>(nodePtr);
+    ani_long ret = reinterpret_cast<ani_long>(peerPtr);
+    return ret;
+}
+
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
 {
     SyncInstanceId(instanceId);
@@ -229,7 +286,9 @@ static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandl
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
     }
-    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+    CHECK_NULL_RETURN(frameNodePeer, std::nullopt);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
     CHECK_NULL_RETURN(frameNode, std::nullopt);
 
     std::string capiCustomProperty;
@@ -578,6 +637,134 @@ void* GetHoverEventPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(peer->GetEventInfo());
 }
 
+void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
+}
+
+ArkUI_Uint32 GetColorValueByString(const std::string& src)
+{
+    Color color;
+    Color::ParseColorString(src, color);
+    return color.GetValue();
+}
+
+ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
+{
+    Color color(ColorAlphaAdapt(src));
+    return color.GetValue();
+}
+
+void SendThemeToNative(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_int id)
+{
+    auto colors = AceType::MakeRefPtr<AniThemeColors>();
+    colors->SetColors(colorArray);
+
+    auto themeScopeId = static_cast<int32_t>(id);
+
+    AniTheme aniTheme;
+    aniTheme.SetColors(colors);
+    AniThemeScope::AddAniTheme(themeScopeId, aniTheme);
+
+    // save the current theme when Theme was created by WithTheme container
+    if (AniThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
+        std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::GetAniTheme(themeScopeId));
+        AniThemeScope::aniCurrentTheme.swap(themeOpt);
+    }
+}
+
+void RemoveThemeInNative(ani_env* env, ani_int withThemeId)
+{
+    auto themeScopeId = static_cast<int32_t>(withThemeId);
+    AniThemeScope::RemoveAniTheme(themeScopeId);
+}
+
+void SetDefaultTheme(ani_env* env, const std::vector<Ark_ResourceColor>& colorArray, ani_boolean isDark)
+{
+    auto isDarkValue = static_cast<bool>(isDark);
+    std::vector<uint32_t> colors;
+    AniThemeModule::ConvertToColorArray(colorArray, colors);
+    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
+}
+
+void UpdateColorMode(ani_int colorMode)
+{
+    auto colorModeValue = static_cast<int32_t>(colorMode);
+    AniThemeModule::UpdateColorMode(colorModeValue);
+}
+
+void RestoreColorMode()
+{
+    AniThemeModule::RestoreColorMode();
+}
+
+void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
+{
+    auto scopeId = static_cast<int32_t>(themeScopeId);
+    AniThemeScope::isCurrentThemeDefault = scopeId == 0;
+
+    std::optional<AniTheme> themeOpt = AniThemeScope::IsAniThemeExists(scopeId)
+                                           ? std::make_optional(AniThemeScope::GetAniTheme(scopeId))
+                                           : std::nullopt;
+
+    AniThemeScope::aniCurrentTheme.swap(themeOpt);
+}
+
+void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId,
+    const std::vector<Ark_ResourceColor>& colorArray, ani_int colorMode, ani_fn_object onThemeScopeDestroy)
+{
+    int32_t themeScopeIdValue = static_cast<int32_t>(themeScopeId);
+    int32_t themeIdValue = static_cast<int32_t>(themeId);
+    int32_t colorModeValue = static_cast<int32_t>(colorMode);
+
+    std::vector<uint32_t> colors;
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    AniThemeModule::ConvertToColorArray(colorArray, colors);
+
+    if (!onThemeScopeDestroy) {
+        return;
+    }
+    auto containerId = Container::CurrentId();
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    std::function<void()> onThemeScopeDestroyFunc = [vm, func = onThemeScopeDestroy, containerId]() {
+        ContainerScope scope(containerId);
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        if (env) {
+            ani_ref result;
+            env->FunctionalObject_Call(func, 0, nullptr, &result);
+        }
+    };
+
+    auto themeModifier = NodeModifier::GetThemeModifier();
+    auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
+    CHECK_NULL_VOID(theme);
+    ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
+    if (!node) {
+        node = AniThemeModule::CreateWithThemeNode(themeScopeId);
+    }
+    themeModifier->createThemeScope(node, theme);
+    themeModifier->setOnThemeScopeDestroy(node, reinterpret_cast<void*>(&onThemeScopeDestroyFunc));
+}
+
+void ApplyParentThemeScopeId(ani_env* env, ani_long self, ani_long parent)
+{
+    auto* selfPtr = reinterpret_cast<UINode*>(self);
+    auto* parentPtr = reinterpret_cast<UINode*>(parent);
+    if (!selfPtr || !parentPtr) {
+        return;
+    }
+    int32_t elementThemeScopeId = selfPtr->GetThemeScopeId();
+    if (parentPtr && elementThemeScopeId == 0) {
+        int32_t themeScopeId = parentPtr->GetThemeScopeId();
+        if (elementThemeScopeId != themeScopeId) {
+            selfPtr->SetThemeScopeId(themeScopeId);
+        }
+    }
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -592,6 +779,10 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
         .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId,
+        .getNodePtrWithPeerPtr = OHOS::Ace::NG::GetNodePtrWithPeerPtr,
+        .getNodeIdWithNodePtr = OHOS::Ace::NG::GetNodeIdWithNodePtr,
+        .getNodeIdWithPeerPtr = OHOS::Ace::NG::GetNodeIdWithPeerPtr,
+        .createRenderNodePeerWithNodePtr = OHOS::Ace::NG::CreateRenderNodePeerWithNodePtr,
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
@@ -626,6 +817,16 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAxisEventPointer = OHOS::Ace::NG::GetAxisEventPointer,
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
+        .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
+        .removeThemeInNative = OHOS::Ace::NG::RemoveThemeInNative,
+        .setDefaultTheme = OHOS::Ace::NG::SetDefaultTheme,
+        .updateColorMode = OHOS::Ace::NG::UpdateColorMode,
+        .restoreColorMode = OHOS::Ace::NG::RestoreColorMode,
+        .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
+        .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
+        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId
     };
     return &impl;
 }

@@ -72,10 +72,16 @@ export interface ScrollBarOptions {
 }
 export type ScrollBarInterface = (value: ScrollBarOptions) => ScrollBarAttribute;
 export interface ScrollBarAttribute extends CommonMethod {
+    setScrollBarOptions(value: ScrollBarOptions): this {
+        return this
+    }
     enableNestedScroll(value: boolean | undefined): this
 }
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined
+    public setScrollBarOptions(value: ScrollBarOptions): this {
+        return this
+    }
     public enableNestedScroll(value: boolean | undefined): this {
         return this
         }
@@ -107,10 +113,9 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
     }
 }
 /** @memo */
-export function ScrollBar(
+export function ScrollBarImpl(
     /** @memo */
     style: ((attributes: ScrollBarAttribute) => void) | undefined,
-    value: ScrollBarOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -118,9 +123,7 @@ export function ScrollBar(
         return new ArkScrollBarComponent()
     })
     NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (_: ArkScrollBarPeer) => {
-        receiver.setScrollBarOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

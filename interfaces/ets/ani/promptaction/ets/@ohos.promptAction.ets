@@ -208,9 +208,9 @@ export default namespace promptAction {
     }
 
     export interface DialogBuilderOptions {
-        builderFunc?: (() => long);
-        builderWithIdFunc?: ((dialogId: number) => long);
+        builder?: long;
         destroyFunc?: ((ptr: long) => void);
+        builderWithId?: ((dialogId: number) => long);
     }
 
     class Cleaner {
@@ -292,7 +292,7 @@ export default namespace promptAction {
     export native function openCustomDialog1(content: long, options?: BaseDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export native function openCustomDialog(builder: long, options: CustomDialogOptions,
+    export native function openCustomDialog(builderOptions: DialogBuilderOptions, options: CustomDialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export native function updateCustomDialog(content: long, options: BaseDialogOptions): Promise<void>;

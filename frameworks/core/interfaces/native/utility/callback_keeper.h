@@ -48,7 +48,8 @@ using ReverseResultHandler = std::variant<
     std::function<void(Ark_Number, Ark_Number)>,
     std::function<void(Ark_Number, Ark_SliderChangeMode)>,
     std::function<void(const void *)>,
-    std::function<void(Ark_Boolean)>
+    std::function<void(Ark_Boolean)>,
+    std::function<void(Ark_Number, Callback_Number_Void)>
 >;
 }
 
@@ -211,7 +212,8 @@ inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(
     : arkCallback_(CallbackKeeper::DefineNumberCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
-inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler)
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(
+    std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler)
     : arkCallback_(CallbackKeeper::DefineSliderTriggerChangeCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>

@@ -52,7 +52,7 @@ using std::string;
 static std::atomic<uint32_t> mallocCounter{0};
 #endif
 
-#ifdef KOALA_NAPI
+#if defined(KOALA_NAPI) || defined(KOALA_ANI)
 // Callback dispatcher MOVED to convertors-napi.cc.
 // Let's keep platform-specific parts of the code together
 
@@ -479,7 +479,10 @@ void resolveDeferred(KVMDeferred* deferred, uint8_t* argsData, int32_t argsLengt
         status = vm->AttachCurrentThread(nullptr, ANI_VERSION_1, &env);
         CHECK_ANI_FATAL(status);
     }
-    status = env->PromiseResolver_Resolve((ani_resolver)deferred->handler, nullptr);
+    ani_ref undef = nullptr;
+    status = env->GetUndefined(&undef);
+    CHECK_ANI_FATAL(status);
+    status = env->PromiseResolver_Resolve((ani_resolver)deferred->handler, undef);
     CHECK_ANI_FATAL(status);
 #endif
 }

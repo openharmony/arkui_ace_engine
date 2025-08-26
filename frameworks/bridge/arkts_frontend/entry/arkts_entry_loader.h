@@ -40,7 +40,7 @@ public:
     EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent);
     ~EntryLoader() = default;
 
-    ani_object GetPageEntryObj(const std::string& entryPath) const;
+    ani_object GetPageEntryObj(std::string& entryPath) const;
 
     operator bool() const
     {

@@ -15,11 +15,11 @@
 
 import { isNullPtr, KInt, KNativePointer, nullptr } from "@koalaui/interop"
 import { global } from "../static/global"
-import { allFlags, unpackNodeArray, unpackNonNullableNode, unpackString } from "../utilities/private"
+import { allFlags, unpackNode, unpackNodeArray, unpackNonNullableNode, unpackString } from "../utilities/private"
 import { throwError } from "../../utils"
 import { Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import { ArktsObject } from "./ArktsObject"
-import { SourcePosition } from "./SourcePosition"
+import { SourcePosition } from "../../generated/peers/SourcePosition"
 import { NodeCache } from "../node-cache"
 
 export abstract class AstNode extends ArktsObject {
@@ -117,7 +117,7 @@ export abstract class AstNode extends ArktsObject {
     
     public get parent(): AstNode | undefined {
         const parent = global.generatedEs2panda._AstNodeParent(global.context, this.peer);
-        return unpackNonNullableNode(parent);
+        return unpackNode(parent);
     }
 
     public set parent(node: AstNode | undefined) {

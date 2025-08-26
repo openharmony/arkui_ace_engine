@@ -19,11 +19,15 @@
 
 namespace OHOS::Ace::Ani {
     // for persistentStorage
-    ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
-    void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key, ani_string value);
-    ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
+    ani_string PersistentStorage_Get(ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_string key, ani_object IntObject);
+    void PersistentStorage_Set(ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_string key, ani_string value, ani_object IntObject);
+    ani_boolean PersistentStorage_Has(ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_string key, ani_object IntObject);
     void PersistentStorage_Clear(ani_env* env, [[maybe_unused]] ani_object aniClass);
-    void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
+    void PersistentStorage_Delete(ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_string key, ani_object IntObject);
 
     // for environment
     ani_boolean Env_GetAccessibilityEnabled(ani_env* env);

@@ -93,6 +93,9 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
 }
 export type CounterInterface = () => CounterAttribute;
 export interface CounterAttribute extends CommonMethod {
+    setCounterOptions(): this {
+        return this
+    }
     onInc(value: VoidCallback | undefined): this
     onDec(value: VoidCallback | undefined): this
     enableDec(value: boolean | undefined): this
@@ -103,6 +106,9 @@ export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttr
     onDec_value?: VoidCallback | undefined
     enableDec_value?: boolean | undefined
     enableInc_value?: boolean | undefined
+    public setCounterOptions(): this {
+        return this
+    }
     public onInc(value: VoidCallback | undefined): this {
         return this
     }
@@ -166,10 +172,9 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
     }
 }
 /** @memo */
-export function Counter(
+export function CounterImpl(
     /** @memo */
     style: ((attributes: CounterAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -177,9 +182,7 @@ export function Counter(
         return new ArkCounterComponent()
     })
     NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (_: ArkCounterPeer) => {
-        receiver.setCounterOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -71,7 +71,10 @@ export class StateMgmtTool {
         return value instanceof InterfaceProxyHandler;
     }
     static tryGetHandler(value: Object): NullableObject {
-        return proxy.Proxy.tryGetHandler(value) as NullableObject;
+        const objType = Type.of(value);
+        return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
+            : undefined;
     }
     static createProxy<T extends Object>(value: T): T {
         return proxy.Proxy.create(value, new InterfaceProxyHandler<T>()) as T;

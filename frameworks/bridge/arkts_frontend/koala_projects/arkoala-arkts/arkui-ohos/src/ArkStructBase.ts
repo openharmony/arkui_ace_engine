@@ -16,7 +16,7 @@
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { ArkComponentRoot } from "./ArkComponentRoot"
-import { ArkColumnPeer } from "./component";
+import { SyntaxNodePeer } from "./handwritten/RepeatImpl";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
 import { OBSERVE } from "./stateManagement";
 import { PeerNode } from "./PeerNode"
@@ -81,13 +81,15 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     ): void {
         ArkComponentRoot(this, () => {
             this.__updateStruct(initializers);
-            this.isV2()
-                ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
-                : OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            const savedRenderingComponent = OBSERVE.renderingComponent
+            OBSERVE.renderingComponent = this.isV2() ?
+                ObserveSingleton.RenderingComponentV2 : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
+            OBSERVE.renderingComponent = savedRenderingComponent;
             remember(() => {
-                this.onDidBuild();
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    this.onDidBuild();
+                })
             });
         })
     }
@@ -102,7 +104,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         initializers?: T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
-        NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
+        NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(content, initializers);

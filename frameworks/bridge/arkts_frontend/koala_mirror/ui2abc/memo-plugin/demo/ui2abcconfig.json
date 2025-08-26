@@ -12,21 +12,16 @@
         },
         "plugins": [
             {
-                "transform": "@koalaui/memo-plugin/ParserTransformer",
-                "stage": "parsed",
+                "transform": "@koalaui/memo-plugin",
+                "state": "parsed",
                 "name": "memo"
             },
             {
-                "transform": "../lib/MemoTransformer",
-                "stage": "checked",
+                "transform": "@koalaui/memo-plugin",
+                "state": "checked",
                 "name": "memo"
             }
         ]
     },
-    "include": ["./demo/demo.ets"],
-    "dependencies": {
-        "@koalaui/runtime": [
-            "../../../incremental/runtime/ui2abcconfig.json"
-        ]
-    }
+    "include": ["./demo/demo.ets"]
 }

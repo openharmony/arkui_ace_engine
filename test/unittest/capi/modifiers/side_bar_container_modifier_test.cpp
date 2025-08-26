@@ -425,7 +425,7 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
     for (auto& [input, value, expected] : controlButtonIconStringValues) {
         checkValue(input, expected, Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(value));
     }
-    auto res = CreateResource(RES_SRC_TEST, Converter::ResourceType::STRING);
+    auto res = CreateResource(RES_SRC_TEST, ResourceType::STRING);
     auto valueRes = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_Resource>(res);
     checkValue(ICON_STRING, ICON_STRING, valueRes);
 }
@@ -534,7 +534,7 @@ HWTEST_F(SideBarContainerModifierTest, setOnChangeTest, TestSize.Level1)
     };
     auto optCallback = Converter::ArkValue<Opt_Callback_Boolean_Void>(arkCallback);
     modifier_->setOnChange(node_, &optCallback);
-    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SideBarContainerEventHub>();
     eventHub->FireChangeEvent(true);
     EXPECT_TRUE(checkEvent.has_value());
     EXPECT_TRUE(checkEvent->value);
@@ -959,7 +959,7 @@ HWTEST_F(SideBarContainerModifierTest, setDividerTestColorValidValues, TestSize.
 HWTEST_F(SideBarContainerModifierTest, setOnChangeEventSelectImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

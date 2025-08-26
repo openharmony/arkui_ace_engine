@@ -37,8 +37,9 @@ export class CascadeMemoState<Value> implements MemoState<Value> {
 
     get value(): Value {
         const manager = GlobalStateManager.instance as StateManagerImpl;
+        const scope = manager?.current;
         this.manager?.scheduleCallback(() => {
-            this.dependencies?.register(manager?.current);
+            this.dependencies?.register(scope);
         });
         return this._value;
     }

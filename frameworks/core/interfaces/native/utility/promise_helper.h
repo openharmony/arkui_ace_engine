@@ -50,6 +50,11 @@ public:
         AsyncWorkHelper::QueueWork(work_);
     }
 
+    void Resolve() const
+    {
+        callback_.InvokeSync(Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+    }
+
     // Resolve the promise.
     template<typename... ArkResult>
     void Resolve(ArkResult&&... result) const

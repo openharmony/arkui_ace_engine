@@ -29,9 +29,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   private wrappedValue_: T;
 
-  public staticWatchId?: number;
+  public staticWatchFunc?: Object;
 
   public _setInteropValueForStaticState?: setValue<T>;
+  public _notifyInteropFireChange?: () => void;
 
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
@@ -50,9 +51,13 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
    * @param eventSource 
    */
-  public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) : void {
+  public syncPeerHasChanged(eventSource?: ObservedPropertyAbstractPU<T>) : void {
     stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
     this.notifyPropertyHasChangedPU();
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop() && eventSource !== undefined && this._notifyInteropFireChange) {
+      this._notifyInteropFireChange();
+    }
   }
 
   public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<T>, changedTrackedObjectPropertyName: string): void {
@@ -75,10 +80,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     if (this.wrappedValue_) {
       if (this.wrappedValue_ instanceof SubscribableAbstract) {
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
-      // for interop
-      } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.wrappedValue_ === 'object' &&
-        'removeWatchSubscriber' in this.wrappedValue_ && typeof this.wrappedValue_.removeWatchSubscriber === 'function') {
-        this.wrappedValue_.removeWatchSubscriber(this.staticWatchId);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
 

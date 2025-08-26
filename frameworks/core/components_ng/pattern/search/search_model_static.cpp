@@ -623,4 +623,16 @@ void SearchModelStatic::SetOnChangeEvent(FrameNode* frameNode,
     };
     eventHub->SetOnChangeEvent(std::move(searchChangeFunc));
 }
+
+void SearchModelStatic::SetSearchSymbolIcon(FrameNode *frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetSearchIconSymbol(iconSymbol);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchSymbolIcon();
+}
+
 } // namespace OHOS::Ace::NG

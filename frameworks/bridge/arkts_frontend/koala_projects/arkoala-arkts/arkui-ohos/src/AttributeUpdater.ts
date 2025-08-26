@@ -14,6 +14,7 @@
  */
 
 import { AttributeModifier, ArkCommonMethodPeer } from "arkui/component/common";
+import { PeerNode } from "./PeerNode"
 
 export type Initializer<T> = (...params:FixedArray<Object>) => T;
 
@@ -25,7 +26,7 @@ export class AttributeUpdater<T> implements AttributeModifier<T> {
     }
     private value: T | undefined = undefined;
     private constructorParams: Initializer<T> | undefined = undefined;
-    public peerNode_?: ArkCommonMethodPeer;
+    public peerNode_?: PeerNode;
 
     public set attribute(value: T) {
         this.value = value

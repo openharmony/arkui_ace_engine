@@ -20,7 +20,7 @@ import { ArkUIAniModule } from "arkui.ani"
 export class WaterFlowHandWritten {
     static hookWaterFlowOptionsImpl(peer: PeerNode, options: WaterFlowOptions | undefined): void {
         if (options !== undefined && options.sections !== undefined) {
-            ArkUIAniModule._SetWaterFlowOptions(peer.peer.ptr, options)
+            ArkUIAniModule._SetWaterFlowSection(peer.peer.ptr, options.sections!)
         }
     }
 }

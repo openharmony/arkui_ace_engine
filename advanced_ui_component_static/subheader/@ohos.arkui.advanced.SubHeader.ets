@@ -33,16 +33,16 @@ import common from '@ohos.app.ability.common';
 import HashMap from '@ohos.util.HashMap';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 
-const INDEX_ZERO: number = 0;
-const INDEX_ONE: number = 1;
-const INDEX_TWO: number = 2;
+const INDEX_ZERO: int = 0;
+const INDEX_ONE: int = 1;
+const INDEX_TWO: int = 2;
 // 字体字重缩放等数值
 const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
 // 资源数值
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
 // 左边尺寸常量
 const LEFT_ICON_SIZE: ResourceStr = '16vp';
 const LEFT_ICON_SIZE_NUMBER: number = 16;
@@ -387,9 +387,9 @@ export struct SubHeader {
           LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
         } as LocalizedPadding)
         .width('100%')
-        // .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        // .accessibilityDescription(this.select ? '' :
-        //   Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' :
+          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -409,9 +409,9 @@ export struct SubHeader {
         } as Margin)
         .width('100%')
         .flexShrink(1)
-        // .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        // .accessibilityDescription(this.select ? '' :
-        //   Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' :
+          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -460,7 +460,10 @@ export struct SubHeader {
     if (!this.operationItem || this.operationItem.length <= 0) {
       return '';
     }
-    if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
+    if (Util.isResourceType(this.operationItem[0].accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.operationItem[0].accessibilityText as Resource).id);
+    } else if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
       return this.operationItem[0].accessibilityText as string;
     } else {
       if (this.operationType === OperationType.TEXT_ARROW && this.operationItem[0].value.toString().length <= 0) {
@@ -475,7 +478,11 @@ export struct SubHeader {
     if (!this.operationItem || this.operationItem.length <= 0) {
       return '';
     }
-    if (this.operationItem[0].accessibilityDescription && this.operationItem[0].accessibilityDescription !== '') {
+    if (Util.isResourceType(this.operationItem[0].accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.operationItem[0].accessibilityDescription as Resource).id);
+    } else if (this.operationItem[0].accessibilityDescription &&
+      this.operationItem[0].accessibilityDescription !== '') {
       return this.operationItem[0].accessibilityDescription as string;
     }
     return '';
@@ -493,9 +500,9 @@ export struct SubHeader {
       .applyStyles(this.rightAreaParentAgingStyles)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .hoverEffect(HoverEffect.None)
-      // .accessibilityGroup(true)
-      // .accessibilityText(this.getRightAreaAccessibilityText())
-      // .accessibilityDescription(this.getAccessibilityDescription())
+      .accessibilityGroup(true)
+      .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -532,9 +539,9 @@ export struct SubHeader {
       .applyStyles(this.rightAreaParentStyles)
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
-      // .accessibilityGroup(true)
-      // .accessibilityText(this.getRightAreaAccessibilityText())
-      // .accessibilityDescription(this.getAccessibilityDescription())
+      .accessibilityGroup(true)
+      .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -641,20 +648,20 @@ export struct SubHeader {
       (this.titleBuilder as () => void)();
     } else if (this.secondaryTitle && this.icon) {
       this.IconSecondaryTitleStyle({
-        content: this.secondaryTitle as string,
+        content: this.secondaryTitle as ResourceStr,
         iconOptions: {
           icon: this.icon as ResourceStr,
           symbolicIconOption: this.iconSymbolOptions,
         },
       });
     } else if (this.secondaryTitle && this.primaryTitle) {
-      this.SubTitleStyle({ content: this.primaryTitle as string, subContent: this.secondaryTitle as string });
+      this.SubTitleStyle({ content: this.primaryTitle as ResourceStr, subContent: this.secondaryTitle as ResourceStr });
     } else if (this.secondaryTitle) {
-      this.SecondTitleStyle({ content: this.secondaryTitle as string });
+      this.SecondTitleStyle({ content: this.secondaryTitle as ResourceStr });
     } else if (this.select) {
       this.SelectStyle(this.select as SelectOptions);
     } else if (this.primaryTitle) {
-      this.PrimaryTitleStyle({ content: this.primaryTitle as string });
+      this.PrimaryTitleStyle({ content: this.primaryTitle as ResourceStr });
     } else {
       // 其他不支持场景
       this.dummyFunction();
@@ -874,7 +881,7 @@ export struct SubHeader {
           } as LocalizedMargin)
       }
     }
-    // .attributeModifier(this.subHeaderModifier)
+    .attributeModifier(this.subHeaderModifier)
     .alignItems(VerticalAlign.Center)
     .focusable(true)
     .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
@@ -998,7 +1005,7 @@ export struct SubHeader {
                 icon: item.value as Resource,
                 symbolicIconOption: this.operationSymbolOptions &&
                   (this.operationSymbolOptions as SymbolOptions[]).length > index ?
-                (this.operationSymbolOptions as SymbolOptions[])[index] : null,
+                (this.operationSymbolOptions as SymbolOptions[])[index.toInt()] : null,
               },
               action: item.action,
               defaultFocus: item.defaultFocus,
@@ -1051,7 +1058,10 @@ struct SingleIconStyle {
   isSingleIcon: boolean = true;
 
   private getRightIconAccessibilityText(): string | undefined {
-    if (this.item?.accessibilityText) {
+    if (Util.isResourceType(this.item?.accessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.item?.accessibilityText as Resource).id);
+    } else if (this.item?.accessibilityText) {
       return this.item?.accessibilityText as string;
     }
     return '';
@@ -1065,7 +1075,10 @@ struct SingleIconStyle {
   }
 
   private getRightIconAccessibilityDescription(): string | undefined {
-    if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
+    if (Util.isResourceType(this.item?.accessibilityDescription)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.item?.accessibilityDescription as Resource).id);
+    } else if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
       return this.item?.accessibilityDescription as string;
     }
     return '';
@@ -1084,9 +1097,9 @@ struct SingleIconStyle {
       .align(Alignment.Center)
       .backgroundColor(this.bgColor)
       .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
-      // .accessibilityLevel(this.getRightIconAccessibilityLevel())
-      // .accessibilityText(this.getRightIconAccessibilityText())
-      // .accessibilityDescription(this.getRightIconAccessibilityDescription())
+      .accessibilityLevel(this.getRightIconAccessibilityLevel())
+      .accessibilityText(this.getRightIconAccessibilityText())
+      .accessibilityDescription(this.getRightIconAccessibilityDescription())
       .focusBox({
         margin: new LengthMetrics(INDEX_ZERO, LengthUnit.VP),
         strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
@@ -1206,7 +1219,7 @@ class Util {
    */
   public static getNumberByResource(resourceId: long, defaultNumber: number): number {
     try {
-      let resourceNumber: number = resourceManager.getSystemResourceManager().getDouble(resourceId);
+      let resourceNumber: number = resourceManager.getSysResourceManager().getDouble(resourceId);
       if (resourceNumber === 0) {
         return defaultNumber;
       } else {
@@ -1250,7 +1263,7 @@ class Util {
     } else if (typeof fontSize === 'number') {
       return fontSize as number;
     } else {
-      return resourceManager.getSystemResourceManager().getDouble((fontSize as Resource).id);
+      return resourceManager.getSysResourceManager().getDouble((fontSize as Resource).id);
     }
   }
 
@@ -1261,15 +1274,7 @@ class Util {
 
 function getResourceValue(resourceName: string): number {
   if (RESOURCE_CACHE_MAP.hasKey(resourceName)) {
-    let resourceValue: number | undefined = (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue;
-    if (typeof resourceValue === 'number') {
-      return resourceValue as number;
-    } else {
-      resourceValue = Util.getNumberByResource((RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceId,
-        (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue);
-      (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).resourceValue = resourceValue;
-      return resourceValue as number;
-    }
+    return (RESOURCE_CACHE_MAP.get(resourceName) as ResourceInfo).defaultValue;
   }
   return 0;
 }

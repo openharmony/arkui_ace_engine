@@ -50,7 +50,7 @@ export function contextLocalScope<Value>(
     value: Value,
     /** @memo */
     content: () => void
-) {
+): void {
     const scope = __context().scope<void>(__id(), 1)
     scope.paramEx<Value>(0, value, undefined, name, true) // can be found by name
     if (scope.unchanged) {

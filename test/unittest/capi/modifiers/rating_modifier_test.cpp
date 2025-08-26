@@ -627,7 +627,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_NE(modifier_->setOnChange0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     EXPECT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -665,7 +665,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(RatingModifierTest, setOnChange1Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::RatingEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RatingEventHub>();
     struct CheckEvent {
         int32_t nodeId;
         float index;
@@ -710,7 +710,7 @@ HWTEST_F(RatingModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
 HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

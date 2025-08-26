@@ -74,7 +74,7 @@ const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
@@ -926,7 +926,7 @@ HWTEST_F(TimePickerModifierTest, setOnChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1006,7 +1006,7 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerTime> selectedTime = std::nullopt;
@@ -1087,7 +1087,7 @@ HWTEST_F(TimePickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnEnterSelectedArea, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TimePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

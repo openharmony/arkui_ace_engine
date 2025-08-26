@@ -128,6 +128,38 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AnimatorAttribute_onFrame(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupBackground(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetUsePopup(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelectedFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetItemSize(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetSelected(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetAutoCollapse(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetOnSelect(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetPopupBackgroundBlurStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_ArcAlphabetIndexerConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_SetConstructInfo(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32, selected: number): void
+    @ani.unsafe.Direct
     native static _Badge_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _BadgeInterface_setBadgeOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3414,9 +3446,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_onSslErrorReceive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _WebAttribute_onRenderExited1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _WebAttribute_onRenderExited(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_onShowFileSelector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3589,6 +3619,10 @@ export class ArkUIGeneratedNativeModule {
     native static _WindowSceneInterface_setWindowSceneOptions(ptr: KPointer, persistentId: number): void
     @ani.unsafe.Direct
     native static _WindowSceneAttribute_attractionEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _WithTheme_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _WithThemeInterface_setWithThemeOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _XComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -3952,6 +3986,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContext_getFrameNodeByUniqueId(ptr: KPointer, id: number): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _UIContext_getNavigationInfoByUniqueId(instanceId: number, id: number): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _FrameNode_getId(name: KPointer): string
     @ani.unsafe.Direct
     native static _FrameNode_getUniqueId(point: KPointer): int32
@@ -3995,9 +4031,9 @@ export class ArkUIGeneratedNativeModule {
     native static _UIContext_getWindowWidthBreakpoint(instanceId: number): number
     @ani.unsafe.Quick
     native static _UIContext_getWindowHeightBreakpoint(instanceId: number): number
-    native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
+    native static _UIContext_openBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _UIContext_closeBindSheet(bindSheetContent: KPointer): void
     @ani.unsafe.Quick
     native static _PromptAction_openPopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
@@ -5774,6 +5810,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Quick
+    native static _CustomDialogController_getExternalOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct
@@ -5790,6 +5828,8 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BaseGestureEvent_getType(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _TapGestureEvent_ctor(): KPointer
     @ani.unsafe.Direct

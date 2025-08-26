@@ -17,23 +17,23 @@
         },
         "plugins": [
             {
-                "transform": "@koalaui/ui-plugins/parsed-stage-plugin",
-                "stage": "parsed",
-                "name": "ui"
-            },
-            {
-                "transform": "@koalaui/memo-plugin/ParserTransformer",
-                "stage": "parsed",
-                "name": "memo"
-            },
-            {
-                "transform": "@koalaui/ui-plugins/checked-stage-plugin",
-                "stage": "checked",
+                "transform": "@koalaui/ui-plugins",
+                "state": "parsed",
                 "name": "ui"
             },
             {
                 "transform": "@koalaui/memo-plugin",
-                "stage": "checked",
+                "state": "parsed",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/ui-plugins",
+                "state": "checked",
+                "name": "ui"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "state": "checked",
                 "name": "memo"
             }
         ]
@@ -44,10 +44,5 @@
     "exclude": [
         "./src/positionalMemoization.ets",
         "./src/1.1/**/*.ets"
-    ],
-    "dependencies": {
-        "@koalaui/runtime": [ "../../incremental/runtime/ui2abcconfig.json" ],
-        "@ohos.arkui": ["../../arkoala-arkts/arkui/ui2abcconfig-sdk-m3.json"]
-    }
-
+    ]
 }

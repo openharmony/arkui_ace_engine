@@ -18,77 +18,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_time_picker_dialog_view.h"
-#else
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
-#endif
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-void BuildDialogPropertiesCallbacks(const Ark_TimePickerDialogOptions options, DialogProperties& dialogProps)
-{
-    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
-    if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidAppear = onDidAppear;
-    }
-    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
-    if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidDisappear = onDidDisappear;
-    }
-    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
-    if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillAppear = onWillAppear;
-    }
-    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
-    if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillDisappear = onWillDisappear;
-    }
-}
-
-DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options)
-{
-    DialogProperties dialogProps;
-    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
-    if (alignment) {
-        dialogProps.alignment = alignment.value();
-    }
-    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
-    if (offset) {
-        dialogProps.offset = offset.value();
-    }
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
-    dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
-    dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
-    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
-    if (enableHoverMode) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
-    }
-    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
-    if (hoverModeArea) {
-        dialogProps.hoverModeArea = hoverModeArea.value();
-    }
-    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    BuildDialogPropertiesCallbacks(options, dialogProps);
-    return dialogProps;
-}
-
-PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions options)
+PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions& options)
 {
     PickerDialogInfo dialogInfo;
 
@@ -125,6 +61,8 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions opt
     }
     dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogInfo.blurStyleOption = Converter::OptConvert<BlurStyleOption>(options.backgroundBlurStyleOptions);
+    dialogInfo.effectOption =  Converter::OptConvert<EffectOption>(options.backgroundEffect);
     dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogInfo.shadow = Converter::OptConvert<Shadow>(options.shadow);
     auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
@@ -139,25 +77,17 @@ PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions opt
     return dialogInfo;
 }
 
-TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions options)
+TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerSettingData settingData;
-    auto format = Converter::OptConvert<TimePickerFormat>(options.format);
-    bool showSecond = format.has_value() && format.value() == TimePickerFormat::HOUR_MINUTE_SECOND;
-    settingData.showSecond = showSecond;
     auto useMilitaryTime = Converter::OptConvert<bool>(options.useMilitaryTime);
     if (useMilitaryTime) {
         settingData.isUseMilitaryTime = useMilitaryTime.value();
     }
-    auto enableCascade = Converter::OptConvert<bool>(options.enableCascade);
-    if (enableCascade) {
-        settingData.isEnableCascade = enableCascade.value();
+    auto selectedDate = Converter::OptConvert<PickerDate>(options.selected);
+    if (selectedDate) {
+        settingData.dialogTitleDate = selectedDate.value();
     }
-    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
-    if (enableHapticFeedback) {
-        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
-    }
-
     auto disappearTextStyle = Converter::OptConvert<PickerTextStyle>(options.disappearTextStyle);
     if (disappearTextStyle) {
         settingData.properties.disappearTextStyle_ = disappearTextStyle.value();
@@ -176,10 +106,21 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions o
         settingData.dateTimeOptions.minuteType = dateTimeOptions->minuteType;
         settingData.dateTimeOptions.secondType = dateTimeOptions->secondType;
     }
+    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
+    if (enableHapticFeedback) {
+        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
+    }
+    auto format = Converter::OptConvert<TimePickerFormat>(options.format);
+    bool showSecond = format.has_value() && format.value() == TimePickerFormat::HOUR_MINUTE_SECOND;
+    settingData.showSecond = showSecond;
+    auto enableCascade = Converter::OptConvert<bool>(options.enableCascade);
+    if (enableCascade) {
+        settingData.isEnableCascade = enableCascade.value();
+    }
     return settingData;
 }
 
-TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions options)
+TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerDialogEvent dialogEvent;
     auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
@@ -213,7 +154,7 @@ TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOpti
     return dialogEvent;
 }
 
-std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions options)
+std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions& options)
 {
     std::vector<ButtonInfo> buttonInfos;
     auto acceptButtonInfo = Converter::OptConvert<ButtonInfo>(options.acceptButtonStyle);

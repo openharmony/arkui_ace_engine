@@ -382,6 +382,9 @@ export interface CircleStyleOptions {
 export type PatternLockInterface = (controller?: PatternLockController) => PatternLockAttribute;
 export type Callback_Array_Number_Void = (input: Array<number>) => void;
 export interface PatternLockAttribute extends CommonMethod {
+    setPatternLockOptions(controller?: PatternLockController): this {
+        return this
+    }
     sideLength(value: Length | undefined): this
     circleRadius(value: Length | undefined): this
     backgroundColor(value: ResourceColor | undefined): this
@@ -410,6 +413,9 @@ export class ArkPatternLockStyle extends ArkCommonMethodStyle implements Pattern
     onDotConnect_value?: ((index: number) => void) | undefined
     activateCircleStyle_value?: CircleStyleOptions | undefined
     skipUnselectedPoint_value?: boolean | undefined
+    public setPatternLockOptions(controller?: PatternLockController): this {
+        return this
+    }
     public sideLength(value: Length | undefined): this {
         return this
     }
@@ -573,10 +579,9 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
     }
 }
 /** @memo */
-export function PatternLock(
+export function PatternLockImpl(
     /** @memo */
     style: ((attributes: PatternLockAttribute) => void) | undefined,
-    controller?: PatternLockController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -584,9 +589,7 @@ export function PatternLock(
         return new ArkPatternLockComponent()
     })
     NodeAttach<ArkPatternLockPeer>((): ArkPatternLockPeer => ArkPatternLockPeer.create(receiver), (_: ArkPatternLockPeer) => {
-        receiver.setPatternLockOptions(controller)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

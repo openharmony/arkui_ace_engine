@@ -15,7 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { getDeclResolveGensym, getMemoFunctionKind, MemoFunctionKind } from "./utils"
-import { getParams, isMemoAnnotatable, isMemoizable } from "./api-utils"
+import { getParams, isMemoAnnotatable, isMemoizable, MemoAnnotatable } from "./api-utils"
 
 class AnalysisVisitorOptions {
     applyMemo?: MemoFunctionKind
@@ -27,6 +27,10 @@ function isSetter(node: arkts.ScriptFunction) {
 
 function isGetter(node: arkts.ScriptFunction) {
     return node.flags & arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER
+}
+
+function updateOptions(options: AnalysisVisitorOptions | undefined, node: MemoAnnotatable): AnalysisVisitorOptions | undefined {
+    return { applyMemo: options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node) }
 }
 
 export class AnalysisVisitor extends arkts.AbstractVisitor {
@@ -44,7 +48,7 @@ export class AnalysisVisitor extends arkts.AbstractVisitor {
     visitor(node: arkts.AstNode, options?: AnalysisVisitorOptions): arkts.AstNode {
         if (arkts.isScriptFunction(node)) {
             if (isSetter(node) || isGetter(node)) {
-                return this.visitEachChild(node, { applyMemo: options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node) })
+                return this.visitEachChild(node, updateOptions(options, node))
             }
             const kind = options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node)
             this.scriptFunctions.set(node.originalPeer, kind)
@@ -57,7 +61,10 @@ export class AnalysisVisitor extends arkts.AbstractVisitor {
         }
 
         if (isMemoAnnotatable(node)) {
-            return this.visitEachChild(node, { applyMemo: options?.applyMemo ? options?.applyMemo : getMemoFunctionKind(node) })
+            if (arkts.isClassProperty(node) && (getMemoFunctionKind(node) == MemoFunctionKind.NONE) && node.typeAnnotation && arkts.isETSFunctionType(node.typeAnnotation)) {
+                return this.visitEachChild(node, updateOptions(options, node.typeAnnotation))
+            }
+            return this.visitEachChild(node, updateOptions(options, node))
         }
 
         if (arkts.isCallExpression(node)) {

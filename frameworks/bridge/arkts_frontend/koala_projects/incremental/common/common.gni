@@ -26,7 +26,6 @@ koalaui_common_files = [
   "src/PerfProbe.ts",
   "src/Point.ts",
   "src/Point3.ts",
-  "src/Utils.ts",
   "src/index.ts",
   "src/koalaKey.ts",
   "src/math.ts",

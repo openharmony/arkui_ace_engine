@@ -46,7 +46,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback, SheetOptions } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { ComputableState, IncrementalNode } from '@koalaui/runtime'
@@ -55,7 +55,7 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver {
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }
@@ -229,16 +229,16 @@ export class ComponentSnapshot {
 
 export class DragController {
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         throw Error("executeDrag with callback not implemented in DragController!")
     }
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         throw Error("executeDrag with promise not implemented in DragController!")
     }
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
@@ -381,11 +381,11 @@ export class PromptAction {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         throw Error("getTopOrder not implemented in PromptAction!")
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         throw Error("getBottomOrder not implemented in PromptAction!")
     }
 
@@ -468,6 +468,9 @@ export class UIContext {
     }
     getFrameNodeByUniqueId(id: number): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
+    }
+    getNavigationInfoByUniqueId(id: number): uiObserver.NavigationInfo | undefined {
+        throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
     }
     getHostContext(): Context | undefined {
         throw Error("getHostContext not implemented in UIContext!")
@@ -623,6 +626,18 @@ export class UIContext {
 
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
+    }
+
+    public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {
+        throw Error("openBindSheet not implemented in UIContext!")
+    }
+
+    public updateBindSheet(content: ComponentContent, options?: SheetOptions, partialUpdate?: boolean) : Promise<void> {
+        throw Error("updateBindSheet not implemented in UIContext!")
+    }
+
+    public closeBindSheet(content: ComponentContent) : Promise<void> {
+        throw Error("closeBindSheet not implemented in UIContext!")
     }
     
     public getFilteredInspectorTree(filters?: Array<string>): string {

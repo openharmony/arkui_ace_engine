@@ -27,7 +27,12 @@ import { TextBackgroundStyle } from "./span"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AttributeModifier } from "./common"
+import { ContainerSpanModifier } from "../ContainerSpanModifier"
+import { hookContainerSpanAttributeModifier } from "../handwritten"
+
 export class ArkContainerSpanPeer extends PeerNode {
+    _attributeSet?: ContainerSpanModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -56,10 +61,17 @@ export class ArkContainerSpanPeer extends PeerNode {
 }
 export type ContainerSpanInterface = () => ContainerSpanAttribute;
 export interface ContainerSpanAttribute {
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
+    setContainerSpanOptions(): this {
+        return this
+    }
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this { return this; }
 }
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
+    public setContainerSpanOptions(): this {
+        return this
+    }
     public textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
         return this
         }
@@ -83,17 +95,19 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<ContainerSpanAttribute> | undefined): this {
+        hookContainerSpanAttributeModifier(this, modifier);
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function ContainerSpan(
+export function ContainerSpanImpl(
     /** @memo */
     style: ((attributes: ContainerSpanAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -101,9 +115,7 @@ export function ContainerSpan(
         return new ArkContainerSpanComponent()
     })
     NodeAttach<ArkContainerSpanPeer>((): ArkContainerSpanPeer => ArkContainerSpanPeer.create(receiver), (_: ArkContainerSpanPeer) => {
-        receiver.setContainerSpanOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

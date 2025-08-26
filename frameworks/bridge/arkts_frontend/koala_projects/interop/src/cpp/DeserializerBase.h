@@ -108,6 +108,20 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
 {
   char *suffixPtr = nullptr;
   float value = std::strtof(string.chars, &suffixPtr);
+    //identify auto
+    int indexFirst = 0;
+    int indexSecond = 1;
+    int indexThird = 2;
+    int indexFourth = 3;
+    int lengthAuto = 4;
+    int autoUnitValue = 5;
+    int length = strlen(suffixPtr);
+    if (length == lengthAuto && suffixPtr[indexFirst] == 'a' && suffixPtr[indexSecond] == 'u' &&
+        suffixPtr[indexThird] == 't' && suffixPtr[indexFourth] == 'o')
+    {
+        result->unit = autoUnitValue;
+        return;
+    }
 
   if (!suffixPtr || suffixPtr == string.chars)
   {
@@ -545,12 +559,28 @@ public:
 
   InteropString readString()
   {
-    InteropString result;
+    InteropString result {};
     InteropInt32 length = readInt32();
     check(length);
+
     // We refer to string data in-place.
-    result.chars = (const char *)(data + position);
-    result.length = length - 1;
+    constexpr int terminatorLen = 1;
+    constexpr int minUtfSize = 6;
+    constexpr uint16_t UTF16_BOM = 0xFEFF;
+    uint16_t* currentData = reinterpret_cast<uint16_t*>(data + position);
+    if (length >= minUtfSize && currentData[0] == UTF16_BOM) {
+      // Handle utf16 strings
+      constexpr int bomLen = 1;
+      constexpr int bytesOccupiedEveryChar = 2;
+      result.chars = (const char *)(data + position);
+      result.length = length / bytesOccupiedEveryChar - bomLen - terminatorLen;
+      currentData[bomLen + result.length] = u'\0';
+    } else {
+      // Handle utf8 strings (only contains latin)
+      result.chars = (const char *)(data + position);
+      result.length = length - terminatorLen;
+      data[position + result.length] = '\0';
+    }
     this->position += length;
     return result;
   }

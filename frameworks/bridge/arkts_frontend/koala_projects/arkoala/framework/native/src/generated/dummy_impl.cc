@@ -19142,21 +19142,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnRenderExited0Impl(Ark_NativePointer node,
+    void OnRenderExitedImpl(Ark_NativePointer node,
                              const Opt_Callback_OnRenderExitedEvent_Void* value)
     {
-        if (!needGroupedLog(1))
+        if (!needGroupedLog(1)) {
             return;
-        string out("onRenderExited(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnRenderExited1Impl(Ark_NativePointer node,
-                             const Opt_Callback_Literal_Object_detail_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-            return;
+        }
         string out("onRenderExited(");
         WriteToString(&out, value);
         out.append(") \n");
@@ -23200,8 +23191,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OnRefreshAccessedHistoryImpl,
             WebAttributeModifier::OnUrlLoadInterceptImpl,
             WebAttributeModifier::OnSslErrorReceiveImpl,
-            WebAttributeModifier::OnRenderExited0Impl,
-            WebAttributeModifier::OnRenderExited1Impl,
+            WebAttributeModifier::OnRenderExitedImpl,
             WebAttributeModifier::OnShowFileSelectorImpl,
             WebAttributeModifier::OnFileSelectorShowImpl,
             WebAttributeModifier::OnResourceLoadImpl,
@@ -35031,7 +35021,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};
@@ -35180,7 +35170,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                              const Opt_String* type,
-                             const Opt_Float32* quality)
+                             const Opt_Number* quality)
     {
         if (!needGroupedLog(1))
             return {};
@@ -35432,6 +35422,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getExternalOptions(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
     {
         if (!needGroupedLog(1))
@@ -35531,6 +35531,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, fingerList);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_GestureControl_GestureType GetTypeImpl(Ark_BaseGestureEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getType(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     } // BaseGestureEventAccessor
     namespace TapGestureEventAccessor {
@@ -46195,6 +46205,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::GetExternalOptionsImpl,
             CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
@@ -46232,6 +46243,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseGestureEventAccessor::GetFinalizerImpl,
             BaseGestureEventAccessor::GetFingerListImpl,
             BaseGestureEventAccessor::SetFingerListImpl,
+            BaseGestureEventAccessor::GetTypeImpl
         };
         return &BaseGestureEventAccessorImpl;
     }

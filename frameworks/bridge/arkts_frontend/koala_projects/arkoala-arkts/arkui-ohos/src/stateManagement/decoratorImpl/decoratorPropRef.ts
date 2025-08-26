@@ -27,13 +27,13 @@ import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
-    sourceValue: IBackingValue<T>;
+    sourceValue: T;
     localValue: IBackingValue<T>;
     needForceUpdateFunc: WatchFunc;
     isForceRender: boolean = false;
     constructor(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@PropRef', owningView, varName, watchFunc);
-        this.sourceValue = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
+        this.sourceValue = initValue;
         this.localValue = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
         this.needForceUpdateFunc = new WatchFunc(() => {
@@ -56,19 +56,18 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         const value = uiUtils.makeObserved(newValue);
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(value);
-        if (this.localValue.set(value)) {
-            this.execWatchFuncs();
-        }
+        this.localValue.setNoCheck(value);
+        this.execWatchFuncs();
     }
 
     update(newValue: T): void {
-        const sourceValue = this.sourceValue.get(false);
+        const sourceValue = this.sourceValue;
         if (sourceValue !== newValue || this.isForceRender) {
             this.isForceRender = false;
             const value = uiUtils.makeObserved(newValue);
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(value);
-            this.sourceValue.setSilently(value);
+            this.sourceValue = value;
             if (sourceValue !== newValue) {
                 this.unregisterCallbackForPropertyChange(sourceValue);
                 this.registerCallbackForPropertyChange(value);

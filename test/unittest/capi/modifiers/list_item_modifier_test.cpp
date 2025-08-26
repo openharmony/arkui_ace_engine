@@ -226,7 +226,7 @@ HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
 HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -339,7 +339,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireOffsetChangeEvent(offsetArg);
@@ -472,7 +472,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onDeleteStart = eventHub->GetStartOnDelete();
@@ -536,7 +536,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onEnterDeleteStart = eventHub->GetOnEnterStartDeleteArea();
@@ -600,7 +600,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto onExitDeleteStart = eventHub->GetOnExitStartDeleteArea();
@@ -663,7 +663,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireStateChangeEvent(SwipeActionState::COLLAPSED, true);
@@ -837,7 +837,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
 HWTEST_F(ListItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

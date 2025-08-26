@@ -15,8 +15,15 @@
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 
+class Cstr {
+    public x: string
+    constructor(x: string) {
+        this.x = x
+    }
+}
+
 export class C {
     @memo protected foo() {
-        return "string"
+        return new Cstr("string")
     }
 }

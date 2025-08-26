@@ -35,8 +35,8 @@ using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
 const auto RES_ID = 11111;
-const auto RES_NAME_ID = NamedResourceId{RES_NAME, Converter::ResourceType::STRING};
-const auto RES_INT_ID = IntResourceId{RES_ID, Converter::ResourceType::STRING};
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, ResourceType::STRING};
+const auto RES_INT_ID = IntResourceId{RES_ID, ResourceType::STRING};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
@@ -190,7 +190,7 @@ HWTEST_F(TabContentModifierTest, setTabBar1BottomStyleTestText, TestSize.Level1)
 HWTEST_F(TabContentModifierTest, setOnWillShowTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TabContentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TabContentEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -222,7 +222,7 @@ HWTEST_F(TabContentModifierTest, setOnWillShowTest, TestSize.Level1)
 HWTEST_F(TabContentModifierTest, setOnWillHideTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TabContentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TabContentEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;

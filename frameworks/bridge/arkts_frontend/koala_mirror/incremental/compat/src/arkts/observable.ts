@@ -232,12 +232,12 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
 
     const valueType = Type.of(value)
     if (valueType instanceof ClassType && !(value instanceof BaseEnum)) {
-        const meta = extractObservableMetadata(value)
-        if (meta == undefined) {
+        const isObservable = isObservedV1Class(value as Object)
+        if (!hasTrackableProperties(value as Object) && !isObservable) {
             return value as Value
         }
         if (valueType.hasEmptyConstructor()) {
-            const result = proxy.Proxy.create(value as Object, new CustomProxyHandler<Object>(meta)) as Value
+            const result = proxy.Proxy.create(value as Object, new CustomProxyHandler<Object>(isObservable)) as Value
             ObservableHandler.installOn(result as Object, new ObservableHandler(parent))
             return result
         } else {
@@ -249,30 +249,30 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
 }
 
 class CustomProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
-    private readonly metadataClass: MetadataClass
+    private readonly isObservable: boolean
 
-    constructor(metadataClass: MetadataClass) {
+    constructor(isObservable: boolean) {
         super();
-        this.metadataClass = metadataClass
+        this.isObservable = isObservable
     }
 
-    override get(target: T, name: string): NullishType {
+    override get(target: T, name: string): Any {
         const value = super.get(target, name)
         const targetHandler = ObservableHandler.find(target)
-        if (targetHandler && this.metadataClass.isObservedClass) {
+        if (targetHandler && this.isObservable) {
             const valueHandler = ObservableHandler.find(value as Object)
             if (valueHandler && !targetHandler.hasChild(valueHandler)) {
                 valueHandler.addParent(targetHandler)
             }
         }
-        targetHandler?.onAccess(this.metadataClass.trackedProperties?.has(name) ? name : undefined)
+        targetHandler?.onAccess(name)
         return value
     }
 
-    override set(target: T, name: string, value: NullishType): boolean {
+    override set(target: T, name: string, value: Any): boolean {
         const observable = ObservableHandler.find(target)
         if (observable) {
-            observable.onModify(this.metadataClass.trackedProperties?.has(name) ? name : undefined)
+            observable.onModify(name)
             observable.removeChild(super.get(target, name))
             value = observableProxy(value, observable, ObservableHandler.contains(observable))
         }
@@ -306,12 +306,12 @@ class ObservableArray<T> extends Array<T> {
         return ObservableHandler.find(this)
     }
 
-    override get length(): number {
+    override get length(): int {
         this.handler?.onAccess()
         return super.length
     }
 
-    override set length(length: number) {
+    override set length(length: int) {
         this.handler?.onModify()
         super.length = length
     }
@@ -360,13 +360,22 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override push(...items: T[]): number {
+    override pushArray(...items: T[]): number {
         const handler = this.handler
         if (handler) {
             handler.onModify()
             proxyChildrenOnly(items, handler)
         }
-        return super.push(...items)
+        return super.pushArray(...items)
+    }
+
+    override pushOne(value: T): number {
+        const handler = this.handler
+        if (handler) {
+            handler.onModify()
+            value = observableProxy(value, handler)
+        }
+        return super.pushOne(value)
     }
 
     override pushECMA(...items: T[]): number {
@@ -1123,42 +1132,124 @@ class ObservableDate extends Date {
     }
 }
 
-class MetadataClass {
-    readonly isObservedClass: boolean
-    readonly trackedProperties: ReadonlySet<string> | undefined
-
-    constructor(isObservedClass: boolean,
-                trackedProperties: ReadonlySet<string> | undefined) {
-        this.isObservedClass = isObservedClass
-        this.trackedProperties = trackedProperties
-    }
+function getClassMetadata<T>(value: T): ClassMetadata | undefined {
+    return value instanceof ObservableClass ? value.getClassMetadata() : undefined
 }
 
-function extractObservableMetadata<T>(value: T): MetadataClass | undefined {
-    const isObservedClass = value instanceof ObservableClass ? value.isObserved() : false
-    const trackedProperties = value instanceof TrackableProps ? value.trackedProperties() : undefined
-    if (isObservedClass || trackedProperties) {
-        return new MetadataClass(isObservedClass, trackedProperties)
-    }
-    return undefined
+function isObservedV1Class(value: Object): boolean {
+    return getClassMetadata(value)?.isObservedV1(value) ?? false
 }
 
-/**
- * Interface for getting the observed properties of a class
- */
-export interface TrackableProps {
-    /**
-     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
-     */
-    trackedProperties(): ReadonlySet<string> | undefined
+function hasTrackableProperties(value: Object): boolean {
+    return getClassMetadata(value)?.hasTrackableProperties() ?? false
 }
 
 /**
  * Interface for getting the observability status of a class
  */
 export interface ObservableClass {
+    getClassMetadata(): ClassMetadata | undefined
+}
+
+/**
+ * Interface for checking the observed properties of a class
+ */
+export interface TrackableProperties {
+    isTrackable(propertyName: string): boolean
+}
+
+/**
+ * If value is a class, then returns a list of trackable properties
+ * @param value
+ */
+export function trackableProperties<T>(value: T): TrackableProperties | undefined {
+    return getClassMetadata(value)
+}
+
+export class ClassMetadata implements TrackableProperties {
+    private readonly parent: ClassMetadata | undefined
+    private readonly markAsObservedV1: boolean
+    private readonly markAsObservedV2: boolean
+    private readonly targetClass: Class
+    private static readonly metadataPropName = "__classMetadata"
+
     /**
-     * Indicates whether the class is decorated with `@Observed`.
+     * Class property names marked with the @Track or @Trace decorator
+     * @private
      */
-    isObserved(): boolean
+    private readonly trackableProperties: ReadonlySet<string> | undefined
+
+    /**
+     * Contains fields marked with the @Type decorator.
+     * The key of the map is the property name and the value is the typename of the corresponding field.
+     * @private
+     */
+    private readonly typedProperties: ReadonlyMap<string, string> | undefined
+
+    constructor(parent: ClassMetadata | undefined,
+                markAsObservedV1: boolean,
+                markAsObservedV2: boolean,
+                trackable: string[] | undefined,
+                typed: [string, string][] | undefined) {
+        const target = Class.ofCaller()
+        if (target == undefined) {
+            throw new Error("ClassMetadata must be created in the class context")
+        }
+        this.targetClass = target!
+        this.parent = parent
+        this.markAsObservedV1 = markAsObservedV1
+        this.markAsObservedV2 = markAsObservedV2
+        if (trackable) {
+            this.trackableProperties = new Set<string>(trackable)
+        }
+        if (typed) {
+            this.typedProperties = new Map<string, string>(typed)
+        }
+    }
+
+    isObservedV1(value: Object): boolean {
+        return this.markAsObservedV1 && Class.of(value) == this.targetClass
+    }
+
+    isObservedV2(value: Object): boolean {
+        return this.markAsObservedV2 && Class.of(value) == this.targetClass
+    }
+
+    isTrackable(propertyName: string): boolean {
+        return (this.trackableProperties?.has(propertyName) || this.parent?.isTrackable(propertyName)) ?? false
+    }
+
+    hasTrackableProperties(): boolean {
+        if (this.trackableProperties) {
+            return this.trackableProperties!.size > 0
+        }
+        return this.parent?.hasTrackableProperties() ?? false
+    }
+
+    getTypenameTypeDecorator(propertyName: string): string | undefined {
+        if (this.typedProperties) {
+            return this.typedProperties?.get(propertyName)
+        }
+        if (this.parent) {
+            return this.parent!.getTypenameTypeDecorator(propertyName)
+        }
+        return undefined
+    }
+
+    static findClassMetadata(type: Type): ClassMetadata | undefined {
+        if (type instanceof ClassType) {
+            const fieldsNum = type.getFieldsNum()
+            for (let i = 0; i < fieldsNum; i++) {
+                const field = type.getField(i)
+                if (field.isStatic() && field.getName() == ClassMetadata.metadataPropName) {
+                    const meta = field.getStaticValue()
+                    if (meta != undefined && meta instanceof ClassMetadata) {
+                        return meta
+                    }
+                    break
+                }
+            }
+        }
+        return undefined
+    }
 }

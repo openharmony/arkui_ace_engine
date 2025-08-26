@@ -27,13 +27,13 @@
 #include "interop-logging.h"
 #include "interop-utils.h"
 
-#define CHECK_ANI_FATAL(result)                                                            \
-do {                                                                                       \
-  ani_status res = (result);                                                               \
-  if (res != ANI_OK) {                                                                     \
-    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", res,  __LINE__); \
-  }                                                                                        \
-}                                                                                          \
+#define CHECK_ANI_FATAL(result)                                                                  \
+do {                                                                                             \
+  ani_status ___res___ = (result);                                                               \
+  if (___res___ != ANI_OK) {                                                                     \
+    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", ___res___,  __LINE__); \
+  }                                                                                              \
+}                                                                                                \
 while (0)
 
 template<class T>
@@ -132,29 +132,26 @@ struct InteropTypeConverter<KVMObjectHandle> {
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = ani_fixedarray_byte;
+    using InteropType = ani_arraybuffer;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
-        if (value == nullptr) {
-            return KInteropBuffer();
-        }
-        ani_size length = 0;
-        CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
-        KByte* data = new KByte[length];
-        CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
-        KInteropBuffer result = { 0 };
-        result.data = data;
-        result.length = length;
-        return result;
+      void* data {};
+      size_t len {};
+      CHECK_ANI_FATAL(env->ArrayBuffer_GetInfo(value, &data, &len));
+      return {static_cast<KLong>(len), data, 0, nullptr};
     }
+
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
-      ani_fixedarray_byte result;
-      CHECK_ANI_FATAL(env->FixedArray_New_Byte(value.length, &result));
-      CHECK_ANI_FATAL(env->FixedArray_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data)));
+      void* data {};
+      ani_arraybuffer result;
+      CHECK_ANI_FATAL(env->CreateArrayBuffer(value.length, &data, &result));
+      interop_memcpy(data, value.length, value.data, value.length);
       value.dispose(value.resourceId);
       return result;
     }
     static inline void release(ani_env* env, InteropType value, KInteropBuffer converted) {
-      delete [] (KByte*)converted.data;
+      if (converted.dispose) {
+        converted.dispose(converted.resourceId);
+      }
     }
 };
 
@@ -186,9 +183,7 @@ template<>
 struct InteropTypeConverter<KStringPtr> {
     using InteropType = ani_string;
     static KStringPtr convertFrom(ani_env* env, InteropType value) {
-        if (value == nullptr) {
-            return KStringPtr();
-        }
+        if (value == nullptr) return KStringPtr();
         KStringPtr result;
         // Notice that we use UTF length for buffer size, but counter is expressed in number of Unicode chars.
         ani_size lengthUtf8 = 0;
@@ -201,7 +196,8 @@ struct InteropTypeConverter<KStringPtr> {
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
-      CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), value.length() - 1 /* drop zero terminator */, &result));
+      int length = value.length();
+      CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), length > 0 ? length - 1 /* drop zero terminator */ : 0, &result));
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}
@@ -223,14 +219,12 @@ template<>
 struct InteropTypeConverter<KInt*> {
     using InteropType = ani_array_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
-        if (!value) {
-            return nullptr;
-        }
-        ani_size length = 0;
-        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        KInt* data = new KInt[length];
-        CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
-        return data;
+      if (!value) return nullptr;
+      ani_size length = 0;
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+      KInt* data = new KInt[length];
+      CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
+      return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
@@ -247,14 +241,12 @@ template<>
 struct InteropTypeConverter<KFloat*> {
     using InteropType = ani_array_float;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
-        if (!value) {
-            return nullptr;
-        }
-        ani_size length = 0;
-        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        KFloat* data = new KFloat[length];
-        CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
-        return data;
+      if (!value) return nullptr;
+      ani_size length = 0;
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+      KFloat* data = new KFloat[length];
+      CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
+      return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
@@ -271,16 +263,14 @@ template<>
 struct InteropTypeConverter<KByte*> {
     using InteropType = ani_array_byte;
     static KByte* convertFrom(ani_env* env, InteropType value) {
-        if (!value) {
-            return nullptr;
-        }
-        ani_size length = 0;
-        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-        KByte* data = new KByte[length];
-        if (length > 0) {
-            CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
-        }
-        return data;
+      if (!value) return nullptr;
+      ani_size length = 0;
+      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+      KByte* data = new KByte[length];
+      if (length > 0) {
+          CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+      }
+      return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
@@ -305,79 +295,6 @@ template <> struct InteropTypeConverter<KInteropNumber> {
   }
   static void release(ani_env *env, InteropType value,
                       KInteropNumber converted) {}
-};
-
-template<>
-struct InteropTypeConverter<KLength> {
-  using InteropType = ani_ref;
-  static KLength convertFrom(ani_env* env, InteropType value) {
-    static ani_class double_class = nullptr;
-    static ani_class int_class = nullptr;
-    static ani_class string_class = nullptr;
-    static ani_class resource_class = nullptr;
-    if (!double_class) {
-      CHECK_ANI_FATAL(env->FindClass("Lstd/core/Double;", &double_class));
-    }
-    if (!int_class) {
-      CHECK_ANI_FATAL(env->FindClass("Lstd/core/Int;", &int_class));
-    }
-    if (!string_class) {
-      CHECK_ANI_FATAL(env->FindClass("Lstd/core/String;", &string_class));
-    }
-    if (!resource_class) {
-      CHECK_ANI_FATAL(env->FindClass("L@ohos/arkui/generated/resource/Resource;", &resource_class));
-    }
-
-    const ani_object valueObj = reinterpret_cast<ani_object>(value);
-
-    ani_boolean isInstanceOf;
-    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, double_class, &isInstanceOf));
-    if (isInstanceOf) {
-        static ani_method double_p = nullptr;
-        if (!double_p) {
-            CHECK_ANI_FATAL(env->Class_FindMethod(double_class, "unboxed", ":D", &double_p));
-        }
-        ani_double result;
-        CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, double_p, &result));
-        return KLength{ 1, (KFloat) result, 1, 0 };
-    }
-
-    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, int_class, &isInstanceOf));
-    if (isInstanceOf) {
-        static ani_method int_p = nullptr;
-        if (!int_p) {
-            CHECK_ANI_FATAL(env->Class_FindMethod(int_class, "unboxed", ":I", &int_p));
-        }
-        ani_int result;
-        CHECK_ANI_FATAL(env->Object_CallMethod_Int(valueObj, int_p, &result));
-        return KLength{ 1, (KFloat) result, 1, 0 };
-    }
-
-    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, string_class, &isInstanceOf));
-    if (isInstanceOf) {
-      KStringPtr ptr = InteropTypeConverter<KStringPtr>::convertFrom(env, reinterpret_cast<ani_string>(value));
-      KLength length { 0 };
-      parseKLength(ptr, &length);
-      length.type = 2;
-      length.resource = 0;
-      return length;
-    }
-
-    CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, resource_class, &isInstanceOf));
-    if (isInstanceOf) {
-        static ani_method resource_p = nullptr;
-        if (!resource_p) {
-            CHECK_ANI_FATAL(env->Class_FindMethod(resource_class, "<get>id", ":D", &resource_p));
-        }
-        ani_double result;
-        CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, resource_p, &result));
-        return KLength{ 3, 0, 1, (KInt) result };
-    }
-
-    return KLength( { 0, 0, 0, 0});
-  }
-  static InteropType convertTo(ani_env* env, KLength value) = delete;
-  static void release(ani_env* env, InteropType value, const KLength& converted) {}
 };
 
 template <typename Type>
@@ -1932,10 +1849,10 @@ ani_env* getKoalaANIContext(void* hint);
   do {                                                                                                  \
     ani_env* env = reinterpret_cast<ani_env*>(vmContext);                                               \
     ani_class errorClass {};                                                                            \
-    CHECK_ANI_FATAL(env->FindClass("Lescompat/Error;", &errorClass));                                   \
+    CHECK_ANI_FATAL(env->FindClass("escompat.Error", &errorClass));                                     \
     ani_method errorCtor {};                                                                            \
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
-      "Lstd/core/String;Lescompat/ErrorOptions;:V", &errorCtor));                                       \
+      "C{std.core.String}C{escompat.ErrorOptions}:", &errorCtor));                                      \
     ani_string messageObject{};                                                                         \
     CHECK_ANI_FATAL(env->String_NewUTF8(message, interop_strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \

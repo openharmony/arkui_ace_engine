@@ -13,41 +13,11 @@
  * limitations under the License.
  */
 
-import { ArkBlankPeer, ArkCommonMethodPeer, AttributeModifier, ResourceColor, BlankAttribute, TextShadowStyleInternal } from './component';
-import { ArkCommonAttributeSet, modifierWithKey, ModifierWithKey } from './handwritten/modifiers/ArkCommonModifier';
+import { AttributeModifier, ResourceColor, BlankAttribute } from './component';
+import { PeerNode } from './PeerNode';
+import { CommonMethodModifier } from './CommonMethodModifier';
 
-class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
-    static identity: string = 'color';
-
-    constructor(value: ResourceColor | undefined) {
-        super(value);
-    }
-
-    applyPeer(node: ArkCommonMethodPeer, reset: boolean): void {
-        let colorPeerNode = node as ArkBlankPeer;
-        if (reset) {
-            // now do nothing
-        } else {
-            if (this.value !== undefined) {
-                colorPeerNode.colorAttribute(this.value as ResourceColor);
-            }
-        }
-    }
-
-    static factory(value: ResourceColor | undefined): ColorModifier {
-        return new ColorModifier(value);
-    }
-}
-
-export class ArkBlankAttributeSet extends ArkCommonAttributeSet implements BlankAttribute {
-    color(value: ResourceColor | undefined): this {
-        modifierWithKey(this._modifiersWithKeys, ColorModifier.identity, ColorModifier.factory, value);
-        return this;
-    }
-}
-
-export class BlankModifier implements AttributeModifier<BlankAttribute> {
-    attributeSet: ArkBlankAttributeSet = new ArkBlankAttributeSet();
+export class BlankModifier extends CommonMethodModifier implements BlankAttribute, AttributeModifier<BlankAttribute> {
 
     applyNormalAttribute(instance: BlankAttribute): void {}
     applyPressedAttribute(instance: BlankAttribute): void {}
@@ -55,8 +25,14 @@ export class BlankModifier implements AttributeModifier<BlankAttribute> {
     applyDisabledAttribute(instance: BlankAttribute): void {}
     applySelectedAttribute(instance: BlankAttribute): void {}
 
+    applyModifierPatch(value: PeerNode): void {
+        super.applyModifierPatch(value)
+    }
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+    }
+
     color(value: ResourceColor | undefined): this {
-        this.attributeSet.color(value);
         return this;
     }
 }

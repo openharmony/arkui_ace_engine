@@ -45,9 +45,10 @@ export class StoragePropRefDecoratedVariable<T>
         storagePropRef: AbstractProperty<T>,
         propName: string,
         varName: string,
+        decoratorName: string,
         watchFunc?: WatchFuncType
     ) {
-        super('@StoragePropRef', owningView, varName, watchFunc);
+        super(decoratorName, owningView, varName, watchFunc);
         this.propName = propName;
         this.backingStorageValue_ = storagePropRef;
         this.backingStorageValue_.onChange(this.onStorageObjChanged);
@@ -83,11 +84,10 @@ export class StoragePropRefDecoratedVariable<T>
             return;
         }
         const value = uiUtils.makeObserved(newValue);
-        if (this.backing_.set(value)) {
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(value);
-            this.execWatchFuncs();
-        }
+        this.backing_.setNoCheck(value);
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.execWatchFuncs();
     }
 
     updateValueFromStorage(): void {

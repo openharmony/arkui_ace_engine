@@ -130,7 +130,7 @@ const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result) {
             }
         }
         // Provide custom logger and callback caller to loaded libs.
-        auto service = (const GenericServiceAPI*)(*getAPI)(GENERIC_SERVICE_API_KIND, GENERIC_SERVICE_API_VERSION);
+        auto service = reinterpret_cast<const GenericServiceAPI*>((*getAPI)(GENERIC_SERVICE_API_KIND, GENERIC_SERVICE_API_VERSION));
         if (service) {
             if (logger) service->setLogger(reinterpret_cast<const ServiceLogger*>(logger));
         }

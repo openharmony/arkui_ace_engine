@@ -138,15 +138,15 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
         return errValue;
     }
     auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::STRING)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId);
         StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::INTEGER)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId));
         StringUtils::StringToDimensionWithUnitNG(value, result, DimensionUnit::VP);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::FLOAT)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resId);
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
@@ -198,7 +198,7 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
         return errValue;
     }
     auto typeValue = resType.value();
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::STRING)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId);
         if (!Color::ParseColorString(value, colorColor)) {
             return errValue;
@@ -206,13 +206,13 @@ Array_Number ColorMetricsResourceColorImpl(const Ark_Resource* color)
         ParseArrayNumber(colorColor, indexes, true);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::INTEGER)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId);
         colorColor = Color(ColorAlphaAdapt(value));
         ParseArrayNumber(colorColor, indexes, true);
         return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
     }
-    if (typeValue == static_cast<int32_t>(OHOS::Ace::NG::Converter::ResourceType::COLOR)) {
+    if (typeValue == static_cast<int32_t>(ResourceType::COLOR)) {
         colorColor = resourceWrapper->GetColor(resId);
         ParseArrayNumber(colorColor, indexes, true);
         indexes.emplace_back(resId);

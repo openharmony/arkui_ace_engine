@@ -29,7 +29,7 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, Length, Position } from "./units"
 import { FontWeight } from "./enums"
 export class ArkBadgePeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkBadgePeer {
@@ -81,8 +81,14 @@ export interface BadgeParamWithString extends BadgeParam {
     value: string;
 }
 export interface BadgeAttribute extends CommonMethod {
+    setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
+        return this
+    }
 }
 export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribute {
+    public setBadgeOptions(value: BadgeParamWithNumber | BadgeParamWithString): this {
+        return this
+    }
 }
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
     getPeer(): ArkBadgePeer {
@@ -111,10 +117,9 @@ export class ArkBadgeComponent extends ArkCommonMethodComponent implements Badge
     }
 }
 /** @memo */
-export function Badge(
+export function BadgeImpl(
     /** @memo */
     style: ((attributes: BadgeAttribute) => void) | undefined,
-    value: BadgeParamWithNumber | BadgeParamWithString,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -122,9 +127,7 @@ export function Badge(
         return new ArkBadgeComponent()
     })
     NodeAttach<ArkBadgePeer>((): ArkBadgePeer => ArkBadgePeer.create(receiver), (_: ArkBadgePeer) => {
-        receiver.setBadgeOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

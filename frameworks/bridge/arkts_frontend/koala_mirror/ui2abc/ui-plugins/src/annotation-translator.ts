@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DecoratorNames, hasDecorator, hasBuilderDecorator, replaceDecorator } from "./property-translators/utils"
+import { DecoratorNames, hasDecorator, hasBuilderDecorator, replaceParameterDecorator, replaceTypeAliasDecorator, replaceFunctionTypeDecorator } from "./utils"
 import { annotation } from "./common/arkts-utils"
 import { CustomComponentNames, InternalAnnotations } from "./utils"
 
@@ -55,7 +55,13 @@ export class AnnotationsTransformer extends arkts.AbstractVisitor {
             return node
         }
         if (arkts.isETSParameterExpression(node) && hasDecorator(node, DecoratorNames.BUILDER)) {
-            return replaceDecorator(node, DecoratorNames.BUILDER, InternalAnnotations.MEMO)
+            return replaceParameterDecorator(node, DecoratorNames.BUILDER, InternalAnnotations.MEMO)
+        }
+        if (arkts.isTSTypeAliasDeclaration(node) && hasDecorator(node, DecoratorNames.BUILDER)) {
+            return replaceTypeAliasDecorator(node, DecoratorNames.BUILDER, InternalAnnotations.MEMO)
+        }
+        if (arkts.isETSFunctionType(node) && hasDecorator(node, DecoratorNames.BUILDER)) {
+            return replaceFunctionTypeDecorator(node, DecoratorNames.BUILDER, InternalAnnotations.MEMO)
         }
         return node
     }

@@ -15,26 +15,35 @@
 
 #include "reverse_converter.h"
 
+#include "arkoala_api_generated.h"
+#include "converter.h"
+#include "validators.h"
+
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
-#include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
+#include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/utility/peer_utils.h"
-#include "converter.h"
-#include "validators.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -107,24 +116,9 @@ void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
     dst.height = Converter::ArkValue<Ark_Length>(src.GetTarget().area.GetHeight().ConvertToVp());
 }
 
-void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src)
-{
-    const auto peer = reinterpret_cast<GeneratedModifier::BaseGestureEventPeerImpl*>(
-        GeneratedModifier::GetFullAPI()->getAccessors()->getBaseGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst = peer;
-}
-
-void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
-{
-    dst.index = Converter::ArkValue<Ark_Number>(0);
-    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
-    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
-}
-
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-    const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<DragEventPeer>();
     peer->dragInfo = info;
     dragEvent = peer;
 }
@@ -252,6 +246,13 @@ void AssignArkValue(Ark_Tuple_Number_Number& dst, const Point& src)
     dst.value1 = ArkValue<Ark_Number>(src.GetY());
 }
 
+void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src)
+{
+    CHECK_NULL_VOID(src);
+    dst.navigationId = ArkValue<Ark_String>(src->navigationId);
+    dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
+}
+
 void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
     dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
@@ -312,15 +313,6 @@ void AssignArkValue(Ark_Length& dst, const float& src)
 void AssignArkValue(Ark_Length& dst, const CalcLength& src)
 {
     dst = ArkValue<Ark_Length>(src.GetDimension());
-}
-
-void AssignArkValue(Ark_Int32& dst, const Ark_Number& src)
-{
-    if (src.tag == INTEROP_TAG_INT32) {
-        dst = src.i32;
-    } else {
-        dst = static_cast<Ark_Int32>(src.f32);
-    }
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
@@ -575,21 +567,6 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     }
 }
 
-void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)
-{
-    dst.id = ArkValue<Ark_Number>(-1);
-    dst.params = ArkValue<Opt_Array_String>();
-    if (auto name = std::get_if<std::string>(&src); name) {
-        CHECK_NULL_VOID(ctx);
-        std::vector<std::string> vecName { *name };
-        auto arkName = Converter::ArkValue<Array_String>(vecName, ctx);
-        dst.params = Converter::ArkValue<Opt_Array_String>(arkName, ctx);
-    } else if (auto id = std::get_if<int32_t>(&src); id) {
-        dst.id = ArkValue<Ark_Number>(*id);
-    }
-    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
-}
-
 void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src, ConvContext *ctx)
 {
     dst.path = ArkValue<Ark_String>(src.path, ctx);
@@ -671,61 +648,28 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     Offset localOffset = src.GetLocalLocation();
     Offset screenOffset = src.GetScreenLocation();
 
-    dst.displayX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.displayX.f32 = static_cast<float>(
+    dst.displayX = ArkValue<Ark_Number>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    dst.displayY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.displayY.f32 = static_cast<float>(
+    dst.displayY = ArkValue<Ark_Number>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-    dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.id.i32 = static_cast<int32_t>(src.GetFingerId());
+    dst.id = ArkValue<Ark_Number>(src.GetFingerId());
 
-    dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    dst.type = ArkValue<Ark_TouchType>(src.GetTouchType());
 
-    dst.type = static_cast<Ark_TouchType>(src.GetTouchType());
+    dst.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    dst.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.windowX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.windowY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.windowY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    dst.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    dst.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
-    dst.x.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.x.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    dst.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.y.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    
-    dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.pressedTime.value.i32 = static_cast<int32_t>(
-        src.GetPressedTime().time_since_epoch().count());
+    dst.pressedTime = ArkValue<Opt_Number>(src.GetPressedTime().time_since_epoch().count());
+    dst.pressure = ArkValue<Opt_Number>(src.GetForce());
 
-    dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressure.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.width = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
+    dst.height = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
 
-    dst.width.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.width.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.width.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
-
-    dst.height.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.height.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.height.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
-
-    dst.hand.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.hand.value = static_cast<Ark_InteractionHand>(src.GetOperatingHand());
+    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<ArkUI_InteractionHand>(src.GetOperatingHand()));
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
@@ -791,8 +735,7 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
             paramsArray.push_back(*param.value);
         }
     }
-    auto arkArray = Converter::ArkValue<Array_String>(paramsArray, ctx);
-    dst.params = Converter::ArkValue<Opt_Array_String>(arkArray, ctx);
+    dst.params = Converter::ArkValue<Opt_Array_String>(paramsArray, ctx);
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
@@ -880,14 +823,14 @@ void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleRes
 
 void AssignArkValue(Ark_NavDestinationContext& dst, const RefPtr<NG::NavDestinationContext>& src)
 {
-    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavDestinationContextAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<NavDestinationContextPeer>();
     peer->SetHandler(src);
     dst = peer;
 }
 
 void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src)
 {
-    auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getNavigationTransitionProxyAccessor()->ctor();
+    const auto peer = PeerUtils::CreatePeer<NavigationTransitionProxyPeer>();
     peer->SetHandler(src);
     dst = peer;
 }
@@ -931,5 +874,31 @@ void AssignArkValue(Ark_NavigationMode& dst, NG::NavigationMode& src)
 void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src)
 {
     dst = static_cast<Ark_NavigationOperation>(src);
+}
+
+
+template<>
+Ark_Resource ArkCreate(int64_t id, ResourceType type)
+{
+    return {
+        .id = ArkValue<Ark_Number>(id),
+        .type = ArkValue<Opt_Number>(static_cast<int32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(),
+    };
+}
+
+template<>
+Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
+{
+    std::vector<Ark_String> params = { ArkValue<Ark_String>(name, ctx) };
+    return {
+        .id = ArkValue<Ark_Number>(static_cast<int64_t>(-1)),
+        .type = ArkValue<Opt_Number>(static_cast<int32_t>(type)),
+        .moduleName = ArkValue<Ark_String>(""),
+        .bundleName = ArkValue<Ark_String>(""),
+        .params = ArkValue<Opt_Array_String>(params, ctx),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter

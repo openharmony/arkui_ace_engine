@@ -1,1 +1,3 @@
 .rollup.cache
+test/out
+test/ets

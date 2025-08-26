@@ -66,8 +66,8 @@ const std::string WORD_BREAK_ATTR = "wordBreak";
 const std::string LINE_BREAK_STRATEGY_ATTR = "lineBreakStrategy";
 const std::string ELLIPSIS_MODE_ATTR = "ellipsisMode";
 const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
-const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
-const auto RES_NAME1 = NamedResourceId("aa.bb.cc", Converter::ResourceType::FLOAT);
+const auto RES_NAME = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
+const auto RES_NAME1 = NamedResourceId("aa.bb.cc", ResourceType::FLOAT);
 
 const auto CONTEXT_ID = 123;
 static constexpr int TEST_RESOURCE_ID = 1000;
@@ -76,14 +76,14 @@ const uint32_t FLOAT_RES_1_ID = 1002;
 const uint32_t FLOAT_RES_2_ID = 1003;
 
 const double FLOAT_RES_0_VALUE = 0.705f;
-const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
+const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, ResourceType::FLOAT);
 
 const double FLOAT_RES_1_VALUE = 5.2f;
-const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);
+const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, ResourceType::FLOAT);
 
 const float FLOAT_RES_2_VALUE = 10.f;
 const auto FLOAT_RES_2_STORED_VALUE = Dimension(FLOAT_RES_2_VALUE, DimensionUnit::PX);
-const Ark_Resource FLOAT_RES_2 = CreateResource(FLOAT_RES_2_ID, Converter::ResourceType::FLOAT);
+const Ark_Resource FLOAT_RES_2 = CreateResource(FLOAT_RES_2_ID, ResourceType::FLOAT);
 
 const auto FONT_SIZE_ATTR_DEFAULT_VALUE = "16.00fp";
 const auto TEXT_OVERFLOW_ATTR_DEFAULT_VALUE = "TextOverflow.Clip";
@@ -675,7 +675,7 @@ HWTEST_F(TextModifierTest, setSelectableMode, TestSize.Level1)
 HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
 
     struct CopyEvent {
         int32_t nodeId;
@@ -705,7 +705,7 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
 
     struct SelectionChangeEvent {
         int32_t nodeId;
@@ -1359,7 +1359,7 @@ HWTEST_F(TextModifierTest, setSelectionTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnSelectionChange([](int32_t start, int32_t end) {
         range.push_back({ .start = start, .end = end });
@@ -1576,7 +1576,7 @@ HWTEST_F(TextModifierTest, setOnMarqueeStateChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     const int32_t start = 0;

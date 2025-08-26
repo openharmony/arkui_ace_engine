@@ -66,7 +66,7 @@ export class StoragePropRefDecoratedVariable<T>
         this.updateValueFromStorage();
     }
 
-    onStorageObjChanged<T>(key: string, newValue: T) {
+    onStorageObjChanged<T>(key: string, newValue: T): void {
         this.updateValueFromStorage();
     }
 
@@ -89,7 +89,7 @@ export class StoragePropRefDecoratedVariable<T>
         }
     }
 
-    updateValueFromStorage() {
+    updateValueFromStorage(): void {
         this.removePrivateWatchSubscription();
         this.set(this.backingStorageValue_.get());
         this.addPrivateWatchSubscription();

@@ -84,7 +84,7 @@ namespace TextInputModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(id, u"", u"", false);
+    auto frameNode = TextFieldModelStatic::CreateTextInputNode(id, u"", u"");
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -153,7 +153,10 @@ void TextIndentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertTextFromArkLength(value->value, DimensionUnit::FP);
+    }
     TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void PlaceholderFontImpl(Ark_NativePointer node,
@@ -592,9 +595,9 @@ void CancelButton0Impl(Ark_NativePointer node,
     Validator::ValidateNonPercent(iconSize);
     TextFieldModelStatic::SetCancelIconSize(frameNode, iconSize);
     // set icon src
-    auto iconSrcOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(optIconOptions->src);
+    auto iconSrcOpt = Converter::OptConvert<Converter::SimpleResource>(optIconOptions->src);
     if (!iconSrcOpt) {
-        iconSrcOpt = Converter::Ark_Resource_Simple();
+        iconSrcOpt = Converter::SimpleResource();
     }
     TextFieldModelStatic::SetCanacelIconSrc(frameNode, iconSrcOpt->content, iconSrcOpt->bundleName,
         iconSrcOpt->moduleName);

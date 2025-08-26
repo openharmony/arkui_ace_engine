@@ -25,8 +25,9 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonConfiguration } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
+import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, RestrictedWorker, RestrictedWorkerInternal, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
 import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
+import { CustomTheme, CustomColors } from '@ohos/arkui/theme';
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { DatePickerSelectedCallback } from "./../datepickerselectedops"
@@ -63,8 +64,9 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
-import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
+import { ImageModifier } from "../../ImageModifier"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -105,7 +107,7 @@ import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal,
 import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
+import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions, CustomDialogControllerExternalOptions } from "./../customDialogController"
 import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, SizeT } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
@@ -193,6 +195,7 @@ import promptAction from '@ohos/promptAction'
 import { LevelOrderInternal, LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { uiObserver } from "@ohos/arkui/observer"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -1281,8 +1284,7 @@ export class Deserializer extends DeserializerBase {
         throw new Error("Interface with functions is not supported")
     }
     readWithThemeAttribute(): WithThemeAttribute {
-        let value : WithThemeAttribute = ({} as WithThemeAttribute)
-        return value
+        throw new Error("Interface with functions is not supported")
     }
     readWorkerEventListener(): WorkerEventListener {
         let valueDeserializer : Deserializer = this
@@ -7331,7 +7333,7 @@ export class Deserializer extends DeserializerBase {
     }
     readCommonConfiguration(): CommonConfiguration {
         let valueDeserializer : Deserializer = this
-        let value : CommonConfiguration = {};
+        let value : CommonConfiguration = {enabled: false, contentModifier: {}};
         return value
     }
     readCommonModifier(): CommonModifier {
@@ -8951,12 +8953,14 @@ export class Deserializer extends DeserializerBase {
         let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
         return value
     }
-    readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
+    readLeadingMarginPlaceholder(map?: PixelMap): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({size: size_result} as LeadingMarginPlaceholder)
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // despite some property types having default values
+        let value : LeadingMarginPlaceholder = ({size: size_result, pixelMap: map!} as LeadingMarginPlaceholder)
         return value
     }
     readLengthMetrics(): LengthMetrics {
@@ -10410,7 +10414,9 @@ export class Deserializer extends DeserializerBase {
         return value
     }
     readPolyToPolyOptions(): PolyToPolyOptions {
-        let value : PolyToPolyOptions = ({} as PolyToPolyOptions)
+        // Note: according to spec 7.5.2, Properties of a non-optional type cannot be skipped in an object literal, 
+        // despite some property types having default values
+        let value : PolyToPolyOptions = ({dst: [], src: []} as PolyToPolyOptions)
         return value
     }
     readPopInfo(): PopInfo {
@@ -10715,17 +10721,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<Object | undefined> | undefined
+        let params_buf : Array<string | int | long | double | Resource> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<Object | undefined> = new Array<Object | undefined>(params_buf__length)
+            let params_buf_ : Array<string | int | long | double | Resource> = new Array<string | int | long | double | Resource>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<Object | undefined> | undefined = params_buf
+        const params_result : Array<string | int | long | double | Resource> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
@@ -11793,7 +11799,7 @@ export class Deserializer extends DeserializerBase {
         let value : SurfaceRotationOptions = ({lock: lock_result} as SurfaceRotationOptions)
         return value
     }
-    readRadioConfiguration(): RadioConfiguration {
+    readRadioConfiguration(cttModifier?: ContentModifier<RadioConfiguration>): RadioConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result : boolean = valueDeserializer.readBoolean()
         const value_result : string = (valueDeserializer.readString() as string)
@@ -11811,10 +11817,10 @@ export class Deserializer extends DeserializerBase {
             triggerChange_buf_argsSerializer.release();
             return;
         }
-        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result} as RadioConfiguration)
+        let value : RadioConfiguration = ({ enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result } as RadioConfiguration)
         return value
     }
-    readButtonConfiguration(): ButtonConfiguration {
+    readButtonConfiguration(cttModifier?: ContentModifier<ButtonConfiguration>): ButtonConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const label_result: string = (valueDeserializer.readString() as string)
@@ -11836,7 +11842,7 @@ export class Deserializer extends DeserializerBase {
         let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result } as ButtonConfiguration)
         return value
     }
-    readCheckBoxConfiguration(): CheckBoxConfiguration {
+    readCheckBoxConfiguration(cttModifier?: ContentModifier<CheckBoxConfiguration>): CheckBoxConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const name_result: string = (valueDeserializer.readString() as string)
@@ -11858,7 +11864,7 @@ export class Deserializer extends DeserializerBase {
         return value
     }
 
-    readToggleConfiguration(): ToggleConfiguration {
+    readToggleConfiguration(cttModifier?: ContentModifier<ToggleConfiguration>): ToggleConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const isOn_result: boolean = valueDeserializer.readBoolean()
@@ -11878,7 +11884,7 @@ export class Deserializer extends DeserializerBase {
         let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result } as ToggleConfiguration)
         return value
     }
-    readRatingConfiguration(): RatingConfiguration {
+    readRatingConfiguration(cttModifier?: ContentModifier<RatingConfiguration>): RatingConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const rating_result: number = (valueDeserializer.readNumber() as number)
@@ -11902,7 +11908,7 @@ export class Deserializer extends DeserializerBase {
         return value
     }
 
-    readSliderConfiguration(): SliderConfiguration {
+    readSliderConfiguration(cttModifier?: ContentModifier<SliderConfiguration>): SliderConfiguration {
         let valueDeserializer : Deserializer = this
         const enabled_result: boolean = valueDeserializer.readBoolean()
         const value_result: number = (valueDeserializer.readNumber() as number)
@@ -12495,46 +12501,44 @@ export class Deserializer extends DeserializerBase {
         const displayY_result : number = (valueDeserializer.readNumber() as number)
         const windowX_result : number = (valueDeserializer.readNumber() as number)
         const windowY_result : number = (valueDeserializer.readNumber() as number)
-        const screenX_result : number = (valueDeserializer.readNumber() as number)
-        const screenY_result : number = (valueDeserializer.readNumber() as number)
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        const hand_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const hand_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hand_buf : InteractionHand | undefined
         if ((RuntimeType.UNDEFINED) != (hand_buf_runtimeType))
         {
             hand_buf = TypeChecker.InteractionHand_FromNumeric(valueDeserializer.readInt32())
         }
         const hand_result : InteractionHand | undefined = hand_buf
-        const pressedTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const pressedTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pressedTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pressedTime_buf_runtimeType))
+        if ((pressedTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             pressedTime_buf = (valueDeserializer.readNumber() as number)
         }
         const pressedTime_result : number | undefined = pressedTime_buf
-        const pressure_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const pressure_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pressure_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pressure_buf_runtimeType))
+        if ((pressure_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             pressure_buf = (valueDeserializer.readNumber() as number)
         }
         const pressure_result : number | undefined = pressure_buf
-        const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             width_buf = (valueDeserializer.readNumber() as number)
         }
         const width_result : number | undefined = width_buf
-        const height_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             height_buf = (valueDeserializer.readNumber() as number)
         }
         const height_result : number | undefined = height_buf
-        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, screenX: screenX_result, screenY: screenY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result} as TouchObject)
+        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result, screenX: 0, screenY: 0} as TouchObject)
         return value
     }
     readTouchResult(): TouchResult {
@@ -16727,8 +16731,9 @@ export class Deserializer extends DeserializerBase {
         const touchObject_result : TouchObject = valueDeserializer.readTouchObject()
         const size_result : number = (valueDeserializer.readNumber() as number)
         const force_result : number = (valueDeserializer.readNumber() as number)
-        const timestamp_result : int64 = valueDeserializer.readInt64()
-        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, timestamp: timestamp_result} as HistoricalPoint)
+        const timestamp_result : int64 = (valueDeserializer.readInt64() as int64)
+        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, 
+        timestamp: timestamp_result} as HistoricalPoint)
         return value
     }
     readHoverEvent(): HoverEvent {
@@ -20813,7 +20818,7 @@ export class Deserializer extends DeserializerBase {
         }
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let value_buf : string | Array<string> | undefined
+        let value_buf : ResourceStr | Array<ResourceStr> | undefined
         if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
@@ -20832,9 +20837,9 @@ export class Deserializer extends DeserializerBase {
             else {
                 throw new Error("One of the branches for value_buf_ has to be chosen through deserialisation.")
             }
-            value_buf = (value_buf_ as string | Array<string>)
+            value_buf = (value_buf_ as ResourceStr | Array<ResourceStr>)
         }
-        const value_result : string | Array<string> | undefined = value_buf
+        const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let selected_buf : number | Array<number> | undefined
         if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
@@ -23390,7 +23395,26 @@ export class Deserializer extends DeserializerBase {
     readBaseGestureEvent(): BaseGestureEvent {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
-        return BaseGestureEventInternal.fromPtr(ptr)
+        let event = BaseGestureEventInternal.fromPtr(ptr)
+        let recognizerType = event.type
+        switch(recognizerType) {
+            case GestureControl.GestureType.TAP_GESTURE:
+                return TapGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.LONG_PRESS_GESTURE:
+                return LongPressGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PAN_GESTURE:
+                return PanGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.PINCH_GESTURE:
+                return PinchGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.SWIPE_GESTURE:
+                return SwipeGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.ROTATION_GESTURE:
+                return RotationGestureEventInternal.fromPtr(ptr)
+            case GestureControl.GestureType.CLICK:
+            case GestureControl.GestureType.DRAG:
+            default:
+                return event
+        }
     }
     readBorderImageOption(): BorderImageOption {
         let valueDeserializer : Deserializer = this
@@ -24371,6 +24395,18 @@ export class Deserializer extends DeserializerBase {
         }
         const focusable_result : boolean | undefined = focusable_buf
         let value : CustomDialogControllerOptions = ({builder: builder_result, cancel: cancel_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, customStyle: customStyle_result, gridCount: gridCount_result, maskColor: maskColor_result, maskRect: maskRect_result, openAnimation: openAnimation_result, closeAnimation: closeAnimation_result, showInSubWindow: showInSubWindow_result, backgroundColor: backgroundColor_result, cornerRadius: cornerRadius_result, isModal: isModal_result, onWillDismiss: onWillDismiss_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, keyboardAvoidMode: keyboardAvoidMode_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, keyboardAvoidDistance: keyboardAvoidDistance_result, levelMode: levelMode_result, levelUniqueId: levelUniqueId_result, immersiveMode: immersiveMode_result, levelOrder: levelOrder_result, focusable: focusable_result} as CustomDialogControllerOptions)
+        return value
+    }
+    readCustomDialogControllerExternalOptions(): CustomDialogControllerExternalOptions {
+        let valueDeserializer : Deserializer = this
+        const customStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let customStyle_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (customStyle_buf_runtimeType))
+        {
+            customStyle_buf = valueDeserializer.readBoolean()
+        }
+        const customStyle_result : boolean | undefined = customStyle_buf
+        let value : CustomDialogControllerExternalOptions = ({customStyle: customStyle_result} as CustomDialogControllerExternalOptions)
         return value
     }
     readCustomPopupOptions(): CustomPopupOptions {
@@ -28100,7 +28136,7 @@ export class Deserializer extends DeserializerBase {
         }
         const range_result : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> = (range_buf as Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent>)
         const value_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let value_buf : string | Array<string> | undefined
+        let value_buf : ResourceStr | Array<ResourceStr> | undefined
         if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
         {
             const value_buf__selector : int32 = valueDeserializer.readInt8()
@@ -28119,9 +28155,9 @@ export class Deserializer extends DeserializerBase {
             else {
                 throw new Error("One of the branches for value_buf_ has to be chosen through deserialisation.")
             }
-            value_buf = (value_buf_ as string | Array<string>)
+            value_buf = (value_buf_ as ResourceStr | Array<ResourceStr>)
         }
-        const value_result : string | Array<string> | undefined = value_buf
+        const value_result : ResourceStr | Array<ResourceStr> | undefined = value_buf
         const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let selected_buf : number | Array<number> | undefined
         if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
@@ -28685,5 +28721,12 @@ export class Deserializer extends DeserializerBase {
         else {
             return undefined
         }
+    }
+    readNavigationInfo(): uiObserver.NavigationInfo {
+        let valueDeserializer : Deserializer = this
+        const navigationIdTmpResult : string = (valueDeserializer.readString() as string)
+        const pathStackTmpResult : NavPathStack = (this.readNavPathStack() as NavPathStack)
+        let value : uiObserver.NavigationInfo = ({navigationId: navigationIdTmpResult, pathStack: pathStackTmpResult} as uiObserver.NavigationInfo)
+        return value
     }
 }

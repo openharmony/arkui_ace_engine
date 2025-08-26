@@ -216,8 +216,6 @@ public:
     static void SetBackgroundEffect(FrameNode* frameNode,
         const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 
-    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
-
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
 
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
@@ -298,12 +296,14 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
-    static void SetFocusScopePriority(
-        FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
+        const std::optional<uint32_t>& focusPriority);
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
-    static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetUseEffect(
+        FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt);
+    static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt);
     static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
     static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
     static void SetClickEffectLevel(FrameNode* frameNode,
@@ -343,7 +343,6 @@ private:
 
 
 // multi thread function start
-void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
 void SetBackgroundEffectMultiThread(FrameNode* frameNode,
     const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
 void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);

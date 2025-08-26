@@ -20,7 +20,7 @@ import {
   BorderStyle, KeyType, TouchType, Placement, CustomPopupOptions, GeometryInfo, Layoutable, ConstraintSizeOptions,
   Builder, focusControl, LocalizedPadding, Padding, PopupStateChangeParam, SymbolEffectStrategy, SymbolEffect,
   TextAlign, BlurStyle, CustomComponent, ButtonOptions, HoverEvent, KeyEvent, TouchEvent, ClickEvent, ShadowStyle,
-  px2vp, Margin
+  px2vp, Margin, ClassCastError
 } from '@ohos.arkui.component';
 import resourceManager from '@ohos.resourceManager';
 import { State, Observed, PropRef, StorageProp, Watch, StorageLink, Provide, Consume, Link } from '@ohos.arkui.stateManagement'
@@ -29,11 +29,10 @@ import { UIContext } from '@ohos.arkui.UIContext';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
-import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 
-export interface ComposeTitleBarMenuItem {
-  value: ResourceStr;
+export class ComposeTitleBarMenuItem {
+  value: ResourceStr = '';
   symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
@@ -43,14 +42,12 @@ export interface ComposeTitleBarMenuItem {
   accessibilityDescription?: ResourceStr;
 }
 
-const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
-const PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG_SIZE = '256vp';
 const MIN_DIALOG_SIZE = '216vp';
-const RESOURCE_TYPE_SYMBOL: number = 40000;
-const ERROR_CODE: number = 0x3900;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
+const ERROR_CODE: int = 0x3900;
 
 class Util {
   public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
@@ -103,6 +100,7 @@ class ButtonGestureModifier implements GestureModifier {
 
 @Component
 export struct ComposeTitleBar {
+  PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
   private static readonly totalHeight: number = 56;
   private static readonly leftPadding: number = 12;
   private static readonly rightPadding: number = 12;
@@ -126,7 +124,7 @@ export struct ComposeTitleBar {
       Row() {
         ImageMenuItem({
           item: {
-            value: PUBLIC_BACK,
+            value: this.PUBLIC_BACK,
             isEnabled: true,
             action: () => {
               this.getUIContext()?.getRouter()?.back()
@@ -179,15 +177,23 @@ export struct ComposeTitleBar {
           .alignItems(HorizontalAlign.Start)
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
-      }.width('80%')
+        .accessibilityGroup(true)
+        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+      }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') } as Margin)
-
-      if (this.menuItems?.length ?? 0 > 0) {
+      if ((this.menuItems?.length ?? 0) > 0) {
         CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ })
       }
     }
     .onAppear(() => {
-      this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+      try {
+        this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+      } catch (exception) {
+        let code: undefined| number = (exception as ClassCastError)?.code;
+        let message: undefined | string = (exception as ClassCastError)?.message;
+        hilog.error(ERROR_CODE, 'ComposeTitleBar',
+          `Faild to getFrameNodeByUniqueId,cause, code: ${code}, message: ${message}`);
+      }
     })
     .width('100%')
     .height(ComposeTitleBar.totalHeight)
@@ -217,13 +223,14 @@ export struct ComposeTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
   static readonly maxCountOfVisibleItems: number = 3;
   private static readonly focusPadding: number = 4;
   private static readonly marginsNum: number = 2;
-  private static readonly focusIndexOffset: number = 3;
+  private static readonly focusIndexOffset: number = 2;
   menuItems: Array<ComposeTitleBarMenuItem> = [] as Array<ComposeTitleBarMenuItem>;
   item: ComposeTitleBarMenuItem = {
-    value: PUBLIC_MORE,
+    value: this.PUBLIC_MORE,
     label: $r('sys.string.ohos_toolbar_more'),
   } as ComposeTitleBarMenuItem;
   index: number = 0;
@@ -250,13 +257,14 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   })
+
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
   private firstFocusableIndex: number = -1;
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick ?
-    $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
-    $r('sys.color.ohos_id_color_titlebar_icon');
+      $r('sys.color.ohos_id_color_titlebar_icon_pressed') :
+      $r('sys.color.ohos_id_color_titlebar_icon');
   }
 
   getMoreIconBgColor() {
@@ -271,13 +279,12 @@ struct CollapsibleMenuSection {
 
   aboutToAppear() {
     try {
-      let uiContent = this.getUIContext();
+      let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
-      this.maxFontScale = 1;
     } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
+      let code: undefined | number = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
@@ -294,15 +301,15 @@ struct CollapsibleMenuSection {
 
   decideFontScale(): number {
     try {
-      let uiContent = this.getUIContext();
+      let uiContent: UIContext = this.getUIContext();
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -326,13 +333,14 @@ struct CollapsibleMenuSection {
                 ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
               })
 
-            Button({ type: ButtonType.Normal, stateEffect: false } as ButtonOptions) {
-              SymbolGlyph(PUBLIC_MORE)
+            Button({ type: ButtonType.Normal, stateEffect: true } as ButtonOptions) {
+              SymbolGlyph(this.PUBLIC_MORE)
                 .fontSize(`${ImageMenuItem.imageSize}vp`)
                 .fontColor([$r('sys.color.icon_primary')])
                 .draggable(false)
                 .focusable(true)
             }
+            .accessibilityText($r('sys.string.ohos_toolbar_more'))
             .width(ImageMenuItem.imageHotZoneWidth)
             .height(ImageMenuItem.imageHotZoneWidth)
             .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -355,13 +363,13 @@ struct CollapsibleMenuSection {
               }
             })
             .onFocus(() => {
-              this.isMoreIconOnFocus = true
+              this.isMoreIconOnFocus = true;
             })
             .onBlur(() => {
-              this.isMoreIconOnFocus = false
+              this.isMoreIconOnFocus = false;
             })
             .onHover((isOn: boolean, event?: HoverEvent) => {
-              this.isMoreIconOnHover = isOn
+              this.isMoreIconOnHover = isOn;
             })
             .onKeyEvent((event: KeyEvent) => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
@@ -382,11 +390,12 @@ struct CollapsibleMenuSection {
               if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isMoreIconOnClick = false;
                 if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.close();
                 }
               }
             })
             .onClick((event?: ClickEvent) => {
-              this.isPopupShown = true
+              this.isPopupShown = true;
             })
             .gestureModifier(this.buttonGestureModifier)
             .bindPopup(this.isPopupShown as boolean, {
@@ -419,7 +428,7 @@ struct CollapsibleMenuSection {
 
   @Builder
   popupBuilder() {
-    Column(undefined) {
+    Column() {
       if (this.menuItems) {
         ForEach(this.menuItems!.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
           this.menuItems!.length),
@@ -443,12 +452,14 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
+  PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
+  PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left');
   static readonly imageSize: number = 24;
   static readonly imageHotZoneWidth: number = 48;
   static readonly buttonBorderRadius: number = 8;
   static readonly focusBorderWidth: number = 2;
   static readonly focusablePrefix: string = 'Id-ComposeTitleBar-ImageMenuItem-';
-  item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
+  item: ComposeTitleBarMenuItem = {value: 'undefined'} as ComposeTitleBarMenuItem;
   index: number = 0;
   itemIndex?: number = 0;
   minFontSize: number = 1.75;
@@ -462,21 +473,79 @@ struct ImageMenuItem {
   @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1;
   @Consume uniqueId?: number;
   dialogController: CustomDialogController | null = new CustomDialogController({
-    builder: ComposeTitleBarDialog(
-      {
-        cancel: () => {
-        },
-        confirm: () => {
-        },
-        itemComposeTitleDialog: this.item,
-        composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
-        fontSize: this.fontSize,
-      }),
+    builder: ComposeTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      itemComposeTitleDialog: this.item,
+      composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
+    }),
     maskColor: Color.Transparent,
     isModal: true,
     customStyle: true,
   })
+
   @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === this.PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else if (this.item.value === this.PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else {
+      return this.item?.label ?? '';
+    }
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource as string;
+    } else if (typeof resource === 'undefined') {
+      return '' as string;
+    } else {
+      let resourceString: undefined | string = '';
+      try {
+        resourceString = (this.getUIContext()
+          .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringSync((resource as Resource).id);
+      } catch (err) {
+        let code: number = (err as ClassCastError)?.code ?? 0;
+        let message: string = (err as ClassCastError)?.message ?? '';
+        hilog.error(ERROR_CODE, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === this.PUBLIC_BACK) {
+      try {
+        return (this.getUIContext()
+          .getHostContext() as common.UIAbilityContext)?.resourceManager!.getStringByNameSync('icon_back');
+      } catch (err) {
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | string = (err as ClassCastError)?.message;
+        hilog.error(ERROR_CODE, 'Ace',
+          `Faild to ComposeTitleBar getStringByNameSync icon_back,code: ${code},message:${message}`);
+      }
+    } else if (this.item.value === this.PUBLIC_MORE) {
+      try {
+        return (this.getUIContext()
+          .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch(err) {
+        let code: undefined | number = (err as ClassCastError)?.code;
+        let message: undefined | string = (err as ClassCastError)?.message;
+        hilog.error(ERROR_CODE, 'Ace',
+          `Faild to ComposeTitleBar getStringByNameSync ohos_toolbar_more,code: ${code},message:${message}`);
+      }
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText) as string;
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label) as string;
+    }
+    return ' ';
+  }
 
   onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
     children.forEach((child) => {
@@ -507,8 +576,8 @@ struct ImageMenuItem {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
+      let code: undefined | number = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
@@ -529,10 +598,9 @@ struct ImageMenuItem {
         return 1;
       }
       return Math.min(this.systemFontScale as number, this.maxFontScale as number);
-      return 1;
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
       hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
@@ -561,7 +629,7 @@ struct ImageMenuItem {
               .key(ImageMenuItem.focusablePrefix + this.index)
           } else {
             Image(this.item!.value)
-              .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
+              .matchTextDirection(this.item?.value === this.PUBLIC_BACK ? true : false)
               .width(ImageMenuItem.imageSize)
               .draggable(false)
               .height(ImageMenuItem.imageSize)
@@ -571,6 +639,9 @@ struct ImageMenuItem {
           }
         }
       }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription) as string)
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
@@ -600,43 +671,44 @@ struct ImageMenuItem {
         this.isOnFocus = true;
       })
       .onBlur(() => {
-        this.isOnFocus = false
+        this.isOnFocus = false;
       })
       .onHover((isOn: boolean, event?: HoverEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
-        this.isOnHover = isOn
+        this.isOnHover = isOn;
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return;
         }
         if (event.type === KeyType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === KeyType.Up) {
-          this.isOnClick = false
+          this.isOnClick = false;
         }
       })
       .onTouch((event: TouchEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         if (event.type === TouchType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.isOnClick = false
+          this.isOnClick = false;
           if (this.fontSize >= this.minFontSize) {
+            this.dialogController?.close();
           }
         }
       })
       .onClick((event?: ClickEvent) => {
-        this.item.isEnabled && this.item.action?.()
+        this.item.isEnabled && this.item.action?.();
       })
       .gestureModifier(this.buttonGestureModifier)
     } else {
@@ -661,7 +733,7 @@ struct ImageMenuItem {
               .key(ImageMenuItem.focusablePrefix + this.index)
           } else {
             Image(this.item!.value)
-              .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
+              .matchTextDirection(this.item?.value === this.PUBLIC_BACK ? true : false)
               .width(ImageMenuItem.imageSize)
               .draggable(false)
               .height(ImageMenuItem.imageSize)
@@ -671,6 +743,9 @@ struct ImageMenuItem {
           }
         }
       }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription) as string)
       .enabled(this.item.isEnabled ? this.item.isEnabled : false)
       .width(ImageMenuItem.imageHotZoneWidth)
       .height(ImageMenuItem.imageHotZoneWidth)
@@ -700,97 +775,46 @@ struct ImageMenuItem {
         this.isOnFocus = true;
       })
       .onBlur(() => {
-        this.isOnFocus = false
+        this.isOnFocus = false;
       })
       .onHover((isOn: boolean, event?: HoverEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
-        this.isOnHover = isOn
+        this.isOnHover = isOn;
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return
+          return;
         }
         if (event.type === KeyType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === KeyType.Up) {
-          this.isOnClick = false
+          this.isOnClick = false;
         }
       })
       .onTouch((event: TouchEvent) => {
-        if (!this.item.isEnabled) {
-          return
+        if (!this.item?.isEnabled) {
+          return;
         }
         if (event.type === TouchType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.isOnClick = false
+          this.isOnClick = false;
           if (this.fontSize >= this.minFontSize) {
+            this.dialogController?.close();
           }
         }
       })
       .onClick((event?: ClickEvent) => {
-        this.item.isEnabled && this.item.action?.()
+        this.item.isEnabled && this.item.action?.();
       })
     }
-
-  }
-
-  private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_MORE) {
-      return $r('sys.string.ohos_toolbar_more');
-    } else if (this.item.value === PUBLIC_BACK) {
-      return $r('sys.string.icon_back');
-    } else {
-      return this.item?.label ?? '';
-    }
-  }
-
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string') {
-      return resource as string;
-    } else if (typeof resource === 'undefined') {
-      return '';
-    } else {
-      let resourceString: string = '';
-      try {
-        let context = this.getUIContext().getHostContext();
-        if ((resource as Resource).id === -1 && (resource as Resource).params?.[0] !== undefined) {
-          resourceString =
-            context!.resourceManager!.getStringByNameSync(((resource as Resource).params?.[0] as string).split('.')
-              .pop() ?? '');
-        } else {
-          resourceString = (this.getUIContext()
-            .getHostContext() as common.UIAbilityContext)!.resourceManager!.getStringByNameSync(resource as string);
-        }
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code ?? 0;
-        let message: string = (err as BusinessError)?.message ?? '';
-        hilog.error(ERROR_CODE, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
-      }
-      return resourceString;
-    }
-  }
-
-  private getAccessibilityReadText(): string | undefined {
-    if (this.item.value === PUBLIC_BACK) {
-      return (this.getUIContext()
-        .getHostContext() as common.UIAbilityContext)?.resourceManager!.getStringByNameSync('icon_back');
-    } else if (this.item.value === PUBLIC_MORE) {
-      return (this.getUIContext()
-        .getHostContext() as common.UIAbilityContext)?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
-    } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
-    } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
-    }
-    return ' ';
   }
 }
 
@@ -799,7 +823,7 @@ struct ImageMenuItem {
  */
 @CustomDialog
 struct ComposeTitleBarDialog {
-  itemComposeTitleDialog: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
+  itemComposeTitleDialog: ComposeTitleBarMenuItem = {value: 'undefined'} as ComposeTitleBarMenuItem;
   callbackId: number | undefined = undefined;
   composeTitleBarDialog?: ResourceStr = '';
   mainWindowStage: window.Window | undefined = undefined;
@@ -809,6 +833,7 @@ struct ComposeTitleBarDialog {
   screenWidth: number = 640;
   verticalScreenLines: number = 6;
   horizontalsScreenLines: number = 1;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
   @State maxLines: number = 1;
   @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
@@ -819,7 +844,7 @@ struct ComposeTitleBarDialog {
 
   build() {
     if (this.composeTitleBarDialog) {
-      Column(undefined) {
+      Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
             .fontColor([$r('sys.color.icon_primary')])
@@ -851,7 +876,7 @@ struct ComposeTitleBarDialog {
               .fillColor($r('sys.color.icon_primary'))
           }
         }
-        Column(undefined) {
+        Column() {
           Text(this.composeTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -873,7 +898,7 @@ struct ComposeTitleBarDialog {
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
-      Column(undefined) {
+      Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
             .fontColor([$r('sys.color.icon_primary')])
@@ -903,15 +928,21 @@ struct ComposeTitleBarDialog {
     }
   }
 
-  aboutToAppear() {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage!.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+  aboutToAppear(): void {
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage!.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+    } catch (exception) {
+      let code: undefined | number = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
+      hilog.error(ERROR_CODE, 'ComposeTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

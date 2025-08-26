@@ -55,9 +55,9 @@ namespace {
     const auto TEST_COLOR_BLUE = Color::BLUE;
     const auto THEME_COLOR_RED = Color::RED;
     const auto TEST_COLOR_RES_NAME = "test_color_res_name";
-    const auto TEST_COLOR_RESOURCE = CreateResource(TEST_COLOR_RES_NAME, Converter::ResourceType::COLOR);
+    const auto TEST_COLOR_RESOURCE = CreateResource(TEST_COLOR_RES_NAME, ResourceType::COLOR);
     const auto TEST_FLOAT_RES_NAME = "float_res_name";
-    const auto TEST_FLOAT_RESOURCE = CreateResource(TEST_FLOAT_RES_NAME, Converter::ResourceType::FLOAT);
+    const auto TEST_FLOAT_RESOURCE = CreateResource(TEST_FLOAT_RES_NAME, ResourceType::FLOAT);
     const auto FLOAT_VALUE = 1.0f;
     const auto PRIMARY_BUTTON_TEXT = "Primary Button";
     const auto SECONDARY_BUTTON_TEXT = "Secondary Button";
@@ -1649,7 +1649,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnWillDismiss
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1686,7 +1686,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnWillDismiss
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1734,7 +1734,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnWillDismiss
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1785,8 +1785,8 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsOnStateChange
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
@@ -1819,7 +1819,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsPrimaryButton
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
@@ -1857,7 +1857,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsPrimaryButton
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
@@ -1880,7 +1880,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsPrimaryButton
 
     auto frameNode = AceType::DynamicCast<FrameNode>(firstButtonNode);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
@@ -1921,7 +1921,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsSecondaryButt
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
     auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_SECONDARY_BUTTON_SHOW);
@@ -1944,7 +1944,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsSecondaryButt
 
     auto frameNode = AceType::DynamicCast<FrameNode>(secondButtonNode);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);

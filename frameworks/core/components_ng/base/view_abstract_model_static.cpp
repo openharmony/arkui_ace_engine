@@ -622,12 +622,6 @@ void ViewAbstractModelStatic::SetBackgroundEffect(FrameNode* frameNode,
         sysOptions.value_or(DEFAULT_SYS_OPTIONS));
 }
 
-void ViewAbstractModelStatic::SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle)
-{
-    FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle);
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
-}
-
 void ViewAbstractModelStatic::SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value)
 {
     FREE_NODE_CHECK(frameNode, SetTranslate, frameNode, value);
@@ -688,10 +682,14 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
         (const WeakPtr<FrameNode>& weak, const std::function<RefPtr<NG::UINode>()>& buildFunc) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
-            CHECK_NULL_VOID(buildFunc);
-            auto virtualNode = buildFunc();
             auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
+            if (buildFunc == nullptr) {
+                node->HasAccessibilityVirtualNode(false);
+                accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
+                return;
+            }
+            auto virtualNode = buildFunc();
             auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
             CHECK_NULL_VOID(virtualFrameNode);
             virtualFrameNode->SetAccessibilityNodeVirtual();
@@ -1242,19 +1240,27 @@ void ViewAbstractModelStatic::SetPivot(FrameNode* frameNode, const std::optional
 
 void  ViewAbstractModelStatic::SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    // int32_t indX = 0;
-    // int32_t indY = 1;
-    // int32_t indZ = 2;
-    // int32_t indA = 3;
-    // int32_t indP = 4;
-    // rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
-    // rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
-    // rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
-    // rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
-    // rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
-    // ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
+    constexpr size_t requiredSize = 5;
+    if (value.size() != requiredSize) {
+        return;
+    }
+    NG::Vector5F rotateVec = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    const NG::Vector5F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    constexpr int32_t indX = 0;
+    constexpr int32_t indY = 1;
+    constexpr int32_t indZ = 2;
+    constexpr int32_t indA = 3;
+    constexpr int32_t indP = 4;
+    if (!value[indX] && !value[indY] && !value[indZ]) {
+        rotateVec.z = 1.0f;
+    } else {
+        rotateVec.x = value[indX].has_value() ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
+        rotateVec.y = value[indY].has_value() ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
+        rotateVec.z = value[indZ].has_value() ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
+    }
+    rotateVec.w = value[indA].has_value() ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
+    rotateVec.v = value[indP].has_value() ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
 void ViewAbstractModelStatic::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius,
@@ -1394,13 +1400,13 @@ void ViewAbstractModelStatic::SetFocusScopeId(FrameNode* frameNode, const std::s
 }
 
 void ViewAbstractModelStatic::SetFocusScopePriority(
-    FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority)
+    FrameNode* frameNode, const std::optional<std::string>& focusScopeId, const std::optional<uint32_t>& focusPriority)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto proirity = focusPriority.value_or(static_cast<uint32_t>(FocusPriority::AUTO));
-    focusHub->SetFocusScopePriority(focusScopeId, proirity);
+    focusHub->SetFocusScopePriority(focusScopeId.value_or(""), proirity);
 }
 
 void ViewAbstractModelStatic::SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale)
@@ -1433,14 +1439,22 @@ void ViewAbstractModelStatic::SetUseShadowBatching(FrameNode* frameNode, std::op
     }
 }
 
-void ViewAbstractModelStatic::SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect)
+void ViewAbstractModelStatic::SetUseEffect(
+    FrameNode* frameNode, const std::optional<bool>& useEffectOpt, const std::optional<EffectType>& effectTypeOpt)
 {
-    if (useEffect.has_value()) {
-        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    auto useEffect = useEffectOpt.value_or(false);
+    auto effectType = effectTypeOpt.value_or(EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(frameNode, useEffect, effectType);
+}
+
+void ViewAbstractModelStatic::SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invertOpt)
+{
+    if (invertOpt) {
+        ViewAbstract::SetInvert(frameNode, invertOpt.value());
+        return;
     }
+    InvertVariant invert = 0.0f;
+    ViewAbstract::SetInvert(frameNode, invert);
 }
 
 void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier)
@@ -1451,12 +1465,7 @@ void ViewAbstractModelStatic::SetDrawModifier(FrameNode* frameNode, const RefPtr
 
 void ViewAbstractModelStatic::SetFreeze(FrameNode* frameNode, std::optional<bool> freeze)
 {
-    if (freeze.has_value()) {
-        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
-    } else {
-        auto target = frameNode->GetRenderContext();
-        ACE_RESET_RENDER_CONTEXT(target, Freeze);
-    }
+    ViewAbstract::SetFreeze(frameNode, freeze.value_or(false));
 }
 
 void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,

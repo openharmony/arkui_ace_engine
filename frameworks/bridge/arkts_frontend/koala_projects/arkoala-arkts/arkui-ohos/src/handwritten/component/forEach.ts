@@ -16,9 +16,10 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
-import { RepeatByArray, memoEntry2, __context } from '@koalaui/runtime';
+import { int32, hashCodeFromString } from '@koalaui/common';
+import { memoEntry2, __context, NodeAttach } from '@koalaui/runtime';
 import { InteropNativeModule } from '@koalaui/interop';
+import { SyntaxNodePeer } from '../handwritten/RepeatImpl';
 
 /** @memo */
 export function ForEach<T>(
@@ -55,5 +56,7 @@ export function ForEach<T>(
             memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i);
         }
     }
-    createAndUpdate();
+    NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
+        createAndUpdate();
+    });
 }

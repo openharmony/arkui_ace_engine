@@ -17,7 +17,7 @@ import { int32 } from "@koalaui/common"
 import { PeerNode } from "arkui/PeerNode"
 import { KPointer } from "@koalaui/interop"
 import { ArkCommonMethodComponent, DragDropOps, DragEvent, CustomBuilder, DragItemInfo, PreviewConfiguration,
-    OnDragEventCallback, DropOptions } from '../component'
+    OnDragEventCallback, DropOptions, DragPreviewOptions, DragInteractionOptions } from '../component'
 import { InteropNativeModule, runtimeType, RuntimeType, toPeerPtr} from "@koalaui/interop"
 import { ArkUIAniModule } from "arkui.ani"
 import { createUiDetachedRoot } from "arkui/ArkUIEntry"
@@ -153,4 +153,8 @@ export function hookOnDrop(node: ArkCommonMethodComponent, eventCallback: ((even
 export function hookDragEventStartDataLoading(node: KPointer, options: DataSyncOptions): string {
     const options_casted = options as (DataSyncOptions)
     return ArkUIAniModule._DragEvent_Start_Data_Loading(node, options_casted)
+}
+
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+    ArkUIAniModule._Drag_Set_DragPreviewOptions(node.getPeer().getPeerPtr(), value, options)
 }

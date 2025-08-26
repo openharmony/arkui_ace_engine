@@ -73,6 +73,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _copyOption0_value?: CopyOptions | undefined
     _draggable_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _draggable0_value?: boolean | undefined
+    _textClip_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textClip0_value?: boolean | undefined
     _textShadow_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textShadow0_value?: ShadowOptions | Array<ShadowOptions> | undefined
     _heightAdaptivePolicy_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -134,6 +136,20 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     applyDisabledAttribute(instance: TextAttribute): void { }
     applySelectedAttribute(instance: TextAttribute): void { }
 
+    onlyHaveNormalFunc(): boolean {
+        const applyPressedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyPressedAttribute");
+        const applyPressedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyPressedAttribute");
+        const applyFocusedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyFocusedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyFocusedAttribute");
+        const applyDisabledAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applyDisabledAttribute");
+        const applyDisabledAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applyDisabledAttribute");
+        const applySelectedAttributeBase = (Type.from<TextModifier>() as ClassType).getMethodByName("applySelectedAttribute");
+        const applySelectedAttributeDerived = (Type.of(this) as ClassType).getMethodByName("applySelectedAttribute");
+        return applyPressedAttributeBase.toString() === applyPressedAttributeDerived.toString() &&
+            applyFocusedAttributeBase.toString() === applyFocusedAttributeDerived.toString() &&
+            applyDisabledAttributeBase.toString() === applyDisabledAttributeDerived.toString() &&
+            applySelectedAttributeBase.toString() === applySelectedAttributeDerived.toString();
+    }
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
         const peer: ArkTextPeer = value as ArkTextPeer
@@ -476,6 +492,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 default: {
                     this._draggable_flag = AttributeUpdaterFlag.INITIAL;
                     peer.draggableAttribute(undefined);
+                }
+            }
+        }
+        if (this._textClip_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textClip_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.clip0Attribute((this._textClip0_value as boolean | undefined));
+                    this._textClip_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textClip_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textClip_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.clip0Attribute(undefined);
                 }
             }
         }
@@ -912,8 +946,12 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             }
         }
     }
-    mergeModifier(modifier: TextModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof TextModifier)) {
+            return
+        }
+        const modifier = value as TextModifier;
         if (modifier._fontColor_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._fontColor_flag) {
@@ -1158,6 +1196,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
                 default: {
                     this.draggable(undefined);
+                }
+            }
+        }
+        if (modifier._textClip_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textClip_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.clip(modifier._textClip0_value);
+                    break;
+                }
+                default: {
+                    this.clip(undefined);
                 }
             }
         }
@@ -1702,6 +1753,18 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         }
         return this
     }
+    clip(value: boolean | undefined): this {
+        if (((this._textClip_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._textClip0_value) !== (value)))
+        {
+            this._textClip_flag = AttributeUpdaterFlag.UPDATE
+            this._textClip0_value = value
+        }
+        else
+        {
+            this._textClip_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
         if (((this._textShadow_flag) == (AttributeUpdaterFlag.INITIAL)) || this._textShadow0_value !== value || !Type.of(value).isPrimitive())
         {
@@ -1949,6 +2012,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._font_flag = AttributeUpdaterFlag.UPDATE
             this._font0_value = fontValue
             this._font1_value = options
+            if (this._fontWeight_flag == AttributeUpdaterFlag.UPDATE && this._font0_value != undefined) {
+                this._fontWeight0_value = this._font0_value!.weight
+            }
         }
         else
         {
@@ -1963,6 +2029,9 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._fontWeight_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight0_value = weight
             this._fontWeight1_value = options
+            if (this._font_flag == AttributeUpdaterFlag.UPDATE && this._font0_value != undefined) {
+                this._font0_value!.weight = this._fontWeight0_value
+            }
         }
         else
         {

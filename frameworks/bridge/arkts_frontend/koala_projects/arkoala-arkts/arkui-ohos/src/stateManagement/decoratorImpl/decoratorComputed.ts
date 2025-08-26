@@ -25,7 +25,7 @@ export interface IComputedDecoratorRef extends ITrackedDecoratorRef {
 export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<T> {
     public static readonly MIN_COMPUTED_ID: RenderIdType = 0x10000000;
     public static nextComputedId_: RenderIdType = ComputedDecoratedVariable.MIN_COMPUTED_ID;
-
+    public readonly decorator: string;
     public id: RenderIdType;
     public varName: string;
     public weakThis: WeakRef<ITrackedDecoratorRef>;
@@ -39,6 +39,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         this.weakThis = new WeakRef<ITrackedDecoratorRef>(this);
         this.computedLambda_ = computedLambda;
         this.varName = varName;
+        this.decorator = '@Computed';
         ObserveSingleton.instance.addToTrackedRegistry(this, this.reverseBindings);
     }
     fireChange(): void {

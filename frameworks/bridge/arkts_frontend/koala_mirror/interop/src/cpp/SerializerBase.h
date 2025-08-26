@@ -76,15 +76,22 @@ private:
         ASSERT(ownData);
         ASSERT(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
+        if (!newData) {
+            INTEROP_FATAL("Cannot allocate memory");
+        }
         interop_memcpy(newData, newLength, data, position);
         free(data);
         data = newData;
+        dataLength = newLength;
     }
 public:
     SerializerBase(CallbackResourceHolder* resourceHolder = nullptr):
         position(0), ownData(true), resourceHolder(resourceHolder) {
         this->dataLength = 256;
         this->data = reinterpret_cast<uint8_t*>(malloc(this->dataLength));
+        if (!this->data) {
+            INTEROP_FATAL("Cannot allocate memory");
+        }
     }
 
     SerializerBase(uint8_t* data, uint32_t dataLength, CallbackResourceHolder* resourceHolder = nullptr):
@@ -209,36 +216,6 @@ public:
 
     void writeBoolean(InteropBoolean value) {
         writeInt8(value);
-    }
-
-    void writeLength(InteropLength value) {
-        InteropRuntimeType tag = (InteropRuntimeType) value.type;
-        writeInt8(tag);
-        switch (tag) {
-            case INTEROP_RUNTIME_NUMBER:
-                writeFloat32(value.value);
-                break;
-            case INTEROP_RUNTIME_OBJECT:
-                writeInt32(value.resource);
-                break;
-            case INTEROP_RUNTIME_STRING: {
-                char buf[64];
-                std::string suffix;
-                switch (value.unit) {
-                    case 0: suffix = "px"; break;
-                    case 1: suffix = "vp"; break;
-                    case 2: suffix = "fp"; break;
-                    case 3: suffix = "%"; break;
-                    case 4: suffix = "lpx"; break;
-                }
-                interop_snprintf(buf, 64, "%.8f%s", value.value, suffix.c_str());
-                InteropString str =  { buf, (InteropInt32) interop_strlen(buf) };
-                writeString(str);
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     void writeCallbackResource(const InteropCallbackResource resource) {

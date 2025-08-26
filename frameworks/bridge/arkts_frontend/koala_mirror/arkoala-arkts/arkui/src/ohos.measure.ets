@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { GlobalScope_ohos_measure_utils, MeasureOptions } from "./generated";
+import { GlobalScope_ohos_measure_utils } from "#generated";
+import { MeasureOptions } from "#generated/ohos.measure"
 import { SizeOptions } from "./component/units";
 
 export class MeasureText {

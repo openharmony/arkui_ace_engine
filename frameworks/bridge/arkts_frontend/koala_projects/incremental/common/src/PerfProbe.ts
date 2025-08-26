@@ -151,17 +151,33 @@ export function getMainPerfProbe(name: string): MainPerfProbe {
 }
 
 class DummyPerfProbe implements MainPerfProbe {
-    get name(): string { return "dummy" }
-    get dummy(): boolean { return true }
+    get name(): string {
+        return "dummy"
+    }
+    get dummy(): boolean {
+        return true
+    }
     exit(log: boolean|undefined): void {}
-    cancel () {}
-    get canceled(): boolean { return false }
-    enterProbe(name: string): PerfProbe { return PerfProbeImpl.DUMMY }
-    exitProbe (name: string): PerfProbe { return PerfProbeImpl.DUMMY }
-    getProbe(name: string): PerfProbe { return PerfProbeImpl.DUMMY }
+    cancel() {}
+    get canceled(): boolean {
+        return false
+    }
+    enterProbe(name: string): PerfProbe {
+        return PerfProbeImpl.DUMMY
+    }
+    exitProbe (name: string): PerfProbe {
+        return PerfProbeImpl.DUMMY
+    }
+    getProbe(name: string): PerfProbe {
+        return PerfProbeImpl.DUMMY
+    }
     //performProbe: <T>(_: string, func: () => T) => func(),
-    performProbe<T>(name: string, func: () => T): T { return func() }
-    probePerformed(_: string): boolean { return false }
+    performProbe<T>(name: string, func: () => T): T {
+        return func()
+    }
+    probePerformed(_: string): boolean {
+        return false
+    }
 
     get userData(): string | undefined {
         return undefined
@@ -223,7 +239,9 @@ class PerfProbeImpl implements PerfProbe {
     }
 
     exit(log?: boolean): void {
-        if (this.canceled) return
+        if (this.canceled) {
+            return
+        }
 
         if (this.currentRecursionDepth == 0) {
             this.totalTime += timeNow() - this.startTime
@@ -234,7 +252,9 @@ class PerfProbeImpl implements PerfProbe {
         if (!this.performing) {
             this.main.pop(this)
         }
-        if (log) this.log()
+        if (log) {
+            this.log()
+        }
     }
 
     cancelWithChildren() {
@@ -248,7 +268,9 @@ class PerfProbeImpl implements PerfProbe {
 
     private maybeCancelChildren() {
         MainPerfProbeImpl.visit(this, false, (probe: PerfProbeImpl, depth: int32) => {
-            if (probe.performing) probe.cancel()
+            if (probe.performing) {
+                probe.cancel()
+            }
         })
     }
 
@@ -290,7 +312,9 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     ) {
         super(name)
         const prev = MainPerfProbeImpl.mainProbes.get(name)
-        if (prev) prev.cancel()
+        if (prev) {
+            prev.cancel()
+        }
         MainPerfProbeImpl.mainProbes.set(name, this)
         this.currentProbe = this.enterProbe(name)
     }
@@ -313,7 +337,9 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     push(probe: PerfProbeImpl) {
         probe.parent = this.currentProbe
         probe.index = probe.parent ? (probe.parent!.children.length).toInt() : 0
-        if (probe.parent) probe.parent!.children.push(probe)
+        if (probe.parent) {
+            probe.parent!.children.push(probe)
+        }
         this.currentProbe = probe
     }
 
@@ -399,7 +425,8 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
             visiting = true
             if (logging && !current.childrenSorted) {
                 current.childrenSorted = true
-                current.children = current.children.sort((p1: PerfProbeImpl, p2: PerfProbeImpl):number => p2.totalTime - p1.totalTime)
+                current.children = current.children.sort(
+                  (p1: PerfProbeImpl, p2: PerfProbeImpl): number => p2.totalTime - p1.totalTime);
                 if (depth == 0) {
                     // a special probe to log the time remained
                     current.children.push(new PerfProbeImpl("<remainder>", root.main, current, true))
@@ -417,14 +444,17 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
 
         MainPerfProbeImpl.visit(this.main, true, (probe, depth):void => {
             let indent = "\t"
-            for (let i = 0; i < depth; i++) indent += "\t"
+            for (let i = 0; i < depth; i++) {
+                indent += "\t"
+            }
             if (probe.remainder) {
                 const parentTime = probe.parent!.totalTime
                 let childrenTime = 0
                 probe.parent!.children.forEach((a: PerfProbeImpl):void => { childrenTime += a.totalTime })
                 probe.totalTime = (Math.max(0, parentTime - childrenTime)).toInt()
                 const percentage = parentTime > 0 ? Math.round((100 / parentTime) * probe.totalTime) : 0
-                console.log(`${prefix}${indent}[${probe.name}] time: ${numberToFixed(probe.totalTime, 2)}ms ${percentage}%`)
+                console.log(
+                    `${prefix}${indent}[${probe.name}] time: ${numberToFixed(probe.totalTime, 2)}ms ${percentage}%`)
             } else {
                 console.log(`${prefix}${indent}${probe.toString()}`)
             }

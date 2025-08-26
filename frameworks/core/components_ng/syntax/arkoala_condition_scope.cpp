@@ -25,4 +25,13 @@ constexpr char CONDITION_SCOPE_TAG[] = "ConditionScope";
 
 ConditionScopeNode::ConditionScopeNode(int32_t nodeId) : UINode(CONDITION_SCOPE_TAG, nodeId) {}
 
+void ConditionScopeNode::AddChild(
+    const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
+{
+    CHECK_NULL_VOID(child);
+    UINode::AddChild(child, slot, silently, addDefaultTransition, addModalUiextension);
+    // for geometryTransition, let all reused children call UpdateGeometryTransition.
+    LayoutProperty::UpdateAllGeometryTransition(child);
+}
+
 } // namespace OHOS::Ace::NG

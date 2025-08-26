@@ -61,7 +61,7 @@ HWTEST_F(RefreshModifierTest, setOnStateChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnStateChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<Ark_RefreshStatus> expected = std::nullopt;
@@ -97,7 +97,7 @@ HWTEST_F(RefreshModifierTest, setOnRefreshingTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnRefreshing, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<bool> expected = std::nullopt;
@@ -233,7 +233,7 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnOffsetChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<float> expected = std::nullopt;
@@ -323,7 +323,7 @@ HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
 HWTEST_F(RefreshModifierTest, setOnChangeEventRefreshingImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

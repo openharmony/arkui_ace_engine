@@ -56,8 +56,8 @@ namespace  {
     constexpr auto TRACK_SHADOW_OFFSET_X_THEME_DEFAULT = "0.000000";
     constexpr auto TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT = "0.000000";
     constexpr auto TRACK_SHADOW_RADIUS_THEME_DEFAULT = "0.000000";
-    const auto RES_VALUE_NAME = NamedResourceId{"test_value", Converter::ResourceType::FLOAT};
-    const auto RES_VALUE_ID = IntResourceId{1, Converter::ResourceType::FLOAT};
+    const auto RES_VALUE_NAME = NamedResourceId{"test_value", ResourceType::FLOAT};
+    const auto RES_VALUE_ID = IntResourceId{1, ResourceType::FLOAT};
 } // namespace
 
 class DataPanelModifierTest : public ModifierTestBase<GENERATED_ArkUIDataPanelModifier,
@@ -474,7 +474,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize
 // Color::RED is mocked by mocked theme constants
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidResourceValues = {{ Color::RED.ToString(),
-        Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(12345, Converter::ResourceType::COLOR)),
+        Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(12345, ResourceType::COLOR)),
         Color::RED.ToString() },
 };
 

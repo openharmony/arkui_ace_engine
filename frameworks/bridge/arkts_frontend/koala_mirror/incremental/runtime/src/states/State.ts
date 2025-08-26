@@ -13,7 +13,21 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, float64ToInt, int32, KoalaCallsiteKey, KoalaCallsiteKeys, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
+import {
+    Array_from_set,
+    className,
+    CoroutineLocalValue,
+    float64toInt32,
+    int32,
+    KoalaCallsiteKey,
+    launchJob,
+    Observable,
+    ObservableHandler,
+    refEqual,
+    trackableProperties,
+    uint32,
+    Utils,
+} from "@koalaui/common"
 import { Dependency, ScopeToStates, StateToScopes } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
@@ -21,6 +35,7 @@ import { markableQueue } from "../common/MarkableQueue"
 import { RuntimeProfiler } from "../common/RuntimeProfiler"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { ReadonlyTreeNode } from "../tree/ReadonlyTreeNode"
+import { TrackableProperties } from "@koalaui/compat";
 
 export const CONTEXT_ROOT_SCOPE = "ohos.koala.context.root.scope"
 export const CONTEXT_ROOT_NODE = "ohos.koala.context.root.node"
@@ -39,6 +54,8 @@ export function createStateManager(): StateManager {
     return new StateManagerImpl()
 }
 
+export const StateManagerLocal = new CoroutineLocalValue<StateManager>()
+
 /**
  * State manager, core of incremental runtime engine.
  *
@@ -46,9 +63,28 @@ export function createStateManager(): StateManager {
  * applications.
  */
 export interface StateManager extends StateContext {
+    /**
+     * Improve:HQ unclear usage of this non-unique identifier
+     * @internal
+     */
     readonly currentScopeId: KoalaCallsiteKey | undefined
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
     contextData: object | undefined
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
     isDebugMode: boolean
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
     setThreadChecker(callback: () => boolean): void
 
     syncChanges(): void
@@ -74,6 +110,21 @@ export interface State<Value> {
      * State value doesn't change during memo code execution.
      */
     readonly value: Value
+}
+
+/**
+ * Extended interface to the state object to get extra info.
+ * @internal
+ */
+export interface StateEx {
+    /**
+     * @return `true` if at least one incremental scope depends on this state
+     */
+    hasDependencies(): boolean
+    /**
+     * @return a string representation of this state, useful for debugging
+     */
+    toString(): string
 }
 
 /**
@@ -151,6 +202,24 @@ export interface StateContext {
         reuseKey?: string
     ): IncrementalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
+    merge<Value>(main: StateContext, rootNode: ComputableState<Value>, compute: () => void): void
+    /**
+     * Improve: can be removed after migration to multi-threaded implementation.
+     * @deprecated
+     * @internal
+     */
+    terminate<Value>(rootScope: ComputableState<Value>): void
 }
 
 /**
@@ -198,7 +267,7 @@ export interface ControlledScope {
 
 // IMPLEMENTATION DETAILS: DO NOT USE IT DIRECTLY
 
-interface ManagedState extends Disposable {
+interface ManagedState extends Disposable, StateEx {
     /**
      * `true` - global state is added to the manager and is valid until it is disposed,
      * `false` - local state is added to the current scope and is valid as long as this scope is valid.
@@ -208,8 +277,7 @@ interface ManagedState extends Disposable {
     updateStateSnapshot(changes?: Changes): void
 }
 
-interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
-    hasDependencies(): boolean
+interface ManagedScope extends Disposable, StateEx, Dependency, ReadonlyTreeNode {
     readonly id: KoalaCallsiteKey
     readonly node: IncrementalNode | undefined
     readonly nodeRef: IncrementalNode | undefined
@@ -236,11 +304,13 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     ): ScopeImpl<Value>
     increment(count: uint32, skip: boolean): void
     invalidateRecursively(predicate?: (scope: ManagedScope) => boolean): void
+    invalidate(): void
+    getCascadeParent(): ManagedScope | undefined
 }
 
-class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
+export /* Improve:HQ private as public*/ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
     protected manager: StateManagerImpl | undefined = undefined
-    private dependencies: StateToScopes | undefined = undefined
+    public /* Improve:HQ private as public*/ dependencies: StateToScopes | undefined = undefined
     protected snapshot: Value
     protected myModified: boolean = false
     protected myUpdated: boolean = true
@@ -266,6 +336,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
         this.manager = manager
         this.dependencies = new StateToScopes()
         this.snapshot = initial
+        this.trackedScopes.setTrackedProperties(trackableProperties(initial))
         ObservableHandler.attach<Value>(initial, this)
         manager.addCreatedState(this)
     }
@@ -282,27 +353,29 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     get value(): Value {
         this.onAccess()
         const manager = this.manager
-        return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
+        if (!manager || manager.frozen) return this.snapshot
+        if (manager.current?.nodeRef) return this.snapshot
+        return this.current(manager.journal)
     }
 
     set value(value: Value) {
-        let actualValue = value
         this.checkSetProhibited()
         const tracker = this.tracker
-        if (tracker) actualValue = tracker.onUpdate(value)
+        if (tracker) value = tracker.onUpdate(value)
+        this.trackedScopes.setTrackedProperties(trackableProperties(value))
         const manager = this.manager
         if (manager) {
             manager.updateNeeded = true
-            manager.journal.addChange(this, actualValue)
+            manager.journal.addChange(this, value)
             this.myUpdated = false
         } else {
-            this.applyStateSnapshot(actualValue)
+            this.applyStateSnapshot(value)
         }
     }
 
     onAccess(propertyName?: string): void {
         const dependency = this.manager?.dependency
-        if (dependency && propertyName) {
+        if (propertyName) {
             this.trackedScopes.register(propertyName, dependency?.states)
         }
         this.dependencies?.register(dependency)
@@ -386,6 +459,10 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
         this.trackedScopes.clear()
     }
 
+    hasDependencies(): boolean {
+        return this.dependencies?.empty == false
+    }
+
     toString(): string {
         let str = this.global ? "GlobalState" : "LocalState"
         if (this.name !== undefined) str += "(" + this.name + ")"
@@ -399,7 +476,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
 class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<Item> {
     constructor(manager: StateManagerImpl, initial: Array<Item>, global: boolean, equivalent?: Equivalent<Item>) {
         super(manager, initial, global, (oldArray: Array<Item>, newArray: Array<Item>): boolean => {
-            let i: number = oldArray.length
+            let i = float64toInt32(oldArray.length)
             if (i != newArray.length) return false
             while (0 < i--) {
                 if (isModified<Item>(oldArray[i], newArray[i], equivalent)) return false
@@ -419,7 +496,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
     }
 
     set length(value: number) {
-        this.mutable.length = value
+        this.mutable.length = float64toInt32(value)
     }
 
     at(index: number): Item {
@@ -465,7 +542,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
 
     splice(start: number, deleteCount: number | undefined, ...items: Item[]): Array<Item> {
         const array = this.mutable
-        return array.splice(start, deleteCount ?? array.length, ...items)
+        return array.splice(float64toInt32(start), deleteCount != undefined ? float64toInt32(deleteCount) : array.length, ...items)
     }
 
     unshift(...items: Item[]): number {
@@ -486,7 +563,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
     }
 }
 
-class ParameterImpl<Value> implements MutableState<Value> {
+class ParameterImpl<Value> implements StateEx, MutableState<Value> {
     private manager: StateManagerImpl | undefined = undefined
     private dependencies: StateToScopes | undefined = undefined
     private name: string | undefined = undefined
@@ -542,6 +619,10 @@ class ParameterImpl<Value> implements MutableState<Value> {
         this.dependencies = this.dependencies?.clear()
     }
 
+    hasDependencies(): boolean {
+        return this.dependencies?.empty == false
+    }
+
     toString(): string {
         let str = "Parameter"
         if (this.name !== undefined) str += "(" + this.name + ")"
@@ -551,7 +632,7 @@ class ParameterImpl<Value> implements MutableState<Value> {
     }
 }
 
-export class StateManagerImpl implements StateManager {
+export /* Improve:HQ private as public*/ class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
     private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
     private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()
@@ -566,6 +647,8 @@ export class StateManagerImpl implements StateManager {
     contextData: object | undefined = undefined
     isDebugMode: boolean = false
     private threadCheckerCallback?: () => boolean
+    private childManager: Array<StateManagerImpl> = new Array<StateManagerImpl>()
+    private parentManager: StateManagerImpl | undefined = undefined
 
     get currentScopeId(): KoalaCallsiteKey | undefined {
         return this.current?.id
@@ -593,6 +676,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     syncChanges(): void {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.syncChanges()
+        })
         this.journal.setMarker()
     }
 
@@ -601,6 +687,9 @@ export class StateManagerImpl implements StateManager {
     }
 
     updateSnapshot(): uint32 {
+        this.childManager.forEach((manager: StateManagerImpl) => {
+            manager.updateSnapshot()
+        })
         RuntimeProfiler.instance?.updateSnapshotEnter()
         this.checkForStateComputing()
         // optimization: all states are valid and not modified
@@ -608,8 +697,7 @@ export class StateManagerImpl implements StateManager {
         let modified: uint32 = 0
         // try to update snapshot for every state, except for parameter states
         const changes = this.journal.getChanges()
-        // Improve: use compat here (toInt cast)
-        const created = float64ToInt(this.statesCreated.size) // amount of created states to update
+        const created = float64toInt32(this.statesCreated.size) // amount of created states to update
         if (created > 0) {
             const it = this.statesCreated.keys()
             while (true) {
@@ -638,7 +726,7 @@ export class StateManagerImpl implements StateManager {
 
     updatableNode<Node extends IncrementalNode>(node: Node, update: (context: StateContext) => void, cleanup?: () => void): ComputableState<Node> {
         this.checkForStateComputing()
-        const scope = ScopeImpl.create<Node>(KoalaCallsiteKeys.empty, 0, (): Node => {
+        const scope = ScopeImpl.create<Node>(0, 0, (): Node => {
             update(this)
             return node
         }, cleanup === undefined ? undefined : (value: Node | undefined): void => {
@@ -648,15 +736,17 @@ export class StateManagerImpl implements StateManager {
         scope.node = node
         scope.nodeRef = node
         scope.dependencies = new StateToScopes()
+        this.current = scope // to attach named states to this scope
         scope.setNamedState(CONTEXT_ROOT_SCOPE, new StateImpl<ScopeImpl<Node>>(this, scope, false))
         scope.setNamedState(CONTEXT_ROOT_NODE, new StateImpl<Node>(this, node, false))
+        this.current = undefined
         return scope
     }
 
     computableState<Value>(compute: (context: StateContext) => Value, cleanup?: (context: StateContext, value: Value | undefined) => void): ComputableState<Value> {
         if (this.current?.once == false) throw new Error("computable state created in memo-context without remember")
         this.checkForStateCreating()
-        const scope = ScopeImpl.create<Value>(KoalaCallsiteKeys.empty, 0, (): Value => compute(this), cleanup === undefined ? undefined : (value: Value | undefined): void => {
+        const scope = ScopeImpl.create<Value>(0, 0, (): Value => compute(this), cleanup === undefined ? undefined : (value: Value | undefined): void => {
             cleanup?.(this, value)
         })
         scope.manager = this
@@ -723,7 +813,7 @@ export class StateManagerImpl implements StateManager {
         }
         const scope = this.current
         if (scope) return scope.getChildScope<Value>(id, paramCount, create, compute, cleanup, once, reuseKey)
-        throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") for the top level")
+        throw new Error("prohibited to create scope(" + id.toString(16) + ") for the top level")
     }
 
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope {
@@ -783,7 +873,7 @@ export class StateManagerImpl implements StateManager {
         if (state) return state.value
         const scope = this.current
         throw new Error(scope
-            ? ("state(" + name + ") is not defined in scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
+            ? ("state(" + name + ") is not defined in scope(" + scope.id.toString(16) + ")")
             : ("global state(" + name + ") is not defined"))
     }
 
@@ -817,14 +907,14 @@ export class StateManagerImpl implements StateManager {
         if (name === undefined) return
         const scope = this.current
         throw new Error(scope
-            ? ("prohibited when creating state(" + name + ") in scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
+            ? ("prohibited when creating state(" + name + ") in scope(" + scope.id.toString(16) + ")")
             : ("prohibited when creating global state(" + name + ")"))
     }
 
     private checkForStateComputing(): void {
         this.checkForStateCreating()
         const scope = this.current
-        if (scope) throw new Error("prohibited when computing scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
+        if (scope) throw new Error("prohibited when computing scope(" + scope.id.toString(16) + ")")
     }
 
     setThreadChecker(callback: () => boolean): void {
@@ -838,6 +928,69 @@ export class StateManagerImpl implements StateManager {
                 throw new Error("prohibited to modify a state when not in UI thread")
             }
         }
+    }
+
+    addChild(child: StateManagerImpl) {
+        this.childManager.push(child)
+    }
+
+    removeChild(child: StateManagerImpl) {
+        this.childManager = this.childManager.filter(item => item !== child)
+    }
+
+    fork(builder: (manager: StateContext) => void, complete: () => void): StateContext {
+        let context = new StateManagerImpl();
+        context.parentManager = this
+        context.contextData = this.contextData
+        const task = () => {
+            Utils.traceBegin(`Do parallel task`);
+            const old = StateManagerLocal.get()
+            StateManagerLocal.set(context)
+            builder(context);
+            StateManagerLocal.set(old)
+            context.current = undefined
+            if (complete) {
+                complete();
+            }
+            Utils.traceEnd();
+            return undefined
+        }
+        launchJob(task).then(() => { }).catch((err: Error) => {
+            console.error('parallel run in taskpool error :', err);
+            console.error(err.stack);
+        })
+        return context;
+    }
+
+    merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
+        const mainContext = main as StateManagerImpl
+        Utils.traceBegin(`merge`)
+        mainContext.childManager.push(this)
+        const current = rootScope as ScopeImpl<Value>
+        const scope = main!.scopeEx<void>(0, 1, () => {
+            return current.nodeRef!
+        }) as ScopeImpl<void>
+        compute()
+        if (scope.unchanged) {
+            scope.cached
+            Utils.traceEnd()
+            return
+        }
+        current.cascadeParent = scope
+        scope.recache()
+        Utils.traceEnd()
+    }
+
+    terminate<Value>(rootScope: ComputableState<Value>): void {
+        Utils.traceBegin(`sub manager terminate`)
+        const root = rootScope as ScopeImpl<Value>
+        const cascadeScope = root.cascadeParent as ScopeImpl<void>
+        cascadeScope.node = undefined
+        cascadeScope.nodeRef = undefined
+        root.dispose();
+        this.parentManager?.removeChild(this);
+        this.parentManager = undefined;
+        Utils.traceEnd()
     }
 }
 
@@ -870,6 +1023,7 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
     private _nodeRef: IncrementalNode | undefined = undefined
     private _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
     nodeCount: uint32 = 0
+    cascadeParent: ManagedScope | undefined = undefined
 
     // Constructor with (compute?: () => Value, cleanup?: (value: Value | undefined) => void)
     // signature causes es2panda recheck crash, so I have introduced a create
@@ -889,10 +1043,6 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
         instance.myCleanup = cleanup
         instance._reuseKey = reuseKey
         return instance
-    }
-
-    hasDependencies(): boolean {
-        return this.dependencies?.empty == false
     }
 
     get id(): KoalaCallsiteKey {
@@ -964,7 +1114,7 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
 
     getChildScope<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): ScopeImpl<Value> {
         const manager = this.manager
-        if (manager === undefined) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the disposed scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
+        if (manager === undefined) throw new Error("prohibited to create scope(" + id.toString(16) + ") within the disposed scope(" + this.id.toString(16) + ")")
         manager.checkForStateCreating()
         const inc = this.incremental
         const next = inc ? inc.next : this.child
@@ -975,7 +1125,7 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
                 return child as ScopeImpl<Value>
             }
         }
-        if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
+        if (once != true && this.once) throw new Error("prohibited to create scope(" + id.toString(16) + ") within the remember scope(" + this.id.toString(16) + ")")
         let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : ScopeImpl.create<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
@@ -1111,11 +1261,14 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
         return this.myModified
     }
 
-    private invalidate() {
+    invalidate() {
         const current = this.manager?.current // parameters can update snapshot during recomposition
         let scope: ManagedScope = this
         while (true) {
-            if (scope === current) break // parameters should not invalidate whole hierarchy
+            if (scope === current) {
+                scope.getCascadeParent()?.invalidate();
+                break // parameters should not invalidate whole hierarchy
+            }
             if (!scope.recomputeNeeded) RuntimeProfiler.instance?.invalidation()
             else if (current === undefined) break // all parent scopes were already invalidated
             scope.recomputeNeeded = true
@@ -1126,6 +1279,7 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
                 // if (this.myRecomputeNeeded && !parent.myRecomputeNeeded) console.log("parent of invalid scope is valid unexpectedly")
                 scope = parent
             } else {
+                scope.getCascadeParent()?.invalidate();
                 // mark top-level computable state as dirty if it has dependencies.
                 // they will be recomputed during the snapshot updating.
                 // we do not recompute other computable states and updatable nodes.
@@ -1135,6 +1289,10 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
                 break
             }
         }
+    }
+
+    getCascadeParent(): ManagedScope | undefined {
+        return this.cascadeParent
     }
 
     private recycleOrDispose(child: ManagedScope): void {
@@ -1169,10 +1327,12 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
         } catch (cause) {
             error = cause as Error
         }
-        this.node?.dispose() // dispose parent before its children
+        // dispose parent after its children to allow recycling a child tree
+        if (this.node) this.node!.disposing = true
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }
+        this.node?.dispose()
         this.child = undefined
         this.parentScope = undefined
         this.node = undefined
@@ -1193,8 +1353,12 @@ class ScopeImpl<Value> implements ManagedScope, IncrementalScope<Value>, Computa
         if (error) throw error
     }
 
+    hasDependencies(): boolean {
+        return this.dependencies?.empty == false
+    }
+
     toString(): string {
-        let str: string = KoalaCallsiteKeys.asString(this.id)
+        let str: string = this.id.toString(16)
         if (this.once) str += " remember..."
         if (this.node) str += " " + className(this.node)
         if (this === this.manager?.current) str += " (*)"
@@ -1267,6 +1431,16 @@ class TrackedScope {
 
 class TrackedScopes {
     private trackedScopes = new Map<string, TrackedScope>()
+    private trackableProperties: TrackableProperties | undefined
+
+    /**
+     * Set the class tracked properties
+     * @param trackedProperties
+     */
+    setTrackedProperties(trackedProperties: TrackableProperties | undefined): void {
+        this.trackedScopes.clear()
+        this.trackableProperties = trackedProperties
+    }
 
     /**
      * Registers or updates a tracking scope for a property.
@@ -1275,17 +1449,21 @@ class TrackedScopes {
      *                    Pass undefined to remove tracking.
      */
     register(propertyName: string, dependency: ScopeToStates | undefined): void {
+        if (!this.trackableProperties?.isTrackable(propertyName)) {
+            return
+        }
+
         if (!dependency) {
-            this.trackedScopes.delete(propertyName);
-            return;
+            this.trackedScopes.delete(propertyName)
+            return
         }
 
-        const existing = this.trackedScopes.get(propertyName);
+        const existing = this.trackedScopes.get(propertyName)
         if (existing && existing.dependency === dependency) {
-            return;
+            return
         }
 
-        this.trackedScopes.set(propertyName, new TrackedScope(dependency));
+        this.trackedScopes.set(propertyName, new TrackedScope(dependency))
     }
 
     /**
@@ -1318,9 +1496,11 @@ class TrackedScopes {
     }
 
     /**
-     * Clears all tracked scopes
+     * Clears all modified scopes
      */
     clear() {
-        this.trackedScopes.clear()
+        this.trackedScopes.forEach(it => {
+            it.isModified = false
+        })
     }
 }

@@ -14,45 +14,49 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import checkedTransformer from "./checked-stage-plugin"
-import parsedTransformer from "./parsed-stage-plugin"
+import checkedTransformer from "./checked-state-plugin"
+import parsedTransformer from "./parsed-state-plugin"
 
-
-interface ExternalPluginContext {
-    getArkTSProgram(): arkts.Program
-}
-
-export function init() {
+export function init(parsedJson?: Object, checkedJson?: Object) {
     let pluginContext = new arkts.PluginContextImpl()
+    const parsedHooks = new arkts.DumpingHooks(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED, "ui")
+    const checkedHooks = new arkts.DumpingHooks(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED, "ui")
+
     return {
         name: "ui",
-        parsed(this: ExternalPluginContext) {
-            console.log("[ui-plugin] Run parsed stage plugin")
-            const transform = parsedTransformer()
+        parsed(hooks: arkts.RunTransformerHooks = parsedHooks) {
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Run parsed state plugin", true)
+            const transform = parsedTransformer(parsedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
-                arkts.runTransformer(prog, state, false, transform, pluginContext)
+                arkts.runTransformer(prog, state, transform, pluginContext, hooks)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
-        checked(this: ExternalPluginContext) {
-            console.log("[ui-plugin] Run checked stage plugin")
-            const transform = checkedTransformer({ trace: !0 })
+        checked(hooks: arkts.RunTransformerHooks = checkedHooks) {
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Run checked state plugin", true)
+            const transform = checkedTransformer(checkedJson)
             const prog = arkts.arktsGlobal.compilerContext.program
             const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
-                arkts.runTransformer(prog, state, false, transform, pluginContext)
+                arkts.runTransformer(prog, state, transform, pluginContext, hooks)
                 arkts.recheckSubtree(prog.ast)
+                arkts.Tracer.popContext()
             } catch(e) {
                 console.trace(e)
                 throw e
             }
         },
         clean() {
-            console.log("[ui-plugin] Clean")
+            arkts.Tracer.pushContext('ui-plugin')
+            arkts.trace(() => "Clean", true)
+            arkts.Tracer.popContext()
             pluginContext = new arkts.PluginContextImpl()
         }
     }

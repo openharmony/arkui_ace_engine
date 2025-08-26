@@ -806,6 +806,40 @@ void* GetParseJsMedia()
     return reinterpret_cast<void*>(parseJsMedia);
 }
 
+void* IncreaseRefDrawable()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*increaseRef)(void* object) = nullptr;
+    increaseRef = reinterpret_cast<void(*)(void*)>(
+        FindFunction(module, "OHOS_ACE_IncreaseRefDrawableDescriptor"));
+    if (!increaseRef) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_IncreaseRefDrawableDescriptor");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(increaseRef);
+}
+
+void* DecreaseRefDrawable()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*decreaseRef)(void* object) = nullptr;
+    decreaseRef = reinterpret_cast<void(*)(void*)>(
+        FindFunction(module, "OHOS_ACE_DecreaseRefDrawableDescriptor"));
+    if (!decreaseRef) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_DecreaseRefDrawableDescriptor");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(decreaseRef);
+}
+
 bool CheckIsCNode(ArkUI_NodeHandle node)
 {
     if (node->cNode || node->buildNode) {

@@ -67,7 +67,7 @@ namespace {
     const auto TEST_COLOR_BLUE = Color::BLUE;
     const auto THEME_COLOR_RED = Color::RED;
     const auto TEST_COLOR_RES_NAME = "test_color_res_name";
-    const auto TEST_COLOR_RESOURCE = CreateResource(TEST_COLOR_RES_NAME, Converter::ResourceType::COLOR);
+    const auto TEST_COLOR_RESOURCE = CreateResource(TEST_COLOR_RES_NAME, ResourceType::COLOR);
     const auto TEST_RESOURCE_ID_1 = 1001;
 }
 
@@ -1679,8 +1679,8 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnState
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
@@ -1728,8 +1728,8 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnState
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
@@ -1766,7 +1766,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnWillD
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1806,7 +1806,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnWillD
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 
@@ -1857,7 +1857,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnWillD
     ASSERT_NE(overlayManager, nullptr);
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
-    
+
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     ASSERT_NE(pattern, nullptr);
 

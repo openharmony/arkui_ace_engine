@@ -204,28 +204,45 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
         src.GetRichEditorReplacedSymbolSpans(), ctx);
 }
 
+PlaceholderOptions GetThemePlaceholderOptions()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, PlaceholderOptions{});
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+    auto richEditorTheme = pipelineContext->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
+    return PlaceholderOptions {
+        .fontSize = textStyle.GetFontSize(),
+        .fontWeight = textStyle.GetFontWeight(),
+        .fontFamilies = textStyle.GetFontFamilies(),
+        .fontStyle = textStyle.GetFontStyle(),
+        .fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : Color()
+    };
+}
+
 template<>
 void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderStyle& src)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto textTheme = pipelineContext->GetTheme<TextTheme>();
-    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    PlaceholderOptions ret;
-    ret.fontSize = Converter::OptConvert<Dimension>(src.font.value.size).value_or(textStyle.GetFontSize());
-    ret.fontWeight = Converter::OptConvert<FontWeight>(src.font.value.weight).value_or(textStyle.GetFontWeight());
-    auto fontFamilyStr = Converter::OptConvert<std::string>(src.font.value.family);
-    ret.fontFamilies = (fontFamilyStr && fontFamilyStr->length() > 0)
-        ? std::vector<std::string>{ fontFamilyStr.value() } : textStyle.GetFontFamilies();
-    ret.fontStyle =
-        Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style).value_or(textStyle.GetFontStyle());
-    ret.fontColor = Converter::OptConvert<Color>(src.fontColor);
-    if (!ret.fontColor.has_value()) {
-        Color fontColor;
-        auto richEditorTheme = pipelineContext->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
-        ret.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
+    dst = GetThemePlaceholderOptions();
+    CHECK_NULL_VOID(dst.has_value());
+    if (auto fontColor = Converter::OptConvert<Color>(src.fontColor)) {
+        dst->fontColor = fontColor;
     }
-    dst = ret;
+    CHECK_NULL_VOID(src.font.tag != INTEROP_TAG_UNDEFINED);
+    auto arkFont = src.font.value;
+    if (auto fontSize = Converter::OptConvert<Dimension>(arkFont.size)) {
+        dst->fontSize = fontSize;
+    }
+    if (auto fontWeight = Converter::OptConvert<FontWeight>(arkFont.weight)) {
+        dst->fontWeight = fontWeight;
+    }
+    auto fontFamilyStr = Converter::OptConvert<std::string>(arkFont.family);
+    if (fontFamilyStr && fontFamilyStr->length() > 0) {
+        dst->fontFamilies = std::vector<std::string>{ fontFamilyStr.value() };
+    }
+    if (auto fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(arkFont.style)) {
+        dst->fontStyle = fontStyle;
+    }
 }
 } // OHOS::Ace::NG::Converter
 
@@ -262,13 +279,22 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     RichEditorModelStatic::SetStyledStringMode(frameNode, true);
-    CHECK_NULL_VOID(options->controller);
+    Ark_RichEditorStyledStringController styledStringControllerPeer = options->controller;
+    CHECK_NULL_VOID(styledStringControllerPeer);
+
     // obtain the internal Styled String RichEditorController
     RefPtr<RichEditorBaseControllerBase> controller =
         RichEditorModelStatic::GetRichEditorStyledStringController(frameNode);
     CHECK_NULL_VOID(controller);
+    styledStringControllerPeer->AddTargetController(controller);
 
-    options->controller->AddTargetController(controller);
+    // apply styledString cache
+    auto styledStringCache = styledStringControllerPeer->GetStyledStringCache();
+    CHECK_NULL_VOID(styledStringCache);
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetStyledString(styledStringCache);
+    styledStringControllerPeer->SetStyledStringCache(nullptr);
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
@@ -280,7 +306,7 @@ void OnReadyImpl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(value);
     CHECK_NULL_VOID(optValue);
     auto onCallback = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     RichEditorModelNG::SetOnReady(frameNode, std::move(onCallback));
 }
@@ -479,7 +505,7 @@ void OnEditingChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(optValue);
     auto onCallback = [arkCallback = CallbackHelper(*optValue)](const bool& param) {
         Ark_Boolean flag = Converter::ArkValue<Ark_Boolean>(param);
-        arkCallback.Invoke(flag);
+        arkCallback.InvokeSync(flag);
     };
     RichEditorModelNG::SetOnEditingChange(frameNode, std::move(onCallback));
 }
@@ -643,8 +669,10 @@ void MaxLinesImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<uint32_t>(*value) : std::nullopt;
-    RichEditorModelNG::SetMaxLines(frameNode, convValue.value_or(UINT_MAX));
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto isValid = convValue && (convValue.value() > 0);
+    auto maxLineValue = isValid ? Converter::OptConvert<uint32_t>(*value).value_or(UINT_MAX) : UINT_MAX;
+    RichEditorModelStatic::SetMaxLines(frameNode, maxLineValue);
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
@@ -670,19 +698,15 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceSpanType = Converter::OptConvert<TextSpanType>(*spanType);
-    auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
+    auto aceSpanType = spanType ? Converter::OptConvert<TextSpanType>(*spanType) : std::nullopt;
+    auto aceResponseType = responseType ? Converter::OptConvert<TextResponseType>(*responseType) : std::nullopt;
     auto response = aceResponseType.value_or(TextResponseType::NONE);
     auto span = aceSpanType.value_or(TextSpanType::NONE);
-    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
-    // TODO: Reset value
-    CHECK_NULL_VOID(convMenuParam);
+    auto aceConvMenuParam = options ? Converter::OptConvert<SelectMenuParam>(*options) : std::nullopt;
+    auto convMenuParam = aceConvMenuParam.value_or(SelectMenuParam{});
     auto optContent = Converter::GetOptPtr(content);
-    if (!optContent) {
-        // TODO: Reset value
-        return;
-    }
-    CallbackHelper(*optContent).BuildAsync([frameNode, span, response, convMenuParam = convMenuParam.value()](
+    CHECK_NULL_VOID(optContent);
+    CallbackHelper(*optContent).BuildAsync([frameNode, span, response, convMenuParam](
         const RefPtr<UINode>& uiNode) mutable {
         std::function<void()> builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);

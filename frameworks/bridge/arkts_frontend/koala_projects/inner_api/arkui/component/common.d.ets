@@ -485,7 +485,6 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public outlineRadius0Attribute(value: Dimension | OutlineRadiuses | undefined): void;
     public outlineRadius1Attribute(value: Dimension | OutlineRadiuses | undefined): void;
     public foregroundColor0Attribute(value: ResourceColor | ColoringStrategy | undefined): void;
-    public foregroundColor1Attribute(value: ResourceColor | ColoringStrategy | undefined): void;
     public onClick0Attribute(value: ((event: ClickEvent) => void) | undefined): void;
     public onClick1Attribute(
         event: ((event: ClickEvent) => void) | undefined,
@@ -533,20 +532,15 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public saturate0Attribute(value: number | undefined): void;
     public saturate1Attribute(value: number | undefined): void;
     public sepia0Attribute(value: number | undefined): void;
-    public sepia1Attribute(value: number | undefined): void;
     public invert0Attribute(value: number | InvertOptions | undefined): void;
-    public invert1Attribute(value: number | InvertOptions | undefined): void;
     public hueRotate0Attribute(value: number | string | undefined): void;
     public hueRotate1Attribute(value: number | string | undefined): void;
     public useShadowBatching0Attribute(value: boolean | undefined): void;
     public useShadowBatching1Attribute(value: boolean | undefined): void;
     public useEffect0Attribute(value: boolean | undefined): void;
     public useEffect1Attribute(useEffect: boolean | undefined, effectType: EffectType | undefined): void;
-    public useEffect2Attribute(useEffect: boolean | undefined, effectType?: EffectType): void;
     public renderGroup0Attribute(value: boolean | undefined): void;
-    public renderGroup1Attribute(value: boolean | undefined): void;
     public freeze0Attribute(value: boolean | undefined): void;
-    public freeze1Attribute(value: boolean | undefined): void;
     public translate0Attribute(value: TranslateOptions | undefined): void;
     public translate1Attribute(value: TranslateOptions | undefined): void;
     public scale0Attribute(value: ScaleOptions | undefined): void;
@@ -554,7 +548,6 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public gridSpanAttribute(value: number | undefined): void;
     public gridOffsetAttribute(value: number | undefined): void;
     public rotate0Attribute(value: RotateOptions | undefined): void;
-    public rotate1Attribute(value: RotateOptions | undefined): void;
     public transform0Attribute(value: TransformationMatrix | undefined): void;
     public transform1Attribute(value: Object | undefined): void;
     public onAppearAttribute(value: (() => void) | undefined): void;
@@ -677,7 +670,6 @@ export declare class ArkCommonMethodPeer extends PeerNode {
     public backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void;
     public backgroundImage0Attribute(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat): void;
     public backgroundImage1Attribute(src: ResourceStr | PixelMap | undefined, options?: BackgroundImageOptions): void;
-    public backgroundBlurStyle0Attribute(value: BlurStyle | undefined, options?: BackgroundBlurStyleOptions): void;
     public backgroundBlurStyle1Attribute(
         style: BlurStyle | undefined,
         options?: BackgroundBlurStyleOptions,

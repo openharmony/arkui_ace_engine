@@ -54,7 +54,7 @@ export class CallTransformer extends arkts.AbstractVisitor {
     transformDollarCallExpression(callExpr: arkts.CallExpression): arkts.CallExpression {
         const name = (callExpr.callee as arkts.Identifier).name.replace('$', '_')
         // add import { _r, _rawfile } from "@ohos.arkui";
-        this.imports.add(name, "@ohos.arkui")
+        this.imports.add(name, getComponentPackage())
         const args = callExpr.arguments.slice()
         return arkts.factory.updateCallExpression(
             callExpr,
@@ -71,30 +71,36 @@ export class CallTransformer extends arkts.AbstractVisitor {
     private componentsList = new Map<string, any>([
         [ "Column", { args: 1 } ],
         [ "Row",  { args: 1 } ],
+        [ "Stack",  { args: 1 } ],
         [ "List",  { args: 1 } ],
         [ "ListItem",  { args: 1 } ],
+        [ "ListItemGroup", { args: 1 } ],
         [ "DatePicker",  { args: 1 } ],
         [ "Slider",  { args: 1 } ],
         [ "Tabs",  { args: 1 } ],
+        [ "Text", { args: 2 } ],
         [ "TextInput",  { args: 1 } ],
         [ "Toggle",  { args: 1 } ],
         [ "Progress",  { args: 1 } ],
-        [ "Swiper",  { args: 1, options: "SwiperController" } ],
-        [ "Grid",  { args: 2,  options: "GridLayoutOptions" } ],
+        [ "Swiper",  { args: 1 } ],
+        [ "Grid",  { args: 2 } ],
+        [ "GridCol",  { args: 1 } ],
+        [ "GridRow",  { args: 1 } ],
         [ "GridItem",  { args: 1 } ],
-        [ "Scroll",  { args: 1, options: "Scroller" } ],
+        [ "Scroll",  { args: 1 } ],
+        [ "Button", { args: 2 } ],
+        [ "Image", { args: 2 } ],
+        [ "Flex", { args: 1 } ],
+        [ "MenuItem", { args: 1 } ],
+        [ "MenuItemGroup", { args: 1 } ],
+        [ "WaterFlow", { args: 1 } ],
 
 
     ])
-    seenComponents = new Set<string>()
 
     transformComponentCallExpression(node: arkts.CallExpression, nameIdent: arkts.Identifier): arkts.CallExpression {
         const name = nameIdent.name
         const component = this.componentsList.get(name)
-        if (!this.seenComponents.has(name)) {
-            this.seenComponents.add(name)
-            this.imports.add(component.options ?? `${name}Options`, getComponentPackage())
-        }
         node = this.visitEachChild(node) as arkts.CallExpression
         return arkts.factory.createCallExpression(node.callee,
             this.insertUndefinedTillTrailing(node.arguments, component.args),

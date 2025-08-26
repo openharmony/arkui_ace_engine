@@ -18,24 +18,28 @@
 #include "common_ani_modifier.h"
 #include "component_content_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
+#include "condition_scope_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
+#include "custom_node_ani_modifier.h"
+#include "drag_ani_modifier.h"
+#include "drag_controller_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "image_span_ani_modifier.h"
-#include "styled_string_ani_modifier.h"
-#include "web_ani_modifier.h"
-#include "custom_node_ani_modifier.h"
-#include "list_ani_modifier.h"
-#include "waterflow_ani_modifier.h"
-#include "drag_ani_modifier.h"
 #include "interop_ani_modifier.h"
-#include "drag_controller_ani_modifier.h"
-#include "video_ani_modifier.h"
+#include "lazy_for_each_node_ani_modifier.h"
+#include "list_ani_modifier.h"
+#include "node_adapter_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
+#include "search_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
+#include "styled_string_ani_modifier.h"
+#include "trace_ani_modifier.h"
+#include "video_ani_modifier.h"
+#include "waterflow_ani_modifier.h"
+#include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
-#include "lazy_for_each_node_ani_modifier.h"
-#include "condition_scope_ani_modifier.h"
+#include "syntax_node_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -57,6 +61,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,
+        .getSearchAniModifier = OHOS::Ace::NG::GetSearchAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
@@ -66,6 +71,9 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
         .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
         .getCanvasAniModifier = OHOS::Ace::NG::GetCanvasAniModifier,
+        .getTraceAniModifier = OHOS::Ace::NG::GetTraceAniModifier,
+        .getSyntaxNodeAniModifier = OHOS::Ace::NG::GetSyntaxNodeAniModifier,
+        .getNodeAdapterAniModifier = OHOS::Ace::NG::GetNodeAdapterAniModifier,
     };
     return &impl;
 }

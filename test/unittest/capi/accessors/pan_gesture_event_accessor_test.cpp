@@ -53,7 +53,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetOffsetXTest, TestSize.Level1)
 {
     PipelineBase::GetCurrentDensity();
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetX(Converter::Convert<float>(value) * TEST_DENSITY);
         auto arkRes = Converter::Convert<double>(accessor_->getOffsetX(peer_));
@@ -71,7 +71,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetOffsetXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setOffsetX(peer_, &value);
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetOffsetX(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetOffsetX";
@@ -86,7 +86,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetOffsetXTest, TestSize.Level1)
 HWTEST_F(PanGestureEventAccessorTest, GetOffsetYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         event->SetOffsetY(Converter::Convert<float>(value) * TEST_DENSITY);
         auto arkRes = Converter::Convert<double>(accessor_->getOffsetY(peer_));
@@ -104,7 +104,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetOffsetYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setOffsetY(peer_, &value);
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetOffsetY(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetOffsetY";
@@ -120,7 +120,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 {
     const double velocityY = 2.3;
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(Converter::Convert<float>(value) * TEST_DENSITY, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
@@ -139,7 +139,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocityX(peer_, &value);
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetVelocity().GetVelocityX(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetVelocityX";
@@ -155,7 +155,7 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 {
     const double velocityX = 2.3;
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, Converter::Convert<float>(value) * TEST_DENSITY);
         event->SetVelocity(Velocity(offsetPerSec));
@@ -174,7 +174,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocityY(peer_, &value);
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetVelocity().GetVelocityY(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetVelocityY";
@@ -189,7 +189,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
 HWTEST_F(PanGestureEventAccessorTest, GetVelocityTest, TestSize.Level1)
 {
     for (auto& [input, velocityX, velocityY, expected] : AccessorTestFixtures::testFixtureVelocity_half_Values) {
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         auto offsetPerSec = Offset(velocityX, velocityY);
         event->SetVelocity(Velocity(offsetPerSec));
@@ -208,7 +208,7 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocity(peer_, &value);
-        PanGestureEvent* event = peer_->GetEventInfo();
+        auto event = peer_->GetEventInfo();
         ASSERT_NE(event, nullptr);
         EXPECT_NEAR(event->GetVelocity().GetVelocityX(), expected, EPSILON) <<
             "Input X value is: " << input << ", method: SetVelocity";

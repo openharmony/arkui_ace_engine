@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -41,11 +42,11 @@ inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const Scrol
 
 namespace {
 const auto FRICTION_RES_NAME = "friction_res_name";
-const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, Converter::ResourceType::FLOAT);
+const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, ResourceType::FLOAT);
 const auto FRICTION_VALUE = 1.2f;
 const auto DIVIDER_COLOR_RES_NAME = "divider_color_res_name";
 const auto DIVIDER_COLOR = "#08000000";
-const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, Converter::ResourceType::COLOR);
+const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, ResourceType::COLOR);
 const float TEST_OFFSET = 10.0f;
 } // namespace
 
@@ -861,7 +862,7 @@ HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.L
 HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -904,7 +905,7 @@ HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -956,7 +957,7 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -995,7 +996,7 @@ HWTEST_F(ListModifierTest, setOnReachStartTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1034,7 +1035,7 @@ HWTEST_F(ListModifierTest, setOnReachEndTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1073,7 +1074,7 @@ HWTEST_F(ListModifierTest, setOnScrollStartTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1153,7 +1154,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
     modifier_->setOnItemDragStart(node_, &optCallback);
 
     // imitate the test case
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ItemDragInfo dragInfo;
     dragInfo.SetX(expectedX);
@@ -1174,7 +1175,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -1214,7 +1215,7 @@ HWTEST_F(ListModifierTest, setOnItemDragEnterTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -1261,7 +1262,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -1304,7 +1305,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {
@@ -1355,7 +1356,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
@@ -1390,7 +1391,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     struct CheckEvent {int32_t nodeId;
@@ -1450,7 +1451,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
 {
     Callback_Number_Boolean func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();
 
     static const int32_t expectedResourceId = 123;
@@ -1477,7 +1478,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1514,5 +1515,37 @@ HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->end.index, 77);
     EXPECT_EQ(checkEvent->end.area, ListItemGroupArea::IN_FOOTER_AREA);
     EXPECT_EQ(checkEvent->end.indexInGroup, 99);
+}
+
+/*
+ * @tc.name: setStackFromEndTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, setStackFromEndTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    std::optional<bool> result;
+    auto value = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+
+    modifier_->setStackFromEnd(node_, &value);
+    result = property->GetStackFromEnd();
+    ASSERT_FALSE(result);
+
+    value = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setStackFromEnd(node_, &value);
+    result = property->GetStackFromEnd();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), true);
+
+    value = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setStackFromEnd(node_, &value);
+    result = property->GetStackFromEnd();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), false);
 }
 } // namespace OHOS::Ace::NG

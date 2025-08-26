@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { FontWeight, Color } from "./enums"
@@ -31,7 +31,11 @@ import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SymbolSpanModifier } from "../SymbolSpanModifier"
+import { hookSymbolSpanAttributeModifier } from "../handwritten"
+
 export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SymbolSpanModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -168,11 +172,15 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
 }
 export type SymbolSpanInterface = (value: Resource) => SymbolSpanAttribute;
 export interface SymbolSpanAttribute extends CommonMethod {
-    fontSize(value: number | string | Resource | undefined): this
-    fontColor(value: Array<ResourceColor> | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
+    setSymbolSpanOptions(value: Resource): this {
+        return this
+    }
+    fontSize(value: number | string | Resource | undefined): this { return this; }
+    fontColor(value: Array<ResourceColor> | undefined): this { return this; }
+    fontWeight(value: number | FontWeight | string | undefined): this { return this; }
+    effectStrategy(value: SymbolEffectStrategy | undefined): this { return this; }
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
 }
 export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
     fontSize_value?: number | string | Resource | undefined
@@ -180,6 +188,9 @@ export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSp
     fontWeight_value?: number | FontWeight | string | undefined
     effectStrategy_value?: SymbolEffectStrategy | undefined
     renderingStrategy_value?: SymbolRenderingStrategy | undefined
+    public setSymbolSpanOptions(value: Resource): this {
+        return this
+    }
     public fontSize(value: number | string | Resource | undefined): this {
         return this
     }
@@ -248,17 +259,19 @@ export class ArkSymbolSpanComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSymbolSpanAttributeModifier(this, modifier);
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function SymbolSpan(
+export function SymbolSpanImpl(
     /** @memo */
     style: ((attributes: SymbolSpanAttribute) => void) | undefined,
-    value: Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -266,9 +279,7 @@ export function SymbolSpan(
         return new ArkSymbolSpanComponent()
     })
     NodeAttach<ArkSymbolSpanPeer>((): ArkSymbolSpanPeer => ArkSymbolSpanPeer.create(receiver), (_: ArkSymbolSpanPeer) => {
-        receiver.setSymbolSpanOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

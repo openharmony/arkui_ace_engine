@@ -30,6 +30,10 @@ using namespace AccessorTestFixtures;
 
 namespace {
     const double EPSILON = 0.00001;
+
+    const int32_t HAND_NONE = 0;
+    const int32_t HAND_LEFT = 1;
+    const int32_t HAND_RIGHT = 2;
 } // namespace
 
 class ClickEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIClickEventAccessor,
@@ -294,5 +298,42 @@ HWTEST_F(ClickEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
     checkWithName("Hyperlink", true);
 
     CallbackKeeper::ReleaseReverseCallback<Callback_Void>(callback);
+}
+
+/**
+ * @tc.name: GetHandTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventAccessorTest, GetHandTest, TestSize.Level1)
+{
+    Opt_InteractionHand optResult = accessor_->getHand(peer_);
+    auto result = Converter::OptConvert<Ark_InteractionHand>(optResult);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), ARK_INTERACTION_HAND_NONE);
+
+    FingerInfo left1 = { .operatingHand_ = HAND_LEFT };
+    FingerInfo left2 = { .operatingHand_ = HAND_LEFT };
+    FingerInfo right1 = { .operatingHand_ = HAND_RIGHT };
+    FingerInfo right2 = { .operatingHand_ = HAND_RIGHT };
+    FingerInfo none = { .operatingHand_ = HAND_NONE };
+
+    auto check = [this](std::list<FingerInfo> fingerList, Ark_InteractionHand expected) {
+        GestureEvent* eventInfo = peer_->GetEventInfo();
+        ASSERT_NE(eventInfo, nullptr);
+        eventInfo->SetFingerList(fingerList);
+        Opt_InteractionHand optResult = accessor_->getHand(peer_);
+        auto result = Converter::OptConvert<Ark_InteractionHand>(optResult);
+        ASSERT_TRUE(result);
+        EXPECT_EQ(result.value(), expected);
+    };
+
+    check({ left1 }, ARK_INTERACTION_HAND_LEFT);
+    check({ right1 }, ARK_INTERACTION_HAND_RIGHT);
+    check({}, ARK_INTERACTION_HAND_NONE);
+    check({ none }, ARK_INTERACTION_HAND_NONE);
+    check({ right1, left1, left2 }, ARK_INTERACTION_HAND_LEFT);
+    check({ right1, right2, left1, none }, ARK_INTERACTION_HAND_RIGHT);
+    check({ right1, left1 }, ARK_INTERACTION_HAND_NONE);
 }
 }

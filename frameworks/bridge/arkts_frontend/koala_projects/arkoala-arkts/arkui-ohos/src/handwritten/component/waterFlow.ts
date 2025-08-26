@@ -103,8 +103,7 @@ export class WaterFlowSections implements MaterializedBase {
 
         if (deleteCount === undefined && sections === undefined) {
             intDeleteCount = oldLength - intStart;
-        }
-        else if(deleteCount !== undefined) {
+        } else if (deleteCount !== undefined) {
             intDeleteCount = Math.trunc(deleteCount);
             if (intDeleteCount > oldLength - intStart) {
                 intDeleteCount = oldLength - intStart;

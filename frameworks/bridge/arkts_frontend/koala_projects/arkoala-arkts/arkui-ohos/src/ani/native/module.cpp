@@ -22,7 +22,8 @@
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
-#include "lazy_for_each_module.h"
+#include "syntax/lazy_for_each_module.h"
+#include "syntax/syntax_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "styled_string/styled_string_module.h"
@@ -32,15 +33,18 @@
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
-#include "water_flow/waterFlowSection_module.h"
+#include "water_flow/water_flow_module.h"
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "rich_editor/rich_editor_module.h"
+#include "search/search_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
+#include "utils/ani_trace.h"
+#include "node_adapter/node_adapter_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -322,6 +326,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetFocusedInstanceId)
         },
         ani_native_function {
+            "_GetNodePtrWithPeerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodePtrWithPeerPtr)
+        },
+        ani_native_function {
+            "_GetNodeIdWithNodePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodeIdWithNodePtr)
+        },
+        ani_native_function {
+            "_GetNodeIdWithPeerPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNodeIdWithPeerPtr)
+        },
+        ani_native_function {
+            "_CreateRenderNodePeerWithNodePtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateRenderNodePeerWithNodePtr)
+        },
+        ani_native_function {
+            "_ToColorLong",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ToColorLong)
+        },
+        ani_native_function {
+            "_ToColorInt",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ToColorInt)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
@@ -335,6 +369,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_LazyForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
+        },
+        ani_native_function {
+            "_SyntaxNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructSyntaxNode)
         },
         ani_native_function {
             "_BuilderProxyNode_Construct",
@@ -372,9 +411,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
-            "_SetWaterFlowOptions",
-            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+            "_SetWaterFlowSection",
+            "JLarkui/component/waterFlow/WaterFlowSections;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowSection)
         },
         ani_native_function {
             "_SetListChildrenMainSize",
@@ -430,6 +469,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Drag_Set_DragPreview",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreview)
+        },
+        ani_native_function {
+            "_Drag_Set_DragPreviewOptions",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreviewOptions)
         },
         ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
@@ -597,6 +641,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::GetPixelMap)
         },
         ani_native_function {
+            "_Search_SetSearchIcon_Symbol",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetSearchIconSymbol)
+        },
+        ani_native_function {
             "_ImageSpan_Set_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanPixelMap)
@@ -638,17 +687,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Get",
-            "Lstd/core/String;:Lstd/core/String;",
+            "Lstd/core/String;Lstd/core/Int;:Lstd/core/String;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
         },
         ani_native_function {
             "_PersistentStorage_Set",
-            "Lstd/core/String;Lstd/core/String;:V",
+            "Lstd/core/String;Lstd/core/String;Lstd/core/Int;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Set)
         },
         ani_native_function {
             "_PersistentStorage_Has",
-            "Lstd/core/String;:Z",
+            "Lstd/core/String;Lstd/core/Int;:Z",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Has)
         },
         ani_native_function {
@@ -658,7 +707,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_PersistentStorage_Delete",
-            "Lstd/core/String;:V",
+            "Lstd/core/String;Lstd/core/Int;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Delete)
         },
         ani_native_function {
@@ -950,6 +999,140 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DrawingRenderingContext_GetCanvas",
             "J:L@ohos/graphics/drawing/drawing/Canvas;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetDrawingCanvas)
+        },
+        ani_native_function {
+            "_CanvasRenderingContext_GetCanvasId",
+            "J:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasId)
+        },
+        ani_native_function {
+            "_FrameNode_MarkDirtyNode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
+        },
+        ani_native_function {
+            "_TraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceBegin)
+        },
+        ani_native_function {
+            "_TraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::TraceEnd)
+        },
+        ani_native_function {
+            "_AsyncTraceBegin",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceBegin)
+        },
+        ani_native_function {
+            "_AsyncTraceEnd",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
+        },
+        ani_native_function {            
+            "_GetStringColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
+        },
+        ani_native_function {            
+            "_GetNumberColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
+        },
+        ani_native_function {
+            "_SendThemeToNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SendThemeToNative)
+        },
+        ani_native_function {
+            "_RemoveThemeInNative",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveThemeInNative)
+        },
+        ani_native_function {
+            "_SetDefaultTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDefaultTheme)
+        },
+        ani_native_function {
+            "_UpdateColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UpdateColorMode)
+        },
+        ani_native_function {
+            "_RestoreColorMode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreColorMode)
+        },
+        ani_native_function {
+            "_SetThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetThemeScopeId)
+        },
+        ani_native_function {
+            "_CreateAndBindTheme",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAndBindTheme)
+        },
+        ani_native_function {
+            "_ApplyParentThemeScopeId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
+        },
+        ani_native_function {
+            "_NodeAdapter_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterConstruct)
+        },
+        ani_native_function {
+            "_NodeAdapter_DetachNodeAdapter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterDetachNodeAdapter)
+        },
+        ani_native_function {
+            "_NodeAdapter_AttachNodeAdapter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterAttachNodeAdapter)
+        },
+        ani_native_function {
+            "_NodeAdapter_Dispose",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterDispose)
+        },
+        ani_native_function {
+            "_NodeAdapter_SetTotalNodeCount",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterSetTotalNodeCount)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemReloaded",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemReloaded)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemChanged",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemChanged)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemRemoved",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemRemoved)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemInserted",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemInserted)
+        },
+        ani_native_function {
+            "_NodeAdapter_NotifyItemMoved",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterNotifyItemMoved)
+        },
+        ani_native_function { "_NodeAdapter_GetAllItems",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterGetAllItems)
         },
     };
 

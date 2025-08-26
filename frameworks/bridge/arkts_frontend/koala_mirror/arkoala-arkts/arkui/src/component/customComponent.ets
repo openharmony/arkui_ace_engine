@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,177 +13,242 @@
  * limitations under the License.
  */
 
+import { AnimateParam, ArkComponentRootPeer, ArkColumnPeer, PageTransitionOptions, LayoutChild, ConstraintSizeOptions, GeometryInfo, Layoutable, Measurable, SizeResult, PageLifeCycle, LayoutCallback } from "#generated"
+import { memo } from "@koalaui/runtime/annotations"
+import { rememberDisposable, remember, rememberMutableState, mutableState, MutableState, NodeAttach, RunEffect } from "@koalaui/runtime"
+import { addPartialUpdate } from '../ArkUIEntry'
+import { CurrentRouterTransitionState, RouterTransitionVisibility } from "../Router";
+import { PeerNode } from "../PeerNode";
+import { PageTransitionEnter, PageTransitionExit } from "../ArkPageTransition"
+import { ExtendableComponent } from './extendableComponent'
+import { UIContext } from '../framework/ohos.arkui.UIContext'
 
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+export interface UICommonBase {
+    @memo
+__applyStyle<T, A>(
+    @memo
+        style: (instance: T, args: A) => T,
+    arg: A
+): T
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { GeometryInfo_serializer, Layoutable_serializer, Measurable_serializer, SizeResult_serializer, GeometryInfo, Layoutable, LayoutableInternal, Measurable, MeasurableInternal, SizeResult } from "./common"
-import { ConstraintSizeOptions_serializer, ConstraintSizeOptions } from "./units"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder } from "@koalaui/builderLambda"
-export interface LayoutCallback {
-    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void
-    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult
+@memo
+__applyAnimatableExtend<T, A>(
+    @memo
+        func: (instance: T, arg: A) => T,
+    arg: A
+): T
+
+animationStart(param: AnimateParam): this
+animationEnd(): this
 }
-export class LayoutCallbackInternal implements MaterializedBase,LayoutCallback {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, LayoutCallbackInternal.getFinalizer())
-    }
-    constructor() {
-        this(LayoutCallbackInternal.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._LayoutCallback_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._LayoutCallback_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): LayoutCallbackInternal {
-        return new LayoutCallbackInternal(ptr)
-    }
-    public onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        const selfLayoutInfo_casted = selfLayoutInfo as (GeometryInfo)
-        const children_casted = children as (Array<Layoutable>)
-        const constraint_casted = constraint as (ConstraintSizeOptions)
-        this.onPlaceChildren_serialize(selfLayoutInfo_casted, children_casted, constraint_casted)
-        return
-    }
-    public onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        const selfLayoutInfo_casted = selfLayoutInfo as (GeometryInfo)
-        const children_casted = children as (Array<Measurable>)
-        const constraint_casted = constraint as (ConstraintSizeOptions)
-        return this.onMeasureSize_serialize(selfLayoutInfo_casted, children_casted, constraint_casted)
-    }
-    private onPlaceChildren_serialize(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
-        thisSerializer.writeInt32((children.length).toInt())
-        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
-            const children_element : Layoutable = children[children_counter_i]
-            Layoutable_serializer.write(thisSerializer, children_element)
+
+export function $r(str: string): string {
+    return str
+}
+
+export function $rawfile(arg: string): string {
+    return arg
+}
+
+export abstract class BaseCustomComponent extends ExtendableComponent {
+    /**
+     * aboutToRecycle Method.
+     *
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @crossplatform
+     * @atomicservice
+     * @since 20
+     */
+    abstract aboutToRecycle(): void;
+}
+export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT extends Object> extends BaseCustomComponent {
+    @memo
+    static $_instantiate<S extends CustomComponent<S, OptionsS>, OptionsS extends Object>(
+        @memo attributeApplier: ((instance: S) => void) | undefined,
+        factory: () => S,
+        options?: OptionsS,
+        reuseId?: string,
+        @memo content?: () => void
+    ): void {
+        @memo const create = (): S => {
+            return rememberDisposable<S>(
+                (): S => {
+                    const instance = factory()
+                    instance.__initializeStruct(options, content)
+                    return instance
+                }, (instance: S | undefined): void => {
+                    instance?.aboutToDisappear()
+                    instance?.__disposeStruct()
+                }
+            )
         }
-        ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
-        ArkUIGeneratedNativeModule._LayoutCallback_onPlaceChildren(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private onMeasureSize_serialize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        GeometryInfo_serializer.write(thisSerializer, selfLayoutInfo)
-        thisSerializer.writeInt32((children.length).toInt())
-        for (let children_counter_i = 0; children_counter_i < children.length; children_counter_i++) {
-            const children_element : Measurable = children[children_counter_i]
-            Measurable_serializer.write(thisSerializer, children_element)
+
+        if (reuseId) {
+            /* need to wrap both states and build() of @Component */
+            NodeAttach<PeerNode>(
+                // temporarily using Column, will replace with purely frontend node
+                (): PeerNode => ArkColumnPeer.create(),
+                (node: PeerNode): void => {
+                    const receiver = create()
+                    node.setOnRecycle(() => {
+                        receiver.aboutToRecycle()
+                    })
+                    node.setOnReuse(() => {
+                        receiver.aboutToReuse(receiver.__toRecord(options))
+                    })
+                    receiver.__buildWrapper(attributeApplier, options, content)
+                },
+                reuseId
+            )
+        } else {
+            const receiver = create()
+            receiver.__buildWrapper(attributeApplier, options, content)
         }
-        ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
-        const retval  = ArkUIGeneratedNativeModule._LayoutCallback_onMeasureSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : SizeResult = SizeResult_serializer.read(retvalDeserializer)
-        return returnResult
+    }
+
+    @memo
+    private __buildWrapper(
+        @memo attributeApplier: ((instance: T) => void) | undefined,
+        options: OptionsT|undefined,
+        @memo content: (() => void) | undefined
+    ): void {
+        NodeAttach<PeerNode>(
+            (): PeerNode => ArkComponentRootPeer.create(),
+            (node: PeerNode): void => {
+                const ready = remember<MutableState<boolean>>(
+                    (): MutableState<boolean> => {
+                        const state = mutableState(false)
+                        addPartialUpdate(() => {
+                            this.aboutToAppear()
+                            state.value = true
+                        }, this, () => {})
+                        return state
+                    }
+                )
+                if (!ready.value) {
+                    return
+                }
+
+                if (this.isEntry()) {
+                    const visible = rememberMutableState<boolean>(false)
+                    const state = CurrentRouterTransitionState()
+                    if (state) {
+                        RunEffect<RouterTransitionVisibility>(state.visibility, (visibility: RouterTransitionVisibility): void => {
+                            switch (visibility.valueOf()) {
+                                case RouterTransitionVisibility.Visible.valueOf():
+                                case RouterTransitionVisibility.Showing.valueOf():
+                                    if (!visible.value) {
+                                        visible.value = true
+                                        this.onPageShow()
+                                    }
+                                    break
+                                case RouterTransitionVisibility.Hidden.valueOf():
+                                case RouterTransitionVisibility.Hiding.valueOf():
+                                    if (visible.value) {
+                                        visible.value = false
+                                        this.onPageHide()
+                                    }
+                                    break
+                                default: break
+                            }
+                        })
+                    }
+                    this.pageTransition()
+                }
+                this.__updateStruct(options)
+                this._build(attributeApplier, content, options)
+                this.onDidBuild()
+            }
+        )
+    }
+
+    protected __initializeStruct(
+        initializers?: Object,
+        @memo
+        content?: () => void
+    ): void {}
+
+    /**
+     * This method is called when the component is completely removed from the UI tree.
+     * It can be used to clean up dependencies, such as added listeners.
+     */
+    protected __disposeStruct(): void {}
+
+    /**
+     * This method is used when the component is going to be reused
+     */
+    protected __toRecord(initializers?: Object): Record<string, Object> {
+        return {}
+    }
+
+    @memo
+    protected __updateStruct(initializers?: OptionsT): void {}
+
+    @memo
+    build(): void {
+        throw new Error("The struct build() should never be executed directly")
+    }
+
+    @memo
+    protected _build(
+        @memo
+        style: ((instance: T) => void) | undefined,
+        @memo
+        content: (() => void) | undefined,
+        options: Object | undefined
+    ): void {
+        throw new Error("The struct _build() must have a valid override")
+    }
+
+    /**
+     * This method defines whether component is a page entry point
+     */
+    protected isEntry(): boolean {
+        return this instanceof PageLifeCycle
+    }
+
+    /**
+     * This method defines whether component customizes layout of its child components
+     */
+    protected isCustomLayoutComponent(): boolean {
+        return this instanceof LayoutCallback
+    }
+
+    aboutToAppear(): void {}
+    aboutToDisappear(): void {}
+    aboutToReuse(params: Record<string, Object>): void {}
+    aboutToRecycle(): void {}
+    onDidBuild(): void {}
+
+    getUIContext(): UIContext { return new UIContext() }
+    getUniqueId(): int { return 666 }
+
+    onLayout(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void {}
+    onMeasure(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void {}
+
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
+    onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
+        throw new Error("Unexpected use of base class method")
+    }
+
+    onPageShow(): void {}
+    onPageHide(): void {}
+    onBackPress(): boolean { return false }
+    @memo
+    pageTransition(): void {
+        PageTransitionEnter({ delay: 100 } as PageTransitionOptions)
+        PageTransitionExit({ delay: 100 } as PageTransitionOptions)
+    }
+
+    protected isFreezable(): boolean {
+        return false
     }
 }
-export interface PageLifeCycle {
-    onPageShow(): void
-    onPageHide(): void
-    onBackPress(): boolean
-    pageTransition(): void
-    onNewParam(param: Object | undefined): void
-}
-export class PageLifeCycleInternal implements MaterializedBase,PageLifeCycle {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, PageLifeCycleInternal.getFinalizer())
-    }
-    constructor() {
-        this(PageLifeCycleInternal.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._PageLifeCycle_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._PageLifeCycle_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): PageLifeCycleInternal {
-        return new PageLifeCycleInternal(ptr)
-    }
-    public onPageShow(): void {
-        this.onPageShow_serialize()
-        return
-    }
-    public onPageHide(): void {
-        this.onPageHide_serialize()
-        return
-    }
-    public onBackPress(): boolean {
-        return this.onBackPress_serialize()
-    }
-    public pageTransition(): void {
-        this.pageTransition_serialize()
-        return
-    }
-    public onNewParam(param: Object | undefined): void {
-        const param_casted = param as (Object | undefined)
-        this.onNewParam_serialize(param_casted)
-        return
-    }
-    private onPageShow_serialize(): void {
-        ArkUIGeneratedNativeModule._PageLifeCycle_onPageShow(this.peer!.ptr)
-    }
-    private onPageHide_serialize(): void {
-        ArkUIGeneratedNativeModule._PageLifeCycle_onPageHide(this.peer!.ptr)
-    }
-    private onBackPress_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._PageLifeCycle_onBackPress(this.peer!.ptr)
-        return retval
-    }
-    private pageTransition_serialize(): void {
-        ArkUIGeneratedNativeModule._PageLifeCycle_pageTransition(this.peer!.ptr)
-    }
-    private onNewParam_serialize(param: Object | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let param_type : int32 = RuntimeType.UNDEFINED
-        param_type = runtimeType(param)
-        thisSerializer.writeInt8((param_type).toChar())
-        if ((param_type) != (RuntimeType.UNDEFINED)) {
-            const param_value  = param!
-            thisSerializer.holdAndWriteObject(param_value)
-        }
-        ArkUIGeneratedNativeModule._PageLifeCycle_onNewParam(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
-export class LayoutCallback_serializer {
-    public static write(buffer: SerializerBase, value: LayoutCallback): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): LayoutCallback {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LayoutCallbackInternal.fromPtr(ptr)
-    }
-}
-export class PageLifeCycle_serializer {
-    public static write(buffer: SerializerBase, value: PageLifeCycle): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): PageLifeCycle {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PageLifeCycleInternal.fromPtr(ptr)
-    }
-}
+
+// Improve: implement this
+export interface SubscribaleAbstract { }
+export interface CommonTransition { }
+export interface IPropertySubscriber { }
+export interface ISinglePropertyChangeSubscriber { }
+
+export interface CustomComponentV2 {}

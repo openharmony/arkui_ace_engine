@@ -102,6 +102,26 @@ if (is_ohos_standard_system) {
     }
   }
 
+  if (use_linux) {
+    import("arkts_framework_modules.gni")
+    ohos_copy("copy_arkts_framework_abc") {
+      deps = []
+      sources = []
+      foreach(item, arkts_framework_modules) {
+        deps += [ item.label ]
+        if (defined(item.name)) {
+          sources += [ get_label_info(item.label, "target_out_dir") + "/" + item.name ]
+        } else {
+          sources += [ get_label_info(item.label, "target_out_dir") + "/" + get_label_info(item.label, "name") + ".abc" ]
+        }
+      }
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/arkts_framework/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/arkts_framework"
+      module_install_name = ""
+    }
+  }
+
   ohos_copy("copy_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -111,6 +131,10 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
       "$ace_root/frameworks/bridge/declarative_frontend:x_node",
     ]
+
+    if (use_linux) {
+      deps += [ ":copy_arkts_framework_abc" ]
+    }
 
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",

@@ -69,13 +69,7 @@ void TimePickerModelStatic::SetSelectedTime(FrameNode* frameNode, const int64_t&
     localtime_r(&time, &local_tm);
 #endif
 
-    auto hour = local_tm.tm_hour;
-    const auto minute = local_tm.tm_min;
-    const auto second = local_tm.tm_sec;
-    if (!timePickerRowPattern->GetHour24()) {
-        hour = (hour % 12 == 0) ? 12 : hour % 12; // Convert to 12-hour format
-    }
-    PickerTime pickerTime(hour, minute, second);
+    PickerTime pickerTime(local_tm.tm_hour, local_tm.tm_min, local_tm.tm_sec);
     timePickerRowPattern->SetSelectedTime(pickerTime);
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,8 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
+#include "base/subwindow/subwindow_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/capi/stubs/mock_subwindow_bind.h"
 
@@ -152,6 +154,13 @@ public:
     MOCK_METHOD2(ShowActionMenuStatic, void(DialogProperties& dialogProps,
         std::function<void(int32_t, int32_t)>&& callback));
     MOCK_METHOD2(OpenCustomDialogStatic, void(DialogProperties &dialogProps, std::function<void(int32_t)> &&callback));
+    MOCK_METHOD(bool, SetFollowParentWindowLayoutEnabled, (bool enable));
+    MOCK_METHOD(void, SwitchFollowParentWindowLayout, (bool freeMultiWindowEnable));
+    MOCK_METHOD(bool, NeedFollowParentWindowLayout, ());
+    MOCK_METHOD(void, AddFollowParentWindowLayoutNode, (int32_t nodeId));
+    MOCK_METHOD(void, RemoveFollowParentWindowLayoutNode, (int32_t nodeId));
+    MOCK_METHOD(void, SetNodeId, (int32_t nodeId));
+    MOCK_METHOD(int32_t, GetNodeId, (), (const));
 };
 } // namespace OHOS::Ace::NG
 

@@ -39,13 +39,7 @@ export class Es2pandaNativeModule {
     _AstNodeRebind(context: KPtr, node: KPtr): void {
         throw new Error("Not implemented")
     }
-    _AstNodeRecheck(context: KPtr, node: KPtr): void {
-        throw new Error("Not implemented")
-    }
     _ContextState(context: KPtr): KInt {
-        throw new Error("Not implemented")
-    }
-    _ContextErrorMessage(context: KPtr): KPtr {
         throw new Error("Not implemented")
     }
     _AstNodeChildren(context: KPtr, node: KPtr): KPtr {
@@ -87,12 +81,6 @@ export class Es2pandaNativeModule {
     _ProceedToState(context: KPtr, state: number): void {
         throw new Error("Not implemented")
     }
-    _ContextProgram(context: KPtr): KPtr {
-        throw new Error("Not implemented")
-    }
-    _ProgramAst(context: KPtr, program: KPtr): KPtr {
-        throw new Error("Not implemented")
-    }
     _CheckerStartChecker(context: KPtr): KBoolean {
         throw new Error("Not implemented")
     }
@@ -114,9 +102,6 @@ export class Es2pandaNativeModule {
     _DeclNode(context: KPtr, decl: KPtr): KPtr {
         throw new Error("Not implemented")
     }
-    _DeclarationFromIdentifier(context: KPtr, identifier: KPtr): KPtr {
-        throw new Error("Not implemented")
-    }
     _ProgramSourceFilePath(context: KNativePointer, instance: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
     }
@@ -135,22 +120,13 @@ export class Es2pandaNativeModule {
     _ETSParserBuildImportDeclaration(context: KNativePointer, importKinds: KInt, specifiers: KNativePointerArray, specifiersSequenceLength: KUInt, source: KNativePointer, program: KNativePointer, flags: KInt): KNativePointer {
         throw new Error("Not implemented");
     }
-    _InsertETSImportDeclarationAndParse(context: KNativePointer, program: KNativePointer, importDeclaration: KNativePointer): void {
-        throw new Error("Not implemented");
-    }
     _ImportPathManagerResolvePathConst(context: KNativePointer, importPathManager: KNativePointer, currentModulePath: String, importPath: String, sourcePosition: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
     }
     _ETSParserGetImportPathManager(context: KNativePointer): KPtr {
         throw new Error("Not implemented");
     }
-    _CreateSourcePosition(context: KNativePointer, index: KInt, line: KInt): KNativePointer {
-        throw new Error("Not implemented");
-    }
-    _SourcePositionIndex(context: KNativePointer, instance: KNativePointer): KInt {
-        throw new Error("Not implemented");
-    }
-    _SourcePositionLine(context: KNativePointer, instance: KNativePointer): KInt {
+    _SourcePositionCol(context: KNativePointer, instance: KNativePointer): KInt {
         throw new Error("Not implemented");
     }
     _ConfigGetOptions(config: KNativePointer): KNativePointer {
@@ -159,24 +135,42 @@ export class Es2pandaNativeModule {
     _OptionsArkTsConfig(context: KNativePointer, options: KNativePointer): KNativePointer {
         throw new Error("Not implemented");
     }
+    _Checker_CreateOpaqueTypeNode(context: KNativePointer, type: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSignature(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSetSignature(context: KNativePointer, node: KNativePointer, signature: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
+    _Checker_SignatureReturnType(context: KNativePointer, signature: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionGetPreferredReturnType(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ScriptFunctionSetPreferredReturnType(context: KNativePointer, node: KNativePointer, type: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
+    _Checker_ExpressionGetPreferredType(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_ExpressionSetPreferredType(context: KNativePointer, node: KNativePointer, type: KNativePointer): void {
+        throw new Error("Not implemented");
+    }
+    _Checker_TypeToString(context: KNativePointer, type: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_TypeClone(context: KNativePointer, type: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
+    _Checker_TypeNodeGetType(context: KNativePointer, node: KNativePointer): KNativePointer {
+        throw new Error("Not implemented");
+    }
 
     // From koala-wrapper
     _ClassVariableDeclaration(context: KNativePointer, classInstance: KNativePointer): KNativePointer {
-        throw new Error("Not implemented")
-    }
-    _IsMethodDefinition(node: KPtr): KBoolean {
-        throw new Error("Not implemented")
-    }
-    _SourceRangeStart(context: KNativePointer, range: KNativePointer): KNativePointer {
-        throw new Error("Not implemented")
-    }
-    _SourceRangeEnd(context: KNativePointer, range: KNativePointer): KNativePointer {
-        throw new Error("Not implemented")
-    }
-    _CreateSourceRange(context: KNativePointer, start: KNativePointer, end: KNativePointer): KNativePointer {
-        throw new Error("Not implemented")
-    }
-    _IsArrayExpression(node: KPtr): KBoolean {
         throw new Error("Not implemented")
     }
     _ETSParserGetGlobalProgramAbsName(context: KNativePointer): KNativePointer {
@@ -185,18 +179,14 @@ export class Es2pandaNativeModule {
     _CreateDiagnosticKind(context: KNativePointer, message: string, type: Es2pandaPluginDiagnosticType): KNativePointer {
         throw new Error("Not implemented")
     }
-    _CreateDiagnosticInfo(context: KNativePointer, kind: KNativePointer, args: string[], argc: number): KNativePointer {
+    _CreateDiagnosticInfo(context: KNativePointer, kind: KNativePointer, args: string[], argc: number, pos: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
     }
     _CreateSuggestionInfo(context: KNativePointer, kind: KNativePointer, args: string[],
-        argc: number, substitutionCode: string): KNativePointer {
+        argc: number, substitutionCode: string, title: string, range: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
     }
     _LogDiagnostic(context: KNativePointer, kind: KNativePointer, argv: string[], argc: number, pos: KNativePointer): void {
-        throw new Error("Not implemented")
-    }
-    _LogDiagnosticWithSuggestion(context: KNativePointer, diagnosticInfo: KNativePointer,
-        suggestionInfo?: KNativePointer, range?: KNativePointer): void {
         throw new Error("Not implemented")
     }
     _SetUpSoPath(soPath: string): void {
@@ -211,10 +201,7 @@ export class Es2pandaNativeModule {
     _ProgramCanSkipPhases(context: KNativePointer, program: KNativePointer): boolean {
         throw new Error("Not implemented")
     }
-    _GenerateTsDeclarationsFromContext(config: KPtr, outputDeclEts: String, outputEts: String, exportAll: KBoolean, isolated: KBoolean): KPtr {
-        throw new Error("Not implemented")
-    }
-    _GenerateStaticDeclarationsFromContext(config: KPtr, outputPath: String): KPtr {
+    _GenerateTsDeclarationsFromContext(config: KPtr, outputDeclEts: String, outputEts: String, exportAll: KBoolean, isolated: KBoolean, recordFile: String): KPtr {
         throw new Error("Not implemented")
     }
     _AstNodeProgram(context: KNativePointer, instance: KNativePointer): KNativePointer {

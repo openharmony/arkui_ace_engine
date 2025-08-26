@@ -6,17 +6,17 @@
         "plugins": [
             {
                 "transform": "./lib/plugins/printer-plugin.js",
-                "stage": "parsed",
+                "state": "parsed",
                 "name": "printer"
             },
             {
                 "transform": "./lib/plugins/printer-plugin.js",
-                "stage": "checked",
+                "state": "checked",
                 "name": "printer"
             },
             {
                 "transform": "./lib/plugins/printer-plugin.js",
-                "stage": "checked",
+                "state": "checked",
                 "name": "printer2"
             }
         ]

@@ -81,20 +81,20 @@ const Ark_Float32 AFLT32_NEG(-5.6789f);
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 // color res
-const auto RES_COLOR_ID = IntResourceId{102001, Converter::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{102001, ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
 const auto RES_COLOR_NAME_VALUE = Color(0xFF123456);
-const auto RES_COLOR_INVALID_ID = IntResourceId{-1, Converter::ResourceType::COLOR};
+const auto RES_COLOR_INVALID_ID = IntResourceId{-1, ResourceType::COLOR};
 const auto RES_COLOR_INVALID_ID_VALUE = "#FFFF0000";
 
 
 // font family res
-const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
-const auto RES_FONT_FAMILY_ID = IntResourceId{102002, Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_ID = IntResourceId{102002, ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
-const auto RES_FONT_FAMILY_INVALID_ID = IntResourceId{-1, Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_INVALID_ID = IntResourceId{-1, ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_INVALID_ID_VALUE = ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE;
 
 // font family
@@ -1026,7 +1026,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1127,7 +1127,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;
@@ -1920,7 +1920,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDateChange1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;
@@ -2007,7 +2007,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;

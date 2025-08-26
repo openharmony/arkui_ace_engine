@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { LengthMetrics } from "../Graphics"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
@@ -31,6 +31,8 @@ import { Resource } from "global.resource"
 import { FontStyle, FontWeight, TextCase, Color } from "./enums"
 import { DecorationStyleInterface } from "./styledString"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SpanModifier } from "../SpanModifier"
+import { hookSpanAttributeModifier } from "../handwritten"
 
 export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -69,6 +71,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
     }
 }
 export class ArkSpanPeer extends ArkBaseSpanPeer {
+    _attributeSet?: SpanModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -324,8 +327,8 @@ export interface TextBackgroundStyle {
     radius?: Dimension | BorderRadiuses;
 }
 export interface BaseSpan extends CommonMethod {
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    baselineOffset(value: LengthMetrics | undefined): this
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this { return this; }
+    baselineOffset(value: LengthMetrics | undefined): this { return this; }
 }
 export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
@@ -339,17 +342,21 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
 }
 export type SpanInterface = (value: string | Resource) => SpanAttribute;
 export interface SpanAttribute extends BaseSpan {
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: number | string | Resource | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    decoration(value: DecorationStyleInterface | undefined): this
-    letterSpacing(value: number | string | undefined): this
-    textCase(value: TextCase | undefined): this
-    lineHeight(value: Length | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
+    setSpanOptions(value: string | Resource): this {
+        return this
+    }
+    font(value: Font | undefined): this { return this; }
+    fontColor(value: ResourceColor | undefined): this { return this; }
+    fontSize(value: number | string | Resource | undefined): this { return this; }
+    fontStyle(value: FontStyle | undefined): this { return this; }
+    fontWeight(value: number | FontWeight | string | undefined): this { return this; }
+    fontFamily(value: string | Resource | undefined): this { return this; }
+    decoration(value: DecorationStyleInterface | undefined): this { return this; }
+    letterSpacing(value: number | string | undefined): this { return this; }
+    textCase(value: TextCase | undefined): this { return this; }
+    lineHeight(value: Length | undefined): this { return this; }
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this { return this; }
+    attributeModifier(modifier: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined
@@ -363,6 +370,9 @@ export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     textCase_value?: TextCase | undefined
     lineHeight_value?: Length | undefined
     textShadow_value?: ShadowOptions | Array<ShadowOptions> | undefined
+    public setSpanOptions(value: string | Resource): this {
+        return this
+    }
     public font(value: Font | undefined): this {
         return this
     }
@@ -417,7 +427,6 @@ export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements Ba
         }
         return this
     }
-    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -523,17 +532,19 @@ export class ArkSpanComponent extends ArkBaseSpanComponent implements SpanAttrib
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<SpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSpanAttributeModifier(this, modifier);
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function Span(
+export function SpanImpl(
     /** @memo */
     style: ((attributes: SpanAttribute) => void) | undefined,
-    value: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -541,9 +552,7 @@ export function Span(
         return new ArkSpanComponent()
     })
     NodeAttach<ArkSpanPeer>((): ArkSpanPeer => ArkSpanPeer.create(receiver), (_: ArkSpanPeer) => {
-        receiver.setSpanOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

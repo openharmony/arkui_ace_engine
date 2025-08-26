@@ -20,6 +20,7 @@ import { MutableState, StateImpl } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
+import { StateUpdateLoop } from './stateUpdateLoop';
 
 class MutableStateMetaBase {
     public readonly info_: string;
@@ -31,7 +32,8 @@ class MutableStateMetaBase {
 
 export interface IBindingSource {
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void;
-    weakThis: WeakRef<IBindingSource>;
+    changeMutableState(): void;
+    readonly weakThis: WeakRef<IBindingSource>;
 }
 
 export interface ITrackedDecoratorRef {
@@ -53,18 +55,21 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     protected __metaDependency: MutableState<int32>;
     private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>>;
     weakThis: WeakRef<IBindingSource>;
+    metaValue: int32;
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
         this.__metaDependency = metaDependency ?? StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
         this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
+        this.metaValue = 0;
     }
 
     public addRef(): void {
         if (
             ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
-            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingPersistentStorage
         ) {
             this.bindingRefs_.add(ObserveSingleton.instance.renderingComponentRef!.weakThis);
             ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);
@@ -77,18 +82,27 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed) {
             throw new Error('Attempt to modify state variables from @Computed function');
         }
-        this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
-            let trackedObject = listener.deref();
-            if (trackedObject) {
-                ObserveSingleton.instance.addDirtyRef(trackedObject);
-            } else {
-                this.clearBindingRefs(listener);
-            }
-        });
-        if (this.shouldFireChange()) {
-            this.__metaDependency!.value += 1;
-            ArkUIAniModule._CustomNode_RequestFrame();
+        if (this.bindingRefs_.size > 0) {
+            this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
+                let trackedObject = listener.deref();
+                if (trackedObject) {
+                    ObserveSingleton.instance.addDirtyRef(trackedObject);
+                } else {
+                    this.clearBindingRefs(listener);
+                }
+            });
         }
+        if (this.shouldFireChange()) {
+            ObserveSingleton.instance.changeMutableState(this);
+            if (StateUpdateLoop.canRequestFrame) {
+                ArkUIAniModule._CustomNode_RequestFrame();
+                StateUpdateLoop.canRequestFrame = false;
+            }
+        }
+    }
+
+    public changeMutableState(): void {
+        this.__metaDependency!.value = ++this.metaValue;
     }
 
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void {

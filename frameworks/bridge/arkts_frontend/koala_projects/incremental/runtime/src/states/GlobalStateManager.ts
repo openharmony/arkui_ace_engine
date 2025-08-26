@@ -103,7 +103,9 @@ export function callScheduledCallbacks(manager: StateManager = GlobalStateManage
  * @param callback - a function to perform between recompositions
  */
 export function scheduleCallback(callback?: () => void, manager: StateManager = GlobalStateManager.instance) {
-    if (callback) manager.scheduleCallback(callback)
+    if (callback) {
+        manager.scheduleCallback(callback)
+    }
 }
 
 /**

@@ -51,7 +51,7 @@ export class DecoratedVariableBase {
     protected readonly owningComponent_: ExtendableComponent | null;
     // can be read publically
     public _varName: string;
-    public readonly decorator: string;
+    public decorator: string;
     // public readonly info: string;  Remaining to be added
     get varName(): string {
         return this._varName;
@@ -144,8 +144,6 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             const handler = StateMgmtTool.tryGetHandler(value as Object);
             if (handler && StateMgmtTool.isIWatchSubscriberRegister(handler)) {
                 this.onObservedObjectChangeExecWatchFuncs_.registerMeTo(handler as IWatchSubscriberRegister);
-            } else {
-                StateMgmtConsole.log('error: watch function register failed');
             }
         }
     }
@@ -168,9 +166,12 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(_: string = ''): void {
-        this._watchFuncs.forEach((watchFunc, id) => {
-            watchFunc.execute(this.varName);
-        });
+        if (this._watchFuncs.size > 0) {
+            this._watchFuncs.forEach((watchFunc, id) => {
+                watchFunc.execute(this.varName);
+            });
+        }
+
     }
 
     public registerWatchToSource(watchOwner: IDecoratedV1Variable<T>): WatchIdType {
@@ -200,5 +201,13 @@ export abstract class DecoratedV2VariableBase extends DecoratedVariableBase impl
     }
     public info(): string {
         return this.varName;
+    }
+
+    get(): Any {
+        return undefined as Any;
+    }
+
+    set(newValue: Any): void {
+        return;
     }
 }

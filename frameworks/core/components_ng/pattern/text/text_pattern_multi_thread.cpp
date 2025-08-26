@@ -92,7 +92,9 @@ void TextPattern::OnAttachToMainTreeMultiThread()
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
+    if (!textLayoutProperty->HasTextAlign()) {
+        textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
+    }
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     isDetachFromMainTree_ = false;
     MultiThreadDelayedExecution(); // Delayed operation
@@ -172,6 +174,7 @@ void TextPattern::SetTextDetectEnableMultiThread(bool enable)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(GetDataDetectorAdapter());
     dataDetectorAdapter_->frameNode_ = host;
     if (enable == textDetectEnable_) {
         return;

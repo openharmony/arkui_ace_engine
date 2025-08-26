@@ -198,6 +198,7 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier();
 const GENERATED_ArkUIVideoModifier* GetVideoModifier();
 const GENERATED_ArkUIWebModifier* GetWebModifier();
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier();
+const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier();
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier();
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier();
 const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier();
@@ -377,6 +378,7 @@ const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponent
 const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffectAccessor();
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
+const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* GetArcAlphabetIndexerExtenderAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
 const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
@@ -561,6 +563,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetVideoModifier,
         GetWebModifier,
         GetWindowSceneModifier,
+        GetWithThemeModifier,
         GetXComponentModifier,
         GetSideBarContainerModifier,
         GetRemoteWindowModifier,
@@ -747,6 +750,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetHierarchicalSymbolEffectAccessor,
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,
+        GetArcAlphabetIndexerExtenderAccessor,
         GetBounceSymbolEffectAccessor,
         GetBuilderNodeOpsAccessor,
         GetPulseSymbolEffectAccessor,

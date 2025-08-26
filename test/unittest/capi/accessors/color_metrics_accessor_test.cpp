@@ -90,7 +90,7 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
 HWTEST_F(ColorMetricsAccessorTest, ResourceColorTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->resourceColor, nullptr);
-    const auto RES_NAME_ID = NamedResourceId { "color_resource_name", Converter::ResourceType::COLOR };
+    const auto RES_NAME_ID = NamedResourceId { "color_resource_name", ResourceType::COLOR };
     const auto EXPECTED_COLOR = Color(0xaabbccdd);
 
     auto arkResource = CreateResource(RES_NAME_ID);

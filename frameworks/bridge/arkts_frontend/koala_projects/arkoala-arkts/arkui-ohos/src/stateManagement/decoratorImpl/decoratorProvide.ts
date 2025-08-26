@@ -62,19 +62,18 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
+        let value: T = uiUtils.makeObserved(newValue);
         // for interop
-        if (isDynamicObject(newValue)) {
-            newValue = getObservedObject(newValue, this);
+        if (isDynamicObject(value)) {
+            value = getObservedObject(value, this);
         }
-        const value = uiUtils.makeObserved(newValue);
-        if (this.backing_.set(value)) {
-            if (this.setProxyValue) {
-                this.setProxyValue!(newValue);
-            }
-            this.unregisterWatchFromObservedObjectChanges(oldValue);
-            this.registerWatchForObservedObjectChanges(value);
-            this.execWatchFuncs();
+        this.backing_.setNoCheck(value);
+        if (this.setProxyValue) {
+            this.setProxyValue!(value);
         }
+        this.unregisterWatchFromObservedObjectChanges(oldValue);
+        this.registerWatchForObservedObjectChanges(value);
+        this.execWatchFuncs();
     }
 
     private proxy?: ESValue;

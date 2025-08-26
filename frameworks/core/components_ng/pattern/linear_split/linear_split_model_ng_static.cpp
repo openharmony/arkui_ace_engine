@@ -29,14 +29,11 @@ RefPtr<FrameNode> LinearSplitModelNGStatic::CreateFrameNode(int32_t nodeId, Spli
 }
 
 void LinearSplitModelNGStatic::SetDivider(FrameNode* frameNode, NG::SplitType splitType,
-    const std::optional<ItemDivider>& optDivider)
+    const std::optional<ColumnSplitDivider>& optDivider)
 {
     CHECK_NULL_VOID(frameNode);
     if (optDivider.has_value()) {
-        ColumnSplitDivider temp;
-        temp.startMargin = optDivider.value().startMargin;
-        temp.endMargin = optDivider.value().endMargin;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, temp, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, optDivider.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, frameNode);
     }

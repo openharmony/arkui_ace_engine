@@ -13,33 +13,23 @@
  * limitations under the License.
  */
 
-import { ExternalSource } from "../peers/ExternalSource"
-import { acceptNativeObjectArrayResult } from "../utilities/private"
-import { KNativePointer } from "@koalaui/interop"
-import { global } from "../static/global"
 import { Program } from "../../generated"
-
-export function programGetExternalSources(program: Program, context: KNativePointer = global.context): ExternalSource[] {
-    return acceptNativeObjectArrayResult<ExternalSource>(
-        global.es2panda._ProgramExternalSources(context, program.peer),
-        (instance: KNativePointer) => new ExternalSource(instance)
-    )
-}
+import { trace } from "../../tracer"
 
 export function dumpProgramInfo(program: Program) {
-    console.log(`Program info:`)
-    console.log(`\tAbsoluteName:          ${program.absoluteName}`)
-    console.log(`\tFileName:              ${program.fileName}`)
-    console.log(`\tFileNameWithExtension: ${program.fileNameWithExtension}`)
-    console.log(`\tModuleName:            ${program.moduleName}`)
-    console.log(`\tModulePrefix:          ${program.modulePrefix}`)
-    console.log(`\tRelativeFilePath:      ${program.relativeFilePath}`)
-    console.log(`\tResolvedFilePath:      ${program.resolvedFilePath}`)
-    console.log(`\tSourceFileFolder:      ${program.sourceFileFolder}`)
-    console.log(`\tSourceFilePath:        ${program.sourceFilePath}`)
+    trace(() => `Program info:`)
+    trace(() => `\tAbsoluteName:          ${program.absoluteName}`)
+    trace(() => `\tFileName:              ${program.fileName}`)
+    trace(() => `\tFileNameWithExtension: ${program.fileNameWithExtension}`)
+    trace(() => `\tModuleName:            ${program.moduleName}`)
+    trace(() => `\tModulePrefix:          ${program.modulePrefix}`)
+    trace(() => `\tRelativeFilePath:      ${program.relativeFilePath}`)
+    trace(() => `\tResolvedFilePath:      ${program.resolvedFilePath}`)
+    trace(() => `\tSourceFileFolder:      ${program.sourceFileFolder}`)
+    trace(() => `\tSourceFilePath:        ${program.sourceFilePath}`)
 }
 
-export function dumpProgramSrcFormatted(program: Program, withLines: boolean = true) {
+export function dumpProgramSrcFormatted(program: Program, recursive: boolean, withLines: boolean = true) {
     const lines = program.ast.dumpSrc()
     console.log(`// file: ${program.absoluteName}`)
     if (withLines) {

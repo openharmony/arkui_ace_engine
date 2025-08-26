@@ -220,6 +220,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __uiContext?: UIContextImpl;
     private _instanceId: int32 = -1;
     private __buildOptions: BuildOptions | undefined = undefined
+    private __updateUseParallel: boolean = false;
 
     private reset(): void {
         this.__root = undefined;
@@ -253,6 +254,9 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.setOptions(buildOptions);
         }
         this.__manager = createStateManager()!;
+        let uiData = new ContextRecord();
+        uiData.uiContext = uiContext;
+        this.__manager.contextData = uiData;
         this.__frameNode = null;
     }
 
@@ -298,7 +302,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                         completed: () => {
                             const ptr = this.__root!.getPeerPtr()
                             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
-                        }
+                        },
+                        updateUseParallel: this.__updateUseParallel
                     }, builder);
                 } else {
                     this.__builder?.builder(this.__params!.value);
@@ -307,7 +312,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             }
         }, this.__manager!, instanceId)
         this.__rootStage?.value;
-        if (!this.__root?.firstChild || !findPeerNode(this.__root!)?.getPeerPtr() && !this.__buildOptions?.useParallel) {
+        if ((!this.__root?.firstChild || !findPeerNode(this.__root!)?.getPeerPtr()) && !this.__buildOptions?.useParallel) {
             this.reset();
             return;
         }
@@ -354,8 +359,9 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder = builder;
         this.__builder0 = undefined;
         this.__arg = arg;
+        this.__buildOptions = options;
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.GetLocalManager();
+        const old = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
         GlobalStateManager.SetLocalManager(old);
@@ -370,10 +376,12 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         const old = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
+        this.__updateUseParallel = !(this.__frameNode?.isAttached() ?? true);
         this.__params!.value = arg!;
         this.__manager!.syncChanges();
         this.__manager!.updateSnapshot();
         this.__rootStage?.value;
+        this.__updateUseParallel = false;
         GlobalStateManager.SetLocalManager(old);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
@@ -415,6 +423,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     public disposeNode(): void {
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
+        this.__frameNode?.disposeNode();
         this.__frameNode = null;
         ArkUIAniModule._Common_Restore_InstanceId();
     }

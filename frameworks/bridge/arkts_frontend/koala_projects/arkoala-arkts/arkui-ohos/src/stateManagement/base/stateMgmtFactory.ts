@@ -74,6 +74,9 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
         return new LocalDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
     }
+    makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T> {
+        return new LocalDecoratedVariable<T>(null, varName, uiUtils.makeObserved(initValue, true) as T);
+    }
 
     makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
         return new ParamDecoratedVariable<T>(owningView, varName, uiUtils.makeObserved(initValue, true) as T);
@@ -481,6 +484,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
+            '@StorageLink',
             UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
@@ -502,6 +506,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             owningView,
             propertyNameInAppStorage,
             varName,
+            '@LocalStorageLink',
             UIUtils.makeObserved(defaultValue) as T,
             watchFunc
         );
@@ -530,6 +535,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             ref,
             propName,
             varName,
+            '@StoragePropRef',
             watchFunc
         ) as IStoragePropRefDecoratedVariable<T>;
     }
@@ -550,6 +556,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             ref,
             propName,
             varName,
+            '@LocalStoragePropRef',
             watchFunc
         ) as ILocalStoragePropRefDecoratedVariable<T>;
     }

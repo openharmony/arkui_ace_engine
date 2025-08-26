@@ -42,15 +42,17 @@ const auto ATTRIBUTE_FONT_SIZE_NAME = "size";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "weight";
 const auto ATTRIBUTE_HINT_RADIUS_NAME = "hintRadius";
 const auto ATTRIBUTE_SELECTED_NAME = "selected";
+const auto ATTRIBUTE_MARK_TODAY_NAME = "markToday";
+const auto ATTRIBUTE_MARK_TODAY_DEFAULT_VALUE = "false";
 
-const auto RES_COLOR_ID = IntResourceId{102001, Converter::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{102001, ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
 const auto RES_COLOR_NAME_VALUE = Color(0xFF123456);
 
-const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
-const auto RES_FONT_FAMILY_ID = IntResourceId{102002, Converter::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_ID = IntResourceId{102002, ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
 
 struct CalendarAlignTest {
@@ -67,7 +69,7 @@ const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>(RES_CONTENT_STR);
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR(RES_CONTENT_STR);
 
@@ -335,7 +337,7 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnChange0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> expected = std::nullopt;
@@ -362,6 +364,56 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
         EXPECT_EQ(expected->GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(expected->GetDay(), testValue.second.GetDay());
     };
+}
+
+/*
+ * @tc.name: setMarkTodayTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerModifierTest, setMarkTodayTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_TODAY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_TODAY_DEFAULT_VALUE) << "Default value for attribute 'markToday'";
+}
+
+std::vector<std::tuple<std::string, Opt_Boolean, std::string>> testFixtureBooleanValidValues = {
+    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
+    { "false", Converter::ArkValue<Opt_Boolean>(false), "false" },
+    { "true", Converter::ArkValue<Opt_Boolean>(true), "true" },
+    { "Ark_Empty", Converter::ArkValue<Opt_Boolean>(Ark_Empty()), "false" },
+};
+
+/*
+ * @tc.name: setMarkTodayTestMarkTodayValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerModifierTest, setMarkTodayTestMarkTodayValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueMarkToday;
+
+    // Initial setup
+    initValueMarkToday = std::get<1>(testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueMarkToday](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueMarkToday = initValueMarkToday;
+
+        inputValueMarkToday = value;
+        modifier_->setMarkToday(node_, &inputValueMarkToday);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_TODAY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMarkToday, attribute: markToday";
+    };
+
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
 }
 
 } // namespace OHOS::Ace::NG

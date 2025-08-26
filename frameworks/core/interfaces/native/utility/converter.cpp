@@ -28,6 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -55,6 +56,8 @@ namespace {
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
+    constexpr uint16_t UTF16_BOM = 0xFEFF;
+    constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -134,7 +137,7 @@ namespace {
                     return;
                 }
             }
-    
+
             std::string replaceContentStr;
             if (shortHolderType) {
                 replaceContentStr = GetReplaceContentStr(searchTime, type, params, containCount);
@@ -142,7 +145,7 @@ namespace {
                 replaceContentStr =
                     GetReplaceContentStr(OHOS::Ace::Framework::StringToInt(pos) - 1, type, params, containCount);
             }
-    
+
             originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
             start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
             end = originStr.end();
@@ -643,18 +646,18 @@ SheetHeight Convert(const Ark_SheetSize& src)
     return detent;
 }
 
+static SheetHeight SheetHeightFromDimension(std::optional<Dimension> src)
+{
+    SheetHeight detent;
+    Validator::ValidateNonNegative(src);
+    detent.height = src;
+    return detent;
+}
+
 template<>
 SheetHeight Convert(const Ark_Length& src)
 {
-    SheetHeight detent;
-    detent.sheetMode.reset();
-    detent.height = Convert<Dimension>(src);
-    Validator::ValidateNonNegative(detent.height);
-    if (!detent.height.has_value()) {
-        detent.sheetMode = NG::SheetMode::LARGE;
-        detent.height.reset();
-    }
-    return detent;
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
@@ -668,8 +671,28 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
+    if (src.chars == nullptr) return u"";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return std::u16string(data, src.length);
+    }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
+std::string Convert(const Ark_String& src)
+{
+    if (src.chars == nullptr) return "";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
+    }
+    return std::string(src.chars, src.length);
 }
 
 template<>
@@ -693,79 +716,48 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
-std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src)
+NG::BarItem Convert(const Ark_NavigationMenuItem& src)
 {
-    std::vector<uint32_t> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto value = Converter::Convert<uint32_t>(*(src.array + i));
-        dst.push_back(value);
+    auto menuItem = src;
+    NG::BarItem item;
+    item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
+    item.icon = Converter::OptConvert<std::string>(menuItem.icon);
+    // iconSymbol is not dealt
+    item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
+    auto optCallback = Converter::GetOpt(menuItem.action);
+    if (optCallback) {
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto actionCallback = [changeCallback = CallbackHelper(*optCallback), node = targetNode]() {
+            PipelineContext::SetCallBackNode(node);
+            changeCallback.Invoke();
+        };
+        item.action = actionCallback;
     }
-    return dst;
+    return item;
 }
 
 template<>
-std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src)
+NG::BarItem Convert(const Ark_ToolbarItem& src)
 {
-    std::vector<uint32_t> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto value = Converter::Convert<uint32_t>(*(src.array + i));
-        dst.push_back(value);
+    auto toolbarItem = src;
+    NG::BarItem item;
+    item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
+    item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
+    //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
+    auto optCallback = Converter::GetOpt(toolbarItem.action);
+    if (optCallback) {
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto actionCallback = [changeCallback = CallbackHelper(*optCallback), node = targetNode]() {
+            PipelineContext::SetCallBackNode(node);
+            changeCallback.Invoke();
+        };
+        item.action = actionCallback;
     }
-    return dst;
-}
-
-template<>
-std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
-{
-    std::vector<NG::BarItem> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto menuItem = *(src.array + i);
-        NG::BarItem item;
-        item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
-        item.icon = Converter::OptConvert<std::string>(menuItem.icon);
-        // iconSymbol is not dealed
-        item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
-        if (menuItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto actionCallback = [changeCallback = CallbackHelper(menuItem.action.value), node = targetNode]() {
-                PipelineContext::SetCallBackNode(node);
-                changeCallback.Invoke();
-            };
-            item.action = actionCallback;
-        }
-        dst.push_back(item);
-    }
-    return dst;
-}
-
-template<>
-std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src)
-{
-    std::vector<NG::BarItem> dst;
-    auto length = Converter::Convert<int>(src.length);
-    for (int i = 0; i < length; i++) {
-        auto toolbarItem = *(src.array + i);
-        NG::BarItem item;
-        item.text = Converter::OptConvert<std::string>(toolbarItem.value).value_or("");
-        item.icon = Converter::OptConvert<std::string>(toolbarItem.icon);
-        //item.iconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.symbolIcon);
-        if (toolbarItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto actionCallback = [changeCallback = CallbackHelper(toolbarItem.action.value), node = targetNode]() {
-                PipelineContext::SetCallBackNode(node);
-                changeCallback.Invoke();
-            };
-            item.action = actionCallback;
-        }
-        item.status = Converter::Convert<NavToolbarItemStatus>(toolbarItem.status);
-        item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
-        //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
-        dst.push_back(item);
-    }
-    return dst;
+    item.status = Converter::OptConvert<NavToolbarItemStatus>(toolbarItem.status)
+        .value_or(NavToolbarItemStatus::NORMAL);
+    item.activeIcon = Converter::OptConvert<std::string>(toolbarItem.activeIcon);
+    //item.activeIconSymbol = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(toolbarItem.activeSymbolIcon);
+    return item;
 }
 
 
@@ -773,32 +765,20 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return Dimension::FromString(str);
-}
-
-template<>
-CalcDimension Convert(const Ark_Length& src)
-{
-    return Convert<Dimension>(src);
-}
-
-template<>
-CalcDimension Convert(const Ark_LengthMetrics& src)
-{
-    return Convert<Dimension>(src);
+    return StringUtils::StringToDimension(str, true);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    if (!str.empty()) {
-        char firstChar = str[0];
-        if (firstChar < '0' || firstChar > '9') {
-            return CalcDimension(str);
-        }
-    }
-    return Dimension::FromString(str);
+    return StringUtils::StringToCalcDimension(str, true);
+}
+
+template<>
+CalcDimension Convert(const Ark_Length& src)
+{
+    return Convert<Dimension>(src);
 }
 
 template<>
@@ -810,20 +790,16 @@ CalcDimension Convert(const Ark_Number& src)
 template<>
 std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
-    return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
+    return {
+        Converter::OptConvert<Dimension>(src.value0).value_or(Dimension()),
+        Converter::OptConvert<Dimension>(src.value1).value_or(Dimension()),
+    };
 }
 
 template<>
 Dimension Convert(const Ark_Number& src)
 {
     return Dimension(Converter::Convert<float>(src), DimensionUnit::VP);
-}
-
-template<>
-StringArray Convert(const Ark_CustomObject& src)
-{
-    LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
-    return StringArray();
 }
 
 template<>
@@ -842,29 +818,8 @@ Color Convert(const Ark_String& src)
 template<>
 std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
 {
-    auto str = Convert<std::string>(src);
-    auto dimension = Dimension::FromString(str);
+    auto dimension = Convert<Dimension>(src);
     return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_Undefined& src)
-{
-    return "";
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_Function& src)
-{
-    LOGE("Convert [Ark_Function/CustomBuilder] to [Ark_CharPtr] is not valid.");
-    return "";
-}
-
-template<>
-Ark_CharPtr Convert(const Ark_CustomObject& src)
-{
-    LOGE("Convert [Ark_CustomObject] to [Ark_CharPtr] is not valid.");
-    return "";
 }
 
 template<>
@@ -963,13 +918,6 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
         property.SetBorderStyle(style.value());
     }
     return property;
-}
-
-template<>
-Dimension Convert(const Ark_CustomObject& src)
-{
-    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
-    return Dimension();
 }
 
 template<>
@@ -1625,13 +1573,9 @@ NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src)
 }
 
 template<>
-NavToolbarItemStatus Convert(const Opt_ToolbarItemStatus& src)
+NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src)
 {
-    NavToolbarItemStatus status = NavToolbarItemStatus::NORMAL;
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        status = static_cast<NavToolbarItemStatus>(src.value);
-    }
-    return status;
+    return static_cast<NavToolbarItemStatus>(src);
 }
 
 template<>
@@ -1676,20 +1620,11 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
-ShapePoint Convert(const Ark_Point& src)
-{
-    return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
-}
-
-template<>
 ShapePoint Convert(const Ark_ShapePoint& src)
 {
-    ShapePoint point = {0.0_vp, 0.0_vp};
-    auto x = Converter::OptConvert<Dimension>(src.value0);
-    auto y = Converter::OptConvert<Dimension>(src.value1);
-    point.first = x.value_or(0.0_vp);
-    point.second = y.value_or(0.0_vp);
-    return point;
+    return ShapePoint(
+        Converter::OptConvert<Dimension>(src.value0).value_or(0.0_vp),
+        Converter::OptConvert<Dimension>(src.value1).value_or(0.0_vp));
 }
 
 template<>
@@ -2085,16 +2020,25 @@ template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
+    dst.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    dst.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+
     if (auto dim = OptConvert<Dimension>(src.width); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetWidth(*dim);
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetWidth(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetWidth(*dim);
+            }
         }
     }
     if (auto dim = OptConvert<Dimension>(src.height); dim) {
-        Validator::ValidateNonNegative(dim);
-        if (dim) {
-            dst.SetHeight(*dim);
+        if (dim.has_value()) {
+            if (dim.value().IsNegative()) {
+                dst.SetHeight(Dimension(NUM_DOUBLE_100, DimensionUnit::PERCENT));
+            } else {
+                dst.SetHeight(*dim);
+            }
         }
     }
     auto offset = dst.GetOffset();
@@ -2458,6 +2402,12 @@ CalcLength Convert(const Ark_Length& src)
         return converter.ToCalcLength().value_or(CalcLength());
     }
     return CalcLength(Convert<Dimension>(src));
+}
+
+template<>
+CalcDimension Convert(const Ark_LengthMetrics& src)
+{
+    return CalcDimension(Convert<Dimension>(src));
 }
 
 template<>
@@ -3167,6 +3117,9 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst = NavigationTitlebarOptions();
     dst->bgOptions = Converter::Convert<NavigationBackgroundOptions>(value);
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
+    if (value.enableHoverMode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+    }
 }
 
 template<>
@@ -3229,34 +3182,26 @@ NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src)
 }
 
 template<>
-void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_NavigationAnimatedTransition& src)
+void AssignCast(std::optional<NG::NavigationTransition>& dst, const Ark_NavigationAnimatedTransition& src)
 {
-    NG::NavigationTransition transition;
+    NG::NavigationTransition transition{};
     dst = transition;
-    if (src.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->isValid = false;
-        return;
-    }
     dst->isValid = true;
-    if (src.value.isInteractive.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->interactive = Converter::Convert<bool>(src.value.isInteractive.value);
-    } else {
-        dst->interactive = false;
-    }
-    if (src.value.timeout.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst->timeout = Converter::Convert<int32_t>(src.value.timeout.value);
-    }
+    dst->interactive = Converter::OptConvert<bool>(src.isInteractive).value_or(false);
+    dst->timeout = Converter::OptConvert<int32_t>(src.timeout).value_or(dst->timeout);
     if (!dst->interactive) {
         dst->timeout = dst->timeout < 0 ? 1000 : dst->timeout;
     }
-    if (src.value.onTransitionEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto onTransitionEnd = [callback = CallbackHelper(src.value.onTransitionEnd.value)](bool success) {
+    auto optCallback = Converter::GetOpt(src.onTransitionEnd);
+    if (optCallback) {
+        auto onTransitionEnd = [callback = CallbackHelper(*optCallback)](bool success) {
             auto isSuccess = Converter::ArkValue<Ark_Boolean>(success);
             callback.Invoke(isSuccess);
         };
         dst->endCallback = std::move(onTransitionEnd);
     }
-    auto transitionCallback = [callback = CallbackHelper(src.value.transition)](const RefPtr<NavigationTransitionProxy>& transitionProxy) {
+    auto transitionCallback = [callback = CallbackHelper(src.transition)](
+            const RefPtr<NavigationTransitionProxy>& transitionProxy) {
         auto transition = Converter::ArkValue<Ark_NavigationTransitionProxy>(transitionProxy);
         callback.Invoke(transition);
     };
@@ -3264,22 +3209,39 @@ void AssignCast(std::optional<NG::NavigationTransition>& dst, const Opt_Navigati
 }
 
 template<>
-void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src)
+NG::NavDestinationTransition Convert(const Ark_NavDestinationTransition& src)
 {
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        dst = Converter::Convert<ShapePoint>(src.value);
+    NG::NavDestinationTransition dst;
+    dst.event = [callback = CallbackHelper(src.event)]() {
+        callback.Invoke();
+    };
+    if (src.onTransitionEnd.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst.onTransitionEnd = [callback = CallbackHelper(src.onTransitionEnd.value)]() {
+            callback.Invoke();
+        };
+    }
+    dst.duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_NAVDESTINATION_TRANSITION_DURATION);
+    dst.delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
+    dst.curve = Converter::OptConvert<RefPtr<Curve>>(src.curve).value_or(Curves::EASE_IN_OUT);
+    return dst;
+}
+
+template<>
+void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
+{
+    auto peer = src;
+    if (peer && peer->levelOrder) {
+        dst = std::make_optional(peer->levelOrder->GetOrder());
     }
 }
 
 template<>
-void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src)
+void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
 {
-    dst = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
-    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto peer = reinterpret_cast<LevelOrderPeer*>(src.value);
-        if (peer && peer->levelOrder) {
-            dst = std::make_optional(peer->levelOrder->GetOrder());
-        }
+    if (src) {
+        dst = Color(src->colorValue.value);
+        return;
     }
+    dst = std::nullopt;
 }
 } // namespace OHOS::Ace::NG::Converter

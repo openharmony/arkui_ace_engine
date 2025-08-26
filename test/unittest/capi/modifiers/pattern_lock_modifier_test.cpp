@@ -69,8 +69,8 @@ const std::string EXPECTED_NUM_VILID_PX("1234.00px");
 const std::string EXPECTED_NUM_MAX_PX("2147483648.00px");
 const std::string EXPECTED_NUM_ZERO_PX("0.00px");
 
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
-const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
 
 const auto COLOR_BY_STRING1 = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);
@@ -452,7 +452,7 @@ HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestValidValues, TestSiz
 HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -503,7 +503,7 @@ HWTEST_F(PatternLockModifierTest, SetOnPatternCompleteTest, TestSize.Level1)
 HWTEST_F(PatternLockModifierTest, SetOnDotConnectTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

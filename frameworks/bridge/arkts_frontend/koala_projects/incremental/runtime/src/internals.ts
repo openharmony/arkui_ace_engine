@@ -28,11 +28,13 @@ export type __memo_transformed_after = number
 export type __memo_transformed = __memo_transformed_before
 
 export function __context(): StateContext {
-    throw new Error("All __context() references should have been transformed by the compiler plugin. Either have 'context' argument or have '/** @memo */' marking and use intrinsic '__context()'.")
+    throw new Error("All __context() references should have been transformed by the compiler plugin. " +
+        "Either have 'context' argument or have '/** @memo */' marking and use intrinsic '__context()'.")
 }
 
 export function __id(): KoalaCallsiteKey {
-    throw new Error("All __id() references should have been transformed by the compiler plugin. Either have 'id' argument or have '/** @memo */' marking and use intrinsic '__id()'.")
+    throw new Error("All __id() references should have been transformed by the compiler plugin. " +
+        "Either have 'id' argument or have '/** @memo */' marking and use intrinsic '__id()'.")
 }
 
 export function __key(): KoalaCallsiteKey {

@@ -18,16 +18,24 @@ import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { ArkUIGeneratedNativeModule } from "#components"
 import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, pointer, NativeThunk
 } from "@koalaui/interop"
-import { int32 } from "@koalaui/common"
+import { finalizerRegister, int32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
-import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
+import {
+    CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
     CustomProperty
 } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
+import { ArkQRCodeNode } from './handwritten/modifiers/ArkQRCodeNode'
+import { ArkBadgeNode } from './handwritten/modifiers/ArkBadgeNode'
+import { ArkProgressNode } from './handwritten/modifiers/ArkProgressNode'
+import { ArkLoadingProgressNode } from './handwritten/modifiers/ArkLoadingProgressNode'
+import { ArkTextClockNode } from './handwritten/modifiers/ArkTextClockNode'
+import { ArkTextTimerNode } from './handwritten/modifiers/ArkTextTimerNode'
+import { ArkImageNode } from './handwritten/modifiers/ArkImageNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ArkListItemNode } from './handwritten/modifiers/ArkListItemNode'
 import { ArkListItemGroupNode } from './handwritten/modifiers/ArkListItemGroupNode'
@@ -49,6 +57,9 @@ import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
 import { ArkSwiperNode } from "./handwritten/modifiers/ArkSwiperNode";
 import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
 import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
+import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
+import { ArkMarqueeNode } from './handwritten/modifiers/ArkMarqueeNode'
+import { ArkSymbolGlyphNode } from './handwritten/modifiers/ArkSymbolGlyphNode'
 import { ArkXComponentNode } from "./handwritten/modifiers/ArkXComponentNode"
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
@@ -65,6 +76,16 @@ import { StackOptions, StackAttribute, ArkStackPeer } from './component/stack'
 import { FlexOptions, FlexAttribute, ArkFlexPeer } from './component/flex'
 import { RelativeContainerAttribute, ArkRelativeContainerPeer } from './component/relativeContainer'
 import { GridRowOptions, GridRowAttribute, ArkGridRowPeer } from './component/gridRow'
+import { ResourceColor, ResourceStr } from "./component/units"
+import { ImageAnalyzerConfig, ImageAIOptions } from "./component/imageCommon"
+import { PixelMap, DrawableDescriptor } from "#external"
+import { ArkImagePeer, ImageContent, ImageAttribute } from "./component/image";
+import { BadgeAttribute, ArkBadgePeer, BadgeParamWithNumber, BadgeParamWithString } from "./component/badge";
+import { QRCodeAttribute, ArkQRCodePeer } from './component/qrcode'
+import { ProgressOptions, ProgressAttribute, ArkProgressPeer } from './component/progress'
+import { LoadingProgressAttribute, ArkLoadingProgressPeer } from './component/loadingProgress'
+import { TextClockOptions, TextClockAttribute, ArkTextClockPeer } from './component/textClock'
+import { TextTimerOptions, ArkTextTimerPeer, TextTimerAttribute } from './component/textTimer'
 import { GridColOptions, GridColAttribute, ArkGridColPeer } from './component/gridCol'
 import { DividerAttribute, ArkDividerPeer } from './component/divider'
 import { BlankAttribute, ArkBlankPeer } from './component/blank'
@@ -72,8 +93,9 @@ import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/searc
 import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
 import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
 import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
-import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
+import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
+import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
 import { XComponentType } from './component/enums'
 import { Deserializer } from "./component/peers/Deserializer";
@@ -83,6 +105,8 @@ import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
 import { ElementIdToCustomProperties } from './handwritten/CommonHandWritten'
+import { ObjectLinkDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorObjectLink"
+import { TapGesture } from "@component_handwritten/gesture"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -142,12 +166,17 @@ export class FrameNode implements MaterializedBase {
     public _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
-    nodeType_?: string | undefined = undefined;
-     
+    public nodeType_?: string | undefined = undefined;
+    private nodeAdapterRef_ ?: NodeAdapter;
+
     getType(): string {
         return 'CustomFrameNode';
     }
 
+    setAdapterRef(adapter :NodeAdapter | undefined){
+        this.nodeAdapterRef_ = adapter;
+    }
+    
     checkValid(node: FrameNode): boolean {
         return true;
     }
@@ -160,7 +189,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(this))
             let peer = new ArkFrameNodePeer(retval, this._nodeId as int32, "FrameNode", 0);
             this._gestureEvent!.setPeer(peer);
         }
@@ -202,6 +231,9 @@ export class FrameNode implements MaterializedBase {
                 this.nodePtr_ = this.peer?.ptr
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            if (this.renderNode_ && this.getType() === "CustomFrameNode") {
+                this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+            }
             this._nodeId = this.getIdByFrameNode_serialize(this);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
@@ -237,7 +269,8 @@ export class FrameNode implements MaterializedBase {
             return;
         }
         if (!this.isModifiable()) {
-            throw Error("The FrameNode is not modifiable.");
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
@@ -387,9 +420,16 @@ export class FrameNode implements MaterializedBase {
         return this.getChildrenCount_serialize();
     }
     public dispose(): void {
-        this.dispose_serialize();
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
         this.nodePtr_ = undefined;
-        return
+        this.renderNode_?.resetNodePtr();
+    }
+    public resetNodePtr(): void {
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
     }
     public getOpacity(): number {
         return this.getOpacity_serialize();
@@ -434,7 +474,7 @@ export class FrameNode implements MaterializedBase {
     public getUserConfigSize(): SizeT<LengthMetrics> {
         return this.getUserConfigSize_serialize()
     }
-     public getId(): string {
+    public getId(): string {
         return ArkUIGeneratedNativeModule._FrameNode_getId(this.peer!.ptr);
     }
     public getUniqueId(): number {
@@ -501,25 +541,25 @@ export class FrameNode implements MaterializedBase {
         return;
     }
     private setMeasuredSize_serialize(size: Size): void {
-        const thisSerializer : Serializer = Serializer.hold();
+        const thisSerializer: Serializer = Serializer.hold();
         thisSerializer.writeSize(size);
         ArkUIGeneratedNativeModule._FrameNode_setMeasuredSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
         thisSerializer.release();
     }
     private setLayoutPosition_serialize(position: Position): void {
-        const thisSerializer : Serializer = Serializer.hold();
+        const thisSerializer: Serializer = Serializer.hold();
         thisSerializer.writeGraphicsPosition(position);
         ArkUIGeneratedNativeModule._FrameNode_setLayoutPosition(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
         thisSerializer.release();
     }
     private measure_serialize(constraint: LayoutConstraint): void {
-        const thisSerializer : Serializer = Serializer.hold();
+        const thisSerializer: Serializer = Serializer.hold();
         thisSerializer.writeLayoutConstraint(constraint);
         ArkUIGeneratedNativeModule._FrameNode_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
         thisSerializer.release();
     }
     private layout_serialize(position: Position): void {
-        const thisSerializer : Serializer = Serializer.hold();
+        const thisSerializer: Serializer = Serializer.hold();
         thisSerializer.writeGraphicsPosition(position);
         ArkUIGeneratedNativeModule._FrameNode_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length());
         thisSerializer.release();
@@ -548,15 +588,15 @@ export class FrameNode implements MaterializedBase {
         };
         return crossLanguageOptions;
     }
-    public isTransferred() :boolean {
+    public isTransferred(): boolean {
         return false;
     }
     private getCommonEvent(): UICommonEvent {
         return this.getCommonEvent_serialize()
     }
     private getCommonEvent_serialize(): UICommonEvent {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getCommonEvent(this.peer!.ptr)
-        const obj : UICommonEvent = UICommonEventInternal.fromPtr(retval)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getCommonEvent(this.peer!.ptr)
+        const obj: UICommonEvent = UICommonEventInternal.fromPtr(retval)
         return obj
     }
     private isModifiable_serialize(): boolean {
@@ -726,87 +766,87 @@ export class FrameNode implements MaterializedBase {
         return obj;
     }
     private getPositionToParent_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParent(this.peer!.ptr);
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToParent(this.peer!.ptr);
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition();
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition();
         return returnResult;
     }
     private getPositionToScreen_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreen(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreen(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToWindow_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindow(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindow(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToParentWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToParentWithTransform(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToParentWithTransform(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToScreenWithTransform_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreenWithTransform(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToScreenWithTransform(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getPositionToWindowWithTransform1_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform1(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform1(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getMeasuredSize_serialize(): Size {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getMeasuredSize(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getMeasuredSize(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Size = retvalDeserializer.readSize()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Size = retvalDeserializer.readSize()
         return returnResult
     }
     private getLayoutPosition_serialize(): Position {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getLayoutPosition(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getLayoutPosition(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private getUserConfigBorderWidth_serialize(): Edges<LengthMetrics> {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigBorderWidth(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getUserConfigBorderWidth(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigPadding_serialize(): Edges<LengthMetrics> {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigPadding(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getUserConfigPadding(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigMargin_serialize(): Edges<LengthMetrics> {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigMargin(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getUserConfigMargin(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: Edges<LengthMetrics> = retvalDeserializer.readEdgesLengthMetrics()
         return returnResult
     }
     private getUserConfigSize_serialize(): SizeT<LengthMetrics> {
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_getUserConfigSize(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._FrameNode_getUserConfigSize(this.peer!.ptr)
         const exactRetValue = GetExactRetValue(retval);
-        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
-        const returnResult : SizeT<LengthMetrics> = retvalDeserializer.readSizeLengthMetrics()
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult: SizeT<LengthMetrics> = retvalDeserializer.readSizeLengthMetrics()
         return returnResult
     }
     public reuse(): void {
@@ -824,8 +864,7 @@ export class FrameNode implements MaterializedBase {
         ArkUIGeneratedNativeModule._FrameNode_recycle(this.peer!.ptr);
     }
     public getRenderNode(): RenderNode | null {
-        const retval = ArkUIGeneratedNativeModule._FrameNode_getRenderNode(this.peer!.ptr)
-        return RenderNodeInternal.fromPtr(retval)
+        return this.renderNode_ ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
         const node_casted = node as (FrameNode)
@@ -912,17 +951,34 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
+    public getRenderNode(): RenderNode | null {
+        return null;
+    }
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, type, ptr);
+        if (!ptr) {
+            return;
+        }
+        this.peer = new Finalizable(ptr!, FrameNode.getFinalizer());
+        this.nodePtr_ = this.peer?.ptr;
+        if (this.renderNode_) {
+            this.renderNode_!.peer = new Finalizable(ArkUIGeneratedNativeModule._FrameNode_getRenderNode(ptr), RenderNode.getFinalizer());
+        }
     }
     getType(): string {
         return 'BuilderRootFrameNode';
     }
     setJsBuilderNode(weak?: JSBuilderNode<T>) {
         this.__BuilderNodeOpt = weak;
+    }
+    public resetNodePtr(): void {
+        super.resetNodePtr();
+        this.__BuilderNodeOpt?.disposeNode();
+        this.__BuilderNodeOpt = undefined;
+        this._nodeId = -1;
     }
     public disposeNode(): void {
         super.dispose();
@@ -968,8 +1024,6 @@ export class FrameNodeUtils {
         if (nodeId !== -1 && !ArkUIGeneratedNativeModule._FrameNode_isModifiable(ptr)) {
             let frameNode = new BuilderRootFrameNode<T>(uiContext, "BuilderRootFrameNode", ptr);
             frameNode._nodeId = nodeId;
-            frameNode.peer = new Finalizable(ptr, FrameNode.getFinalizer());
-            frameNode.nodePtr_ = frameNode.peer?.ptr;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(nodeId, frameNode);
             return frameNode;
         }
@@ -981,6 +1035,10 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";
+
+    public isModifiable() : boolean {
+        return true;
+    }
 
     constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => T) {
         super(uiContext, type, nullptr);
@@ -1203,9 +1261,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: SearchOptions): SearchAttribute {
+        initialize(value?: SearchOptions): SearchAttribute {
             let arkSearchNode = this.attribute as ArkSearchNode;
-            return arkSearchNode!.initialize(options);
+            return arkSearchNode!.initialize(value);
         }
     }
 
@@ -1223,9 +1281,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: TextAreaOptions): TextAreaAttribute {
+        initialize(value?: TextAreaOptions): TextAreaAttribute {
             let arkTextAreaNode = this.attribute as ArkTextAreaNode;
-            return arkTextAreaNode!.initialize(options);
+            return arkTextAreaNode!.initialize(value);
         }
     }
 
@@ -1233,9 +1291,9 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(options: TextInputOptions): TextInputAttribute {
+        initialize(value?: TextInputOptions): TextInputAttribute {
             let arkTextInputNode = this.attribute as ArkTextInputNode;
-            return arkTextInputNode!.initialize(options);
+            return arkTextInputNode!.initialize(value);
         }
     }
 
@@ -1246,6 +1304,26 @@ export namespace typeNode {
         initialize(content?: string | Resource, value?: TextOptions): TextAttribute {
             let arkTextNode = this.attribute as ArkTextNode;
             return arkTextNode!.initialize(content, value);
+        }
+    }
+
+    class MarqueeFrameNode extends TypedFrameNode<ArkMarqueeNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkMarqueeNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value: MarqueeOptions): MarqueeAttribute {
+            let arkMarqueeNode = this.attribute as ArkMarqueeNode;
+            return arkMarqueeNode!.initialize(value);
+        }
+    }
+
+    class SymbolGlyphFrameNode extends TypedFrameNode<ArkSymbolGlyphNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSymbolGlyphNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value?: Resource): SymbolGlyphAttribute {
+            let arkSymbolGlyphNode = this.attribute as ArkSymbolGlyphNode;
+            return arkSymbolGlyphNode!.initialize(value);
         }
     }
 
@@ -1267,10 +1345,95 @@ export namespace typeNode {
         }
     }
 
-    overload createNode { createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
+    class ImageFrameNode extends TypedFrameNode<ArkImageNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkImageNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src);
+        }
+        initialize(src: PixelMap | ResourceStr | DrawableDescriptor, options: ImageAIOptions): ImageAttribute {
+            let arkImageNode = this.attribute as ArkImageNode;
+            return arkImageNode!.initialize(src, options);
+        }
+    }
+
+    class QRCodeFrameNode extends TypedFrameNode<ArkQRCodeNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkQRCodeNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value: string): QRCodeAttribute {
+            let arkQRCodeNode = this.attribute as ArkQRCodeNode;
+            return arkQRCodeNode!.initialize(value);
+        }
+    }
+
+    class BadgeFrameNode extends TypedFrameNode<ArkBadgeNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBadgeNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(value: BadgeParamWithNumber): BadgeAttribute {
+            let arkBadgeNode = this.attribute as ArkBadgeNode;
+            return arkBadgeNode!.initialize(value);
+        }
+        initialize(value: BadgeParamWithString): BadgeAttribute {
+            let arkBadgeNode = this.attribute as ArkBadgeNode;
+            return arkBadgeNode!.initialize(value);
+        }
+    }
+
+    class ProgressFrameNode extends TypedFrameNode<ArkProgressNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkProgressNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ProgressOptions): ProgressAttribute {
+            let arkProgressNode = this.attribute as ArkProgressNode;
+            return arkProgressNode!.initialize(options);
+        }
+    }
+
+    class LoadingProgressFrameNode extends TypedFrameNode<ArkLoadingProgressNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkLoadingProgressNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): LoadingProgressAttribute {
+            let arkLoadingProgressNode = this.attribute as ArkLoadingProgressNode;
+            return arkLoadingProgressNode!.initialize();
+        }
+    }
+
+    class TextClockFrameNode extends TypedFrameNode<ArkTextClockNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextClockNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options?: TextClockOptions): TextClockAttribute {
+            let arkTextClockNode = this.attribute as ArkTextClockNode;
+            return arkTextClockNode!.initialize(options);
+        }
+    }
+
+    class TextTimerFrameNode extends TypedFrameNode<ArkTextTimerNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextTimerNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options?: TextTimerOptions): TextTimerAttribute {
+            let arkTextTimerNode = this.attribute as ArkTextTimerNode;
+            return arkTextTimerNode!.initialize(options);
+        }
+    }
+
+    overload createNode {
+        createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
         createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
-        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode,
-        createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode }
+        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNodeDefault,
+        createXComponentNodeWithOptions, createXComponentNodeWithNativeParameters, createSwiperNode, createBadgeNode,
+        createQRCodeNode, createProgressNode, createLoadingProgressNode, createTextClockNode, createTextTimerNode,createImageNode
+    }
 
     // @ts-ignore
     export function createColumnNode(context: UIContext, type: 'Column'): ColumnFrameNode {
@@ -1460,7 +1623,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createSearchNode(context: UIContext, type: string): SearchFrameNode {
+    function createSearchNode(context: UIContext, type: 'Search'): SearchFrameNode {
         return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
             let arknode = new ArkSearchNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1471,7 +1634,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-   function createSwiperNode(context: UIContext, type: string): SwiperFrameNode {
+    function createSwiperNode(context: UIContext, type: string): SwiperFrameNode {
         return new SwiperFrameNode(context, 'Swiper', (node: FrameNode, type: ModifierType): ArkSwiperNode => {
             let arknode = new ArkSwiperNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1482,7 +1645,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextAreaNode(context: UIContext, type: string): TextAreaFrameNode {
+    function createTextAreaNode(context: UIContext, type: 'TextArea'): TextAreaFrameNode {
         return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
             let arknode = new ArkTextAreaNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1493,7 +1656,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createTextInputNode(context: UIContext, type: string): TextInputFrameNode {
+    function createTextInputNode(context: UIContext, type: 'TextInput'): TextInputFrameNode {
         return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
             let arknode = new ArkTextInputNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1503,19 +1666,51 @@ export namespace typeNode {
         });
     }
 
-   // @ts-ignore
-   function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
-       return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
-           let arknode = new ArkTextNode();
-           const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-           const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
-           arknode.setPeer(peer);
-           return arknode;
-       });
-   }
+    // @ts-ignore
+    function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
+        return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
+            let arknode = new ArkTextNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    class ArkMarqueePeerCustom extends ArkMarqueePeer {
+        constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+            super(peerPtr, id, name, flags)
+        }
+    }
+    // @ts-ignore
+    function createMarqueeNode(context: UIContext, type: 'Marquee'): MarqueeFrameNode {
+        return new MarqueeFrameNode(context, 'Marquee', (node: FrameNode, type: ModifierType): ArkMarqueeNode => {
+            let arknode = new ArkMarqueeNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkMarqueePeerCustom(retval, node._nodeId as int32, "Marquee", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    class ArkSymbolGlyphPeerCustom extends ArkSymbolGlyphPeer {
+        constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+            super(peerPtr, id, name, flags)
+        }
+    }
+    // @ts-ignore
+    function createSymbolGlyphNode(context: UIContext, type: 'SymbolGlyph'): SymbolGlyphFrameNode {
+        return new SymbolGlyphFrameNode(context, 'SymbolGlyph', (node: FrameNode, type: ModifierType): ArkSymbolGlyphNode => {
+            let arknode = new ArkSymbolGlyphNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSymbolGlyphPeerCustom(retval, node._nodeId as int32, "SymbolGlyph", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
 
     // @ts-ignore
-    function createXComponentNode(context: UIContext, type: string): XComponentFrameNode {
+    function createXComponentNodeDefault(context: UIContext, type: string): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1523,7 +1718,7 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
-        xcFrameNode.initialize({type: XComponentType.SURFACE} as NativeXComponentParameters);
+        xcFrameNode.initialize({ type: XComponentType.SURFACE } as NativeXComponentParameters);
         return xcFrameNode;
     }
 
@@ -1541,7 +1736,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createXComponentNodeWithParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
+    function createXComponentNodeWithNativeParameters(context: UIContext, type: string, parameters: NativeXComponentParameters): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1551,5 +1746,281 @@ export namespace typeNode {
         });
         xcFrameNode.initialize(parameters);
         return xcFrameNode;
+    }
+
+    // @ts-ignore
+    function createImageNode(context: UIContext, type: 'Image'): ImageFrameNode {
+        return new ImageFrameNode(context, 'Image', (node: FrameNode, type: ModifierType): ArkImageNode => {
+            let arknode = new ArkImageNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkImagePeer(retval, node._nodeId as int32, 'Image', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createBadgeNode(context: UIContext, type: 'Badge'): BadgeFrameNode {
+        return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
+            let arknode = new ArkBadgeNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkBadgePeer(retval, node._nodeId as int32, 'Badge', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createQRCodeNode(context: UIContext, type: 'QRCode'): QRCodeFrameNode {
+        return new QRCodeFrameNode(context, 'QRCode', (node: FrameNode, type: ModifierType): ArkQRCodeNode => {
+            let arknode = new ArkQRCodeNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkQRCodePeer(retval, node._nodeId as int32, 'QRCode', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createProgressNode(context: UIContext, type: 'Progress'): ProgressFrameNode {
+        return new ProgressFrameNode(context, 'Progress', (node: FrameNode, type: ModifierType): ArkProgressNode => {
+            let arknode = new ArkProgressNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkProgressPeer(retval, node._nodeId as int32, 'Progress', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createLoadingProgressNode(context: UIContext, type: 'LoadingProgress'): LoadingProgressFrameNode {
+        return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
+            let arknode = new ArkLoadingProgressNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkLoadingProgressPeer(retval, node._nodeId as int32, 'LoadingProgress', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextClockNode(context: UIContext, type: 'TextClock'): TextClockFrameNode {
+        return new TextClockFrameNode(context, 'TextClock', (node: FrameNode, type: ModifierType): ArkTextClockNode => {
+            let arknode = new ArkTextClockNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextClockPeer(retval, node._nodeId as int32, 'TextClock', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextTimerNode(context: UIContext, type: 'TextTimer'): TextTimerFrameNode {
+        return new TextTimerFrameNode(context, 'TextTimer', (node: FrameNode, type: ModifierType): ArkTextTimerNode => {
+            let arknode = new ArkTextTimerNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextTimerPeer(retval, node._nodeId as int32, 'TextTimer', 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+}
+
+class NodeAdapterThunk extends NativeThunk {
+    private ptr?: pointer;
+
+    constructor(obj: pointer) {
+        super(obj, nullptr);
+    }
+
+    clean(): void {
+        if (this.ptr) {
+            ArkUIAniModule._NodeAdapter_Dispose(this.ptr!);
+        }
+    }
+}
+
+class NodeAdapterFinalizable extends Finalizable {
+    ptr: pointer
+    finalizer: pointer
+    cleaner: NativeThunk | undefined = undefined
+    managed: boolean
+
+    constructor(ptr: pointer) {
+        super(ptr, nullptr, false);
+        this.init(ptr)
+    }
+
+    init(ptr: pointer): void {
+        this.ptr = ptr
+        const thunk = new NodeAdapterThunk(ptr)
+        finalizerRegister(this, thunk)
+        this.cleaner = thunk
+    }
+}
+
+export class NodeAdapter implements MaterializedBase {
+    private peer?: Finalizable | undefined = undefined;
+    private attachedNodeRef_?: WeakRef<FrameNode>;
+    private count_: number = 0;
+    private nodeRefs_: Array<FrameNode> = new Array<FrameNode>();
+
+    onDisposeChild(index: number, node: FrameNode) {
+
+    }
+
+    onUpdateChild(index: number, node: FrameNode) {
+
+    }
+
+    onCreateChild(index: number): FrameNode {
+        return new FrameNode(undefined);
+    }
+
+    constructor() {
+        const retval = ArkUIAniModule._NodeAdapter_Construct(this);
+        this.peer = new NodeAdapterFinalizable(retval);
+    }
+    getPeer(): Finalizable | undefined {
+        return this.peer;
+    }
+
+    dispose() {
+        let hostNode = this.attachedNodeRef_?.deref();
+        if (hostNode !== undefined) {
+            NodeAdapter.detachNodeAdapter(hostNode);
+        }
+        if (this.peer?.ptr) {
+            this.peer?.close();
+        }
+    }
+
+    set totalNodeCount(count: number) {
+        if (count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_SetTotalNodeCount(this.peer!.ptr!, count);
+        this.count_ = count;
+    }
+
+    get totalNodeCount() {
+        return this.count_;
+    }
+
+    reloadAllItems() {
+        ArkUIAniModule._NodeAdapter_NotifyItemReloaded(this.peer!.ptr!);
+    }
+    reloadItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemChanged(this.peer!.ptr!, start, count);
+    }
+    removeItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemRemoved(this.peer!.ptr!, start, count);
+    }
+    insertItem(start: number, count: number) {
+        if (start < 0 || count < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemInserted(this.peer!.ptr!, start, count);
+    }
+    moveItem(from: number, to: number) {
+        if (from < 0 || to < 0) {
+            return;
+        }
+        ArkUIAniModule._NodeAdapter_NotifyItemMoved(this.peer!.ptr!, from, to);
+    }
+    getAllAvailableItems(): Array<FrameNode> {
+        let result = new Array<FrameNode>();
+        let nodes = ArkUIAniModule._NodeAdapter_GetAllItems(this.peer!.ptr!);
+        if (nodes !== undefined) {
+            nodes.forEach((nodeId: number, index: number, arr: Array<number>) => {
+                if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+                    let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+                    result.push(frameNode!);
+                }
+            });
+        }
+        return result;
+    }
+    onAttachToNodePtr(nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (frameNode === undefined) {
+                return;
+            }
+            frameNode.setAdapterRef(this);
+            this.attachedNodeRef_ = new WeakRef<FrameNode>(frameNode);
+            if (this.onAttachToNode !== undefined) {
+                this.onAttachToNode(frameNode);
+            }
+        }
+    }
+    onAttachToNode(frameNode: FrameNode): void {
+
+    }
+    onDetachFromNode(): void {
+
+    }
+    onDetachFromNodePtr() {
+        if (this === undefined) {
+            return;
+        }
+        if (this.onDetachFromNode !== undefined) {
+            this.onDetachFromNode();
+        }
+        let attachedNode = this.attachedNodeRef_?.deref();
+        if (attachedNode !== undefined) {
+            attachedNode.setAdapterRef(undefined);
+        }
+        this.nodeRefs_.splice(0, this.nodeRefs_.length);
+    }
+    onCreateNewNodePtr(index: number): pointer {
+        if (this.onCreateChild !== undefined) {
+            let frameNode = this.onCreateChild(index);
+            if (!this.nodeRefs_.find((node) => {
+                return node === frameNode;
+            })) {
+                this.nodeRefs_.push(frameNode);
+            }
+            if (frameNode?.peer?.ptr) {
+                return frameNode!.peer!.ptr!;
+            }
+        }
+        return nullptr;
+    }
+
+    onDisposeNodePtr(index: number, nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (this.onDisposeChild !== undefined && frameNode !== undefined) {
+                this.onDisposeChild(index, frameNode);
+                let index2 = this.nodeRefs_.indexOf(frameNode);
+                if (index2 > -1) {
+                    this.nodeRefs_.splice(index2, 1);
+                }
+            }
+        }
+    }
+
+    onUpdateNodePtr(index: number, nodeId: number) {
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
+            if (this.onUpdateChild !== undefined && frameNode !== undefined) {
+                this.onUpdateChild(index, frameNode!);
+            }
+        }
+    }
+
+    static detachNodeAdapter(node: FrameNode) {
+        ArkUIAniModule._NodeAdapter_DetachNodeAdapter(node.peer!.ptr!);
+    }
+
+    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode) {
+        return ArkUIAniModule._NodeAdapter_AttachNodeAdapter(adapter.peer!.ptr!, node.peer!.ptr!);
     }
 }

@@ -17,12 +17,13 @@
 #define _INTEROP_UTILS_H_
 
 #include <cstring>
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef __STDC_LIB_EXT1__
     #include "securec.h"
     #define USE_SAFE(name, ...) name##_s(__VA_ARGS__)
 #else
+    /* handle possible unsafe case */
     #define USE_SAFE(name, ...) name(__VA_ARGS__)
 #endif
 
@@ -31,6 +32,7 @@ inline char *interop_strcpy(char *dest, size_t destsz, const char *src)
 #ifdef __STDC_LIB_EXT1__
     return reinterpret_cast<char(*)>(USE_SAFE(strcpy, dest, reinterpret_cast<rsize_t>(destsz), src));
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(strcpy, dest, src);
 #endif
 }
@@ -40,6 +42,7 @@ inline char *interop_strcat(char *dest, size_t destsz, const char *src)
 #ifdef __STDC_LIB_EXT1__
     return reinterpret_cast<char(*)>(USE_SAFE(strcat, dest, reinterpret_cast<rsize_t>(destsz), src));
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(strcat, dest, src);
 #endif
 }
@@ -49,6 +52,7 @@ inline void *interop_memcpy(void *dest, size_t destsz, const void *src, size_t c
 #ifdef __STDC_LIB_EXT1__
     return reinterpret_cast<void(*)>(USE_SAFE(memcpy, dest, reinterpret_cast<rsize_t>(destsz), src, count));
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(memcpy, dest, src, count);
 #endif
 }
@@ -58,6 +62,7 @@ inline void *interop_memset(void *dest, size_t destsz, int ch, size_t count)
 #ifdef __STDC_LIB_EXT1__
     return reinterpret_cast<void(*)>(USE_SAFE(memset, dest, reinterpret_cast<rsize_t>(destsz), ch, count))
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(memset, dest, ch, count);
 #endif
 }
@@ -68,6 +73,7 @@ inline int interop_sprintf(char *buffer, size_t bufsz, const char *format, T... 
 #ifdef __STDC_LIB_EXT1__
     return USE_SAFE(sprintf, buffer, reinterpret_cast<rsize_t>(bufsz), format, args...);
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(sprintf, buffer, format, args...);
 #endif
 }
@@ -86,8 +92,9 @@ inline int interop_vsnprintf(char *buffer, size_t bufsz, const char *format, va_
 inline size_t interop_strlen(const char *str)
 {
 #ifdef __STDC_LIB_EXT1__
-    return USE_SAFE(strlen, str, sizeof(str) - 1);
+    return USE_SAFE(strnlen, str, UINT_MAX);
 #else
+    /* handle possible unsafe case */
     return USE_SAFE(strlen, str);
 #endif
 }

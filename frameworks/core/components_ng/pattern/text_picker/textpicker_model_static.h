@@ -41,8 +41,7 @@ public:
 
     static void InitialSetupSinglePicker(FrameNode* frameNode, uint32_t columnKind);
     static void SetCanLoop(FrameNode* frameNode, const bool value);
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& crownSensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);

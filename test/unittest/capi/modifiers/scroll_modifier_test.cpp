@@ -140,7 +140,7 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_Number_Number_Void func{};
 
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetOnScrollEvent());
 
@@ -179,7 +179,7 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
 
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetOnScrollStart());
 
@@ -214,7 +214,7 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
 
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetScrollEndEvent());
 
@@ -249,7 +249,7 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
 
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_FALSE(eventHub->GetOnScrollStop());
 
@@ -496,7 +496,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     double testVal = 0.317;
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
-    auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::FLOAT};
+    auto RES_NAME = NamedResourceId{resName.c_str(), ResourceType::FLOAT};
     auto friction = CreateResourceUnion<Opt_Union_Number_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
@@ -1223,7 +1223,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct resultData {
@@ -1262,7 +1262,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSiz
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
@@ -1279,7 +1279,7 @@ HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.L
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
@@ -1314,7 +1314,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct ScrollData
@@ -1370,7 +1370,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::Test
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
@@ -1388,7 +1388,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct resultData {
@@ -1439,7 +1439,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetNullCallback, testing::ext::TestSize
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     ASSERT_NE(modifier_->setOnDidScroll, nullptr);

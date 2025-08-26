@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-export function errorAsString(error: Error): string {
-    return error.stack ?? error.toString()
+export function errorAsString(error: any): string {
+    if (error instanceof Error) {
+        return error.stack ?? error.toString()
+    }
+    return JSON.stringify(error)
 }
 
 export function unsafeCast<T>(value: unknown): T {
@@ -27,12 +30,15 @@ export function memoryStats(): string {
     return `none`
 }
 
-export function launchJob(job: () => void): Promise<void> {
-    return new Promise<void>(resolve => setTimeout(() => {
-            resolve()
-            job()
-        }, 0)
-    )
+export function launchJob(task: () => void): Promise<any> {
+    return new Promise((resolve, reject) => {
+        try {
+            task()
+            resolve(undefined)
+        } catch (error) {
+            reject(error)
+        }
+    })
 }
 
 export class CoroutineLocalValue<T> {

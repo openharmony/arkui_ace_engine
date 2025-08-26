@@ -29,7 +29,7 @@ class StructToClass extends arkts.AbstractVisitor {
 }
 
 export function rewriteStructToClass(program: arkts.Program, options: arkts.CompilationOptions) {
-    if (!options.isMainProgram) {
+    if (!options.isProgramForCodegeneration) {
         program.setAst(new StructToClass().visitor(program.ast))
     }
     return program
@@ -47,7 +47,7 @@ class ExportClass extends arkts.AbstractVisitor {
 }
 
 export function addUseImportClassSameFileAfterRewritingStructToClass(program: arkts.Program, options: arkts.CompilationOptions) {
-    if (options.isMainProgram) {
+    if (options.isProgramForCodegeneration) {
         const module = program.ast as arkts.ETSModule
         program.setAst(
             arkts.factory.updateETSModule(

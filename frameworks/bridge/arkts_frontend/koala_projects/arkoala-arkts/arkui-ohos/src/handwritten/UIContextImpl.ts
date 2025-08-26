@@ -29,7 +29,7 @@ import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEn
     IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
-import { KeyEvent, PopupCommonOptions, MenuOptions } from "arkui/component/common"
+import { KeyEvent, PopupCommonOptions, MenuOptions, SheetOptions } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
@@ -74,6 +74,7 @@ import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { CommonMethodHandWritten } from "./CommonHandWritten"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
+import { uiObserver } from "@ohos/arkui/observer"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -331,10 +332,18 @@ export class DragControllerImpl extends DragController {
     }
 
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        if (typeof custom === "function") {
+        if (undefined === custom) {
+            let rootNode = nullptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(rootNode, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo, callback);
+        } else if (typeof custom === "function") {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
@@ -355,9 +364,12 @@ export class DragControllerImpl extends DragController {
                     destroyCallback, dragInfo, callback);
             } else {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, customDragInfo.builder as CustomBuilder);
+                let peerNode: PeerNode | undefined = undefined;
+                if (customDragInfo.builder !== undefined) {
+                    peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                        return ArkComponentRootPeer.create(undefined);
+                    }, customDragInfo.builder as CustomBuilder);
+                }
                 let rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                 destroyCallback = (): void => {
                     destroyUiDetachedRoot(rootNode, this.instanceId_);
@@ -371,11 +383,19 @@ export class DragControllerImpl extends DragController {
     }
 
     // @ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
-        if (typeof custom === "function") {
+        if (undefined === custom) {
+            let rootNode = nullptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(rootNode, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo);
+        } else if (typeof custom === "function") {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
@@ -396,9 +416,12 @@ export class DragControllerImpl extends DragController {
                     nullptr, destroyCallback, dragInfo);
             } else {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, customDragInfo.builder as CustomBuilder);
+                let peerNode: PeerNode | undefined = undefined;
+                if (customDragInfo.builder !== undefined) {
+                    peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                        return ArkComponentRootPeer.create(undefined);
+                    }, customDragInfo.builder as CustomBuilder);
+                }
                 let rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                 destroyCallback = (): void => {
                     destroyUiDetachedRoot(rootNode, this.instanceId_);
@@ -412,7 +435,7 @@ export class DragControllerImpl extends DragController {
         return promise;
     }
 
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
 
@@ -420,6 +443,13 @@ export class DragControllerImpl extends DragController {
         let peerNodeArray: Array<PeerNode> = [];
         let dragItemInfoArray: Array<DragItemInfo> = [];
 
+        if (undefined === customArray) {
+            let destroyCallback = (): void => {};
+            let dragAction = ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
+                destroyCallback, dragInfo);
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return dragAction;
+        }
         for (let element of customArray) {
             if (typeof element === "function") {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -437,9 +467,12 @@ export class DragControllerImpl extends DragController {
                     dragItemInfoArray.push(dragItemInfo);
                 } else {
                     let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                    const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                        return ArkComponentRootPeer.create(undefined);
-                    }, dragItemInfo.builder as CustomBuilder);
+                    let peerNode: PeerNode | undefined = undefined;
+                    if (dragItemInfo.builder !== undefined) {
+                        peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                            return ArkComponentRootPeer.create(undefined);
+                        }, dragItemInfo.builder as CustomBuilder);
+                    }
                     const rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                     if (peerNode && rootNode) {
                         rootNodeArray.push(rootNode);
@@ -633,7 +666,7 @@ export class UIInspectorImpl extends UIInspector {
         super()
         this.instanceId_ = instanceId;
     }
-    public createComponentObserver(id: string): inspector.ComponentObserver {
+    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let componentObserver = inspector.createComponentObserver(id);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -838,10 +871,14 @@ export class PromptActionImpl extends PromptAction {
     //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let builderOptions: promptAction.DialogBuilderOptions = {};
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
         }, options.builder, this.instanceId_);
-        let builderPtr = peerNode.peer.ptr;
+        builderOptions.builder = peerNode.peer.ptr;
+        builderOptions.destroyFunc = (ptr: KPointer): void => {
+            destroyUiDetachedRoot(ptr, this.instanceId_);
+        };
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
         const transition = options?.transition?.getPeer?.();
@@ -860,7 +897,7 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
-        const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
+        const retval = promptAction.openCustomDialog(builderOptions, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -930,14 +967,12 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
         if (builder instanceof CustomBuilder) {
-            builderOptions.builderFunc = (): KPointer => {
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder as CustomBuilder, this.instanceId_);
-                return peerNode.peer.ptr;
-            };
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, builder as CustomBuilder, this.instanceId_);
+            builderOptions.builder = peerNode.peer.ptr;
         } else {
-            builderOptions.builderWithIdFunc = (dialogId: number): KPointer => {
+            builderOptions.builderWithId = (dialogId: number): KPointer => {
                 const peerNode = createUiDetachedRootT<number>((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, builder as CustomBuilderT<number>, dialogId, this.instanceId_);
@@ -970,10 +1005,10 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let orderValue: number | undefined = promptAction.getTopOrder();
-        let order: LevelOrder = LevelOrder.clamp(0);
+        let order: LevelOrder | undefined = undefined;
         if (orderValue !== undefined) {
             order = LevelOrder.clamp(orderValue as number);
         }
@@ -981,10 +1016,10 @@ export class PromptActionImpl extends PromptAction {
         return order;
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let orderValue: number | undefined = promptAction.getBottomOrder();
-        let order: LevelOrder = LevelOrder.clamp(0);
+        let order: LevelOrder | undefined = undefined;
         if (orderValue !== undefined) {
             order = LevelOrder.clamp(orderValue as number);
         }
@@ -1181,7 +1216,11 @@ export class DetachedRootEntryManager {
 
     public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
          return this.detachedRoots_;
-     }
+    }
+
+    public setDetachedRootNode(nativeNode: KPointer, rootNode: ComputableState<IncrementalNode>) {
+        this.detachedRoots_.set(nativeNode, new DetachedRootEntryImpl<IncrementalNode>(rootNode));
+    }
 
     public createUiDetachedRoot(
         peerFactory: () => PeerNode,
@@ -1426,6 +1465,13 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
     }
+    public getNavigationInfoByUniqueId(id: number): uiObserver.NavigationInfo | undefined {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const id_casted = id as (number)
+        let ret = this.getNavigationInfoByUniqueId_serialize(id_casted)
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return ret;
+    }
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
@@ -1569,6 +1615,24 @@ export class UIContextImpl extends UIContext {
                                                                thisSerializer.length(), delayTime)
         thisSerializer.release()
     }
+    private getNavigationInfoByUniqueId_serialize(id: number): uiObserver.NavigationInfo | undefined {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._UIContext_getNavigationInfoByUniqueId(this.instanceId_, id) as FixedArray<byte>;
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = retvalDeserializer.readInt8() as int32
+        let buffer : uiObserver.NavigationInfo | undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readNavigationInfo()
+        }
+        const returnResult : uiObserver.NavigationInfo | undefined = buffer
+        return returnResult
+    }
     runScopedTask(callback: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         if (callback !== undefined) {
@@ -1699,6 +1763,78 @@ export class UIContextImpl extends UIContext {
 
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
+    }
+
+    public openBindSheet(content: ComponentContent, options?: SheetOptions, targetId?: number) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSheetOptions(options_value)
+        }
+
+        let targetId_type : int32 = RuntimeType.UNDEFINED
+        targetId_type = runtimeType(targetId)
+        thisSerializer.writeInt8(targetId_type as int32)
+        if ((RuntimeType.UNDEFINED) != (targetId_type)) {
+            const targetId_value  = targetId!
+            thisSerializer.writeNumber(targetId_value)
+        }
+        ArkUIGeneratedNativeModule._UIContext_openBindSheet(contentPtr, thisSerializer.asBuffer(), thisSerializer.length());
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
+    }
+
+    public updateBindSheet(content: ComponentContent, options?: SheetOptions, partialUpdate?: boolean) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeSheetOptions(options_value)
+        }
+
+        let partialUpdate_type : int32 = RuntimeType.UNDEFINED
+        partialUpdate_type = runtimeType(partialUpdate)
+        thisSerializer.writeInt8(partialUpdate_type as int32)
+        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+            const partialUpdate_value  = partialUpdate!
+            thisSerializer.writeBoolean(partialUpdate_value)
+        }
+        ArkUIGeneratedNativeModule._UIContext_updateBindSheet(contentPtr, thisSerializer.asBuffer(), thisSerializer.length());
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
+    }
+
+    public closeBindSheet(content: ComponentContent) : Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const content_component = content as ComponentContent
+        let frameNode = content_component.getFrameNode()
+        let contentPtr = toPeerPtr(frameNode as FrameNode) as KPointer
+
+        ArkUIGeneratedNativeModule._UIContext_closeBindSheet(contentPtr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        const thisSerializer : Serializer = Serializer.hold()
+        const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
+        thisSerializer.release()
+        return retval;
     }
     
     public getFilteredInspectorTree(filters?: Array<string>): string {

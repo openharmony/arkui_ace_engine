@@ -105,7 +105,7 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub()
     {
         if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
-            if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
+            if (auto eventHub = fnode->GetOrCreateEventHub<NG::EventHub>(); eventHub) {
                 return eventHub->GetOrCreateGestureEventHub();
             }
         }
@@ -121,7 +121,7 @@ public:
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnPreDragTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -177,7 +177,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnPreDragTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
@@ -224,7 +224,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEnterTest, TestSize.Level1
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
@@ -271,7 +271,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragMoveTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
@@ -318,7 +318,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragLeaveTest, TestSize.Level1
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDrop0Test, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
@@ -365,7 +365,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDrop0Test, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
@@ -449,7 +449,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestCOPY, TestSize.Le
     auto optCallback = Converter::ArkValue<Opt_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(arkCallback);
     modifier_->setOnDragStart(node_, &optCallback);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto fireOnDragStart = eventHub->GetOnDragStart();
     ASSERT_NE(fireOnDragStart, nullptr);
@@ -509,7 +509,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnDragStartTestMOVE, TestSize.Le
     auto optCallback = Converter::ArkValue<Opt_Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(arkCallback);
     modifier_->setOnDragStart(node_, &optCallback);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto fireOnDragStart = eventHub->GetOnDragStart();
     ASSERT_NE(fireOnDragStart, nullptr);

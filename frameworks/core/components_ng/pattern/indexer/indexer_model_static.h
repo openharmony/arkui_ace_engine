@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerModelStatic {
 public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isArc);
     static void SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue);
     static void SetSelected(FrameNode* frameNode, int32_t selected);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect);
@@ -44,7 +44,7 @@ public:
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
-    static void SetItemSize(FrameNode* frameNode, const Dimension& value);
+    static void SetItemSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
         const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
         const std::optional<OHOS::Ace::FontStyle>& fontStyle);
@@ -64,7 +64,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& state);
     static void SetAlignStyle(FrameNode* frameNode, const std::optional<AlignStyle>& alignStyle);
     static void SetPopupHorizontalSpace(FrameNode* frameNode, const std::optional<Dimension>& popupHorizontalSpace);
-    static void SetCreatChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
+    static void SetCreateChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_BAR_SCROLL_BAR_MODEL_STATIC_H

@@ -59,7 +59,7 @@ OffscreenCanvasRenderingContext2DPeer* OffscreenCanvasPeer::GetContext2D(
     OffscreenCanvasRenderingContext2DPeer* offscreenCanvasContextPeer,
     RenderingContextSettingsPeer* offscreenCanvasSettingsPeer)
 {
-    CHECK_NULL_RETURN(offscreenCanvasContext, nullptr);
+    CHECK_NULL_RETURN(offscreenCanvasContextPeer, nullptr);
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     if (isDetached) {
         return nullptr;

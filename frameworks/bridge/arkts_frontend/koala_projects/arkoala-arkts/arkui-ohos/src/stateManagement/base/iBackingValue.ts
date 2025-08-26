@@ -22,5 +22,6 @@ export interface IBackingValue<T> {
     get(shouldAddRef: boolean): T;
     set(newValue: T): boolean;
     setSilently(newValue: T): void;
+    setNoCheck(newValue: T): void;
     fireChange(): void;
 }

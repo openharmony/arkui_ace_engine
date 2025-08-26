@@ -174,7 +174,7 @@ class RouterImpl implements Router {
         try {
             //@ts-ignore
             let runtimeLinker = getNearestNonBootRuntimeLinker();
-            let entryClass = runtimeLinker?.loadClass(url, false);
+            let entryClass = runtimeLinker?.loadClass(url.replaceChar(c'/', c'.'), false);
             if (!entryClass) {
                 InteropNativeModule._NativeLog("AceRouter: load entryClass failed")
             } else {
@@ -200,8 +200,8 @@ class RouterImpl implements Router {
             return;
         }
         if (this.visiblePages.length > index && this.peerNodeList.length > index) {
-            this.visiblePages.value[index].updatePeerNode(node)
-            RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[index])
+            this.visiblePages.value[index as int32].updatePeerNode(node)
+            RouterExtender.moveCommonUnderPageNode(node.peer.ptr, this.peerNodeList[index as int32])
         }
     }
 
@@ -226,7 +226,8 @@ class RouterImpl implements Router {
                 const incNode = stateNode.value;
                 peerNode = findPeerNode(incNode);
             } catch (e: Error) {
-                console.log("AceRouter: create page failed: " + e.stack)
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
@@ -235,6 +236,8 @@ class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
                 if (index !== -1) {
@@ -273,7 +276,8 @@ class RouterImpl implements Router {
                 const incNode = stateNode.value;
                 peerNode = findPeerNode(incNode);
             } catch (e: Error) {
-                console.log("AceRouter: create page failed: " + e.stack);
+                console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+                console.log(e.stack);
             }
             if (peerNode === undefined) {
                 InteropNativeModule._NativeLog("AceRouter:create jsView failed");
@@ -282,6 +286,8 @@ class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
                 if (index !== -1) {
@@ -417,7 +423,8 @@ class RouterImpl implements Router {
             const incNode = stateNode.value;
             peerNode = findPeerNode(incNode);
         } catch (e: Error) {
-            console.log("AceRouter: create page failed: " + e.stack)
+            console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
+            console.log(e.stack);
         }
         if (peerNode === undefined) {
             InteropNativeModule._NativeLog("AceRouter:create jsView failed");
@@ -426,6 +433,8 @@ class RouterImpl implements Router {
         const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode);
         this.peerNodeList.push(jsViewNodePtr);
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
         let pagePushTransitionCallback = (jsNode: KPointer) => {
             let index = this.peerNodeList.indexOf(jsNode);
             if (index !== -1) {

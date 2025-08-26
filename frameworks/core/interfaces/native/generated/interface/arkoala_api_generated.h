@@ -777,6 +777,8 @@ typedef struct Opt_Undefined Opt_Undefined;
 typedef struct UnifiedDataPeer UnifiedDataPeer;
 typedef struct UnifiedDataPeer* Ark_UnifiedData;
 typedef struct Opt_UnifiedData Opt_UnifiedData;
+typedef struct Ark_uiObserver_NavigationInfo Ark_uiObserver_NavigationInfo;
+typedef struct Opt_uiObserver_NavigationInfo Opt_uiObserver_NavigationInfo;
 typedef struct Ark_Union_Boolean_EditMode Ark_Union_Boolean_EditMode;
 typedef struct Opt_Union_Boolean_EditMode Opt_Union_Boolean_EditMode;
 typedef struct Ark_Union_Boolean_Number Ark_Union_Boolean_Number;
@@ -3188,6 +3190,8 @@ typedef struct ClickEventPeer* Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct Ark_CustomDialogControllerOptions Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerExternalOptions Ark_CustomDialogControllerExternalOptions;
+typedef struct Opt_CustomDialogControllerExternalOptions Opt_CustomDialogControllerExternalOptions;
 typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
 typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
 typedef struct Ark_CustomTheme Ark_CustomTheme;
@@ -3275,6 +3279,8 @@ typedef struct Ark_Union_DotIndicator_DigitIndicator_Boolean Ark_Union_DotIndica
 typedef struct Opt_Union_DotIndicator_DigitIndicator_Boolean Opt_Union_DotIndicator_DigitIndicator_Boolean;
 typedef struct Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
 typedef struct Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions;
+typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
+typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_Union_String_ImageAttachment_CustomSpan Ark_Union_String_ImageAttachment_CustomSpan;
 typedef struct Opt_Union_String_ImageAttachment_CustomSpan Opt_Union_String_ImageAttachment_CustomSpan;
 typedef struct Ark_AttachmentType Ark_AttachmentType;
@@ -8060,6 +8066,15 @@ typedef struct Opt_UnifiedData {
     Ark_Tag tag;
     Ark_UnifiedData value;
 } Opt_UnifiedData;
+typedef struct Ark_uiObserver_NavigationInfo {
+    /* kind: Interface */
+    Ark_String navigationId;
+    Ark_NavPathStack pathStack;
+} Ark_uiObserver_NavigationInfo;
+typedef struct Opt_uiObserver_NavigationInfo {
+    Ark_Tag tag;
+    Ark_uiObserver_NavigationInfo value;
+} Opt_uiObserver_NavigationInfo;
 typedef struct Ark_Union_Boolean_EditMode {
     Ark_Int32 selector;
     union {
@@ -15233,8 +15248,6 @@ typedef struct Ark_TouchObject {
     Ark_Number displayY;
     Ark_Number windowX;
     Ark_Number windowY;
-    Ark_Number screenX;
-    Ark_Number screenY;
     Ark_Number x;
     Ark_Number y;
     Opt_InteractionHand hand;
@@ -19176,6 +19189,13 @@ typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
     Ark_CustomDialogControllerOptions value;
 } Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomDialogControllerExternalOptions {
+    Opt_Boolean customStyle;
+} Ark_CustomDialogControllerExternalOptions;
+typedef struct Opt_CustomDialogControllerExternalOptions {
+    Ark_Tag tag;
+    Ark_CustomDialogControllerExternalOptions value;
+} Opt_CustomDialogControllerExternalOptions;
 typedef struct Ark_CustomPopupOptions {
     CustomNodeBuilder builder;
     Opt_Placement placement;
@@ -23978,10 +23998,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                   const Opt_Type_WebAttribute_onUrlLoadIntercept_callback* value);
     void (*setOnSslErrorReceive)(Ark_NativePointer node,
                                  const Opt_Callback_Literal_Function_handler_Object_error_Void* value);
-    void (*setOnRenderExited0)(Ark_NativePointer node,
-                               const Opt_Callback_OnRenderExitedEvent_Void* value);
-    void (*setOnRenderExited1)(Ark_NativePointer node,
-                               const Opt_Callback_Literal_Object_detail_Boolean* value);
+    void (*setOnRenderExited)(Ark_NativePointer node,
+                              const Opt_Callback_OnRenderExitedEvent_Void* value);
     void (*setOnShowFileSelector)(Ark_NativePointer node,
                                   const Opt_Callback_OnShowFileSelectorEvent_Boolean* value);
     void (*setOnFileSelectorShow)(Ark_NativePointer node,
@@ -24163,6 +24181,13 @@ typedef struct GENERATED_ArkUIWindowSceneModifier {
                                 const Opt_Position* destination,
                                 const Opt_Number* fraction);
 } GENERATED_ArkUIWindowSceneModifier;
+
+typedef struct GENERATED_ArkUIWithThemeModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setWithThemeOptions)(Ark_NativePointer node,
+                                const Ark_WithThemeOptions* options);
+} GENERATED_ArkUIWithThemeModifier;
 
 typedef struct GENERATED_ArkUIXComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -24640,6 +24665,8 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                                                               const Ark_String* id);
     Ark_Union_FrameNode_Undefined (*getFrameNodeByUniqueId)(Ark_UIContext peer,
                                                             const Ark_Number* id);
+    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(const Ark_Number* instanceId,
+                                                                 const Ark_Number* id);
     Ark_Number (*vp2px)(Ark_UIContext peer,
                         const Ark_Number* value);
     Ark_Number (*px2vp)(Ark_UIContext peer,
@@ -24657,18 +24684,15 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                               const Ark_String* id,
                               const Ark_Number* value);
     void (*openBindSheet)(Ark_VMContext vmContext,
-                          Ark_UIContext peer,
-                          Ark_ComponentContent bindSheetContent,
+                          Ark_NativePointer bindSheetContent,
                           const Opt_SheetOptions* sheetOptions,
                           const Opt_Number* targetId);
     void (*updateBindSheet)(Ark_VMContext vmContext,
-                            Ark_UIContext peer,
-                            Ark_ComponentContent bindSheetContent,
-                            const Ark_SheetOptions* sheetOptions,
+                            Ark_NativePointer bindSheetContent,
+                            const Opt_SheetOptions* sheetOptions,
                             const Opt_Boolean* partialUpdate);
     void (*closeBindSheet)(Ark_VMContext vmContext,
-                           Ark_UIContext peer,
-                           Ark_ComponentContent bindSheetContent);
+                           Ark_NativePointer bindSheetContent);
     void (*clearResourceCache)(Ark_VMContext vmContext,
                                Ark_UIContext peer);
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);
@@ -26625,7 +26649,7 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     void (*startImageAnalyzer)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_CanvasRenderingContext2D peer,
@@ -26658,7 +26682,7 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
-                            const Opt_Float32* quality);
+                            const Opt_Number* quality);
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvasRenderingContext2D peer);
 } GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor;
 
@@ -26698,6 +26722,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*open)(Ark_CustomDialogController peer);
     void (*close)(Ark_CustomDialogController peer);
+    Ark_CustomDialogControllerExternalOptions (*getExternalOptions)(Ark_CustomDialogController peer);
     void (*setOwnerView)(Ark_CustomDialogController peer, Ark_NodeHandle node);
 } GENERATED_ArkUICustomDialogControllerAccessor;
 
@@ -26718,6 +26743,7 @@ typedef struct GENERATED_ArkUIBaseGestureEventAccessor {
     Array_FingerInfo (*getFingerList)(Ark_BaseGestureEvent peer);
     void (*setFingerList)(Ark_BaseGestureEvent peer,
                           const Array_FingerInfo* fingerList);
+    Ark_GestureControl_GestureType (*getType)(Ark_BaseGestureEvent peer);
 } GENERATED_ArkUIBaseGestureEventAccessor;
 
 typedef struct GENERATED_ArkUITapGestureEventAccessor {
@@ -27150,7 +27176,7 @@ typedef struct GENERATED_ArkUIRichEditorControllerAccessor {
     Ark_RichEditorController (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Number (*addTextSpan)(Ark_RichEditorController peer,
-                              const Ark_String* value,
+                              const Ark_ResourceStr* content,
                               const Opt_RichEditorTextSpanOptions* options);
     Ark_Number (*addImageSpan)(Ark_RichEditorController peer,
                                const Ark_Union_PixelMap_ResourceStr* value,
@@ -27347,6 +27373,44 @@ typedef struct GENERATED_ArkUIDisappearSymbolEffectAccessor {
     void (*setScope)(Ark_DisappearSymbolEffect peer,
                      Ark_EffectScope scope);
 } GENERATED_ArkUIDisappearSymbolEffectAccessor;
+
+typedef struct GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor {
+    void (*SetColor)(Ark_NativePointer node,
+                     const Opt_ColorMetrics* color);
+    void (*SetSelectedColor)(Ark_NativePointer node,
+                             const Opt_ColorMetrics* color);
+    void (*SetPopupColor)(Ark_NativePointer node,
+                          const Opt_ColorMetrics* color);
+    void (*SetSelectedBackgroundColor)(Ark_NativePointer node,
+                                       const Opt_ColorMetrics* color);
+    void (*SetPopupBackground)(Ark_NativePointer node,
+                               const Opt_ColorMetrics* color);
+    void (*SetUsePopup)(Ark_NativePointer node,
+                        const Opt_Boolean* enabled);
+    void (*SetSelectedFont)(Ark_NativePointer node,
+                            const Opt_Font* font);
+    void (*SetPopupFont)(Ark_NativePointer node,
+                         const Opt_Font* font);
+    void (*SetFont)(Ark_NativePointer node,
+                    const Opt_Font* font);
+    void (*SetItemSize)(Ark_NativePointer node,
+                        const Opt_LengthMetrics* size);
+    void (*SetSelected)(Ark_NativePointer node,
+                        const Opt_Number* index,
+                        const Opt_Callback_Number_Void* bindableCallback);
+    void (*SetAutoCollapse)(Ark_NativePointer node,
+                            const Opt_Boolean* enable);
+    void (*SetOnSelect)(Ark_NativePointer node,
+                        const Opt_Callback_Number_Void* handler);
+    void (*SetPopupBackgroundBlurStyle)(Ark_NativePointer node,
+                                        const Opt_BlurStyle* style);
+    Ark_NativePointer (*ArcAlphabetIndexerConstruct)(Ark_Int32 id,
+                                                     Ark_Int32 flags);
+    void (*SetConstructInfo)(Ark_NativePointer node,
+                             const Array_String* arrayValue,
+                             const Ark_Number* selected,
+                             const Opt_Callback_Number_Void* bindableCallback);
+} GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor;
 
 typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
     void (*destroyPeer)(Ark_BounceSymbolEffect peer);
@@ -28384,6 +28448,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIVideoModifier* (*getVideoModifier)();
     const GENERATED_ArkUIWebModifier* (*getWebModifier)();
     const GENERATED_ArkUIWindowSceneModifier* (*getWindowSceneModifier)();
+    const GENERATED_ArkUIWithThemeModifier* (*getWithThemeModifier)();
     const GENERATED_ArkUIXComponentModifier* (*getXComponentModifier)();
     const GENERATED_ArkUISideBarContainerModifier* (*getSideBarContainerModifier)();
     const GENERATED_ArkUIRemoteWindowModifier* (*getRemoteWindowModifier)();
@@ -28568,6 +28633,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* (*getHierarchicalSymbolEffectAccessor)();
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
+    const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* (*getArcAlphabetIndexerExtenderAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
     const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();

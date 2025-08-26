@@ -69,8 +69,8 @@ static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
 static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
 static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
-const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
-const auto RES_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
+const auto RES_NAME = NamedResourceId("aa.bb.cc", ResourceType::COLOR);
+const auto RES_ID = IntResourceId(1234, ResourceType::COLOR);
 const auto CONTEXT_ID = 123;
 } // namespace
 
@@ -1352,7 +1352,7 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1572,7 +1572,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1626,7 +1626,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1679,7 +1679,7 @@ HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1885,7 +1885,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorInteractiveTest, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

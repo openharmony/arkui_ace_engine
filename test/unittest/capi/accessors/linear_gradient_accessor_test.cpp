@@ -49,8 +49,8 @@ namespace {
     const auto COLOR_RES_NAME_RED = "color_res_name_red";
 
     std::vector<std::pair<Ark_Resource, float>> validValues4 = {
-        std::make_pair(CreateResource(COLOR_RES_NAME_BLUE, Converter::ResourceType::COLOR), 0.5f),
-        std::make_pair(CreateResource(COLOR_RES_NAME_RED, Converter::ResourceType::COLOR), 1.f),
+        std::make_pair(CreateResource(COLOR_RES_NAME_BLUE, ResourceType::COLOR), 0.5f),
+        std::make_pair(CreateResource(COLOR_RES_NAME_RED, ResourceType::COLOR), 1.f),
 
     };
 

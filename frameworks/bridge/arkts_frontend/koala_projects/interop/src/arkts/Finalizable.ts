@@ -17,7 +17,7 @@ import { finalizerRegister, finalizerUnregister, Thunk } from "@koalaui/common"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { pointer, nullptr } from "./InteropTypes"
 
-class NativeThunk implements Thunk {
+export class NativeThunk implements Thunk {
     finalizer: pointer
     obj: pointer
     name: string|undefined

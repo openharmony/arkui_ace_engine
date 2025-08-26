@@ -337,6 +337,9 @@ export interface XComponentParameters {
 export type OnNativeLoadCallback = (event?: Object) => void;
 export type Callback_String_SurfaceRect_Void = (surfaceId: string, rect: SurfaceRect) => void;
 export interface XComponentAttribute extends CommonMethod {
+    setXComponentOptions(value: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
+        return this
+    }
     onLoad(value: VoidCallback | undefined): this
     onDestroy(value: VoidCallback | undefined): this
     enableAnalyzer(value: boolean | undefined): this
@@ -352,6 +355,9 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
     enableSecure_value?: boolean | undefined
     hdrBrightness_value?: number | undefined
     enableTransparentLayer_value?: boolean | undefined
+    public setXComponentOptions(value: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
+        return this
+    }
     public onLoad(value: VoidCallback | undefined): this {
         return this
     }
@@ -441,10 +447,9 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function XComponent(
+export function XComponentImpl(
     /** @memo */
     style: ((attributes: XComponentAttribute) => void) | undefined,
-    value: XComponentParameters | XComponentOptions | NativeXComponentParameters,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -452,9 +457,7 @@ export function XComponent(
         return new ArkXComponentComponent()
     })
     NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer) => {
-        receiver.setXComponentOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

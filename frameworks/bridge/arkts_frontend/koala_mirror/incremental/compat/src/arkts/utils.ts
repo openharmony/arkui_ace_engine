@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
-export function errorAsString(error: Error): string {
-    const stack = error.stack
-    return stack
-        ? error.toString() + '\n' + stack
-        : error.toString()
+export function errorAsString(error: Any): string {
+    if (error instanceof Error) {
+        const stack = error.stack
+        return stack
+            ? error.toString() + '\n' + stack
+            : error.toString()
+    }
+    return JSON.stringify(error)
 }
 
 export function unsafeCast<T>(value: Object): T {
@@ -32,8 +35,8 @@ export function memoryStats(): string {
     return `used ${GC.getUsedHeapSize()} free ${GC.getFreeHeapSize()}`
 }
 
-export function launchJob(job: () => void): Promise<void> {
-    throw new Error("unsupported yet: return launch job()")
+export function launchJob(task: () => void): Promise<Any> {
+    return taskpool.execute(task)
 }
 
 export class CoroutineLocalValue<T> {

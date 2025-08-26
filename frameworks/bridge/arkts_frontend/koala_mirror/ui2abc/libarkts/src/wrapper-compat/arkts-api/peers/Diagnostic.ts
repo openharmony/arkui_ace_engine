@@ -18,7 +18,7 @@ import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 import { DiagnosticKind } from './DiagnosticKind';
 import { passStringArray } from '../utilities/private';
-import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
+import { SourcePosition } from '../../../generated'
 import { SourceRange } from './SourceRange';
 import { DiagnosticInfo } from './DiagnosticInfo';
 import { SuggestionInfo } from './SuggestionInfo';
@@ -31,9 +31,8 @@ export class Diagnostic extends ArktsObject {
     global.es2panda._LogDiagnostic(global.context, kind.peer, passStringArray(args), args.length, pos.peer);
   }
 
-  static logDiagnosticWithSuggestion(diagnosticInfo: DiagnosticInfo, suggestionInfo: SuggestionInfo,
-    range: SourceRange): void {
-    global.es2panda._LogDiagnosticWithSuggestion(global.context, diagnosticInfo.peer, suggestionInfo.peer, range.peer);
+  static logDiagnosticWithSuggestion(diagnosticInfo: DiagnosticInfo, suggestionInfo: SuggestionInfo): void {
+    global.generatedEs2panda._LogDiagnosticWithSuggestion(global.context, diagnosticInfo.peer, suggestionInfo.peer);
   }
 
 }

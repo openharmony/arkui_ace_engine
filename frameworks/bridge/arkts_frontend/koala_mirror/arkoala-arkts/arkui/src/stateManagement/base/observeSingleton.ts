@@ -36,7 +36,9 @@ export class ObserveSingleton implements IObserve {
     public renderingComponentRef?: ITrackedDecoratorRef;
     private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
     private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
-    private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(this.finalizeComputedAndMonitorPath);
+    private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
+        this.finalizeComputedAndMonitorPath
+    );
     private reverseBindingRefsToSet_ = new Map<WeakRef<ITrackedDecoratorRef>, Set<WeakRef<IBindingSource>>>();
 
     get renderingComponent(): number {
@@ -94,7 +96,7 @@ export class ObserveSingleton implements IObserve {
         return handler !== undefined && StateMgmtTool.isInterfaceProxyHandler(handler);
     }
 
-    public shouldAddRef(iObjectsRenderId: RenderIdType | undefined): boolean {
+    public shouldAddRef(iObjectsRenderId: RenderIdType): boolean {
         return (
             this.renderingComponent >= ObserveSingleton.RenderingComponentV2 ||
             (this.renderingComponent === ObserveSingleton.RenderingComponentV1 && iObjectsRenderId === this.renderingId)
@@ -119,14 +121,14 @@ export class ObserveSingleton implements IObserve {
         if (bindingSources) {
             bindingSources.forEach((binding: WeakRef<IBindingSource>) => {
                 binding.deref()?.clearBindingRefs(ref);
-            })
+            });
             this.reverseBindingRefsToSet_.delete(ref);
         }
     }
 
     public updateDirty(): void {
         do {
-            while(this.computedPropRefsChanged_.size > 0) {
+            while (this.computedPropRefsChanged_.size > 0) {
                 const computedProps = this.computedPropRefsChanged_;
                 this.computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
                 this.updateDirtyComputedProps(computedProps);
@@ -136,10 +138,12 @@ export class ObserveSingleton implements IObserve {
                 this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
                 let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
                 if (monitorsToRun && monitorsToRun.size > 0) {
-                    monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => { monitor.runMonitorFunction(); });
+                    monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
+                        monitor.runMonitorFunction();
+                    });
                 }
             }
-        } while(this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0);
+        } while (this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0);
     }
 
     private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
@@ -149,7 +153,7 @@ export class ObserveSingleton implements IObserve {
             if (computedPropRef) {
                 (computedPropRef as IComputedDecoratorRef).fireChange();
             }
-        })
+        });
     }
 
     private notifyDirtyMonitorPaths(monitorPaths: Set<WeakRef<ITrackedDecoratorRef>>): Set<MonitorFunctionDecorator> {

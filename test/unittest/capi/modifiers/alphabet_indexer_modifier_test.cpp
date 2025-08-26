@@ -160,9 +160,9 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_WHITE = {
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE },
     { Converter::ArkUnion<Opt_ResourceColor, Ark_String>(""), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE }
 };
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
-const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
-const auto INVALID_ID_COLOR = IntResourceId{-1, Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
+const auto INVALID_ID_COLOR = IntResourceId{-1, ResourceType::COLOR};
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_RED },
@@ -177,7 +177,7 @@ const Ark_Float32 AFLT32_NEG(-5.6789f);
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
-const auto RES_NAME = NamedResourceId{"res_name", Converter::ResourceType::STRING};
+const auto RES_NAME = NamedResourceId{"res_name", ResourceType::STRING};
 const Opt_Union_String_Resource OPT_UNION_RESOURCE_RESOURCE = CreateResourceUnion<Opt_Union_String_Resource>(RES_NAME);
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
@@ -380,7 +380,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSi
 HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1307,7 +1307,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1346,7 +1346,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static bool wasInvoke = false;
@@ -1378,7 +1378,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnPopupSelect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
@@ -1645,7 +1645,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {

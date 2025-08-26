@@ -22,18 +22,15 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
-import { Callback_Boolean_Void } from "./navigation"
-import { Callback_Opt_Boolean_Void } from "./checkbox"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 import { Length } from "./units"
-import { Callback_Number_Void } from "./alphabetIndexer"
-import { ListItemOpsHandWritten } from "./../handwritten"
+import { ListItemOpsHandWritten, hookListItemAttributeModifier } from "./../handwritten"
+import { ListItemModifier } from '../ListItemModifier'
 
 export class ArkListItemPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ListItemModifier
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -209,13 +206,17 @@ export interface ListItemOptions {
     style?: ListItemStyle;
 }
 export interface ListItemAttribute extends CommonMethod {
-    sticky(value: Sticky | undefined): this
-    editable(value: boolean | EditMode | undefined): this
-    selectable(value: boolean | undefined): this
-    selected(value: boolean | Bindable<boolean> | undefined): this
-    swipeAction(value: SwipeActionOptions | undefined): this
-    onSelect(value: ((isVisible: boolean) => void) | undefined): this
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
+    setListItemOptions(value?: ListItemOptions | undefined): this {
+        return this
+    }
+    sticky(value: Sticky | undefined): this { return this; }
+    editable(value: boolean | EditMode | undefined): this { return this; }
+    selectable(value: boolean | undefined): this { return this; }
+    selected(value: boolean | Bindable<boolean> | undefined): this { return this; }
+    swipeAction(value: SwipeActionOptions | undefined): this { return this; }
+    onSelect(value: ((isVisible: boolean) => void) | undefined): this { return this; }
+    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {}
+    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAttribute {
     sticky_value?: Sticky | undefined
@@ -224,6 +225,9 @@ export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAt
     selected_value?: boolean | Bindable<boolean> | undefined
     swipeAction_value?: SwipeActionOptions | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
+    public setListItemOptions(value?: ListItemOptions | undefined): this {
+        return this
+    }
     public sticky(value: Sticky | undefined): this {
         return this
     }
@@ -327,17 +331,19 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
         }
         return
     }
-    
+    public attributeModifier(modifier: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookListItemAttributeModifier(this, modifier)
+        return this
+    }    
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function ListItem(
+export function ListItemImpl(
     /** @memo */
     style: ((attributes: ListItemAttribute) => void) | undefined,
-    value?: ListItemOptions | undefined,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -345,9 +351,7 @@ export function ListItem(
         return new ArkListItemComponent()
     })
     NodeAttach<ArkListItemPeer>((): ArkListItemPeer => ArkListItemPeer.create(receiver), (_: ArkListItemPeer) => {
-        receiver.setListItemOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

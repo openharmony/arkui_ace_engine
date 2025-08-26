@@ -72,16 +72,16 @@ using StringResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 using ArkResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
 // resource names and id
-const auto RES_STRING_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::STRING};
-const auto RES_STRING_ID = IntResourceId{01234, Converter::ResourceType::STRING};
-const auto INVALID_STRING_ID = IntResourceId{-1, Converter::ResourceType::STRING};
+const auto RES_STRING_NAME = NamedResourceId{"aa.bb.cc", ResourceType::STRING};
+const auto RES_STRING_ID = IntResourceId{01234, ResourceType::STRING};
+const auto INVALID_STRING_ID = IntResourceId{-1, ResourceType::STRING};
 
-const auto RES_COLOR_NAME = NamedResourceId{"color_resource", Converter::ResourceType::COLOR};
-const auto RES_COLOR_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
-const auto INVALID_COLOR_ID = IntResourceId{-1, Converter::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_resource", ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{11111, ResourceType::COLOR};
+const auto INVALID_COLOR_ID = IntResourceId{-1, ResourceType::COLOR};
 
-const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", Converter::ResourceType::STRARRAY};
-const auto RES_FAMILY_ID = IntResourceId{3333, Converter::ResourceType::STRARRAY};
+const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", ResourceType::STRARRAY};
+const auto RES_FAMILY_ID = IntResourceId{3333, ResourceType::STRARRAY};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
@@ -90,9 +90,9 @@ const auto COLOR_BY_NUMBER = Color(0xFF654321);
 const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FFFF0000";
 
 const auto RES_DIMENSION_ID = 22222; // Ark_Length.Resource
-const auto RES_NUMBER_ID = IntResourceId{RES_DIMENSION_ID, Converter::ResourceType::FLOAT};
-const auto RES_NUMBER_NAME = NamedResourceId{"number_resource", Converter::ResourceType::FLOAT};
-const auto RES_NUMBER_INVALID = IntResourceId{-1, Converter::ResourceType::FLOAT};
+const auto RES_NUMBER_ID = IntResourceId{RES_DIMENSION_ID, ResourceType::FLOAT};
+const auto RES_NUMBER_NAME = NamedResourceId{"number_resource", ResourceType::FLOAT};
+const auto RES_NUMBER_INVALID = IntResourceId{-1, ResourceType::FLOAT};
 
 const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
 const auto DIMENSION_BY_NAME = Dimension(4, DimensionUnit::VP);
@@ -407,7 +407,7 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_TRUE(textFieldChild);
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = textFieldChild->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_TRUE(textFieldEventHub);
     struct CheckEvent {
         int32_t nodeId;

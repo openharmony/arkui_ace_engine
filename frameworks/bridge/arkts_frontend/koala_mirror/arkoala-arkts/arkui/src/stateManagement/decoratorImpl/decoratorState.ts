@@ -84,7 +84,6 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
             // unregister if old value is an object
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(value);
-            // TODO unregister Watch from old value object, add to new value object
             this.execWatchFuncs();
         }
     }

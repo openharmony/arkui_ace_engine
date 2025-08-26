@@ -1,5 +1,6 @@
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +14,6 @@
  * limitations under the License.
  */
 
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 import {
     LayoutChild,
     ConstraintSizeOptions,
@@ -24,8 +24,8 @@ import {
     NavigationInfo,
     NavDestinationInfo,
     RouterPageInfo
-} from "./generated"
-import { Theme } from "./generated/ohos.arkui.theme"
+} from "#generated"
+import { Theme } from "#generated/ohos.arkui.theme"
 import { UIContext } from "./ohos.arkui.UIContext"
 
 /**

@@ -116,6 +116,40 @@ HWTEST_F(OverlayManagerTestThreeNg, CalculateMenuPosition001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculateMenuPosition002
+ * @tc.desc: Test CalculateMenuPosition with valid menu node and geometry
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CalculateMenuPosition002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto menuWrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(1);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, menuWrapperPattern);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(1, "menu", MenuType::MENU);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+    auto geometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset(OffsetF(100.0f, 100.0f));
+    overlayManager->isContextMenuDragHideFinished_ = false;
+    overlayManager->menuMap_.emplace(3, menuNode);
+    overlayManager->dragMoveVector_ = OffsetF(20.0f, 20.0f);
+    overlayManager->lastDragMoveVector_ = OffsetF(30.0, 30.0);
+    OffsetF ret = overlayManager->CalculateMenuPosition(menuWrapperNode, OffsetF(10.0f, 10.0f));
+    EXPECT_EQ(ret.GetX(), 90.0f);
+    EXPECT_EQ(ret.GetY(), 90.0f);
+    EXPECT_EQ(menuPattern->GetEndOffset().GetX(), 90.0f);
+    EXPECT_EQ(menuPattern->GetEndOffset().GetY(), 90.0f);
+    EXPECT_EQ(geometryNode->GetFrameOffset().GetX(), 90.0f);
+    EXPECT_EQ(geometryNode->GetFrameOffset().GetY(), 90.0f);
+}
+
+/**
  *@tc.name:RemoveMenuWrapperNode001
  *@tc.desc:Test RemoveMenuWrapperNode
  *@tc.type:FUNC

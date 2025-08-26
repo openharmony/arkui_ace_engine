@@ -27,7 +27,7 @@ export default {
             APACHE_LICENSE_HEADER()
         ].join("\n"),
     },
-    external: ["commander", "typescript", "@koalaui/libarkts"],
+    external: ["@koalaui/libarkts"],
     plugins: [
 	    commonjs(),
         typescript({
@@ -40,7 +40,8 @@ export default {
             tsconfig: "./tsconfig.host.json"
         }),
         nodeResolve({
-            extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"]
+            extensions: [".js", ".mjs", ".cjs", ".ts", ".cts", ".mts"],
+            preferBuiltins: true,
         })
     ],
 }

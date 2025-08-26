@@ -117,6 +117,12 @@
             ],
             "@ohos/arkui/Parallelize": [
                 "./@ohos.arkui.Parallelize.ets"
+            ],
+            "@ohos/arkui/theme": [
+                "@ohos.arkui.theme.ets"
+            ],
+            "@ohos.arkui.component": [
+                "./arkui/component"
             ]
         }
     },

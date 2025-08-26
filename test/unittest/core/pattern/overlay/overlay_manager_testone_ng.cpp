@@ -1513,6 +1513,37 @@ HWTEST_F(OverlayManagerTestOneNG, RemovePixelMapAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemovePixelMapAnimation002
+ * @tc.desc: Test OverlayManager::RemovePixelMapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, RemovePixelMapAnimation002, TestSize.Level1)
+{
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto imageNode = FrameNode::CreateFrameNode("Image",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    columnNode->AddChild(imageNode);
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    hub->SetPixelMap(pixelMap);
+    overlayManager->isOnAnimation_ = false;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->hasEvent_ = true;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    overlayManager->RemovePixelMapAnimation(false, 1.0, 1.0, false);
+    EXPECT_TRUE(overlayManager->isOnAnimation_);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    EXPECT_NE(imageContext->GetBackShadow(), std::nullopt);
+}
+
+/**
  * @tc.name: RemoveAllModalInOverlay001
  * @tc.desc: Test OverlayManager::RemoveAllModalInOverlay
  * @tc.type: FUNC
@@ -1569,6 +1600,34 @@ HWTEST_F(OverlayManagerTestOneNG, RemovePopupInSubwindow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemovePopupInSubwindow002
+ * @tc.desc: Test RemovePopupInSubwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, RemovePopupInSubwindow002, TestSize.Level1)
+{
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG,
+        popupId, AceType::MakeRefPtr<BubblePattern>(targetId, V2::BUTTON_ETS_TAG));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    NG::PopupInfo popupInfo;
+    popupInfo.popupNode = popupNode;
+    overlayManager->popupMap_[targetId] = popupInfo;
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    bubblePattern->SetInteractiveDismiss(true);
+    bubblePattern->onWillDismiss_ = nullptr;
+    bool testResult = overlayManager->RemovePopupInSubwindow(bubblePattern, popupNode, rootNode);
+    EXPECT_FALSE(testResult);
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
+}
+
+/**
  * @tc.name: GetMenuNode001
  * @tc.desc: Test OverlayManager::GetMenuNode
  * @tc.type: FUNC
@@ -1603,6 +1662,31 @@ HWTEST_F(OverlayManagerTestOneNG, CleanHoverImagePreviewInSubWindow001, TestSize
     rootNode->tag_ = "Flex";
     overlayManager->CleanHoverImagePreviewInSubWindow(rootNode);
     EXPECT_TRUE(rootNode->GetTag() == V2::FLEX_ETS_TAG);
+}
+
+/**
+ * @tc.name: CleanHoverImagePreviewInSubWindow002
+ * @tc.desc: Test OverlayManager::CleanHoverImagePreviewInSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, CleanHoverImagePreviewInSubWindow002, TestSize.Level1)
+{
+    auto flexNode = FrameNode::CreateFrameNode(
+        V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    flexNode->AddChild(stageNode);
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    stageNode->AddChild(imageNode);
+    auto previewNode = FrameNode::CreateFrameNode(
+        V2::MENU_PREVIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    stageNode->AddChild(previewNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(flexNode);
+    EXPECT_EQ(stageNode->GetChildren().size(), 2);
+    overlayManager->CleanHoverImagePreviewInSubWindow(flexNode);
+    EXPECT_TRUE(stageNode->GetChildren().empty());
+    EXPECT_TRUE(flexNode->GetChildren().empty());
 }
 
 /**

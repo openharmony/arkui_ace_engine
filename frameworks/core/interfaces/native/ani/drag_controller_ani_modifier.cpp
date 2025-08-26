@@ -825,6 +825,24 @@ void UpdatePreviewOptionDefaultAttr(
     NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAsyncContext->dragPreviewOption);
 }
 
+void UpdateDragPreviewOptionsFromModifier(std::shared_ptr<DragControllerAsyncCtx> dragAsyncContext,
+    const ArkUIDragControllerAsync& asyncCtx)
+{
+    CHECK_NULL_VOID(dragAsyncContext);
+    if (!asyncCtx.dragPreviewOption.modifier) {
+        return;
+    }
+    auto onApply = [executeFunc =
+        std::move(asyncCtx.dragPreviewOption.modifier)](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto ptr = AceType::RawPtr(node);
+        CHECK_NULL_VOID(executeFunc);
+        executeFunc(ptr);
+    };
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(onApply, dragAsyncContext->dragPreviewOption);
+}
+
 void CreateDragEventPeer(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer)
 {
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -854,6 +872,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
+    UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {
         auto unifiedDataPtr = std::static_pointer_cast<UDMF::UnifiedData>(asyncCtx.unifiedData.GetSharedPtr());
         auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
@@ -873,7 +892,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     return dragAsyncContext;
 }
 
-bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -882,11 +901,13 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }
@@ -894,7 +915,7 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -903,11 +924,13 @@ bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
     auto container = Ace::AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (CheckDragging(container)) {
+        errMsg = "only one drag is allowed at the same time.";
         LOGE("AceDrag, only one drag is allowed at the same time.");
         return false;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(dragAsyncContext, container);
     if (!getPointSuccess) {
+        errMsg = "confirm current point info failed.";
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }

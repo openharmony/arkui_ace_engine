@@ -17,26 +17,24 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, KPointer } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, AttributeModifier , CommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { ConstraintSizeOptions, Length, Dimension, Padding } from "./units"
 import { FlexDirection } from "./enums"
 import { Resource } from "global.resource"
-import { Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Number_Void } from "./grid"
-import { ScrollState } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 import { Scroller, OnScrollFrameBeginCallback } from "./scroll"
 import { WaterFlowHandWritten } from "../handwritten/WaterFlowImpl"
+import { WaterFlowModifier } from "../WaterFlowModifier"
+import { hookWaterFlowAttributeModifier } from "../handwritten"
 
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
+    _attributeSet?: WaterFlowModifier
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -308,23 +306,27 @@ export interface WaterFlowOptions {
 }
 export type WaterFlowInterface = (options?: WaterFlowOptions) => WaterFlowAttribute;
 export interface WaterFlowAttribute extends ScrollableCommonMethod {
-    columnsTemplate(value: string | undefined): this
-    itemConstraintSize(value: ConstraintSizeOptions | undefined): this
-    rowsTemplate(value: string | undefined): this
-    columnsGap(value: Length | undefined): this
-    rowsGap(value: Length | undefined): this
-    layoutDirection(value: FlexDirection | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    cachedCount(count: number | undefined, show?: boolean): this
-    cachedCount(value: number | undefined): this
-    onReachStart(value: (() => void) | undefined): this
-    onReachEnd(value: (() => void) | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
+    setWaterFlowOptions(options?: WaterFlowOptions): this {
+        return this
+    }
+    columnsTemplate(value: string | undefined): this { return this; }
+    itemConstraintSize(value: ConstraintSizeOptions | undefined): this { return this; }
+    rowsTemplate(value: string | undefined): this { return this; }
+    columnsGap(value: Length | undefined): this { return this; }
+    rowsGap(value: Length | undefined): this { return this; }
+    layoutDirection(value: FlexDirection | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
+    cachedCount(count: number | undefined, show?: boolean): this { return this; }
+    cachedCount(value: number | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this { return this; }
+    onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
+    onDidScroll(value: OnScrollCallback | undefined): this { return this; }
+    attributeModifier(modifier: AttributeModifier<WaterFlowAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined
@@ -343,6 +345,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
+    public setWaterFlowOptions(options?: WaterFlowOptions): this {
+        return this
+    }
     public columnsTemplate(value: string | undefined): this {
         return this
     }
@@ -558,6 +563,11 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
+
+    public attributeModifier(modifier: AttributeModifier<WaterFlowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookWaterFlowAttributeModifier(this, modifier)
+        return this
+    }   
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -565,10 +575,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     }
 }
 /** @memo */
-export function WaterFlow(
+export function WaterFlowImpl(
     /** @memo */
     style: ((attributes: WaterFlowAttribute) => void) | undefined,
-    options?: WaterFlowOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -576,9 +585,7 @@ export function WaterFlow(
         return new ArkWaterFlowComponent()
     })
     NodeAttach<ArkWaterFlowPeer>((): ArkWaterFlowPeer => ArkWaterFlowPeer.create(receiver), (_: ArkWaterFlowPeer) => {
-        receiver.setWaterFlowOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

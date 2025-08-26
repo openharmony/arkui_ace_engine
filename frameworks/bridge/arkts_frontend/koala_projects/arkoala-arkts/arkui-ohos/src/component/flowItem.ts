@@ -44,8 +44,14 @@ export class ArkFlowItemPeer extends ArkCommonMethodPeer {
 }
 export type FlowItemInterface = () => FlowItemAttribute;
 export interface FlowItemAttribute extends CommonMethod {
+    setFlowItemOptions(): this {
+        return this
+    }
 }
 export class ArkFlowItemStyle extends ArkCommonMethodStyle implements FlowItemAttribute {
+    public setFlowItemOptions(): this {
+        return this
+    }
 }
 export class ArkFlowItemComponent extends ArkCommonMethodComponent implements FlowItemAttribute {
     getPeer(): ArkFlowItemPeer {
@@ -65,10 +71,9 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
     }
 }
 /** @memo */
-export function FlowItem(
+export function FlowItemImpl(
     /** @memo */
     style: ((attributes: FlowItemAttribute) => void) | undefined,
-    
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -76,9 +81,7 @@ export function FlowItem(
         return new ArkFlowItemComponent()
     })
     NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (_: ArkFlowItemPeer) => {
-        receiver.setFlowItemOptions()
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -45,23 +45,23 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testWeightNumberVa
 };
 
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testIntResValidValues = {
-    { "ResId:INT_RES_0_ID", CreateResource(INT_RES_0_STR, Converter::ResourceType::INTEGER), "0" },
-    { "ResId:INT_RES_1_ID", CreateResource(INT_RES_1_STR, Converter::ResourceType::INTEGER), "1" },
-    { "ResName:INT_RES_2_STR", CreateResource(INT_RES_2_STR, Converter::ResourceType::INTEGER), "12" },
-    { "ResId:INT_RES_3_ID", CreateResource(INT_RES_3_STR, Converter::ResourceType::INTEGER), "123" },
-    { "ResName:INT_RES_4_STR", CreateResource(INT_RES_4_STR, Converter::ResourceType::INTEGER), "1234" },
-    { "ResId:INT_RES_5_ID", CreateResource(INT_RES_5_STR, Converter::ResourceType::INTEGER), "12345" },
-    { "ResName:INT_RES_6_STR", CreateResource(INT_RES_6_STR, Converter::ResourceType::INTEGER), "123456" },
+    { "ResId:INT_RES_0_ID", CreateResource(INT_RES_0_STR, ResourceType::INTEGER), "0" },
+    { "ResId:INT_RES_1_ID", CreateResource(INT_RES_1_STR, ResourceType::INTEGER), "1" },
+    { "ResName:INT_RES_2_STR", CreateResource(INT_RES_2_STR, ResourceType::INTEGER), "12" },
+    { "ResId:INT_RES_3_ID", CreateResource(INT_RES_3_STR, ResourceType::INTEGER), "123" },
+    { "ResName:INT_RES_4_STR", CreateResource(INT_RES_4_STR, ResourceType::INTEGER), "1234" },
+    { "ResId:INT_RES_5_ID", CreateResource(INT_RES_5_STR, ResourceType::INTEGER), "12345" },
+    { "ResName:INT_RES_6_STR", CreateResource(INT_RES_6_STR, ResourceType::INTEGER), "123456" },
 };
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testStringResValidValues = {
-    { "ResId:STR_RES_0_ID", CreateResource(STR_RES_0_ID, Converter::ResourceType::STRING), "abc" },
-    { "ResName:STR_RES_0_STR", CreateResource(STR_RES_0_STR, Converter::ResourceType::STRING), "abc" },
-    { "ResId:STR_RES_1_ID", CreateResource(STR_RES_1_ID, Converter::ResourceType::STRING), "" },
-    { "ResName:STR_RES_1_STR", CreateResource(STR_RES_1_STR, Converter::ResourceType::STRING), "" },
+    { "ResId:STR_RES_0_ID", CreateResource(STR_RES_0_ID, ResourceType::STRING), "abc" },
+    { "ResName:STR_RES_0_STR", CreateResource(STR_RES_0_STR, ResourceType::STRING), "abc" },
+    { "ResId:STR_RES_1_ID", CreateResource(STR_RES_1_ID, ResourceType::STRING), "" },
+    { "ResName:STR_RES_1_STR", CreateResource(STR_RES_1_STR, ResourceType::STRING), "" },
 };
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testColorsResValidValues = {
-    { "ResId:COLOR_RES_0_ID", CreateResource(COLOR_RES_0_ID, Converter::ResourceType::COLOR), "#A1FAC0DE" },
-    { "ResName:COLOR_RES_0_STR", CreateResource(COLOR_RES_0_STR, Converter::ResourceType::COLOR), "#A1FAC0DE" },
+    { "ResId:COLOR_RES_0_ID", CreateResource(COLOR_RES_0_ID, ResourceType::COLOR), "#A1FAC0DE" },
+    { "ResName:COLOR_RES_0_STR", CreateResource(COLOR_RES_0_STR, ResourceType::COLOR), "#A1FAC0DE" },
 };
 std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable = {
     { INT_RES_0_ID, INT_RES_0_STR, 0 },

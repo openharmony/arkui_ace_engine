@@ -20,6 +20,8 @@ import { WrappedDate } from './observeWrappedDate';
 import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
 import { ObserveWrappedBase } from './observeWrappedBase';
+import { Binding, MutableBinding } from '../utils';
+import { getRawObject, isDynamicObject } from '@component_handwritten/interop';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -97,19 +99,22 @@ export class UIUtilsImpl {
         if (!value || typeof value !== 'object') {
             return value as T;
         }
+        if (isDynamicObject(value)) {
+            value = getRawObject(value);
+        }
         if (value instanceof ObserveWrappedBase) {
             return value as T;
         }
-        if (value instanceof Array && Type.of(value).getName() === 'escompat.Array') {
+        if (value instanceof Array) {
             return UIUtilsImpl.makeObservedArray(value, allowDeep) as T;
         }
-        if (value instanceof Date && Type.of(value).getName() === 'escompat.Date') {
+        if (value instanceof Date) {
             return UIUtilsImpl.makeObservedDate(value, allowDeep) as T;
         }
-        if (value instanceof Map && Type.of(value).getName() === 'escompat.Map') {
+        if (value instanceof Map) {
             return UIUtilsImpl.makeObservedMap(value, allowDeep) as T;
         }
-        if (value instanceof Set && Type.of(value).getName() === 'escompat.Set') {
+        if (value instanceof Set) {
             return UIUtilsImpl.makeObservedSet(value, allowDeep) as T;
         }
         if (value && StateMgmtTool.isObjectLiteral(value)) {
@@ -134,6 +139,13 @@ export class UIUtilsImpl {
             return (source as ObserveWrappedBase).getRaw()! as T;
         }
         return source;
+    }
+
+    public makeBindingReadonly<T>(getter: () => T): Binding<T> {
+        return new Binding<T>(getter);
+    }
+    public makeBindingMutable<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
+        return new MutableBinding<T>(getter, setter);
     }
 }
 

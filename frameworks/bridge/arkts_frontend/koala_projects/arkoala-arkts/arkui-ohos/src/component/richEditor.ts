@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, DecorationStyleResult, MenuType, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from "./textCommon"
-import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, CustomBuilder, ShadowOptions, Callback_ClickEvent_Void, ClickEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -42,6 +42,8 @@ import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 import { OnHoverCallback } from "./sdk-stubs"
 import { ColorMetrics } from "../Graphics"
+import { RichEditorModifier } from "../RichEditorModifier"
+import { hookRichEditorAttributeModifier } from "../handwritten"
 
 import { CustomNodeBuilder } from "./customBuilder"
 export class RichEditorBaseControllerInternal {
@@ -191,6 +193,7 @@ export class RichEditorBaseController implements MaterializedBase {
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
+    _attributeSet?:RichEditorModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -936,6 +939,9 @@ export type Callback_RichEditorChangeValue_Boolean = (parameter: RichEditorChang
 export type Callback_CutEvent_Void = (parameter: CutEvent) => void;
 export type Callback_CopyEvent_Void = (parameter: CopyEvent) => void;
 export interface RichEditorAttribute extends CommonMethod {
+    setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
+        return this
+    }
     onReady(value: (() => void) | undefined): this
     onSelect(value: ((parameter: RichEditorSelection) => void) | undefined): this
     onSelectionChange(value: ((parameter: RichEditorRange) => void) | undefined): this
@@ -969,6 +975,7 @@ export interface RichEditorAttribute extends CommonMethod {
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
+    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
     onReady_value?: (() => void) | undefined
@@ -1001,6 +1008,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: number | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    public setRichEditorOptions(value: RichEditorOptions | RichEditorStyledStringOptions): this {
+        return this
+    }
     public onReady(value: (() => void) | undefined): this {
         return this
     }
@@ -1404,6 +1414,11 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+
+    public attributeModifier(modifier: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookRichEditorAttributeModifier(this, modifier);
+        return this
+    }
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
@@ -1411,10 +1426,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     }
 }
 /** @memo */
-export function RichEditor(
+export function RichEditorImpl(
     /** @memo */
     style: ((attributes: RichEditorAttribute) => void) | undefined,
-    value: RichEditorOptions | RichEditorStyledStringOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1422,10 +1436,8 @@ export function RichEditor(
         return new ArkRichEditorComponent()
     })
     NodeAttach<ArkRichEditorPeer>((): ArkRichEditorPeer => ArkRichEditorPeer.create(receiver), (_: ArkRichEditorPeer) => {
-        receiver.setRichEditorOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class RichEditorControllerInternal {
@@ -1448,10 +1460,10 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RichEditorController_getFinalizer()
     }
-    public addTextSpan(value: string, options?: RichEditorTextSpanOptions): number {
-        const value_casted = value as (string)
+    public addTextSpan(content: ResourceStr, options?: RichEditorTextSpanOptions): number {
+        const content_casted = content as (ResourceStr)
         const options_casted = options as (RichEditorTextSpanOptions | undefined)
-        return this.addTextSpan_serialize(value_casted, options_casted)
+        return this.addTextSpan_serialize(content_casted, options_casted)
     }
     public addImageSpan(value: PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): number {
         const value_casted = value as (PixelMap | ResourceStr)
@@ -1502,8 +1514,21 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const value_casted = value as (RichEditorRange)
         return this.toStyledString_serialize(value_casted)
     }
-    private addTextSpan_serialize(value: string, options?: RichEditorTextSpanOptions): number {
+    private addTextSpan_serialize(content: ResourceStr, options?: RichEditorTextSpanOptions): number {
         const thisSerializer : Serializer = Serializer.hold()
+        let content_type : int32 = RuntimeType.UNDEFINED
+        let value : string = ""
+        content_type = runtimeType(content)
+        if (RuntimeType.STRING == content_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const content_0  = content as string
+            thisSerializer.writeString(content_0)
+        }
+        else if (RuntimeType.OBJECT == content_type) {
+            thisSerializer.writeInt8(1 as int32)
+            const content_1  = content as Resource
+            thisSerializer.writeResource(content_1)
+        }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type as int32)

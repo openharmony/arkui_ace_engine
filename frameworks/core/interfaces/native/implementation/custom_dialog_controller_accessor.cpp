@@ -64,7 +64,7 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->SetOnWillAppear(value->onWillAppear, peer);
     peer->SetOnWillDisappear(value->onWillDisappear, peer);
     peer->SetKeyboardAvoidDistance(value->keyboardAvoidDistance);
-    peer->SetLevelMode(value->levelMode);
+    peer->SetLevelMode(value->showInSubWindow, value->levelMode);
     peer->SetLevelUniqueId(value->levelUniqueId);
     peer->SetImersiveMode(value->immersiveMode);
     peer->SetLevelOrder(value->levelOrder);
@@ -86,6 +86,15 @@ void CloseImpl(Ark_CustomDialogController peer)
     CHECK_NULL_VOID(peer);
     peer->CloseDialog();
 }
+Ark_CustomDialogControllerExternalOptions GetExternalOptionsImpl(Ark_CustomDialogController peer)
+{
+    Ark_CustomDialogControllerExternalOptions result = {
+        .customStyle = Converter::ArkValue<Opt_Boolean>(false),
+    };
+    CHECK_NULL_RETURN(peer, result);
+    result.customStyle = peer->GetCustomStyle();
+    return result;
+}
 void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
 {
     CHECK_NULL_VOID(peer);
@@ -101,6 +110,7 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
         CustomDialogControllerAccessor::GetFinalizerImpl,
         CustomDialogControllerAccessor::OpenImpl,
         CustomDialogControllerAccessor::CloseImpl,
+        CustomDialogControllerAccessor::GetExternalOptionsImpl,
         CustomDialogControllerAccessor::SetOwnerViewImpl,
     };
     return &CustomDialogControllerAccessorImpl;

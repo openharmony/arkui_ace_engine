@@ -219,6 +219,9 @@ class Application {
         } else {
             throw new Error(`Cannot start VM: ${result}`)
         }
+        if (this.rootPointer == nullptr) {
+            throw new Error(`FAIL: _StartApplication returned nullptr`)
+        }
     }
 
     start(loopIterations?: int32): Promise<AppControl> {
@@ -251,7 +254,8 @@ class Application {
             }
         }
         console.log("EXIT_APP");
-        process?.exit(0)
+        const success = "" == nativeModule()._EmitEvent(2, 0, 0, 0)
+        process?.exit(success ? 0 : -1)
     }
 }
 
@@ -268,7 +272,7 @@ export function loadVM(variant: string, app: string, appParams: string, loopIter
     let vmKind = -1
 
     if (app.startsWith("tests")) {
-        app = "class=@arkui.tests.ets.TestHarnessApp.TestHarness"
+        app = "class=@arkui.tests.ets.TestHarness.TestHarness"
     }
 
     switch (variant) {

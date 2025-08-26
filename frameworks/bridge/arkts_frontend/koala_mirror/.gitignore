@@ -1,6 +1,7 @@
 **/node_modules
 build
 build-m3*
+arkoala-arkts/arkui/build-recheck
 dist
 arkoala/tools/peer-generator/arkoala
 **/package-lock.json
@@ -31,6 +32,7 @@ incremetal-cj/runtime/ck
 tsconfig.tsbuildinfo
 *.meta.json
 .cache
+incremental/benchmarks/memo-benchmark/ets
 koala_mirror
 out
 sdk

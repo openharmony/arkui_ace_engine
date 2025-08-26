@@ -90,16 +90,6 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         }
     }
 
-    // [index] operator
-    public override $_get(index: number): T {
-        return this.$_get(index as int);
-    }
-
-    // [] operator
-    public override $_set(i: number, val: T): void {
-        this.$_set(i as int, val);
-    }
-
     // [] operator
     public override $_get(idx: int): T {
         if (this.shouldAddRef()) {
@@ -847,34 +837,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * If `fromIndex` is ommited then `fromIndex = length()-1`.
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public override lastIndexOf(searchElement: T, fromIndex: int): int {
+    public override lastIndexOf(searchElement: T, fromIndex?: int): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.lastIndexOf(searchElement, fromIndex);
     }
 
-    /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
-     *
-     * @param searchElement element to locate in the array.
-     * @param fromIndex zero-based index at which to start searching backwards.
-     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
-     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
-     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`.
-     * If `fromIndex` is ommited then `fromIndex = length()-1`.
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-    public override lastIndexOf(searchElement: T, fromIndex: number | undefined): number {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.lastIndexOf(searchElement, fromIndex);
-    }
-
-    public override lastIndexOf(searchElement: T): number {
+    public override lastIndexOf(searchElement: T): int {
          if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
@@ -1005,29 +975,14 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param fromIndex index to search from
      * @returns index of val, -1 otherwise
      */
-    public override indexOf(val: T, fromIndex: int): int {
+    public override indexOf(val: T, fromIndex?: int): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.indexOf(val, fromIndex);
     }
 
-    /**
-     * Returns the first index at which a given element
-     * can be found in the array, or -1 if it is not present.
-     *
-     * @param val value to search
-     * @param fromIndex index to search from
-     * @returns index of val, -1 otherwise
-     */
-    public override indexOf(val: T, fromIndex?: Number): number {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.indexOf(val, fromIndex);
-    }
-
-    public override indexOf(val: T) {
+    public override indexOf(val: T): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }

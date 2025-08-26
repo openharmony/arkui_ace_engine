@@ -42,6 +42,8 @@ public:
     void SetNativeHandler(const std::function<void(void*)>& handler);
     void UpdateId(const std::string &id);
     bool UpdateType(XComponentType type);
+    void RegisterSurfaceInitEvent();
+    void HandleSurfaceInitEvent();
 private:
     // Hooked xcomponent pattern methods.
     void InitializeNativeXComponent();
@@ -160,6 +162,8 @@ void XComponentStaticPattern::InitParams()
     CHECK_EQUAL_VOID(isHostAttached_, true);
     XCOMPONENT_STATIC_PATTERN_METHOD(OnAttachToFrameNode);
     isHostAttached_ = true;
+    CHECK_EQUAL_VOID(isBindNative_, true);
+    RegisterSurfaceInitEvent();
 }
 
 bool XComponentStaticPattern::IsBindNative()
@@ -214,7 +218,35 @@ void XComponentStaticPattern::InitializeNativeXComponent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     nativeXComponentImpl_->SetXComponentId(GetId());
     nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
+    CHECK_EQUAL_VOID(isTypedNode_, false);
+    InitializeAccessibility();
+    SetExpectedRateRangeInit();
+    OnFrameEventInit();
+    UnregisterOnFrameEventInit();
+    LoadNative();
+}
+
+void XComponentStaticPattern::RegisterSurfaceInitEvent()
+{
+    auto surfaceInitEvent = [weak = AceType::WeakClaim(this)]
+        (const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleSurfaceInitEvent();
+    };
+    auto host = GetHost();
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSurfaceInitEvent(std::move(surfaceInitEvent));
+}
+
+void XComponentStaticPattern::HandleSurfaceInitEvent()
+{
+    CHECK_NULL_VOID(nativeHandler_);
+    CHECK_NULL_VOID(nativeXComponent_);
     nativeHandler_(reinterpret_cast<void*>(nativeXComponent_.get()));
+    CHECK_EQUAL_VOID(isTypedNode_, true);
+    XComponentPattern::OnSurfaceCreated();
 }
 
 void XComponentStaticPattern::OnAttachToMainTree()

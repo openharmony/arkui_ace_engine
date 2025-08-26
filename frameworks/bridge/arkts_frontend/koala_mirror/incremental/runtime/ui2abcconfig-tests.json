@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime-tests",
+        "outDir": "build",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": ["../common/src"],
+            "@koalaui/compat": ["../compat/src/arkts"],
+            "@koalaui/runtime/annotations": ["./annotations"],
+            "@koalaui/harness": ["../harness/src/arkts"]
+        },
+        "plugins": [
+           {
+                "transform": "@koalaui/memo-plugin",
+                "state": "parsed",
+                "contextImport": "../../ets/internals",
+                "name": "memo"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "state": "checked",
+                "name": "memo"
+            }
+        ]
+    },
+    "include": [
+        "annotations/**/*.ts",
+        "ets/**/*.ts",
+        "ets-test/**/*.ts"
+    ],
+    "exclude": [
+        "ets-test/states/state_basics.test.ts"
+    ]
+}

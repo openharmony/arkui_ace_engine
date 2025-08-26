@@ -17,7 +17,7 @@
 #define _KOALA_PROFILER_
 
 #include <stdint.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include <unordered_map>
 #include <string>

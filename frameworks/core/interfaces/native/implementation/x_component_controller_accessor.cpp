@@ -53,20 +53,12 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     auto surfaceId = peerImpl->controller->GetSurfaceId();
-    surfaceId.push_back('\0');
     arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
 #endif //XCOMPONENT_SUPPORTED
     return arkSurfaceId;
 }
 Ark_Object GetXComponentContextImpl(Ark_XComponentController peer)
 {
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer, {});
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(peerImpl->controller, {});
-    LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
-#endif //XCOMPONENT_SUPPORTED
     return {};
 }
 void SetXComponentSurfaceSizeImpl(Ark_XComponentController peer,
@@ -162,24 +154,15 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 void OnSurfaceCreatedImpl(Ark_XComponentController peer,
                           const Ark_String* surfaceId)
 {
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceCreatedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
 }
 void OnSurfaceChangedImpl(Ark_XComponentController peer,
                           const Ark_String* surfaceId,
                           const Ark_SurfaceRect* rect)
 {
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceChangedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
 }
 void OnSurfaceDestroyedImpl(Ark_XComponentController peer,
                             const Ark_String* surfaceId)
 {
-#ifdef XCOMPONENT_SUPPORTED
-    LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
-#endif //XCOMPONENT_SUPPORTED
 }
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,

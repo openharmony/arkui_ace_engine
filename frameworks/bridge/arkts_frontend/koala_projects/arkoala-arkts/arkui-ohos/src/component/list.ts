@@ -22,19 +22,19 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, RectResult, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, 
+    ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, RectResult, 
+    OnWillScrollCallback, OnScrollCallback, AttributeModifier } from "./common"
 import { Axis, BarState, EdgeEffect } from "./enums"
 import { Resource } from "global.resource"
-import { Callback_Number_Number_Void, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./grid"
-import { ListAttribute_onItemDragStart_event_type } from "./type-replacements"
 import { LengthConstrain, Dimension, PX, VP, FP, LPX, Percentage, Length, ResourceColor } from "./units"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { OnScrollFrameBeginCallback, Scroller, ScrollerInternal, ScrollAlign } from "./scroll"
 import { Deserializer } from "./peers/Deserializer"
-import { hookListChildrenMainSizeImpl } from "./../handwritten"
+import { hookListChildrenMainSizeImpl, hookListAttributeModifier } from "./../handwritten"
+import { ListModifier } from "../ListModifier"
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
+    _attributeSet?: ListModifier
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -122,7 +122,9 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            thisSerializer.writeListDividerOptions({ strokeWidth: 0.0 } as ListDividerOptions)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeListDividerOptions(value_value)
         }
@@ -643,45 +645,49 @@ export type Callback_Number_Number_Number_Void = (start: number, end: number, ce
 export type Callback_Number_Boolean = (index: number) => boolean;
 export type Callback_Number_Number_Boolean = (from: number, to: number) => boolean;
 export interface ListAttribute extends ScrollableCommonMethod {
-    alignListItem(value: ListItemAlign | undefined): this
-    listDirection(value: Axis | undefined): this
-    scrollBar(value: BarState | undefined): this
-    contentStartOffset(value: number | undefined): this
-    contentEndOffset(value: number | undefined): this
-    divider(value: ListDividerOptions | null | undefined): this
-    editMode(value: boolean | undefined): this
-    multiSelectable(value: boolean | undefined): this
-    cachedCount(count: number | undefined, show: boolean | undefined): this
-    cachedCount(value: number | undefined): this
-    chainAnimation(value: boolean | undefined): this
-    chainAnimationOptions(value: ChainAnimationOptions | undefined): this
-    sticky(value: StickyStyle | undefined): this
-    scrollSnapAlign(value: ScrollSnapAlign | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    childrenMainSize(value: ChildrenMainSize | undefined): this
-    maintainVisibleContentPosition(value: boolean | undefined): this
-    stackFromEnd(value: boolean | undefined): this
-    onScroll(value: ((first: number,last: number) => void) | undefined): this
-    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this
-    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this
-    onReachStart(value: (() => void) | undefined): this
-    onReachEnd(value: (() => void) | undefined): this
-    onScrollStart(value: (() => void) | undefined): this
-    onScrollStop(value: (() => void) | undefined): this
-    onItemDelete(value: ((index: number) => boolean) | undefined): this
-    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this
-    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this
-    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
-    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
-    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    setListOptions(options?: ListOptions): this {
+        return this
+    }
+    alignListItem(value: ListItemAlign | undefined): this { return this; }
+    listDirection(value: Axis | undefined): this { return this; }
+    scrollBar(value: BarState | undefined): this { return this; }
+    contentStartOffset(value: number | undefined): this { return this; }
+    contentEndOffset(value: number | undefined): this { return this; }
+    divider(value: ListDividerOptions | null | undefined): this { return this; }
+    editMode(value: boolean | undefined): this { return this; }
+    multiSelectable(value: boolean | undefined): this { return this; }
+    cachedCount(count: number | undefined, show: boolean | undefined): this { return this; }
+    cachedCount(value: number | undefined): this { return this; }
+    chainAnimation(value: boolean | undefined): this { return this; }
+    chainAnimationOptions(value: ChainAnimationOptions | undefined): this { return this; }
+    sticky(value: StickyStyle | undefined): this { return this; }
+    scrollSnapAlign(value: ScrollSnapAlign | undefined): this { return this; }
+    nestedScroll(value: NestedScrollOptions | undefined): this { return this; }
+    enableScrollInteraction(value: boolean | undefined): this { return this; }
+    friction(value: number | Resource | undefined): this { return this; }
+    childrenMainSize(value: ChildrenMainSize | undefined): this { return this; }
+    maintainVisibleContentPosition(value: boolean | undefined): this { return this; }
+    stackFromEnd(value: boolean | undefined): this { return this; }
+    onScroll(value: ((first: number,last: number) => void) | undefined): this { return this; }
+    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this { return this; }
+    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this { return this; }
+    onReachStart(value: (() => void) | undefined): this { return this; }
+    onReachEnd(value: (() => void) | undefined): this { return this; }
+    onScrollStart(value: (() => void) | undefined): this { return this; }
+    onScrollStop(value: (() => void) | undefined): this { return this; }
+    onItemDelete(value: ((index: number) => boolean) | undefined): this { return this; }
+    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this { return this; }
+    onItemDragStart(value: ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) | undefined): this { return this; }
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this { return this; }
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this { return this; }
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this { return this; }
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this { return this; }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this { return this; }
+    onWillScroll(value: OnWillScrollCallback | undefined): this { return this; }
+    onDidScroll(value: OnScrollCallback | undefined): this { return this; }
+    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this { return this; }
+    edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this { return this; }
+    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {
     alignListItem_value?: ListItemAlign | undefined
@@ -720,6 +726,9 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
+    public setListOptions(options?: ListOptions): this {
+        return this
+    }
     public alignListItem(value: ListItemAlign | undefined): this {
         return this
     }
@@ -1180,17 +1189,19 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<ListAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookListAttributeModifier(this, modifier)
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function List(
+export function ListImpl(
     /** @memo */
     style: ((attributes: ListAttribute) => void) | undefined,
-    options?: ListOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -1198,10 +1209,8 @@ export function List(
         return new ArkListComponent()
     })
     NodeAttach<ArkListPeer>((): ArkListPeer => ArkListPeer.create(receiver), (_: ArkListPeer) => {
-        receiver.setListOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }
 export class ListScrollerInternal {

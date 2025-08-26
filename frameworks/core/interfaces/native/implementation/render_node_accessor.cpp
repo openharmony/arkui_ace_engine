@@ -31,7 +31,6 @@ namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
 namespace {
 constexpr int32_t ARK_UNION_UNDEFINED = 1;
-enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
 
 DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, DimensionUnit defaultUnit)
 {
@@ -47,13 +46,16 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
 }
 } // namespace
 namespace RenderNodeAccessor {
-void DestroyPeerImpl(Ark_RenderNode peer) {}
+void DestroyPeerImpl(Ark_RenderNode peer)
+{
+    PeerUtils::DestroyPeer(peer);
+}
 Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* value)
 {
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
     frameNode->SetIsArkTsRenderNode(true);
-    auto renderNodePeer = RenderNodePeer::Create(frameNode);
+    auto renderNodePeer = PeerUtils::CreatePeer<RenderNodePeer>(frameNode);
     return renderNodePeer;
 }
 Ark_NativePointer GetFinalizerImpl()

@@ -32,10 +32,13 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
-import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { drawing } from "@ohos/graphics/drawing"
+import { ImageSpanModifier } from "../ImageSpanModifier"
+import { hookImageSpanAttributeModifier } from "../handwritten"
 
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
+    _attributeSet?: ImageSpanModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -155,12 +158,16 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
 }
 export type ImageSpanInterface = (value: ResourceStr | PixelMap) => ImageSpanAttribute;
 export interface ImageSpanAttribute extends BaseSpan {
-    verticalAlign(value: ImageSpanAlignment | undefined): this
-    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
-    objectFit(value: ImageFit | undefined): this
-    onComplete(value: ImageCompleteCallback | undefined): this
-    onError(value: ImageErrorCallback | undefined): this
-    alt(value: PixelMap | undefined): this
+    setImageSpanOptions(value: ResourceStr | PixelMap): this {
+        return this
+    }
+    verticalAlign(value: ImageSpanAlignment | undefined): this { return this; }
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this { return this; }
+    objectFit(value: ImageFit | undefined): this { return this; }
+    onComplete(value: ImageCompleteCallback | undefined): this { return this; }
+    onError(value: ImageErrorCallback | undefined): this { return this; }
+    alt(value: PixelMap | undefined): this { return this; }
+    attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
 }
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined
@@ -169,6 +176,9 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     onComplete_value?: ImageCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     alt_value?: PixelMap | undefined
+    public setImageSpanOptions(value: ResourceStr | PixelMap): this {
+        return this
+    }
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
         return this
     }
@@ -257,17 +267,19 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         }
         return this
     }
-    
+    public attributeModifier(modifier: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookImageSpanAttributeModifier(this, modifier);
+        return this
+    }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
     }
 }
 /** @memo */
-export function ImageSpan(
+export function ImageSpanImpl(
     /** @memo */
     style: ((attributes: ImageSpanAttribute) => void) | undefined,
-    value: ResourceStr | PixelMap,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -275,9 +287,7 @@ export function ImageSpan(
         return new ArkImageSpanComponent()
     })
     NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer) => {
-        receiver.setImageSpanOptions(value)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

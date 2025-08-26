@@ -182,7 +182,7 @@ ani_object LegacyLoadPage(ani_env* env)
             break;
         }
 
-        std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
+        std::string entryPath = "entry.src.main.ets.pages.Index.ComExampleTrivialApplication";
         ani_string entryClassStr;
         env->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
         ani_class entryClass = nullptr;
@@ -551,6 +551,18 @@ void ArktsFrontend::SetHostContext(int32_t instanceId, ani_ref* context)
 ani_ref* ArktsFrontend::GetHostContext(int32_t instanceId)
 {
     return Framework::AniContextModule::GetAniContext(instanceId);
+}
+
+void ArktsFrontend::NotifyArkoalaConfigurationChange()
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(app_);
+    ani_status status;
+    if ((status = env->Object_CallMethodByName_Void((ani_object)app_, "notifyConfigurationChange", ":")) != ANI_OK) {
+        LOGE("Call notifyConfigurationChange error");
+        return;
+    }
 }
 
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;

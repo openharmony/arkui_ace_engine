@@ -269,7 +269,9 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
         return false;
     }
-    value = static_cast<double>(aniValue);
+    if (OHOS::Ace::GreatNotEqual(aniValue, 0.0)) {
+        value = static_cast<double>(aniValue);
+    }
     return true;
 }
 

@@ -62,18 +62,6 @@ public:
         return mode_;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        Pattern::ToJsonValue(json, filter);
-         /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        json->PutExtAttr("mode", this->NavRouteModeToString(mode_).c_str(), filter);
-    }
-
 
 private:
     RefPtr<ClickEvent> clickListener_;

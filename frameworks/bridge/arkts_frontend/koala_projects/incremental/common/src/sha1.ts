@@ -118,7 +118,9 @@ export class SHA1Hash {
         }
 
         // no more bytes
-        if (offset == length) return this
+        if (offset == length) {
+            return this
+        }
 
         return this._uint8(new Uint8Array(buffer!), offset)
     }
@@ -158,7 +160,7 @@ export class SHA1Hash {
             let index = start
 
             while (offset < length && index < inputBytes) {
-                let code = text.charCodeAt(offset++) | 0
+                let code = text.charCodeAt(offset++).toInt() | 0
                 if (code < 0x80) {
                     // ASCII characters
                     _byte[index++] = code
@@ -261,8 +263,12 @@ export class SHA1Hash {
         const bits64: int32 = this._size * 8
         const low32: int32 = ((bits64 & 0xffffffff).toInt() >>> 0).toInt()
         const high32: int32 = ((bits64 - low32).toInt() / 0x100000000).toInt()
-        if (high32) _word[highIndex] = swap32(high32).toInt()
-        if (low32) _word[lowIndex] = swap32(low32).toInt()
+        if (high32) {
+            _word[highIndex] = swap32(high32).toInt()
+        }
+        if (low32) {
+            _word[lowIndex] = swap32(low32).toInt()
+        }
 
         this._int32(_word)
 
@@ -306,7 +312,11 @@ const W = new Int32Array(workWords)
 let sharedBuffer: ArrayBuffer
 let sharedOffset: int32 = 0
 
-const swapLE: NN = ((c:int32):int32 => (((c << 24) & 0xff000000) | ((c << 8) & 0xff0000) | ((c >> 8) & 0xff00) | ((c >> 24) & 0xff)))
+const swapLE: NN = (c: int32): int32 =>
+  ((c << 24) & 0xff000000) |
+  ((c << 8) & 0xff0000) |
+  ((c >> 8) & 0xff00) |
+  ((c >> 24) & 0xff);
 const swapBE: NN = ((c:int32):int32 => c)
 const swap32: NN = isBE() ? swapBE : swapLE
 const rotate1: NN = (num: int32): int32 => (num << 1) | (num >>> 31)

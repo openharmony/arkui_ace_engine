@@ -15,6 +15,7 @@
 
 #include <common.h>
 #include <utility>
+#include "interop-types.h"
 
 using std::string, std::cout, std::endl, std::vector;
 
@@ -58,13 +59,16 @@ char* StageArena::strdup(const char* string)
     auto* arena = StageArena::instance();
     auto size = strlen(string) + 1;
     char* memory = (char*)arena->alloc(size);
-    memcpy_s(memory, size, string, size);
+    interop_memcpy(memory, size, string, size);
     return memory;
 }
 
 void* StageArena::alloc(size_t size)
 {
     void* result = malloc(size);
+    if (!result) {
+        INTEROP_FATAL("Cannot allocate memory");
+    }
     totalSize += size;
     add(result);
     return result;
@@ -131,7 +135,7 @@ KOALA_INTEROP_V1(SetUpSoPath, KStringPtr);
 void* FindLibrary() {
     void *res = nullptr;
     std::vector<std::string> pathArray;
-    
+
     // find by SetUpSoPath
     if (!ES2PANDA_LIB_PATH.empty()) {
         pathArray = {ES2PANDA_LIB_PATH, LIB_DIR, LIB_ES2PANDA_PUBLIC};

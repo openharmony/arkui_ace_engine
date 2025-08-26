@@ -17,16 +17,17 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
+import { KPointer } from '@koalaui/interop';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
 import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
-import { LazyForEachImpl } from './LazyForEachImpl';
-import { ArkColumnPeer } from '../component/column';
+import { LazyForEachImplForOptions } from './LazyForEachImpl';
 import { InternalListener } from '../DataChangeListener';
 import { PeerNode } from '../PeerNode';
+import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule';
 
 /** @memo:intrinsic */
-export function RepeatImpl<T>(
+export function RepeatImplForOptions<T>(
     /** @memo */
     style: ((attributes: RepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
@@ -126,7 +127,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
                 console.error(`onLazyLoading function execute error: ${error}`);
             }
         }
-        return this.arr_[index];
+        return this.arr_[index as int32];
     }
 
     setOnLazyLoading(onLazyLoading?: (index: number) => void): void {
@@ -150,6 +151,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
 const RepeatEachFuncType: string = '';
 
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
+    arr: RepeatArray<T> = [];
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
     templateCacheSize_: Map<string, number> = new Map<string, number>(); // size of spare nodes for each template
@@ -160,6 +162,9 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 
     reusable_: boolean = false;
     disableVirtualScroll_: boolean = false;
+    setRepeatOptions(arr: RepeatArray<T>): this {
+        return this;
+    }
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
@@ -203,6 +208,21 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 }
 
+export class SyntaxNodePeer extends PeerNode {
+    public static create(): SyntaxNodePeer {
+        const peerId = PeerNode.nextId();
+        const _peerPtr = ArkUIAniModule._SyntaxNode_Construct(peerId);
+        if (!_peerPtr) {
+            throw new Error(`Failed to create SyntaxNodePeer with id: ${peerId}`);
+        }
+        return new SyntaxNodePeer(_peerPtr, peerId, 'SyntaxNode');
+    }
+
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags);
+    }
+}
+
 /** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
@@ -231,14 +251,14 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
+            NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
                 itemBuilder(ri);
             }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
     };
-    LazyForEachImpl<T>(dataSource, itemGen, attributes.keyGenFunc_);
+    LazyForEachImplForOptions<T>(dataSource, itemGen, attributes.keyGenFunc_);
 }
 
 /** @memo */
@@ -252,8 +272,10 @@ function nonVirtualRender<T>(arr: RepeatArray<T>,
     }
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, (i as number))) : i;
-    RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
-        const ri = new RepeatItemImpl<T>(ele, (i as number));
-        itemGenerator(ri);
+    NodeAttach(() => SyntaxNodePeer.create(), (node: SyntaxNodePeer) => {
+        RepeatByArray<T>(arr, keyGen, (ele: T, i: int32) => {
+            const ri = new RepeatItemImpl<T>(ele, (i as number));
+            itemGenerator(ri);
+        });
     });
 }

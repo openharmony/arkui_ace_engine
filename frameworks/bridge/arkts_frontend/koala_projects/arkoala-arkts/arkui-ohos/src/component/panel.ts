@@ -285,6 +285,9 @@ export type PanelInterface = (show: boolean) => PanelAttribute;
 export type Callback_Number_Number_PanelMode_Void = (width: number, height: number, mode: PanelMode) => void;
 export type Callback_Opt_PanelMode_Void = (mode: PanelMode | undefined) => void;
 export interface PanelAttribute extends CommonMethod {
+    setPanelOptions(show: boolean): this {
+        return this
+    }
     mode(value: PanelMode | undefined): this
     type(value: PanelType | undefined): this
     dragBar(value: boolean | undefined): this
@@ -312,6 +315,9 @@ export class ArkPanelStyle extends ArkCommonMethodStyle implements PanelAttribut
     showCloseIcon_value?: boolean | undefined
     onChange_value?: ((width: number,height: number,mode: PanelMode) => void) | undefined
     onHeightChange_value?: ((index: number) => void) | undefined
+    public setPanelOptions(show: boolean): this {
+        return this
+    }
     public mode(value: PanelMode | undefined): this {
         return this
     }
@@ -475,10 +481,9 @@ export class ArkPanelComponent extends ArkCommonMethodComponent implements Panel
     }
 }
 /** @memo */
-export function Panel(
+export function PanelImpl(
     /** @memo */
     style: ((attributes: PanelAttribute) => void) | undefined,
-    show: boolean,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -486,9 +491,7 @@ export function Panel(
         return new ArkPanelComponent()
     })
     NodeAttach<ArkPanelPeer>((): ArkPanelPeer => ArkPanelPeer.create(receiver), (_: ArkPanelPeer) => {
-        receiver.setPanelOptions(show)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

@@ -36,9 +36,11 @@ Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, errValue);
-    const auto& angle = info->GetAngle();
+    auto* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, errValue);
+    SwipeGestureEvent* swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(event);
+    CHECK_NULL_RETURN(swipeGestureEvent, errValue);
+    const auto& angle = swipeGestureEvent->GetAngle();
     return Converter::ArkValue<Ark_Number>(static_cast<float>(angle));
 }
 void SetAngleImpl(Ark_SwipeGestureEvent peer,
@@ -46,28 +48,34 @@ void SetAngleImpl(Ark_SwipeGestureEvent peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(angle);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    info->SetAngle(Converter::Convert<float>(*angle));
+    auto* event = peer->GetEventInfo();
+    CHECK_NULL_VOID(event);
+    SwipeGestureEvent* swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(event);
+    CHECK_NULL_VOID(swipeGestureEvent);
+    swipeGestureEvent->SetAngle(Converter::Convert<float>(*angle));
 }
 Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
-    auto event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, errValue);
-    double value = event->GetSpeed();
+    SwipeGestureEvent* swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(event);
+    CHECK_NULL_RETURN(swipeGestureEvent, errValue);
+    double value = swipeGestureEvent->GetSpeed();
     return Converter::ArkValue<Ark_Number>(static_cast<float>(value));
 }
 void SetSpeedImpl(Ark_SwipeGestureEvent peer,
                   const Ark_Number* speed)
 {
     CHECK_NULL_VOID(peer);
-    auto event = peer->GetEventInfo();
+    auto* event = peer->GetEventInfo();
     CHECK_NULL_VOID(event);
+    SwipeGestureEvent* swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(event);
+    CHECK_NULL_VOID(swipeGestureEvent);
     CHECK_NULL_VOID(speed);
     auto convValue = Converter::Convert<float>(*speed);
-    event->SetSpeed(convValue);
+    swipeGestureEvent->SetSpeed(convValue);
 }
 } // SwipeGestureEventAccessor
 const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor()

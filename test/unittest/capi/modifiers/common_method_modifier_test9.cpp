@@ -138,7 +138,7 @@ public:
     RefPtr<GestureEventHub> GetGestureEventHub()
     {
         if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
-            if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
+            if (auto eventHub = fnode->GetOrCreateEventHub<NG::EventHub>(); eventHub) {
                 return eventHub->GetOrCreateGestureEventHub();
             }
         }
@@ -312,7 +312,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestVal
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
-    auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, Converter::ResourceType::STRING);
+    auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ResourceType::STRING);
     auto src = Converter::ArkValue<Opt_Resource>(CreateResource(resName));
 
     modifier_->setAccessibilityDescription1(node_, &src);
@@ -427,7 +427,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
 HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     static const std::string expectedType = "onHover";
     static const int expectedResId = 123;
@@ -489,7 +489,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -550,7 +550,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSi
 HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;
@@ -595,7 +595,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     static const int expectedResId = 123;
     static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -641,7 +641,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
     static const int expectedResId = 123;
     static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -683,7 +683,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -722,7 +722,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -863,7 +863,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnDigitalCrownTest, TestSize.Lev
     ASSERT_TRUE(modifier_->setOnDigitalCrown);
 #ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;
@@ -897,7 +897,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnDigitalCrownTest, TestSize.Lev
         focusCallback(info);
         ASSERT_TRUE(checkEvent);
         EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
-        
+
         EXPECT_THAT(checkEvent->eventInfo, CompareCrownEventInfo(info));
     }
     checkEvent = std::nullopt;

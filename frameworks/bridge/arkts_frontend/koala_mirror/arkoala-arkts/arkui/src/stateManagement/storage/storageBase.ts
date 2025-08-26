@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractProperty } from './storageProperty';
+import { SubscribedAbstractProperty } from './storageProperty';
 import { WatchFuncType, WatchIdType, IDecoratedV1Variable } from '../decorator';
 import { DecoratedV1VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
@@ -38,14 +38,14 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         super(null, propName, initValue);
     }
 
-    public mkRef(propertyNameInAppStorage: string, ttype: Type): AbstractProperty<T> {
+    public mkRef(propertyNameInAppStorage: string, ttype: Type): SubscribedAbstractProperty<T> {
         const get = (): T => {
             return this.get() as T;
         };
         const set = (newValue: T): void => {
             this.set(newValue);
         };
-        return new AbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
+        return new SubscribedAbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
     }
 
     public makeStorageLink(
@@ -172,7 +172,7 @@ export class StorageBase {
         return sp ? sp.get() : undefined;
     }
 
-    public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
+    public ref<T>(key: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         const expectedTtype: Type | undefined = this.key2Type.get(key);
         if (expectedTtype === undefined || !expectedTtype!.equals(ttype)) {
             return undefined;

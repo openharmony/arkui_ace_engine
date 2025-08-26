@@ -51,8 +51,10 @@ typedef enum {
     ARKUI_DIRTY_FLAG_RENDER = 0b1000000,
     ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
 } ArkUIDirtyFlag;
-}
-std::map<int32_t, FrameNodePeer> FrameNodePeer::peerMap_;
+} // namespace OHOS::Ace::NG
+std::map<int32_t, std::shared_ptr<FrameNodePeer>> FrameNodePeer::peerMap_;
+std::mutex FrameNodePeer::peerMapMutex_;
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 Opt_Number GetOptNumberFromDimension(const std::optional<Dimension>& dimension)
@@ -85,12 +87,11 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 
 Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
-    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
-    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
+    auto peer = FrameNodePeer::Create(node);
     return peer;
 }
 
@@ -453,7 +454,7 @@ void RecycleImpl(Ark_FrameNode peer)
 }
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
-    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    CHECK_NULL_RETURN(peer, nullptr);
     return peer->GetRenderNodePeer();
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
@@ -582,11 +583,9 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 Ark_FrameNode CreateByRawPtrImpl(void* rawPtr)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(rawPtr);
+    frameNode->SetExclusiveEventForChild(true);
+    frameNode->SetIsArkTsFrameNode(true);
     auto peer = FrameNodePeer::Create(frameNode);
-    auto nodeId = frameNode->GetId();
-    peer->node->SetExclusiveEventForChild(true);
-    peer->node->SetIsArkTsFrameNode(true);
-    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
     return peer;
 }
 
@@ -631,7 +630,16 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
         { "TextArea", GENERATED_ARKUI_TEXT_AREA },
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },
+        { "Marquee", GENERATED_ARKUI_MARQUEE },
+        { "SymbolGlyph", GENERATED_ARKUI_SYMBOL_GLYPH },
         { "XComponent", GENERATED_ARKUI_XCOMPONENT },
+        { "QRCode", GENERATED_ARKUI_QRCODE },
+        { "Badge", GENERATED_ARKUI_BADGE },
+        { "Progress", GENERATED_ARKUI_PROGRESS },
+        { "LoadingProgress", GENERATED_ARKUI_LOADING_PROGRESS },
+        { "TextClock", GENERATED_ARKUI_TEXT_CLOCK },
+        { "TextTimer", GENERATED_ARKUI_TEXT_TIMER },
+        { "Image", GENERATED_ARKUI_IMAGE },
     };
     GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
     auto iter = typeMap.find(type);

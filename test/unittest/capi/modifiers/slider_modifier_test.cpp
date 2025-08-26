@@ -2517,7 +2517,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2560,7 +2560,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setOnChangeEventValueImpl, TestSize.Level1
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -2626,7 +2626,7 @@ HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = [this](

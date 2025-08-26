@@ -13,20 +13,25 @@
  * limitations under the License.
  */
 
-import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
-import { PeerNode } from "./PeerNode";
-import { ArkComponentRootPeer, ArkCustomComponentRootPeer } from "./component";
-import { ArkCustomComponent } from "./ArkCustomComponent"
-import { int32 } from "@koalaui/common"
-import { InteropNativeModule } from "@koalaui/interop"
-import router from "@ohos/router"
+import {
+    GlobalStateManager, 
+    mutableState,
+    MutableState,
+    NodeAttach,
+    rememberDisposable,
+    scheduleCallback }
+from '@koalaui/runtime';
+import { ArkCustomComponentRootPeer } from './component';
+import { ArkCustomComponent } from './ArkCustomComponent';
+import { InteropNativeModule } from '@koalaui/interop';
+import { ObserveSingleton } from '@ohos.arkui.stateManagement';
+import { PeerNode } from './PeerNode';
 
-let _isNeedCreate: boolean = false
 
 export function setNeedCreate(isNeedCreate: boolean): boolean
 {
-    const temp = _isNeedCreate
-    _isNeedCreate = isNeedCreate
+    const temp = GlobalStateManager.instance._isNeedCreate
+    GlobalStateManager.instance._isNeedCreate = isNeedCreate
     return temp
 }
 
@@ -40,40 +45,17 @@ export function ArkComponentRoot(
     NodeAttach<PeerNode>(
         () => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode) => {
-            if (_isNeedCreate) {
-                rememberDisposable(() => {
-                    let state = mutableState(false)
-                    scheduleCallback(() => {})
-                    return state;
-                }, (_: MutableState<boolean> | undefined) => {
-                    scheduleCallback(() => {
-                        component.aboutToDisappear()
-                    })
-                })
-                component.aboutToAppear()
-                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before content`)
-                content()
-                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after content`)
-                return
-            }
-            let shown = rememberDisposable(() => {
-                let state = mutableState(false)
-                scheduleCallback(() => {
+            rememberDisposable(() => {
+                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                     component.aboutToAppear()
-                    state.value = true
                 })
-                return state
-            }, (_: MutableState<boolean> | undefined) =>
+                return true;
+            }, (_: boolean | undefined) =>
                 scheduleCallback(() => {
                     component.aboutToDisappear()
                 })
             )
-            if (shown.value) {
-                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
-                InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
-                content();
-                InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
-            }
+            content();
         }
     )
 }

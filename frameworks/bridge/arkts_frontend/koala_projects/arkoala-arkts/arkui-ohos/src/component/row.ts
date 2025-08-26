@@ -28,10 +28,11 @@ import { CallbackKind } from './peers/CallbackKind';
 import { CallbackTransformer } from './peers/CallbackTransformer';
 import { NodeAttach, remember } from '@koalaui/runtime';
 import { ArkRowNode } from '../handwritten/modifiers/ArkRowNode';
-import { ArkRowAttributeSet, RowModifier } from '../RowModifier';
+import { RowModifier } from '../RowModifier';
+import { hookRowAttributeModifier } from '../handwritten';
 
 export class ArkRowPeer extends ArkCommonMethodPeer {
-
+    _attributeSet?:RowModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags);
     }
@@ -149,10 +150,14 @@ export interface RowOptionsV2 {
 }
 
 export interface RowAttribute extends CommonMethod {
-    alignItems(value: VerticalAlign | undefined): this;
-    justifyContent(value: FlexAlign | undefined): this;
-    pointLight(value: PointLightStyle | undefined): this;
-    reverse(value: boolean | undefined): this;
+    setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
+        return this
+    }
+    alignItems(value: VerticalAlign | undefined): this {return this;}
+    justifyContent(value: FlexAlign | undefined): this {return this;}
+    pointLight(value: PointLightStyle | undefined): this {return this;}
+    reverse(value: boolean | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {return this;}
 }
 
 export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
@@ -160,6 +165,9 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     justifyContent_value?: FlexAlign | undefined;
     pointLight_value?: PointLightStyle | undefined;
     reverse_value?: boolean | undefined;
+    public setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
+        return this
+    }
     public alignItems(value: VerticalAlign | undefined): this {
         return this;
     }
@@ -234,6 +242,12 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
         return this;
     }
 
+    public attributeModifier(modifier: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> |
+        undefined): this {
+        hookRowAttributeModifier(this, modifier);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish();
@@ -241,10 +255,9 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
 }
 
 /** @memo */
-export function Row(
+export function RowImpl(
     /** @memo */
     style: ((attributes: RowAttribute) => void) | undefined,
-    options?: RowOptions | RowOptions | RowOptionsV2,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
@@ -252,9 +265,7 @@ export function Row(
         return new ArkRowComponent()
     })
     NodeAttach<ArkRowPeer>((): ArkRowPeer => ArkRowPeer.create(receiver), (_: ArkRowPeer) => {
-        receiver.setRowOptions(options)
         style?.(receiver)
         content_?.()
-        receiver.applyAttributesFinish()
     })
 }

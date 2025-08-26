@@ -106,7 +106,10 @@ export function getName(node: Memoizable): string {
 // but this require AnalysisVisitor to be run on all sources
 export function isMemo(node: Memoizable) {
     if (arkts.isMethodDefinition(node)) {
-        const kind = getMemoFunctionKind(node.function!)
+        let kind = getMemoFunctionKind(node.function!)
+        if (node.isGetter && isMemoAnnotatableType(node.function!.returnTypeAnnotation)) {
+            kind = getMemoFunctionKind(node.function!.returnTypeAnnotation)
+        }
         if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
             return true
         }
@@ -115,6 +118,12 @@ export function isMemo(node: Memoizable) {
         const kind = getMemoFunctionKind(node)
         if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
             return true
+        }
+        if (isMemoAnnotatableType(node.typeAnnotation)) {
+            const kind = getMemoFunctionKind(node.typeAnnotation)
+            if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
+                return true
+            }
         }
         if (arkts.isETSTypeReference(node.typeAnnotation)) {
             const name = node.typeAnnotation.part?.name
@@ -148,7 +157,10 @@ export function isMemo(node: Memoizable) {
         }
     }
     if (arkts.isClassProperty(node)) {
-        const kind = getMemoFunctionKind(node)
+        let kind = getMemoFunctionKind(node)
+        if (kind == MemoFunctionKind.NONE && isMemoAnnotatableType(node.typeAnnotation)) {
+            kind = getMemoFunctionKind(node.typeAnnotation)
+        }
         if (kind == MemoFunctionKind.MEMO || kind == MemoFunctionKind.INTRINSIC) {
             return true
         }
@@ -260,4 +272,52 @@ export function memoizableHasReceiver(node: Memoizable): boolean {
         return false
     }
     assertIsNever(node)
+}
+
+export function checkReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
+    if (scriptFunction.returnTypeAnnotation) {
+        return true
+    }
+    if (scriptFunction.getSignaturePointer() && arkts.signatureReturnType(scriptFunction.getSignaturePointer())) {
+        return true
+    }
+    if (scriptFunction.getPreferredReturnTypePointer()) {
+        return true
+    }
+    return false
+}
+
+export function getReturnTypeAnnotation(scriptFunction: arkts.ScriptFunction) {
+    const returnTypeAnnotation = scriptFunction.returnTypeAnnotation
+    if (returnTypeAnnotation) {
+        return returnTypeAnnotation
+    }
+
+    const signaturePointer = scriptFunction.getSignaturePointer()
+    if (signaturePointer) {
+        const signatureReturnType = arkts.convertCheckerTypeToTypeNode(
+            arkts.signatureReturnType(signaturePointer)
+        )
+        if (signatureReturnType) {
+            if (scriptFunction.id) {
+                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            } else {
+                console.log(`Using inferred return type ${signatureReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+            }
+            return signatureReturnType
+        }
+    }
+
+    const preferredReturnType = arkts.convertCheckerTypeToTypeNode(
+        scriptFunction.getPreferredReturnTypePointer()
+    )
+    if (preferredReturnType) {
+        if (scriptFunction.id) {
+            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for @memo function ${scriptFunction.id.name} ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+        } else {
+            console.log(`Using inferred return type ${preferredReturnType.dumpSrc()} for anonymous @memo function ${arkts.originalSourcePositionString(scriptFunction.parent)}`)
+        }
+        return preferredReturnType
+    }
+    return undefined
 }

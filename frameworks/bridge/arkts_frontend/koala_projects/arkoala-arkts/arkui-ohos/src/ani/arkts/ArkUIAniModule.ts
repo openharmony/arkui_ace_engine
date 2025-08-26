@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -21,7 +21,7 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
@@ -31,7 +31,8 @@ import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
-
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
+import { NodeAdapter } from '../../FrameNode'
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -50,6 +51,12 @@ export class ArkUIAniModule {
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
+    native static _GetNodePtrWithPeerPtr(ptr: KPointer): KLong
+    native static _GetNodeIdWithNodePtr(ptr: KPointer): KInt
+    native static _GetNodeIdWithPeerPtr(ptr: KPointer): KInt
+    native static _CreateRenderNodePeerWithNodePtr(ptr: KPointer): KPointer
+    native static _ToColorLong(color: KInt): KLong
+    native static _ToColorInt(color: KLong): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _CustomNode_RequestFrame(): void
@@ -63,9 +70,10 @@ export class ArkUIAniModule {
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
-    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SyntaxNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     native static _TransferKeyEventPointer(input: KPointer): KPointer
@@ -127,6 +135,7 @@ export class ArkUIAniModule {
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+    native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer
@@ -190,6 +199,9 @@ export class ArkUIAniModule {
     native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
 
+    // for search
+    native static _Search_SetSearchIcon_Symbol(ptr: KPointer, value: SymbolGlyphModifier): void
+
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -210,11 +222,11 @@ export class ArkUIAniModule {
     native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
 
     // for  stateMgmt
-    native static _PersistentStorage_Get(key: string): string
-    native static _PersistentStorage_Set(key: string, value: string): void
-    native static _PersistentStorage_Has(key: string): boolean
+    native static _PersistentStorage_Get(key: string, areaMode?: KInt): string
+    native static _PersistentStorage_Set(key: string, value: string, areaMode?: KInt): void
+    native static _PersistentStorage_Has(key: string, areaMode?: KInt): boolean
     native static _PersistentStorage_Clear(): void
-    native static _PersistentStorage_Delete(key: string): void
+    native static _PersistentStorage_Delete(key: string, areaMode?: KInt): void
     native static _Env_GetColorMode(): KInt
     native static _Env_GetFontScale(): KFloat
     native static _Env_GetFontWeightScale(): KFloat
@@ -273,4 +285,42 @@ export class ArkUIAniModule {
     native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
         dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
     native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
+    native static _CanvasRenderingContext_GetCanvasId(peerPtr: KPointer): KInt
+
+    native static _FrameNode_MarkDirtyNode(ptr: KPointer): void
+    native static _TraceBegin(traceName: string): void
+    native static _TraceEnd(): void
+    native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
+    native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _GetColorValue(color: number | string): KUInt
+    native static _GetStringColorValue(color: string): KUInt
+    native static _GetNumberColorValue(color: number): KUInt
+    native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
+    native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
+    native static _RemoveThemeInNative(withThemeId: number): void
+    native static _UpdateColorMode(colorMode: KInt): void
+    native static _RestoreColorMode(): void
+    native static _SetThemeScopeId(themeScopeId: number): void
+    native static _CreateAndBindTheme(
+        themeScopeId: KInt,
+        themeId: KInt,
+        thisArray: KSerializerBuffer, thisLength: number,
+        colorMode: KInt,
+        onThemeScopeDestroy: () => void
+    ): void;
+    native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    
+    //NodeAdapter 
+    native static _NodeAdapter_Construct( nodeAdapter : NodeAdapter): KPointer
+    native static _NodeAdapter_DetachNodeAdapter(ptr : KPointer) : void
+    native static _NodeAdapter_AttachNodeAdapter(ptr : KPointer, node: KPointer) : boolean
+    native static _NodeAdapter_Dispose(ptr : KPointer) : void
+    native static _NodeAdapter_SetTotalNodeCount(ptr : KPointer, count : number) : void
+    native static _NodeAdapter_NotifyItemReloaded(ptr : KPointer) : void
+    native static _NodeAdapter_NotifyItemChanged(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemRemoved(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemInserted(ptr : KPointer, start : number, count : number) : void
+    native static _NodeAdapter_NotifyItemMoved(ptr : KPointer, from : number, to : number) : void
+    native static _NodeAdapter_GetAllItems(ptr : KPointer) : Array<number>
+
 }

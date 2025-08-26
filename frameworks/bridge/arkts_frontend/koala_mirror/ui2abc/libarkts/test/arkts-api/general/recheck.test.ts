@@ -37,7 +37,7 @@ class RenameTestFunction extends arkts.AbstractVisitor {
     visitor(node: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
-        // Don't change name at checked stage, add another import
+        // Don't change name at checked state, add another import
         if (arkts.isImportDeclaration(node)) return node
         if (arkts.isIdentifier(node) && node.name == "testFunction") {
             return arkts.factory.createIdentifier("testFunctionChanged")
@@ -50,7 +50,7 @@ class RenameTestFunction extends arkts.AbstractVisitor {
 suite(util.basename(__filename), () => {
 
 
-    test("add import at parsed stage and proceed to checked", function() {
+    test("add import at parsed state and proceed to checked", function() {
         createConfig()
 
         const code =
@@ -58,6 +58,7 @@ suite(util.basename(__filename), () => {
         console.log("test")
         `
 
+        arkts.arktsGlobal.filePath = "./plugins/input/main.ets"
         arkts.arktsGlobal.compilerContext = arkts.Context.createFromString(code)
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
@@ -122,6 +123,7 @@ console.log("test");
         testFunction()
         `
 
+        arkts.arktsGlobal.filePath = "./plugins/input/main.ets"
         arkts.arktsGlobal.compilerContext = arkts.Context.createFromString(code)
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
@@ -130,7 +132,7 @@ console.log("test");
         const importStorage = new arkts.ImportStorage(program, true)
         const module = program.ast as arkts.ETSModule
 
-        arkts.programGetExternalSources(arkts.arktsGlobal.compilerContext.program).forEach(it => {
+        arkts.arktsGlobal.compilerContext.program.getExternalSources().forEach(it => {
             if (!it.getName().includes("library")) return
             it.programs.forEach(program => {
                 program.setAst(new RenameTestFunction().visitor(program.ast))

@@ -35,6 +35,7 @@
 #include "es2panda_lib.h"
 #include "common-interop.h"
 #include "stdexcept"
+#include "interop-utils.h"
 #include <string>
 #include <iostream>
 #include <vector>

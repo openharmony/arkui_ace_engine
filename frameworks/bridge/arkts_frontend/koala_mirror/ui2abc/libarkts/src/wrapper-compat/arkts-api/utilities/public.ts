@@ -40,7 +40,7 @@ import {
 } from '../../../generated';
 import { Program } from '../peers/Program';
 import { clearNodeCache, nodeByType } from '../class-by-peer';
-import { SourcePosition } from '../../../arkts-api/peers/SourcePosition';
+import { SourcePosition } from '../../../generated';
 import { MemberExpression } from '../to-be-generated/MemberExpression';
 
 export function proceedToState(state: Es2pandaContextState, context: KNativePointer, forceDtsEmit = false): void {
@@ -61,7 +61,7 @@ export function proceedToState(state: Es2pandaContextState, context: KNativePoin
 function processErrorState(state: Es2pandaContextState, context: KNativePointer, forceDtsEmit = false): void {
     try {
         if (global.es2panda._ContextState(context) === Es2pandaContextState.ES2PANDA_STATE_ERROR && !forceDtsEmit) {
-            const errorMessage = unpackString(global.es2panda._ContextErrorMessage(context));
+            const errorMessage = unpackString(global.generatedEs2panda._ContextErrorMessage(context));
             if (errorMessage === undefined) {
                 throwError(`Could not get ContextErrorMessage`);
             }
@@ -78,7 +78,7 @@ export function startChecker(): boolean {
 }
 
 export function recheckSubtree(node: AstNode): void {
-    global.es2panda._AstNodeRecheck(global.context, node.peer);
+    global.generatedEs2panda._AstNodeRecheck(global.context, node.peer);
 }
 
 export function rebindSubtree(node: AstNode): void {
@@ -142,7 +142,7 @@ function getDeclFromArrayOrObjectMember(node: MemberExpression): AstNode | undef
 }
 
 export function getPeerDecl(peer: KNativePointer): AstNode | undefined {
-    const decl = global.es2panda._DeclarationFromIdentifier(global.context, peer);
+    const decl = global.generatedEs2panda._DeclarationFromIdentifier(global.context, peer);
     if (decl === nullptr) {
         return undefined;
     }
@@ -196,7 +196,7 @@ export function ImportSpecifierIsRemovableConst(node: ImportSpecifier): boolean 
 }
 
 // Improve: It seems like Definition overrides AstNode  modifiers
-// with it's own modifiers which is completely unrelated set of flags.
+// with its own modifiers which is completely unrelated set of flags.
 // Use this function if you need
 // the language level modifiers: public, declare, export, etc.
 export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFlags {
@@ -205,7 +205,7 @@ export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFla
 
 // Improve: Import statements should be inserted to the statements
 export function importDeclarationInsert(node: ETSImportDeclaration, program: Program): void {
-    global.es2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, node.peer);
+    global.generatedEs2panda._InsertETSImportDeclarationAndParse(global.context, program.peer, node.peer);
 }
 
 export function getProgramFromAstNode(node: AstNode): Program {
@@ -256,19 +256,21 @@ export function generateTsDeclarationsFromContext(
   outputDeclEts: string,
   outputEts: string,
   exportAll: boolean,
-  isolated: boolean
+  isolated: boolean,
+  recordFile: string
 ): KInt {
   return global.es2panda._GenerateTsDeclarationsFromContext(
     global.context,
     passString(outputDeclEts),
     passString(outputEts),
     exportAll,
-    isolated
+    isolated,
+    recordFile
   );
 }
 
 export function generateStaticDeclarationsFromContext(outputPath: string): KInt {
-    return global.es2panda._GenerateStaticDeclarationsFromContext(
+    return global.generatedEs2panda._GenerateStaticDeclarationsFromContext(
         global.context,
         passString(outputPath)
     );

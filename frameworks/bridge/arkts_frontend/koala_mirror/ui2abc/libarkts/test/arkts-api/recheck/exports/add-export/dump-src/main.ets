@@ -3,7 +3,7 @@ import { C as C } from "./library";
 
 import { f as f } from "./library";
 
-function main(): void {}
+function main() {}
 
 f();
 

@@ -19,12 +19,20 @@ import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-interface IAniStorage {
-    get(key: string): string | undefined;
-    set(key: string, val: string): void;
-    has(key: string): boolean;
+export const enum AreaMode {
+    EL1 = 0,
+    EL2 = 1,
+    EL3 = 2,
+    EL4 = 3,
+    EL5 = 4
+}
+
+export interface IAniStorage {
+    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined;
+    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void;
+    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean;
     clear(): void;
-    delete(key: string): void;
+    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void;
 }
 
 // class JsonElement{}
@@ -90,21 +98,21 @@ class TypedMap {
     }
 }
 
-class AniStorage implements IAniStorage {
-    get(key: string): string | undefined {
-        return ArkUIAniModule._PersistentStorage_Get(key);
+export class AniStorage implements IAniStorage {
+    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined {
+        return ArkUIAniModule._PersistentStorage_Get(key, areaMode);
     }
-    set(key: string, val: string): void {
-        ArkUIAniModule._PersistentStorage_Set(key, val);
+    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void {
+        ArkUIAniModule._PersistentStorage_Set(key, val, areaMode);
     }
-    has(key: string): boolean {
-        return ArkUIAniModule._PersistentStorage_Has(key);
+    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean {
+        return ArkUIAniModule._PersistentStorage_Has(key, areaMode);
     }
     clear(): void {
         ArkUIAniModule._PersistentStorage_Clear();
     }
-    delete(key: string): void {
-        ArkUIAniModule._PersistentStorage_Delete(key);
+    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void {
+        ArkUIAniModule._PersistentStorage_Delete(key, areaMode);
     }
 }
 
@@ -116,6 +124,7 @@ class AniStorage implements IAniStorage {
  */
 class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
+    private readonly storage_: IAniStorage = new AniStorage();
     private map_: TypedMap = new TypedMap();
     private simpleTypeSet: Set<Type> = new Set<Type>([
         Type.from<int>(),
@@ -126,7 +135,6 @@ class PersistentStorage {
         Type.from<string>(),
         Type.from<boolean>(),
     ]);
-    private readonly storage_: IAniStorage = new AniStorage();
 
     private static getOrCreate(): PersistentStorage {
         if (PersistentStorage.instance_) {
@@ -169,9 +177,9 @@ class PersistentStorage {
         fromJson?: FromJSONType<T>
     ): boolean {
         const ttype = Type.of(defaultValue);
-
+        let isSimpleType = false;
         try {
-            if (!this.simpleTypeSet.has(ttype) && (!toJson || !fromJson)) {
+            if (!isSimpleType && (!toJson || !fromJson)) {
                 StateMgmtConsole.log(
                     `Object Types for key ${key} requires toJson and fromJson functions to be defined`
                 );
@@ -198,8 +206,8 @@ class PersistentStorage {
                 PersistentStorage.getOrCreate().__readFromDiskSetAndPersist<T>(
                     key,
                     ttype,
-                    this.simpleTypeSet.has(key) ? undefined : fromJson,
-                    this.simpleTypeSet.has(key) ? undefined : toJson
+                    isSimpleType ? undefined : fromJson,
+                    isSimpleType ? undefined : toJson
                 )
             ) {
                 return true;
@@ -210,7 +218,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
-                this.simpleTypeSet.has(key)? undefined : toJson,
+                isSimpleType ? undefined : toJson,
             );
             if (!success) {
                 StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
@@ -293,8 +301,8 @@ class PersistentStorage {
         }
 
         try {
-            if (this.simpleTypeSet.has(key)) {
-                // Step 2: simple type just parse from disk
+            if (this.simpleTypeSet.has(ttype) && fromJson === undefined) {
+                // Step 2: simple type just parse from disk    
                 const value = JSON.parse<T>(jsonString, ttype);
 
                 // Step 3: Store the value in AppStorage
@@ -343,7 +351,7 @@ class PersistentStorage {
                 return;
             }
             try {
-                if (this.simpleTypeSet.has(key)) {
+                if (this.simpleTypeSet.has(ttype) && toJson === undefined) {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { float32, int32, int64 } from "@koalaui/common"
+import { float32, float64, int32, int64 } from "@koalaui/common"
 import { pointer, KPointer, KSerializerBuffer } from "./InteropTypes"
 import { wrapCallback } from "./InteropOps"
 import { InteropNativeModule } from "./InteropNativeModule"
@@ -287,6 +287,11 @@ export class SerializerBase {
         this.view.setFloat32(this.position, value, true)
         this.position += 4
     }
+    writeFloat64(value: float64) {
+        this.checkCapacity(8)
+        this.view.setFloat64(this.position, value, true)
+        this.position += 8
+    }
     writeBoolean(value: boolean|undefined) {
         this.checkCapacity(1)
         this.view.setInt8(this.position, value == undefined ? RuntimeType.UNDEFINED : +value)
@@ -302,10 +307,11 @@ export class SerializerBase {
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
-    writeBuffer(buffer: NativeBuffer) {
+    writeBuffer(buffer: ArrayBuffer) {
         this.holdAndWriteObject(buffer)
-        this.writePointer(buffer.data)
-        this.writeInt64(buffer.length)
+        const ptr = InteropNativeModule._GetNativeBufferPointer(buffer)
+        this.writePointer(ptr)
+        this.writeInt64(buffer.byteLength)
     }
 }
 

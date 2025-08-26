@@ -123,7 +123,7 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
 HWTEST_F(WebModifierTest, onPageEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
 
     struct CheckEvent {
@@ -160,7 +160,7 @@ HWTEST_F(WebModifierTest, onPageEndTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onPageBeginTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
 
     struct CheckEvent {
@@ -197,7 +197,7 @@ HWTEST_F(WebModifierTest, onPageBeginTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onProgressChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     int32_t newProgress = 99;
 
     struct CheckEvent {
@@ -234,7 +234,7 @@ HWTEST_F(WebModifierTest, onProgressChangeTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onTitleReceiveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string title = "title";
 
     struct CheckEvent {
@@ -271,7 +271,7 @@ HWTEST_F(WebModifierTest, onTitleReceiveTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onGeolocationHideTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string origin = "origin";
 
     struct CheckEvent {
@@ -305,7 +305,7 @@ HWTEST_F(WebModifierTest, onGeolocationHideTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onGeolocationShowTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string origin = "origin";
     RefPtr<WebGeolocation> webGeolocation = Referenced::MakeRefPtr<MockWebGeolocation>();
 
@@ -347,7 +347,7 @@ HWTEST_F(WebModifierTest, onGeolocationShowTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onRequestSelectedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string type = "onRequestSelected";
 
     struct CheckEvent {
@@ -381,7 +381,7 @@ HWTEST_F(WebModifierTest, onRequestSelectedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::string message = "message";
     std::string value = "value";
@@ -437,7 +437,7 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::string message = "message";
     std::string value = "value";
@@ -493,7 +493,7 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::string message = "message";
     std::string value = "value";
@@ -549,7 +549,7 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::string message = "message";
     std::string value = "value";
@@ -605,7 +605,7 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string message = "message";
     std::string sourceId = "sourceId";
     int lineNumber = 5;
@@ -655,7 +655,7 @@ HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onErrorReceiveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string errorInfo = "errorInfo";
     int errorCode = 5;
     RefPtr<WebError> webError = Referenced::MakeRefPtr<WebError>(errorInfo, errorCode);
@@ -706,7 +706,7 @@ HWTEST_F(WebModifierTest, onErrorReceiveTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onHttpErrorReceiveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebResponse> webResponse = Referenced::MakeRefPtr<WebResponse>();
     std::map<std::string, std::string> headers = {};
     std::string method = "method";
@@ -755,7 +755,7 @@ HWTEST_F(WebModifierTest, onHttpErrorReceiveTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onDownloadStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::string userAgent = "userAgent";
     std::string contentDisposition = "contentDisposition";
@@ -809,7 +809,7 @@ HWTEST_F(WebModifierTest, onDownloadStartTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onRefreshAccessedHistoryTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     bool isRefreshed = true;
 
@@ -850,7 +850,7 @@ HWTEST_F(WebModifierTest, onRefreshAccessedHistoryTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string dataStr = "data";
 
     struct CheckEvent {
@@ -903,7 +903,7 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RenderExitReason exitedReason = RenderExitReason::CRASHED;
 
     struct CheckEvent {
@@ -924,7 +924,7 @@ HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
         Converter::ArkValue<Callback_OnRenderExitedEvent_Void>(checkCallback, contextId);
 
     auto optCallback = Converter::ArkValue<Opt_Callback_OnRenderExitedEvent_Void>(arkCallback);
-    modifier_->setOnRenderExited0(node_, &optCallback);
+    modifier_->setOnRenderExited(node_, &optCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     webEventHub->FireOnRenderExitedEvent(std::make_shared<RenderExitedEvent>(
@@ -942,7 +942,7 @@ HWTEST_F(WebModifierTest, onRenderExitedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebFileSelectorParam> param = Referenced::MakeRefPtr<MockWebFileSelectorParam>();
     RefPtr<FileSelectorResult> result = Referenced::MakeRefPtr<MockFileSelectorResult>();
 
@@ -993,7 +993,7 @@ HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onResourceLoadTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
 
     struct CheckEvent {
@@ -1030,7 +1030,7 @@ HWTEST_F(WebModifierTest, onResourceLoadTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onFullScreenExitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string type = "onFullScreenExit";
 
     struct CheckEvent {
@@ -1064,7 +1064,7 @@ HWTEST_F(WebModifierTest, onFullScreenExitTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onFullScreenEnterTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<FullScreenExitHandler> handler = Referenced::MakeRefPtr<MockFullScreenExitHandler>();
     int width = 600;
     int height = 800;
@@ -1110,7 +1110,7 @@ HWTEST_F(WebModifierTest, onFullScreenEnterTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onScaleChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     float oldScale = 2.5f;
     float newScale = 3.5f;
 
@@ -1151,7 +1151,7 @@ HWTEST_F(WebModifierTest, onScaleChangeTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<AuthResult> result = Referenced::MakeRefPtr<MockAuthResult>();
     std::string host = "host";
     std::string realm = "realm";
@@ -1205,7 +1205,7 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::map<std::string, std::string> headers = {};
     RefPtr<WebRequest> webRequest = Referenced::MakeRefPtr<WebRequest>(
         headers, "method", "url", true, true, true);
@@ -1263,7 +1263,7 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onPermissionRequestTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebPermissionRequest> webPermissionRequest = Referenced::MakeRefPtr<MockWebPermissionRequest>();
 
     struct CheckEvent {
@@ -1300,7 +1300,7 @@ HWTEST_F(WebModifierTest, onPermissionRequestTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onScreenCaptureRequestTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebScreenCaptureRequest> request = Referenced::MakeRefPtr<MockWebScreenCaptureRequest>();
 
     struct CheckEvent {
@@ -1337,7 +1337,7 @@ HWTEST_F(WebModifierTest, onScreenCaptureRequestTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebContextMenuParam> param = Referenced::MakeRefPtr<MockWebContextMenuParam>();
     RefPtr<ContextMenuResult> result = Referenced::MakeRefPtr<MockContextMenuResult>();
 
@@ -1388,7 +1388,7 @@ HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onContextMenuHideTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string type = "onContextMenuHide";
 
     struct CheckEvent {
@@ -1421,7 +1421,7 @@ HWTEST_F(WebModifierTest, onContextMenuHideTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onSearchResultReceiveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     int activeMatchOrdina = 5;
     int numberOfMatches = 2;
     bool isDoneCounting = true;
@@ -1466,7 +1466,7 @@ HWTEST_F(WebModifierTest, onSearchResultReceiveTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onScrollTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     double xOffset = 6.6f;
     double yOffset = 8.9f;
 
@@ -1506,7 +1506,7 @@ HWTEST_F(WebModifierTest, onScrollTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onSslErrorEventReceiveTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
 
     RefPtr<SslErrorResult> result = Referenced::MakeRefPtr<MockSslErrorResult>();
     SslError error = SslError::DATE_INVALID;
@@ -1554,7 +1554,7 @@ HWTEST_F(WebModifierTest, onSslErrorEventReceiveTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onSslErrorEventTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
 
     RefPtr<AllSslErrorResult> result = Referenced::MakeRefPtr<MockSslErrorResult>();
     SslError error = SslError::DATE_INVALID;
@@ -1615,7 +1615,7 @@ HWTEST_F(WebModifierTest, onSslErrorEventTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onClientAuthenticationRequestTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<SslSelectCertResult> handler = Referenced::MakeRefPtr<MockSslSelectCertResult>();
     std::string host = "host";
     int32_t port = 80;
@@ -1669,7 +1669,7 @@ HWTEST_F(WebModifierTest, onClientAuthenticationRequestTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onWindowNewTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string targetUrl = "targetUrl";
     bool isAlert = true;
     bool isUserTrigger = true;
@@ -1719,7 +1719,7 @@ HWTEST_F(WebModifierTest, onWindowNewTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onWindowExitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string type = "onWindowExit";
 
     struct CheckEvent {
@@ -1752,7 +1752,7 @@ HWTEST_F(WebModifierTest, onWindowExitTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onTouchIconUrlReceivedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     bool precomposed = true;
 
@@ -1792,7 +1792,7 @@ HWTEST_F(WebModifierTest, onTouchIconUrlReceivedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onPageVisibleTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
 
     struct CheckEvent {
@@ -1828,7 +1828,7 @@ HWTEST_F(WebModifierTest, onPageVisibleTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onDataResubmittedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<DataResubmitted> handler = Referenced::MakeRefPtr<MockDataResubmitted>();
 
     struct CheckEvent {
@@ -1865,7 +1865,7 @@ HWTEST_F(WebModifierTest, onDataResubmittedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onAudioStateChangedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     bool playing = true;
 
     struct CheckEvent {
@@ -1901,7 +1901,7 @@ HWTEST_F(WebModifierTest, onAudioStateChangedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onFirstContentfulPaintTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     int64_t navigationStartTick = 1000;
     int64_t firstContentfulPaintMs = 4000;
 
@@ -1941,7 +1941,7 @@ HWTEST_F(WebModifierTest, onFirstContentfulPaintTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onFirstMeaningfulPaintTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     int64_t navigationStartTime = 1000;
     int64_t firstMeaningfulPaintTime = 4000;
 
@@ -1983,7 +1983,7 @@ HWTEST_F(WebModifierTest, onFirstMeaningfulPaintTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onLargestContentfulPaintTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     int64_t navigationStartTime = 5000;
     int64_t largestImagePaintTime = 6000;
     int64_t largestTextPaintTime = 7000;
@@ -2039,7 +2039,7 @@ HWTEST_F(WebModifierTest, onLargestContentfulPaintTest, TestSize.Level1)
 HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::map<std::string, std::string> headers = {};
     std::string method = "method";
     std::string url = "url";

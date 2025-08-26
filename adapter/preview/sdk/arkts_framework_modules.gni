@@ -1,0 +1,922 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+arkts_framework_modules = [
+  {
+    label = "//applications/standard/settings/ani/settings:settings"
+  },
+  {
+    label = "//arkcompiler/runtime_core/static_core/plugins/ets:ets2abc_etsstdlib_bootabc"
+    name = "etsstdlib_bootabc.abc"
+  },
+  {
+    label = "//arkcompiler/runtime_core/static_core/plugins/ets:ets2abc_commonsdk_api"
+  },
+  {
+    label = "//arkcompiler/runtime_core/static_core/plugins/ets:ets2abc_commonsdk_arkts"
+  },
+  {
+    label = "//base/startup/init/interfaces/taihe/deviceInfo:deviceInfo"
+  },
+  {
+    label = "//base/startup/init/interfaces/taihe/systemParameterEnhance:systemParameterEnhance"
+  },
+  {
+    label = "//base/startup/init/interfaces/taihe/syscap:global"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_user_input_abc"
+    name = "notification_user_input.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_template_abc"
+    name = "notification_template.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_subscribe_info_abc"
+    name = "notification_subscribe_info.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_slot_abc"
+    name = "notification_slot.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_flags_abc"
+    name = "notification_flags.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_content_abc"
+    name = "notification_content.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_common_def_abc"
+    name = "notification_common_def.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/ets/ets:notification_action_button_abc"
+    name = "notification_action_button.abc"
+  },
+  {
+    label = "//base/notification/distributed_notification_service/frameworks/reminder_ani:reminder_agent_manager_abc"
+  },
+  {
+    label = "//base/notification/eventhandler/frameworks/emitter:event_emitter_abc"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:common_event_manager"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:commonEventData"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:commonEventPublishData"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:commonEventSubscribeInfo"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:commonEventSubscriber"
+  },
+  {
+    label = "//base/notification/common_event_service/interfaces/kits/ani/common_event:static_subscriber_extension_context"
+  },
+  {
+    label = "//base/telephony/sms_mms/frameworks/ets/taihe:telephony_sms_abc"
+  },
+  {
+    label = "//base/telephony/core_service/frameworks/js/taihe/network_search:telephony_radio_abc"
+  },
+  {
+    label = "//base/telephony/core_service/frameworks/ets/ani/esim:esim_ani_abc"
+    name = "telephony_esim.abc"
+  },
+  {
+    label = "//base/telephony/core_service/frameworks/ets/ani/sim:sim_ani_abc"
+    name = "telephony_sim.abc"
+  },
+  {
+    label = "//base/telephony/cellular_data/frameworks/ets/ani:cellular_data_abc"
+    name = "telephony_data.abc"
+  },
+  {
+    label = "//base/telephony/state_registry/frameworks/ets/taihe:telephony_observer_abc"
+  },
+  {
+    label = "//base/telephony/state_registry/frameworks/ets/ani/observer:observer_ani_abc"
+    name = "telephony_observer.abc"
+  },
+  {
+    label = "//base/telephony/call_manager/frameworks/ets/taihe:telephony_call_abc"
+  },
+  {
+    label = "//base/powermgr/display_manager/state_manager/frameworks/ets/taihe/brightness:brightness_abc"
+  },
+  {
+    label = "//base/powermgr/thermal_manager/frameworks/ets/taihe/thermal:thermal_abc"
+  },
+  {
+    label = "//base/powermgr/power_manager/frameworks/ets/taihe/power:power_abc"
+  },
+  {
+    label = "//base/powermgr/power_manager/frameworks/ets/taihe/runninglock:runningLock_abc"
+  },
+  {
+    label = "//base/powermgr/battery_statistics/frameworks/ets/taihe/battery_stats:batterystats_abc"
+  },
+  {
+    label = "//base/powermgr/battery_manager/frameworks/ets/taihe/charger:charger"
+  },
+  {
+    label = "//base/powermgr/battery_manager/frameworks/ets/taihe/batteryInfo:batteryInfo_abc"
+  },
+  {
+    label = "//base/time/time_service/framework/js/taihe/system_datetime:systemdatetime_abc"
+  },
+  {
+    label = "//base/time/time_service/framework/js/taihe/system_timer:systemtimer_abc"
+  },
+  {
+    label = "//base/time/time_service/framework/js/ani:systemdatetime_abc"
+    name = "systemdatetime.abc"
+  },
+  {
+    label = "//base/inputmethod/imf/frameworks/ets/taihe/inputMethod:inputmethod_abc"
+  },
+  {
+    label = "//base/inputmethod/imf/frameworks/ets/taihe/inputMethod:inputmethod_panel_abc"
+  },
+  {
+    label = "//base/inputmethod/imf/frameworks/ets/taihe/inputMethod:inputmethod_subtype_abc"
+  },
+  {
+    label = "//base/location/frameworks/ets/taihe/locator_sdk:location_framework_abc"
+  },
+  {
+    label = "//base/global/font_manager/interfaces/ani:fontManager"
+  },
+  {
+    label = "//base/global/i18n/interfaces/ets/ani/intl:intl"
+  },
+  {
+    label = "//base/global/i18n/interfaces/ets/ani/i18n:i18n"
+  },
+  {
+    label = "//base/global/resource_management/interfaces/ets/ani/resourceManager:resourceManager"
+  },
+  {
+    label = "//base/global/resource_management/interfaces/ets/ani/resourceManager:resource"
+  },
+  {
+    label = "//base/global/resource_management/interfaces/ets/ani/resourceManager:rawFileDescriptor"
+  },
+  {
+    label = "//base/useriam/user_auth_framework/frameworks/ets/ani/user_access_ctrl:user_access_ctrl_abc"
+    name = "ohos.userIAM.userAccessCtrl.abc"
+  },
+  {
+    label = "//base/useriam/user_auth_framework/frameworks/ets/ani/user_auth:user_auth"
+  },
+  {
+    label = "//base/useriam/user_auth_framework/frameworks/ets/ani/user_auth_extension:user_auth_extension"
+  },
+  {
+    label = "//base/useriam/face_auth/frameworks/ets/ani:face_auth_taihe_abc"
+    name = "ohos.userIAM.faceAuth.abc"
+  },
+  {
+    label = "//base/account/os_account/frameworks/ets/taihe:distributed_account_abc"
+  },
+  {
+    label = "//base/account/os_account/frameworks/ets/taihe:app_account_abc"
+  },
+  {
+    label = "//base/account/os_account/frameworks/ets/taihe:os_account_abc"
+  },
+  {
+    label = "//base/customization/enterprise_device_management/interfaces/ets/ani/enterprise_device_management:adminManager"
+  },
+  {
+    label = "//base/customization/enterprise_device_management/interfaces/ets/ani/enterprise_device_management:securityManager"
+  },
+  {
+    label = "//base/customization/config_policy/interfaces/ets/ani:configPolicy"
+  },
+  {
+    label = "//base/customization/config_policy/interfaces/ets/ani:custom_config"
+  },
+  {
+    label = "//base/security/certificate_manager/interfaces/kits/ani/certificate_manager_ani:certmanager_abc"
+  },
+  {
+    label = "//base/security/certificate_manager/interfaces/kits/ani/certificate_manager_dialog_ani:certmanager_dialog_abc"
+  },
+  {
+    label = "//base/security/certificate_framework/frameworks/js/ani:cert_framework_ets"
+  },
+  {
+    label = "//base/security/huks/interfaces/kits/ani/ani_implement:security_huks_ani"
+  },
+  {
+    label = "//base/security/access_token/frameworks/ets/ani/privacy:privacy_manager"
+  },
+  {
+    label = "//base/security/access_token/frameworks/ets/ani/accesstoken:ability_access_ctrl"
+  },
+  {
+    label = "//base/security/access_token/frameworks/ets/ani/el5filekeymanager:screen_lock_file_manager"
+  },
+  {
+    label = "//base/security/access_token/frameworks/ets/ani/common:Permission_Request_Result"
+  },
+  {
+    label = "//base/security/access_token/frameworks/ets/ani/common:permissions"
+  },
+  {
+    label = "//base/security/crypto_framework/frameworks/js/ani:crypto_framework_ets"
+  },
+  {
+    label = "//base/web/webview/interfaces/kits/ani/webview:web_webview"
+  },
+  {
+    label = "//base/print/print_fwk/interfaces/kits/ani/printani:print"
+  },
+  {
+    label = "//base/print/print_fwk/interfaces/kits/ani/printani:print_extension_ability_ani_abc"
+    name = "print_extension_ability_ani.abc"
+  },
+  {
+    label = "//base/print/print_fwk/interfaces/kits/ani/printani:print_extension_context_abc"
+  },
+  {
+    label = "//base/update/updateservice/frameworks/js/ani:update_framework_abc"
+    name = "update_ani.abc"
+  },
+  {
+    label = "//base/sensors/miscdevice/frameworks/ets/taihe:vibrator_abc"
+  },
+  {
+    label = "//base/sensors/sensor/frameworks/ets/taihe:sensor_abc"
+  },
+  {
+    label = "//base/hiviewdfx/hitrace/interfaces/ets/ani/hitracechain:hitrace_chain"
+  },
+  {
+    label = "//base/hiviewdfx/hitrace/interfaces/ets/ani/hitracemeter:hitrace_meter"
+  },
+  {
+    label = "//base/hiviewdfx/hisysevent/interfaces/ets/ani/hisysevent:hisysevent"
+  },
+  {
+    label = "//base/hiviewdfx/hiview/interfaces/ets/ani/loglibrary:loglibrary"
+  },
+  {
+    label = "//base/hiviewdfx/hiappevent/frameworks/ets/ani/hiappevent:hiappevent"
+  },
+  {
+    label = "//base/msdp/device_status/frameworks/ets/drag:drag_abc"
+  },
+  {
+    label = "//base/request/request/frameworks/js/ani:requestmodule_abc"
+    name = "requestmodule.abc"
+  },
+  {
+    label = "//base/request/request/frameworks/ets/ani/cache_download:cache_download"
+  },
+  {
+    label = "//base/request/request/frameworks/ets/ani/request:request"
+  },
+  {
+    label = "//base/theme/screenlock_mgr/frameworks/ets/ani:screenLock_static"
+  },
+  {
+    label = "//commonlibrary/ets_utils/base_sdk:base_sdk"
+  },
+  {
+    label = "//commonlibrary/ets_utils/base_sdk:base_transfer"
+  },
+  {
+    label = "//drivers/external_device_manager/frameworks/js/taihe/driver_extension_context:driverExtensionContext_abc"
+  },
+  {
+    label = "//drivers/external_device_manager/frameworks/js/taihe:device_manager_abc"
+  },
+  {
+    label = "//drivers/external_device_manager/frameworks/js/ani/driver_extension_ability:driver_extension_ability_abc"
+    name = "driverExtensionAbility.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/relational_store/frameworks/js/ani/relationalstore:relationalstore_abc"
+    name = "relationalstore.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/relational_store/frameworks/ets/taihe/relational_store:relationalstore_abc"
+    name = "relationalstore.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/relational_store/frameworks/ets/taihe/relational_store:relationalstore_framework_test"
+  },
+  {
+    label = "//foundation/distributeddatamgr/pasteboard/interfaces/taihe:pasteboard_taihe_ani"
+  },
+  {
+    label = "//foundation/distributeddatamgr/pasteboard/interfaces/ani:pasteboard_abc"
+    name = "pasteboard_ani.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/preferences/frameworks/js/ani/preferences:preferences_abc"
+    name = "preferences.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/preferences/frameworks/ets/taihe/preferences:preferences_abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/udmf/interfaces/taihe:udmf_abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/data_share/frameworks/js/ani/dataShare:data_share_predicates_abc"
+    name = "data_share_predicates.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/data_share/frameworks/js/ani/dataShareResultSet:data_share_result_set_abc"
+    name = "data_share_result_set.abc"
+  },
+  {
+    label = "//foundation/distributeddatamgr/kv_store/frameworks/ets:kvstore_framework_abc"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/short_key:short_key"
+  },{
+    label = "//foundation/multimodalinput/input/frameworks/ets/key_code:key_code"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/touch_event:touch_event"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/input_monitor:input_monitor"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/pointer:pointer"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/input_device:input_device"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/intention_code:intention_code"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/input_event_client:input_event_client"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/mouse_event:mouse_event"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/gesture_event:gesture_event"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/key_event:key_event"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/input_consumer:input_consumer"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ets/input_event:input_event"
+  },
+  {
+    label = "//foundation/multimodalinput/input/frameworks/ani/input_device:input_device_abc"
+    name = "input_device.abc"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/frameworks/text/interface/mlb/ani:text_engine"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/drawing:drawing"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/hdr_capability:hdr_capability"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/ui_effect:uiEffect"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/effect_kit:effectKit"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/effect_kit:effectKit_entry"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/interfaces/kits/ani/color_manager:color_space_manager"
+  },
+  {
+    label = "//foundation/distributedhardware/device_manager/interfaces/kits/taihe:ohos_distributedDeviceManager_abc"
+  },
+  {
+    label = "//foundation/arkui/ui_appearance/interfaces/ets/ani:ui_appearance_abc"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/performanceMonitor:performanceMonitor"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/focuscontroller:focusController"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/componentSnapshot:componentSnapshot"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/shape:shape_ani_abc"
+    name = "shape_ani.abc"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/matrix4:matrix4"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/componentUtils:componentUtils"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/ohosprompt:prompt"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/pluginComponent:pluginComponent"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/observer:observer"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/overlayManager:overlayManager"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/imagecache:imagecache"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/mediaquery:mediaquery"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/drawableDescriptor:drawable_descriptor_ani_abc"
+    name = "drawable_descriptor_ani.abc"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/inspector:inspector"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/curves:curves"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/promptaction:promptAction"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/systemprompt:systemprompt"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/displaySync:display_sync_ani_abc"
+    name = "display_sync_ani.abc"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/ets/ani/animator:animator_ani_abc"
+    name = "animator_ani.abc"
+  },
+  {
+    label = "//foundation/communication/wifi/wifi/frameworks/ets/taihe/wifi:wifi_framework_abc"
+  },
+  {
+    label = "//foundation/communication/wifi/wifi/frameworks/ets/taihe/wifiManager:wifiManager_framework_abc"
+  },
+  {
+    label = "//foundation/communication/wifi/wifi/frameworks/ets/ani/wifi_manager:wifimanager_ani_abc"
+  },
+  {
+    label = "//foundation/communication/netmanager_ext/frameworks/ets/ani/sharing:sharing"
+  },
+  {
+    label = "//foundation/communication/netstack/frameworks/ets/ani/net_ssl:network_security"
+  },
+  {
+    label = "//foundation/communication/netstack/frameworks/ets/ani/web_socket:websocket"
+  },
+  {
+    label = "//foundation/communication/netstack/frameworks/ets/ani/http:http"
+  },
+  {
+    label = "//foundation/communication/nfc/frameworks/ets/taihe/nfc_cardEmulation:nfc_fwk_etc_cardEmulation_abc"
+  },
+  {
+    label = "//foundation/communication/nfc/frameworks/ets/taihe/nfc_controller:nfc_fwk_etc_controller_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_baseProfile:bluetoothBaseProfile_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_connection:bluetoothConnection_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_a2dp:bluetoothA2dp_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_constant:bluetoothConstant_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_ble:bluetoothBle_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_hid:bluetoothHid_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_hfp:bluetoothHfp_abc"
+  },
+  {
+    label = "//foundation/communication/bluetooth/frameworks/ets/taihe/bluetooth_access:bluetoothAccess_abc"
+  },
+  {
+    label = "//foundation/communication/ipc/ipc/native/src/taihe:rpc_taihe_abc"
+  },
+  {
+    label = "//foundation/communication/ipc/ipc/native/src/ani/rpc:rpc_abc"
+    name = "rpc.abc"
+  },
+  {
+    label = "//foundation/communication/netmanager_base/frameworks/ets/ani/statistics:statistics"
+  },
+  {
+    label = "//foundation/communication/netmanager_base/frameworks/ets/ani/connection:connection"
+  },
+  {
+    label = "//foundation/multimedia/player_framework/frameworks/taihe/audioHaptic:audioHaptic_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/player_framework/frameworks/taihe:media_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/player_framework/frameworks/taihe:soundpool_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/player_framework/frameworks/taihe/system_sound_manager:system_sound_manager_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/audio_framework/frameworks/taihe:audio_framework_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/drm_framework/frameworks/taihe:drm_framework_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/media_library/frameworks/ani:photo_access_helper"
+  },
+  {
+    label = "//foundation/multimedia/media_library/frameworks/ani:userfile_manager"
+  },
+  {
+    label = "//foundation/multimedia/av_session/frameworks/taihe:avsession_taihe_abc"
+  },
+  {
+    label = "//foundation/multimedia/image_framework/frameworks/kits/taihe:image_framework_taihe_abc"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/default_app_manager:default_app_manager"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/app_control:app_control"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/overlay:overlay"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/overlay:overlay_module_info"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/zlib:zlib"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/bundle_monitor:bundle_monitor"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/launcher_bundle_manager:launcher_bundle_manager"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/launcher_bundle_manager:element_name"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/shortcut_manager:shortcut_info"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/shortcut_manager:shortcut_manager"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/bundle_manager:hap_module_info"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/bundle_manager:metadata"
+  },
+  {
+    label = "//foundation/bundlemanager/bundle_framework/interfaces/kits/ani/bundle_manager:skill"
+  },
+  {
+    label = "//foundation/bundlemanager/app_domain_verify/interfaces/kits/js/ani:app_domain_verify_ets"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_base_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_application_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_utils_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_state_data_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_constant_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_start_options_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_want_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_want_constant_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_extension_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_configuration_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_configuration_constant_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_data_uri_utils_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_result_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_app_state_data_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_process_data_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_process_information_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_running_app_clone_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_multi_app_mode_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_stage_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ui_ability_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ui_ability_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_caller_callee_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_delegator_application_testRunner_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_delegator_registry_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_delegator_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_delegator_args_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_delegator_ability_monitor_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_stage_monitor_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_shell_cmd_result_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_context_constant_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:form_extension_ability_ani"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_stage_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:uri_permission_manager_abc"
+    name = "uri_permission_manager.abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_want_agent_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_trigger_info_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_want_agent_info_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_openLink_options_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_application_abc"
+    name = "ability_application.abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_insight_intent_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_insight_intent_context_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_insight_intent_driver_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_insight_intent_executor_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_environment_callback_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_application_state_change_callback_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_AbilityRunningInfo_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_lifecycle_callback_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_connect_options_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_auto_fill_type_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_error_code_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_custom_data_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_extension_ability_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_extension_running_info_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_ability_start_callback_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:appRecovery_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_data_ability_helper_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_mission_info_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:atomic_service_options_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_first_frame_state_data_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:app_foreground_state_observer_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_foreground_state_observer_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:application_state_observer_abc"
+  },
+  {
+    label = "//foundation/ability/ability_runtime/frameworks/ets/ets:ability_runtime_event_hub_abc"
+  },
+  {
+    label = "//foundation/ability/form_fwk/frameworks/ets/ani/form_provider:formProvider"
+  },
+  {
+    label = "//foundation/ability/form_fwk/frameworks/ets/ani/form_binding_data:form_binding_data"
+  },
+  {
+    label = "//foundation/ability/form_fwk/frameworks/ets/ani/form_info:formInfo"
+  },
+  {
+    label = "//foundation/ability/form_fwk/frameworks/ets/ani/form_error:formError"
+  },
+  {
+    label = "//foundation/filemanagement/storage_service/interfaces/kits/taihe/storage_statistics:storage_statistics_taihe_abc"
+  },
+  {
+    label = "//foundation/filemanagement/storage_service/interfaces/kits/taihe/key_manager:key_manager_taihe_abc"
+  },
+  {
+    label = "//foundation/filemanagement/storage_service/interfaces/kits/taihe/volume_manager:volume_manager_taihe_abc"
+  },
+  {
+    label = "//foundation/filemanagement/app_file_service/frameworks/native/backup_ext/ani:backup_ext_abc"
+    name = "backup_ext.abc"
+  },
+  {
+    label = "//foundation/filemanagement/app_file_service/interfaces/kits/taihe/fileshare:file_share_taihe_abc"
+  },
+  {
+    label = "//foundation/filemanagement/app_file_service/interfaces/kits/taihe/fileuri:file_fileuri_taihe_abc"
+  },
+  {
+    label = "//foundation/filemanagement/app_file_service/interfaces/kits/ani/file_uri:fileuri_abc"
+    name = "fileuri.abc"
+  },
+  {
+    label = "//foundation/filemanagement/dfs_service/interfaces/kits/js/ani/file_cloud_sync_manager:file_cloud_sync_manager"
+  },
+  {
+    label = "//foundation/filemanagement/dfs_service/interfaces/kits/js/ani/file_cloud_sync:file_cloud_sync"
+  },
+  {
+    label = "//foundation/filemanagement/file_api/interfaces/kits/js:ohos_file_fs_abc"
+  },
+  {
+    label = "//foundation/filemanagement/file_api/interfaces/kits/js:ohos_file_hash_abc"
+  },
+  {
+    label = "//foundation/filemanagement/file_api/interfaces/kits/js:ohos_file_securityLabel_abc"
+  },
+  {
+    label = "//foundation/filemanagement/file_api/interfaces/kits/js:ohos_file_environment_abc"
+  },
+  {
+    label = "//foundation/filemanagement/file_api/interfaces/kits/js:ohos_file_statvfs_abc"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani:window_stage_ani"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/screen_runtime/screen_ani:screen_abc"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/ets:extension_window_ani"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/ets:extension_window_host_ani"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/screenshot_runtime/screenshot_ani:screenshot_abc"
+  },
+  {
+    label = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani:display_abc"
+  },
+  {
+    label = "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager/scene_session_manager_ani:scene_session_manager_abc"
+  },
+  {
+    label = "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/kits/ets/taihe/systemload:systemload_abc"
+  },
+  {
+    label = "//foundation/resourceschedule/resource_schedule_service/ressched/interfaces/kits/ets/taihe/background_process_manager:backgroundprocessmanager_abc"
+  },
+  {
+    label = "//foundation/resourceschedule/background_task_mgr/interfaces/kits/ets/taihe:background_task_manager_abc"
+  },
+  {
+    label = "//foundation/resourceschedule/device_usage_statistics/interfaces/kits/bundlestats/taihe/usage_statistics:usage_statistics_abc"
+  },
+  {
+    label = "//foundation/resourceschedule/work_scheduler/interfaces/kits/ets/taihe/work_scheduler:work_scheduler_abc"
+  },
+  {
+    label = "//foundation/barrierfree/accessibility/interfaces/kits/ani:accessibility_ani_abc"
+    name = "accessibility.abc"
+  },
+  {
+    label = "//foundation/barrierfree/accessibility/interfaces/kits/ani/accessibility_config:accessibility_config_ani_abc"
+    name = "accessibility_config.abc"
+  },
+  {
+    label = "//developtools/profiler/hidebug/interfaces/ets/ani/hidebug:hidebug"
+  },
+  {
+    label = "//developtools/syscap_codec/taihe/syscap:systemCapability"
+  },
+]
