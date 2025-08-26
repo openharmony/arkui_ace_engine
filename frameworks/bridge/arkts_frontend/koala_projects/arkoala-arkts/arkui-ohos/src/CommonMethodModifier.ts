@@ -25,7 +25,7 @@ import {
   ScaleOptions, RotateOptions, ClickEffect,  LinearGradientOptions, SweepGradientOptions, RadialGradientOptions,
   MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, BackgroundBrightnessOptions,
   BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback,
-  BlurOptions, LinearGradientBlurOptions, GeometryTransitionOptions } from "./component/common";
+  BlurOptions, LinearGradientBlurOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions } from "./component/common";
 import { PeerNode } from './PeerNode';
 import { ResourceColor, ResourceStr, SizeOptions, Area, Position, Padding, LocalizedPadding, Edges, LocalizedEdges,
   LocalizedPosition, ConstraintSizeOptions, Dimension, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths,
@@ -65,6 +65,10 @@ export class CommonMethodModifier implements CommonMethod {
   _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
   _backgroundEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _backgroundEffect_0_0value?: BackgroundEffectOptions | undefined
+
+  _bindTips_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+  _bindTips0_value: TipsMessageType | undefined
+  _bindTips1_value: TipsOptions | undefined
 
   _foregroundEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
   _foregroundEffect_0_0value?: ForegroundEffectOptions | undefined
@@ -498,6 +502,18 @@ export class CommonMethodModifier implements CommonMethod {
         this._backgroundEffect_1_1value = sysOptions
     } else {
       this._backgroundEffect_1_flag = AttributeUpdaterFlag.SKIP
+    }
+    return this
+  }
+  public bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
+    if ((this._bindTips_flag) == (AttributeUpdaterFlag.INITIAL) ||
+      !Type.of(message).isPrimitive() || !Type.of(options).isPrimitive() ||
+      this._bindTips0_value !== message || this._bindTips1_value !== options) {
+        this._bindTips_flag = AttributeUpdaterFlag.UPDATE
+        this._bindTips0_value = message
+        this._bindTips1_value = options
+    } else {
+      this._bindTips_flag = AttributeUpdaterFlag.SKIP
     }
     return this
   }
@@ -2509,6 +2525,23 @@ export class CommonMethodModifier implements CommonMethod {
         }
       }
     }
+    if (this._bindTips_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (this._bindTips_flag) {
+        case AttributeUpdaterFlag.UPDATE: {
+          peerNode.bindTipsAttribute((this._bindTips0_value as TipsMessageType | undefined), (this._bindTips1_value as TipsOptions | undefined));
+          this._bindTips_flag = AttributeUpdaterFlag.RESET;
+          break;
+        }
+        case AttributeUpdaterFlag.SKIP: {
+          this._bindTips_flag = AttributeUpdaterFlag.RESET;
+          break;
+        }
+        default: {
+          this._bindTips_flag = AttributeUpdaterFlag.INITIAL;
+          peerNode.bindTipsAttribute((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
+        }
+      }
+    }
     if (this._foregroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL) {
       switch (this._foregroundBlurStyle_0_flag) {
         case AttributeUpdaterFlag.UPDATE: {
@@ -3869,6 +3902,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
       }
     }
+    if (value._bindTips_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (value._bindTips_flag) {
+        case AttributeUpdaterFlag.UPDATE:
+        case AttributeUpdaterFlag.SKIP: {
+          this.bindTips(value._bindTips0_value, value._bindTips1_value);
+          break;
+        }
+        default: {
+          this.bindTips((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
+        }
+      }
+    }
     if (value._foregroundEffect_0_flag != AttributeUpdaterFlag.INITIAL) {
       switch (value._foregroundEffect_0_flag) {
         case AttributeUpdaterFlag.UPDATE:
@@ -4442,6 +4487,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
         default: {
           this.backgroundEffect((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+        }
+      }
+    }
+    if (value._bindTips_flag != AttributeUpdaterFlag.INITIAL) {
+      switch (value._bindTips_flag) {
+        case AttributeUpdaterFlag.UPDATE:
+        case AttributeUpdaterFlag.SKIP: {
+          this.bindTips(value._bindTips0_value, value._bindTips1_value);
+          break;
+        }
+        default: {
+          this.bindTips((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
         }
       }
     }
