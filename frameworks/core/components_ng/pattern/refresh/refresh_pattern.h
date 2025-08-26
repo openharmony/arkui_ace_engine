@@ -84,13 +84,21 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    void OnColorConfigurationUpdate() override;
-
     void OnColorModeChange(uint32_t colorMode) override;
 
     Axis GetAxis() const override
     {
         return Axis::VERTICAL;
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
     }
 
     ScrollResult HandleScroll(
@@ -101,6 +109,7 @@ public:
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
+    void OnColorConfigurationUpdate() override;
 
     bool NestedScrollOutOfBoundary() override
     {
@@ -118,16 +127,6 @@ public:
     }
 
     bool IsEnableChildrenMatchParent() override
-    {
-        return true;
-    }
-
-    bool ChildPreMeasureHelperEnabled() override
-    {
-        return true;
-    }
-
-    bool PostponedTaskForIgnoreEnabled() override
     {
         return true;
     }
@@ -183,8 +182,8 @@ private:
     float GetLoadingTextOpacity();
     Color GetLoadingProgressColor();
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_ = 0.0f;

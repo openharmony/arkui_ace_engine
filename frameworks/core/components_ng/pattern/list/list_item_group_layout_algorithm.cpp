@@ -1537,7 +1537,7 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
                 return;
             }
             if (!wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
-                pauseMeasureCacheItem_ = curIndex + i;
+                pauseMeasureCacheItem_ = curIndex - i;
                 return;
             }
             cnt++;

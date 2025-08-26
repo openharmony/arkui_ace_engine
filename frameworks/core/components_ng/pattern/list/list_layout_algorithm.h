@@ -672,7 +672,6 @@ protected:
     bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
-    int32_t defCachedCount_ = 1;
 
 private:
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;

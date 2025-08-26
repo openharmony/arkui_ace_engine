@@ -793,6 +793,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented008, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(600.f));
     CreateWaterFlowItems(60);
     CreateDone();
+
     // after measure, PropertyChangeFlag should be reset to 0.
     EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_NORMAL);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();

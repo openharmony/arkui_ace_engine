@@ -240,6 +240,7 @@ class ScrollInitializeModifier extends ModifierWithKey<Scroller> {
     }
   }
 }
+
 class ScrollOnScrollStartModifier extends ModifierWithKey<() => void> {
   constructor(value: () => void) {
     super(value);

@@ -955,13 +955,13 @@ HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
 
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
     pattern_->ScrollPage(false);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
 
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
     pattern_->ScrollPage(false);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     // sw need estimate currentOffset.
     EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
 }
@@ -1018,7 +1018,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
         .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
 
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
@@ -1033,7 +1033,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
     EXPECT_EQ(reachEnd, false);
 
     UpdateCurrentOffset(-50.0f);
-    FlushUITasks();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(reachEnd, true);
 }
 

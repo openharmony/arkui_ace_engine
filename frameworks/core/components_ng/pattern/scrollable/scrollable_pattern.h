@@ -387,8 +387,8 @@ public:
     {
         scrollAbort_ = abort;
     }
-    void PlaySpringAnimation(
-        float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
+    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
+                            bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual double GetTotalOffset() const
     {
@@ -427,7 +427,7 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(
-        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true);
     virtual bool CanOverScroll(int32_t source)
     {
@@ -704,6 +704,7 @@ public:
         return children;
     }
     void InitScrollBarGestureEvent();
+
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent();
     void InitScrollBarMouseEvent();
@@ -921,6 +922,8 @@ public:
     }
 protected:
     void SuggestOpIncGroup(bool flag);
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromMainTree() override;
@@ -946,6 +949,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
+    void FireObserverOnPanActionEnd(GestureEvent& info);
 
     float FireOnWillScroll(float offset) const;
 
@@ -981,7 +985,6 @@ protected:
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
     bool animateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
-    bool lastCanOverScroll_ = false;
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
@@ -1014,10 +1017,9 @@ protected:
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
+    bool lastCanOverScroll_ = false;
 
     void CheckScrollBarOff();
-
-    void RecordScrollEvent(Recorder::EventType eventType);
 
     bool IsBackToTopRunning() const
     {
@@ -1028,6 +1030,9 @@ protected:
     void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif
+
+    void RecordScrollEvent(Recorder::EventType eventType);
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -1046,8 +1051,6 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
-    void OnAttachToFrameNodeMultiThread();
-    void OnAttachToMainTreeMultiThread();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
@@ -1130,6 +1133,7 @@ private:
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
     void SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrollable);
+    void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
     void SetOnWillStopDraggingCallback(const RefPtr<Scrollable>& scrollable);
     RefPtr<Scrollable> CreateScrollable();
 
@@ -1245,13 +1249,13 @@ private:
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
     float GetDVSyncOffset();
-    RefPtr<InputEvent> mouseEvent_;
-    bool isMousePressed_ = false;
-    RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isMousePressed_ = false;
     bool preHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 

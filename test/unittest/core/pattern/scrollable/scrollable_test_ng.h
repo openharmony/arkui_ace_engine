@@ -29,7 +29,7 @@ public:
     void TearDown() override;
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    
+
 protected:
     virtual void InitNestedScrolls();
 
