@@ -27,11 +27,20 @@ void OnUpdateDone(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long n
     uiNode->OnChildUpdateDone();
     return;
 }
+
+void SetUINodeIsStatic(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetIsStatic(true);
+    return;
+}
     
 const ArkUIAniUINodeOnUpdateDoneAniModifier* GetUINodeOnUpdateDoneAniModifier()
 {
     static const ArkUIAniUINodeOnUpdateDoneAniModifier impl = {
-        .onUpdateDone = OHOS::Ace::NG::OnUpdateDone
+        .onUpdateDone = OHOS::Ace::NG::OnUpdateDone,
+        .setUINodeIsStatic = OHOS::Ace::NG::SetUINodeIsStatic,
     };
     return &impl;
 }

@@ -646,6 +646,7 @@ struct ArkUIAniSyntaxNodeModifier {
 
 struct ArkUIAniUINodeOnUpdateDoneAniModifier {
     void (*onUpdateDone)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+    void (*setUINodeIsStatic)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
 };
 
 struct ArkUIAniNodeAdapterModifier {

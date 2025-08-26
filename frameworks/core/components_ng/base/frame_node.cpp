@@ -2550,7 +2550,8 @@ void FrameNode::MarkModifyDone()
     pattern_->OnMountToParentDone();
 }
 
-void FrameNode::OnChildUpdateDone() {
+void FrameNode::OnChildUpdateDone()
+{
     pattern_->OnHostChildUpdateDone();
 }
 

@@ -28,4 +28,13 @@ void OnUpdateDone(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long n
     return uiNodeOnUpdateDoneAniModifier->onUpdateDone(env, aniClass, node);
 }
 
+void SetUINodeIsStatic(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto uiNodeOnUpdateDoneAniModifier = modifier->getUINodeOnUpdateDoneAniModifier();
+    CHECK_NULL_VOID(uiNodeOnUpdateDoneAniModifier);
+    return uiNodeOnUpdateDoneAniModifier->setUINodeIsStatic(env, aniClass, node);
+}
+
 } // namespace OHOS::Ace::Ani

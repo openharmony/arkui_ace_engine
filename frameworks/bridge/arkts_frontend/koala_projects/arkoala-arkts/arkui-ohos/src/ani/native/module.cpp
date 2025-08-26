@@ -1087,6 +1087,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::OnUpdateDone)
         },
         ani_native_function {
+            "_UINode_SetStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetUINodeIsStatic)
+        },
+        ani_native_function {
             "_NodeAdapter_Construct",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::NodeAdapterConstruct)

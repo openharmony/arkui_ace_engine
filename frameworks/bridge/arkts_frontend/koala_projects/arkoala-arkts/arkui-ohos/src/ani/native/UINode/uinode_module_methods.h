@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::Ani {
 void OnUpdateDone(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+void SetUINodeIsStatic(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_UINODE_MODULE_METHODS_H
