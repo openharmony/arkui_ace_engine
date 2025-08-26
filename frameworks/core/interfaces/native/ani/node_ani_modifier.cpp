@@ -39,7 +39,8 @@
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
-#include "syntax_node_ani_modifier.h"
+#include "syntax_item_ani_modifier.h"
+#include "for_each_node_ani_modifier.h"
 #include "uinode_ani_modifier.h"
 
 extern "C" {
@@ -73,9 +74,10 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
         .getCanvasAniModifier = OHOS::Ace::NG::GetCanvasAniModifier,
         .getTraceAniModifier = OHOS::Ace::NG::GetTraceAniModifier,
-        .getSyntaxNodeAniModifier = OHOS::Ace::NG::GetSyntaxNodeAniModifier,
         .getUINodeOnUpdateDoneAniModifier = OHOS::Ace::NG::GetUINodeOnUpdateDoneAniModifier,
         .getNodeAdapterAniModifier = OHOS::Ace::NG::GetNodeAdapterAniModifier,
+        .getSyntaxItemAniModifier = OHOS::Ace::NG::GetSyntaxItemAniModifier,
+        .getForEachNodeAniModifier = OHOS::Ace::NG::GetForEachNodeAniModifier,
     };
     return &impl;
 }

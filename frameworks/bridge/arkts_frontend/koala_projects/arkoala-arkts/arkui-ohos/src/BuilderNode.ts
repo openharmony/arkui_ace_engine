@@ -45,7 +45,8 @@ export interface BuildOptions {
     useParallel?: boolean;
 }
 
-const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "ConditionScope"]
+const __uiNode_name_map__: Array<string> =
+    ["ContentSlot", "CustomComponent", "ForEach", "LazyForEach", "Repeat", "ConditionScope"]
 
 class BuilderRootNode extends IncrementalNode {
     public __parent?: ArkBuilderProxyNodePeer;
