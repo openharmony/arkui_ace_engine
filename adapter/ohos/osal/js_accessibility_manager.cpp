@@ -4302,10 +4302,9 @@ bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start
     return true;
 }
 
-bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator start,
+bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator& arg,
     const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
-    auto arg = start;
     argument.mode = DumpMode::HOVER_TEST;
     static constexpr int32_t NUM_POINT_DIMENSION = 2;
     if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
