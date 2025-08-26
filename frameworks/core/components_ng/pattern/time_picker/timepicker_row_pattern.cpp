@@ -51,11 +51,9 @@ const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
 const PickerTime START_DEFAULT_TIME = PickerTime(0, 0, 0);
 const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
-const uint32_t TIME_0 = 0;
-const uint32_t TIME_9 = 9;
-const uint32_t TIME_59 = 59;
 const uint32_t INDEX_AM_0 = 0;
 const uint32_t INDEX_PM_1 = 1;
+const uint32_t DIGITS_COUNT_2 = 2;
 const uint32_t INDEX_HOUR_STRAT = 0;
 const uint32_t INDEX_MINUTE_STRAT = 0;
 const uint32_t INDEX_MINUTE_END = 59;
@@ -361,7 +359,7 @@ void TimePickerRowPattern::OnModifyDone()
     isDateTimeOptionUpdate_ = false;
     ClearFocus();
     loop_ = pickerProperty->GetLoopValue(true);
-    UpdateTranslatedOptionsMap();
+    translatedOptionsMap_.clear();
     UpdateLanguageAndAmPmTimeOrder();
     CreateOrDeleteSecondNode();
     CreateAmPmNode();
@@ -670,8 +668,8 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
         CHECK_NULL_RETURN(secondColumn, time);
         auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(secondColumnPattern, time);
-        auto secondColumnIdex = secondColumnPattern->GetCurrentIndex();
-        auto second = options_[secondColumn][secondColumnIdex];
+        auto secondColumnIndex = secondColumnPattern->GetCurrentIndex();
+        auto second = options_[secondColumn][secondColumnIndex];
         time.SetSecond(StringUtils::StringToUint(second)); // second from 0 to 59, index from 0 to 59
     }
     return time;
@@ -708,11 +706,11 @@ PickerTime TimePickerRowPattern::GetCurrentEnterTime()
         auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(amPmColumnPattern, time);
         time.SetHour(
-            GetHourFromAmPm(amPmColumnPattern->GetCurrentIndex() == INDEX_AM_0, StringUtils::StringToUint(hour)));
+            GetHourFromAmPm(amPmColumnPattern->GetEnterIndex() == INDEX_AM_0, StringUtils::StringToUint(hour)));
     }
     
-    auto minuteColumnIdex = minuteColumnPattern->GetEnterIndex();
-    auto minute = options_[minuteColumn][minuteColumnIdex];
+    auto minuteColumnIndex = minuteColumnPattern->GetEnterIndex();
+    auto minute = options_[minuteColumn][minuteColumnIndex];
     time.SetMinute(StringUtils::StringToUint(minute));
 
     if (hasSecond_) {
@@ -720,8 +718,8 @@ PickerTime TimePickerRowPattern::GetCurrentEnterTime()
         CHECK_NULL_RETURN(secondColumn, time);
         auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_RETURN(secondColumnPattern, time);
-        auto secondColumnIdex = secondColumnPattern->GetEnterIndex();
-        auto second = options_[secondColumn][secondColumnIdex];
+        auto secondColumnIndex = secondColumnPattern->GetEnterIndex();
+        auto second = options_[secondColumn][secondColumnIndex];
         time.SetSecond(StringUtils::StringToUint(second)); // second from 0 to 59, index from 0 to 59
     }
     return time;
@@ -900,14 +898,12 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     auto amPmColumn = allChildNode_["amPm"].Upgrade();
     // update hour column's options
     if (!GetHour24() && tag == amPmColumn) {
-        options_[hourColumn].clear();
         HandleHourBuildTimeRange(oldHourValue_);
     }
     oldHourValue_ = GetCurrentTime().GetHour();
     
     // update minute column's options
     if (tag != minuteColumn) {
-        options_[minuteColumn].clear();
         HandleMinuteBuildTimeRange(oldHourValue_, oldMinuteValue_);
     }
     oldMinuteValue_ = GetCurrentTime().GetMinute();
@@ -931,6 +927,7 @@ void TimePickerRowPattern::HandleSecondBuildTimeRange()
     auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(secondColumnPattern);
     optionsTotalCount_[secondColumn] = 0;
+    options_[secondColumn].clear();
 
     for (uint32_t second = INDEX_SECOND_STRAT; second <= INDEX_SECOND_END; second++) { // time's second from 0 to 59
         options_[secondColumn][second] = GetSecondColumnFormatString(second);
@@ -1003,6 +1000,7 @@ void TimePickerRowPattern::HandleMinuteBuildTimeRange(uint32_t hourOf24, uint32_
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     optionsTotalCount_[minuteColumn] = 0;
+    options_[minuteColumn].clear();
     uint32_t index = 0;
     for (uint32_t minute = startMinute; minute <= endMinute; minute++) {
         options_[minuteColumn][index] = GetMinuteColumnFormatString(minute);
@@ -1010,10 +1008,10 @@ void TimePickerRowPattern::HandleMinuteBuildTimeRange(uint32_t hourOf24, uint32_
         index++;
     }
     minuteColumnPattern->SetOptions(GetOptionsCount());
-    SetMinuteColumnIndexByTime(GetMinuteColumnFormatString(minuteValue));
+    SetMinuteColumnIndexByTime(hourOf24, GetMinuteColumnFormatString(minuteValue));
 }
 
-void TimePickerRowPattern::SetMinuteColumnIndexByTime(std::string minute)
+void TimePickerRowPattern::SetMinuteColumnIndexByTime(uint32_t hourOf24, std::string minute)
 {
     auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
@@ -1021,9 +1019,11 @@ void TimePickerRowPattern::SetMinuteColumnIndexByTime(std::string minute)
     CHECK_NULL_VOID(minuteColumnPattern);
     uint32_t newIndex = INDEX_MINUTE_STRAT;
     if (!GetOptionsIndex(minuteColumn, minute, newIndex)) {
-        if (StringUtils::StringToUint(minute) < startTime_.GetMinute()) {
+        uint32_t startMinute = (hourOf24 == startTime_.GetHour()) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
+        uint32_t endMinute = (hourOf24 == endTime_.GetHour()) ? endTime_.GetMinute() : INDEX_MINUTE_END;
+        if (StringUtils::StringToUint(minute) < startMinute) {
             newIndex = INDEX_MINUTE_STRAT;
-        } else if (options_.find(minuteColumn) != options_.end()) {
+        } else if (StringUtils::StringToUint(minute) > endMinute) {
             newIndex = options_[minuteColumn].size() - 1;
         }
     }
@@ -1096,16 +1096,6 @@ void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& butt
 
     UpdateButtonMargin(buttonNode, dialogTheme, isNext);
     updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void TimePickerRowPattern::UpdateTranslatedOptionsMap()
-{
-    for (uint32_t time = TIME_0; time <= TIME_59; time++) {
-        translatedOptionsMap_[std::to_string(time)] = GetTranslatedTimeString(time, false);
-    }
-    for (uint32_t time = TIME_0; time <= TIME_9; time++) {
-        translatedOptionsMap_[ZERO_PREFIX + std::to_string(time)] = GetTranslatedTimeString(time, true);
-    }
 }
 
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
@@ -1358,7 +1348,15 @@ const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>
     if (options_[frameNode].find(optionIndex) == options_[frameNode].end()) {
         OnColumnsBuilding();
     }
-    return translatedOptionsMap_[options_[frameNode][optionIndex]];
+    std::string optionStr = options_[frameNode][optionIndex];
+    if (translatedOptionsMap_.find(optionStr) == translatedOptionsMap_.end()) {
+        if (optionStr.length() == DIGITS_COUNT_2 && optionStr[0] == '0') {
+            translatedOptionsMap_[optionStr] = GetTranslatedTimeString(StringUtils::StringToUint(optionStr), true);
+        } else {
+            translatedOptionsMap_[optionStr] = GetTranslatedTimeString(StringUtils::StringToUint(optionStr), false);
+        }
+    }
+    return translatedOptionsMap_[optionStr];
 }
 
 bool TimePickerRowPattern::GetOptionsIndex(
@@ -1479,7 +1477,6 @@ void TimePickerRowPattern::HandleHourColumnBuildingRange(const PickerTime& value
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(hourColumnPattern);
     if (GetHour24()) {
-        SetHourColumnIndexByTime(GetHourColumnFormatString(value.GetHour()));
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
@@ -1535,7 +1532,7 @@ void TimePickerRowPattern::HandleMinAndSecColumnBuildingRange()
     const std::string selectedHour = std::to_string(GetCurrentTime().GetHour());
     auto currentHourOf24 = StringUtils::StringToUint(selectedHour);
     HandleMinuteBuildTimeRange(currentHourOf24, GetCurrentTime().GetMinute());
-    SetMinuteColumnIndexByTime(GetMinuteColumnFormatString(selectedTime_.GetMinute()));
+    SetMinuteColumnIndexByTime(currentHourOf24, GetMinuteColumnFormatString(selectedTime_.GetMinute()));
     HandleSecondBuildTimeRange();
     auto secondColumn = allChildNode_["second"].Upgrade();
     CHECK_NULL_VOID(secondColumn);
