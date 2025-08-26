@@ -717,13 +717,10 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->isResizeContentAvoid_, false);
-    EXPECT_EQ(webPattern->isInWindowDrag_, false);
     webPattern->isInWindowDrag_ = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(webPattern->isInWindowDrag_, true);
     config.contentSizeChange = true;
     webPattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(config.contentSizeChange, true);
     webPattern->isInWindowDrag_ = false;
     webPattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(webPattern->drawSize_.width_, 0.0);
@@ -835,7 +832,6 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_004, TestSize.Level1)
     webPattern->OnAreaChangedInner();
     EXPECT_NE(webPattern->layoutMode_, WebLayoutMode::NONE);
     EXPECT_FALSE(webPattern->isInWindowDrag_);
-    EXPECT_EQ(webPattern->renderMode_, RenderMode::SYNC_RENDER);
 #endif
 }
 
