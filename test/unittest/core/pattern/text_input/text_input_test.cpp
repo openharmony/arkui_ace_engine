@@ -2520,4 +2520,98 @@ HWTEST_F(TextFieldUXTest, AutoCapTypeToString001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_STREQ(pattern_->AutoCapTypeToString().c_str(), "AutoCapitalizationMode.ALL_CHARACTERS");
 }
+
+/**
+ * @tc.name: accessibilityProperty001
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    std::string contentStr = "12345678";
+    CreateTextField(contentStr, "", [](TextFieldModelNG model) { model.SetType(TextInputType::UNSPECIFIED); });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, contentStr);
+}
+
+/**
+ * @tc.name: accessibilityProperty002
+ * @tc.desc: test textInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    std::string contentStr = "你好12345678";
+    CreateTextField(contentStr, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, "**********");
+}
+
+/**
+ * @tc.name: accessibilityProperty003
+ * @tc.desc: test textInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, "");
+}
+
+/**
+ * @tc.name: accessibilityProperty004
+ * @tc.desc: test textInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, accessibilityProperty004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text filed node
+     */
+    std::string contentStr = "12345678";
+    CreateTextField(contentStr, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordText(true);
+    });
+
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_NE(accessibilityProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. GetText
+     */
+    std::string textPropStr = accessibilityProperty_->GetText();
+    EXPECT_EQ(textPropStr, contentStr);
+}
 } // namespace OHOS::Ace::NG
