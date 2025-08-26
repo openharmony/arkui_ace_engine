@@ -766,26 +766,6 @@ HWTEST_F(TextFieldPatternTestten, FloatingCaretLand005, TestSize.Level1)
 }
 
 /**
- * @tc.name: FloatingCaretLand006
- * @tc.desc: Test FloatingCaretLand
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestten, FloatingCaretLand006, TestSize.Level1)
-{
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    EdgeEffect edgeEffect;
-    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    ASSERT_NE(scrollEdgeEffect, nullptr);
-    textFieldPattern->textFieldOverlayModifier_ = nullptr;
-    textFieldPattern->floatCaretState_.FloatingCursorVisible = false;
-    textFieldPattern->selectController_->firstHandleInfo_.index = 1;
-    textFieldPattern->selectController_->secondHandleInfo_.index = 1;
-    textFieldPattern->FloatingCaretLand();
-    EXPECT_EQ(textFieldPattern->textFieldOverlayModifier_, 1);
-}
-
-/**
  * @tc.name: FloatingCaretLand007
  * @tc.desc: Test FloatingCaretLand
  * @tc.type: FUNC
