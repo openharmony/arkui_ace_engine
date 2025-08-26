@@ -3708,6 +3708,41 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent and padding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ViewAbstract::SetPadding(AceType::RawPtr(list), CalcLength(10.f));
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's height is 280.
+    auto listPattern = list->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto height = listPattern->contentMainSize_;
+    EXPECT_EQ(height, 280.0f);
+}
+
+/**
  * @tc.name: LayoutPolicyTest001
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC

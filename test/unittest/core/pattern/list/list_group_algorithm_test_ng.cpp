@@ -1859,4 +1859,37 @@ HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerEndMargin002, TestSize.Level1)
     divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
     EXPECT_NE(divider.endMargin, 1000.0_vp);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting fixAtIdealSize and lanes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default listItemGroup and set lanes.
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewAbstractModelNG model1;
+    model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    for (int32_t index = 0; index < 10; index++) {
+        CreateListItem();
+        ViewAbstract::SetWidth(CalcLength(150.f));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateDone();
+
+    // Expect listItemGroup's width is 300.
+    FlushUITasks();
+    auto geometryNode = listItemGroup->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 300.0f);
+}
 } // namespace OHOS::Ace::NG

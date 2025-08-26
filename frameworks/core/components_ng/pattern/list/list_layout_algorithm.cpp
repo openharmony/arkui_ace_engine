@@ -113,6 +113,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+    const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
 
     auto layoutPolicy = listLayoutProperty->GetLayoutPolicyProperty();
     auto isCrossWrap = false;
@@ -127,10 +128,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isCrossFix = (isVertical ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
         auto layoutPolicySize =
             ConstrainIdealSizeByLayoutPolicy(layoutConstraint, widthLayoutPolicy, heightLayoutPolicy, axis_);
+        MinusPaddingToSize(padding, layoutPolicySize);
         contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
     }
 
-    const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
