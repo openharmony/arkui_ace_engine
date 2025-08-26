@@ -50,6 +50,13 @@ export type ToJSONType<T> = (value: T) => jsonx.JsonElement;
  */
 export type FromJSONType<T> = (element: jsonx.JsonElement) => T;
 
+interface PersistPropsOptions<T> {
+    key: string;
+    defaultValue: T;
+    toJson?: ToJSONType<T>;
+    fromJson?: FromJSONType<T>;
+}
+
 class TypedMap {
     private key2Type_ = new Map<string, Type>();
     private key2Value_ = new Map<string, IStorageProperty>();
@@ -162,6 +169,23 @@ class PersistentStorage {
         return PersistentStorage.getOrCreate().persistPropInternal(key, defaultValue, toJson, fromJson);
     }
 
+    /**
+     * Add property 'key' to AppStorage properties whose current value will be
+     * persistent for a loop.
+     * If AppStorage does not include this property it will be added and initializes
+     * with given value
+     *
+     * @param { PersistPropsOptions } properties - see PersistPropsOptions
+     * @static
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    public static persistProps(properties: PersistPropsOptions<Any>[]): void {
+        properties.forEach((prop) => {
+            PersistentStorage.persistProp(prop.key, prop.defaultValue, prop.toJson, prop.fromJson);
+        });
+    }
+
     private persistPropInternal<T>(
         key: string,
         defaultValue: T,
@@ -213,7 +237,7 @@ class PersistentStorage {
                 key,
                 ttype,
                 defaultValue,
-                isSimpleType ? undefined : toJson,
+                isSimpleType ? undefined : toJson
             );
             if (!success) {
                 StateMgmtConsole.log(`Failed to create and persist key ${key} with default value`);
@@ -267,12 +291,7 @@ class PersistentStorage {
 
     // case 1: neither on disk nor in storage
     // create with default value and start to persist
-    private __createNewAndPersist<T>(
-        key: string,
-        ttype: Type,
-        defaultValue: T,
-        toJson?: ToJSONType<T>,
-    ): boolean {
+    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, toJson?: ToJSONType<T>): boolean {
         if (!AppStorage.setOrCreate<T>(key, defaultValue)) {
             StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
@@ -297,7 +316,7 @@ class PersistentStorage {
 
         try {
             if (this.simpleTypeSet.has(ttype) && fromJson === undefined) {
-                // Step 2: simple type just parse from disk    
+                // Step 2: simple type just parse from disk
                 const value = JSON.parse<T>(jsonString, ttype);
 
                 // Step 3: Store the value in AppStorage

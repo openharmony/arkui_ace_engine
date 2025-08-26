@@ -98,7 +98,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             // unregister if old value is an object
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
-            
+
             newValue = uiUtils.makeObserved(newValue);
             // for interop
             if (isDynamicObject(newValue)) {
