@@ -17,6 +17,11 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2104,5 +2109,225 @@ HWTEST_F(TextPatternTestNg, GetOriginCaretPosition002, TestSize.Level1)
     textPattern->originCaretPosition_ = offset;
     auto result = textPattern->GetOriginCaretPosition(offset);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ParseOriText001
+ * @tc.desc: Test ParseOriText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ParseOriText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::u16string currentText = u"bundleName";
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    textPattern->childNodes_.emplace_back(frameNode);
+    textPattern->ParseOriText(currentText);
+    EXPECT_NE(textPattern->textForDisplay_, u"");
+}
+
+/**
+ * @tc.name: UpdateSpanItemDragStatus001
+ * @tc.desc: Test UpdateSpanItemDragStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, UpdateSpanItemDragStatus001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->isSpanStringMode_ = true;
+    std::list<ResultObject> resultObjects;
+    bool isDragging = true;
+    textPattern->UpdateSpanItemDragStatus(resultObjects, isDragging);
+    EXPECT_EQ(textPattern->dragSpanItems_.empty(), true);
+}
+
+/**
+ * @tc.name: AddPixelMapToUdmfData001
+ * @tc.desc: Test AddPixelMapToUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, AddPixelMapToUdmfData001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    textPattern->AddPixelMapToUdmfData(pixelMap, unifiedData);
+    EXPECT_NE(textPattern->pManager_, nullptr);
+}
+
+/**
+ * @tc.name: AddPixelMapToUdmfData002
+ * @tc.desc: Test AddPixelMapToUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, AddPixelMapToUdmfData002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<PixelMap> pixelMap = nullptr;
+    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    ASSERT_NE(unifiedData, nullptr);
+    textPattern->AddPixelMapToUdmfData(pixelMap, unifiedData);
+    EXPECT_NE(textPattern->pManager_, nullptr);
+}
+
+/**
+ * @tc.name: AddPixelMapToUdmfData003
+ * @tc.desc: Test AddPixelMapToUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, AddPixelMapToUdmfData003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    auto unifiedData = nullptr;
+    textPattern->AddPixelMapToUdmfData(pixelMap, unifiedData);
+    EXPECT_NE(textPattern->pManager_, nullptr);
+}
+
+/**
+ * @tc.name: AddPixelMapToUdmfData004
+ * @tc.desc: Test AddPixelMapToUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, AddPixelMapToUdmfData004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<PixelMap> pixelMap = nullptr;
+    auto unifiedData = nullptr;
+    textPattern->AddPixelMapToUdmfData(pixelMap, unifiedData);
+    EXPECT_NE(textPattern->pManager_, nullptr);
+}
+
+/**
+ * @tc.name: AddUdmfData001
+ * @tc.desc: Test AddUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, AddUdmfData001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    ASSERT_NE(textPattern->styledString_, nullptr);
+    RefPtr<Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    textPattern->isSpanStringMode_ = true;
+    textPattern->AddUdmfData(event);
+    EXPECT_EQ(textPattern->dragResultObjects_.empty(), true);
+}
+
+/**
+ * @tc.name: HandleSelectionUp001
+ * @tc.desc: Test HandleSelectionUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSelectionUp001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
+    textPattern->textSelector_.secondHandle = { 1, 2, 1, 2 };
+    textPattern->HandleSelectionUp();
+    EXPECT_NE(textPattern->textSelector_.GetEnd(), 0);
+}
+
+/**
+ * @tc.name: InitUrlTouchEvent001
+ * @tc.desc: Test InitUrlTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, InitUrlTouchEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->urlTouchEventInitialized_ = false;
+    textPattern->InitUrlTouchEvent();
+    EXPECT_EQ(textPattern->urlTouchEventInitialized_, true);
+}
+
+/**
+ * @tc.name: HandleMouseRightButton001
+ * @tc.desc: Test HandleMouseRightButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleMouseRightButton001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    Offset textOffset;
+    textPattern->HandleMouseRightButton(info, textOffset);
+    EXPECT_EQ(textPattern->selectOverlay_, 1);
+}
+
+/**
+ * @tc.name: HandleMouseLeftReleaseAction020
+ * @tc.desc: Test HandleMouseLeftReleaseAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleMouseLeftReleaseAction020, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::NONE);
+    Offset textOffset;
+    textPattern->isDoubleClick_ = true;
+    textPattern->mouseStatus_ = MouseStatus::PRESSED;
+    textPattern->status_ = Status::DRAGGING;
+    textPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    textPattern->HandleMouseLeftReleaseAction(info, textOffset);
+    EXPECT_EQ(textPattern->isMousePressed_, false);
+}
+
+/**
+ * @tc.name: HandleMouseLeftPressAction001
+ * @tc.desc: Test HandleMouseLeftPressAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleMouseLeftPressAction001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    Offset textOffset;
+    textPattern->HandleMouseLeftPressAction(info, textOffset);
+    EXPECT_NE(textPattern->blockPress_, true);
 }
 } // namespace OHOS::Ace::NG
