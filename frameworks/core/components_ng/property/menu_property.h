@@ -110,10 +110,10 @@ struct MenuParam {
     std::optional<NG::BorderColorProperty> outlineColor;
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
+    std::optional<OffsetF> anchorPosition;
     std::optional<ModalMode> modalMode;
     std::optional<PreviewScaleMode> previewScaleMode;
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
-    std::optional<OffsetF> anchorPosition;
     bool isDarkMode = false;
     bool isWithTheme = false;
     struct resourceUpdater {
@@ -138,7 +138,7 @@ struct MenuParam {
         }
         resMap_[key] = { resObj, std::move(nullptr) };
     }
-    
+
     const RefPtr<ResourceObject> GetResource(const std::string& key) const
     {
         auto iter = resMap_.find(key);
