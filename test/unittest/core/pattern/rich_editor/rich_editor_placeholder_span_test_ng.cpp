@@ -234,6 +234,33 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan004, TestSize.Level1
 }
 
 /**
+ * @tc.name: AddPlaceholderSpan005
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    RefPtr<FrameNode> builderNode1 = nullptr;
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(static_cast<int32_t>(contentNode->GetChildren().size()), 1);
+    ClearSpan();
+}
+
+/**
  * @tc.name: InitPlaceholderSpansMap001
  * @tc.desc: test InitPlaceholderSpansMap
  * @tc.type: FUNC
@@ -447,4 +474,5 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, Tes
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, 0);
 }
+
 }

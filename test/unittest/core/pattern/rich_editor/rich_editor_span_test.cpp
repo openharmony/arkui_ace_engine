@@ -1509,4 +1509,176 @@ HWTEST_F(RichEditorSpanTest, PlaceholderSpanNodeTest001, TestSize.Level1)
     EXPECT_EQ(placeholderSpanItem->needReLayout, true);
 }
 
+/**
+ * @tc.name: SpanAddAndClear001
+ * @tc.desc: test delete span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, SpanAddAndClear001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    RangeOptions option1;
+    option1.start = 5;
+    option1.end = 10;
+    richEditorController->DeleteSpans(option1);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    RangeOptions option2;
+    option2.start = 10;
+    option2.end = 5;
+    richEditorController->DeleteSpans(option2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    RangeOptions option3;
+    option3.start = -5;
+    option3.end = 10;
+    richEditorController->DeleteSpans(option3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: SpanAddAndClear002
+ * @tc.desc: test delete span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, SpanAddAndClear002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    RangeOptions option4;
+    option4.start = 5;
+    option4.end = -10;
+    richEditorController->DeleteSpans(option4);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    RangeOptions option5;
+    richEditorController->DeleteSpans(option5);
+    EXPECT_TRUE(contentNode->GetChildren().empty());
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    option5.start = 100;
+    option5.end = 10;
+    richEditorController->DeleteSpans(option5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    option5.start = 3;
+    option5.end = 3;
+    richEditorController->DeleteSpans(option5);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
+    ClearSpan();
+    richEditorController->DeleteSpans(option5);
+}
+
+/**
+ * @tc.name: SymbolTest001
+ * @tc.desc: test update symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, SymbolTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_1);
+    style.SetRenderStrategy(RENDER_STRATEGY_SINGLE);
+    style.SetEffectStrategy(EFFECT_STRATEGY_NONE);
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+
+    /**
+     * @tc.steps: step4. update symbol span style
+     */
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateSymbolFontSize = FONT_SIZE_VALUE_2;
+    updateSpanStyle.updateSymbolFontWeight = FONT_WEIGHT_BOLD;
+    updateSpanStyle.updateSymbolColor = SYMBOL_COLOR_LIST_2;
+    updateSpanStyle.updateSymbolRenderingStrategy = RENDER_STRATEGY_MULTI_COLOR;
+    updateSpanStyle.updateSymbolEffectStrategy = EFFECT_STRATEGY_SCALE;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+
+    ImageSpanAttribute imageStyle;
+    style.SetFontSize(FONT_SIZE_VALUE_2);
+    style.SetFontWeight(FONT_WEIGHT_BOLD);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_2);
+    style.SetRenderStrategy(RENDER_STRATEGY_MULTI_COLOR);
+    style.SetEffectStrategy(EFFECT_STRATEGY_SCALE);
+
+    // update the first symbol span
+    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
+
+    /**
+     * @tc.steps: step5. test symbol span style
+     */
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE_2);
+    EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_BOLD);
+    EXPECT_EQ(newSpan1->GetSymbolColorList(), SYMBOL_COLOR_LIST_2);
+    EXPECT_EQ(newSpan1->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_COLOR);
+    EXPECT_EQ(newSpan1->GetSymbolEffectStrategy(), EFFECT_STRATEGY_SCALE);
+
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(1));
+    ASSERT_NE(newSpan2, nullptr);
+    EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(newSpan2->GetSymbolColorList(), SYMBOL_COLOR_LIST_1);
+    EXPECT_EQ(newSpan2->GetSymbolRenderingStrategy(), RENDER_STRATEGY_SINGLE);
+    EXPECT_EQ(newSpan2->GetSymbolEffectStrategy(), EFFECT_STRATEGY_NONE);
+
+    ClearSpan();
+}
+
 } // namespace OHOS::Ace::NG
