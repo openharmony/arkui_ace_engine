@@ -48,8 +48,8 @@ using OneTestColorStep = std::pair<Opt_ResourceColor, std::string>;
 using OneUnionNumStrResStep = std::pair<Opt_Union_Number_String_Resource, std::string>;
 
 // global test plans
-const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR};
-const auto RES_ID = IntResourceId{11111, Converter::ResourceType::COLOR};
+const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
+const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
 static const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
@@ -622,11 +622,11 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashArrayTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setStrokeDashArrayInavlidTest
+ * @tc.name: setStrokeDashArrayInvalidTest
  * @tc.desc: Check the invalid cases for setStrokeDashArray
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayInavlidTest, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierTest, DISABLED_setStrokeDashArrayInvalidTest, TestSize.Level1)
 {
     static const std::string propName("strokeDashArray");
     ASSERT_NE(modifier_->setStrokeDashArray, nullptr);

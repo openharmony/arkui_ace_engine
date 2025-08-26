@@ -65,6 +65,7 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
     "condition_scope/condition_scope.cpp",
+    "UINode/uinode_module_methods.cpp",
     "node_adapter/node_adapter_module.cpp",
   ]
 

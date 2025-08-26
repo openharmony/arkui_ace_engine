@@ -49,20 +49,20 @@ namespace {
     using ButtonLabelResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
     // invalid id
-    const auto INVALID_ID_STRING = IntResourceId{-1, Converter::ResourceType::STRING};
-    const auto INVALID_ID_COLOR = IntResourceId{-1, Converter::ResourceType::COLOR};
+    const auto INVALID_ID_STRING = IntResourceId{-1, ResourceType::STRING};
+    const auto INVALID_ID_COLOR = IntResourceId{-1, ResourceType::COLOR};
 
     // resource names and id
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::STRING};
-    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::STRING};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::STRING};
+    const auto RES_ID = IntResourceId{11111, ResourceType::STRING};
 
-    const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
-    const auto RES_COLOR_ID = IntResourceId{123456, Converter::ResourceType::COLOR};
+    const auto RES_COLOR_NAME = NamedResourceId{"color_name", ResourceType::COLOR};
+    const auto RES_COLOR_ID = IntResourceId{123456, ResourceType::COLOR};
 
     const auto RES_DIMENSION_ID = 654321; // Ark_Length.Resource
 
-    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", Converter::ResourceType::STRARRAY};
-    const auto RES_FAMILY_ID = IntResourceId{22222, Converter::ResourceType::STRARRAY};
+    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", ResourceType::STRARRAY};
+    const auto RES_FAMILY_ID = IntResourceId{22222, ResourceType::STRARRAY};
 
     // resource values
     const auto RESOURCE_BY_STRING = "ResourceByString";

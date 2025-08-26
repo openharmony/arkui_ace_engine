@@ -19,6 +19,7 @@
 #include <variant>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/list/list_properties.h"
@@ -36,21 +37,10 @@ enum class LengthMetricsUnit : int32_t { DEFAULT = 0, PX };
 }
 
 namespace OHOS::Ace::NG::Converter {
-/*
- * Keep this enum in sync with the same enum in frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h
- */
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
+struct SimpleResource {
+    std::string content;
+    std::string bundleName;
+    std::string moduleName;
 };
 
 struct RadioStyle {

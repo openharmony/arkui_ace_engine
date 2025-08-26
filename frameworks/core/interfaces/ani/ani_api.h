@@ -544,8 +544,8 @@ struct ArkUIAniInteropModifier {
     void (*deleteViewStackProcessor)(ani_long ptr);
 };
 struct ArkUIAniDragControllerModifier {
-    bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx);
-    bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx);
+    bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
+    bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
     void (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer);
     ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
@@ -641,6 +641,11 @@ struct ArkUIAniTraceModifier {
     void (*asyncTraceEnd)(const std::string& traceName, int taskId);
 };
 
+struct ArkUIAniUINodeOnUpdateDoneAniModifier {
+    void (*onUpdateDone)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+    void (*setUINodeIsStatic)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node);
+};
+
 struct ArkUIAniNodeAdapterModifier {
     ani_long (*nodeAdapterConstruct)(NodeAdapterInfo&& info);
     void (*nodeAdapterDetachNodeAdapter)(ani_long node);
@@ -689,6 +694,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
     const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
     const ArkUIAniTraceModifier* (*getTraceAniModifier)();
+    const ArkUIAniUINodeOnUpdateDoneAniModifier* (*getUINodeOnUpdateDoneAniModifier)();
     const ArkUIAniNodeAdapterModifier* (*getNodeAdapterAniModifier)();
     const ArkUIAniSyntaxItemModifier* (*getSyntaxItemAniModifier)();
     const ArkUIAniForEachNodeModifier* (*getForEachNodeAniModifier)();

@@ -4929,6 +4929,8 @@ ASSIGN_OPT(Opt_CheckBoxModifierBuilder)
 ASSIGN_OPT(Opt_RatingModifierBuilder)
 ASSIGN_OPT(Opt_ToggleModifierBuilder)
 ASSIGN_OPT(Opt_SliderModifierBuilder)
+ASSIGN_OPT(Opt_LevelOrder)
+ASSIGN_OPT(Opt_NavigationAnimatedTransition)
 #undef ASSIGN_OPT
 }
 

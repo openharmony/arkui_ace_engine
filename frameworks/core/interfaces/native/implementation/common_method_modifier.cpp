@@ -75,6 +75,7 @@
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "base/log/log_wrapper.h"
 
 using namespace OHOS::Ace::NG::Converter;
@@ -1938,7 +1939,7 @@ void ResponseRegionImpl(Ark_NativePointer node,
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
     } else {
-        ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
+        ViewAbstract::SetResponseRegion(frameNode, {});
     }
 }
 void MouseResponseRegionImpl(Ark_NativePointer node,
@@ -5452,8 +5453,14 @@ void BindTipsImpl(Ark_NativePointer node,
             }
             ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
         },
-        [] (const Ark_StyledString& value) {
-            return;
+        [frameNode, popupParam] (const Ark_StyledString& value) {
+            if (!value->spanString) {
+                LOGE("BindTipsImpl can not get the spanString.");
+                return;
+            }
+            auto message = value->spanString->GetString();
+            popupParam->SetMessage(message);
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, value->spanString);
         },
         [] () {
             return;

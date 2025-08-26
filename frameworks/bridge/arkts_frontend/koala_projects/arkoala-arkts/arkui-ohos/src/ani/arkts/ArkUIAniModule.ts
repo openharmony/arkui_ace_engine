@@ -308,6 +308,8 @@ export class ArkUIAniModule {
         onThemeScopeDestroy: () => void
     ): void;
     native static _ApplyParentThemeScopeId(self: KPointer, parent: KPointer): void
+    native static _UINode_OnUpdateDone(peer: KPointer): void;
+    native static _UINode_SetStatic(peer: KPointer): void;
     
     //NodeAdapter 
     native static _NodeAdapter_Construct( nodeAdapter : NodeAdapter): KPointer

@@ -2991,6 +2991,7 @@ frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
 frameworks/core/interfaces/native/node/web_modifier.h @arkwebinarkuireview
+frameworks/core/interfaces/native/utility/reverse_converter.cpp @huawei_g_five
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @arkuievent
 interfaces/native/drawable_descriptor.h @arkui_image
@@ -3242,6 +3243,7 @@ test/unittest/core/event/ @arkuievent
 test/unittest/core/gestures/ @arkuievent
 test/unittest/core/image_file_cache/ @arkui_image
 test/unittest/core/image_provider/ @arkui_image
+test/unittest/core/image/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent

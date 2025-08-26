@@ -108,7 +108,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.
     std::string resultStr;
     std::string expectedStr = TEST_VALUE;
     auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(
-        CreateResource(IMAGES_OK_STR.c_str(), Converter::ResourceType::STRING));
+        CreateResource(IMAGES_OK_STR.c_str(), ResourceType::STRING));
     auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
     modifier_->setImageSpanOptions(node_, &options);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -244,7 +244,7 @@ HWTEST_F(ImageSpanModifierTest, setOnCompleteTest, TestSize.Level1)
         },
         .call = onComplete
     };
-    
+
     auto optFunc = Converter::ArkValue<Opt_ImageCompleteCallback>(func);
     modifier_->setOnComplete(node_, &optFunc);
 

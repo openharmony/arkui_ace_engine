@@ -83,7 +83,7 @@ template<>
 RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
 {
     ImageSpanOptions imageOptions;
-    auto resourceStrOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(value.resourceValue);
+    auto resourceStrOpt = Converter::OptConvert<Converter::SimpleResource>(value.resourceValue);
     if (resourceStrOpt.has_value()) {
         imageOptions.bundleName = resourceStrOpt->bundleName;
         imageOptions.moduleName = resourceStrOpt->moduleName;

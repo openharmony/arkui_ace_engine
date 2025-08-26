@@ -332,10 +332,18 @@ export class DragControllerImpl extends DragController {
     }
 
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        if (typeof custom === "function") {
+        if (undefined === custom) {
+            let rootNode = nullptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(rootNode, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo, callback);
+        } else if (typeof custom === "function") {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
@@ -356,9 +364,12 @@ export class DragControllerImpl extends DragController {
                     destroyCallback, dragInfo, callback);
             } else {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-                const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, customDragInfo.builder as CustomBuilder);
+                let peerNode: PeerNode | undefined = undefined;
+                if (customDragInfo.builder !== undefined) {
+                    peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
+                        return ArkComponentRootPeer.create(undefined);
+                    }, customDragInfo.builder as CustomBuilder);
+                }
                 let rootNode = peerNode ? peerNode.peer.ptr : nullptr;
                 destroyCallback = (): void => {
                     destroyUiDetachedRoot(rootNode, this.instanceId_);
@@ -372,11 +383,19 @@ export class DragControllerImpl extends DragController {
     }
 
     // @ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
-        if (typeof custom === "function") {
+        if (undefined === custom) {
+            let rootNode = nullptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(rootNode, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo);
+        } else if (typeof custom === "function") {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             const peerNode = context.getDetachedRootEntryManager().createUiDetachedFreeRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
@@ -416,7 +435,7 @@ export class DragControllerImpl extends DragController {
         return promise;
     }
 
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
 
@@ -424,6 +443,13 @@ export class DragControllerImpl extends DragController {
         let peerNodeArray: Array<PeerNode> = [];
         let dragItemInfoArray: Array<DragItemInfo> = [];
 
+        if (undefined === customArray) {
+            let destroyCallback = (): void => {};
+            let dragAction = ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
+                destroyCallback, dragInfo);
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return dragAction;
+        }
         for (let element of customArray) {
             if (typeof element === "function") {
                 let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -979,10 +1005,10 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    getTopOrder(): LevelOrder {
+    getTopOrder(): LevelOrder | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let orderValue: number | undefined = promptAction.getTopOrder();
-        let order: LevelOrder = LevelOrder.clamp(0);
+        let order: LevelOrder | undefined = undefined;
         if (orderValue !== undefined) {
             order = LevelOrder.clamp(orderValue as number);
         }
@@ -990,10 +1016,10 @@ export class PromptActionImpl extends PromptAction {
         return order;
     }
 
-    getBottomOrder(): LevelOrder {
+    getBottomOrder(): LevelOrder | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let orderValue: number | undefined = promptAction.getBottomOrder();
-        let order: LevelOrder = LevelOrder.clamp(0);
+        let order: LevelOrder | undefined = undefined;
         if (orderValue !== undefined) {
             order = LevelOrder.clamp(orderValue as number);
         }

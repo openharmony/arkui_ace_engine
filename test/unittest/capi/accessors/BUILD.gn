@@ -24,6 +24,7 @@ ace_unittest("capi_all_accessors_test") {
     "action_sheet_accessor_test.cpp",
     "alert_dialog_accessor_test.cpp",
     "appear_symbol_effect_accessor_test.cpp",
+    "axis_event_accessor_test.cpp",
     "background_color_style_accessor_test.cpp",
     "base_event_accessor_test.cpp",
     "base_gesture_event_accessor_test.cpp",
