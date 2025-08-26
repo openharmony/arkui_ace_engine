@@ -56,6 +56,8 @@ public:
     void InitUiContent(OHOS::AbilityRuntime::Context *abilityContext);
     void SetUIContentType(UIContentType uIContentType) override;
     bool HasWorkerUsingByWorkerId(int32_t workerId) override;
+    bool CheckDCMaxConstraintInWorker(int32_t workerId) override;
+    bool CheckWorkerMaxConstraint(int32_t workerId) override;
 
     void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -120,7 +122,7 @@ private:
     bool adaptiveHeight_ = true;
     bool backgroundTransparent_ = true;
     float density_ = 0;
-    static std::set<int32_t> usingWorkers_;
+    static std::map<int32_t, int32_t> usingWorkers_;
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;

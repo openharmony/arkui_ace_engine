@@ -32,6 +32,8 @@ public:
     void OnDetachContext(PipelineContext *context) override;
 
     void SetDynamicParam(const DynamicParam& param);
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void InitializeArktsDcRender();

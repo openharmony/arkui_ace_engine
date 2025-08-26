@@ -44,9 +44,12 @@ namespace {
 constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr int32_t INVALID_WORKER_ID = -1;
+constexpr size_t WORKER_MAX_NUM = 1;
+constexpr int32_t WORKER_SIZE_ONE = 1;
+constexpr int32_t DC_MAX_NUM_IN_WORKER = 4;
 }
 
-std::set<int32_t> ArktsDynamicComponentRendererImpl::usingWorkers_;
+std::map<int32_t, int32_t> ArktsDynamicComponentRendererImpl::usingWorkers_;
 std::mutex ArktsDynamicComponentRendererImpl::usingWorkerMutex_;
 
 ArktsDynamicComponentRendererImpl::ArktsDynamicComponentRendererImpl(
@@ -94,6 +97,36 @@ bool ArktsDynamicComponentRendererImpl::HasWorkerUsingByWorkerId(int32_t workerI
     return usingWorkers_.find(workerId) != usingWorkers_.end();
 }
 
+bool ArktsDynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(int32_t workerId)
+{
+    if (workerId == INVALID_WORKER_ID) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        return true;
+    }
+
+    return iter->second < DC_MAX_NUM_IN_WORKER;
+}
+
+bool ArktsDynamicComponentRendererImpl::CheckWorkerMaxConstraint(int32_t workerId)
+{
+    if (workerId == INVALID_WORKER_ID) {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        return usingWorkers_.size() < WORKER_MAX_NUM;
+    }
+
+    return usingWorkers_.size() < WORKER_MAX_NUM + 1;
+}
+
 void ArktsDynamicComponentRendererImpl::AddWorkerUsing(int32_t workerId)
 {
     if (workerId == INVALID_WORKER_ID) {
@@ -101,11 +134,13 @@ void ArktsDynamicComponentRendererImpl::AddWorkerUsing(int32_t workerId)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(workerId) != usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
+        usingWorkers_[workerId] = WORKER_SIZE_ONE;
         return;
     }
 
-    usingWorkers_.insert(workerId);
+    iter->second++;
 }
 
 void ArktsDynamicComponentRendererImpl::DeleteWorkerUsing(int32_t workerId)
@@ -115,11 +150,17 @@ void ArktsDynamicComponentRendererImpl::DeleteWorkerUsing(int32_t workerId)
     }
 
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    if (usingWorkers_.find(workerId) == usingWorkers_.end()) {
+    auto iter = usingWorkers_.find(workerId);
+    if (iter == usingWorkers_.end()) {
         return;
     }
 
-    usingWorkers_.erase(workerId);
+    if (iter->second <= WORKER_SIZE_ONE) {
+        usingWorkers_.erase(iter);
+        return;
+    }
+
+    iter->second++;
 }
 
 void ArktsDynamicComponentRendererImpl::CreateContent()

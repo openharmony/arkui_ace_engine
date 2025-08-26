@@ -344,6 +344,8 @@
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
+      OHOS::Ace::NG::DynamicModelStatic::*;
+      OHOS::Ace::NG::DynamicParam::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
