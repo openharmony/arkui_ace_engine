@@ -705,11 +705,8 @@ bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 
 bool IsLongPreviewMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
-    if (param->previewBuilder && param->responseType == ResponseType::LONG_PRESS &&
-        param->type != WebElementType::TEXT) {
-        return true;
-    }
-    return false;
+    return param->previewBuilder && param->responseType == ResponseType::LONG_PRESS &&
+        param->type != WebElementType::TEXT;
 }
 
 void WebPattern::ConfigLongPreviewMenuParam(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
@@ -986,7 +983,8 @@ void WebPattern::UpdateImagePreviewParam()
 #endif
 }
 
-void WebPattern::ShowPreviewMenu(WebElementType type) {
+void WebPattern::ShowPreviewMenu(WebElementType type)
+{
     auto sourceType = contextMenuParam_->GetSourceTypeV2();
     if (sourceType == OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_MOUSE) {
         curResponseType_ = ResponseType::RIGHT_CLICK;
@@ -1141,7 +1139,7 @@ void WebPattern::OnCloseContextMenu()
     isAILinkMenuShow_ = false;
     CloseContextSelectionMenu();
     RemovePreviewMenuNode();
-    curContextMenuResult_ = false;  
+    curContextMenuResult_ = false;
 }
 
 void WebPattern::OnContextMenuHide()
@@ -2893,8 +2891,18 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    if (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile() &&
+        keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
+        bool isKeyNull = !(keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ||
+            keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ||
+            keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ||
+            keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT));
+        if (isKeyNull) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern Handle Escape");
+            CloseContextSelectionMenu();
+        }
+    }
     bool ret = false;
-
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
     auto eventHub = host->GetEventHub<WebEventHub>();
@@ -4432,6 +4440,9 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
+    if (!fromOverlay) {
+        CloseContextSelectionMenu();
+    }
     isTouchUpEvent_ = false;
     InitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
@@ -6232,6 +6243,9 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    if (contextSelectOverlay_ && contextSelectOverlay_->SelectOverlayIsOn()) {
+        contextSelectOverlay_->UpdateMenuOnWindowSizeChanged(type);
+    }
     CHECK_NULL_VOID(delegate_);
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     if (type == WindowSizeChangeReason::MAXIMIZE) {
