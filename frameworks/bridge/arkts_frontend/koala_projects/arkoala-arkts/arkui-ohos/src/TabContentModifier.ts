@@ -19,7 +19,7 @@
 import { AttributeUpdaterFlag, CommonMethodModifier } from "./CommonMethodModifier"
 import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
 import { AttributeModifier, CommonMethod, CustomBuilder } from "./component/common"
-import { ComponentContent } from "./component/arkui-custom"
+import { ComponentContent } from "./ComponentContent"
 import { Resource } from "global.resource"
 import { VoidCallback } from "./component/units"
 import { PeerNode } from './PeerNode'
@@ -48,17 +48,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL) {
             switch (this._tabBar_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    const value_type = runtimeType(this._tabBar_0_0value)
-                    if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                        const value_casted = this._tabBar_0_0value as (SubTabBarStyle | BottomTabBarStyle | undefined)
-                        peer.tabBar1Attribute(value_casted)
-                    } else if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                        const value_casted = this._tabBar_0_0value as (string | Resource | CustomBuilder | TabBarOptions | undefined)
-                        peer.tabBar0Attribute(value_casted)
-                    } else if ((RuntimeType.STRING == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                        const value_casted = this._tabBar_0_0value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
-                        peer.tabBar2Attribute(value_casted)
-                    }
+                    peer.tabBarAttribute(this._tabBar_0_0value)
                     this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -68,7 +58,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
                 }
                 default: {
                     this._tabBar_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.tabBar2Attribute((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    peer.tabBarAttribute((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
                 }
             }
         }
