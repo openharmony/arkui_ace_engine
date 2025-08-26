@@ -3195,7 +3195,16 @@ bool SheetPresentationPattern::AvoidKeyboardBeforeTranslate()
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::RESIZE_ONLY) {
         // resize bindSheet need to keep safe distance from keyboard
         auto distanceFromBottom = sheetType_ == SheetType::SHEET_CENTER ? height_ - centerHeight_ : 0.0f;
-        DecreaseScrollHeightInSheet(keyboardHeight_ == 0 ? 0.0f : keyboardHeight_ - distanceFromBottom);
+
+        /**
+         * If the keyboardHeight_ is less than distanceFromBottom,
+         * it means that there is no overlap between the current soft keyboard and the sheet,
+         * and there is no need to resize sheet Content area.
+         */
+        auto decreaseHeight = keyboardHeight_ == 0 || LessNotEqual(keyboardHeight_, distanceFromBottom)
+            ? 0.0f
+            : keyboardHeight_ - distanceFromBottom;
+        DecreaseScrollHeightInSheet(decreaseHeight);
         return true;
     }
     return false;
