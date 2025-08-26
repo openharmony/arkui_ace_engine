@@ -103,7 +103,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
         tree = std::to_string(container->GetWindowId());
         return;
     }
-    if (params.infoType == InspectorInfoType::WEB_LANG) {
+    if (params.infoType == InspectorInfoType::WEB_LANG && params.webId > 0) {
         tree = GetWebLanguageByNodeId(params.webId);
         return;
     }
