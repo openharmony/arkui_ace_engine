@@ -31,9 +31,193 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
     
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
+        const peerNode: ArkMenuPeer = value as ArkMenuPeer
+        if (this._font_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._font_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.fontAttribute((this._font_0_0value as Font | undefined))
+                    this._font_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._font_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._font_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.fontAttribute(undefined)
+                }
+            }
+        }
+        if (this._fontColor_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._fontColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.fontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined))
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._fontColor_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.fontColorAttribute(undefined)
+                }
+            }
+        }
+        if (this._radius_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._radius_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.radiusAttribute((this._radius_0_0value as Dimension | BorderRadiuses | undefined))
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._radius_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.radiusAttribute(undefined)
+                }
+            }
+        }
+        if (this._menuItemDivider_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._menuItemDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.menuItemDividerAttribute((this._menuItemDivider_0_0value as DividerStyleOptions | undefined))
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._menuItemDivider_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.menuItemDividerAttribute(undefined)
+                }
+            }
+        }
+        if (this._menuItemGroupDivider_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._menuItemGroupDivider_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.menuItemGroupDividerAttribute((this._menuItemGroupDivider_0_0value as DividerStyleOptions | undefined))
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.menuItemGroupDividerAttribute(undefined)
+                }
+            }
+        }
+        if (this._subMenuExpandingMode_0_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._subMenuExpandingMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.subMenuExpandingModeAttribute((this._subMenuExpandingMode_0_0value as SubMenuExpandingMode | undefined))
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.subMenuExpandingModeAttribute(undefined)
+                }
+            }
+        }
     }
     mergeModifier(value: CommonMethodModifier): void {
         super.mergeModifier(value)
+        if (value instanceof MenuModifier) {
+            const modifier = value as MenuModifier;
+            if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._font_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.font(modifier._font_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.font((undefined as Font | undefined));
+                    }
+                }
+            }
+            if (modifier._fontColor_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._fontColor_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.fontColor(modifier._fontColor_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.fontColor((undefined as ResourceColor | undefined));
+                    }
+                }
+            }
+            if (modifier._radius_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._radius_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.radius(modifier._radius_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.radius((undefined as Dimension | BorderRadiuses | undefined));
+                    }
+                }
+            }
+            if (modifier._menuItemDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._menuItemDivider_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.menuItemDivider(modifier._menuItemDivider_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.menuItemDivider((undefined as DividerStyleOptions | undefined));
+                    }
+                }
+            }
+            if (modifier._menuItemGroupDivider_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._menuItemGroupDivider_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.menuItemGroupDivider(modifier._menuItemGroupDivider_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.menuItemGroupDivider((undefined as DividerStyleOptions | undefined));
+                    }
+                }
+            }
+            if (modifier._subMenuExpandingMode_0_flag != AttributeUpdaterFlag.INITIAL)
+            {
+                switch (modifier._subMenuExpandingMode_0_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.subMenuExpandingMode(modifier._subMenuExpandingMode_0_0value);
+                        break;
+                    }
+                    default: {
+                        this.subMenuExpandingMode((undefined as SubMenuExpandingMode | undefined));
+                    }
+                }
+            }
+        }
     }
  
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
