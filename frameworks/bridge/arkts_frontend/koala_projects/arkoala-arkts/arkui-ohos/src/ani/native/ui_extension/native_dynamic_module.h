@@ -34,6 +34,9 @@ private:
     static ani_status SetOnError(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
         [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj);
+    static ani_status SetIsReportFrameEvent(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+        [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_boolean value);
 };
 } // namespace OHOS::Ace::Ani
 

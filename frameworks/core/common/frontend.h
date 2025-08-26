@@ -33,6 +33,7 @@ using FrontendDialogCallback = std::function<void(const std::string& event, cons
 typedef struct napi_value__* napi_value;
 typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
+typedef struct __ani_vm ani_vm;
 typedef class __ani_object* ani_object;
 
 namespace OHOS::Ace {
@@ -412,6 +413,11 @@ public:
     virtual void SetHostContext(int32_t instanceId, ani_ref* context) {}
 
     virtual ani_ref* GetHostContext(int32_t instanceId)
+    {
+        return nullptr;
+    }
+
+    virtual ani_vm *GetVM()
     {
         return nullptr;
     }

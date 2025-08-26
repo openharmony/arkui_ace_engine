@@ -43,6 +43,8 @@ public:
     explicit ArktsDynamicFrontend(void* runtime);
     ~ArktsDynamicFrontend() override = default;
 
+    void Destroy() override;
+
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override
     {
         assetManager_ = assetManager;
@@ -85,6 +87,7 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<AssetManager> assetManager_;
+    ani_ref globalLinkObj_ = nullptr;
     bool isBundle_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ArktsDynamicFrontend);
