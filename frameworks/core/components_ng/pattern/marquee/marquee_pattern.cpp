@@ -266,8 +266,8 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI,
-                                   "ArkUIMarqueePlayAnimation", PriorityType::VIP);
+            taskExecutor->PostTask(
+                [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -750,7 +750,8 @@ void MarqueePattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyV
                 if (auto realValue = std::get_if<CalcDimension>(&(value->GetValue()))) {
                     prop->UpdateFontSize(*realValue);
                 }
-            } },
+            }
+        },
         { "TextColor",
             [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
                 MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
@@ -762,13 +763,15 @@ void MarqueePattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyV
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
                     prop->UpdateFontColor(*realValue);
                 }
-            } },
+            }
+        },
         { "FontFamily",
             [](MarqueeLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
                 if (auto realValue = std::get_if<std::vector<std::string>>(&(value->GetValue()))) {
                     prop->UpdateFontFamily(*realValue);
                 }
-            } },
+            }
+        },
     };
     auto it = handlers.find(key);
     if (it != handlers.end()) {

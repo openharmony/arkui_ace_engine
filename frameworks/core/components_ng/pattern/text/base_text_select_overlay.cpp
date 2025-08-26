@@ -1070,7 +1070,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
                     overlay->RegisterScrollingListener(scrollingNode.Upgrade());
                 }
             },
-            TaskExecutor::TaskType::UI, "RegisterScrollingListener", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "RegisterScrollingListener");
     } else {
         hasRegisterListener_ = false;
     }
