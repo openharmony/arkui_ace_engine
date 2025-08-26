@@ -5018,6 +5018,8 @@ void FrameNode::Layout()
 
         if (overlayNode_) {
             LayoutOverlay();
+        } else if (renderContext_) {
+            renderContext_->UpdateOverlayText();
         }
         time = GetSysTimestamp() - time;
         AddNodeFlexLayouts();
@@ -5580,14 +5582,19 @@ void FrameNode::LayoutOverlay()
     auto align = Alignment::TOP_LEFT;
     Dimension offsetX, offsetY;
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
     childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto direction = childLayoutProperty->GetNonAutoLayoutDirection();
+    if (direction == TextDirection::RTL) {
+        offsetX = -offsetX;
+    }
     auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
     if (childLayoutProperty->GetPositionProperty()) {
         align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
 
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
-    auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
+    auto translate = Alignment::GetAlignPositionWithDirection(size, childSize, align, direction) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
     overlayNode_->Layout();
 }

@@ -3208,6 +3208,12 @@ void RosenRenderContext::UpdateCustomBackground()
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateOverlayText()
+{
+    CHECK_NULL_VOID(overlayTextModifier_);
+    overlayTextModifier_->UpdateText();
+}
+
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
     CHECK_NULL_VOID(rsNode_);

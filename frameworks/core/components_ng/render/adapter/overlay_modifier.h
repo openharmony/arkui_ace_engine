@@ -149,13 +149,24 @@ public:
         return fontManager->IsDefaultFontChanged();
     }
 
+    void UpdateText()
+    {
+        UpdateToRender();
+    }
+
 private:
     static OffsetF GetTextPosition(const SizeF& parentSize, const SizeF& childSize, OverlayOptions& overlay)
     {
-        const double dx = overlay.x.ConvertToPx();
-        const double dy = overlay.y.ConvertToPx();
+        double dx = overlay.x.ConvertToPx();
+        double dy = overlay.y.ConvertToPx();
         const Alignment align = overlay.align;
-        OffsetF const offset = Alignment::GetAlignPosition(parentSize, childSize, align);
+        auto direction = overlay.direction;
+        direction = direction != TextDirection::AUTO ? direction : (AceApplicationInfo::GetInstance().IsRightToLeft() ?
+            TextDirection::RTL : TextDirection::LTR);
+        if (direction == TextDirection::RTL) {
+            dx = -dx;
+        }
+        OffsetF const offset = Alignment::GetAlignPositionWithDirection(parentSize, childSize, align, direction);
         const float fx = static_cast<float>(dx) + offset.GetX();
         const float fy = static_cast<float>(dy) + offset.GetY();
         return { fx, fy };

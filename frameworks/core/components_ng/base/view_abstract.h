@@ -713,6 +713,7 @@ public:
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay);
+    static void SetOverlayNode(FrameNode* frameNode, FrameNode* overlayNode, const NG::OverlayOptions& overlay);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc);
     static void SetHasBorderImageSlice(FrameNode* frameNode, bool tag);
@@ -1089,7 +1090,7 @@ public:
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY);
+        const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;

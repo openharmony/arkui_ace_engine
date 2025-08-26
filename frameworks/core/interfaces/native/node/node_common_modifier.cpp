@@ -199,6 +199,44 @@ Alignment ParseAlignment(int32_t align)
     return alignment;
 }
 
+TextDirection ParseDirection(int32_t dir)
+{
+    TextDirection direction = TextDirection::LTR;
+    switch (dir) {
+        case NUM_0:
+            direction = TextDirection::LTR;
+            break;
+        case NUM_1:
+            direction = TextDirection::RTL;
+            break;
+        case NUM_3:
+            direction = TextDirection::AUTO;
+            break;
+        default:
+            break;
+    }
+    return direction;
+}
+
+int32_t ParseDirectionToIndex(TextDirection dir)
+{
+    int32_t direction = 0;
+    switch (dir) {
+        case TextDirection::LTR:
+            direction = NUM_0;
+            break;
+        case TextDirection::RTL:
+            direction = NUM_1;
+            break;
+        case TextDirection::AUTO:
+            direction = NUM_3;
+            break;
+        default:
+            break;
+    }
+    return direction;
+}
+
 int32_t ConvertAlignmentToInt(Alignment alignment)
 {
     if (alignment == Alignment::TOP_LEFT) {
@@ -2160,22 +2198,10 @@ void ResetRadialGradient(ArkUINodeHandle node)
     ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 
-/**
- * @param text text value
- * @param options option value
- * option[0], option[1]: align(hasValue, value)
- * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
- * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
- * option[8]: hasOptions
- * option[9]: hasOffset
- * @param optionsLength options length
- */
-void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options, ArkUI_Int32 optionsLength)
+bool ParseOverlayOptions(const ArkUI_Float32* options, ArkUI_Int32 optionsLength, NG::OverlayOptions& overlay)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if ((options == nullptr) || (optionsLength != NUM_10)) {
-        return;
+    if ((options == nullptr) || (optionsLength != NUM_12)) {
+        return false;
     }
     auto alignHasValue = options[NUM_0];
     auto alignValue = options[NUM_1];
@@ -2187,10 +2213,9 @@ void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* o
     auto offsetYUnit = options[NUM_7];
     auto hasOptions = options[NUM_8];
     auto hasOffset = options[NUM_9];
-    NG::OverlayOptions overlay;
-    if (text != nullptr) {
-        overlay.content = text;
-    }
+    auto hasDirection = options[NUM_10];
+    auto direction = options[NUM_11];
+
     if (static_cast<bool>(hasOptions)) {
         if (static_cast<bool>(alignHasValue)) {
             overlay.align = ParseAlignment(static_cast<int32_t>(alignValue));
@@ -2205,12 +2230,48 @@ void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* o
                 overlay.y = CalcDimension(offsetYValue, static_cast<DimensionUnit>(offsetYUnit));
             }
         }
+        if (static_cast<bool>(hasDirection)) {
+            overlay.direction = ParseDirection(static_cast<int32_t>(direction));
+        } else {
+            overlay.direction = TextDirection::LTR;
+        }
     } else {
         overlay.align = Alignment::TOP_LEFT;
         overlay.x = CalcDimension(0);
         overlay.y = CalcDimension(0);
     }
-    ViewAbstract::SetOverlay(frameNode, overlay);
+    return true;
+}
+
+/**
+ * @param text text value
+ * @param options option value
+ * option[0], option[1]: align(hasValue, value)
+ * option[2], option[3], option[4]: offsetX(hasValue, value, unit)
+ * option[5], option[6], option[7]: offsetY(hasValue, value, unit)
+ * option[8]: hasOptions
+ * option[9]: hasOffset
+ * option[10], option[11]: direction(hasDirection, direction)
+ * @param optionsLength options length
+ */
+void SetOverlay(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options,
+    ArkUI_Int32 optionsLength, ArkUINodeHandle overlayNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OverlayOptions overlay;
+    if (!ParseOverlayOptions(options, optionsLength, overlay)) {
+        return;
+    }
+    if (text != nullptr) {
+        overlay.content = text;
+    }
+
+    if (!overlay.content.empty()) {
+        ViewAbstract::SetOverlay(frameNode, overlay);
+    } else {
+        ViewAbstract::SetOverlayNode(frameNode, reinterpret_cast<FrameNode*>(overlayNode), overlay);
+    }
 }
 
 void ResetOverlay(ArkUINodeHandle node)
@@ -2221,7 +2282,9 @@ void ResetOverlay(ArkUINodeHandle node)
     overlay.align = Alignment::TOP_LEFT;
     overlay.x = CalcDimension(0);
     overlay.y = CalcDimension(0);
+    overlay.direction = TextDirection::LTR;
     ViewAbstract::SetOverlay(frameNode, overlay);
+    ViewAbstract::SetOverlayNode(frameNode, nullptr, overlay);
 }
 
 /**
@@ -6555,7 +6618,8 @@ ArkUI_Int32 GetResponseRegion(ArkUINodeHandle node, ArkUI_Float32 (*values)[32])
     return index;
 }
 
-ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit)
+ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit,
+    ArkUINodeHandle& overlayNode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -6564,6 +6628,11 @@ ArkUI_CharPtr GetOverlay(ArkUINodeHandle node, ArkUIOverlayOptions* options, Ark
     options->x = overlayOptions.x.GetNativeValue(static_cast<DimensionUnit>(unit));
     options->y = overlayOptions.y.GetNativeValue(static_cast<DimensionUnit>(unit));
     options->content = overlayOptions.content.c_str();
+    options->direction = ParseDirectionToIndex(overlayOptions.direction);
+    auto overlay = frameNode->GetOverlayNode();
+    if (overlay) {
+        overlayNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(overlay));
+    }
     g_strValue = overlayOptions.content;
     return g_strValue.c_str();
 }

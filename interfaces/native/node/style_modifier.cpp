@@ -73,7 +73,7 @@ const int ALLOW_SIZE_7(7);
 const int ALLOW_SIZE_8(8);
 const int ALLOW_SIZE_9(9);
 const int ALLOW_SIZE_16(16);
-const int ALLOW_SIZE_10(10);
+const int ALLOW_SIZE_12(12);
 
 constexpr int DEFAULT_SIZE_18 = 18;
 constexpr int DEFAULT_SIZE_24 = 24;
@@ -2646,7 +2646,7 @@ int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
 
-    ArkUI_Float32 values[ALLOW_SIZE_10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    ArkUI_Float32 values[ALLOW_SIZE_12] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
     if (item->size > 0) {
         values[0] = 1;
@@ -2669,17 +2669,24 @@ int32_t SetOverlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     values[8] = item->size > 0 ? 1 : 0;
     values[9] = item->size > 1 ? 1 : 0;
+    if (item->size > 3) {
+        values[NUM_10] = 1;
+        values[NUM_11] = item->value[3].i32;
+    }
+    ArkUI_NodeHandle overlay = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+    auto overlayNode = overlay ? overlay->uiNodeHandle : nullptr;
     fullImpl->getNodeModifiers()->getCommonModifier()->setOverlay(
-        node->uiNodeHandle, item->string, values, ALLOW_SIZE_10);
+        node->uiNodeHandle, item->string, values, ALLOW_SIZE_12, overlayNode);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetOverlay(ArkUI_NodeHandle node)
 {
     ArkUIOverlayOptions options;
+    ArkUINodeHandle overlayNode;
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     auto contentStr = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getOverlay(
-        node->uiNodeHandle, &options, unit);
+        node->uiNodeHandle, &options, unit, overlayNode);
     g_attributeItem.string = contentStr;
     int index = 0;
     //index 0 : align
@@ -2688,7 +2695,14 @@ const ArkUI_AttributeItem* GetOverlay(ArkUI_NodeHandle node)
     g_numberValues[index++].f32 = options.x;
     //index 2 : offset y
     g_numberValues[index++].f32 = options.y;
+    //index 3 : direction
+    g_numberValues[index++].i32 = options.direction;
     g_attributeItem.size = index;
+    if (overlayNode) {
+        auto* fullImpl = GetFullImpl();
+        void* attachNode = fullImpl->getExtendedAPI()->getAttachNodePtr(overlayNode);
+        g_attributeItem.object = attachNode;
+    }
     return &g_attributeItem;
 }
 

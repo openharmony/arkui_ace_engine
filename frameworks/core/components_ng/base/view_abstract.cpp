@@ -5531,7 +5531,7 @@ void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& conte
 
 void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY)
+    const std::optional<Dimension>& offsetY, TextDirection direction)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -5549,6 +5549,7 @@ void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNod
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
     layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    layoutProperty->UpdateLayoutDirection(direction);
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -6397,6 +6398,34 @@ void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& g
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
+}
+
+void ViewAbstract::SetOverlayNode(FrameNode* frameNode, FrameNode* node, const NG::OverlayOptions& overlay)
+{
+    CHECK_NULL_VOID(frameNode);
+    SetOverlay(frameNode, overlay);
+    auto overlayNode = AceType::WeakClaim(node).Upgrade();
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(overlay.align);
+    layoutProperty->SetOverlayOffset(overlay.x, overlay.y);
+    layoutProperty->UpdateLayoutDirection(overlay.direction);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
 }
 
 void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)

@@ -1660,6 +1660,7 @@ struct ArkUIOverlayOptions {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
     ArkUI_CharPtr content;
+    ArkUI_Int32 direction;
 };
 
 union ArkUIInt32orFloat32 {
@@ -2358,8 +2359,8 @@ struct ArkUICommonModifier {
     void (*setRadialGradient)(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
         const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* resRawPtr);
     void (*resetRadialGradient)(ArkUINodeHandle node);
-    void (*setOverlay)(
-        ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options, ArkUI_Int32 optionsLength);
+    void (*setOverlay)(ArkUINodeHandle node, ArkUI_CharPtr text, const ArkUI_Float32* options,
+        ArkUI_Int32 optionsLength, ArkUINodeHandle overlayNode);
     void (*resetOverlay)(ArkUINodeHandle node);
     void (*setBorderImage)(
         ArkUINodeHandle node, ArkUI_CharPtr src, const ArkUIStringAndFloat* options, ArkUI_Int32 optionsLength);
@@ -2630,7 +2631,8 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getFocusable)(ArkUINodeHandle node);
     ArkUI_Bool (*getDefaultFocus)(ArkUINodeHandle node);
     ArkUI_Int32 (*getResponseRegion)(ArkUINodeHandle node, ArkUI_Float32 (*values)[32]);
-    ArkUI_CharPtr (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit);
+    ArkUI_CharPtr (*getOverlay)(ArkUINodeHandle node, ArkUIOverlayOptions* options, ArkUI_Int32 unit,
+        ArkUINodeHandle& overlayNode);
     ArkUI_Bool (*getAccessibilityGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityText)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityDescription)(ArkUINodeHandle node);

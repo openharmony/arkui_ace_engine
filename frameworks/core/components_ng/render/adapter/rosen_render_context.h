@@ -540,6 +540,8 @@ public:
 
     void UpdateCustomBackground() override;
 
+    void UpdateOverlayText() override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
