@@ -1163,7 +1163,8 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
 }
 } // namespace
 
-bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
+bool GridScrollLayoutAlgorithm::MeasureExistingLine(
+    int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
 {
     auto it = info_.gridMatrix_.find(line);
     if (it == info_.gridMatrix_.end() || info_.lineHeightMap_.find(line) == info_.lineHeightMap_.end()) {
@@ -1186,11 +1187,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         }
         AdjustRowColSpan(item, wrapper_, idx);
         auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
-        if (crossStart == -1) {
-            MeasureChildPlaced(frameSize_, idx, cell.first, wrapper_, item);
-        } else {
-            MeasureChildPlaced(frameSize_, idx, crossStart, wrapper_, item);
-        }
+        MeasureChildPlaced(frameSize_, idx, crossStart == -1 ? cell.first : crossStart, wrapper_, item);
         measuredItems_.emplace(idx);
         // Record end index. When fill new line, the [endIndex_] will be the first item index to request
         LargeItemLineHeight(item);
@@ -1199,6 +1196,15 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
+        auto deltaHeight = info_.lineHeightMap_[line] - cellAveLength_;
+        if (Positive(deltaHeight) && isScrollableSpringMotionRunning && !info_.reachStart_) {
+            mainLength += deltaHeight;
+            info_.currentOffset_ = mainLength;
+            float totalHeight = GetContentHeight(wrapper_) - deltaHeight;
+            if (info_.lastMainSize_ >= totalHeight) {
+                info_.currentOffset_ += totalHeight - info_.lastMainSize_;
+            }
+        }
         info_.lineHeightMap_[line] = cellAveLength_;
         mainLength += cellAveLength_ + mainGap_;
     }
@@ -1218,8 +1224,13 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, runOutOfRecord);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, runOutOfRecord);
+    auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
     while (LessNotEqual(mainLength, mainSize)) {
-        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex)) {
+        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
         }
@@ -2524,5 +2535,19 @@ bool GridScrollLayoutAlgorithm::HasLayoutOptions(LayoutWrapper* layoutWrapper)
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(gridLayoutProperty, false);
     return gridLayoutProperty->GetLayoutOptions().has_value();
+}
+
+float GridScrollLayoutAlgorithm::GetContentHeight(LayoutWrapper* layoutWrapper)
+{
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(gridLayoutProperty, 0.0f);
+    auto options = gridLayoutProperty->GetLayoutOptions();
+    if (options.has_value()) {
+        if (info_.IsAllItemsMeasured()) {
+            return info_.GetTotalLineHeight(mainGap_);
+        }
+        return info_.GetContentHeight(options.value(), info_.childrenCount_, mainGap_);
+    }
+    return info_.GetContentHeight(mainGap_);
 }
 } // namespace OHOS::Ace::NG
