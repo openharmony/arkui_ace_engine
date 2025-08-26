@@ -507,7 +507,7 @@ public:
             return false;
         }
         auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(
-            false, { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL
+            false, { .type = ignoreType, .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL
                                                           : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);

@@ -1945,4 +1945,56 @@ HWTEST_F(TabsAttrTestNg, TabContentCreateWithResourceObj001, TestSize.Level1)
     tabContentModel.Pop();
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: AccumulatingTerminateHelper001
+ * @tc.desc: Test TabContentPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, AccumulatingTerminateHelper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabContent.
+     */
+    CreateTabContent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is true.
+     */
+    frameNode->isScrollableAxis_ = true;
+    ExpandEdges padding {0, 10, 20, 30};
+    RectF rect {};
+    auto result = pattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccumulatingTerminateHelper002
+ * @tc.desc: Test TabContentPattern AccumulatingTerminateHelper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, AccumulatingTerminateHelper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabContent.
+     */
+    CreateTabContent();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test AccumulatingTerminateHelper, when "IsScrollableAxisInsensitive" is false.
+     */
+    frameNode->isScrollableAxis_ = false;
+    ExpandEdges padding {30, 20, 10, 0};
+    RectF rect {};
+    auto result = pattern->AccumulatingTerminateHelper(rect, padding);
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG
