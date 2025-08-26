@@ -44,6 +44,7 @@
 #include "xcomponent/xcomponent_module_methods.h"
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
+#include "UINode/uinode_module_methods.h"
 #include "node_adapter/node_adapter_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -1079,6 +1080,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ApplyParentThemeScopeId",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
+        },
+        ani_native_function {
+            "_UINode_OnUpdateDone",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::OnUpdateDone)
+        },
+        ani_native_function {
+            "_UINode_SetStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetUINodeIsStatic)
         },
         ani_native_function {
             "_NodeAdapter_Construct",

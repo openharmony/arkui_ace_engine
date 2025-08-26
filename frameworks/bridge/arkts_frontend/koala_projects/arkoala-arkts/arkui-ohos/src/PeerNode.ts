@@ -45,6 +45,10 @@ export class PeerNode extends IncrementalNode {
         }
         return PeerNode.currentId++;
     }
+    override incrementalUpdateDone(parent?: IncrementalNode) {
+        super.incrementalUpdateDone(parent)
+        ArkUIAniModule._UINode_OnUpdateDone(this.peer.ptr)
+    }
     private id: int32
     private _reuseCb?: () => void
     private _recycleCb?: () => void
