@@ -57,7 +57,7 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
             }
             auto u8Content = UtfUtils::Str16DebugToStr8(content);
             auto arkResourceContent = Converter::ArkCreate<Ark_Resource>(u8Content,
-                Converter::ResourceType::STRING, &ctx);
+                ResourceType::STRING, &ctx);
             arkResourceContent.bundleName = Converter::ArkValue<Ark_String>(container->GetBundleName(), &ctx);
             arkResourceContent.moduleName = Converter::ArkValue<Ark_String>(container->GetModuleName(), &ctx);
             arkResourceContent.type = resourceType;

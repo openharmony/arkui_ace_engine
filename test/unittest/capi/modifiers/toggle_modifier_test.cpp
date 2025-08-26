@@ -54,10 +54,10 @@ namespace  {
     const auto SWITCH_HEIGHT = 20;
     const auto SWITCH_PADDING = 5;
     const auto SWITCH_RADIUS = 7;
-    const auto SELECTED_COLOR_RESOURCE = CreateResource("switch_selected_color", Converter::ResourceType::COLOR);
-    const auto POINT_COLOR_RESOURCE = CreateResource("switch_point_color", Converter::ResourceType::COLOR);
-    const auto POINT_RADIUS_RESOURCE = CreateResource("switch_point_radius", Converter::ResourceType::FLOAT);
-    const auto TRACK_BORDER_RADIUS_RESOURCE = CreateResource("track_border_radius", Converter::ResourceType::FLOAT);
+    const auto SELECTED_COLOR_RESOURCE = CreateResource("switch_selected_color", ResourceType::COLOR);
+    const auto POINT_COLOR_RESOURCE = CreateResource("switch_point_color", ResourceType::COLOR);
+    const auto POINT_RADIUS_RESOURCE = CreateResource("switch_point_radius", ResourceType::FLOAT);
+    const auto TRACK_BORDER_RADIUS_RESOURCE = CreateResource("track_border_radius", ResourceType::FLOAT);
 } // namespace
 
 class ToggleModifierTest : public ModifierTestBase<GENERATED_ArkUIToggleModifier,

@@ -32,7 +32,7 @@ class TextMenuItemIdAccessorTest : public AccessorTestBase<GENERATED_ArkUITextMe
 public:
     template<typename ResourceValue>
     Ark_ResourceStr CreateResourceStr(const ResourceValue& value,
-        Converter::ResourceType type = Converter::ResourceType::STRING)
+        ResourceType type = ResourceType::STRING)
     {
         AddResource(++resCounter_, value);
         IntResourceId id {resCounter_, type};
@@ -60,7 +60,7 @@ HWTEST_F(TextMenuItemIdAccessorTest, ofTest, TestSize.Level1)
     const Ark_ResourceStr resource3 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(string3);
     const std::string string4("");
     const Ark_ResourceStr resource4 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(string4);
-    const Ark_ResourceStr resource5 = CreateResourceStr(Color::BLACK, Converter::ResourceType::COLOR);
+    const Ark_ResourceStr resource5 = CreateResourceStr(Color::BLACK, ResourceType::COLOR);
     const std::vector<std::tuple<const Ark_ResourceStr*, std::optional<std::string>>> testPlan {
         {&resource1, string1},
         {&resource2, string2},

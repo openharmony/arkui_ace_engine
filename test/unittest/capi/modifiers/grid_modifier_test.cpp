@@ -92,8 +92,8 @@ namespace {
     const Color THEME_SCROLLBAR_COLOR(0x00FF00FF);
 
     // resource names and id
-    const auto RES_NAME = NamedResourceId{"aa.bb.cc", Converter::ResourceType::FLOAT};
-    const auto RES_ID = IntResourceId{11111, Converter::ResourceType::FLOAT};
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::FLOAT};
+    const auto RES_ID = IntResourceId{11111, ResourceType::FLOAT};
 
     // resource values
     const auto RESOURCE_OPACITY_BY_STRING = 0.4f;

@@ -338,12 +338,12 @@ HWTEST_F(ProgressModifierTest, setLinearStyleStrokeRadiusValidValues, TestSize.L
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "1.00fp");
 
-    auto strokeRes = CreateResource(RES_NAME_ID, Converter::ResourceType::FLOAT);
+    auto strokeRes = CreateResource(RES_NAME_ID, ResourceType::FLOAT);
     value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "22.55px");
 
-    strokeRes = CreateResource(RES_NAME_NEG_ID, Converter::ResourceType::FLOAT);
+    strokeRes = CreateResource(RES_NAME_NEG_ID, ResourceType::FLOAT);
     value = Converter::ArkUnion<Opt_Union_String_Number_Resource, Ark_Resource>(strokeRes);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
     checkValue(options, "25.00px");

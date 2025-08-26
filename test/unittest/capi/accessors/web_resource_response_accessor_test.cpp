@@ -31,18 +31,18 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-const auto RES_NAME_ID = NamedResourceId { "aa.bb.cc", Converter::ResourceType::STRING };
+const auto RES_NAME_ID = NamedResourceId { "aa.bb.cc", ResourceType::STRING };
 const auto RES_NAME_ID_ANY = "res_name_any";
-const auto RES_NAME_ID_EMPTY = NamedResourceId { "res_name_empty", Converter::ResourceType::STRING };
-const auto RES_NUMBER_ID = IntResourceId { 11111, Converter::ResourceType::STRING };
-const auto RES_INVALID_ID = IntResourceId { -1, Converter::ResourceType::STRING };
+const auto RES_NAME_ID_EMPTY = NamedResourceId { "res_name_empty", ResourceType::STRING };
+const auto RES_NUMBER_ID = IntResourceId { 11111, ResourceType::STRING };
+const auto RES_INVALID_ID = IntResourceId { -1, ResourceType::STRING };
 const std::string RES_DATA_URL = "/super.example.com";
 const std::string RES_DATA_URL_ANY = "any string not url";
 const std::string RES_DATA_URL_OTHER = "example.com/";
 const std::string RES_DATA_EMPTY = "";
 const std::vector<std::tuple<std::string, Ark_Resource, std::string>> resourceTestPlan = {
     { RES_DATA_URL, CreateResource(RES_NAME_ID), "super.example.com" },
-    { RES_DATA_URL_ANY, CreateResource(RES_NAME_ID_ANY, Converter::ResourceType::STRING), "any string not url" },
+    { RES_DATA_URL_ANY, CreateResource(RES_NAME_ID_ANY, ResourceType::STRING), "any string not url" },
     { RES_DATA_EMPTY, CreateResource(RES_NAME_ID_EMPTY), "" },
     { RES_DATA_URL_OTHER, CreateResource(RES_NUMBER_ID), "example.com" },
     { RES_DATA_URL, CreateResource(RES_INVALID_ID), "" },

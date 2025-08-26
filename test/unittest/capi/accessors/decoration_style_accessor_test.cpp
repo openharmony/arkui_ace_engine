@@ -76,8 +76,8 @@ namespace {
     const auto TEST_COLOR_BLUE = Color::BLUE;
     const auto TEST_COLOR_RED = Color::RED;
     std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues = {
-        { "ResId:COLORS_RES_0_ID", CreateResource(COLORS_RES_0_ID, Converter::ResourceType::COLOR), "#FF0000FF" },
-        { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, Converter::ResourceType::COLOR), "#FFFF0000" },
+        { "ResId:COLORS_RES_0_ID", CreateResource(COLORS_RES_0_ID, ResourceType::COLOR), "#FF0000FF" },
+        { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, ResourceType::COLOR), "#FFFF0000" },
     };
 
     std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {

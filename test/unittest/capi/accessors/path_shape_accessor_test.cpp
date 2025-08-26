@@ -26,10 +26,10 @@
 
 
 namespace OHOS::Ace::NG {
- 
+
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace Converter {
     template<>
     void AssignArkValue(Ark_PathShapeOptions& dst, const PathShapeOptions& src, ConvContext *ctx)
@@ -38,7 +38,7 @@ namespace Converter {
         dst.commands = commands;
     }
 }
- 
+
 class PathShapeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIPathShapeAccessor,
     &GENERATED_ArkUIAccessors::getPathShapeAccessor, PathShapePeer> {
 public:
@@ -49,7 +49,7 @@ public:
         return accessor_->ctor(&options);
     }
 };
- 
+
 /**
  * @tc.name: OffsetTest
  * @tc.desc:
@@ -159,7 +159,7 @@ HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
     ASSERT_NE(accessor_->fill, nullptr);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
-    const auto RES_NAME_ID = NamedResourceId { "fill_color_resource_name", Converter::ResourceType::COLOR };
+    const auto RES_NAME_ID = NamedResourceId { "fill_color_resource_name", ResourceType::COLOR };
     const auto EXPECTED_COLOR = Color(0xAABBCCDD);
 
     auto arkResource = CreateResource(RES_NAME_ID);
