@@ -580,6 +580,7 @@ void WebSelectOverlay::QuickMenuIsNeedNewAvoid(
         float selectWidth = params->GetSelectWidth();
         float selectHeight = params->GetSelectXHeight();
         selectInfo.selectArea = RectF(selectX, selectY, selectWidth, selectHeight);
+        selectInfo.selectArea = ComputeSelectAreaRect(selectInfo.selectArea);
     }
 }
 
@@ -719,6 +720,35 @@ RectF WebSelectOverlay::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebT
     paintRect.SetOffset({ x, y });
     paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), edgeHeight });
     return paintRect;
+}
+
+RectF WebSelectOverlay::ComputeSelectAreaRect(RectF& selectArea)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_RETURN(pattern, RectF());
+    RectF selectAreaRect;
+    auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+    auto size = pattern->GetHostFrameSize().value_or(SizeF());
+    float x = selectArea.GetX();
+    float y = selectArea.GetY();
+
+    if (x > size.Width()) {
+        x = offset.GetX() + size.Width();
+    } else {
+        x += offset.GetX();
+    }
+
+    if (y < 0) {
+        y = offset.GetY();
+    } else if (y > size.Height()) {
+        y = offset.GetY() + size.Height();
+    } else {
+        y += offset.GetY();
+    }
+
+    selectAreaRect.SetOffset({ x, y });
+    selectAreaRect.SetSize({ selectArea.Width(), selectArea.Height()});
+    return selectAreaRect;
 }
 
 WebOverlayType WebSelectOverlay::GetTouchHandleOverlayType(

@@ -112,6 +112,7 @@ public:
     void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
     void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    RectF ComputeSelectAreaRect(RectF& selectArea);
     void SetMenuOptions(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
