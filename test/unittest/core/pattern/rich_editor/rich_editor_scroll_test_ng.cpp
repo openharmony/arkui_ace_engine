@@ -662,9 +662,8 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarOffset001, TestSize.Level1)
  */
 HWTEST_F(RichEditorScrollTestOneNg, RichEditorAddSpanAutoScroll001, TestSize.Level1)
 {
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isRichEditorInit_ = true;
 

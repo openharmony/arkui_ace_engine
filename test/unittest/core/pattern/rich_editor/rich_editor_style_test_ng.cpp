@@ -1384,4 +1384,55 @@ HWTEST_F(RichEditorStyleTestNg, UpdateDecoration001, TestSize.Level1)
     ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
 }
 
+/**
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: test GetSelectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->selectedBackgroundColor_.reset();
+    auto ret = richEditorPattern->GetSelectedBackgroundColor();
+    EXPECT_NE(ret.GetValue(), 0);
+}
+
+/**
+ * @tc.name: RichEditorHalfLeading001
+ * @tc.desc: test RichEditor HalfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, RichEditorHalfLeading001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+    TextStyle textStyle;
+    textStyle.SetHalfLeading(true);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateHalfLeading = true;
+
+    richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetHalfLeading(), true);
+    ClearSpan();
+}
+
 }
