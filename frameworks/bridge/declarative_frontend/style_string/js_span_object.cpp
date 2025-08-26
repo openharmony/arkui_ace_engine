@@ -868,6 +868,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
     JSClass<JSImageAttachment>::CustomProperty(
         "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
     JSClass<JSImageAttachment>::CustomProperty(
+        "sizeInVp", &JSImageAttachment::GetImageSizeInVp, &JSImageAttachment::SetImageSizeInVp);
+    JSClass<JSImageAttachment>::CustomProperty(
         "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
     JSClass<JSImageAttachment>::CustomProperty(
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
@@ -1083,6 +1085,25 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
         imageSize->SetProperty<float>("height", size->height->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
+    }
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageSizeInVp(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    const auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
     }
     info.SetReturnValue(imageSize);
 }

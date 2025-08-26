@@ -286,6 +286,8 @@ public:
     void SetImageSrc(const JSCallbackInfo& info) {}
     void GetImageSize(const JSCallbackInfo& info);
     void SetImageSize(const JSCallbackInfo& info) {}
+    void GetImageSizeInVp(const JSCallbackInfo& info);
+    void SetImageSizeInVp(const JSCallbackInfo& info) {}
     void GetImageVerticalAlign(const JSCallbackInfo& info);
     void SetImageVerticalAlign(const JSCallbackInfo& info) {}
     void GetImageObjectFit(const JSCallbackInfo& info);
