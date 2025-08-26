@@ -43,6 +43,7 @@ public:
     static void TearDownTestSuite();
     static ImageSpanOptions GetImageOption(const std::string& src);
     static ImageSpanOptions GetColorFilterImageOption(const std::string& src);
+    static ImageSpanOptions GetImageOptionWithSize(const std::string& src);
 };
 
 void SpanStringTestNg::SetUpTestSuite()
@@ -75,6 +76,25 @@ ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
         .borderRadius = borderRadius,
         .objectFit = ImageFit::COVER,
         .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions option { .image = src, .imageAttribute = attr };
+    return option;
+}
+
+ImageSpanOptions SpanStringTestNg::GetImageOptionWithSize(const std::string& src)
+{
+    ImageSpanSize size { .width = 100.0_vp, .height = 100.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(NUMBER_TEN));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(NUMBER_FIVE));
+    ImageSpanAttribute attr { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM,
+        .size = size };
     ImageSpanOptions option { .image = src, .imageAttribute = attr };
     return option;
 }
@@ -1768,6 +1788,27 @@ HWTEST_F(SpanStringTestNg, SpanString019, TestSize.Level1)
     spanString->AppendSpanString(spanString);
     spans = spanString->GetSpans(0, spanString->GetLength());
     EXPECT_EQ(spans.size(), 6);
+}
+
+/**
+ * @tc.name: SpanStringTest035
+ * @tc.desc: Test basic properties of ImageAttachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString035, TestSize.Level1)
+{
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    auto imageOption = SpanStringTestNg::GetImageOptionWithSize("src/icon-1.png");
+    auto imageSpan = AceType::MakeRefPtr<SpanString>(imageOption);
+    spanString->AppendSpanString(imageSpan);
+    auto imageSpans = spanString->GetSpans(0, spanString->GetLength(), SpanType::Image);
+    EXPECT_EQ(imageSpans.size(), 1);
+    auto imageSpanInList = AceType::DynamicCast<ImageSpan>(imageSpans.front());
+    ImageSpanAttribute imageAttribute = imageSpanInList->GetImageAttribute().value();
+    ImageSpanSize imageSize = imageAttribute.size.value();
+    EXPECT_EQ(imageSize.width->ConvertToVp(), 100.0);
+    EXPECT_EQ(imageSize.height->ConvertToVp(), 100.0);
 }
 
 /*
