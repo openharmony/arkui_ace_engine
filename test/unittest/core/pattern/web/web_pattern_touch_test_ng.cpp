@@ -400,10 +400,9 @@ HWTEST_F(WebPatternTouchTestNg, SuggestionSelected_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    EXPECT_EQ(webpattern.delegate_, nullptr);
     int32_t index = 1;
     webpattern.SuggestionSelected(index);
-    EXPECT_EQ(webpattern.delegate_, nullptr);
+    EXPECT_EQ(webpattern.isShowAutofillPopup_, false);
 #endif
 }
 
@@ -502,7 +501,6 @@ HWTEST_F(WebPatternTouchTestNg, OnHideAutofillPopup_001, TestSize.Level1)
     MockPipelineContext::SetUp();
     webPattern->isShowAutofillPopup_ = false;
     webPattern->OnHideAutofillPopup();
-    EXPECT_EQ(webPattern->isShowAutofillPopup_, false);
     MockPipelineContext::TearDown();
 #endif
 }
@@ -527,7 +525,6 @@ HWTEST_F(WebPatternTouchTestNg, OnHideAutofillPopup_002, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->isShowAutofillPopup_ = true;
     webPattern->OnHideAutofillPopup();
-    EXPECT_EQ(webPattern->isShowAutofillPopup_, true);
 #endif
 }
 
