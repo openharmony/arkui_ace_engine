@@ -5007,4 +5007,52 @@ HWTEST_F(WebModelTestNg, SetJavaScriptProxy003, TestSize.Level1)
     EXPECT_FALSE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetForceEnableZoom001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetForceEnableZoom001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetForceEnableZoom(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckForceEnableZoom(false), true);
+    webModelNG.SetForceEnableZoom(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckForceEnableZoom(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetForceEnableZoom002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetForceEnableZoom002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetForceEnableZoom(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckForceEnableZoom(false), true);
+    webModelNG.SetForceEnableZoom(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckForceEnableZoom(true), true);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -546,6 +546,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
 
     bool IsFocus() const
     {
@@ -1022,6 +1023,7 @@ private:
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnGestureFocusModeUpdate(GestureFocusMode mode);
+    void OnForceEnableZoomUpdate(bool value);
 
     int GetWebId();
 

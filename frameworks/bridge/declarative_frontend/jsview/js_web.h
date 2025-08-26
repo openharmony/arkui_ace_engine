@@ -161,6 +161,7 @@ public:
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     static void SetCallbackFromController(const JSRef<JSObject> controller);
+    static void SetForceEnableZoom(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);

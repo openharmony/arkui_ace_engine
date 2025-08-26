@@ -43,6 +43,7 @@ constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
 constexpr bool DEFAULT_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT = false;
 constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
+constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 8;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 16;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 13;
@@ -2154,6 +2155,20 @@ void ResetJavaScriptProxy(ArkUINodeHandle node)
     WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
 }
 
+void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceEnableZoom(frameNode, value);
+}
+
+void ResetForceEnableZoom(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetForceEnableZoom(frameNode, DEFAULT_FORCE_ENABLE_ZOOM_ENABLED);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2359,6 +2374,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnBeforeUnload = ResetOnBeforeUnload,
         .setJavaScriptProxy = SetJavaScriptProxy,
         .resetJavaScriptProxy = ResetJavaScriptProxy,
+        .setForceEnableZoom = SetForceEnableZoom,
+        .resetForceEnableZoom = ResetForceEnableZoom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2568,6 +2585,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnBeforeUnload = ResetOnBeforeUnload,
         .setJavaScriptProxy = SetJavaScriptProxy,
         .resetJavaScriptProxy = ResetJavaScriptProxy,
+        .setForceEnableZoom = SetForceEnableZoom,
+        .resetForceEnableZoom = ResetForceEnableZoom,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

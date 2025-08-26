@@ -10374,6 +10374,13 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _WebAttribute_forceEnableZoom(ptr: KPointer, value: KInt): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._WebAttribute_forceEnableZoom(ptr, value)
+        }
+        throw new Error("Not implemented")
+    }
     static _WindowScene_construct(id: KInt, flags: KInt): KPointer {
         if ((this._LoadOnce()) == (true))
         {

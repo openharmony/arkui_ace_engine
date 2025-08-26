@@ -1615,6 +1615,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     }) => void): this;
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
     onActivateContent(callback: () => void): this;
+    forceEnableZoom(forceEnableZoom: boolean): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

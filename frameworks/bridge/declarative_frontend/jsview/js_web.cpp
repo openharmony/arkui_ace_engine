@@ -2182,6 +2182,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::StaticMethod("onPdfScrollAtBottom", &JSWeb::OnPdfScrollAtBottom);
     JSClass<JSWeb>::StaticMethod("onPdfLoadEvent", &JSWeb::OnPdfLoadEvent);
+    JSClass<JSWeb>::StaticMethod("forceEnableZoom", &JSWeb::SetForceEnableZoom);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -6520,6 +6521,15 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
     }
     auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
     WebModel::GetInstance()->SetGestureFocusMode(mode);
+}
+ 
+void JSWeb::SetForceEnableZoom(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool enabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetForceEnableZoom(enabled);
 }
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)

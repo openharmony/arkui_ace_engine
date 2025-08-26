@@ -3699,6 +3699,15 @@ void WebPattern::OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& c
     }
 }
 
+void WebPattern::OnForceEnableZoomUpdate(bool isEnabled)
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (delegate_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "SetForceEnableZoom :%{public}d", isEnabled);
+        delegate_->SetForceEnableZoom(isEnabled);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &pipelineContext)
 {
     if (!needUpdateWeb_) {

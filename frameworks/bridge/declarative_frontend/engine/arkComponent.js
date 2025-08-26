@@ -31304,6 +31304,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
+  forceEnableZoom(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebForceEnableZoomModifier.identity, WebForceEnableZoomModifier, enabled);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -32744,6 +32748,20 @@ class WebJavaScriptProxyModifier extends ModifierWithKey {
   }
 }
 WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
+
+class WebForceEnableZoomModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetForceEnableZoom(node);
+    } else {
+      getUINativeModule().web.setForceEnableZoom(node, this.value);
+    }
+  }
+}
+WebForceEnableZoomModifier.identity = Symbol('webForceEnableZoomModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

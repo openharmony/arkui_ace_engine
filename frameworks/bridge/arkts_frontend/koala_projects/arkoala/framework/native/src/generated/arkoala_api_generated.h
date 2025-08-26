@@ -23119,6 +23119,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_WebResponseType* responseType,
                                  const Opt_SelectionMenuOptionsExt* options);
+    void (*setForceEnableZoom)(Ark_NativePointer node,
+                               const Opt_Boolean* value);
 } GENERATED_ArkUIWebModifier;
 
 typedef struct GENERATED_ArkUIWindowSceneModifier {
