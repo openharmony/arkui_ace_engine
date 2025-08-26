@@ -1167,13 +1167,31 @@ void OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(ArkUI_RectShapeOption* opti
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(
-    ArkUI_RectShapeOption* option, float top, float right, float bottom, float left)
+    ArkUI_RectShapeOption* option, float rect, ArkUI_EdgeDirection direction)
 {
     CHECK_NULL_VOID(option);
-    option->left = left;
-    option->right = right;
-    option->top = top;
-    option->bottom = bottom;
+    switch (direction) {
+        case ARKUI_EDGE_DIRECTION_ALL:
+            option->left = rect;
+            option->right = rect;
+            option->top = rect;
+            option->bottom = rect;
+            break;
+        case ARKUI_EDGE_DIRECTION_LEFT:
+            option->left = rect;
+            break;
+        case ARKUI_EDGE_DIRECTION_RIGHT:
+            option->right = rect;
+            break;
+        case ARKUI_EDGE_DIRECTION_TOP:
+            option->top = rect;
+            break;
+        case ARKUI_EDGE_DIRECTION_BOTTOM:
+            option->bottom = rect;
+            break;
+        default:
+            return;
+    }
 }
 
 ArkUI_NodeBorderStyleOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption()
@@ -1393,13 +1411,31 @@ void OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(ArkUI_RoundRectShapeOp
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(
-    ArkUI_RoundRectShapeOption* option, float top, float right, float bottom, float left)
+    ArkUI_RoundRectShapeOption* option, float value, ArkUI_EdgeDirection direction)
 {
     CHECK_NULL_VOID(option);
-    option->left = left;
-    option->right = right;
-    option->top = top;
-    option->bottom = bottom;
+    switch (direction) {
+        case ARKUI_EDGE_DIRECTION_ALL:
+            option->left = value;
+            option->right = value;
+            option->top = value;
+            option->bottom = value;
+            break;
+        case ARKUI_EDGE_DIRECTION_LEFT:
+            option->left = value;
+            break;
+        case ARKUI_EDGE_DIRECTION_RIGHT:
+            option->right = value;
+            break;
+        case ARKUI_EDGE_DIRECTION_TOP:
+            option->top = value;
+            break;
+        case ARKUI_EDGE_DIRECTION_BOTTOM:
+            option->bottom = value;
+            break;
+        default:
+            return;
+    }
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY(
