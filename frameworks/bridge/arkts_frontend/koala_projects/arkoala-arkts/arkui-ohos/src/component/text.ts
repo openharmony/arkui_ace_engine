@@ -1588,7 +1588,7 @@ export function Text(
     })
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
         ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
-        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstRender)
 
         receiver.setTextOptions(content,value)
         style?.(receiver)

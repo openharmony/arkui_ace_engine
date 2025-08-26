@@ -190,8 +190,8 @@ export class ArkThemeScope {
      *
      * @returns array of elmIds as numbers
      */
-    componentsInScope(): Array<ArkThemeScopeItem> {
-        return this.components!;
+    componentsInScope(): Array<ArkThemeScopeItem> | undefined {
+        return this.components;
     }
 
     /**

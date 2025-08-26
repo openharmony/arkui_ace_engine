@@ -389,6 +389,9 @@ export class ArkThemeScopeManager {
         if (scope === undefined) {
             scope = this.scopeForElmtId(elmtId!);
         }
+        if (scope === undefined) {
+            scope = this.themeScopes?.find((item) => item.getWithThemeId() === this.lastThemeScopeId);
+        }
         // keep color mode for handled container
         this.handledColorMode = scope ? scope.colorMode() : ThemeColorMode.SYSTEM;
         // trigger for enter local color mode for the component before rendering
@@ -439,9 +442,13 @@ export class ArkThemeScopeManager {
             return;
         }
         const theme: Theme = scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.systemTheme;
-        scope
-            .componentsInScope()
-            ?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
+        scope.componentsInScope()?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
+
+        if (scope.isColorModeChanged()) {
+            const stateManager = GlobalStateManager.instance as StateManagerImpl;
+            const memoScope = stateManager.current;
+            memoScope?.forceCompleteRerender();
+        }
     }
 
     /**
