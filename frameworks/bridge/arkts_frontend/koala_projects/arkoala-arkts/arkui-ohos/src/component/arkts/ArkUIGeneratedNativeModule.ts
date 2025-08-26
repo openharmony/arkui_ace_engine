@@ -7232,9 +7232,7 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_cursorControl_restoreDefault(): void
     @ani.unsafe.Quick
     native static _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterPush1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterReplace1attribute(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_MoveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void
@@ -7242,7 +7240,6 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_RouterBack0attribute(): void
     @ani.unsafe.Direct
     native static _RouterExtender_RouterBack1attribute(thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RouterExtender_RouterRunPage(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_RouterClear(): void

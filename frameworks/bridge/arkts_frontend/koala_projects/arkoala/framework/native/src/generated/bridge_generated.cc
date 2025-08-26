@@ -45962,7 +45962,7 @@ Ark_NativePointer impl_RouterExtender_RouterPush1attribute(KSerializerBuffer thi
     }
     return GetAccessors()->getRouterExtenderAccessor()->push((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterPush1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterPush1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     const auto url = static_cast<Ark_String>(thisDeserializer.readString());
@@ -45983,7 +45983,7 @@ Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer 
     }
     return GetAccessors()->getRouterExtenderAccessor()->replace((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode) {
         return GetAccessors()->getRouterExtenderAccessor()->moveCommonUnderPageNode(commonNode, pageNode);
 }
@@ -46027,7 +46027,7 @@ Ark_NativePointer impl_RouterExtender_RouterRunPage(KSerializerBuffer thisArray,
     }
     return GetAccessors()->getRouterExtenderAccessor()->runPage((const Ark_String*)(&url), (const Opt_Boolean*)(&recover_value_buf), jsView, (const Opt_Callback_Pointer_Void*)(&callback_value_buf));
 }
-KOALA_INTEROP_DIRECT_2(RouterExtender_RouterRunPage, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_2(RouterExtender_RouterRunPage, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_RouterClear() {
         GetAccessors()->getRouterExtenderAccessor()->clear();
 }
