@@ -75,14 +75,11 @@ export class ArkThemeNativeHelper {
         }
     }
     public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined): ResourceColor[] {
-        if (!theme) {
-            return new Array<ResourceColor>(Object.keys(new ArkColorsImpl()).length);
-        }
         const srcTheme: Theme = { colors: new ArkColorsImpl() };
         if (theme instanceof Theme) {
             srcTheme.colors = theme.colors;
-        } else {
-            ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!)
+        } else if (theme instanceof CustomTheme) {
+            ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
         }
         return [
             srcTheme.colors.brand,
