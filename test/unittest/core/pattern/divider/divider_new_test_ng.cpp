@@ -29,7 +29,7 @@ class DividerNewTestNG : public DividerBaseTestNG {};
  * @tc.desc: percentRef > maxSize, horizontal.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, DividerLengthTest01, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, DividerLengthTest01, TestSize.Level0)
 {
     // step: make percentRef > maxSize
     OHOS::Ace::NG::LayoutConstraintF parentConstraint;
@@ -51,7 +51,7 @@ HWTEST_F(DividerNewTestNG, DividerLengthTest01, TestSize.Level1)
  * @tc.desc: percentRef > maxSize, vertical
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, DividerLengthTest02, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, DividerLengthTest02, TestSize.Level0)
 {
     // step: make percentRef > maxSize
     OHOS::Ace::NG::LayoutConstraintF parentConstraint;
@@ -71,7 +71,7 @@ HWTEST_F(DividerNewTestNG, DividerLengthTest02, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest001, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest001, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {
@@ -119,7 +119,7 @@ HWTEST_F(DividerNewTestNG, LayoutPolicyTest001, TestSize.Level1)
  * @tc.desc: test the measure result when setting matchParent and parent has padding.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest002, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest002, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {
@@ -169,7 +169,7 @@ HWTEST_F(DividerNewTestNG, LayoutPolicyTest002, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest003, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest003, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {
@@ -219,7 +219,7 @@ HWTEST_F(DividerNewTestNG, LayoutPolicyTest003, TestSize.Level1)
  * @tc.desc: test the measure result when setting wrapContent.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest004, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest004, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {
@@ -271,7 +271,7 @@ HWTEST_F(DividerNewTestNG, LayoutPolicyTest004, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest005, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest005, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {
@@ -321,7 +321,7 @@ HWTEST_F(DividerNewTestNG, LayoutPolicyTest005, TestSize.Level1)
  * @tc.desc: test the measure result when setting fixAtIdealSize.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerNewTestNG, LayoutPolicyTest006, TestSize.Level1)
+HWTEST_F(DividerNewTestNG, LayoutPolicyTest006, TestSize.Level0)
 {
     RefPtr<FrameNode> divider;
     auto stack = CreateStack([this, &divider](StackModelNG model) {

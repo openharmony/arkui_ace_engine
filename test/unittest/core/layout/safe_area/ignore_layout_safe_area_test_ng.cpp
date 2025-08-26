@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
  * @tc.desc: Test the operator== of IgnoreLayoutSafeAreaOpts.
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorEqual, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorEqual, TestSize.Level0)
 {
     IgnoreLayoutSafeAreaOpts opts1 = {
         .type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
@@ -50,7 +50,7 @@ HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorEqual, TestSize.Level1)
  * @tc.desc: Test NeedUpdateWithCheck
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedUpdateWithCheck, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedUpdateWithCheck, TestSize.Level0)
 {
     IgnoreLayoutSafeAreaOpts opts = {
         .type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
@@ -76,7 +76,7 @@ HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedUpdateWithCheck, TestSize.Level
  * @tc.desc: Test the operator!= of IgnoreLayoutSafeAreaOpts.
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorNotEqual, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorNotEqual, TestSize.Level0)
 {
     IgnoreLayoutSafeAreaOpts opts1 = {
         .type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
@@ -102,7 +102,7 @@ HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestOperatorNotEqual, TestSize.Level1)
  * @tc.desc: Test NeedIgnoreLayoutSafeArea
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedIgnoreLayoutSafeArea, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedIgnoreLayoutSafeArea, TestSize.Level0)
 {
     IgnoreLayoutSafeAreaOpts opts1 = {
         .type = LAYOUT_SAFE_AREA_TYPE_KEYBOARD,
@@ -119,7 +119,7 @@ HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestNeedIgnoreLayoutSafeArea, TestSize.
  * @tc.desc: Test IsTrivial
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestIsTrivial, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestIsTrivial, TestSize.Level0)
 {
     IgnoreLayoutSafeAreaOpts opts1 = {
         .type = LAYOUT_SAFE_AREA_TYPE_SYSTEM
@@ -136,7 +136,7 @@ HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestIsTrivial, TestSize.Level1)
  * @tc.desc: Test TypeToMask and EdgeToMask
  * @tc.type: FUNC
  */
-HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestTypeAndEdgeToMask, TestSize.Level1)
+HWTEST_F(IgnoreLayoutSafeAreaOptsTestNg, TestTypeAndEdgeToMask, TestSize.Level0)
 {
     EXPECT_EQ(IgnoreLayoutSafeAreaOpts::TypeToMask(uint32_t(1)), NG::LAYOUT_SAFE_AREA_TYPE_KEYBOARD);
     EXPECT_EQ(IgnoreLayoutSafeAreaOpts::TypeToMask(uint32_t(3)), 0);

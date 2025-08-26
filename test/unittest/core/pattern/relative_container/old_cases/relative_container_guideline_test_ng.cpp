@@ -121,7 +121,7 @@ void RelativeContainerGuideTestNg::CreateInstance(const std::function<void(Relat
  * @tc.desc: Set an item with Guideline with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest001, TestSize.Level0)
 {
     /**
      * set pipeline: api = 11
@@ -169,7 +169,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest001, TestSize.Level1)
  * @tc.desc: Set an item with Guideline with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest002, TestSize.Level0)
 {
     std::vector<OffsetF> offsets = {
         OffsetF(250.0f, 0.0f),
@@ -217,7 +217,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest002, TestSize.Level1)
  * @tc.desc: Set Guideline empty and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest003, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -255,7 +255,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest003, TestSize.Level1)
  * @tc.desc: Set Guideline HORIZONTAL and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest004, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -295,7 +295,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest004, TestSize.Level1)
  * @tc.desc: Set childNode vertical alignment verticalGuideline.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest005, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -335,7 +335,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest005, TestSize.Level1)
  * @tc.desc: Set childNode horizontal alignment horizontalGuideline.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest006, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest006, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -375,7 +375,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest006, TestSize.Level1)
  * @tc.desc: Align childNode to the left/middle/right of verticalGuideline.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest007, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest007, TestSize.Level0)
 {
     std::vector<HorizontalAlign> horizontalAligns = {
         HorizontalAlign::START,
@@ -422,7 +422,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest007, TestSize.Level1)
  * @tc.desc: Align childNode to the center/bottom of horizontalGuideline.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest008, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest008, TestSize.Level0)
 {
     std::vector<VerticalAlign> verticalAligns = {
         VerticalAlign::TOP,
@@ -469,7 +469,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTest008, TestSize.Level1)
  * @tc.desc: Align childNode to the left/middle/right of verticalGuideline, direction::RTL.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl001, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl001, TestSize.Level0)
 {
     std::vector<HorizontalAlign> horizontalAligns = {
         HorizontalAlign::START,
@@ -520,7 +520,7 @@ HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl001, TestSize.Level1)
  * @tc.desc: Set an item with Guideline with RelativeContainer and check it, direction::RTL.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl002, TestSize.Level1)
+HWTEST_F(RelativeContainerGuideTestNg, GuidelineTestRtl002, TestSize.Level0)
 {
     /**
      * set pipeline: api = 11

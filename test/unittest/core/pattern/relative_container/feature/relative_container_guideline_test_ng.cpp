@@ -25,7 +25,7 @@ class RelativeContainerGuidelineTest : public RelativeContainerBaseTestNG {};
  * @tc.desc: Test func CalcGuideline, calculate the position of multiple guidelines based on the size of the container
  * and record them in guidelines_ and recordOffsetMap_.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
@@ -69,7 +69,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest1, TestSize.Level1)
  * @tc.desc: test the case where guidelines are expressed in percentage form use and the container width and height are
  * auto.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(0.0f, DimensionUnit::AUTO));
@@ -131,7 +131,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest2, TestSize.Level1)
  * @tc.desc: test the case where guidelines are expressed in percentage form use and the container width and height are
  * not auto.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(300.0f, DimensionUnit::PX));
@@ -174,7 +174,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineTest3, TestSize.Level1)
  * @tc.name: CalcGuidelineOffsetTest1
  * @tc.desc: Test CalcOffsetParam, use guideline.
  */
-HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto relativeContainer = CreateRelativeContainer([this, &row1](RelativeContainerModelNG model) {
@@ -210,7 +210,7 @@ HWTEST_F(RelativeContainerGuidelineTest, CalcGuidelineOffsetTest1, TestSize.Leve
  * @tc.desc: Test ResObjGuidelineTest1 of Relative_Container
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level0)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -234,7 +234,7 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest1, TestSize.Level1)
  * @tc.desc: Test ResObjGuidelineTest2 of Relative_Container
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level0)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -257,7 +257,7 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest2, TestSize.Level1)
  * @tc.desc: Test ResObjGuidelineTest3 of Relative_Container
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level0)
 {
     g_isConfigChangePerform = false;
     SystemProperties::ConfigChangePerform();
@@ -282,7 +282,7 @@ HWTEST_F(RelativeContainerGuidelineTest, ResObjGuidelineTest3, TestSize.Level1)
  * @tc.desc: Test SetPositionResObj of Relative_Container
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerGuidelineTest, SetPositionResObj, TestSize.Level1)
+HWTEST_F(RelativeContainerGuidelineTest, SetPositionResObj, TestSize.Level0)
 {
     g_isConfigChangePerform = true;
     std::string bundleName = "com.example.test";

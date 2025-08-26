@@ -101,7 +101,7 @@ RefPtr<FrameNode> DividerTestNg::CreateDividerNode(TestProperty& testProperty)
  * @tc.desc: Test all the property of divider.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DividerPatternTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create frameNode
@@ -128,7 +128,7 @@ HWTEST_F(DividerTestNg, DividerPatternTest001, TestSize.Level1)
  * @tc.desc: Test all the layoutAlgorithm of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DividerPatternTest002, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest002, TestSize.Level0)
 {
     bool vertical[2] = { VERTICAL_TRUE, VERTICAL_FALSE };
     testProperty.strokeWidth = STROKE_WIDTH;
@@ -163,7 +163,7 @@ HWTEST_F(DividerTestNg, DividerPatternTest002, TestSize.Level1)
  * @tc.desc: Test all the pattern of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DividerPatternTest003, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerPatternTest003, TestSize.Level0)
 {
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -202,7 +202,7 @@ HWTEST_F(DividerTestNg, DividerPatternTest003, TestSize.Level1)
  * @tc.desc: Test the dynamic effect of the Divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DividerModifierTest001, TestSize.Level0)
 {
     DividerModifier dividerModifier;
     Testing::MockCanvas rsCanvas;
@@ -217,7 +217,7 @@ HWTEST_F(DividerTestNg, DividerModifierTest001, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DivideAlgorithmTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest001, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -247,7 +247,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DivideAlgorithmTest002, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest002, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_FALSE;
@@ -275,7 +275,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest002, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_FALSE and no selfIdealSize
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DivideAlgorithmTest003, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest003, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_FALSE;
@@ -302,7 +302,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test layoutAlgorithm of divider with testProperty.vertical = VERTICAL_TRUE and no selfIdealSize
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
+HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -329,7 +329,7 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
  * @tc.desc: Test CreateWithDividerColorResourceObj of Divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level1)
+HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -351,7 +351,7 @@ HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level1)
  * @tc.desc: Test OnColorConfigurationUpdate of Divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;
@@ -379,7 +379,7 @@ HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
  * @tc.desc: Test ResetDividerColor of Divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerTestNg, ResetDividerColorTest01, TestSize.Level1)
+HWTEST_F(DividerTestNg, ResetDividerColorTest01, TestSize.Level0)
 {
     testProperty.strokeWidth = STROKE_WIDTH;
     testProperty.vertical = VERTICAL_TRUE;

@@ -218,7 +218,7 @@ RefPtr<LayoutWrapperNode> FlexTestTwoNg::CreateRTLReverseWrapper()
  * @tc.desc: Test layout of flex wrap.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest001, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest001, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -312,7 +312,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest001, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest002, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest002, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -409,7 +409,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest002, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest003, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest003, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -505,7 +505,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest003, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest004, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest004, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -603,7 +603,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest004, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest005, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest005, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -700,7 +700,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest005, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest006, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest006, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -799,7 +799,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest006, TestSize.Level1)
  * @tc.desc: Test the sum of width is bigger than flex size
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest007, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest007, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -892,7 +892,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest007, TestSize.Level1)
  * @tc.desc: Test the sum of width is bigger than flex width in column
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest008, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest008, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -986,7 +986,7 @@ HWTEST_F(FlexTestTwoNg, wrapRowLayoutTest008, TestSize.Level1)
  * layoutweight, the 6 has 2 displayPriority and 1 layoutweight.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest015, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest015, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -1127,7 +1127,7 @@ HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest015, TestSize.Level1)
  * texts with 20% width, and 4,5 has 1 layoutweight, the 6 has 2 displayPriority and 1 layoutweight.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest016, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest016, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     ASSERT_NE(rowFrameNode, nullptr);
@@ -1263,7 +1263,7 @@ HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest016, TestSize.Level1)
  * @tc.desc: Set three texts with different flexBasis, flexGrows, flexShrink.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest017, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest017, TestSize.Level0)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     EXPECT_FALSE(rowFrameNode == nullptr);
@@ -1384,7 +1384,7 @@ HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest017, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test direction_ is HORIZONTAL
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest001, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest001, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1417,7 +1417,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest001, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest002, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest002, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1450,7 +1450,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest002, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest003, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest003, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1483,7 +1483,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest003, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest004, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest004, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1516,7 +1516,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest004, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test direction_ is VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest005, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest005, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1549,7 +1549,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest005, TestSize.Level1)
  * @tc.desc: Test layout of different flex wrap settings.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest006, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest006, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1632,7 +1632,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest006, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test WrapAlignment is change
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest007, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest007, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1667,7 +1667,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest007, TestSize.Level1)
  * @tc.desc: Set Flex Row Layout Test WrapAlignment is change
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexLayoutTest008, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexLayoutTest008, TestSize.Level0)
 {
     auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
     EXPECT_FALSE(wrapFrameNode == nullptr);
@@ -1756,7 +1756,7 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest008, TestSize.Level1)
  * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is Wrap.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest001, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest001, TestSize.Level0)
 {
     /* corresponding ets code:
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start, alignItems:
@@ -1797,7 +1797,7 @@ HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest001, TestSize.Level1)
  * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is WrapReverse.
  * @tc.type: FUNC
  */
-HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest002, TestSize.Level1)
+HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest002, TestSize.Level0)
 {
     /* corresponding ets code:
         Flex({ direction: FlexDirection.Row, wrap: FlexWrap.WrapReverse, justifyContent: FlexAlign.Center, alignItems:

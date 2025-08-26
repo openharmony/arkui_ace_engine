@@ -31,7 +31,7 @@ class GridRowNewTestNG : public GridRowBaseTestNG {};
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
  */
-HWTEST_F(GridRowNewTestNG, Example, TestSize.Level1)
+HWTEST_F(GridRowNewTestNG, Example, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -113,7 +113,7 @@ HWTEST_F(GridRowNewTestNG, Example, TestSize.Level1)
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
  */
-HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level1)
+HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -184,7 +184,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level1)
  * @tc.desc: Show an example of creating a test case.
  * @tc.type: ETS
  */
-HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
+HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level0)
 {
     // If this test is related to api versions, need to SetMinPlatformVersion
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -257,7 +257,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
  * @tc.desc: Test Create001 of GridRow
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowBaseTestNG, Create001, TestSize.Level1)
+HWTEST_F(GridRowBaseTestNG, Create001, TestSize.Level0)
 {
     GridRowModelNG gridRowModelNG;
     std::string bundleName = "com.example.test";
@@ -291,7 +291,7 @@ HWTEST_F(GridRowBaseTestNG, Create001, TestSize.Level1)
  * @tc.desc: Test InheritGridRowColumns()
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level1)
+HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. containerSizeArray is initialized with -1.

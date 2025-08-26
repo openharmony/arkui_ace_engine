@@ -38,7 +38,7 @@ public:
 /**
  * @tc.desc: Test UpdateSizeWhenChildrenEmpty, set width and height.
  */
-HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest1, TestSize.Level0)
 {
     // step: make node & property
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
@@ -62,7 +62,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest1, TestSiz
 /**
  * @tc.desc: Test UpdateSizeWhenChildrenEmpty, without height and width
  */
-HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest2, TestSize.Level0)
 {
     // node & property
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {});
@@ -83,7 +83,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest2, TestSiz
 /**
  * @tc.desc: Test UpdateSizeWhenChildrenEmpty, use auto.
  */
-HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest3, TestSize.Level0)
 {
     // node & property
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
@@ -106,7 +106,7 @@ HWTEST_F(RelativeContainerMeasureTest, UpdateSizeWhenChildrenEmptyTest3, TestSiz
 /**
  * @tc.desc: Test Initialize, has width and height.
  */
-HWTEST_F(RelativeContainerMeasureTest, InitializeTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, InitializeTest, TestSize.Level0)
 {
     // node & property
     auto relativeContainer = CreateRelativeContainer([](RelativeContainerModelNG model) {
@@ -132,7 +132,7 @@ HWTEST_F(RelativeContainerMeasureTest, InitializeTest, TestSize.Level1)
 /**
  * @tc.desc: Test Initialize, use maxSize.
  */
-HWTEST_F(RelativeContainerMeasureTest, InitializeTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, InitializeTest2, TestSize.Level0)
 {
     // node & property
     auto relativeContainer =
@@ -148,7 +148,7 @@ HWTEST_F(RelativeContainerMeasureTest, InitializeTest2, TestSize.Level1)
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
 }
 
-HWTEST_F(RelativeContainerMeasureTest, CollectNodesByIdTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, CollectNodesByIdTest, TestSize.Level0)
 {
     // create three child nodes
     auto relativeContainer = CreateRelativeContainer([this](RelativeContainerModelNG model) {
@@ -173,7 +173,7 @@ HWTEST_F(RelativeContainerMeasureTest, CollectNodesByIdTest, TestSize.Level1)
     EXPECT_NE(idNodeMap.find("@concatColumn-1"), idNodeMap.end());
 }
 
-HWTEST_F(RelativeContainerMeasureTest, GetDependencyRelationshipTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, GetDependencyRelationshipTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     auto relativeContainer = CreateRelativeContainer([this](RelativeContainerModelNG model) {
@@ -217,7 +217,7 @@ HWTEST_F(RelativeContainerMeasureTest, GetDependencyRelationshipTest, TestSize.L
     input: loop child nodes
     output: detect whether node loop dependency exists (true or false).
  */
-HWTEST_F(RelativeContainerMeasureTest, PreTopologicalLoopDetectionTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, PreTopologicalLoopDetectionTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     auto relativeContainer = CreateRelativeContainer([this](RelativeContainerModelNG model) {
@@ -259,7 +259,7 @@ HWTEST_F(RelativeContainerMeasureTest, PreTopologicalLoopDetectionTest, TestSize
     dependence: idNodeMap_, reliedOnMap_ , incomingDegreeMap_
     output: renderList
  */
-HWTEST_F(RelativeContainerMeasureTest, TopologicalSortTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, TopologicalSortTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     auto relativeContainer = CreateRelativeContainer([this](RelativeContainerModelNG model) {
@@ -307,7 +307,7 @@ HWTEST_F(RelativeContainerMeasureTest, TopologicalSortTest, TestSize.Level1)
     dependence: renderList_, reliedOnMap_ , incomingDegreeMap_
     output: renderList、recordOffsetMap_
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2, row3;
@@ -389,7 +389,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest, TestSize.Level1)
     dependence: renderList_
     output: recordOffsetMap_, child measure.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest2, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1;
@@ -449,7 +449,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest2, TestSize.Level1)
     dependence: renderList_
     output: recordOffsetMap_, child measure.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest3, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1;
@@ -509,7 +509,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest3, TestSize.Level1)
     dependence: renderList_
     output: recordOffsetMap_, measure child.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest4, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest4, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1;
@@ -569,7 +569,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest4, TestSize.Level1)
     dependence: renderList_
     output: recordOffsetMap_, measure child.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest5, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest5, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2, row3;
@@ -635,7 +635,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest5, TestSize.Level1)
     dependence: renderList_
     output: recordOffsetMap_, measure child.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest6, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest6, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2;
@@ -689,7 +689,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureChildTest6, TestSize.Level1)
  * @tc.name: MeasureSelfTest1
  * @tc.desc: Test relative container with auto height or auto width.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest1, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2;
@@ -741,7 +741,7 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest1, TestSize.Level1)
  * @tc.name: MeasureSelfTest2
  * @tc.desc: Test relative container with auto height or auto width.
  */
-HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest2, TestSize.Level0)
 {
     // create three child nodes with alignRules
     RefPtr<FrameNode> row1, row2;

@@ -57,7 +57,7 @@ void GridColTestNg::TearDownTestCase()
  * @tc.desc: Test the default values of GridCol's properties.
  * @tc.type: FUNC
  */
-HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
+HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create gridCol and Set properties.
@@ -94,7 +94,7 @@ HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
  * @tc.desc: Test GetPropValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(GridColTestNg, GridColDefault002, TestSize.Level1)
+HWTEST_F(GridColTestNg, GridColDefault002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create gridCol and get frameNode, layoutProperty.

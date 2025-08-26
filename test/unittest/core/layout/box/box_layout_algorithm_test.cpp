@@ -70,7 +70,7 @@ public:
  * @tc.desc: Test the functionality of Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, MeasureTest, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, MeasureTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -113,7 +113,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, MeasureTest, TestSize.Level1)
  * @tc.desc: Test the functionality of Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, LayoutTest, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, LayoutTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -163,7 +163,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, LayoutTest, TestSize.Level1)
  * @tc.desc: Test the functionality of MeasureContent.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest001, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -202,7 +202,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest001, TestSize.Level1)
  * @tc.desc: Test the functionality of MeasureContent.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest002, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -262,7 +262,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, MeasureContentTest002, TestSize.Level1)
  * @tc.desc: Test the functionality of PerformLayout.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, PerformLayoutTest, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, PerformLayoutTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -310,7 +310,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, PerformLayoutTest, TestSize.Level1)
  * @tc.desc: Test the functionality of PerformMeasureSelfWithChildList.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest001, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -360,7 +360,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest001, TestSiz
  * @tc.desc: Test the functionality of PerformMeasureSelfWithChildList.
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest002, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a layoutWrapper, initial layout parameter and expect it is not nullptr.
@@ -441,7 +441,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, PerformMeasureSelfWithChildListTest002, TestSiz
  * @tc.desc:test CalcSingleSideMarginFrame
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame001, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame001, TestSize.Level0)
 {
     RefPtr<FrameNode> row1, row2, row3;
     auto layoutWrapper = CreateBox([this, &row1, &row2, &row3]() {
@@ -483,7 +483,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame001, TestSize.Level1)
  * @tc.desc:test CalcSingleSideMarginFrame
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame002, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame002, TestSize.Level0)
 {
     RefPtr<FrameNode> row1, row2;
     auto layoutWrapper = CreateBox([this, &row1, &row2]() {
@@ -522,7 +522,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, CalcSingleSideMarginFrame002, TestSize.Level1)
  * @tc.desc:test CalcLayoutPolicySingleSide
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, CalcLayoutPolicySingleSide001, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, CalcLayoutPolicySingleSide001, TestSize.Level0)
 {
     MarginPropertyF margin = { .left = 10.0f, .right = 20.0f, .top = 30.0f, .bottom = 5.0f };
     float maxWidth = 50.0f;
@@ -540,7 +540,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, CalcLayoutPolicySingleSide001, TestSize.Level1)
  * @tc.desc:test parent wrap and child match parent
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent001, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent001, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto layoutWrapper = CreateBox([this, &row1]() {
@@ -576,7 +576,7 @@ HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent001, TestSize.Level1)
  * @tc.desc:test parent wrap and child match parent
  * @tc.type: FUNC
  */
-HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent002, TestSize.Level1)
+HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent002, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto layoutWrapper = CreateBox([this, &row1]() {

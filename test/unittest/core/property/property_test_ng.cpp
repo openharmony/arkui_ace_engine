@@ -37,7 +37,7 @@ class PropertyTestNg : public testing::Test {};
  * @tc.desc: Test CheckNeedRender funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest001, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNeedRender and set input is TEST_PROPERTY_UPDATE_NORMAL.
@@ -66,7 +66,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest001, TestSize.Level1)
  * @tc.desc: Test CheckNeedRequestMeasureAndLayout funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest002, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNeedRequestMeasureAndLayout and set input is PROPERTY_UPDATE_MEASURE.
@@ -95,7 +95,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest002, TestSize.Level1)
  * @tc.desc: Test CheckNeedRequestParentMeasure funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest003, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNeedRequestParentMeasure and set input is TEST_PROPERTY_UPDATE_MEASURE.
@@ -131,7 +131,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest003, TestSize.Level1)
  * @tc.desc: Test CheckNeedMeasure funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest004, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNeedMeasure and set input is TEST_PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT.
@@ -160,7 +160,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest004, TestSize.Level1)
  * @tc.desc: Test CheckForceParentMeasureFlag funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest005, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckForceParentMeasureFlag and set input is TEST_PROPERTY_UPDATE_MEASURE.
@@ -189,7 +189,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest005, TestSize.Level1)
  * @tc.desc: Test CheckUpdateByChildRequest funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest006, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckUpdateByChildRequest and set input is TEST_PROPERTY_UPDATE_BY_CHILD_REQUEST.
@@ -211,7 +211,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest006, TestSize.Level1)
  * @tc.desc: Test CheckNoChanged funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest007, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNoChanged and set input is TEST_PROPERTY_UPDATE_MEASURE.
@@ -232,7 +232,7 @@ HWTEST_F(PropertyTestNg, PropertyTestNgTest007, TestSize.Level1)
  * @tc.desc: Test CheckNeedLayout funcation.
  * @tc.type: FUNC
  */
-HWTEST_F(PropertyTestNg, PropertyTestNgTest008, TestSize.Level1)
+HWTEST_F(PropertyTestNg, PropertyTestNgTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call CheckNeedLayout and set input is TEST_PROPERTY_UPDATE_NORMAL.

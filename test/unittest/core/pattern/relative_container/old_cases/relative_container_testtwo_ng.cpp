@@ -139,7 +139,7 @@ void RelativeContainerTestTwoNg::SetContainerParam(std::string id, float width, 
  * @tc.desc: BarrierDirection::LEFT, AlignDirection::LEFT.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level0)
 {
     /**
      * set pipeline: api = 11
@@ -205,7 +205,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest001, TestSize.Level1)
  * @tc.desc: BarrierDirection::RIGHT, AlignDirection::LEFT.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest002, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -256,7 +256,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest002, TestSize.Level1)
  * @tc.desc: BarrierDirection::TOP, AlignDirection::TOP.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -314,7 +314,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest003, TestSize.Level1)
  * @tc.desc: BarrierDirection::BOTTOM, AlignDirection::BOTTOM.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -372,7 +372,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest004, TestSize.Level1)
  * @tc.desc: BarrierDirection::LEFT, AlignDirection::LEFT
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -431,7 +431,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest005, TestSize.Level1)
  * @tc.desc: don't have reference id.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -492,7 +492,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest006, TestSize.Level1)
  * @tc.desc: test id not exist.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -553,7 +553,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest007, TestSize.Level1)
  * @tc.desc: BarrierDirection::TOP, AlignDirection::LEFT.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -611,7 +611,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest008, TestSize.Level1)
  * @tc.desc: BarrierDirection::RIGHT, AlignDirection::TOP.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -669,7 +669,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest009, TestSize.Level1)
  * @tc.desc: BarrierDirection::RIGHT, AlignDirection::LEFT, HorizontalAlign::START.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -727,7 +727,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest010, TestSize.Level1)
  * @tc.desc: BarrierDirection::RIGHT, AlignDirection::LEFT, HorizontalAlign::CENTER.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -785,7 +785,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest011, TestSize.Level1)
  * @tc.desc: BarrierDirection::RIGHT, AlignDirection::LEFT, HorizontalAlign::END.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -843,7 +843,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest012, TestSize.Level1)
  * @tc.desc: BarrierDirection::TOP, AlignDirection::TOP, VerticalAlign::TOP.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -901,7 +901,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest013, TestSize.Level1)
  * @tc.desc: BarrierDirection::TOP, AlignDirection::TOP, VerticalAlign::CENTER.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -959,7 +959,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest014, TestSize.Level1)
  * @tc.desc: BarrierDirection::TOP, AlignDirection::TOP, VerticalAlign::BOTTOM.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level0)
 {
     CreateInstance([](RelativeContainerModelNG model) {
         ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
@@ -1017,7 +1017,7 @@ HWTEST_F(RelativeContainerTestTwoNg, BarrierTest015, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::HORIZONTAL style ChainStyle::SPREAD
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest001, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1076,7 +1076,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest001, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::HORIZONTAL style ChainStyle::SPREAD_INSIDE
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest002, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1135,7 +1135,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest002, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::HORIZONTAL style ChainStyle::PACKED
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest003, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1194,7 +1194,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest003, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::HORIZONTAL style ChainStyle::PACKED bias(0,0)
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest004, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest004, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1254,7 +1254,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest004, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::VERTICAL style ChainStyle::SPREAD
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest005, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest005, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1313,7 +1313,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest005, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::VERTICAL style ChainStyle::SPREAD_INSIDE
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest006, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest006, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1372,7 +1372,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest006, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::VERTICAL style ChainStyle::PACKED
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest007, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest007, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1431,7 +1431,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest007, TestSize.Level1)
  * @tc.desc: chainMode direction LineDirection::VERTICAL style ChainStyle::PACKED bias(0,0)
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest008, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest008, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1491,7 +1491,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest008, TestSize.Level1)
  * @tc.desc: chainMode without chain relationship
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest009, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest009, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1539,7 +1539,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest009, TestSize.Level1)
  * @tc.desc: chain without start anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest010, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest010, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1597,7 +1597,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest010, TestSize.Level1)
  * @tc.desc: chain without end anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest011, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest011, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1655,7 +1655,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest011, TestSize.Level1)
  * @tc.desc: chainMode with broken chain relationship
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest012, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest012, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1713,7 +1713,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest012, TestSize.Level1)
  * @tc.desc: content of spread chain is outside the constraints of the anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest0013, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest0013, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1772,7 +1772,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest0013, TestSize.Level1)
  * @tc.desc: content of spread_inside chain is outside the constraints of the anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest0014, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest0014, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1831,7 +1831,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest0014, TestSize.Level1)
  * @tc.desc: content of packed chain is outside the constraints of the anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest0015, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest0015, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1890,7 +1890,7 @@ HWTEST_F(RelativeContainerTestTwoNg, ChainTest0015, TestSize.Level1)
  * @tc.desc: content of packed chain with bias is outside the constraints of the anchor
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTest0016, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTest0016, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -1962,7 +1962,7 @@ static void AddAlignRule(const std::string& id, const AlignDirection& direction,
  * @tc.desc: content of packed chain with bias is outside the constraints of the anchor, direction::RTL.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerTestTwoNg, ChainTestRtl001, TestSize.Level1)
+HWTEST_F(RelativeContainerTestTwoNg, ChainTestRtl001, TestSize.Level0)
 {
     CreateInstance([=](RelativeContainerModelNG model) {
         SetContainerParam(CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);

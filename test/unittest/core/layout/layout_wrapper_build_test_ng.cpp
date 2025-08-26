@@ -66,7 +66,7 @@ class LayoutWrapperBuildTestNg : public testing::Test {};
  * @tc.desc: Test the operation of layout_property.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildGetOrCreateWrapperByIndex, TestSize.Level1)
+HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildGetOrCreateWrapperByIndex, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a wrapperBuilder.
@@ -100,7 +100,7 @@ HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildGetOrCreateWrapperByIndex, 
  * @tc.desc: Test the operation of layout_property.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildExpandAllChildWrappers, TestSize.Level1)
+HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildExpandAllChildWrappers, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a wrapperBuilder and callback ExpandAllChildWrappers.
@@ -116,7 +116,7 @@ HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildExpandAllChildWrappers, Tes
  * @tc.desc: Test the operation of layout_property.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildRemoveAllChildInRenderTree, TestSize.Level1)
+HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildRemoveAllChildInRenderTree, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a wrapperBuilder and callback RemoveAllChildInRenderTree.
@@ -141,7 +141,7 @@ HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildRemoveAllChildInRenderTree,
  * @tc.desc: Test the operation of GetOrCreateWrapperByIndex.
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildTest0001, TestSize.Level1)
+HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildTest0001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a wrapperBuilder.

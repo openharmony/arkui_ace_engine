@@ -49,7 +49,7 @@ public:
  * @tc.name: CalcBarrierTest1
  * @tc.desc: Test that barriers_ are created correctly
  */
-HWTEST_F(RelativeContainerBarrierTest, CalcBarrierTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerBarrierTest, CalcBarrierTest1, TestSize.Level0)
 {
     auto relativeContainer = CreateRelativeContainer([this](RelativeContainerModelNG model) {
         CreateRow([](RowModelNG model) { ViewAbstract::SetInspectorId("barrier3"); });
@@ -93,7 +93,7 @@ HWTEST_F(RelativeContainerBarrierTest, CalcBarrierTest1, TestSize.Level1)
  * @tc.name: UpdateDegreeMapWithBarrierTest
  * @tc.desc: Test UpdateDegreeMapWithBarrierTest
  */
-HWTEST_F(RelativeContainerBarrierTest, UpdateDegreeMapWithBarrierTest, TestSize.Level1)
+HWTEST_F(RelativeContainerBarrierTest, UpdateDegreeMapWithBarrierTest, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto relativeContainer = CreateRelativeContainer([this, &row1](RelativeContainerModelNG model) {
@@ -130,7 +130,7 @@ HWTEST_F(RelativeContainerBarrierTest, UpdateDegreeMapWithBarrierTest, TestSize.
  * @tc.name: MeasureBarrierTest1
  * @tc.desc: Test MeasureBarrier
  */
-HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest1, TestSize.Level1)
+HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest1, TestSize.Level0)
 {
     RefPtr<FrameNode> row1, row2, row3;
     auto relativeContainer = CreateRelativeContainer([this, &row1, &row2, &row3](RelativeContainerModelNG model) {
@@ -195,7 +195,7 @@ HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest1, TestSize.Level1)
  * @tc.name: MeasureBarrierTest2
  * @tc.desc: Test MeasureBarrier, barrier depends on guideLine.
  */
-HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest2, TestSize.Level1)
+HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest2, TestSize.Level0)
 {
     RefPtr<FrameNode> row1;
     auto relativeContainer = CreateRelativeContainer([this, &row1](RelativeContainerModelNG model) {
@@ -244,7 +244,7 @@ HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest2, TestSize.Level1)
  * @tc.name: MeasureBarrierTest3
  * @tc.desc: Test MeasureBarrier, barrier A depends on barrier B.
  */
-HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest3, TestSize.Level1)
+HWTEST_F(RelativeContainerBarrierTest, MeasureBarrierTest3, TestSize.Level0)
 {
     RefPtr<FrameNode> row1, row2, row3;
     auto relativeContainer = CreateRelativeContainer([this, &row1, &row2, &row3](RelativeContainerModelNG model) {

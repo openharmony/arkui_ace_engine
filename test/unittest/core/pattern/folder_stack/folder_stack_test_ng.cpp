@@ -125,7 +125,7 @@ RefPtr<UINode> FolderStackTestNg::CreateWithItem(bool enableAnimation, bool auto
  * @tc.desc: Test folderStack Layout with Alignment
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest001, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -187,7 +187,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest001, TestSize.Level1)
  * @tc.desc: Test folderStack Layout with AlignmentContent
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest002, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -247,7 +247,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest002, TestSize.Level1)
  * @tc.desc: Test folderStack pattern with AlignmentContent
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest003, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -280,7 +280,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest003, TestSize.Level1)
  * @tc.desc: Test folderStack pattern transitionStatus_ has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest004, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -316,7 +316,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest004, TestSize.Level1)
  * @tc.desc: Test folderStack pattern visible has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest005, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -342,7 +342,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest005, TestSize.Level1)
  * @tc.desc: Test folderStack pattern visible has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest006, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -369,7 +369,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest006, TestSize.Level1)
  * @tc.desc: Test folderStack pattern RefreshStack changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest007, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -393,7 +393,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest007, TestSize.Level1)
  * @tc.desc: Test folderStack pattern visible has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest008, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -422,7 +422,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest008, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest009, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -456,7 +456,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest009, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest010, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -489,7 +489,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest010, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest011, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -522,7 +522,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest011, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest012, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -555,7 +555,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest012, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest013, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -588,7 +588,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest013, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest014, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -621,7 +621,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest014, TestSize.Level1)
  * @tc.desc: Test folderStack pattern SetAutoRotate has changed.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgTest015, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -654,7 +654,7 @@ HWTEST_F(FolderStackTestNg, FolderStackTestNgTest015, TestSize.Level1)
  * @tc.desc: Test folderStack match parent.
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent001, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgMatchParent001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
