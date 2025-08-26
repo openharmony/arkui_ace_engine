@@ -1202,7 +1202,7 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
 
 void JSText::SetContentTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && !info[0]->IsObject()) {
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
         TextModel::GetInstance()->ResetContentTransition();
         return;
     }

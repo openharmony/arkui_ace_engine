@@ -56,9 +56,9 @@ int TxtTextEffect::AppendTypography(const std::vector<RefPtr<Paragraph>>& paragr
 {
     CHECK_NULL_RETURN(textEffect_, -1);
     std::vector<Rosen::TypographyConfig> typographyConfigs;
-    for (const auto& paragrah : paragraphs) {
-        CHECK_NULL_RETURN(paragrah, -1);
-        auto txtParagraph = DynamicCast<TxtParagraph>(paragrah);
+    for (const auto& paragraph : paragraphs) {
+        CHECK_NULL_RETURN(paragraph, -1);
+        auto txtParagraph = DynamicCast<TxtParagraph>(paragraph);
         CHECK_NULL_RETURN(txtParagraph, -1);
         Rosen::TypographyConfig config;
         config.typography = txtParagraph->GetSharedParagraph();
@@ -77,9 +77,9 @@ void TxtTextEffect::RemoveTypography(const std::vector<RefPtr<Paragraph>>& parag
 {
     CHECK_NULL_VOID(textEffect_);
     std::vector<Rosen::TypographyConfig> typographyConfigs;
-    for (const auto& paragrah : paragraphs) {
-        CHECK_NULL_VOID(paragrah);
-        auto txtParagraph = DynamicCast<TxtParagraph>(paragrah);
+    for (const auto& paragraph : paragraphs) {
+        CHECK_NULL_VOID(paragraph);
+        auto txtParagraph = DynamicCast<TxtParagraph>(paragraph);
         CHECK_NULL_VOID(txtParagraph);
         Rosen::TypographyConfig config;
         if (SystemProperties::GetTextTraceEnabled()) {
@@ -97,16 +97,16 @@ int TxtTextEffect::UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, Ref
 {
     CHECK_NULL_RETURN(textEffect_, -1);
     std::vector<std::pair<Rosen::TypographyConfig, Rosen::TypographyConfig>> typographyConfigs;
-    for (const auto& paragrah : paragraphs) {
-        CHECK_NULL_RETURN(paragrah.first, -1);
-        auto oldTxtParagraph = DynamicCast<TxtParagraph>(paragrah.first);
+    for (const auto& paragraph : paragraphs) {
+        CHECK_NULL_RETURN(paragraph.first, -1);
+        auto oldTxtParagraph = DynamicCast<TxtParagraph>(paragraph.first);
         CHECK_NULL_RETURN(oldTxtParagraph, -1);
         Rosen::TypographyConfig oldConfig;
         oldConfig.typography = oldTxtParagraph->GetSharedParagraph();
         oldConfig.rawTextRange = std::pair(0, oldTxtParagraph->GetParagraphText().size());
 
-        CHECK_NULL_RETURN(paragrah.second, -1);
-        auto newTxtParagraph = DynamicCast<TxtParagraph>(paragrah.second);
+        CHECK_NULL_RETURN(paragraph.second, -1);
+        auto newTxtParagraph = DynamicCast<TxtParagraph>(paragraph.second);
         CHECK_NULL_RETURN(newTxtParagraph, -1);
         Rosen::TypographyConfig newConfig;
         newConfig.typography = newTxtParagraph->GetSharedParagraph();

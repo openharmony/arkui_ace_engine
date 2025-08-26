@@ -47,6 +47,7 @@ RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
 void TxtParagraph::SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode)
 {
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
     auto rsNode = context->GetRSNode();
     rsSymbolAnimation_ = RSSymbolAnimation();
     rsSymbolAnimation_.SetNode(rsNode);
