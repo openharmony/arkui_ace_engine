@@ -396,9 +396,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetShaderStyle(ArkUIRuntimeCallInfo* r
     for (size_t i = 0; i < jsArray->Length(); ++i) {
         auto jsGradientObj = Framework::JSRef<Framework::JSObject>::Cast(jsArray->GetValueAt(i));
         SymbolGradient gradient;
-        if (Framework::JSSymbol::ParseShaderStyle(jsGradientObj, gradient)) {
-            gradients.emplace_back(std::move(gradient));
-        }
+        Framework::JSSymbol::ParseShaderStyle(jsGradientObj, gradient);
+        gradients.emplace_back(std::move(gradient));
     }
     SymbolModelNG::SetShaderStyle(frameNode, gradients);
     return panda::JSValueRef::Undefined(vm);
