@@ -291,6 +291,8 @@ declare namespace promptAction {
 
     export function getTopOrder(): number | undefined;
     export function getBottomOrder(): number | undefined;
+
+    export function getDialogController(content: KPointer): DialogController | undefined;
 }
 
 export default promptAction
