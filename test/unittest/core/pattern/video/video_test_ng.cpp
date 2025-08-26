@@ -499,7 +499,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -584,7 +584,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string preparedCheck;
     VideoEventCallback onPrepared = [&preparedCheck](
@@ -647,7 +647,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     auto rawChildNum = static_cast<int32_t>(frameNode->GetChildren().size());
 
     // set video event
-    auto videoEventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = pattern->GetEventHub<VideoEventHub>();
     std::string pauseCheck;
     VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     videoEventHub->SetOnPause(std::move(onPause));
@@ -754,7 +754,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string seekingCheck;
     VideoEventCallback onSeeking = [&seekingCheck](
@@ -993,7 +993,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
 
     std::string fullScreenCheck;
@@ -1161,7 +1161,7 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
      */
     std::string result;
     auto errorCallback = [&result](const std::string& error) { result = VIDEO_CALLBACK_RESULT; };
-    auto eventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = pattern->GetEventHub<VideoEventHub>();
     eventHub->SetOnError(std::move(errorCallback));
     pattern->OnError(VIDEO_ERROR_ID);
     EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);

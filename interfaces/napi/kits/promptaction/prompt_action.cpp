@@ -24,7 +24,6 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -522,23 +521,18 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int32_t alignment = -1;
-    int32_t updateAlignment = 0;
-    const int32_t steps = 2; // 2: alignment from theme
     auto pipelineContext = PipelineBase::GetCurrentContext();
     if (pipelineContext) {
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
-        updateAlignment = steps - 1;
         if (toastTheme) {
             alignment = toastTheme->GetAlign();
-            updateAlignment = steps;
         }
     }
     auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = alignment };
+
     if (!GetToastParams(env, argv, toastInfo)) {
         return nullptr;
     }
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "The show toast process: parameters are prased successfully, "
-        "updateAlignment is %{public}d", updateAlignment);
     std::function<void(int32_t)> toastCallback = nullptr;
     ShowToast(env, toastInfo, toastCallback);
     return nullptr;

@@ -337,7 +337,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAttachTest, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     std::function<void()> onAttachCallback = []() {};
     ViewAbstract::SetOnAttach(AceType::RawPtr(node), std::move(onAttachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAttach_;
     EXPECT_NE(callback, nullptr);
 
@@ -371,7 +371,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnDetachTest, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     std::function<void()> onDetachCallback = []() {};
     ViewAbstract::SetOnDetach(AceType::RawPtr(node), std::move(onDetachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onDetach_;
     EXPECT_NE(callback, nullptr);
 
@@ -405,7 +405,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAttachByFrameNodeTest, TestSiz
     ASSERT_NE(node, nullptr);
     std::function<void()> onAttachCallback = []() {};
     ViewAbstract::SetOnAttach(AceType::RawPtr(node), std::move(onAttachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAttach_;
     EXPECT_NE(callback, nullptr);
 
@@ -439,7 +439,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnDetachByFrameNodeTest, TestSiz
     ASSERT_NE(node, nullptr);
     std::function<void()> onDetachCallback = []() {};
     ViewAbstract::SetOnDetach(AceType::RawPtr(node), std::move(onDetachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onDetach_;
     EXPECT_NE(callback, nullptr);
 
@@ -750,7 +750,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOnAttach001, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     std::function<void()> onAttachCallback = []() {};
     ViewAbstract::SetOnAttach(AceType::RawPtr(node), std::move(onAttachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAttach_;
     EXPECT_NE(callback, nullptr);
 
@@ -789,7 +789,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOnDetach001, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     std::function<void()> onDetachCallback = []() {};
     ViewAbstract::SetOnDetach(std::move(onDetachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onDetach_;
     EXPECT_NE(callback, nullptr);
 
@@ -828,7 +828,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOnAttach002, TestSize.Level1)
     ASSERT_NE(node, nullptr);
     std::function<void()> onAttachCallback = []() {};
     ViewAbstract::SetOnAttach(std::move(onAttachCallback));
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onAttach_;
     EXPECT_NE(callback, nullptr);
 
@@ -1450,7 +1450,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest001, TestSize.L
 
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, true);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -1493,7 +1493,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.L
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     param->SetAnchorType(TipsAnchorType::CURSOR);
     ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, false);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -1541,7 +1541,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddMouseEventForTipsTest001, TestSize.L
     param->SetAnchorType(TipsAnchorType::CURSOR);
     EXPECT_EQ(param->GetAnchorType(), TipsAnchorType::CURSOR);
     ViewAbstract::AddMouseEventForTips(targetNode, popupInfo);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -1789,14 +1789,14 @@ HWTEST_F(ViewAbstractTestNg, CustomBackgroundResourceTest001, TestSize.Level1)
 HWTEST_F(ViewAbstractTestNg, ViewAbstractClearJSFrameNodeOnClickTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Create a FrameNode and set a native onClick event via SetJSFrameNodeOnClick.
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetFrameNodeCommonOnClick.
      * @tc.expected: The nodeEventRegistered should be true.
      */
     auto frameNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(frameNode, nullptr);
     GestureEventFunc onClick = [](GestureEvent&) {};
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(onClick));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(frameNode), std::move(onClick));
 
     auto* uiNode = reinterpret_cast<UINode*>(AceType::RawPtr(frameNode));
     ASSERT_NE(uiNode, nullptr);
@@ -1856,5 +1856,46 @@ HWTEST_F(ViewAbstractTestNg, FocusBoxTest001, TestSize.Level1)
     ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleMargin");
     ViewAbstract::SetFocusBoxStyleUpdateFunc(style, nullptr, "focusBoxStyleWidth");
     EXPECT_TRUE(resMap.find("focusBox") == resMap.end());
+}
+
+/**
+ * @tc.name: SetOverlayNodeTest001
+ * @tc.desc: Test SetOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetOverlayNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create frameNode and overlayNode
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(overlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2.Create overlayOptions
+     */
+    NG::OverlayOptions options;
+    const Dimension dimensionValue = Dimension(5);
+    options.x = dimensionValue;
+    options.y = dimensionValue;
+    options.direction = TextDirection::RTL;
+
+    /**
+     * @tc.steps: step3.Execute SetOverlayNode
+     */
+    ViewAbstract::SetOverlayNode(AceType::RawPtr(frameNode), AceType::RawPtr(overlayNode), options);
+    auto overlayNodeWithFrameNode = frameNode->GetOverlayNode();
+    EXPECT_EQ(overlayNode, overlayNodeWithFrameNode);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNodeWithFrameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    auto direction = layoutProperty->GetLayoutDirection();
+    EXPECT_EQ(direction, TextDirection::RTL);
+    Dimension x;
+    Dimension y;
+    layoutProperty->GetOverlayOffset(x, y);
+    EXPECT_EQ(x, dimensionValue);
+    EXPECT_EQ(y, dimensionValue);
 }
 } // namespace OHOS::Ace::NG

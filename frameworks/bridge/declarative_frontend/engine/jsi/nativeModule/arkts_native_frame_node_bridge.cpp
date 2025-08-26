@@ -811,7 +811,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnClick(frameNode, std::move(onClick));
+    NG::ViewAbstract::SetFrameNodeCommonOnClick(frameNode, std::move(onClick));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -906,7 +906,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnTouch(frameNode, std::move(onTouch));
+    NG::ViewAbstract::SetFrameNodeCommonOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -940,7 +940,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnAppear(ArkUIRuntimeCallInfo* runtim
         PipelineContext::SetCallBackNode(node);
         function->Call(vm, function.ToLocal(), nullptr, 0);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnAppear(frameNode, std::move(onAppear));
+    NG::ViewAbstract::SetFrameNodeCommonOnAppear(frameNode, std::move(onAppear));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -974,7 +974,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(node);
         function->Call(vm, function.ToLocal(), nullptr, 0);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnDisappear(frameNode, std::move(onDisappear));
+    NG::ViewAbstract::SetFrameNodeCommonOnDisappear(frameNode, std::move(onDisappear));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1170,7 +1170,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
     };
-    NG::ViewAbstract::SetJSFrameNodeOnHover(frameNode, std::move(onHover));
+    NG::ViewAbstract::SetFrameNodeCommonOnHover(frameNode, std::move(onHover));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1208,7 +1208,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* run
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
     };
-    NG::ViewAbstract::SetJSFrameNodeOnHoverMove(frameNode, std::move(onHoverMove));
+    NG::ViewAbstract::SetFrameNodeCommonOnHoverMove(frameNode, std::move(onHoverMove));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1305,7 +1305,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtime
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnMouse(frameNode, std::move(onMouse));
+    NG::ViewAbstract::SetFrameNodeCommonOnMouse(frameNode, std::move(onMouse));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1972,7 +1972,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnSizeChange(ArkUIRuntimeCallInfo* ru
         panda::Local<panda::JSValueRef> params[2] = { oldSize, newSize };
         function->Call(vm, function.ToLocal(), params, 2);
     };
-    NG::ViewAbstract::SetJSFrameNodeOnSizeChange(frameNode, std::move(onSizeChange));
+    NG::ViewAbstract::SetFrameNodeCommonOnSizeChange(frameNode, std::move(onSizeChange));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2030,7 +2030,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnVisibleAreaApproximateChange(ArkUIR
     if (intervalMs < 0) {
         intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
     }
-    NG::ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
+    NG::ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
         frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs);
     return panda::JSValueRef::Undefined(vm);
 }

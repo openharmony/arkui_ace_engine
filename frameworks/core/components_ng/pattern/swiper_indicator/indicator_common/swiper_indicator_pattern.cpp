@@ -135,7 +135,7 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     RefPtr<SwiperPattern> swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
 
-    auto swiperEventHub = swiperPattern->GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
@@ -408,7 +408,7 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -769,7 +769,7 @@ void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (isInteractive) {
         eventHub->SetEnabled(true);

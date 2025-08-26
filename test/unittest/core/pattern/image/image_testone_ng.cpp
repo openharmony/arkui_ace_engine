@@ -1617,7 +1617,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&successEvent](const LoadImageSuccessEvent& info) { successEvent = info; };
     ImageModelNG::SetOnComplete(frameNode, std::move(onComplete));
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1640,7 +1640,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto finishEventData = RADIUS_DEFAULT;
@@ -1886,7 +1886,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
 
     int testData = 0;
-    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
     eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!", {}));
@@ -2097,5 +2097,21 @@ HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
     image.SetDynamicRangeMode(DynamicRangeMode::STANDARD);
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
+}
+
+/**
+ * @tc.name: Matrix 001
+ * @tc.desc: Test Matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, Matrix001, TestSize.Level1)
+{
+    Matrix4 value1 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    Matrix4 value2 = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    EXPECT_TRUE(value1 == value2.matrix4x4_);
+    Matrix4 value3 = Matrix4(1.0f, 0, 1.0f, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    double matrix[4][4] = {};
+    value3.CopyMatrix(matrix);
+    EXPECT_TRUE(value3 == matrix);
 }
 } // namespace OHOS::Ace::NG

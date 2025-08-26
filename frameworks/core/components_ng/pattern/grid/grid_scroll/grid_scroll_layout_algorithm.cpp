@@ -90,6 +90,18 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize_.SetWidth(round(frameSize_.Width()));
             frameSize_.SetHeight(round(frameSize_.Height()));
         }
+        // fix layout bug when children are not GridItems
+        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+            currentItemRowSpan_ = 1;
+            currentItemColSpan_ = 1;
+        }
+        if (!isLayouted_) {
+            auto pattern = host->GetPattern<GridPattern>();
+            if (pattern) {
+                info_ = pattern->GetGridLayoutInfo();
+                unLayoutedItems_ = itemsCrossPosition_;
+            }
+        }
     }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount());
@@ -110,8 +122,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update layout info.
     info_.prevOffset_ = info_.currentOffset_;
     // update cache info.
-    const int32_t cacheCnt =
-        static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * crossCount_);
+    auto cache = CalculateCachedCount(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_));
+    const int32_t cacheCnt = std::max(cache.first, cache.second);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -123,21 +135,37 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (SystemProperties::GetGridCacheEnabled()) {
         if (measureInNextFrame_) {
+            UpdateUnlayoutedItems();
+            isLayouted_ = false;
             return;
         }
         const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
         if (sync) {
             SyncPreload(
                 layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_), crossSize, mainSize);
+            UpdateUnlayoutedItems();
+            isLayouted_ = false;
             return;
         }
 
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
-        AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
+        AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cache.first, predictBuildList_);
         if (!predictBuildList_.empty()) {
             PreloadItems(layoutWrapper);
             predictBuildList_.clear();
         }
+    }
+    UpdateUnlayoutedItems();
+    isLayouted_ = false;
+}
+
+void GridScrollLayoutAlgorithm::UpdateUnlayoutedItems()
+{
+    if (isLayouted_) {
+        return;
+    }
+    for (auto& [index, _] : itemsCrossPosition_) {
+        unLayoutedItems_.erase(index);
     }
 }
 
@@ -344,7 +372,6 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            measuredItems_.erase(itemIdex);
             auto frameNode = DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode(axis_);
@@ -378,11 +405,12 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     UpdateOverlay(layoutWrapper);
+    isLayouted_ = true;
 }
 
 void GridScrollLayoutAlgorithm::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
 {
-    for (int32_t itemIndex : measuredItems_) {
+    for (auto& [itemIndex, _] : unLayoutedItems_) {
         auto wrapper = layoutWrapper->GetChildByIndex(itemIndex);
         if (!wrapper) {
             continue;
@@ -774,7 +802,6 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
                 --currentIndex;
                 break;
             }
-            measuredItems_.emplace(currentIndex);
             i += static_cast<uint32_t>(childState) - 1;
             // Step3. Measure [GridItem]
             LargeItemLineHeight(itemWrapper);
@@ -1189,7 +1216,6 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         } else {
             MeasureChildPlaced(frameSize_, idx, crossStart, wrapper_, item);
         }
-        measuredItems_.emplace(idx);
         // Record end index. When fill new line, the [endIndex_] will be the first item index to request
         LargeItemLineHeight(item);
         endIdx = std::max(idx, endIdx);
@@ -1411,7 +1437,6 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         } else {
             MeasureChildPlaced(frameSize, currentIndex, crossStart, layoutWrapper, itemWrapper);
         }
-        measuredItems_.emplace(currentIndex);
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper);
         info_.startIndex_ = currentIndex;
@@ -1566,7 +1591,6 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             --currentIndex;
             break;
         }
-        measuredItems_.emplace(currentIndex);
         i = static_cast<uint32_t>(lastCross_ - 1);
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper);
@@ -2084,7 +2108,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (GridUtils::CheckNeedCacheLayout(itemWrapper)) {
-                    for (uint32_t y = i; y < crossCount_ && currentIndex < childrenCount; y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < cacheEnd_; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
@@ -2359,7 +2383,8 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* lay
     CHECK_NULL_RETURN(host, res);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, res);
-    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false)) // avoid reset during overScroll
+    // avoid reset during overScroll
+    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false))
         || updateIdx == -1) {
         return res;
     }

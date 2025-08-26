@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, DividerStyle, BlendMode } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, DividerStyle, BlendMode } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Callback_CreateItem, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
@@ -12598,59 +12598,59 @@ export class Deserializer extends DeserializerBase {
     readAlignRuleOption(): AlignRuleOption {
         let valueDeserializer : Deserializer = this
         const left_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let left_buf : HorizontalAlignOptions | undefined
+        let left_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
         {
             const left_buf__anchor : string = (valueDeserializer.readString() as string)
             const left_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            left_buf = ({anchor: left_buf__anchor, align: left_buf__align} as HorizontalAlignOptions)
+            left_buf = ({anchor: left_buf__anchor, align: left_buf__align} as HorizontalAlignParam)
         }
-        const left_result : HorizontalAlignOptions | undefined = left_buf
+        const left_result : HorizontalAlignParam | undefined = left_buf
         const right_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let right_buf : HorizontalAlignOptions | undefined
+        let right_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
         {
             const right_buf__anchor : string = (valueDeserializer.readString() as string)
             const right_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            right_buf = ({anchor: right_buf__anchor, align: right_buf__align} as HorizontalAlignOptions)
+            right_buf = ({anchor: right_buf__anchor, align: right_buf__align} as HorizontalAlignParam)
         }
-        const right_result : HorizontalAlignOptions | undefined = right_buf
+        const right_result : HorizontalAlignParam | undefined = right_buf
         const middle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let middle_buf : HorizontalAlignOptions | undefined
+        let middle_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (middle_buf_runtimeType))
         {
             const middle_buf__anchor : string = (valueDeserializer.readString() as string)
             const middle_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            middle_buf = ({anchor: middle_buf__anchor, align: middle_buf__align} as HorizontalAlignOptions)
+            middle_buf = ({anchor: middle_buf__anchor, align: middle_buf__align} as HorizontalAlignParam)
         }
-        const middle_result : HorizontalAlignOptions | undefined = middle_buf
+        const middle_result : HorizontalAlignParam | undefined = middle_buf
         const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let top_buf : VerticalAlignOptions | undefined
+        let top_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
         {
             const top_buf__anchor : string = (valueDeserializer.readString() as string)
             const top_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            top_buf = ({anchor: top_buf__anchor, align: top_buf__align} as VerticalAlignOptions)
+            top_buf = ({anchor: top_buf__anchor, align: top_buf__align} as VerticalAlignParam)
         }
-        const top_result : VerticalAlignOptions | undefined = top_buf
+        const top_result : VerticalAlignParam | undefined = top_buf
         const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottom_buf : VerticalAlignOptions | undefined
+        let bottom_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
         {
             const bottom_buf__anchor : string = (valueDeserializer.readString() as string)
             const bottom_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            bottom_buf = ({anchor: bottom_buf__anchor, align: bottom_buf__align} as VerticalAlignOptions)
+            bottom_buf = ({anchor: bottom_buf__anchor, align: bottom_buf__align} as VerticalAlignParam)
         }
-        const bottom_result : VerticalAlignOptions | undefined = bottom_buf
+        const bottom_result : VerticalAlignParam | undefined = bottom_buf
         const center_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let center_buf : VerticalAlignOptions | undefined
+        let center_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (center_buf_runtimeType))
         {
             const center_buf__anchor : string = (valueDeserializer.readString() as string)
             const center_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            center_buf = ({anchor: center_buf__anchor, align: center_buf__align} as VerticalAlignOptions)
+            center_buf = ({anchor: center_buf__anchor, align: center_buf__align} as VerticalAlignParam)
         }
-        const center_result : VerticalAlignOptions | undefined = center_buf
+        const center_result : VerticalAlignParam | undefined = center_buf
         const bias_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let bias_buf : Bias | undefined
         if ((RuntimeType.UNDEFINED) != (bias_buf_runtimeType))

@@ -184,6 +184,7 @@ public:
         EXTERNAL,
         INCREMENTAL_CANVAS,
         HARDWARE_SURFACE,
+        COMPOSITE_COMPONENT,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -836,6 +837,8 @@ public:
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
     virtual void UpdateCustomBackground() {}
+
+    virtual void UpdateOverlayText() {}
 
 protected:
     RenderContext() = default;

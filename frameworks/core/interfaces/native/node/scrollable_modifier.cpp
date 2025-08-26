@@ -176,13 +176,14 @@ void ResetOnScrollStopCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnScrollStop(frameNode, nullptr);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     (*values)[0] = ScrollableModelNG::GetEdgeEffect(frameNode);
     (*values)[1] = ScrollableModelNG::GetAlwaysEnabled(frameNode);
-    return 2;
+    (*values)[2] = static_cast<ArkUI_Int32>(ScrollableModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -334,15 +335,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnReachStartCallBack = ResetOnReachStartCallBack,
         .setOnReachEndCallBack = SetOnReachEndCallBack,
         .resetOnReachEndCallBack = ResetOnReachEndCallBack,
-        .getFlingSpeedLimit = GetFlingSpeedLimit,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
         .getBackToTop = GetBackToTop,
         .setScrollBarMargin = SetScrollBarMargin,
         .resetScrollBarMargin = ResetScrollBarMargin,
         .getScrollBarMargin = GetScrollBarMargin,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setOnWillScrollCallBack = SetOnWillScrollCallBack,
         .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
         .setOnDidScrollCallBack = SetOnDidScrollCallBack,

@@ -21,9 +21,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const int DOUBLE_DIGIT = 10;
 const std::string COLON = ":";
-const std::string ZERO = "0";
 } // namespace
 
 std::string DatePickerAccessibilityProperty::GetText() const
@@ -91,30 +89,31 @@ std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
     CHECK_NULL_RETURN(hourColumn, "");
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(hourPickerColumnPattern, "");
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    CHECK_NULL_RETURN(minuteColumn, "");
+    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(minutePickerColumnPattern, "");
 
     std::string result;
-    auto hour = static_cast<int32_t>(hourPickerColumnPattern->GetCurrentIndex());
-    if (!timePickerRowPattern->GetHour24()) {
-        hour += 1;
+    auto options = timePickerRowPattern->GetOptions();
+    if (options.find(hourColumn) != options.end()) {
+        std::string hour = options[hourColumn][hourPickerColumnPattern->GetCurrentIndex()];
+        result += hour;
     }
-    std::string textHour = std::to_string(hour);
-    if (hour < DOUBLE_DIGIT) {
-        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            textHour = ZERO + textHour;
-        } else if (timePickerRowPattern->GetHour24()) {
-            if (timePickerRowPattern->GetPrefixHour() != ZeroPrefixType::HIDE) {
-                textHour = ZERO + textHour;
-            }
-        } else {
-            if (timePickerRowPattern->GetPrefixHour() == ZeroPrefixType::SHOW) {
-                textHour = ZERO + textHour;
-            }
+    if (options.find(minuteColumn) != options.end()) {
+        std::string minute = options[minuteColumn][minutePickerColumnPattern->GetCurrentIndex()];
+        result += COLON + minute;
+    }
+    if (timePickerRowPattern->GetHasSecond()) {
+        auto secondColumn = allChildNode["second"].Upgrade();
+        CHECK_NULL_RETURN(secondColumn, "");
+        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_RETURN(secondPickerColumnPattern, "");
+        if (options.find(secondColumn) != options.end()) {
+            std::string second = options[secondColumn][secondPickerColumnPattern->GetCurrentIndex()];
+            result += COLON + second;
         }
     }
-    result += textHour;
-
-    GetMinuteText(timeNode, result);
-    GetSecondText(timeNode, result);
     if (!timePickerRowPattern->GetHour24()) {
         auto amPmColumn = allChildNode["amPm"].Upgrade();
         CHECK_NULL_RETURN(amPmColumn, "");
@@ -126,48 +125,5 @@ std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
         }
     }
     return result;
-}
-
-void DatePickerAccessibilityProperty::GetMinuteText(const RefPtr<FrameNode>& frameNode, std::string& result) const
-{
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    auto allChildNode = timePickerRowPattern->GetAllChildNode();
-    auto minuteColumn = allChildNode["minute"].Upgrade();
-    CHECK_NULL_VOID(minuteColumn);
-
-    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
-    CHECK_NULL_VOID(minutePickerColumnPattern);
-    int minute = static_cast<int>(minutePickerColumnPattern->GetCurrentIndex());
-    std::string textMinute = std::to_string(minute);
-    if (minute < DOUBLE_DIGIT) {
-        if (timePickerRowPattern->GetPrefixMinute() != ZeroPrefixType::HIDE) {
-            textMinute = ZERO + textMinute;
-        }
-    }
-    result += COLON + textMinute;
-}
-
-void DatePickerAccessibilityProperty::GetSecondText(const RefPtr<FrameNode>& frameNode, std::string& result) const
-{
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    if (timePickerRowPattern->GetHasSecond()) {
-        auto allChildNode = timePickerRowPattern->GetAllChildNode();
-        auto secondColumn = allChildNode["second"].Upgrade();
-        CHECK_NULL_VOID(secondColumn);
-        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
-        CHECK_NULL_VOID(secondPickerColumnPattern);
-        int second = static_cast<int>(secondPickerColumnPattern->GetCurrentIndex());
-        std::string textSecond = std::to_string(second);
-        if (second < DOUBLE_DIGIT) {
-            if (timePickerRowPattern->GetPrefixSecond() != ZeroPrefixType::HIDE) {
-                textSecond = ZERO + textSecond;
-            }
-        }
-        result += COLON + textSecond;
-    }
 }
 } // namespace OHOS::Ace::NG

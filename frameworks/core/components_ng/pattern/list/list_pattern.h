@@ -455,11 +455,13 @@ public:
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void UpdateDefaultColor();
+    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
 
     void SetDraggingIndex(int32_t index)
     {
         draggingIndex_ = index;
     }
+    bool LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup);
 
 protected:
     void OnModifyDone() override;
@@ -511,6 +513,7 @@ protected:
     bool isScrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
 
@@ -534,8 +537,6 @@ private:
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
     bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
-    bool JudgeCanOverScrollStart();
-    bool JudgeCanOverScrollEnd();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -580,7 +581,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
     // focus
-    bool LayoutListForFocus(int32_t nextIndex, int32_t curIndex);
     bool IsLayout(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     int32_t GetNextMoveStepForMultiLanes(int32_t curIndex, FocusStep focuseStep, bool isVertical, int32_t& nextIndex);
     WeakPtr<FocusHub> GetNextFocusNodeInList(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
@@ -614,7 +614,6 @@ private:
     bool ScrollToLastFocusIndex(const KeyEvent& event);
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
-    void HandleFocusParentCheck(const RefPtr<FocusHub>& childFocusHub, const RefPtr<FocusHub>& focusHub);
     void FireFocus();
     bool CheckValidInList(int32_t index);
     void ProcessFocusEvent(bool indexChanged);
@@ -643,7 +642,6 @@ private:
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 
-    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;

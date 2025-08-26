@@ -193,6 +193,8 @@ void RosenRenderSurface::RegisterSurface() const
     CHECK_NULL_VOID(producerSurface_);
     const std::string usage = GetBufferUsage();
     producerSurface_->SetBufferName(usage);
+    const std::string bufferTypeLeak = GetBufferTypeLeak();
+    producerSurface_->SetBufferTypeLeak(bufferTypeLeak);
     auto* surfaceUtils = SurfaceUtils::GetInstance();
     CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);

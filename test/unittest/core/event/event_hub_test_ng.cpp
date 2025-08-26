@@ -112,13 +112,13 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->MarkModifyDone();
     EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Get EventHub's properties.
-     * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
+     * @tc.expected: These properties are null when GetEventHub functions have not been invoked.
      */
     EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
     EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
@@ -137,7 +137,7 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
 
 /**
  * @tc.name: EventHubPropertyTest002
- * @tc.desc: Create EventHub and invoke GetOrCreateEventHub functions.
+ * @tc.desc: Create EventHub and invoke GetEventHub functions.
  * @tc.type: FUNC
  */
 HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
@@ -147,11 +147,11 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
-     * @tc.steps: step2. Invoke GetOrCreateEventHub functions.
+     * @tc.steps: step2. Invoke GetEventHub functions.
      * @tc.expected: These eventHub properties are not null.
      */
     eventHub->GetOrCreateGestureEventHub();
@@ -802,7 +802,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest001, TestSize.Level1)
      * @tc.expected: flag is equal 1.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnDisappear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnDisappear(std::move(flagFunc));
     EXPECT_NE(eventHub->onJSFrameNodeDisappear_, nullptr);
     eventHub->ClearJSFrameNodeOnDisappear();
     EXPECT_EQ(eventHub->onJSFrameNodeDisappear_, nullptr);
@@ -835,7 +835,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest002, TestSize.Level1)
      * @tc.expected:onJSFrameNodeAppear_ is nullptr.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(flagFunc));
     EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
     eventHub->ClearJSFrameNodeOnAppear();
     EXPECT_EQ(eventHub->onJSFrameNodeAppear_, nullptr);
@@ -869,9 +869,17 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
      * @tc.expected: onJSFrameNodeAppear_ is not nullptr.
      */
     std::function<void()> flagFunc = []() { ++flag; };
-    eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
+    eventHub->SetFrameNodeCommonOnAppear(std::move(flagFunc));
     eventHub->FireOnAppear();
     EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
+
+    /**
+     * @tc.steps: step4. Call FireOnAppear with onAppear_  is and onJSFrameNodeAppear_ are both not nullptr.
+     * @tc.expected: onAppear_ is nullptr.
+     */
+    eventHub->SetOnAppear(std::move(flagFunc));
+    eventHub->FireOnAppear();
+    EXPECT_NE(eventHub->onAppear_, nullptr);
 }
 
 /**
@@ -964,7 +972,7 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest005, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest006, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     RectF tempOldRect;
     OffsetF tempOldOrigin;
@@ -1004,7 +1012,7 @@ HWTEST_F(EventHubTestNg, EventHubTest006, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
 
     eventHub->GetOrCreateGestureEventHub();
     eventHub->GetOrCreateInputEventHub();
@@ -1034,7 +1042,7 @@ HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest008, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     RectF tempOldRect;
     OffsetF tempOldOrigin;
@@ -1074,7 +1082,7 @@ HWTEST_F(EventHubTestNg, EventHubTest008, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubTest009, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->GetOrCreateGestureEventHub();
     eventHub->GetOrCreateInputEventHub();
     eventHub->GetOrCreateFocusHub();
@@ -1136,7 +1144,7 @@ HWTEST_F(EventHubTestNg, EventHubTest012, TestSize.Level1)
     OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
     RectF tempOldRect;
     RectF tempNewRect;
-    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
     eventHub->FireJSFrameNodeOnSizeChanged(tempOldRect, tempNewRect);
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
@@ -1177,7 +1185,7 @@ HWTEST_F(EventHubTestNg, EventHubTest015, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     bool flags = false;
     OnSizeChangedFunc onSizeChanged = [&flags](const RectF& oldRect, const RectF& Rect) { flags = !flags; };
-    eventHub->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+    eventHub->SetFrameNodeCommonOnSizeChangeCallback(std::move(onSizeChanged));
     eventHub->ClearJSFrameNodeOnSizeChange();
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }

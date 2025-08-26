@@ -473,7 +473,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetOrCreateEventHub<ListEventHub>();
+    auto listEventHub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
@@ -715,39 +715,14 @@ void ListPattern::SetLayoutAlgorithmParams(
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(JudgeCanOverScrollStart());
-    listLayoutAlgorithm->SetCanOverScrollEnd(JudgeCanOverScrollEnd());
+    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
+    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom(true));
     if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
-}
-
-bool ListPattern::JudgeCanOverScrollStart()
-{
-    auto source = GetScrollSource();
-    if (!CanOverScrollStart(source)) {
-        return false;
-    }
-    if (IsAtTop()) {
-        return true;
-    }
-    
-    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
-}
-
-bool ListPattern::JudgeCanOverScrollEnd()
-{
-    auto source = GetScrollSource();
-    if (!CanOverScrollEnd(source)) {
-        return false;
-    }
-    if (IsAtBottom(true)) {
-        return true;
-    }
-    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -3106,7 +3081,7 @@ void ListPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<ListEventHub>();
+    auto hub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -3128,7 +3103,7 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<ListEventHub>();
+    auto hub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
@@ -3417,15 +3392,18 @@ bool ListPattern::LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextInd
     return true;
 }
 
-bool ListPattern::LayoutListForFocus(int32_t nextIndex, int32_t curIndex)
+bool ListPattern::LayoutListForFocus(int32_t nextIndex, std::optional<int32_t> indexInGroup)
 {
-    if (!IsLayout(nextIndex, std::nullopt, ScrollAlign::AUTO)) {
+    if (!IsLayout(nextIndex, indexInGroup, ScrollAlign::AUTO)) {
         isLayoutListForFocus_ = true;
         targetIndex_ = nextIndex;
         if (nextIndex < startIndex_) {
             scrollAlign_ = ScrollAlign::START;
         } else if (nextIndex > endIndex_) {
             scrollAlign_ = ScrollAlign::END;
+        }
+        if (indexInGroup) {
+            targetIndexInGroup_ = indexInGroup.value();
         }
         auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
@@ -3491,7 +3469,7 @@ int32_t ListPattern::GetNextMoveStepForMultiLanes(
         auto it = itemPosition_.find(loopIndex);
         auto itCache = cachedItemPosition_.find(loopIndex);
         if (it == itemPosition_.end() && itCache == cachedItemPosition_.end()) {
-            LayoutListForFocus(loopIndex, curIndex);
+            LayoutListForFocus(loopIndex, std::nullopt);
             it = itemPosition_.find(loopIndex);
             itCache = cachedItemPosition_.find(loopIndex);
             if (it == itemPosition_.end() && itCache == cachedItemPosition_.end()) {
@@ -3539,7 +3517,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
         if (nextIndex == curIndex) {
             return nullptr;
         }
-        LayoutListForFocus(nextIndex, curIndex);
+        LayoutListForFocus(nextIndex, std::nullopt);
         auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step, curIndex);
         auto isDefault = GetFocusWrapMode() == FocusWrapMode::DEFAULT;
         if (nextFocusNode.Upgrade()) {

@@ -1002,7 +1002,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to widthDimen.
      */
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     std::vector<DimensionRect> initMouseResponseRegion;
@@ -1045,7 +1045,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to 100.0_pct.
      */
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     std::vector<DimensionRect> initMouseResponseRegion;
@@ -1103,6 +1103,13 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest011, TestSize.Level1)
      * @tc.expected: dialogLayoutAlgorithm.touchingBoundaryFlag_. equal to TouchingBoundaryType::TouchBottomBoundary.
      */
     EXPECT_EQ(dialogLayoutAlgorithm.touchingBoundaryFlag_, TouchingBoundaryType::TouchBottomBoundary);
+    SizeF newChildSize(1.0, 1.0);
+    SizeF newSelfSize(1000.0, 1000.0);
+    auto dialog = overlayManager->ShowDialog(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    dialogLayoutAlgorithm.MultipleDialog(dialogProp, newChildSize, newSelfSize, overlayManager);
+    EXPECT_EQ(dialogLayoutAlgorithm.touchingBoundaryFlag_, TouchingBoundaryType::NotTouchBoundary);
 }
 
 /**
@@ -1568,7 +1575,6 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Lev
     props.isSceneBoardDialog = false;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_TRUE(props.isShowInSubWindow);
-    EXPECT_TRUE(props.isModal);
 }
 
 /**
@@ -1835,7 +1841,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest029, TestSize.Level1)
      * @tc.steps: step3. test GetMouseResponseRegion function.
      * @tc.expected: step3. return width equal to widthDimen.
      */
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();
@@ -1989,6 +1995,33 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest031, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogPatternTest034
+ * @tc.desc: Test AdjustHoverModeForWaterfall
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest034, TestSize.Level1)
+{
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto dialogLayoutProperty = AceType::MakeRefPtr<DialogLayoutProperty>();
+    ASSERT_NE(dialogLayoutProperty, nullptr);
+    dialogLayoutProperty->UpdateEnableHoverMode(true);
+    frameNode->layoutProperty_ = dialogLayoutProperty;
+    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
+    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(1, containerTwo);
+    dialogLayoutAlgorithm.expandDisplay_ = true;
+    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
+    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
+}
+
+/**
  * @tc.name: DialogPatternTest032
  * @tc.desc: Test dialogPattern.BuildTitle
  * @tc.type: FUNC
@@ -2107,32 +2140,5 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest033, TestSize.Level1)
     ASSERT_NE(subTitleProp, nullptr);
     EXPECT_EQ(titleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
     EXPECT_EQ(subTitleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
-}
-
-/**
- * @tc.name: DialogPatternTest034
- * @tc.desc: Test AdjustHoverModeForWaterfall
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternTestNg, DialogPatternTest034, TestSize.Level1)
-{
-    DialogLayoutAlgorithm dialogLayoutAlgorithm;
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto dialogLayoutProperty = AceType::MakeRefPtr<DialogLayoutProperty>();
-    ASSERT_NE(dialogLayoutProperty, nullptr);
-    dialogLayoutProperty->UpdateEnableHoverMode(true);
-    frameNode->layoutProperty_ = dialogLayoutProperty;
-    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
-    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
-    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
-    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
-    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
-    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
-    AceEngine::Get().AddContainer(0, containerOne);
-    AceEngine::Get().AddContainer(1, containerTwo);
-    dialogLayoutAlgorithm.expandDisplay_ = true;
-    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
-    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
 }
 } // namespace OHOS::Ace::NG

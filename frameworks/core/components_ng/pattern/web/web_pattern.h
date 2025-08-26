@@ -678,6 +678,7 @@ public:
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool IsRtl();
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
         bool isAccessibilityFocus);
@@ -743,6 +744,14 @@ public:
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
+
+    std::string GetInspectorId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, "");
+        return host->GetInspectorId().value_or(std::to_string(host->GetId()));
+    }
+
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
@@ -852,6 +861,7 @@ public:
     RefPtr<WebAccessibilityEventReport> GetAccessibilityEventReport();
     void InitInputEventReportCallback();
     void SetTextEventAccessibilityEnable(bool enable);
+    bool IsAccessibilityUsedByEventReport();
 
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
@@ -866,7 +876,7 @@ public:
         isAILinkMenuShow_ = isAILinkMenuShow;
     }
 
-    void CreateSnapshotImageFrameNode(const std::string& snapshotPath);
+    void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode();
 
     void OnPip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
@@ -900,6 +910,7 @@ private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
+    friend class WebAccessibilityEventReport;
 
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
     napi_env CreateEnv();
@@ -1118,6 +1129,13 @@ private:
         float x = -1.0f;
         float y = -1.0f;
         int32_t id = -1;
+        float force = 0.0f;
+        float tiltX = 0.0f;
+        float tiltY = 0.0f;
+        float rollAngle = 0.0f;
+        int32_t width = 0;
+        int32_t height = 0;
+        SourceTool sourceTool = SourceTool::UNKNOWN;
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
@@ -1362,6 +1380,7 @@ private:
     std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
+    uint32_t windowId_ = 0;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isRenderModeInit_ = false;

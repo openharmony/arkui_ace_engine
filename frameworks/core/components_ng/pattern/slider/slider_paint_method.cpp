@@ -99,4 +99,43 @@ void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintPro
     }
     sliderContentModifier_->SetSelectedBorderRadius(selectedBorderRadius.ConvertToPx());
 }
+
+void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(sliderTipModifier_);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+
+    auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    sliderTipModifier_->UpdateThemeParams(theme);
+    sliderTipModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
+    sliderTipModifier_->SetTipColor(paintProperty->GetTipColorValue(theme->GetTipColor()));
+    sliderTipModifier_->SetTextFont(paintProperty->GetFontSizeValue(theme->GetTipFontSize()));
+    sliderTipModifier_->SetTextColor(paintProperty->GetTextColorValue(theme->GetTipTextColor()));
+    sliderTipModifier_->SetContent(paintProperty->GetCustomContent().value_or(paintProperty->GetContentValue("")));
+    sliderTipModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
+    auto blockSize = parameters_.blockSize;
+    if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
+        blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),
+            std::min(blockSize.Height(), parameters_.trackThickness));
+    }
+    sliderTipModifier_->SetBlockSize(blockSize);
+    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_, host);
+    sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+    sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
+    sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
+    sliderTipModifier_->SetSliderGlobalOffset(tipParameters_.sliderGlobalOffset_);
+    sliderTipModifier_->BuildParagraph();
+    sliderTipModifier_->UpdateBubbleSize();
+    if (sliderTipModifier_->UpdateOverlayRect(paintWrapper->GetGeometryNode()->GetFrameSize())) {
+        paintWrapper->FlushOverlayModifier();
+    }
+}
 } // namespace OHOS::Ace::NG

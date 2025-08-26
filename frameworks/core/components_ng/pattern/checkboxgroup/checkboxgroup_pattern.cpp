@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -134,7 +134,7 @@ void CheckBoxGroupPattern::MarkIsSelected(bool isSelected)
         return;
     }
     updateFlag_ = isSelected;
-    auto eventHub = GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
     std::vector<std::string> vec;
     CheckboxGroupResult groupResult(vec, int(isSelected));
     eventHub->UpdateChangeEvent(&groupResult);
@@ -203,7 +203,7 @@ void CheckBoxGroupPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -244,7 +244,6 @@ void CheckBoxGroupPattern::OnClick()
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
     updateFlag_ = true;
     UpdateState();
-    ReportChangeEvent(isSelected);
 }
 
 void CheckBoxGroupPattern::OnTouchDown()
@@ -317,7 +316,7 @@ void CheckBoxGroupPattern::UpdateState()
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateCheckBoxStyle();
     }
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto preGroup = GetPreGroup();
     if (!preGroup.has_value()) {
@@ -385,7 +384,7 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
         return;
     }
 
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     std::vector<std::string> vec;
     if (initSelected_) {
@@ -398,7 +397,7 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
             }
             auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
-            auto eventHub = node->GetOrCreateEventHub<CheckBoxEventHub>();
+            auto eventHub = node->GetEventHub<CheckBoxEventHub>();
             CHECK_NULL_VOID(eventHub);
             vec.push_back(eventHub->GetName());
         }
@@ -437,7 +436,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
         }
         auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
-        auto eventHub = node->GetOrCreateEventHub<CheckBoxEventHub>();
+        auto eventHub = node->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         if (select) {
             vec.push_back(eventHub->GetName());
@@ -452,7 +451,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
         }
     }
     CheckboxGroupResult groupResult(vec, int(status));
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     eventHub->UpdateChangeEvent(&groupResult);
 }
 
@@ -468,11 +467,11 @@ void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& fr
     CHECK_NULL_VOID(paintProperty);
     paintProperty->SetSelectStatus(
         select ? CheckBoxGroupPaintProperty::SelectStatus::ALL : CheckBoxGroupPaintProperty::SelectStatus::NONE);
-    auto checkBoxGroupEventHub = GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto checkBoxGroupEventHub = GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CheckboxGroupResult groupResult(vec, int(status));
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     eventHub->UpdateChangeEvent(&groupResult);
 }
 
@@ -753,7 +752,7 @@ bool CheckBoxGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void CheckBoxGroupPattern::DumpInfo()
 {
-    auto eventHub = GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
 
@@ -810,7 +809,7 @@ std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
     if (currentNavId_.has_value()) {
         return eventHub->GetGroupName() + currentNavId_.value();
@@ -836,7 +835,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStyle()
     CHECK_NULL_VOID(host);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    auto checkBoxGroupEventHub = GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto checkBoxGroupEventHub = GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
     auto group = checkBoxGroupEventHub->GetGroupName();
     auto list = groupManager->GetCheckboxList(group);
@@ -873,70 +872,5 @@ void CheckBoxGroupPattern::SetCheckBoxStyle(const RefPtr<CheckBoxPaintProperty>&
         paintProperty->UpdateCheckBoxSelectedStyle(checkBoxGroupStyle);
         checkboxNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-}
-
-std::optional<bool> CheckBoxGroupPattern::ParseSelectStatus(const std::string& command)
-{
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || json->IsNull()) {
-        return std::nullopt;
-    }
-
-    auto cmdType = json->GetString("cmd");
-    if (cmdType != "selectCheckBoxGroup") {
-        return std::nullopt;
-    }
-
-    if (!json->GetValue("selectStatus")->IsBool() || !json->Contains("selectStatus")) {
-        return std::nullopt;
-    }
-
-    return json->GetBool("selectStatus");
-}
-
-int32_t CheckBoxGroupPattern::OnInjectionEvent(const std::string& command)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, RET_FAILED);
-    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, RET_FAILED);
-    auto status = paintProperty->GetSelectStatus();
-    bool currentStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
-    auto selectStatus = ParseSelectStatus(command);
-    CHECK_EQUAL_RETURN(selectStatus, std::nullopt, RET_FAILED);
-    if (status == CheckBoxGroupPaintProperty::SelectStatus::NONE ||
-        status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
-        CHECK_EQUAL_RETURN(selectStatus.value(), currentStatus, RET_SUCCESS);
-    }
-    auto pattern = host->GetPattern<CheckBoxGroupPattern>();
-    CHECK_NULL_RETURN(pattern, RET_FAILED);
-    pattern->SetUpdateFlag(true);
-    auto eventHub = host->GetOrCreateEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_RETURN(eventHub, RET_FAILED);
-    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selectStatus.value());
-    paintProperty->UpdateCheckBoxGroupSelect(selectStatus.value());
-    pattern->UpdateState();
-    pattern->ReportChangeEvent(selectStatus.value());
-
-    return RET_SUCCESS;
-}
-
-void CheckBoxGroupPattern::ReportChangeEvent(bool selectStatus)
-{
-    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
-        return;
-    }
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("selectStatus", selectStatus);
-    params->Put("cmd", "selectCheckBoxGroup");
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("event", params);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto id = host->GetId();
-    json->Put("nodeId", id);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

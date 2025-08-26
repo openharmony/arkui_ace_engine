@@ -1129,7 +1129,6 @@ HWTEST_F(WebPatternAddTestNg, GetAccessibilityVisible_001, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebPattern webpattern;
     webpattern.delegate_ = nullptr;
-    ASSERT_EQ(webpattern.delegate_, nullptr);
     bool ret = webpattern.GetAccessibilityVisible(1);
     EXPECT_TRUE(ret);
 #endif

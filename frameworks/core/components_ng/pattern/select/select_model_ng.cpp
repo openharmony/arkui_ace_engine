@@ -39,7 +39,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
             CalcLength(theme->GetSelectDefaultHeight(pattern->GetControlSize()))));
     }
 }
-
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -1065,14 +1064,6 @@ void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::s
     pattern->SetItemSelected(index, value);
 }
 
-void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto hub = frameNode->GetOrCreateEventHub<SelectEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetSelectEvent(std::move(onSelect));
-}
-
 void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
@@ -1085,6 +1076,14 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurS
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuBackgroundBlurStyle(blurStyle);
+}
+
+void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto hub = frameNode->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectEvent(std::move(onSelect));
 }
 
 void SelectModelNG::SetLayoutDirection(TextDirection value)
@@ -1124,21 +1123,6 @@ void SelectModelNG::ResetBackgroundColor()
     ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, false);
 }
 
-void SelectModelNG::SetMenuOutline(const MenuParam& menuParam)
-{
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetMenuOutline(menuParam);
-}
-
-void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetMenuOutline(menuParam);
-}
-
 void SelectModelNG::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
@@ -1170,6 +1154,21 @@ void SelectModelNG::SetSelectedOptionTextModifier(
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionTextModifier(optionSelectedApply);
     ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionTextModifierSetByUser, true);
+}
+
+void SelectModelNG::SetMenuOutline(const MenuParam& menuParam)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
+}
+
+void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
 }
 
 void SelectModelNG::SetShowInSubWindow(bool isShowInSubWindow)

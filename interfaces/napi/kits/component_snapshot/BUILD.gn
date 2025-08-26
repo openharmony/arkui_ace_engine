@@ -31,6 +31,7 @@ template("napi_componentsnapshot_static") {
 
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     } else {
       external_deps += [ "napi:ace_napi" ]
     }

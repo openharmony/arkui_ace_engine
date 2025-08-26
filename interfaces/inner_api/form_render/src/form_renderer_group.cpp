@@ -15,9 +15,9 @@
 
 #include "form_renderer_group.h"
 
+#include "form_event_report.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
-#include "form_renderer_event_report.h"
 
 namespace OHOS {
 namespace Ace {
@@ -129,8 +129,8 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
     auto compId = formRequest.compId;
     OHOS::AAFwk::Want want = formRequest.want;
     AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
-    FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(formJsInfo.formId, formJsInfo.bundleName,
-        formJsInfo.formName);
+    int32_t errCode = ERR_OK;
+    AppExecFwk::AddFormFailedErrorType errType;
     if (formRenderer_ == nullptr || initState_ == FormRendererInitState::UNINITIALIZED) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_, eventHandler_);
         if (!formRenderer_) {
@@ -141,22 +141,35 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             compId.c_str(),
             std::to_string(formJsInfo.formId).c_str(),
             formJsInfo.formData.size());
-        formRenderer_->AddForm(want, formJsInfo);
+        errCode = formRenderer_->AddForm(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_CREATE_FAILED;
     } else if (initState_ == FormRendererInitState::PRE_INITIALIZED) {
         HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}zu",
             compId.c_str(),
             std::to_string(formJsInfo.formId).c_str(),
             formJsInfo.formData.size());
-        formRenderer_->RunFormPage(want, formJsInfo);
+        errCode = formRenderer_->RunFormPage(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_CREATE_FAILED;
     } else { // initState_ == FormRendererInitState::INITIALIZED
-        HILOG_INFO("AttachForm compId is %{public}s, formRequests size is %{public}s, \
-            formJsInfo.formData.size is %{public}zu",
+        HILOG_INFO("AttachForm compId: %{public}s, currentCompId_: %{public}s, formRequests size is %{public}s, "
+                   "formJsInfo.formData.size is %{public}zu",
             compId.c_str(),
+            currentCompId_.c_str(),
             std::to_string(formRequests_.size()).c_str(),
             formJsInfo.formData.size());
-        formRenderer_->AttachForm(want, formJsInfo);
+        errCode = formRenderer_->AttachForm(want, formJsInfo);
+        errType = AppExecFwk::AddFormFailedErrorType::SURFACE_NODE_REUSE_FAILED;
+    }
+
+    if (errCode != ERR_OK) {
+        AppExecFwk::FormEventReport::SendFormFailedEvent(AppExecFwk::FormEventName::FORM_NODE_ERROR,
+            formJsInfo.formId,
+            formJsInfo.bundleName,
+            formJsInfo.formName,
+            static_cast<int32_t>(errType),
+            errCode);
     }
 }
 

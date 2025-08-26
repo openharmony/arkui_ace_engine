@@ -682,6 +682,7 @@ void HandleFail(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t errorC
     } else {
         napi_reject_deferred(asyncCtx->env, asyncCtx->deferred, result[0]);
     }
+    asyncCtx->deferred = nullptr;
 }
 
 void HandleDragEnd(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg)
@@ -758,14 +759,6 @@ bool GetShadowInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Devic
     return true;
 }
 
-static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
-{
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetIsDragging(isDragging);
-}
-
 bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 {
     CHECK_NULL_RETURN(shadowInfo.pixelMap, false);
@@ -777,6 +770,14 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
         return false;
     }
     return true;
+}
+
+static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
+{
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetIsDragging(isDragging);
 }
 
 int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& udKey,
@@ -935,11 +936,13 @@ void LogDragInfoInner(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const Ms
     std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
-        "extraParams length %{public}d, pointerId %{public}d, summary %{public}s, eventId %{public}d",
+        "extraParams length %{public}d, pointerId %{public}d, toolType %{public}d, summary %{public}s, "
+        "eventId %{public}d",
         pixelMap->GetWidth(), pixelMap->GetHeight(),
         NG::DragDropFuncWrapper::GetAnonyString(dragData.udKey).c_str(), dragData.dragNum,
         static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->dragPointerEvent.pointerId,
-        summarys.c_str(), asyncCtx->dragPointerEvent.pointerEventId);
+        static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), summarys.c_str(),
+        asyncCtx->dragPointerEvent.pointerEventId);
 }
 
 bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
@@ -995,13 +998,13 @@ void HideDragPreviewWindow(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         TaskExecutor::TaskType::UI, "ArkUIHideDragPreviewWindow", PriorityType::VIP);
 }
 
-void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& ret)
+bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
-    CHECK_NULL_VOID(asyncCtx);
+    CHECK_NULL_RETURN(asyncCtx, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     NG::PreparedInfoForDrag data;
     NG::PreparedAsyncCtxForAnimate asyncCtxData;
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
@@ -1014,15 +1017,14 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
             continue;
         }
-        auto ret = CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, pixelMap);
-        if (!ret) {
-            return;
+        if (!CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, pixelMap)) {
+            return false;
         }
         shadowInfos.push_back(shadowInfo);
     }
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
-        return;
+        return false;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HideDragPreviewWindow(asyncCtx);
@@ -1033,17 +1035,19 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
     NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     LogDragInfoInner(asyncCtx, dragData.value());
 #ifdef CROSS_PLATFORM
-    ret = StartDrag(asyncCtx, dragData.value(), true);
+    auto ret = StartDrag(asyncCtx, dragData.value(), true);
 #else
-    ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
+    auto ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
-    if (ret == 0) {
-        asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
-        if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
-            asyncCtx->isSwitchedToSubWindow = true;
-        }
+    if (ret) {
+        return false;
     }
+    asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
+    if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
+        asyncCtx->isSwitchedToSubWindow = true;
+    }
+    return true;
 }
 
 void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
@@ -1074,9 +1078,8 @@ void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
-            int32_t ret = 0;
-            StartDragService(asyncCtx, ret);
-            if (ret != 0) {
+            bool ret = StartDragService(asyncCtx);
+            if (!ret) {
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "msdp start drag failed.");
@@ -1919,6 +1922,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     }
     if (CheckDragging(container)) {
         NapiThrow(env, "only one drag is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
+        napi_escape_handle(env, scope, result, &result);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
@@ -1964,7 +1968,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
 
     if (CheckDragging(container)) {
-        NapiThrow(env, "only one dragAction is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "only one drag is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }

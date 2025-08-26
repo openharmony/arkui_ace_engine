@@ -28,7 +28,7 @@ struct ToggleOptions {
     std::optional<ToggleType> type;
     std::optional<bool> isOn;
 };
-
+ 
 template<>
 ToggleOptions Convert(const Ark_ToggleOptions& src)
 {
@@ -37,14 +37,14 @@ ToggleOptions Convert(const Ark_ToggleOptions& src)
         .isOn = Converter::OptConvert<bool>(src.isOn)
     };
 }
-
+ 
 struct SwitchStyle {
     std::optional<Dimension> pointRadius;
     std::optional<Color> unselectedColor;
     std::optional<Color> pointColor;
     std::optional<Dimension> trackBorderRadius;
 };
-
+ 
 template<>
 SwitchStyle Convert(const Ark_SwitchStyle& src)
 {
@@ -79,7 +79,6 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
     if (convValue.isOn.has_value()) {
         ToggleModelNG::SetToggleState(frameNode, convValue.isOn.value());
     }
-    LOGE("ToggleModifier::SetToggleOptionsImpl. Set ToggleType is not supported!");
 }
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
@@ -104,8 +103,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ToggleModelNG::SetContentModifier(frameNode, convValue);
+    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // ToggleModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SelectedColorImpl(Ark_NativePointer node,

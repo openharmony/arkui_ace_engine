@@ -1975,10 +1975,10 @@ typedef struct Ark_Literal_Number_surfaceHeight_surfaceWidth Ark_Literal_Number_
 typedef struct Opt_Literal_Number_surfaceHeight_surfaceWidth Opt_Literal_Number_surfaceHeight_surfaceWidth;
 typedef struct Ark_Literal_Object_object__String_name_Array_String_methodList Ark_Literal_Object_object__String_name_Array_String_methodList;
 typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_HorizontalAlignOptions Ark_HorizontalAlignOptions;
-typedef struct Opt_HorizontalAlignOptions Opt_HorizontalAlignOptions;
-typedef struct Ark_VerticalAlignOptions Ark_VerticalAlignOptions;
-typedef struct Opt_VerticalAlignOptions Opt_VerticalAlignOptions;
+typedef struct Ark_HorizontalAlignParam Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam Opt_HorizontalAlignParam;
+typedef struct Ark_VerticalAlignParam Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam Opt_VerticalAlignParam;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType;
 typedef struct Ark_Literal_String_plainText Ark_Literal_String_plainText;
@@ -13026,22 +13026,22 @@ typedef struct Opt_Literal_Object_object__String_name_Array_String_methodList {
     Ark_Tag tag;
     Ark_Literal_Object_object__String_name_Array_String_methodList value;
 } Opt_Literal_Object_object__String_name_Array_String_methodList;
-typedef struct Ark_HorizontalAlignOptions {
+typedef struct Ark_HorizontalAlignParam {
     Ark_String anchor;
     Ark_HorizontalAlign align;
-} Ark_HorizontalAlignOptions;
-typedef struct Opt_HorizontalAlignOptions {
+} Ark_HorizontalAlignParam;
+typedef struct Opt_HorizontalAlignParam {
     Ark_Tag tag;
-    Ark_HorizontalAlignOptions value;
-} Opt_HorizontalAlignOptions;
-typedef struct Ark_VerticalAlignOptions {
+    Ark_HorizontalAlignParam value;
+} Opt_HorizontalAlignParam;
+typedef struct Ark_VerticalAlignParam {
     Ark_String anchor;
     Ark_VerticalAlign align;
-} Ark_VerticalAlignOptions;
-typedef struct Opt_VerticalAlignOptions {
+} Ark_VerticalAlignParam;
+typedef struct Opt_VerticalAlignParam {
     Ark_Tag tag;
-    Ark_VerticalAlignOptions value;
-} Opt_VerticalAlignOptions;
+    Ark_VerticalAlignParam value;
+} Opt_VerticalAlignParam;
 typedef struct Ark_Literal_String_baseUrl_data_encoding_historyUrl_mimeType {
     Ark_String data;
     Ark_String mimeType;
@@ -15870,12 +15870,12 @@ typedef struct Opt_AlertDialogButtonOptions {
     Ark_AlertDialogButtonOptions value;
 } Opt_AlertDialogButtonOptions;
 typedef struct Ark_AlignRuleOption {
-    Opt_HorizontalAlignOptions left;
-    Opt_HorizontalAlignOptions right;
-    Opt_HorizontalAlignOptions middle;
-    Opt_VerticalAlignOptions top;
-    Opt_VerticalAlignOptions bottom;
-    Opt_VerticalAlignOptions center;
+    Opt_HorizontalAlignParam left;
+    Opt_HorizontalAlignParam right;
+    Opt_HorizontalAlignParam middle;
+    Opt_VerticalAlignParam top;
+    Opt_VerticalAlignParam bottom;
+    Opt_VerticalAlignParam center;
     Opt_Bias bias;
 } Ark_AlignRuleOption;
 typedef struct Opt_AlignRuleOption {
@@ -26917,7 +26917,9 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
     const GENERATED_ArkUIFlexModifier* (*getFlexModifier)();
     const GENERATED_ArkUIFlowItemModifier* (*getFlowItemModifier)();
+#ifndef ARKUI_WEARABLE
     const GENERATED_ArkUIFolderStackModifier* (*getFolderStackModifier)();
+#endif
     const GENERATED_ArkUIFormComponentModifier* (*getFormComponentModifier)();
     const GENERATED_ArkUIFormLinkModifier* (*getFormLinkModifier)();
     const GENERATED_ArkUIGaugeModifier* (*getGaugeModifier)();

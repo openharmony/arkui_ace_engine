@@ -891,78 +891,6 @@ HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
 }
 
 /**
- * @tc.name: SafeAreaExpand001
- * @tc.desc: When set SafeAreaExpand, layout expands to safeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
-{
-    // "[480.00px x 800.00px]"
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetColumnsTemplate("1fr 1fr");
-    model.SetFooter(GetDefaultHeaderBuilder());
-    for (int i = 0; i < 40; ++i) {
-        CreateItemWithHeight(100.0f);
-    }
-    bool reachEnd = false;
-    model.SetOnReachEnd([&reachEnd]() { reachEnd = true; });
-    CreateDone();
-
-    EXPECT_EQ(layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->ToString(), "[480.00px x 800.00px]");
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
-    EXPECT_EQ(GetChildHeight(frameNode_, 18), 0.0f);
-
-    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(4)
-        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
-    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-
-    FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
-    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
-    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 18), 100.0f);
-    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 480, 800)));
-
-    ScrollToIndex(39, false, ScrollAlign::END);
-    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
-    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
-    EXPECT_EQ(reachEnd, false);
-
-    UpdateCurrentOffset(-50.0f);
-    FlushUITasks();
-    EXPECT_EQ(reachEnd, true);
-}
-
-/**
- * @tc.name: scrollPage001
- * @tc.desc: Test the currentOffset after scrollPage.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
-{
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateWaterFlowItems(30);
-    CreateDone();
-
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
-    pattern_->ScrollPage(false);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
-
-    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
-    pattern_->ScrollPage(false);
-    FlushUITasks();
-    // sw need estimate currentOffset.
-    EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
-}
-
-/**
  * @tc.name: OverScroll002
  * @tc.desc: only have footer, test GetOverScrollOffset.
  * @tc.type: FUNC
@@ -1014,6 +942,31 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: scrollPage001
+ * @tc.desc: Test the currentOffset after scrollPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
+    pattern_->ScrollPage(false);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
+    pattern_->ScrollPage(false);
+    FlushUITasks();
+    // sw need estimate currentOffset.
+    EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
+}
+
+/**
  * @tc.name: Delete006
  * @tc.desc: Delete all items, test footer position.
  * @tc.type: FUNC
@@ -1035,6 +988,53 @@ HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: SafeAreaExpand001
+ * @tc.desc: When set SafeAreaExpand, layout expands to safeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
+{
+    // "[480.00px x 800.00px]"
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    for (int i = 0; i < 40; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    bool reachEnd = false;
+    model.SetOnReachEnd([&reachEnd]() { reachEnd = true; });
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->ToString(), "[480.00px x 800.00px]");
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 0.0f);
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(4)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 100.0f);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 480, 800)));
+
+    ScrollToIndex(39, false, ScrollAlign::END);
+    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(reachEnd, false);
+
+    UpdateCurrentOffset(-50.0f);
+    FlushUITasks();
+    EXPECT_EQ(reachEnd, true);
 }
 
 /**

@@ -1435,6 +1435,17 @@ void JSRichEditor::SetUndoStyle(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetSupportStyledUndo(enable);
 }
 
+void JSRichEditor::SetScrollBarColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    std::optional<Color> scrollBarColor = std::nullopt;
+    if (Color color; JSContainerBase::ParseColorMetricsToColor(jsValue, color)) {
+        scrollBarColor = color;
+    }
+    RichEditorModel::GetInstance()->SetScrollBarColor(scrollBarColor);
+}
+
 void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsNumber()) {
@@ -1500,6 +1511,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
+    JSClass<JSRichEditor>::StaticMethod("scrollBarColor", &JSRichEditor::SetScrollBarColor);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1526,7 +1538,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         imageStyle.size = imageSize;
     }
     JSRef<JSVal> verticalAlign = imageAttribute->GetProperty("verticalAlign");
-    if (!verticalAlign->IsNull()) {
+    if (!verticalAlign->IsNull() && verticalAlign->IsNumber()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
         if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
             align = VerticalAlign::BOTTOM;
@@ -2615,7 +2627,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
-    } else if (!lineHeight->IsUndefined() &&
+    } else if (!lineHeight->IsUndefined() && lineHeight->IsString() &&
                !std::all_of(lineHeight->ToString().begin(), lineHeight->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2635,7 +2647,7 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         letters = theme->GetTextStyle().GetLetterSpacing();
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
-    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() &&
+    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() && letterSpacing->IsString() &&
                !std::all_of(letterSpacing->ToString().begin(), letterSpacing->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -2682,7 +2694,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
     auto decorationObject = JSObjectCast(styleObject->GetProperty("decoration"));
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
-        if (!type->IsNull() && !type->IsUndefined()) {
+        if (!type->IsNull() && !type->IsUndefined() && type->IsNumber()) {
             updateSpanStyle.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
@@ -2694,7 +2706,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
             updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
-        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
+        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined() && textDecorationStyle->IsNumber()) {
             updateSpanStyle.updateTextDecorationStyle =
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));

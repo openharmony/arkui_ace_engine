@@ -226,7 +226,7 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     nodeInfo->Put("hoverPoint", selfPoint.ToString().c_str());
     nodeInfo->Put("clip", renderContext->GetClipEdge().value_or(false));
 
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     nodeInfo->Put("enabled", eventHub->IsEnabled());
 
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -405,7 +405,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     // hitTarget true means self hit hover, and will not search brothers
     if (hitSelf && shouldSearchSelf
         && CheckHoverConsumeByAccessibility(node)
-        && CheckHoverConsumeByComponent(node, selfPoint)) {
+        && CheckHoverConsumeByComponent(node, selfPoint - rect.GetOffset())) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -526,7 +526,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
                 }
             }
         }
-        auto eventHub = node->GetOrCreateEventHub<EventHub>();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (!eventHub->IsEnabled()) {
             shouldSearchChildren = false;
             // Fall through to update `shouldSearchSelf`
@@ -610,7 +610,7 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
         info->Put("hasAction", accessibilityProperty->HasAction());
     }
 
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     info->Put("enabled", eventHub->IsEnabled());
     auto gestureEventHub = eventHub->GetGestureEventHub();
     if (gestureEventHub != nullptr) {
@@ -648,7 +648,7 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             }
         }
 
-        auto eventHub = node->GetOrCreateEventHub<EventHub>();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (!eventHub->IsEnabled()) {
             focusable = true;
             break;
@@ -1311,19 +1311,6 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
     accessibilityHoverPriority_ = hoverPriority;
 }
 
-void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
-{
-    if (static_cast<FocusDrawLevel>(drawLevel) == focusDrawLevel_) {
-        return;
-    }
-    focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
-}
-
-int32_t AccessibilityProperty::GetFocusDrawLevel()
-{
-    return static_cast<int32_t>(focusDrawLevel_);
-}
-
 void AccessibilityProperty::SetAccessibilityZIndex(const int32_t& accessibilityZIndex)
 {
     accessibilityZIndex_ = accessibilityZIndex;
@@ -1346,4 +1333,18 @@ void AccessibilityProperty::OnAccessibilityDetachFromMainTree()
         accessibilityManager->OnAccessbibilityDetachFromMainTree(frameNode);
     }
 }
+
+void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
+{
+    if (static_cast<FocusDrawLevel>(drawLevel) == focusDrawLevel_) {
+        return;
+    }
+    focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
+}
+
+int32_t AccessibilityProperty::GetFocusDrawLevel()
+{
+    return static_cast<int32_t>(focusDrawLevel_);
+}
+
 } // namespace OHOS::Ace::NG

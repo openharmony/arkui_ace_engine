@@ -351,18 +351,13 @@ public:
 
     void CleanHoverStatusForDragBegin();
 
+    void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
+
     void RegisterDragTouchEventListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
 
     void UnRegisterDragTouchEventListener(int32_t uniqueIdentify);
 
     void NotifyDragTouchEventListener(const TouchEvent& dragPointerEvent);
-
-    void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
-
-    bool GetPassThroughResult() const
-    {
-        return passThroughResult_;
-    }
 
     template<typename T>
     bool CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events);
@@ -379,24 +374,28 @@ public:
 
     void DelegateTouchEvent(const TouchEvent& point);
 
-    void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
-
     MouseFormat GetCurrentMouseStyle()
     {
         CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
         return mouseStyleManager_->GetCurrentMouseStyle();
     }
 
+    void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
+
     bool IsDragCancelPending() const
     {
         return isDragCancelPending_;
     }
-
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
         bool needAppend = false, const std::string& target = "");
 #endif
+
+    bool GetPassThroughResult()
+    {
+        return passThroughResult_;
+    }
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();

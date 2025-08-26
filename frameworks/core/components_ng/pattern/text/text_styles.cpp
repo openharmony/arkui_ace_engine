@@ -118,8 +118,6 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
     }
     if (fontStyle) {
-        // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
-        // depend on its value.
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
 
@@ -160,7 +158,6 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         
-        UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
         UPDATE_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
@@ -172,6 +169,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
         UPDATE_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, SetIsOnlyBetweenLines);
         UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
+        UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
     }
 }
 
@@ -189,9 +187,9 @@ std::string GetFontWeightInJson(const std::optional<FontWeight>& value)
 }
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value)
 {
-    std::vector<std::string> fontFamilyVector = value.value_or<std::vector<std::string>>({"HarmonyOS Sans"});
+    std::vector<std::string> fontFamilyVector = value.value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
     if (fontFamilyVector.empty()) {
-        fontFamilyVector = std::vector<std::string>({"HarmonyOS Sans"});
+        fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
     }
     std::string fontFamily = fontFamilyVector.at(0);
     for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {

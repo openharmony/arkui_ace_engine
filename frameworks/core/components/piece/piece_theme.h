@@ -20,7 +20,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 
@@ -42,7 +41,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->iconResource_ = themeConstants->GetResourceId(THEME_PIECE_ICON_SOURCE);
+            theme->iconResource_ = InternalResource::ResourceId::PIECE_DELETE_SVG;
             ParsePattern(themeConstants, theme);
             return theme;
         }

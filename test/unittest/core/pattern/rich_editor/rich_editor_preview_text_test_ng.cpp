@@ -298,6 +298,66 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FinishTextPreview003
+ * @tc.desc: test FinishTextPreview
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    PreviewRange previewRange;
+    previewRange.start = -1;
+    previewRange.end = -1;
+
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
+    richEditorPattern->FinishTextPreview();
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
+    ASSERT_NE(childFrameNode, nullptr);
+    auto childSpanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
+    ASSERT_NE(childSpanNode, nullptr);
+
+    do {
+        auto newHost1 = richEditorPattern->GetContentHost();
+        auto newHost2 = richEditorPattern->GetContentHost();
+        ASSERT_EQ(newHost1, newHost2);
+
+        newHost1->children_.emplace_back(childFrameNode);
+        newHost1->children_.emplace_back(childSpanNode);
+        ASSERT_EQ(newHost1, newHost2);
+    } while (0);
+
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
+    richEditorPattern->FinishTextPreview();
+    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewContent, u"");
+}
+
+/**
+ * @tc.name: FinishTextPreview004
+ * @tc.desc: test FinishTextPreview
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    richEditorPattern->FinishTextPreview();
+    ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
+
+    richEditorPattern->previewTextRecord_.previewContent = INIT_VALUE_1;
+    richEditorPattern->FinishTextPreview();
+    ASSERT_EQ(richEditorPattern->GetTextContentLength(), 6);
+}
+
+/**
  * @tc.name: GetPreviewTextInfo001
  * @tc.desc: test RichEditorPattern GetPreviewTextInfo
  * @tc.type: FUNC
@@ -354,6 +414,104 @@ HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText001, TestSize.Level1)
     previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
     previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
     EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
+}
+
+/**
+ * @tc.name: UpdatePreviewText002
+ * @tc.desc: test UpdatePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.startOffset = -99;
+    richEditorPattern->previewTextRecord_.endOffset = 99;
+
+    PreviewRange previewRange;
+
+    std::u16string previewTextValue;
+    previewRange.start = -2;
+    previewRange.end = -2;
+    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = 9;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewTextValue = u"abc";
+    previewRange.start = -2;
+    previewRange.end = -2;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = 9;
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    ASSERT_NE(res, false);
+}
+
+/**
+ * @tc.name: UpdatePreviewText003
+ * @tc.desc: test UpdatePreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewTextRecord_.startOffset = -99;
+    richEditorPattern->previewTextRecord_.endOffset = 99;
+
+    PreviewRange previewRange;
+
+    std::u16string previewTextValue;
+
+    previewRange.start = -2;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent = u"";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -2;
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    previewRange.start = -2;
+    previewRange.end = -1;
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
+
+    ASSERT_NE(res, true);
 }
 
 /**
@@ -483,46 +641,6 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextUnderlineWidth001, TestSize.
 }
 
 /**
- * @tc.name: FinishTextPreview003
- * @tc.desc: test FinishTextPreview
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
-    richEditorPattern->FinishTextPreview();
-
-    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
-    ASSERT_NE(childFrameNode, nullptr);
-    auto childSpanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
-    ASSERT_NE(childSpanNode, nullptr);
-
-    do {
-        auto newHost1 = richEditorPattern->GetContentHost();
-        auto newHost2 = richEditorPattern->GetContentHost();
-        ASSERT_EQ(newHost1, newHost2);
-
-        newHost1->children_.emplace_back(childFrameNode);
-        newHost1->children_.emplace_back(childSpanNode);
-        ASSERT_EQ(newHost1, newHost2);
-    } while (0);
-
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
-    richEditorPattern->FinishTextPreview();
-    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewContent, u"");
-}
-
-/**
  * @tc.name: GetPreviewTextRects001
  * @tc.desc: test GetPreviewTextRects
  * @tc.type: FUNC
@@ -590,124 +708,6 @@ HWTEST_F(RichEditorPreviewTextTestNg, ReplacePreviewText001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePreviewText002
- * @tc.desc: test UpdatePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewTextRecord_.startOffset = -99;
-    richEditorPattern->previewTextRecord_.endOffset = 99;
-
-    PreviewRange previewRange;
-
-    std::u16string previewTextValue;
-    previewRange.start = -2;
-    previewRange.end = -2;
-    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -2;
-    previewRange.end = 9;
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewTextValue = u"abc";
-    previewRange.start = -2;
-    previewRange.end = -2;
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -2;
-    previewRange.end = 9;
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    ASSERT_NE(res, false);
-}
-
-/**
- * @tc.name: UpdatePreviewText003
- * @tc.desc: test UpdatePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewTextRecord_.startOffset = -99;
-    richEditorPattern->previewTextRecord_.endOffset = 99;
-
-    PreviewRange previewRange;
-
-    std::u16string previewTextValue;
-
-    previewRange.start = -2;
-    previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -2;
-    previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -2;
-    previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    previewRange.start = -2;
-    previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
-
-    ASSERT_NE(res, true);
-}
-
-/**
- * @tc.name: FinishTextPreview004
- * @tc.desc: test FinishTextPreview
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    richEditorPattern->FinishTextPreview();
-    ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
-
-    richEditorPattern->previewTextRecord_.previewContent = INIT_VALUE_1;
-    richEditorPattern->FinishTextPreview();
-    ASSERT_EQ(richEditorPattern->GetTextContentLength(), 6);
-}
-
-/**
  * @tc.name: RichEditorPatternTestGetPreviewTextStyle001
  * @tc.desc: test GetPreviewTextStyle
  * @tc.type: FUNC
@@ -760,6 +760,23 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetResultObjectText001, TestSize.Level0)
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->SetResultObjectText(resultObject, spanItem);
     EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
+}
+
+/**
+ * @tc.name: MergeAdjacentSpansTest
+ * @tc.desc: test SetResultObjectText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, MergeAdjacentSpansTest, TestSize.Level0)
+{
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextSpanOptions options = { .value = u"abc", .style = TEXT_STYLE_1 };
+    pattern->AddTextSpan(options);
+    pattern->AddTextSpan(options);
+    ASSERT_EQ(pattern->spans_.size(), 2);
+    pattern->MergeAdjacentSpans(3);
+    EXPECT_EQ(pattern->spans_.size(), 1);
 }
 
 } // namespace OHOS::Ace::NG

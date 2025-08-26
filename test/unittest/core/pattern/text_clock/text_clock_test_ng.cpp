@@ -288,7 +288,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level0)
     auto stack = ViewStackProcessor::GetInstance();
     auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<TextClockEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -799,7 +799,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     auto stack = ViewStackProcessor::GetInstance();
     auto frameNode = stack->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<TextClockEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextClockEventHub>();
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**

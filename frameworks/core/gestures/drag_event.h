@@ -382,6 +382,16 @@ public:
         return requestId_;
     }
 
+    void SetDisplayId(int32_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    int32_t GetDisplayId() const
+    {
+        return displayId_;
+    }
+
     void SetDragSource(const std::string& bundleName)
     {
         bundleName_ = bundleName;
@@ -401,16 +411,6 @@ public:
     bool isRemoteDev() const
     {
         return isRemoteDev_;
-    }
-    
-    void SetDisplayId(int32_t displayId)
-    {
-        displayId_ = displayId;
-    }
-
-    int32_t GetDisplayId() const
-    {
-        return displayId_;
     }
 
     void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation)
@@ -481,9 +481,9 @@ private:
     std::function<void()> executeDropAnimation_;
     int32_t requestId_ = -1;
     bool isDragEndPending_ = false;
+    int32_t displayId_ = -1;
     std::string bundleName_;
     bool isRemoteDev_ { false };
-    int32_t displayId_ = -1;
     bool needDoInternalDropAnimation_ = false;
     RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
     bool useDataLoadParams_ { false };

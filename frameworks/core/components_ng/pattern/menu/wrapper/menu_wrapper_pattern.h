@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
@@ -471,8 +472,8 @@ public:
     }
 
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     MenuDumpInfo GetDumpInfo() const
     {
@@ -524,6 +525,22 @@ public:
         lastTouchItem_ = lastTouchItem;
     }
 
+    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
+    {
+        forceUpdateEmbeddedMenu_ = forceUpdate;
+    }
+
+    bool GetForceUpdateEmbeddedMenu() const
+    {
+        return forceUpdateEmbeddedMenu_;
+    }
+
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
+    bool HasStackSubMenu();
+
     int IncreaseEmbeddedSubMenuCount()
     {
         ++embeddedSubMenuExpandTotalCount_;
@@ -540,23 +557,8 @@ public:
         return embeddedSubMenuExpandTotalCount_;
     }
 
-    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
-    {
-        forceUpdateEmbeddedMenu_ = forceUpdate;
-    }
-
-    bool GetForceUpdateEmbeddedMenu() const
-    {
-        return forceUpdateEmbeddedMenu_;
-    }
-
-    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
-    RefPtr<FrameNode> GetShowedSubMenu();
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
-    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
-    bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
 
@@ -672,11 +674,11 @@ public:
         hasCustomOutlineColor_ = hasCustomOutlineColor;
     }
 
+    void CheckAndShowAnimation();
     bool GetMenuMaskEnable() const;
     Color GetMenuMaskColor() const;
     BlurStyle GetMenuMaskBlurStyle() const;
     void UpdateFilterMaskType();
-    void CheckAndShowAnimation();
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 
-#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -27,8 +26,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 struct SelectOverlayRightClickMenuLayoutHelper {
-    static void AdjustLayoutConstraints(
-        LayoutConstraintF& constrainMinWidth, const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
+    static void AdjustLayoutConstraints(LayoutConstraintF& constrainMinWidth,
+        const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
     {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
@@ -66,7 +65,8 @@ struct SelectOverlayRightClickMenuLayoutHelper {
             { CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT) });
     }
 
-    static void AdjustLayoutConstraintsAutoWidth(const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
+    static void AdjustLayoutConstraintsAutoWidth(LayoutConstraintF& constrainMinWidth,
+        const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
     {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
@@ -407,11 +407,11 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper, Layo
             continue;
         }
         auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
-        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraints(
-            resetLayoutConstraint, child, layoutWrapper);
         if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
             resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
         }
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraints(
+            resetLayoutConstraint, child, layoutWrapper);
         child->Measure(resetLayoutConstraint);
         auto childGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(childGeometryNode);
@@ -467,7 +467,8 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
         if (pattern->IsEmbedded() && (childConstraint.minSize.Width() > childConstraint.maxSize.Width())) {
             childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
         }
-        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraintsAutoWidth(child, layoutWrapper);
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraintsAutoWidth(
+            childConstraint, child, layoutWrapper);
         auto childLayoutProperty = child->GetLayoutProperty();
         if (childLayoutProperty) {
             auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();

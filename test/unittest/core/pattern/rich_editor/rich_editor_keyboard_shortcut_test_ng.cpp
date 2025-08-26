@@ -450,7 +450,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -482,7 +482,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -775,7 +775,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -819,7 +819,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -871,7 +871,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
     /**
      * @tc.steps: step3. change parameter and call function.
      */
@@ -879,13 +879,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     spanItem3->unicode = 0;
     richEditorPattern->spans_.emplace_back(spanItem3);
     ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
     /**
      * @tc.steps: step4. change parameter and call function.
      */
     firstInfo.SetSpanIndex(1);
     ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret.first, nullptr);
 }
 
 /**

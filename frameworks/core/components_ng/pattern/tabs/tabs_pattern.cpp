@@ -37,7 +37,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -94,14 +93,13 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     jsEvent(&eventInfo);
                 }, true);
         }
-        pattern->ReportComponentChangeEvent(currentIndex);
     });
 
     if (onChangeEvent_) {
         (*onChangeEvent_).swap(changeEvent);
     } else {
         onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>(changeEvent);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEventWithPreIndex(onChangeEvent_);
     }
@@ -197,7 +195,7 @@ void TabsPattern::SetAnimationStartEvent(AnimationStartEvent&& event)
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         animationStartEvent_ = std::make_shared<AnimationStartEvent>(std::move(event));
         eventHub->AddAnimationStartEvent(animationStartEvent_);
@@ -215,7 +213,7 @@ void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(event));
         eventHub->AddAnimationEndEvent(animationEndEvent_);
@@ -240,7 +238,7 @@ void TabsPattern::SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&&
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         selectedEvent_ = std::make_shared<ChangeEvent>(std::move(selectedEvent));
         eventHub->AddOnSlectedEvent(selectedEvent_);
@@ -360,7 +358,7 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
         (*onIndexChangeEvent_).swap(changeEvent);
     } else {
         onIndexChangeEvent_ = std::make_shared<ChangeEvent>(changeEvent);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->AddOnChangeEvent(onIndexChangeEvent_);
     }
@@ -787,73 +785,11 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
         CHECK_NULL_VOID(tabsNode);
         auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
         CHECK_NULL_VOID(swiperNode);
-        auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
         unselectedEvent_ = std::make_shared<ChangeEvent>(std::move(unselectedEvent));
         eventHub->AddOnUnselectedEvent(unselectedEvent_);
     }
-}
-
-void TabsPattern::ReportComponentChangeEvent(int32_t currentIndex)
-{
-    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto params = JsonUtil::Create();
-    CHECK_NULL_VOID(params);
-    params->Put("index", currentIndex);
-    auto json = JsonUtil::Create();
-    CHECK_NULL_VOID(json);
-    json->Put("cmd", "onTabBarClick");
-    json->Put("params", params);
-
-    auto result = JsonUtil::Create();
-    CHECK_NULL_VOID(result);
-    auto nodeId = host->GetId();
-    result->Put("nodeId", nodeId);
-    result->Put("event", json);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
-}
-
-bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
-{
-    auto json = JsonUtil::ParseJsonString(command);
-    if (!json || !json->IsValid() || !json->IsObject()) {
-        return false;
-    }
-
-    if (json->GetString("cmd") != "changeIndex") {
-        TAG_LOGW(AceLogTag::ACE_TABS, "Invalid command");
-        return false;
-    }
-
-    auto paramJson = json->GetValue("params");
-    if (!paramJson || !paramJson->IsObject()) {
-        return false;
-    }
-
-    targetIndex = paramJson->GetInt("index");
-    return true;
-}
-
-int32_t TabsPattern::OnInjectionEvent(const std::string& command)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, RET_FAILED);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_RETURN(tabsNode, RET_FAILED);
-    int32_t targetIndex = 0;
-    if (!GetTargetIndex(command, targetIndex)) {
-        return RET_FAILED;
-    }
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_RETURN(tabBarNode, RET_FAILED);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_RETURN(tabBarPattern, RET_FAILED);
-    tabBarPattern->ChangeIndex(targetIndex);
-    return RET_SUCCESS;
 }
 
 void TabsPattern::OnColorModeChange(uint32_t colorMode)

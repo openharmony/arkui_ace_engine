@@ -35,6 +35,41 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetWrapContentMaxHeight(LayoutConstraintF& childLayoutConstraint, float maxHeight)
+    {
+        if (heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT) {
+            childLayoutConstraint.maxSize.SetHeight(maxHeight);
+        }
+    }
+
+    void SetWrapContentMaxWidth(LayoutConstraintF& childLayoutConstraint, float maxWidth)
+    {
+        if (widthLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT) {
+            childLayoutConstraint.maxSize.SetWidth(maxWidth);
+        }
+    }
+
+    void SetFixAtIdealSizeMaxSize(LayoutConstraintF& childLayoutConstraint)
+    {
+        if (widthLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            childLayoutConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+        }
+        if (heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            childLayoutConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        }
+    }
+
+    bool IsWidthFixOrWrap() const
+    {
+        return widthLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+            widthLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    }
+
+    bool IsHeightFixOrWrap() const
+    {
+        return heightLayoutPolicy_ == LayoutCalPolicy::FIX_AT_IDEAL_SIZE ||
+            heightLayoutPolicy_ == LayoutCalPolicy::WRAP_CONTENT;
+    }
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
@@ -48,6 +83,8 @@ private:
     std::vector<OffsetF> LayoutOffsetList(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
         const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const;
+    LayoutCalPolicy widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    LayoutCalPolicy heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
 };
 
 } // namespace OHOS::Ace::NG

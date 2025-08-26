@@ -94,7 +94,6 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(algo);
         algo->StartCacheLayout();
 
-        ScopedLayout scope(host->GetContext());
         bool needMarkDirty = false;
         auto items = pattern->MovePreloadList();
         for (auto it = items.begin(); it != items.end(); ++it) {
@@ -104,6 +103,7 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 break;
             }
             ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
+            ScopedLayout scope(host->GetContext());
             needMarkDirty |= algo->PreloadItem(RawPtr(host), *it, deadline);
         }
         if (needMarkDirty) {
@@ -137,7 +137,7 @@ void WaterFlowLayoutBase::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
-    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
+    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize(true));
 }
 
 void WaterFlowLayoutBase::GetExpandArea(

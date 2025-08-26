@@ -296,7 +296,17 @@ void ResetScrollScrollBarWidth(ArkUINodeHandle node)
     ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
 
-ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetScrollEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -836,8 +846,8 @@ const ArkUIScrollModifier* GetScrollModifier()
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
-        .createWithResourceObjSnap = CreateWithResourceObjSnap,
         .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
+        .createWithResourceObjSnap = CreateWithResourceObjSnap,
         .setMaxZoomScale = SetMaxZoomScale,
         .resetMaxZoomScale = ResetMaxZoomScale,
         .getMaxZoomScale = GetMaxZoomScale,
@@ -886,7 +896,7 @@ const CJUIScrollModifier* GetCJUIScrollModifier()
         .getScrollScrollBarWidth = GetScrollScrollBarWidth,
         .setScrollScrollBarWidth = SetScrollScrollBarWidth,
         .resetScrollScrollBarWidth = ResetScrollScrollBarWidth,
-        .getScrollEdgeEffect = GetScrollEdgeEffect,
+        .getScrollEdgeEffect = GetScrollEdgeEffectCJ,
         .setScrollEdgeEffect = SetScrollEdgeEffect,
         .resetScrollEdgeEffect = ResetScrollEdgeEffect,
         .getEnableScrollInteraction = GetEnableScrollInteraction,

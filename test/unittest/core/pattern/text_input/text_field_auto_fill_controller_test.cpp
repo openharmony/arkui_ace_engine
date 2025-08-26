@@ -41,7 +41,7 @@ HWTEST_F(TextFieldAutoFillControllerTest, StartAutoFillAnimation001, TestSize.Le
     pattern_->autoFillController_ = autoFillController;
 
     /**
-     * @tc.steps: step2. Set the paragraph_ property to null so that the InitAutoFillParagraph method returns false
+     * @tc.steps: step2. Set the paragraph_ property to null so that the InitAutoFillParagraph method returns false.
      */
     pattern_->paragraph_ = nullptr;
 
@@ -586,7 +586,6 @@ HWTEST_F(TextFieldAutoFillControllerTest, ResetAutoFillAnimationStatus001, TestS
     });
     auto autoFillController = AceType::MakeRefPtr<AutoFillController>(AceType::WeakClaim(AceType::RawPtr(pattern_)));
     pattern_->autoFillController_ = autoFillController;
-
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
     layoutProperty->layoutDirection_ = TextDirection::RTL;

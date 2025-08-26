@@ -462,6 +462,11 @@ public:
         return canvasDebugMode_;
     }
 
+    static uint32_t GetSafeRefactorMode()
+    {
+        return safeRefactorMode_;
+    }
+
     static bool GetDebugEnabled();
 
     static bool DetectContainerMultiThread()
@@ -789,6 +794,7 @@ public:
     static bool IsSuperFoldDisplayDevice();
 
     static bool IsPageTransitionFreeze();
+    static bool IsForcibleLandscapeEnabled();
 
     static bool IsSoftPageTransition();
 
@@ -847,6 +853,7 @@ private:
     static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
+    static uint32_t safeRefactorMode_;
     static bool isRound_;
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;
@@ -925,6 +932,7 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;

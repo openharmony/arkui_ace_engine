@@ -104,31 +104,31 @@ void SetMark(ArkUINodeHandle node, uint32_t color, float sizeValue, int sizeUnit
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, width);
 }
 
-void SetCheckboxPadding(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, uint32_t length)
+void SetCheckboxPadding(ArkUINodeHandle node, const float* values, const int* units, uint32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (length != 4) { // 4 : data length
         return;
     }
-    CalcLength topDim;
-    CalcLength rightDim;
-    CalcLength bottomDim;
-    CalcLength leftDim;
-    topDim = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
-    rightDim = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
-    bottomDim = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
-    leftDim = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
+    topDimen = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
+    rightDimen = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
+    bottomDimen = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
+    leftDimen = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
     NG::PaddingProperty padding;
-    padding.top = std::optional<CalcLength>(topDim);
-    padding.bottom = std::optional<CalcLength>(bottomDim);
-    padding.left = std::optional<CalcLength>(leftDim);
-    padding.right = std::optional<CalcLength>(rightDim);
+    padding.top = std::optional<CalcLength>(topDimen);
+    padding.bottom = std::optional<CalcLength>(bottomDimen);
+    padding.left = std::optional<CalcLength>(leftDimen);
+    padding.right = std::optional<CalcLength>(rightDimen);
 
     CheckBoxModelNG::SetPadding(frameNode, padding);
 }
 
-void SetCheckboxResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units, uint32_t length)
+void SetCheckboxResponseRegion(ArkUINodeHandle node, const float* values, const int32_t* units, uint32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

@@ -231,18 +231,18 @@ bool ScrollBarProxy::NotifySnapScroll(
     float delta, float velocity, float barScrollableDistance, float dragDistance) const
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
-    CHECK_NULL_RETURN(scrollable, false);
-    if (scorllableNode_.startSnapAnimationCallback) {
-        auto controlDistance = GetScrollableNodeDistance(scrollable);
-        SnapAnimationOptions snapAnimationOptions = {
-            .snapDelta = CalcPatternOffset(controlDistance, barScrollableDistance, delta),
-            .animationVelocity = -velocity,
-            .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
-            .fromScrollBar = true,
-        };
-        return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
+    if (!scrollable || !CheckScrollable(scrollable) || !scorllableNode_.startSnapAnimationCallback) {
+        return false;
     }
-    return false;
+    auto controlDistance = GetScrollableNodeDistance(scrollable);
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = CalcPatternOffset(controlDistance, barScrollableDistance, delta),
+        .animationVelocity = -velocity,
+        .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
+        .snapDirection = SnapDirection::NONE,
+        .fromScrollBar = true,
+    };
+    return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
 
 bool ScrollBarProxy::NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const
@@ -260,6 +260,23 @@ float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollab
         return delta * controlDistance / barScrollableDistance;
     } else {
         return 0.0f;
+    }
+}
+
+void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const
+{
+    auto scrollable = weakScrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable)) {
+        return;
+    }
+
+    for (const auto& weakScrollBar : scrollBars_) {
+        auto scrollBar = weakScrollBar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+
+        scrollBar->SetScrollEnabled(scrollEnabled);
     }
 }
 
@@ -288,23 +305,6 @@ void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
         NotifyScrollStart();
         scorllableNode_.onPositionChanged(offset, source, true, false);
         NotifyScrollStop();
-    }
-}
-
-void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const
-{
-    auto scrollable = weakScrollableNode.Upgrade();
-    if (!scrollable || !CheckScrollable(scrollable)) {
-        return;
-    }
-
-    for (const auto& weakScrollBar : scrollBars_) {
-        auto scrollBar = weakScrollBar.Upgrade();
-        if (!scrollBar) {
-            continue;
-        }
-
-        scrollBar->SetScrollEnabled(scrollEnabled);
     }
 }
 

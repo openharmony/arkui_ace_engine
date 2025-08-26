@@ -140,7 +140,7 @@ void SelectPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
@@ -201,7 +201,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     menuPattern->HideMenu(HideMenuType::SELECT_SELECTED);
-    auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto hub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(hub);
 
     auto onSelect = hub->GetSelectEvent();
@@ -462,7 +462,7 @@ void SelectPattern::RegisterOnPress()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<SelectEventHub>();
+    auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     std::function<void(UIState)> callback = [weak = WeakClaim(this)](const UIState& state) {
         auto pattern = weak.Upgrade();
@@ -505,7 +505,7 @@ void SelectPattern::CreateSelectedCallback()
         pattern->SetSelected(index);
         pattern->UpdateText(index);
         pattern->isSelected_ = true;
-        auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+        auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
         auto selectChangeEvent = hub->GetSelectChangeEvent();
@@ -530,7 +530,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetOrCreateEventHub<MenuItemEventHub>();
+        auto hub = option->GetEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -2056,7 +2056,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             pattern->UpdateText(index);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            auto hub = host->GetOrCreateEventHub<SelectEventHub>();
+            auto hub = host->GetEventHub<SelectEventHub>();
             CHECK_NULL_VOID(hub);
             if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
                 return;

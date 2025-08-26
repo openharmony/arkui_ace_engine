@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
     void RosenRenderSurface::CreateNativeWindow() {}
     void RosenRenderSurface::AdjustNativeWindowSize(unsigned int, unsigned int) {}
     std::string RosenRenderSurface::GetUniqueId() const { return ""; }
+    uint64_t RosenRenderSurface::GetUniqueIdNum() const { return 0; }
     void RosenRenderSurface::UpdateSurfaceSizeInUserData(unsigned int, unsigned int) {}
     void RosenRenderSurface::SetExtSurfaceBounds(int, int, int, int) {}
     void RosenRenderSurface::SetExtSurfaceCallback(

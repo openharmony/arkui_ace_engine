@@ -31,6 +31,7 @@ const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI(void);
 const struct CJUINodeModifiers* GetCJUINodeModifiers(void);
 void SendArkUISyncEvent(struct ArkUINodeEvent* event);
 void SendArkUIAsyncCustomEvent(struct ArkUICustomNodeEvent* event);
+void SendArkUIAsyncCommonEvent(struct ArkUINodeEvent* event);
 #ifdef __cplusplus
 };
 #endif

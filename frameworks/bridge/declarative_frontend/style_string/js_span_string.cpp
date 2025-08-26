@@ -781,7 +781,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::VIP);
+                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
         }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
@@ -958,12 +958,12 @@ void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
     }
     auto engine = EngineHelper::GetCurrentEngineSafely();
     if (!engine) {
-        free(asyncContext);
+        delete(asyncContext);
         return;
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     if (!nativeEngine) {
-        free(asyncContext);
+        delete(asyncContext);
         return;
     }
     asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);

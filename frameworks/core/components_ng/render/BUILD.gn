@@ -50,6 +50,7 @@ build_component_ng("render_ng") {
     "polygon_painter.cpp",
     "rect_painter.cpp",
     "render_context.cpp",
+    "render_context_creator.cpp",
     "render_context_multi_thread.cpp",
     "render_property.cpp",
     "render_surface_creator.cpp",
@@ -72,13 +73,6 @@ build_component_ng("render_ng") {
     "adapter/rosen_transition_effect.cpp",
     "adapter/rosen_window.cpp",
   ]
-
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_render)) {
-    sources += vendor_configs.ace_engine_advanced_split_mode_render
-  } else {
-    sources += [ "render_context_creator.cpp" ]
-  }
 
   external_deps = []
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {

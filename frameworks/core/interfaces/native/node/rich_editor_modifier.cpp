@@ -687,6 +687,20 @@ void ResetRichEditorUndoStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
 }
+
+void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, Color(color));
+}
+ 
+void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
+}
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -757,7 +771,9 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
-        .resetRichEditorUndoStyle = ResetRichEditorUndoStyle
+        .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
+        .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
+        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

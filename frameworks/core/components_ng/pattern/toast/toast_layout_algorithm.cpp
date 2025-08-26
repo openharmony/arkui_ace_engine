@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr Dimension LIMIT_SPACING = 8.0_vp;
 } // namespace
-        
+
 void UpdateToastAlign(int32_t& alignment)
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();

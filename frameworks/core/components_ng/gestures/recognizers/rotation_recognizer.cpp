@@ -66,9 +66,8 @@ void RotationRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
-        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+        GetAttachedNode(), false, isPostEventResult_ || touchPoint.passThrough, touchPoint.postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
 }
@@ -365,9 +364,6 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
 {
     std::string callbackName = GetCallbackName(callback);
     ACE_SCOPED_TRACE("RotationRecognizer %s, resultAngle_: %f", callbackName.c_str(), resultAngle_);
-    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
-        localMatrix_.clear();
-    }
     if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
         return;
     }
@@ -379,6 +375,9 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         HandleGestureAccept(info, type, GestureListenerType::ROTATION);
         callbackFunction(info);
         HandleReports(info, type);
+    }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
     }
 }
 

@@ -45,7 +45,8 @@ const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NO
 bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     std::vector<ArkUITextShadowStruct>& textShadowArray,
     std::vector<RefPtr<ResourceObject>>& radiusResArr, std::vector<RefPtr<ResourceObject>>& colorResArr,
-    std::vector<RefPtr<ResourceObject>>& offsetXResArr, std::vector<RefPtr<ResourceObject>>& offsetYResArr)
+    std::vector<RefPtr<ResourceObject>>& offsetXResArr, std::vector<RefPtr<ResourceObject>>& offsetYResArr,
+    const std::optional<NodeInfo>& nodeInfo = std::nullopt)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, false);
@@ -67,7 +68,7 @@ bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(vm, typeArg, typeArray.get(), length,
         ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, colorArg, colorArray.get(), length,
-        ArkTSUtils::parseShadowColorWithResObj, colorResArr);
+        ArkTSUtils::parseShadowColorWithResObj, colorResArr, nodeInfo);
     bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, offsetXArg, offsetXArray.get(), length,
         ArkTSUtils::parseShadowOffsetWithResObj, offsetXResArr);
     bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, offsetYArg, offsetYArray.get(), length,
@@ -572,7 +573,9 @@ ArkUINativeModuleValue SpanBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     std::vector<RefPtr<ResourceObject>> colorResArr;
     std::vector<RefPtr<ResourceObject>> offsetXResArr;
     std::vector<RefPtr<ResourceObject>> offsetYResArr;
-    ParseTextShadow(runtimeCallInfo, length, textShadowArray, radiusResArr, colorResArr, offsetXResArr, offsetYResArr);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParseTextShadow(runtimeCallInfo, length, textShadowArray, radiusResArr, colorResArr, offsetXResArr, offsetYResArr,
+        nodeInfo);
     GetArkUINodeModifiers()->getSpanModifier()->setTextShadow(nativeNode, textShadowArray.data(), length,
         static_cast<void*>(&radiusResArr), static_cast<void*>(&colorResArr),
         static_cast<void*>(&offsetXResArr), static_cast<void*>(&offsetYResArr));

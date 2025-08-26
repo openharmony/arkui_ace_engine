@@ -43,6 +43,8 @@ constexpr char ENABLE_HOOK_KEY[] = "enableHook";
 constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
 constexpr char NAVIGATION_OPTIONS_ID_KEY[] = "id";
 constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
+constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholder";
+constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 }
 
 RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<PipelineContext>& context)
@@ -103,7 +105,7 @@ RefPtr<NavDestinationGroupNode> ForceSplitUtils::CreateNavDestinationProxyNode()
     auto pattern = proxyNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetName("__NavDestination_proxy__");
-    auto eventHub = proxyNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = proxyNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -213,7 +215,7 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
         .edges = SAFE_AREA_EDGE_ALL };
     property->UpdateSafeAreaExpandOpts(opts);
-    auto eventHub = phNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = phNode->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);
     }
@@ -232,8 +234,12 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
 
 bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parse forceSplit config: %{public}s", configJsonStr.c_str());
     auto configJson = JsonUtil::ParseJsonString(configJsonStr);
-    if (!configJson || !configJson->IsObject()) {
+    if (!configJson) {
+        return false;
+    }
+    if (!configJson->IsObject()) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, arkUIOptions is an invalid json object!");
         return false;
     }
@@ -264,6 +270,22 @@ bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, Fo
             return false;
         }
         config.navigationDepth = navOptions->GetInt(NAVIGATION_OPTIONS_DEPTH_KEY);
+    }
+    if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY)) {
+        auto disablePlaceholderJson = navOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY);
+        if (!disablePlaceholderJson->IsBool()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disablePlaceholder is not bool!");
+            return false;
+        }
+        config.navigationDisablePlaceholder = disablePlaceholderJson->GetBool();
+    }
+    if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) {
+        auto disableDividerJson = navOptions->GetValue(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY);
+        if (!disableDividerJson->IsBool()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.disableDivider is not bool!");
+            return false;
+        }
+        config.navigationDisableDivider = disableDividerJson->GetBool();
     }
     return true;
 }

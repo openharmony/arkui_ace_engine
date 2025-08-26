@@ -304,6 +304,36 @@ HWTEST_F(RichEditorCursorTestNg, CalcCursorOffsetByPosition003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+}
+
+/**
+ * @tc.name: CursorMoveUp002
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("hello1");
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF paintOffset = { -10, 1 };
+    richEditorPattern->richTextRect_.SetOffset(paintOffset);
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+}
+
+/**
  * @tc.name: CursorMoveUp003
  * @tc.desc: test RichEditorPattern CursorMoveUp
  * @tc.type: FUNC
@@ -413,36 +443,6 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveEnd001, TestSize.Level2)
 }
 
 /**
- * @tc.name: CursorMoveUp001
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-}
-
-/**
- * @tc.name: CursorMoveUp002
- * @tc.desc: test CursorMoveUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorCursorTestNg, CursorMoveUp002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("hello1");
-    richEditorPattern->caretPosition_ = 1;
-    OffsetF paintOffset = { -10, 1 };
-    richEditorPattern->richTextRect_.SetOffset(paintOffset);
-    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
-}
-
-/**
  * @tc.name: CursorMoveDown001
  * @tc.desc: test CursorMoveDown
  * @tc.type: FUNC
@@ -515,6 +515,52 @@ HWTEST_F(RichEditorCursorTestNg, AdjustWordCursorAndSelect001, TestSize.Level1)
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/*
+ * @tc.name: AdjustWordCursorAndSelect001
+ * @tc.desc: test double click
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, AdjustSelectorForEmoji001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ClearSpan();
+    TextSpanOptions options = { .value = u"123👨‍👩‍👦‍👦456", .style = TEXT_STYLE_1 };
+    richEditorPattern->AddTextSpan(options);
+    int32_t index = 0;
+    
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    info.start = 0;
+    info.end = 8;
+    EXPECT_CALL(*mockParagraph, GetWordBoundary(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t index, int32_t& start, int32_t& end) -> bool {
+            start = 3;
+            end = 5;
+            return true;
+        }));
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    
+    index = 4;
+    richEditorPattern->AdjustSelectorForEmoji(index, HandleType::FIRST, SelectorAdjustPolicy::INCLUDE);
+    EXPECT_EQ(index, 4);
+
+    index = 4;
+    richEditorPattern->AdjustSelectorForEmoji(index, HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE);
+    EXPECT_EQ(index, 4);
+
+    index = 4;
+    richEditorPattern->AdjustSelectorForEmoji(index, HandleType::SECOND, SelectorAdjustPolicy::INCLUDE);
+    EXPECT_EQ(index, 4);
+
+    index = 4;
+    richEditorPattern->AdjustSelectorForEmoji(index, HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE);
+    EXPECT_EQ(index, 4);
 }
 
 }

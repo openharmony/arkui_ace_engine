@@ -44,7 +44,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/slider/slider_tip_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -185,7 +184,7 @@ void SliderPattern::InitEvent()
     RegisterVisibleAreaChange();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -235,45 +234,6 @@ void SliderPattern::InitSliderEnds()
     sliderContentModifier_->RegisterStepPointCallback(std::move(callback));
 }
 
-void SliderPattern::CreateTipToMountRoot()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!sliderTipNode_) {
-        auto rootNode = host->GetCurrentPageRootNode();
-        CHECK_NULL_VOID(rootNode);
-        sliderTipNode_ = FrameNode::CreateFrameNode(V2::SLIDER_TIP_NODE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<SliderTipPattern>(host->GetPattern<SliderPattern>()));
-        CHECK_NULL_VOID(sliderTipNode_);
-        if (rootNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-            MountToNavigation(sliderTipNode_);
-        } else {
-            sliderTipNode_->MountToParent(rootNode);
-        }
-        sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-    return;
-}
-
-void SliderPattern::MountToNavigation(RefPtr<FrameNode>& tipNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto parentNode = host->GetParent();
-    while (parentNode) {
-        if (parentNode) {
-            if (parentNode->GetTag() == V2::NAVBAR_CONTENT_ETS_TAG ||
-                parentNode->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
-                tipNode->MountToParent(parentNode);
-                navigationNode_ = parentNode;
-                return;
-            }
-        }
-        parentNode = parentNode->GetParent();
-    }
-}
-
 void SliderPattern::OnColorConfigurationUpdate()
 {
     if (!SystemProperties::ConfigChangePerform()) {
@@ -303,52 +263,6 @@ void SliderPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
-void SliderPattern::CalculateOffset()
-{
-    if (sliderTipNode_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto xOffsetSlider = host->GetPositionToScreen().GetX();
-        auto yOffsetSlider = host->GetPositionToScreen().GetY();
-        auto xOffsetTip = sliderTipNode_->GetPositionToScreen().GetX();
-        auto yOffsetTip = sliderTipNode_->GetPositionToScreen().GetY();
-        if ((xOffsetSlider != xLastSlider_) || (yOffsetSlider != yLastSlider_)) {
-            xLastSlider_ = xOffsetSlider;
-            yLastSlider_ = yOffsetSlider;
-            auto renderContext = sliderTipNode_->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateOffset(
-                OffsetT<Dimension>(Dimension(xOffsetSlider - xOffsetTip), Dimension(yOffsetSlider - yOffsetTip)));
-        }
-
-        auto width = host->GetGeometryNode()->GetFrameSize().Width();
-        auto height = host->GetGeometryNode()->GetFrameSize().Height();
-        auto layoutProperty = sliderTipNode_->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        if (width > height) {
-            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(1)));
-        } else {
-            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1), CalcLength(height)));
-        }
-    }
-}
-
-void SliderPattern::RemoveTipFromRoot()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(sliderTipNode_);
-    auto rootNode = host->GetCurrentPageRootNode();
-    CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-        CHECK_NULL_VOID(navigationNode_);
-        navigationNode_->RemoveChild(sliderTipNode_);
-    } else {
-        rootNode->RemoveChild(sliderTipNode_);
-    }
-    sliderTipNode_ = nullptr;
-}
-
 void SliderPattern::PlayHapticFeedback(bool isShowSteps)
 {
     if (!isEnableHaptic_) {
@@ -366,7 +280,7 @@ void SliderPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1211,21 +1125,6 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateContent(content);
 }
 
-void SliderPattern::OnFinishEventTipSize()
-{
-    CHECK_NULL_VOID(sliderTipNode_);
-    auto layoutProperty = sliderTipNode_->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-    sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SliderPattern::RefreshTipNode()
-{
-    CHECK_NULL_VOID(sliderTipNode_);
-    sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 {
     eventSourceDevice_ = info.GetSourceDevice();
@@ -1480,15 +1379,9 @@ void SliderPattern::UpdateCircleCenterOffset()
 void SliderPattern::UpdateBubble()
 {
     CHECK_NULL_VOID(bubbleFlag_);
-    CalculateOffset();
-    CHECK_NULL_VOID(sliderTipNode_);
-    auto layoutProperty = sliderTipNode_->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
     // update the tip value according to the slider value, update the tip position according to current block position
     UpdateTipsValue();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    RefreshTipNode();
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1906,7 +1799,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider fire change %{public}d %{public}f", mode, value_);
-    auto sliderEventHub = GetOrCreateEventHub<SliderEventHub>();
+    auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
         NearEqual(value_, sliderEventHub->GetValue())) {
@@ -2511,7 +2404,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -2587,9 +2480,6 @@ void SliderPattern::RegisterVisibleAreaChange()
         CHECK_NULL_VOID(pattern);
         pattern->isVisibleArea_ = visible;
         visible ? pattern->StartAnimation() : pattern->StopAnimation();
-        if (visible) {
-            pattern->CreateTipToMountRoot();
-        }
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2720,7 +2610,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     auto value = sliderPaintProperty->GetValue().value_or(min);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     SliderConfiguration sliderConfiguration(value, min, max, step, enabled);
@@ -2729,7 +2619,6 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
 {
-    RemoveTipFromRoot();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -2741,7 +2630,6 @@ void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach OK");
 }
 

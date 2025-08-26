@@ -113,9 +113,9 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsClickPreventDefault));
+    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetPropertyObject("getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
@@ -166,9 +166,9 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetPropertyObject("getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));

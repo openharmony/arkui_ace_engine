@@ -335,7 +335,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.steps: step2. Get eventHub and set onDragStart.
      * @tc.expected: eventHub is not nullptr.
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->AttachHost(frameNode);
     auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {

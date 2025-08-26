@@ -465,6 +465,91 @@ HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetNearScale002
+ * @tc.desc: Test GetNearScale when the height of the item is large
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetNearScale002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with a large height of one of the items in the list.
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(1);
+    CreateListItemsWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(1000.f)));
+    CreateListItems(1);
+    CreateDone();
+    auto maxScale = 1.08f;
+    auto minScale = 0.406643271f;
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: The distance between the item and the middle point of the list does not reach the threshold.
+     * Therefore, the scale is minimum.
+     */
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 250.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1250.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step3. Scroll to 50.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(50);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 50.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1050.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step4. Scroll to 100.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 1000.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step5. Scroll to 400.
+     * @tc.expected: The distance is 0. Therefore, the scale reaches the maximum value.
+     */
+    ScrollTo(400);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -300.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 700.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step6. Scroll to 700.
+     * @tc.expected: The distance reach the threshold. Therefore, the scale changed.
+     */
+    ScrollTo(700);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -600.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 400.0f);
+    EXPECT_TRUE(GreatNotEqual(pattern_->itemPosition_[1].scale, minScale));
+    EXPECT_TRUE(LessNotEqual(pattern_->itemPosition_[1].scale, maxScale));
+
+    /**
+     * @tc.steps: step7. Scroll to 750.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale reaches the minimum value.
+     */
+    ScrollTo(750);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -650.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 350.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+
+    /**
+     * @tc.steps: step8. Scroll to 800.
+     * @tc.expected: The distance does not reach the threshold. Therefore, the scale remains unchanged.
+     */
+    ScrollTo(800);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -700.0f);
+    EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300.0f);
+    EXPECT_TRUE(NearEqual(pattern_->itemPosition_[1].scale, minScale));
+}
+
+/**
  * @tc.name: UpdatePosMap001
  * @tc.desc: Test class ArcListPositionMap interface UpdatePosMap
  * @tc.type: FUNC
@@ -974,6 +1059,65 @@ HWTEST_F(ArcListLayoutTestNg, LayoutHeader003, TestSize.Level1)
     algorithm->expandSafeArea_ = true;
     algorithm->LayoutHeader(layoutWrapper, algorithm->paddingOffset_, 5.0);
     EXPECT_EQ(algorithm->headerIndex_, 0);
+}
+
+/**
+ * @tc.name: LayoutHeader004
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader when the height of first item changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list with header.
+     */
+    ListModelNG model = CreateList();
+    auto headerSize = 50.0f;
+    auto column = CreateColumn([headerSize](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(headerSize));
+        ViewAbstract::SetHeight(CalcLength(headerSize));
+    });
+    model.SetHeader(column);
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Flush ui task.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The distance between the header and the first item
+     * is greater than 0, that is, the value of headerOffset_ is greater than 0.
+     */
+    FlushUITasks(frameNode_);
+    auto headerDist = 40.0f;
+    auto headerOffset = (LIST_HEIGHT - ITEM_HEIGHT * 1.08f) / 2.0f - headerDist - headerSize;
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT);
+    EXPECT_EQ(pattern_->oldHeaderSize_, headerSize);
+
+    /**
+     * @tc.steps: step3. Scroll list.
+     * @tc.expected: The value of headerOffset_ unchanged.
+     */
+    ScrollTo(100);
+    EXPECT_EQ(pattern_->headerOffset_, headerOffset);
+
+    /**
+     * @tc.steps: step4. Decrease the height of the first item.
+     * @tc.expected: The value of headerOffset_ becomes larger.
+     */
+    auto firstItem = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(firstItem), CalcLength(ITEM_HEIGHT / 2.0f));
+    FlushUITasks(frameNode_);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
+    EXPECT_EQ(pattern_->oldFirstItemSize_, ITEM_HEIGHT / 2.0f);
+
+    /**
+     * @tc.steps: step5. Scroll list.
+     * @tc.expected: 1. The start position of the header is 40.0f. 2. The value of headerOffset_ unchanged.
+     */
+    ScrollTo(-200);
+    EXPECT_EQ(pattern_->startHeaderPos_, headerDist);
+    EXPECT_GT(pattern_->headerOffset_, headerOffset);
 }
 
 /**

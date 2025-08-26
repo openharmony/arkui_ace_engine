@@ -376,7 +376,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, Te
     bool ancestorGroupFlag = false;
     node->isAccessibilityVirtualNode_ = true;
     
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     eventHub->enabled_ = false;
 
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();

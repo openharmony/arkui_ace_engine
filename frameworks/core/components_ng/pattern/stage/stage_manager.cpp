@@ -39,7 +39,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto eventHub = page->GetOrCreateEventHub<EventHub>();
+    auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
@@ -461,7 +461,8 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     if (children.empty()) {
         return false;
     }
-    const auto& lastPage = children.back();
+    // srcPageNode_ is last page in pageRouterStack.
+    const auto& lastPage = srcPageNode_.Upgrade();
     if (lastPage == node) {
         return true;
     }
@@ -809,5 +810,4 @@ void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& hom
     ignoreOrientation_ = ignoreOrientation;
     OnForceSplitConfigUpdate();
 }
-
 } // namespace OHOS::Ace::NG

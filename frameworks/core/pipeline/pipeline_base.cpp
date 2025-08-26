@@ -216,9 +216,8 @@ double PipelineBase::CalcPageWidth(double rootWidth) const
     if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
         return rootWidth;
     }
-    // Divider Width equal to 1.0_vp
-    constexpr double HALF = 2.0;
-    return (rootWidth - Vp2PxInner(1.0)) / HALF;
+
+    return rootWidth / 2.0;
 }
 
 double PipelineBase::GetPageWidth() const
@@ -846,6 +845,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 #endif
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance, forceChange);
@@ -872,6 +872,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
         }
     }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, false)) {
+        OnRawKeyboardChangedCallback();
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);

@@ -844,6 +844,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
     }
+    if (layoutProperty_->GetPixelRound() != 0) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("PixelRound flag: ").append(std::to_string(layoutProperty_->GetPixelRound())));
+    }
     if (!propInspectorId_->empty()) {
         DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     }
@@ -861,8 +865,11 @@ void FrameNode::DumpCommonInfo()
     }
     if (tag_ == V2::ROOT_ETS_TAG) {
         auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
+        if (pipeline) {
+            DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
+            DumpLog::GetInstance().AddDesc(std::string("PixelRoundMode: ")
+                    .append(std::to_string(static_cast<int32_t>(pipeline->GetPixelRoundMode()))));
+        }
     }
     auto layoutPolicy = layoutProperty_->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
@@ -1799,14 +1806,14 @@ void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& cal
     eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
 }
 
-void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
+void FrameNode::SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 {
     if (!lastFrameNodeRect_) {
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
     CHECK_NULL_VOID(eventHub_);
-    eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+    eventHub_->SetFrameNodeCommonOnSizeChangeCallback(std::move(callback));
 }
 
 RectF FrameNode::GetRectWithRender()
@@ -5011,6 +5018,8 @@ void FrameNode::Layout()
 
         if (overlayNode_) {
             LayoutOverlay();
+        } else if (renderContext_) {
+            renderContext_->UpdateOverlayText();
         }
         time = GetSysTimestamp() - time;
         AddNodeFlexLayouts();
@@ -5573,14 +5582,19 @@ void FrameNode::LayoutOverlay()
     auto align = Alignment::TOP_LEFT;
     Dimension offsetX, offsetY;
     auto childLayoutProperty = overlayNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
     childLayoutProperty->GetOverlayOffset(offsetX, offsetY);
+    auto direction = childLayoutProperty->GetNonAutoLayoutDirection();
+    if (direction == TextDirection::RTL) {
+        offsetX = -offsetX;
+    }
     auto offset = OffsetF(offsetX.ConvertToPx(), offsetY.ConvertToPx());
     if (childLayoutProperty->GetPositionProperty()) {
         align = childLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
 
     auto childSize = overlayNode_->GetGeometryNode()->GetMarginFrameSize();
-    auto translate = Alignment::GetAlignPosition(size, childSize, align) + offset;
+    auto translate = Alignment::GetAlignPositionWithDirection(size, childSize, align, direction) + offset;
     overlayNode_->GetGeometryNode()->SetMarginFrameOffset(translate);
     overlayNode_->Layout();
 }

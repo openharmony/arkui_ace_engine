@@ -88,7 +88,7 @@ void PreviewUIExtensionAdapter::SetOnRemoteReady(const RefPtr<FrameNode>& frameN
     std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRemoteReadyCallback(std::move(onRemoteReady));
     return;
@@ -98,7 +98,7 @@ void PreviewUIExtensionAdapter::SetOnTerminated(const RefPtr<FrameNode>& frameNo
     std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTerminatedCallback(std::move(onTerminated));
 }
@@ -107,7 +107,7 @@ void PreviewUIExtensionAdapter::SetOnReceive(const RefPtr<FrameNode>& frameNode,
     std::function<void(const AAFwk::WantParams&)>&& onReceive)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<UIExtensionHub>();
+    auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReceiveCallback(std::move(onReceive));
 }

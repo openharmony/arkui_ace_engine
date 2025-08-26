@@ -775,6 +775,11 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
     rosenRenderContext->InitContext(false, contextParamValue8);
     EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
     rosenRenderContext->rsNode_ = nullptr;
+    contextParam.type = RenderContext::ContextType::COMPOSITE_COMPONENT;
+    std::optional<RenderContext::ContextParam> contextParamValue10 = std::make_optional(contextParam);
+    rosenRenderContext->InitContext(false, contextParamValue10);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    rosenRenderContext->rsNode_ = nullptr;
     contextParam.type = RenderContext::ContextType::EXTERNAL;
     std::optional<RenderContext::ContextParam> contextParamValue9 = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue9);
@@ -1088,6 +1093,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest043, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
     const Color value = Color::RED;
     ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
     OHOS::Rosen::RSColor rsColor;

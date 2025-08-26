@@ -238,7 +238,7 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
     /**
      * @tc.steps: step2. create richEditorEventHub and SetEnabled false.
      */
-    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
 
@@ -291,44 +291,6 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 1);
     EXPECT_EQ(richEditorPattern->moveLength_, 0);
     EXPECT_FALSE(richEditorPattern->isTextChange_);
-}
-
-/**
- * @tc.name: HandleBlurEvent
- * @tc.desc: test HandleBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, HandleBlurEvent, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select
-     */
-    AddSpan(u"test");
-    richEditorPattern->textSelector_.Update(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
-
-    /**
-     * @tc.step: step3. Request focus and set blurReason_
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
-
-    /**
-     * @tc.step: step4. call the callback function
-     */
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
 /**

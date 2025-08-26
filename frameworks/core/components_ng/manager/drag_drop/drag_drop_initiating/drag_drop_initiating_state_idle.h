@@ -53,8 +53,8 @@ private:
     void StartCreateSnapshotTask(int32_t fingerId);
     void StartPreDragDetectingStartTask();
     void StartGatherTask();
-    void StartPreDragStatusCallback(const TouchEvent& touchEvent);
     void StartCreateTextThumbnailPixelMap();
+    void StartPreDragStatusCallback(const TouchEvent& touchEvent);
     void HideGatherNode();
 };
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,50 @@ struct MockClickRecognizerCase {
     RefereeState expectedRefereeState;
     std::vector<TouchEvent> inputTouchEvents;
 };
+
+struct ClickRecognizerConstructorTestCase {
+    int32_t count_;
+    int32_t finger_;
+    double distanceThreshold_;
+    ClickRecognizerConstructorTestCase(
+        int32_t count, int32_t finger, double distanceThreshold)
+        : count_(count), finger_(finger), distanceThreshold_(distanceThreshold) {}
+};
+
+const std::vector<ClickRecognizerConstructorTestCase> CLICK_RECOGNIZER_FINGER_TEST_CASES = {
+    ClickRecognizerConstructorTestCase(COUNT, 0, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 1, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 100, 0),
+    ClickRecognizerConstructorTestCase(COUNT, 0, 10),
+    ClickRecognizerConstructorTestCase(COUNT, 1, 10),
+    ClickRecognizerConstructorTestCase(COUNT, 100, 10),
+};
+
+struct ClickRecognizerCheckReconcileFromPropertiesTestCase {
+    ClickRecognizerConstructorTestCase originRecognizer_;
+    ClickRecognizerConstructorTestCase currentRecognizer_;
+    bool expectReconcileFrom_;
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(ClickRecognizerConstructorTestCase originRecognizer,
+        ClickRecognizerConstructorTestCase currentRecognizer, bool expectReconcileFrom)
+        : originRecognizer_(originRecognizer), currentRecognizer_(currentRecognizer),
+        expectReconcileFrom_(expectReconcileFrom) {}
+};
+
+const std::vector<ClickRecognizerCheckReconcileFromPropertiesTestCase> CLICK_RECOGNIZER_RECONCILEFROM_TEST_CASES = {
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1), ClickRecognizerConstructorTestCase(COUNT, 1, 1), false),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 0), ClickRecognizerConstructorTestCase(COUNT, 1, 1), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()),
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, 1),
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()), true),
+    ClickRecognizerCheckReconcileFromPropertiesTestCase(
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()),
+        ClickRecognizerConstructorTestCase(COUNT, 1, std::numeric_limits<double>::infinity()), false),
+};
 } // namespace
 
 class ClickRecognizerTestNg : public GesturesCommonTestNg {
@@ -2056,6 +2100,50 @@ HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest002, TestSize.Lev
     clickRecognizer->targetComponent_ = targetComponent;
     targetComponent->SetOnGestureRecognizerJudgeBegin(func);
     clickRecognizer->TriggerGestureJudgeCallback();
+}
+
+/**
+ * @tc.name: ClickRecognizerDistanceThresholdTest001
+ * @tc.desc: Test ClickRecognizer construct with dimension distanceThreshold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerDistanceThresholdTest001, TestSize.Level1)
+{
+    for (const auto &testCase : CLICK_RECOGNIZER_FINGER_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create ClickRecognizer.
+         */
+        RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(testCase.finger_, COUNT);
+        ASSERT_NE(clickRecognizer, nullptr);
+        EXPECT_EQ(clickRecognizer->fingers_, 1);
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+        RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+        EXPECT_TRUE(clickRecognizer->CheckReconcileFromProperties(exclusiveRecognizer));
+    }
+}
+
+/**
+ * @tc.name: ClickRecognizerDistanceThresholdTest002
+ * @tc.desc: Test ClickRecognizer CheckReconcileFromProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerDistanceThresholdTest002, TestSize.Level1)
+{
+    for (const auto &testCase : CLICK_RECOGNIZER_RECONCILEFROM_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create ClickRecognizer.
+         */
+        RefPtr<ClickRecognizer> originClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            testCase.originRecognizer_.finger_, testCase.originRecognizer_.count_,
+            testCase.originRecognizer_.distanceThreshold_);
+        ASSERT_NE(originClickRecognizer, nullptr);
+        RefPtr<ClickRecognizer> currentClickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(
+            testCase.currentRecognizer_.finger_, testCase.currentRecognizer_.count_,
+            testCase.currentRecognizer_.distanceThreshold_);
+        ASSERT_NE(currentClickRecognizer, nullptr);
+        EXPECT_EQ(originClickRecognizer->CheckReconcileFromProperties(currentClickRecognizer),
+            testCase.expectReconcileFrom_);
+    }
 }
 
 /**

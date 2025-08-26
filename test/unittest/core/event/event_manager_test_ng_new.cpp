@@ -1418,10 +1418,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest074, TestSize.Level1)
     frameNodeAlt->SetActive(true);
     frameNodeCtrlShift->SetActive(true);
 
-    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetOrCreateEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetOrCreateEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
@@ -1451,7 +1451,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest075, TestSize.Level2)
     EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
 
     auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
-    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
     frameNodeCtrl->SetActive(true);
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
@@ -2114,12 +2114,12 @@ HWTEST_F(EventManagerTestNg, DispatchTouchCancelToRecognizer_ItemsEmpty, TestSiz
     auto& touchTestResult = eventManager->touchTestResults_;
     RefPtr<TouchEventActuator> target = AceType::MakeRefPtr<TouchEventActuator>();
     using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
- 
+
     TouchTestResult resultList;
     resultList.push_back(target);
     touchTestResult[1] = resultList;
     TouchRecognizerTarget items;
- 
+
     eventManager->DispatchTouchCancelToRecognizer(AceType::RawPtr(target), items);
     EXPECT_EQ(touchTestResult.size(), 1);
     EXPECT_EQ(touchTestResult.count(1), 1);

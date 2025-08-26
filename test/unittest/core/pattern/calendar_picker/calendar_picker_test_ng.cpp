@@ -2255,7 +2255,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level0)
     ASSERT_NE(dialogPattern, nullptr);
     auto calendarNode = dialogPattern->GetCalendarFrameNode();
     ASSERT_NE(calendarNode, nullptr);
-    auto eventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = calendarNode->GetEventHub<CalendarEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     std::string info = " ";
@@ -2462,7 +2462,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level0)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
-    auto calendarpickerEventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
+    auto calendarpickerEventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
     ASSERT_NE(calendarpickerEventHub, nullptr);
     std::string info = " ";
     calendarpickerEventHub->UpdateInputChangeEvent(info);

@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
@@ -445,7 +444,7 @@ Dimension ToVp(float value)
 
 OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
 {
-    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, delta);
     const auto& onScroll = eventHub->GetOnWillScrollEvent();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollWillScroll();
@@ -473,7 +472,7 @@ OffsetF FreeScrollController::FireOnWillScroll(const OffsetF& delta, ScrollState
 
 void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState state) const
 {
-    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScroll = eventHub->GetOnDidScrollEvent();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollDidScroll();
@@ -487,7 +486,7 @@ void FreeScrollController::FireOnDidScroll(const OffsetF& delta, ScrollState sta
 
 void FreeScrollController::FireOnScrollStart() const
 {
-    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollStart = eventHub->GetOnScrollStart();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStart();
@@ -505,7 +504,7 @@ void FreeScrollController::FireOnScrollStart() const
 
 void FreeScrollController::FireOnScrollEnd() const
 {
-    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollStop = eventHub->GetOnScrollStop();
     const auto& frameCb = eventHub->GetJSFrameNodeOnScrollStop();
@@ -523,7 +522,7 @@ void FreeScrollController::FireOnScrollEnd() const
 
 void FreeScrollController::FireOnScrollEdge(const std::vector<ScrollEdge>& edges) const
 {
-    auto eventHub = pattern_.GetOrCreateEventHub<ScrollEventHub>();
+    auto eventHub = pattern_.GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID(onScrollEdge);

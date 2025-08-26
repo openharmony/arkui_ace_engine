@@ -34,12 +34,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -866,6 +868,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
     JSClass<JSImageAttachment>::CustomProperty(
         "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
     JSClass<JSImageAttachment>::CustomProperty(
+        "sizeInVp", &JSImageAttachment::GetImageSizeInVp, &JSImageAttachment::SetImageSizeInVp);
+    JSClass<JSImageAttachment>::CustomProperty(
         "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
     JSClass<JSImageAttachment>::CustomProperty(
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
@@ -1072,15 +1076,34 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
     auto imageSize = JSRef<JSObject>::New();
     auto size = imageAttr->size;
     if (size->width.has_value()) {
-        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+        imageSize->SetProperty<float>("width", size->width->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("width", 0.0);
     }
 
     if (size->height.has_value()) {
-        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
+        imageSize->SetProperty<float>("height", size->height->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
+    }
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageSizeInVp(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    const auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
     }
     info.SetReturnValue(imageSize);
 }

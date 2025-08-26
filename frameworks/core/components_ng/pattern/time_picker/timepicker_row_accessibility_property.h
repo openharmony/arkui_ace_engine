@@ -29,8 +29,6 @@ public:
     ~TimePickerRowAccessibilityProperty() override = default;
 
     std::string GetText() const override;
-    void GetMinuteText(std::string& result) const;
-    void GetSecondText(std::string& result) const;
 
 private:
     std::string GetShowDatePickerText() const;

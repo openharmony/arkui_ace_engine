@@ -370,8 +370,8 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
         if (children.empty()) {
             callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Children is empty from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-                SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+                "Children is empty from FrameNode(Id=%{public}d,Tag=%{public}s)",
+                node->GetId(), node->GetTag().c_str());
             return;
         }
         node = children.front();
@@ -381,8 +381,8 @@ void ComponentSnapshot::GetByUniqueId(int32_t uniqueId, JsCallback&& callback, c
     if (!rsNode) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "RsNode is null from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-            SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+            "RsNode is null from FrameNode(Id=%{public}d,Tag=%{public}s)",
+            node->GetId(), node->GetTag().c_str());
         return;
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::GetByUniqueId_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
@@ -569,23 +569,6 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
-std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
-    const SnapshotOptions& options)
-{
-    CHECK_RUN_ON(UI);
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
-    auto node = Inspector::GetFrameNodeByKey(componentId);
-    if (!node) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't find a component that id or key are " SEC_PLD(%{public}s)
-            ", Please check your parameters are correct",
-            SEC_PARAM(componentId.c_str()));
-        return result;
-    }
-
-    return GetSync(node, options);
-}
-
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const RefPtr<FrameNode>& node,
     std::shared_ptr<Rosen::RSNode> rsNode, const SnapshotOptions& options)
 {
@@ -630,8 +613,8 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
         node->GetOneDepthVisibleFrame(children);
         if (children.empty()) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Children is empty from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-                SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+                "Children is empty from FrameNode(Id=%{public}d,Tag=%{public}s)",
+                node->GetId(), node->GetTag().c_str());
             return result;
         }
         node = children.front();
@@ -640,17 +623,33 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
 
     if (!rsNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "RsNode is null from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
-            SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
+            "RsNode is null from FrameNode(Id=%{public}d,Tag=%{public}s)",
+            node->GetId(), node->GetTag().c_str());
         return result;
     }
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "GetSyncByUniqueId ComponentSnapshot options=%{public}s Id=" SEC_PLD(%{public}d)
-        " Depth=%{public}d Tag=%{public}s RsNodeId=%{public}" PRIu64 "",
-        options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
-        rsNode->GetId());
+        "GetSyncByUniqueId ComponentSnapshot options=%{public}s Id=%{public}d Tag=%{public}s "
+        "RsNodeId=%{public}" PRIu64 "",
+        options.ToString().c_str(), node->GetId(), node->GetTag().c_str(), rsNode->GetId());
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> captureResult = TakeCaptureBySync(node, rsNode, options);
     return captureResult;
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
+    const SnapshotOptions& options)
+{
+    CHECK_RUN_ON(UI);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    auto node = Inspector::GetFrameNodeByKey(componentId);
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that id or key are " SEC_PLD(%{public}s)
+            ", Please check your parameters are correct",
+            SEC_PARAM(componentId.c_str()));
+        return result;
+    }
+
+    return GetSync(node, options);
 }
 
 void ComponentSnapshot::SetRSUIContext(
@@ -776,14 +775,14 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
     auto endNode = GetRangeIDNode(endID);
     if (!startNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Node not found that startld is " SEC_PLD(%{public}s),
+            "Node not found that startId is " SEC_PLD(%{public}s),
             SEC_PARAM(GetRangeIDStr(startID).c_str()));
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     if (!endNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Node not found that endld is " SEC_PLD(%{public}s),
+            "Node not found that endId is " SEC_PLD(%{public}s),
             SEC_PARAM(GetRangeIDStr(endID).c_str()));
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
@@ -817,22 +816,26 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
 std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnapshot::GetSoloNode(
     const RefPtr<FrameNode>& node)
 {
+    std::pair<uint64_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> results;
+    results.push_back(result);
     if (!node) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "GetSoloNode Internal error! node is nullptr");
-        return {{ERROR_CODE_INTERNAL_ERROR, nullptr}};
+        return results;
     }
     auto rsNode = GetRsNode(node);
     if (!rsNode) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can't get RsNode! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",
             SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
-        return {{ERROR_CODE_INTERNAL_ERROR, nullptr}};
+        return results;
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::GetSoloNode_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to get solo node snapshot, rootId=" SEC_PLD(%{public}d) " depth=%{public}d size=%{public}s",
         SEC_PARAM(node->GetId()), node->GetDepth(), node->GetGeometryNode()->GetFrameSize().ToString().c_str());
-    return rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
+    auto pixelMaps = rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
+    return pixelMaps;
 }
 } // namespace OHOS::Ace::NG

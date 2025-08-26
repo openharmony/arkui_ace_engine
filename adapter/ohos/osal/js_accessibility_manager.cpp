@@ -1252,6 +1252,9 @@ void SetRootAccessibilityPreFocusId(const RefPtr<NG::UINode>& currentNode, const
     auto it = nextFocusIdMap.find(currentInspectorId);
     if (it != nextFocusIdMap.end()) {
         int64_t preAccessibilityId = it->second;
+        if (nodeInfo.GetBelongTreeId() > 0) {
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(nodeInfo.GetBelongTreeId(), preAccessibilityId);
+        }
         nodeInfo.SetAccessibilityPreviousFocusId(preAccessibilityId);
     }
 }
@@ -3640,8 +3643,10 @@ void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node,
     }
 
     if (releaseAll) {
-        pageController_.DeleteInstanceNodeAll(node);
-        ReleaseAllCacheAccessibilityEvent(containerId);
+        pageController_.DeleteInstanceNodeAllWithPriority(node);
+        if (pageController_.CheckEmpty(containerId)) {
+            ReleaseAllCacheAccessibilityEvent(containerId);
+        }
     }
 }
 

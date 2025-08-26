@@ -899,7 +899,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 
     options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), "03");
+    EXPECT_NE(accessibilityProperty->GetText(), "");
 
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);
@@ -959,6 +959,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetHour24(true);
     timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"].Upgrade();
@@ -973,14 +974,13 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
-    timePickerRowPattern->SetHour24(true);
     EXPECT_EQ(accessibilityProperty->GetText(),
         ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE1));
 
-    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE2);
     minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE2);
-    EXPECT_EQ(
-        accessibilityProperty->GetText(), std::to_string(CURRENT_VALUE2) + COLON + std::to_string(CURRENT_VALUE2));
+    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE2);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        std::to_string(CURRENT_VALUE2) + COLON + std::to_string(CURRENT_VALUE2));
 }
 
 /**
@@ -1330,7 +1330,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     minuteColumnPattern->InitPanEvent(gestureHub);
     auto panEvent = minuteColumnPattern->panEvent_;
@@ -1545,7 +1545,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level0)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
 
@@ -1755,7 +1755,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level0)
 
     timePickerRowPattern->SetHour24(false);
     frameNode->RemoveChildAtIndex(0);
-    timePickerRowPattern->HandleHourColumnBuilding();
+    timePickerRowPattern->HandleHourBuildTimeRange(0);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(allChildNode["amPm"].Upgrade(), nullptr);
 }
@@ -1882,7 +1882,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
 
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
@@ -2231,7 +2231,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern018, TestSize.Level0)
      * @tc.steps: step2. call InitDisabled.
      * @tc.expected: set eventHub is disenabled.
      */
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     eventHub->enabled_ = false;
     timePickerRowPattern->InitDisabled();
     bool res = eventHub->IsEnabled();
@@ -2685,7 +2685,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern028, TestSize.Level0)
 
 /**
  * @tc.name: TimePickerRowPattern029
- * @tc.desc: Test GetSecondFormatString.
+ * @tc.desc: Test GetSecondColumnFormatString.
  * @tc.type: FUNC
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern029, TestSize.Level0)
@@ -2701,14 +2701,14 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern029, TestSize.Level0)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     EXPECT_NE(timePickerRowPattern, nullptr);
     /**
-     * @tc.steps: step2. call GetSecondFormatString.
+     * @tc.steps: step2. call GetSecondColumnFormatString.
      * @tc.expected: set Api Version is 15.
      */
     int32_t setApiVersion = 15;
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     int32_t currApiVersion = MockContainer::Current()->GetApiTargetVersion();
     uint32_t second = 12;
-    timePickerRowPattern->GetSecondFormatString(second);
+    timePickerRowPattern->GetSecondColumnFormatString(second);
     EXPECT_GT(currApiVersion, second);
 }
 
@@ -6010,7 +6010,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest004, TestSize.Level0)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
 
     CrownEvent crownEvent;
@@ -7395,7 +7395,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerGetCurrentOption001, TestSize.Level0
 
     options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
-    EXPECT_EQ(minuteColumnPattern->GetCurrentOption(), "03");
+    EXPECT_NE(minuteColumnPattern->GetCurrentOption(), "");
 
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);

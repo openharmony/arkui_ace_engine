@@ -47,7 +47,6 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "the touch info is illegal");
             return;
         }
-
         auto lastPoint = changeTouches.back();
         const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
@@ -94,7 +93,7 @@ void StateStyleManager::HandleTouchDown()
     if (!hasScrollingParent_ || scrollingFeatureForbidden_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
         PostListItemPressStyleTask(currentState_);
-    } else if (!isFastScrolling_){
+    } else if (!isFastScrolling_) {
         if (IsPressedCancelStatePending()) {
             ResetPressedCancelState();
         }
@@ -306,7 +305,7 @@ bool StateStyleManager::GetCustomNodeFromNavgation(
             return true;
         }
         auto customParent = DynamicCast<CustomNode>(navDestinationCustomNode);
-        CHECK_NULL_RETURN(navDestinationCustomNode, false);
+        CHECK_NULL_RETURN(customParent, false);
         node = customParent->GetParent();
     }
     return false;
@@ -421,7 +420,6 @@ void StateStyleManager::CleanScrollingParentListener()
 {
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
-
     auto parent = node->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto pattern = parent->GetPattern();

@@ -1814,7 +1814,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest028, TestSize.Leve
     previewOption.isMultiSelectionEnabled = true;
     parentNode->SetDragPreviewOptions(previewOption);
     dragEventActuator->IsBelongToMultiItemNode(frameNode);
-    auto eventHubp = parentNode->GetOrCreateEventHub<EventHub>();
+    auto eventHubp = parentNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHubp, nullptr);
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHubp->onDragStart_ = func;

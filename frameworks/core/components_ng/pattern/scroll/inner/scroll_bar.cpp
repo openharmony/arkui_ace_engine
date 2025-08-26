@@ -461,12 +461,12 @@ void ScrollBar::SetMouseEvent()
         bool inHoverRegion = scrollBar->InBarHoverRegion(point);
         if (inBarRegion) {
             scrollBar->PlayScrollBarAppearAnimation();
+            scrollBar->isShowScrollBar_ = true;
             if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
                 scrollBar->isMousePressed_ = true;
             } else {
                 scrollBar->isMousePressed_ = false;
             }
-            scrollBar->isShowScrollBar_ = true;
         }
         if (inBarRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
@@ -776,6 +776,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         .snapDelta = CalcPatternOffset(frictionMotion_->GetFinalPosition()),
         .animationVelocity = -velocity,
         .dragDistance = CalcPatternOffset(GetDragOffset()),
+        .snapDirection = SnapDirection::NONE,
         .fromScrollBar = true,
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {

@@ -164,15 +164,15 @@ public:
         RefPtr<ResourceObject>& resourceObject);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo = std::nullopt);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId,
         RefPtr<ResourceObject>& resourceObject);
@@ -228,8 +228,9 @@ public:
     }
     template <class T>
     static bool ParseArrayWithResObj(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
-        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &)> getValue,
-        std::vector<RefPtr<ResourceObject>>& resObjArray)
+        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &,
+        const std::optional<NodeInfo> &)> getValue,
+        std::vector<RefPtr<ResourceObject>>& resObjArray, const std::optional<NodeInfo>& nodeInfo = std::nullopt)
     {
         CHECK_NULL_RETURN(vm, false);
         CHECK_NULL_RETURN(array, false);
@@ -247,7 +248,7 @@ public:
         for (int32_t i = 0; i < length; i++) {
             RefPtr<ResourceObject> resObj;
             auto value = handle->GetValueAt(vm, arg, i);
-            *(array + i) = getValue(vm, value, resObj);
+            *(array + i) = getValue(vm, value, resObj, nodeInfo);
             resObjArray.emplace_back(resObj);
         }
         return true;
@@ -350,6 +351,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
+    static Local<JSValueRef> JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info);
 
     template<typename T>
     static panda::Local<panda::JSValueRef> ToJSValueWithVM(const EcmaVM* vm, T val)

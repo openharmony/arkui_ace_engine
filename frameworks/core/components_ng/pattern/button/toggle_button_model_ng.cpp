@@ -48,7 +48,7 @@ void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 

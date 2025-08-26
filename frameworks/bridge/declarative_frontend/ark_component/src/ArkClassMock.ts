@@ -103,7 +103,6 @@ declare class ModifierJS {
   SymbolSpanModifier(nativePtr: KNode, classType: ModifierType): void;
   Component3DModifier(nativePtr: KNode, classType: ModifierType): void;
   ContainerSpanModifier(nativePtr: KNode, classType: ModifierType): void;
-  LinearIndicatorModifier(nativePtr: KNode, classType: ModifierType): void;
   IndicatorComponentModifier(nativePtr: KNode, classType: ModifierType): void;
   LazyVGridLayoutModifier(nativePtr: KNode, classType: ModifierType): void;
   StepperModifier(nativePtr: KNode, classType: ModifierType): void;

@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("web_pattern_unit_test_ohos") {
-  module_out_path = pattern_test_output_path
+  module_out_path = "ace_engine/security"
   testonly = true
   defines = [
     "OHOS_STANDARD_SYSTEM",

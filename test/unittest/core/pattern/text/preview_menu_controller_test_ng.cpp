@@ -37,6 +37,7 @@ const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
 constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
 constexpr Dimension PREVIEW_MAX_WIDTH = 360.0_vp;
+constexpr float PERCENT_FULL = 1.0;
 } // namespace
 class PreviewMenuControllerTest : public testing::Test {
 public:
@@ -398,5 +399,56 @@ HWTEST_F(PreviewMenuControllerTest, CreateContactAndAddressPreviewNodeTest001, T
     auto addressNode = controller.CreateContactAndAddressPreviewNode(TextDataDetectType::ADDRESS);
     EXPECT_NE(addressNode, nullptr);
     VerifyContactAndAddressNodeProperties(addressNode, TextDataDetectType::ADDRESS);
+}
+
+/**
+ * @tc.name: CreateLinkingPreviewNodeTest001
+ * @tc.desc: Test CreateLinkingPreviewNode creates node with correct flex properties and size constraints
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateLinkingPreviewNodeTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    PreviewMenuController controller(AceType::WeakClaim(AceType::RawPtr(pattern)));
+
+    // Setup theme manager and mock theme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+
+    // Execute the function
+    auto frameNode = controller.CreateLinkingPreviewNode();
+    
+    // Verify node creation
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::FLEX_ETS_TAG);
+
+    // Verify flex layout properties
+    auto flexLayoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
+    EXPECT_NE(flexLayoutProperty, nullptr);
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
+    EXPECT_EQ(flexLayoutProperty->GetMainAxisAlign(), FlexAlign::CENTER);
+
+    auto&& calcLayoutConstraint = flexLayoutProperty->GetCalcLayoutConstraint();
+    // Verify size constraints
+    auto maxSize = calcLayoutConstraint->maxSize;
+    EXPECT_TRUE(maxSize.has_value());
+    EXPECT_TRUE(maxSize->Width().has_value());
+    EXPECT_TRUE(maxSize->Height().has_value());
+    EXPECT_EQ(maxSize->Height(), CalcLength(PREVIEW_MAX_WIDTH));
+    EXPECT_EQ(maxSize->Width(), CalcLength(PREVIEW_MAX_WIDTH));
+
+    auto minSize = calcLayoutConstraint->minSize;
+    EXPECT_TRUE(minSize.has_value());
+    EXPECT_TRUE(minSize->Height().has_value());
+    EXPECT_EQ(minSize->Height(), CalcLength(PREVIEW_MIN_HEIGHT));
+
+    // Verify ideal size
+    auto idealSize = calcLayoutConstraint->selfIdealSize;
+    EXPECT_TRUE(idealSize.has_value());
+    EXPECT_TRUE(idealSize->Height().has_value());
+    EXPECT_EQ(idealSize->Height(), CalcLength(Dimension(PERCENT_FULL, DimensionUnit::PERCENT)));
 }
 } // namespace OHOS::Ace::NG

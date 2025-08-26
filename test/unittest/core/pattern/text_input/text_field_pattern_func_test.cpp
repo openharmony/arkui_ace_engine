@@ -857,7 +857,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc050, TestSize.Level1)
 
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ state = true; };
-    pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>()->SetOnDidInsertValueEvent(callback);
+    pattern->GetHost()->GetEventHub<TextFieldEventHub>()->SetOnDidInsertValueEvent(callback);
     std::u16string insertValue;
     pattern->AfterIMEInsertValue(insertValue);
     EXPECT_TRUE(state);
@@ -874,7 +874,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     auto state = false;
-    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
@@ -896,7 +896,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
 
-    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
@@ -922,7 +922,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
 
-    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     auto state = false;
     auto callback = [&state](const DeleteValueInfo&){ state = true; };
     eventHub->SetOnDidDeleteEvent(callback);
@@ -1843,7 +1843,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc092, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     auto state = false;
-    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const ChangeValueInfo& info){ return (state = true); };
     eventHub->SetOnWillChangeEvent(callback);

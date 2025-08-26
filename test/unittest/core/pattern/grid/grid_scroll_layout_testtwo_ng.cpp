@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollLayoutTestNg : public GridTestNg {
@@ -109,20 +110,16 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
     auto algo = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     ASSERT_TRUE(algo);
     algo->Measure(AceType::RawPtr(frameNode_));
-    std::set<int32_t> measuredItems = { 0, 1, 2, 3, 4, 5, 6, 7 };
-    EXPECT_EQ(measuredItems, algo->measuredItems_);
+    EXPECT_TRUE(algo->unLayoutedItems_.empty());
     EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT);
 
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode_->GetLayoutProperty());
-    layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT + 100);
+    layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT - 100);
     algo->Measure(AceType::RawPtr(frameNode_));
-    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT + 100);
-    measuredItems.emplace(8);
-    measuredItems.emplace(9);
-    EXPECT_EQ(measuredItems, algo->measuredItems_);
-
-    algo->Layout(AceType::RawPtr(frameNode_));
-    EXPECT_TRUE(algo->measuredItems_.empty());
+    EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT - 100);
+    EXPECT_EQ(algo->unLayoutedItems_.size(), 2);
+    EXPECT_EQ(algo->unLayoutedItems_.count(7), 1);
+    EXPECT_EQ(algo->unLayoutedItems_.count(6), 1);
 }
 
 /**
@@ -189,6 +186,38 @@ HWTEST_F(GridScrollLayoutTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startIndex_, 6);
     EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
     EXPECT_TRUE(GetItem(5, true)->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_LAYOUT);
+}
+
+/**
+ * @tc.name: FadingEdge003
+ * @tc.desc: Test FadingEdge property with safe area
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, FadingEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateFixedItems(20);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 400.f);
+
+    /**
+     * @tc.steps: step2. Update Safe Area
+     * @tc.expected: overlay frame size expand safe area.
+     */
+    frameNode_->GetGeometryNode()->SetSelfAdjust(RectF(0, 0, 0, 10.f));
+    FlushUITasks(frameNode_);
+    geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
 }
 } // namespace OHOS::Ace::NG
  

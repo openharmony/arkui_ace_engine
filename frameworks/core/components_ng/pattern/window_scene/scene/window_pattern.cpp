@@ -701,7 +701,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         ClearImageCache(sourceInfo, key, freeMultiWindow);
-        auto eventHub = snapshotWindow_->GetOrCreateEventHub<ImageEventHub>();
+        auto eventHub = snapshotWindow_->GetEventHub<ImageEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
             auto self = weakThis.Upgrade();

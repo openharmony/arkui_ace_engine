@@ -66,7 +66,6 @@ public:
 
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
-    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
@@ -104,6 +103,7 @@ public:
     static float GetScrollBarWidth(FrameNode* frameNode);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static Dimension GetItemMinWidth(FrameNode* frameNode);
     static Dimension GetItemMaxWidth(FrameNode* frameNode);
     static Dimension GetItemMinHeight(FrameNode* frameNode);
@@ -127,10 +127,11 @@ public:
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
     static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
-    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetFooter(FrameNode* frameNode, std::function<void()>&& footer);
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
     static bool GetSyncLoad(FrameNode* frameNode);
+    void ParseResObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG

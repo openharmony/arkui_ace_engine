@@ -933,7 +933,7 @@ void PipelineContext::InspectDrew()
             if (node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
-            auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+            auto eventHub = node->GetEventHub<NG::EventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireDrawCompletedNDKCallback(this);
         }
@@ -5096,7 +5096,7 @@ void PipelineContext::NotifyDragOnHide()
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     manager->HandlePipelineOnHide();
-    manager->OnDragAsyncEnd();
+    manager->OnDragEnd();
 }
 
 void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)

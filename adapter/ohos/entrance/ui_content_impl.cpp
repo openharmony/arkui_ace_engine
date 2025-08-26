@@ -40,7 +40,9 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
+#include "ui_extension_context.h"
 #include "wm_common.h"
+#include "form_ashmem.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -1095,6 +1097,14 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
     auto context = context_.lock();
     CHECK_NULL_VOID(context);
     StoreConfiguration(context->GetConfiguration());
+}
+
+UIContentImpl::~UIContentImpl()
+{
+    UnSubscribeEventsPassThroughMode();
+    ProcessDestructCallbacks();
+    DestroyUIDirector();
+    DestroyCallback();
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -2465,16 +2475,26 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             });
     }
 
-    container->SetAbilityOnSearch([context = context_](const std::string& queryWord) {
+    container->SetAbilityOnSearch([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+                                      const std::string& queryWord) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
+        auto container = containerWeak.Upgrade();
+        CHECK_NULL_VOID(container);
         AAFwk::Want want;
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
+        if (container->IsUIExtensionWindow()) {
+            auto uiExtensionContext =
+                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
+            CHECK_NULL_VOID(uiExtensionContext);
+            uiExtensionContext->StartAbility(want, REQUEST_CODE);
+            return;
+        }
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
         abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
@@ -4964,6 +4984,11 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
         [container, isVisible]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipeline);
+            if (isVisible) {
+                pipeline->OnShow();
+            } else {
+                pipeline->OnHide();
+            }
             auto mgr = pipeline->GetFormVisibleManager();
             if (mgr) {
                 mgr->HandleFormVisibleChangeEvent(isVisible);
@@ -5298,10 +5323,11 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     Ace::DecorButtonStyle decorButtonStyle;
     ConvertDecorButtonStyle(buttonStyle, decorButtonStyle);
     taskExecutor->PostTask(
-        [container, decorButtonStyle]() {
+        [container, buttonStyle]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, decorButtonStyle);
+            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
+                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
@@ -5511,14 +5537,17 @@ void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d", config.isArkUIHookEnabled,
         (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
+        config.navigationDisablePlaceholder, config.navigationDisableDivider);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
     CHECK_NULL_VOID(navManager);
     navManager->SetForceSplitNavigationId(config.navigationId);
     navManager->SetForceSplitNavigationDepth(config.navigationDepth);
+    navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+    navManager->SetDividerDisabled(config.navigationDisableDivider);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

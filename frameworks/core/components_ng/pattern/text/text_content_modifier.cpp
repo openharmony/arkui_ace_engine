@@ -19,7 +19,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -478,7 +477,9 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
                 const RectF& contentRect = textPattern->GetTextRect();
                 RectF boundsRect;
                 pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
-                recordingCanvas->ResetHybridRenderSize(boundsRect.Width(), boundsRect.Height());
+                recordingCanvas->ResetHybridRenderSize(
+                    std::max(boundsRect.Width(), pManager->GetLongestLineWithIndent()),
+                    std::max(boundsRect.Height(), pManager->GetHeight()));
             }
         }
     }

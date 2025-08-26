@@ -990,7 +990,7 @@ HWTEST_F(SymbolTestNg, SetShaderStyle003, TestSize.Level1)
     SymbolGradient linearGradientCase;
     linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
     linearGradientCase.angle = 45.0f;
-    linearGradientCase.isDefined = true;
+    linearGradientCase.gradientType = GradientDefinedStatus::GRADIENT_TYPE;
 
     gradients.emplace_back(std::move(linearGradientCase));
 
@@ -1009,11 +1009,13 @@ HWTEST_F(SymbolTestNg, SetShaderStyle003, TestSize.Level1)
     /**
      * @tc.steps: step3. test get shaderStyle property
      */
-    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
-
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+ 
     auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
     EXPECT_EQ(symbolOptions.size(), 1);
 }
 
@@ -1062,12 +1064,73 @@ HWTEST_F(SymbolTestNg, SetShaderStyle004, TestSize.Level1)
     /**
      * @tc.steps: step3. test get shaderStyle property
      */
-    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_TRUE(textLayoutProperty->HasShaderStyle());
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
+ 
+    auto symbolOptions = textStyle.GetShaderStyle();
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 3);
+}
+
+/**
+ * @tc.name: ShaderStyle005
+ * @tc.desc: test SetShaderStyle and GetShaderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SetShaderStyle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<SymbolGradient> gradients;
+
+    // test input base color
+    SymbolGradient colorShaderCase;
+    colorShaderCase.type = SymbolGradientType::COLOR_SHADER;
+
+    // test input line gradient
+    SymbolGradient linearGradientCase;
+    linearGradientCase.type = SymbolGradientType::LINEAR_GRADIENT;
+    linearGradientCase.angle = 45.0f;
+
+    // test input radial gradient
+    SymbolGradient radialGradientCase;
+    radialGradientCase.type = SymbolGradientType::RADIAL_GRADIENT;
+    radialGradientCase.radialCenterX = Dimension(0.5);
+    radialGradientCase.radialCenterY = Dimension(0.5);
+    radialGradientCase.radius =  Dimension(0.6);
+
+    gradients.emplace_back(std::move(colorShaderCase));
+    gradients.emplace_back(std::move(linearGradientCase));
+    gradients.emplace_back(std::move(radialGradientCase));
+
+    symbolModelNG.SetShaderStyle(gradients);
+    symbolModelNG.ResetShaderStyle();
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get shaderStyle property
+     */
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    TextStyle textStyle;
+    CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, true);
 
     auto symbolOptions = textStyle.GetShaderStyle();
-    EXPECT_EQ(symbolOptions.size(), 3);
+        std::cout << "Debug: textStyle.GetSymbolShadow().radius = " << symbolOptions.size() << std::endl;
+    EXPECT_EQ(symbolOptions.size(), 0);
 }
 
 /**

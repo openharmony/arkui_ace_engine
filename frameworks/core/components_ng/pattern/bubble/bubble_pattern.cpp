@@ -107,13 +107,12 @@ void BubblePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -164,7 +163,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -323,6 +322,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
+    CHECK_NULL_VOID(buttonNode);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto theme = GetPopupTheme();
@@ -938,7 +938,7 @@ void BubblePattern::UpdateArrowWidth(const CalcDimension& dimension)
     }
 
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
@@ -951,7 +951,7 @@ void BubblePattern::UpdateArrowHeight(const CalcDimension& dimension)
         popupLayoutProp->UpdateArrowHeight(dimension);
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateWidth(const CalcDimension& dimension)
@@ -966,7 +966,7 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dimension), std::nullopt));
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void BubblePattern::UpdateRadius(const CalcDimension& dimension)
@@ -978,7 +978,7 @@ void BubblePattern::UpdateRadius(const CalcDimension& dimension)
         layoutProps->UpdateRadius(dimension);
     }
     host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 

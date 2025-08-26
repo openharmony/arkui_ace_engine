@@ -66,7 +66,7 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
-        auto eventHub = GetOrCreateEventHub<GridItemEventHub>();
+        auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
@@ -159,7 +159,7 @@ void GridItemPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -231,7 +231,7 @@ void GridItemPattern::InitDisableStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -334,24 +334,6 @@ void GridItemPattern::DumpAdvanceInfo()
     }
 }
 
-void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
-{
-    gridItemStyle_ = gridItemStyle;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<GridItemTheme>();
-    CHECK_NULL_VOID(theme);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (gridItemStyle_ == GridItemStyle::PLAIN) {
-        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
-    } else if (gridItemStyle_ == GridItemStyle::NONE) {
-        renderContext->UpdateBorderRadius(BorderRadiusProperty());
-    }
-}
-
 void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     auto property = GetLayoutProperty<GridItemLayoutProperty>();
@@ -386,6 +368,24 @@ void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         default: {
             break;
         }
+    }
+}
+
+void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
+{
+    gridItemStyle_ = gridItemStyle;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+    } else if (gridItemStyle_ == GridItemStyle::NONE) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty());
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,7 +179,7 @@ class ArkThemeCache {
     }
     remove(theme) {
         const index = this.cache.indexOf(theme);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.cache.splice(index, 1);
@@ -270,7 +270,7 @@ class ArkThemeBase {
     }
     unbindFromScope(themeScopeId) {
         const index = this.bindedThemeScopesIds.indexOf(themeScopeId);
-        if (index == -1) {
+        if (index === -1) {
             return;
         }
         this.scopesCounter--;

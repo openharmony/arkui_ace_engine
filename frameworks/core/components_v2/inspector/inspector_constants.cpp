@@ -373,10 +373,6 @@ const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
 const char SLIDER_ETS_TAG[] = "Slider";
 
-// sliderTip
-const char SLIDER_TIP_NODE_COMPONENT_TAG[] = "sliderTipFrameNodeComponent";
-const char SLIDER_TIP_NODE_ETS_TAG[] = "sliderTipFrameNode";
-
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
 const char RATING_ETS_TAG[] = "Rating";

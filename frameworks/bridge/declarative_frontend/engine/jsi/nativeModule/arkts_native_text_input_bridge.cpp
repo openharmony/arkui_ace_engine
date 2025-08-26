@@ -1768,8 +1768,7 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
         srcStr = "";
     }
 
-    struct ArkUISizeType size = { static_cast<ArkUI_Float32>(iconSize.Value()),
-        static_cast<int8_t>(iconSize.Unit()), nullptr };
+    struct ArkUISizeType size = { iconSize.Value(), static_cast<int8_t>(iconSize.Unit()), nullptr };
     ArkUIImageIconRes cancelButtonImageObj;
     cancelButtonImageObj.sizeObj = AceType::RawPtr(sizeObject);
     cancelButtonImageObj.colorObj = AceType::RawPtr(colorObject);

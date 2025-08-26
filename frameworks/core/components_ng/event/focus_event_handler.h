@@ -140,6 +140,7 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyEventDispatchCallback, OnKeyEventDispatchFunc, onKeyEventDispatchCallback)
     ACE_DEFINE_FOCUS_EVENT(OnCrownCallback, OnCrownCallbackFunc, onCrownEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnCrownEventInternal, OnCrownEventFunc, onCrownEventsInternal)
+
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     bool isNodeNeedKey_ { false }; // extension use only
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;

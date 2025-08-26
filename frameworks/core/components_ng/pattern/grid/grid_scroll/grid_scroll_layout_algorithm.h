@@ -229,6 +229,8 @@ private:
 
     void ClearUnlayoutedItems(LayoutWrapper* layoutWrapper);
 
+    void UpdateUnlayoutedItems();
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -244,7 +246,7 @@ protected:
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
-    std::set<int32_t> measuredItems_;
+    std::map<int32_t, float> unLayoutedItems_;
 
 private:
     /**
@@ -265,12 +267,14 @@ private:
 
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
+    int32_t cacheEnd_ = 0;
     bool isChildrenUpdated_ = false;
 
     bool expandSafeArea_ = false;
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;
     bool enableSkipping_ = true;               // enables skipping lines on a large offset change.
+    bool isLayouted_ = true;
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
 
     // Map structure: [index, crossPosition], store cross position of each item.

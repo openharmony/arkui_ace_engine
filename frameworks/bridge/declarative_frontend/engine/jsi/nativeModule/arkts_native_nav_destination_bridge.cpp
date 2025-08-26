@@ -188,8 +188,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackgroundColor(ArkUIRuntimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
-    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationBackgroundColor(
-        nativeNode, color.GetValue(), bgColorRawPtr);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationBackgroundColorWithColorSpace(
+        nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

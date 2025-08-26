@@ -25,9 +25,9 @@ constexpr int32_t BAR_APPEAR_DURATION = 100;           // 100ms
 constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15;       // 15fps, the expected frame rate of opacity animation
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
+constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 120;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
-constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 120;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -114,7 +114,7 @@ void ScrollBarPattern::AddScrollableEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -890,6 +890,16 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     }
 }
 
+bool ScrollBarPattern::IsReverse() const
+{
+    return isReverse_;
+}
+
+void ScrollBarPattern::SetReverse(bool reverse)
+{
+    isReverse_ = reverse;
+}
+
 void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
@@ -907,9 +917,109 @@ void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
     }
 }
 
+void ScrollBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    GetAxisDumpInfo(json);
+    GetDisplayModeDumpInfo(json);
+    GetPanDirectionDumpInfo(json);
+    json->Put("hasChild", hasChild_);
+    json->Put("preFrameChildState", preFrameChildState_);
+    json->Put("enableNestedSorll", enableNestedSorll_);
+    if (!hasChild_ && scrollBar_) {
+        scrollBar_->DumpAdvanceInfo(json);
+    }
+    json->Put("childRect", childRect_.ToString().c_str());
+    json->Put("scrollableDistance", std::to_string(scrollableDistance_).c_str());
+    json->Put("controlDistance_", std::to_string(controlDistance_).c_str());
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : outerScrollBarLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("outerScrollBarLayoutInfos", children);
+}
+
+void ScrollBarPattern::GetDisplayModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (displayMode_) {
+        case DisplayMode::OFF: {
+            json->Put("outerScrollBarState", "OFF");
+            break;
+        }
+        case DisplayMode::AUTO: {
+            json->Put("outerScrollBarState", "AUTO");
+            break;
+        }
+        case DisplayMode::ON: {
+            json->Put("outerScrollBarState", "ON");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBarPattern::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                json->Put("panDirection", "NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                json->Put("panDirection", "VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                json->Put("panDirection", "HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                json->Put("panDirection", "FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        json->Put("panDirection", "null");
+    }
+}
+
+void ScrollBarPattern::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
 void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    ResponseLinkResult& responseLinkResult)
 {
     if (longPressRecognizer_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -1048,115 +1158,6 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
-}
-
-bool ScrollBarPattern::IsReverse() const
-{
-    return isReverse_;
-}
-
-void ScrollBarPattern::SetReverse(bool reverse)
-{
-    isReverse_ = reverse;
-}
-
-void ScrollBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
-{
-    GetAxisDumpInfo(json);
-    GetDisplayModeDumpInfo(json);
-    GetPanDirectionDumpInfo(json);
-    json->Put("hasChild", hasChild_);
-    json->Put("preFrameChildState", preFrameChildState_);
-    json->Put("enableNestedSorll", enableNestedSorll_);
-    if (!hasChild_ && scrollBar_) {
-        scrollBar_->DumpAdvanceInfo(json);
-    }
-    json->Put("childRect", childRect_.ToString().c_str());
-    json->Put("scrollableDistance", std::to_string(scrollableDistance_).c_str());
-    json->Put("controlDistance_", std::to_string(controlDistance_).c_str());
-
-    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
-    for (const auto& info : outerScrollBarLayoutInfos_) {
-        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
-        info.ToJson(child);
-        children->Put(child);
-    }
-    json->Put("outerScrollBarLayoutInfos", children);
-}
-
-void ScrollBarPattern::GetDisplayModeDumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    switch (displayMode_) {
-        case DisplayMode::OFF: {
-            json->Put("outerScrollBarState", "OFF");
-            break;
-        }
-        case DisplayMode::AUTO: {
-            json->Put("outerScrollBarState", "AUTO");
-            break;
-        }
-        case DisplayMode::ON: {
-            json->Put("outerScrollBarState", "ON");
-            break;
-        }
-        default: {
-            break;
-        }
-    }
-}
-
-void ScrollBarPattern::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    if (panRecognizer_) {
-        switch (panRecognizer_->GetAxisDirection()) {
-            case Axis::NONE: {
-                json->Put("panDirection", "NONE");
-                break;
-            }
-            case Axis::VERTICAL: {
-                json->Put("panDirection", "VERTICAL");
-                break;
-            }
-            case Axis::HORIZONTAL: {
-                json->Put("panDirection", "HORIZONTAL");
-                break;
-            }
-            case Axis::FREE: {
-                json->Put("panDirection", "FREE");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    } else {
-        json->Put("panDirection", "null");
-    }
-}
-
-void ScrollBarPattern::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
-{
-    switch (axis_) {
-        case Axis::NONE: {
-            json->Put("Axis", "NONE");
-            break;
-        }
-        case Axis::VERTICAL: {
-            json->Put("Axis", "VERTICAL");
-            break;
-        }
-        case Axis::HORIZONTAL: {
-            json->Put("Axis", "HORIZONTAL");
-            break;
-        }
-        case Axis::FREE: {
-            json->Put("Axis", "FREE");
-            break;
-        }
-        default: {
-            break;
-        }
-    }
 }
 
 void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

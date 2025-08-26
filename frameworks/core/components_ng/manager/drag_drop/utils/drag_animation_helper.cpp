@@ -293,13 +293,7 @@ void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
     if (data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
-    auto menuNode = data.menuNode;
-    CHECK_NULL_VOID(menuNode);
-    auto menuNodeRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(menuNodeRenderContext);
-    if (data.isMenuNotShow) {
-        menuNodeRenderContext->UpdateOpacity(0.0f);
-    } else {
+    if (!data.isMenuNotShow) {
         MenuView::ExecuteMenuDisappearAnimation(data);
     }
 }
@@ -856,6 +850,24 @@ void DragAnimationHelper::HideDragNodeCopy(const RefPtr<OverlayManager>& overlay
     renderContext->UpdateOpacity(0.0f);
 }
 
+void DragAnimationHelper::PreLayout(const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto subwindowContext = imageNode->GetContext();
+    if (subwindowContext) {
+        subwindowContext->FlushSyncGeometryNodeTasks();
+        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
+    }
+}
+
+void DragAnimationHelper::SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(visible);
+}
+
 void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode,
     const RefPtr<FrameNode>& textNode, int32_t childSize, float previewScale, OffsetF previewOffset)
 {
@@ -964,24 +976,6 @@ void DragAnimationHelper::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameN
     if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
     }
-}
-
-void DragAnimationHelper::PreLayout(const RefPtr<FrameNode>& imageNode)
-{
-    CHECK_NULL_VOID(imageNode);
-    auto subwindowContext = imageNode->GetContext();
-    if (subwindowContext) {
-        subwindowContext->FlushSyncGeometryNodeTasks();
-        subwindowContext->PreLayout(subwindowContext->GetTimeFromExternalTimer(), 0);
-    }
-}
-
-void DragAnimationHelper::SetNodeVisible(const RefPtr<FrameNode>& frameNode, bool visible)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetVisible(visible);
 }
 
 void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
@@ -1173,9 +1167,19 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
         data.relativeContainerNode->AddChild(data.textRowNode);
     }
     if (data.menuNode) {
-        auto menuNode = data.menuNode;
-        MenuView::UpdateMenuNodePosition(data);
-        data.relativeContainerNode->AddChild(data.menuNode);
+        MountMenuNode(data);
+    }
+}
+
+void DragAnimationHelper::MountMenuNode(PreparedInfoForDrag& data)
+{
+    auto menuNode = data.menuNode;
+    MenuView::UpdateMenuNodePosition(data);
+    data.relativeContainerNode->AddChild(data.menuNode);
+    if (data.isMenuNotShow) {
+        auto menuNodeRenderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(menuNodeRenderContext);
+        menuNodeRenderContext->UpdateOpacity(0.0f);
     }
 }
 

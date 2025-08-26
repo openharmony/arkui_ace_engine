@@ -31,7 +31,7 @@ RefPtr<FocusManager> GetCurrentFocusManager()
 }
 }
 
-FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
+FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline) : pipeline_(pipeline)
 {
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetRootElement()) {
@@ -488,7 +488,7 @@ void FocusManager::WindowFocus(bool isFocus)
     if (!curFocusViewHub) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "Current focus view can not found!");
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Request current focus view: %{public}s/%{public}d",
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
         if (!IsAutoFocusTransfer()) {
             SetFocusViewRootScope(curFocusView);
@@ -499,7 +499,7 @@ void FocusManager::WindowFocus(bool isFocus)
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
-            TAG_LOGD(AceLogTag::ACE_FOCUS,
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request default focus on current focus view: %{public}s/%{public}d",
                 curFocusView->GetFrameName().c_str(),
                 curFocusView->GetFrameId());
@@ -515,7 +515,7 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS,
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
             "Request focus on rootFocusHub: %{public}s/%{public}d",
             rootFocusHub->GetFrameName().c_str(),
             rootFocusHub->GetFrameId());

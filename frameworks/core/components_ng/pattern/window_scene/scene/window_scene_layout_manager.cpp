@@ -54,6 +54,11 @@ void WindowSceneLayoutManager::Init()
             GetTotalUITreeInfo(info);
         }
     );
+    Rosen::SceneSessionManager::GetInstance().SetFindScenePanelRsNodeByZOrderFunc(
+        [this](uint64_t screenId, uint32_t targetZOrder) {
+            return FindScenePanelRsNodeByZOrder(screenId, targetZOrder);
+        }
+    );
 }
 
 bool WindowSceneLayoutManager::IsNodeDirty(const RefPtr<FrameNode>& node)
@@ -836,5 +841,62 @@ void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNo
         oss << "localGeometry: [null],";
     }
     oss << std::endl;
+}
+
+void WindowSceneLayoutManager::TraverseTreeFindTransformScene(const RefPtr<FrameNode>& rootNode,
+    uint32_t targetZOrder, std::vector<std::pair<RefPtr<FrameNode>, uint32_t>>& scenePanelNodeArr)
+{
+    CHECK_NULL_VOID(rootNode);
+    auto nodeType = rootNode->GetWindowPatternType();
+    TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "Nodetype: %{public}u", nodeType);
+    if (WindowSceneHelper::IsTransformScene(nodeType)) {
+        auto parentNode = rootNode->GetParentFrameNode();
+        if (!parentNode) {
+            return;
+        }
+        int32_t nodeZOrder = GetNodeZIndex(rootNode);
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "ParentZindex: %{public}d, nodeZOrder: %{public}d",
+            GetNodeZIndex(parentNode), nodeZOrder);
+        nodeZOrder = std::max(GetNodeZIndex(parentNode) + 1, nodeZOrder);
+        if (static_cast<uint32_t>(nodeZOrder) > targetZOrder) {
+            return;
+        }
+        scenePanelNodeArr.emplace_back(std::make_pair(rootNode, nodeZOrder));
+        return;
+    }
+    for (const auto& weakNode: rootNode->GetFrameChildren()) {
+        auto node = weakNode.Upgrade();
+        if (!node) {
+            continue;
+        }
+        TraverseTreeFindTransformScene(node, targetZOrder, scenePanelNodeArr);
+    }
+}
+
+std::shared_ptr<Rosen::RSNode> WindowSceneLayoutManager::FindScenePanelRsNodeByZOrder(uint64_t screenId,
+    uint32_t targetZOrder)
+{
+    TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "ScreenId: %{public}" PRIu64 ", zOrder: %{public}d",
+        screenId, targetZOrder);
+    auto iter = screenNodeMap_.find(screenId);
+    if (iter == screenNodeMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "Screen node is null");
+        return nullptr;
+    }
+    RefPtr<FrameNode> screenNode = iter->second.Upgrade();
+    std::vector<std::pair<RefPtr<FrameNode>, uint32_t>> scenePanelNodeArr;
+    TraverseTreeFindTransformScene(screenNode, targetZOrder, scenePanelNodeArr);
+    if (scenePanelNodeArr.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "No transform scene node found");
+        return nullptr;
+    }
+    RefPtr<FrameNode> retNode = nullptr;
+    std::sort(scenePanelNodeArr.begin(), scenePanelNodeArr.end(),
+        [](const auto& a, const auto& b) {
+            return a.second > b.second;
+        }
+    );
+    TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "Find node zOrder: %{public}d", scenePanelNodeArr.front().second);
+    return GetRSNode(scenePanelNodeArr.front().first);
 }
 } // namespace OHOS::Ace::NG

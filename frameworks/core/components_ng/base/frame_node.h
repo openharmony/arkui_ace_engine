@@ -302,7 +302,7 @@ public:
 
     void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
 
-    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+    void SetFrameNodeCommonOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();
 
@@ -379,12 +379,6 @@ public:
 
     template<typename T>
     RefPtr<T> GetEventHub()
-    {
-        return DynamicCast<T>(eventHub_);
-    }
-
-    template<typename T>
-    RefPtr<T> GetOrCreateEventHub()
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);

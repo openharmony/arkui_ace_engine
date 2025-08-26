@@ -1543,7 +1543,8 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
 
 /**
  * @tc.name: EventManagerDispatchMouseEventNGTest011
- * @tc.desc: DispatchMouseEventNG only work for five kinds(press/release/move/window_enter/window_leave) mouse action.
+ * @tc.desc: DispatchMouseEventNG only work for six kinds(press/release/move/window_enter/window_leave/cancel) mouse
+ * action.
  * @tc.type: FUNC
  */
 HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGTest011, TestSize.Level1)

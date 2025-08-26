@@ -468,7 +468,17 @@ ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarColor(frameNode);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    (*values)[0] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEdgeEffect(frameNode));
+    (*values)[1] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEdgeEffectAlways(frameNode));
+    (*values)[2] = static_cast<ArkUI_Int32>(WaterFlowModelNG::GetEffectEdge(frameNode)); /* 2: param index */
+    return 3; /* 3: param count */
+}
+
+ArkUI_Int32 GetEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
@@ -840,7 +850,7 @@ const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier()
         .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
         .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
         .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,
-        .getEdgeEffect = GetEdgeEffect,
+        .getEdgeEffect = GetEdgeEffectCJ,
         .setSectionOption = SetWaterFlowSectionOptions,
         .resetSectionOption = ResetWaterFlowSectionOptions,
         .getSectionOption = GetWaterFlowSectionOptions,

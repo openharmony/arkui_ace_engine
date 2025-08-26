@@ -1611,7 +1611,7 @@ HWTEST_F(ListCommonTestNg, EventHub002, TestSize.Level1)
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
@@ -1736,7 +1736,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     bool isFifthItemSelected = false;
     auto selectCallback = [&isFifthItemSelected](bool) { isFifthItemSelected = true; };
     GetChildPattern<ListItemPattern>(group, 3)->SetSelectable(false);
-    GetChildFrameNode(group, 4)->GetOrCreateEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
+    GetChildFrameNode(group, 4)->GetEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
 
     /**
      * @tc.steps: step2. Select zone.
@@ -2107,7 +2107,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator(), nullptr);
 }
@@ -2129,7 +2129,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 
@@ -2142,7 +2142,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
+    listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
@@ -2701,7 +2701,7 @@ HWTEST_F(ListCommonTestNg, InitDragDropEvent001, TestSize.Level1)
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     auto dragManager = listItemPattern->dragManager_;
-    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     // InitDragDropEvent
     auto dragEvent = gestureHub->dragEventActuator_->userCallback_;
@@ -2937,6 +2937,47 @@ HWTEST_F(ListCommonTestNg, EstimateHeight002, TestSize.Level1)
     auto gtHeight = (groupNumber - 1) * SPACE + 100.0 * 2 * groupNumber;
 
     ScrollToIndex(900, false, ScrollAlign::START);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+
+    UpdateCurrentOffset(157.0f);
+    {
+        auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
+            pattern_->GetAxis(), pattern_->itemStartIndex_);
+        calculate.SetPosMap(pattern_->posMap_);
+        calculate.GetEstimateHeightAndOffset(pattern_->GetHost());
+        auto estimatedHeight = calculate.GetEstimateHeight();
+        EXPECT_TRUE(IsEqual(estimatedHeight, gtHeight));
+    }
+}
+
+/**
+ * @tc.name: EstimateHeight003
+ * @tc.desc: While updating the position of scroll bar, test estimateHeight for multiple lazyforeach
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, EstimateHeight003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    const int32_t itemCount1 = 20;
+    const float itemMainSize1 = 200;
+    const int32_t itemCount2 = 100;
+    const float itemMainSize2 = 200;
+    CreateItemsInLazyForEach(itemCount1, itemMainSize1);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateItemsInLazyForEach(itemCount2, itemMainSize2);
+    CreateDone();
+    auto gtHeight = itemCount1 * itemMainSize1 + itemCount2 * itemMainSize2 + SPACE * (itemCount1 + itemCount2 - 1);
+
+    ScrollToIndex(70, false, ScrollAlign::START);
     {
         auto calculate = ListHeightOffsetCalculator(pattern_->itemPosition_, pattern_->spaceWidth_, pattern_->lanes_,
             pattern_->GetAxis(), pattern_->itemStartIndex_);
@@ -4254,11 +4295,11 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Focus node scroll inside.
-     * @tc.expected: Node lost focus
+     * @tc.expected: Node not lost focus
      */
     pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
     FlushUITasks();
-    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
 }
 
 /**
@@ -4284,6 +4325,67 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf002, TestSize.Level1)
     pattern_->focusIndex_ = 1;
     pattern_->startIndex_ = 1;
     pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, 1);
+    focusNode = GetChildFocusHub(frameNode_, 1);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node scroll inside.
+     * @tc.expected: Node not lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: LostChildFocusToSelf003
+ * @tc.desc: Test LostChildFocusToSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LostChildFocusToSelf003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    // Get ListItemNode
+    auto listItemNode = GetChildFrameNode(frameNode_, 1);
+    auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+    
+    // Create RepeatVirtualScroll2Node
+    auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        10,
+        10,
+        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, int32_t) {},
+        [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
+        [](int32_t, int32_t) {},
+        []() {}
+    );
+    
+    // Set parent-child relationships
+    repeatNode->AddChild(listItemNode);
+    frameNode_->AddChild(repeatNode);
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step1. Focus node scroll outside.
+     * @tc.expected: Node keep focus.
+     */
+    pattern_->focusIndex_ = 1;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 5;
     pattern_->maxListItemIndex_ = 10;
     pattern_->FireFocus();
     FlushUITasks();

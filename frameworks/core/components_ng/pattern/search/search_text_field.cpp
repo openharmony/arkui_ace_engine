@@ -44,7 +44,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    auto eventHub = parentFrameNode->GetOrCreateEventHub<SearchEventHub>();
+    auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     // Enter key type callback
     TextFieldCommonEvent event;

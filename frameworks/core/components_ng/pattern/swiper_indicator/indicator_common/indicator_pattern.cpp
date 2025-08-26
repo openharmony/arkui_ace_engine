@@ -71,14 +71,14 @@ bool IndicatorPattern::IsLoopFromProperty() const
 
 void IndicatorPattern::FireChangeEvent() const
 {
-    auto indicatorEventHub = GetOrCreateEventHub<IndicatorEventHub>();
+    auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
     indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
 }
 
 void IndicatorPattern::FireIndicatorIndexChangeEvent(int32_t index) const
 {
-    auto indicatorEventHub = GetOrCreateEventHub<IndicatorEventHub>();
+    auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
     indicatorEventHub->FireChangeEvent(GetLoopIndex(index));
 }

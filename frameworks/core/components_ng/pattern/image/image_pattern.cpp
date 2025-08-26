@@ -207,7 +207,7 @@ void ImagePattern::OnCompleteInDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetOrCreateEventHub<ImageEventHub>();
+    auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     CHECK_NULL_VOID(loadingCtx_);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
@@ -243,7 +243,7 @@ void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
     image->SetOnFinishCallback([weak = WeakPtr(GetHost())] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
-        auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
+        auto eventHub = imageNode->GetEventHub<ImageEventHub>();
         if (eventHub) {
             eventHub->FireFinishEvent();
         }
@@ -344,7 +344,7 @@ void ImagePattern::RemoveAreaChangeInner()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = host->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
         return;
@@ -478,7 +478,7 @@ void ImagePattern::OnImageLoadSuccess()
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
         paintRect.Height(), paintRect.GetX(), paintRect.GetY());
-    auto eventHub = GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = GetEventHub<ImageEventHub>();
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
@@ -617,7 +617,7 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg, const ImageError
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
-    auto imageEventHub = GetOrCreateEventHub<ImageEventHub>();
+    auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg, errorInfo);
@@ -1010,7 +1010,7 @@ void ImagePattern::InitOnKeyEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1588,7 +1588,7 @@ void ImagePattern::EnableDrag()
         info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
     };
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -2554,7 +2554,7 @@ int32_t ImagePattern::GetNextIndex(int32_t preIndex)
 void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode)
 {
     CHECK_NULL_VOID(imageFrameNode);
-    auto eventHub = imageFrameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = imageFrameNode->GetEventHub<ImageEventHub>();
     eventHub->SetOnComplete(
         [weakImage = WeakPtr<FrameNode>(imageFrameNode), weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
             if (info.GetLoadingStatus() != 1) {
@@ -2840,10 +2840,10 @@ void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, 
     for (const auto& childNode : node->GetChildren()) {
         if (AceType::InstanceOf<FrameNode>(childNode)) {
             auto frame = AceType::DynamicCast<FrameNode>(childNode);
-            if (!frame || !frame->GetOrCreateEventHub<EventHub>()) {
+            if (!frame || !frame->GetEventHub<EventHub>()) {
                 continue;
             }
-            auto callback = frame->GetOrCreateEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
+            auto callback = frame->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback;
             if (callback) {
                 callback(visible, ratio);
             }

@@ -57,9 +57,7 @@ constexpr int32_t MAX_LINES = 4;
 const std::string CALENDAR_ABILITY_NAME = "AgendaPreviewUIExtensionAbility";
 const std::string UIEXTENSION_PARAM = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_PARAM_VALUE = "sys/commonUI";
-#if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
 constexpr float PERCENT_FULL = 1.0;
-#endif
 } // namespace
 PreviewMenuController::PreviewMenuController(const WeakPtr<TextPattern>& pattern)
 {
@@ -364,7 +362,9 @@ RefPtr<FrameNode> PreviewMenuController::CreateLinkingPreviewNode()
     std::optional<CalcLength> minHeight = CalcLength(PREVIEW_MIN_HEIGHT);
     flexLayoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, minHeight));
     flexLayoutProperty->UpdateCalcMaxSize(CalcSize(maxWidth, maxHeight));
-    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, maxHeight));
+    std::optional<CalcLength> height = CalcLength(Dimension(PERCENT_FULL, DimensionUnit::PERCENT));
+    flexLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return frameNode;
 }
 

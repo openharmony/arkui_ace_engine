@@ -24,8 +24,8 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -260,7 +260,11 @@ public:
                 theme->expandDisplay_ = false;
             } else {
                 std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
-                theme->expandDisplay_ = (expandDisplay == "true");
+                if (expandDisplay == "true") {
+                    theme->expandDisplay_ = true;
+                } else {
+                    theme->expandDisplay_ = false;
+                }
             }
             theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
@@ -515,11 +519,11 @@ public:
         theme->checkMarkFontWeight_ = checkMarkFontWeight_;
         theme->checkMarkColor_ = checkMarkColor_;
         theme->contentMargin_ = contentMargin_;
-        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
-        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
         theme->maxPaddingEnd_ = maxPaddingEnd_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
         theme->menuItemChildMinHeight_ = menuItemChildMinHeight_;
@@ -1530,11 +1534,6 @@ public:
     {
         return menuBackgroundBlurStyle_;
     }
-
-    WordBreak GetWordBreak() const
-    {
-        return menuWordBreak_;
-    }
     
     int32_t GetMenuAnimationDuration() const
     {
@@ -1553,6 +1552,11 @@ public:
         } else {
             return Curves::FAST_OUT_SLOW_IN;
         }
+    }
+
+    WordBreak GetWordBreak() const
+    {
+        return menuWordBreak_;
     }
 
 private:
@@ -1662,11 +1666,11 @@ private:
 
     Edge optionPadding_;
 
-    Color selectDefaultBgColor_;
-    Dimension selectDefaultBorderRadius_;
     bool expandDisplay_ = false;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
     std::unordered_map<ControlSize, Dimension> selectMinWidthMap_;
     std::unordered_map<ControlSize, Dimension> selectMinHeightMap_;
     std::unordered_map<ControlSize, Dimension> selectBorderRadiusMap_;
@@ -1675,6 +1679,7 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
+    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
     Dimension menuItemChildMinHeight_;
     Dimension menuItemVerticalPadding_;
     Dimension menuItemGroupTitleTextFontSize_;
@@ -1685,7 +1690,6 @@ private:
     Dimension menuMaxWidth_;
     double menuMaxWidthRatio_;
     Color menuTextColor_;
-    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
     Dimension selectNormalBorderWidth_;
     Color selectNormalBorderColor_;
     Color selectFocusedTextColor_;

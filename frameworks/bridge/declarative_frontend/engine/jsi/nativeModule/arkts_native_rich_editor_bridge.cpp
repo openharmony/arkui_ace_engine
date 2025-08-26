@@ -487,7 +487,7 @@ Local<panda::ObjectRef> CreateSpanResultObject(EcmaVM *vm, const ResultObject& r
         if (resultObject.valuePixelMap) {
 #if defined (PIXEL_MAP_SUPPORTED)
             auto jsPixmap = Framework::ConvertPixmap(resultObject.valuePixelMap);
-            if (!jsPixmap->IsUndefined()) {
+            if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
                 resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                     panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
             }
@@ -552,7 +552,7 @@ void SetImageChangeSpanResult(
             returnHeight = valuePixelMap->GetHeight();
         }
         auto jsPixmap = Framework::ConvertPixmap(valuePixelMap);
-        if (!jsPixmap->IsUndefined()) {
+        if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
             resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                 panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
         }
@@ -753,7 +753,7 @@ void CreateImageStyleObj(EcmaVM* vm, Local<panda::ObjectRef>& imageStyleObj, Loc
     if (spanResult.GetValuePixelMap()) {
 #ifdef PIXEL_MAP_SUPPORTED
         auto jsPixmap = Framework::ConvertPixmap(spanResult.GetValuePixelMap());
-        if (!jsPixmap->IsUndefined()) {
+        if (!jsPixmap->IsUndefined() && jsPixmap->IsString()) {
             spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
                 panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
         }
@@ -2045,6 +2045,41 @@ ArkUINativeModuleValue RichEditorBridge::ResetUndoStyle(ArkUIRuntimeCallInfo* ru
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorUndoStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    Color color;
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseColorMetricsToColor(vm, secondArg, color, resObj)) {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorScrollBarColor(nativeNode);
+    } else {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
+        nodeModifiers->getRichEditorModifier()->setRichEditorScrollBarColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorScrollBarColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

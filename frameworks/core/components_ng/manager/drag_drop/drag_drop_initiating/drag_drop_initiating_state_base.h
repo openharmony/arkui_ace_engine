@@ -63,8 +63,8 @@ struct DragDropInitiatingParams {
         getThumbnailPixelMapCallback.Cancel();
         notifyPreDragCallback.Cancel();
         showGatherCallback.Cancel();
-        preDragStatusCallback.Cancel();
         touchOffset.Reset();
+        preDragStatusCallback.Cancel();
     }
 };
 
@@ -113,11 +113,11 @@ protected:
     void HideEventColumn();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     bool CheckStatusForPanActionBegin(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
-    int32_t GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration);
-    void FireCustomerOnDragEnd();
     void SetTextPixelMap();
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     void HandleTextDragCallback();
+    int32_t GetCurDuration(const TouchEvent& touchEvent, int32_t curDuration);
+    void FireCustomerOnDragEnd();
     void HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;

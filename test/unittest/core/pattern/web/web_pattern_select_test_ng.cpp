@@ -1214,7 +1214,6 @@ HWTEST_F(WebPatternSelectTestNg, NotifyForNextTouchEvent_002, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->delegate_ = nullptr;
-    ASSERT_EQ(webPattern->delegate_, nullptr);
     webPattern->NotifyForNextTouchEvent();
 #endif
 }
@@ -1238,7 +1237,6 @@ HWTEST_F(WebPatternSelectTestNg, InitTouchEventListener_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->touchEventListener_ = nullptr;
-    ASSERT_EQ(webPattern->touchEventListener_, nullptr);
     webPattern->InitTouchEventListener();
 #endif
 }
@@ -1568,11 +1566,13 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Leve
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
     std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/123456.png";
-    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456";
-    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
-    webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
+    snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.heic";
+    webPattern->CreateSnapshotImageFrameNode(snapshotPath, 100, 100);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
     ASSERT_NE(webPattern, nullptr);

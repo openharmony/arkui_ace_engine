@@ -1967,4 +1967,25 @@ HWTEST_F(LayoutPropertyTestNg, ConstraintEqual002, TestSize.Level1)
     bResult = layoutProperty->ConstraintEqual(preLayoutTemp, preContentTemp); // 1080
     EXPECT_TRUE(bResult);
 }
+
+/**
+ * @tc.name: UpdateChainWeight001
+ * @tc.desc: Test cast to UpdateChainWeight001
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateChainWeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    ChainWeightPair chainWeightPair(0.0f, 0.0f);
+    
+    /**
+     * @tc.steps2 Call UpdateChainWeight with chainWeightPair.
+     */
+    layoutProperty->UpdateChainWeight(chainWeightPair);
+    EXPECT_NE(layoutProperty->flexItemProperty_, nullptr);
+}
 } // namespace OHOS::Ace::NG

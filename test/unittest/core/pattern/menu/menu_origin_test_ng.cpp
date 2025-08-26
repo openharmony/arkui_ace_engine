@@ -33,6 +33,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -334,7 +335,7 @@ HWTEST_F(MenuTestNg, PerformActionTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto menuItemEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     ASSERT_NE(menuItemEventHub, nullptr);
     auto menuItemAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     ASSERT_NE(menuItemAccessibilityProperty, nullptr);
@@ -404,7 +405,7 @@ HWTEST_F(MenuTestNg, MenuAccessibilityEventTestNg001, TestSize.Level1)
      */
     int testIndex = SELECTED_INDEX;
     auto selectFunc = [optionPattern, testIndex](int index) { optionPattern->index_ = testIndex; };
-    auto optionEventHub = frameNode->GetOrCreateEventHub<MenuItemEventHub>();
+    auto optionEventHub = frameNode->GetEventHub<MenuItemEventHub>();
     optionEventHub->SetOnSelect(selectFunc);
     optionPattern->RegisterOnClick();
 
@@ -629,12 +630,6 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate005, TestSize.Level1)
     menuWrapperPattern->SetHoverMode(false);
     ASSERT_EQ(menuWrapperPattern->enableFold_, false);
 }
-
-/**
- * @tc.name: MenuPaintMethodTestNg001
- * @tc.desc: Verify MenuPaintMethod::GetContentDrawFunction.
- * @tc.type: FUNC
- */
 HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
 {
     /**
@@ -1312,6 +1307,9 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto nodeContainer = Container::Current();
+    menuNode->instanceId_ = nodeContainer->GetInstanceId();
+    AceEngine::Get().AddContainer(nodeContainer->GetInstanceId(), nodeContainer);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1800,7 +1798,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
     ASSERT_NE(previewNode, nullptr);
     menuNode->MountToParent(menuWrapperNode);
     previewNode->MountToParent(menuWrapperNode);
-    auto previewEventHub = previewNode->GetOrCreateEventHub<EventHub>();
+    auto previewEventHub = previewNode->GetEventHub<EventHub>();
     ASSERT_NE(previewEventHub, nullptr);
     auto previewGestureEventHub = previewEventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(previewGestureEventHub, nullptr);
@@ -1811,7 +1809,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
      */
     auto menuPreviewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     ASSERT_NE(menuPreviewPattern, nullptr);
-    auto hub = previewNode->GetOrCreateEventHub<EventHub>();
+    auto hub = previewNode->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     menuPreviewPattern->InitPanEvent(gestureHub);
@@ -2007,29 +2005,29 @@ HWTEST_F(MenuTestNg, MenuViewTestNg009, TestSize.Level1)
     targetNode->SetParent(targetParentNode);
     customNode->SetDepth(2);
     targetParentNode->SetParent(customNode);
-
+ 
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
     menuParam.maskEnable = true;
     menuParam.isShowInSubWindow = true;
     std::vector<OptionParam> optionParams;
-
+ 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
-
+ 
     auto container = MockContainer::Current();
     container->pipelineContext_ = pipeline;
-
+ 
     RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
-
+ 
     auto menuWrapperNode = MenuView::Create(std::move(optionParams), 11, V2::TEXT_ETS_TAG, MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(menuWrapperPattern->GetFilterColumnNode(), nullptr);
 }
-
+ 
 /**
  * @tc.name: MenuViewTestNg010
  * @tc.desc: Verify MenuView::Create when mask is false.
@@ -2046,7 +2044,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNg010, TestSize.Level1)
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
     menuParam.maskEnable = false;
-
+ 
     auto menuWrapperNode = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();

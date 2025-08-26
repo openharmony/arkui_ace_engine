@@ -84,6 +84,9 @@ public:
     static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollSnap(FrameNode* frameNode, std::optional<ScrollSnapAlign> scrollSnapAlignOpt,
+        const std::optional<Dimension>& intervalSize, const std::vector<Dimension>& snapPaginations,
+        const std::optional<bool>& enableSnapToStart, const std::optional<bool>& enableSnapToEnd);
     static int32_t GetScrollBar(FrameNode* frameNode);
     static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
     static int32_t GetAxis(FrameNode* frameNode);
@@ -94,6 +97,7 @@ public:
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static EffectEdge GetEffectEdge(FrameNode* frameNode);
     static void SetEdgeEffect(
         FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static int32_t GetEnablePaging(FrameNode* frameNode);

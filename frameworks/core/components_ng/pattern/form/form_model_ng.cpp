@@ -138,7 +138,7 @@ void FormModelNG::SetOnAcquired(std::function<void(const std::string&)>&& onAcqu
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAcquired(std::move(onAcquired));
 }
@@ -147,7 +147,7 @@ void FormModelNG::SetOnError(std::function<void(const std::string&)>&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -156,7 +156,7 @@ void FormModelNG::SetOnUninstall(std::function<void(const std::string&)>&& onUni
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUninstall(std::move(onUninstall));
 }
@@ -165,7 +165,7 @@ void FormModelNG::SetOnRouter(std::function<void(const std::string&)>&& onRouter
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRouter(std::move(onRouter));
 }
@@ -174,7 +174,7 @@ void FormModelNG::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
@@ -183,7 +183,7 @@ void FormModelNG::SetOnUpdate(std::function<void(const std::string&)>&& onUpdate
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUpdate(std::move(onUpdate));
 }

@@ -42,10 +42,7 @@ group("core_pattern_unittest") {
     "divider:divider_test_ng",
     "flex:flex_test_ng",
     "folder_stack:folder_stack_test_ng",
-    "form:form_node_test",
-    "form:form_pattern_test",
-    "form:form_test_ng",
-    "form:form_special_style_test",
+    "form:ace_form_test",
     "form_link:form_link_test",
     "gauge:gauge_test_ng",
     "grid:grid_test_ng",
@@ -132,9 +129,8 @@ group("core_pattern_unittest") {
     deps += [ "model:model_test_ng" ]
   }
 
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng)) {
-    deps += vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng
+  if (ace_engine_feature_enable_split_mode) {
+    deps += [ "stage:force_split_stage_test_ng" ]
   }
 
   if (ace_engine_feature_wearable &&

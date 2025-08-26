@@ -120,24 +120,6 @@ void JSMenuItem::AddMenuItemOptionsResource(const RefPtr<ResourceObject>& conten
             props.labelInfo = labelInfoStr;
         });
     }
-    if (startIconObj) {
-        menuItemProps.AddResource("MenuItem.StartIcon", startIconObj, [](const RefPtr<ResourceObject>& resObj,
-            MenuItemProperties& props) {
-            std::string iconStr;
-            CHECK_NE_VOID(ResourceParseUtils::ParseResMedia(resObj, iconStr), true);
-            ImageSourceInfo imageSourceInfo(iconStr);
-            props.startIcon = imageSourceInfo;
-        });
-    }
-    if (endIconObj) {
-        menuItemProps.AddResource("MenuItem.EndIcon", endIconObj, [](const RefPtr<ResourceObject>& resObj,
-            MenuItemProperties& props) {
-            std::string iconStr;
-            CHECK_NE_VOID(ResourceParseUtils::ParseResMedia(resObj, iconStr), true);
-            ImageSourceInfo imageSourceInfo(iconStr);
-            props.endIcon = imageSourceInfo;
-        });
-    }
 }
 
 void JSMenuItem::Create(const JSCallbackInfo& info)
@@ -325,8 +307,26 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
         }
     }
 
+    ParseContentFontFamily(obj);
+    MenuItemModel::GetInstance()->SetFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
+            fontSizeResObj, MenuItemFontSizeType::FONT_SIZE);
+    }
+    MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+}
+
+void JSMenuItem::ParseContentFontFamily(const JSRef<JSObject>& obj)
+{
     auto jsFamily = obj->GetProperty("family");
-    if (!jsFamily->IsNull() && jsFamily->IsString()) {
+    if (jsFamily->IsNull()) {
+        return;
+    }
+    if (jsFamily->IsString()) {
+        auto familyVal = jsFamily->ToString();
+        auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+        MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
+    } else if (jsFamily->IsObject()) {
         RefPtr<ResourceObject> familyResObj;
         std::vector<std::string> fontFamilies;
         if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
@@ -337,12 +337,6 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 familyResObj, MenuItemFontFamilyType::FONT_FAMILY);
         }
     }
-    MenuItemModel::GetInstance()->SetFontSize(fontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
-            fontSizeResObj, MenuItemFontSizeType::FONT_SIZE);
-    }
-    MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
@@ -398,8 +392,26 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
         }
     }
 
+    ParseLabelFontFamily(obj);
+    MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
+            fontSizeResObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
+    }
+    MenuItemModel::GetInstance()->SetLabelFontWeight(ConvertStrToFontWeight(weight));
+}
+
+void JSMenuItem::ParseLabelFontFamily(const JSRef<JSObject>& obj)
+{
     auto jsFamily = obj->GetProperty("family");
-    if (!jsFamily->IsNull() && jsFamily->IsString()) {
+    if (jsFamily->IsNull()) {
+        return;
+    }
+    if (jsFamily->IsString()) {
+        auto familyVal = jsFamily->ToString();
+        auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+        MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
+    } else if (jsFamily->IsObject()) {
         RefPtr<ResourceObject> familyResObj;
         std::vector<std::string> fontFamilies;
         if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
@@ -410,12 +422,6 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
                 familyResObj, MenuItemFontFamilyType::LABEL_FONT_FAMILY);
         }
     }
-    MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);
-    if (SystemProperties::ConfigChangePerform()) {
-        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
-            fontSizeResObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
-    }
-    MenuItemModel::GetInstance()->SetLabelFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)

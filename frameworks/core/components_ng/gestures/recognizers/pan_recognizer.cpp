@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_report.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
-
-#include "base/perfmonitor/perf_monitor.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -364,7 +365,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
-
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
@@ -509,8 +509,8 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
     } else if (event.sourceTool == SourceTool::TOUCHPAD) {
         PointF originPoint(lastAxisEvent_.horizontalAxis, lastAxisEvent_.verticalAxis);
         PointF finalPoint(originPoint.GetX() + delta_.GetX(), originPoint.GetY() + delta_.GetY());
-        TransformForRecognizer(originPoint, GetAttachedNode(), false, false, -1);
-        TransformForRecognizer(finalPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(originPoint, GetAttachedNode(), false, false, -1);
+        NGGestureRecognizer::Transform(finalPoint, GetAttachedNode(), false, false, -1);
         delta_ = Offset(finalPoint.GetX(), finalPoint.GetY()) - Offset(originPoint.GetX(), originPoint.GetY());
     }
 }
@@ -737,7 +737,6 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         return IsPanGestureAcceptInAllDirection(judgeDistance);
     }
-
     if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
         return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
     }
@@ -850,9 +849,6 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type)
 {
     std::string callbackName = GetCallbackName(callback);
-    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
-        localMatrix_.clear();
-    }
     if (type == GestureCallbackType::START || type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         std::string callbackTypeStr = (type == GestureCallbackType::START) ? "START" :
             (type == GestureCallbackType::END) ? "END" : "CANCEL";
@@ -869,6 +865,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             auto callbackFunction = *panEndOnDisableState_;
             callbackFunction(info);
             HandleReports(info, type);
+            localMatrix_.clear();
             return;
         }
     }
@@ -879,6 +876,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         HandleCallbackReports(info, type, PanGestureState::BEFORE);
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
+    }
+    if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
+        localMatrix_.clear();
     }
 }
 

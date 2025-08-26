@@ -53,6 +53,19 @@ struct IndexPage {
     new TextList(19, 'Graduator', 'pages/List/Graduator/Graduator'),
     new TextList(20, 'simulateSwiper', 'pages/List/simulateSwiper'),
     new TextList(21, 'scrollToControlParent', 'pages/List/scrollToControlParent'),
+    new TextList(22, 'dividerColor', 'pages/List/divider/dividerColor'),
+    new TextList(23, 'dividerEndMargin', 'pages/List/divider/dividerEndMargin'),
+    new TextList(24, 'dividerStartMargin', 'pages/List/divider/dividerStartMargin'),
+    new TextList(25, 'dividerStrokeWidth', 'pages/List/divider/dividerStrokeWidth'),
+    new TextList(26, 'friction', 'pages/List/friction/friction'),
+    new TextList(27, 'lanesMaxLength', 'pages/List/Lanes/lanesMaxLength'),
+    new TextList(28, 'lanesMinLength', 'pages/List/Lanes/lanesMinLength'),
+    new TextList(29, 'dividerColor', 'pages/List/ListItemGroup/dividerColor'),
+    new TextList(30, 'dividerEndMargin', 'pages/List/ListItemGroup/dividerEndMargin'),
+    new TextList(31, 'dividerStartMargin', 'pages/List/ListItemGroup/dividerStartMargin'),
+    new TextList(32, 'dividerStrokeWidth', 'pages/List/ListItemGroup/dividerStrokeWidth'),
+    new TextList(33, 'listCAPILazy', 'pages/List/CAPI/ListCAPILazy'),
+    new TextList(34, 'listCAPIGroup', 'pages/List/CAPI/ListCAPIGroup')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

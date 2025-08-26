@@ -541,6 +541,7 @@ public:
     {
         return onWillDismiss_;
     }
+
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
@@ -569,6 +570,16 @@ public:
     bool IsCaretMode() const
     {
         return isCaretMode_;
+    }
+
+    void SetFollowTransformOfTarget (bool followTransformOfTarget)
+    {
+        followTransformOfTarget_ = followTransformOfTarget;
+    }
+
+    bool IsFollowTransformOfTarget() const
+    {
+        return followTransformOfTarget_;
     }
 
     StateChangeFunc GetDoubleBindCallback()
@@ -601,16 +612,6 @@ public:
         return avoidTarget_;
     }
 
-    void SetFollowTransformOfTarget (bool followTransformOfTarget)
-    {
-        followTransformOfTarget_ = followTransformOfTarget;
-    }
-
-    bool IsFollowTransformOfTarget() const
-    {
-        return followTransformOfTarget_;
-    }
-
     std::optional<bool> GetIsPartialUpdate() const
     {
         return isPartialUpdate_;
@@ -630,6 +631,7 @@ public:
     {
         return isTips_;
     }
+
     void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
     {
         outlineLinearGradient_ = outlineLinearGradient;

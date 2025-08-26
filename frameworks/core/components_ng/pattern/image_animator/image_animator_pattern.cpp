@@ -433,7 +433,7 @@ void ImageAnimatorPattern::OnAttachToMainTree()
 
 void ImageAnimatorPattern::UpdateEventCallback()
 {
-    auto eventHub = GetOrCreateEventHub<ImageAnimatorEventHub>();
+    auto eventHub = GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     controlledAnimator_->ClearAllListeners();
@@ -570,7 +570,7 @@ int32_t ImageAnimatorPattern::GetNextIndex(int32_t preIndex)
 void ImageAnimatorPattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode)
 {
     CHECK_NULL_VOID(imageFrameNode);
-    auto eventHub = imageFrameNode->GetOrCreateEventHub<ImageEventHub>();
+    auto eventHub = imageFrameNode->GetEventHub<ImageEventHub>();
     eventHub->SetOnComplete(
         [weakImage = WeakPtr<FrameNode>(imageFrameNode), weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
             if (info.GetLoadingStatus() != 1) {

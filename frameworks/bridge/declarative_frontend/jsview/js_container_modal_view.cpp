@@ -108,6 +108,7 @@ void JSContainerModal::AddButtonPointLightAnim(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_APPBAR, "AddButtonPointLightAnim");
     auto pattern = GetContainerModalPattern();
     CHECK_NULL_VOID(pattern);
+    pattern->AddPointLight();
 }
 
 void JSContainerModal::CallButtonsRectChange(const JSCallbackInfo& info)

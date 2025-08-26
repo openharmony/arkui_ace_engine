@@ -319,7 +319,7 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    auto eventHub = contentNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = contentNode->GetEventHub<EventHub>();
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     sheetPattern->CheckBuilderChange();
@@ -353,7 +353,7 @@ HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
     auto targetNode = FrameNode::GetFrameNode(sheetPattern->targetTag_, sheetPattern->targetId_);
     ASSERT_NE(targetNode, nullptr);
     sheetPattern->OnAttachToFrameNode();
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto innerOnAreaChangeCallback = eventHub->onAreaChangedInnerCallbacks_[sheetNode->GetId()];
     ASSERT_NE(innerOnAreaChangeCallback, nullptr);
@@ -807,6 +807,33 @@ HWTEST_F(SheetPresentationTestNg, OnScrollEndRecursive001, TestSize.Level1)
 
     sheetObject->isSheetPosChanged_ = true;
     sheetPattern->OnScrollEndRecursive(std::nullopt);
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnScrollDragEndRecursive001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::OnScrollDragEndRecursive function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnScrollDragEndRecursive001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->isSheetPosChanged_ = false;
+    sheetPattern->OnScrollDragEndRecursive();
+    EXPECT_FALSE(sheetObject->isSheetPosChanged_);
+
+    sheetObject->isSheetPosChanged_ = true;
+    sheetPattern->OnScrollDragEndRecursive();
     EXPECT_FALSE(sheetObject->isSheetPosChanged_);
     SheetPresentationTestNg::TearDownTestCase();
 }

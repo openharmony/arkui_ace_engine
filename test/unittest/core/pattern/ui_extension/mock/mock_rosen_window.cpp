@@ -16,7 +16,8 @@
 #include "frameworks/core/components_ng/render/adapter/rosen_window.h"
 
 namespace OHOS::Ace::NG {
-RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
+RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
+    RefPtr<TaskExecutor> taskExecutor, int32_t id, bool isGlobalPipeline)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id) {}
 
 void RosenWindow::Init() {}

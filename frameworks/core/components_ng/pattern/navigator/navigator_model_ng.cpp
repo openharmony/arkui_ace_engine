@@ -34,7 +34,7 @@ void NavigatorModelNG::SetType(NavigatorType value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetType(value);
 }
@@ -43,7 +43,7 @@ void NavigatorModelNG::SetActive(bool active)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetActive(active);
 }
@@ -52,7 +52,7 @@ void NavigatorModelNG::SetUri(const std::string& uri)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetUrl(uri);
 }
@@ -61,7 +61,7 @@ void NavigatorModelNG::SetParams(const std::string& params)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetParams(params);
 }
@@ -69,7 +69,7 @@ void NavigatorModelNG::SetParams(const std::string& params)
 void NavigatorModelNG::SetParams(FrameNode* frameNode, const std::string& params)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetParams(params);
 }
@@ -77,7 +77,7 @@ void NavigatorModelNG::SetParams(FrameNode* frameNode, const std::string& params
 void NavigatorModelNG::SetType(FrameNode* frameNode, NavigatorType value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetType(value);
 }
@@ -85,7 +85,7 @@ void NavigatorModelNG::SetType(FrameNode* frameNode, NavigatorType value)
 void NavigatorModelNG::SetUri(FrameNode* frameNode, const std::string& uri)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetUrl(uri);
 }
@@ -93,7 +93,7 @@ void NavigatorModelNG::SetUri(FrameNode* frameNode, const std::string& uri)
 void NavigatorModelNG::SetActive(FrameNode* frameNode, bool active)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<NavigatorEventHub>();
+    auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetActive(active);
 }

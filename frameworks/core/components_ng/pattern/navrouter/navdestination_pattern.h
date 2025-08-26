@@ -73,7 +73,7 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
-        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetName(name);
     }
@@ -158,7 +158,7 @@ public:
 
     NavDestinationState GetNavDestinationState() const
     {
-        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
         auto state = eventHub->GetState();
         return state;
@@ -264,7 +264,7 @@ public:
 
     bool IsNeedHandleScroll() const override
     {
-        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
         if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
             return true;
         }

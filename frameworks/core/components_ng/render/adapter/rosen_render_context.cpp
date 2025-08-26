@@ -375,8 +375,8 @@ void RosenRenderContext::OnNodeDisappear(bool recursive)
     }
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
-    if (!recursive && host && host->GetOrCreateEventHub<EventHub>()) {
-        host->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
+    if (!recursive && host && host->GetEventHub<EventHub>()) {
+        host->GetEventHub<EventHub>()->SetEnabledInternal(false);
     }
     auto rect = GetPaintRectWithoutTransform();
     // only start default transition on the break point of render node tree.
@@ -484,6 +484,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
+
     std::shared_ptr<Rosen::RSUIContext> rsContext;
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
@@ -495,21 +496,28 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             rsContext = rsUIDirector_->GetRSUIContext();
         }
     }
+
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
+
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode, rsContext);
-        SetSkipCheckInMultiInstance();
-        AddFrameNodeInfoToRsNode();
-        return;
     } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
+    } else {
+        patternType_ = param->patternType;
+        CreateNodeByType(*param, isTextureExportNode, rsContext);
+    }
+
+    if (rsNode_) {
         SetSkipCheckInMultiInstance();
         AddFrameNodeInfoToRsNode();
-        return;
     }
-    patternType_ = param->patternType;
-    // create proper RSNode base on input
-    switch (param->type) {
+}
+
+void RosenRenderContext::CreateNodeByType(
+    const ContextParam& param, bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsContext)
+{
+    switch (param.type) {
         case ContextType::CANVAS:
             rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
             break;
@@ -517,7 +525,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
             rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode, rsContext);
             break;
         case ContextType::SURFACE: {
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
                 .isTextureExportNode = isTextureExportNode };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
             break;
@@ -535,6 +543,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode, rsContext);
             break;
+        case ContextType::COMPOSITE_COMPONENT: {
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
+                .isTextureExportNode = isTextureExportNode };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
+            break;
+        }
         case ContextType::INCREMENTAL_CANVAS: {
             if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
                 rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
@@ -549,8 +563,6 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         default:
             break;
     }
-    SetSkipCheckInMultiInstance();
-    AddFrameNodeInfoToRsNode();
 }
 
 void RosenRenderContext::SetSkipCheckInMultiInstance()
@@ -2353,9 +2365,6 @@ std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     CHECK_NULL_RETURN(rsNode_, {});
-    if (ShouldSkipAffineTransformation(rsNode_)) {
-        return Matrix4();
-    }
     auto center = rsNode_->GetStagingProperties().GetPivot();
     Matrix4 rotateMat;
     if (transformModifier_ && !transformModifier_->GetQuaternion().IsIdentity()) {
@@ -3197,6 +3206,12 @@ void RosenRenderContext::UpdateCustomBackground()
 {
     ModifyCustomBackground();
     RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateOverlayText()
+{
+    CHECK_NULL_VOID(overlayTextModifier_);
+    overlayTextModifier_->UpdateText();
 }
 
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)

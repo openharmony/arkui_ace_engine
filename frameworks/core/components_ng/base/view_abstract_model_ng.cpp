@@ -305,7 +305,7 @@ void CreateCustomMenuWithPreview(
     if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = context->GetThumbnailPixelMap();
         gestureHub->SetPixelMap(pixelMap);
@@ -1533,6 +1533,120 @@ void ViewAbstractModelNG::ParseOptionsDimension(const RefPtr<NG::FrameNode>& fra
             return;
     }
     return;
+}
+
+void ViewAbstractModelNG::RegisterRadiusesResObj(
+    const std::string& key, NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (key == "borderRadius.topLeft") {
+            borderRadius.radiusTopLeft = result;
+        } else if (key == "borderRadius.topRight") {
+            borderRadius.radiusTopRight = result;
+        } else if (key == "borderRadius.bottomLeft") {
+            borderRadius.radiusBottomLeft = result;
+        } else if (key == "borderRadius.bottomRight") {
+            borderRadius.radiusBottomRight = result;
+        }
+    };
+    borderRadius.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ViewAbstractModelNG::RegisterLocationPropsEdgesResObj(
+    const std::string& key, EdgesParam& edges, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        if (key == "edges.top") {
+            edges.SetTop(result);
+        } else if (key == "edges.left") {
+            edges.SetLeft(result);
+        } else if (key == "edges.bottom") {
+            edges.SetBottom(result);
+        } else if (key == "edges.right") {
+            edges.SetRight(result);
+        }
+    };
+    edges.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ViewAbstractModelNG::RegisterEdgesWidthResObj(
+    const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (key == "borderWidth.left") {
+            borderWidth.leftDimen = result;
+        } else if (key == "borderWidth.right") {
+            borderWidth.rightDimen = result;
+        } else if (key == "borderWidth.top") {
+            borderWidth.topDimen = result;
+        } else if (key == "borderWidth.bottom") {
+            borderWidth.bottomDimen = result;
+        }
+        borderWidth.multiValued = true;
+    };
+    borderWidth.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ViewAbstractModelNG::RegisterEdgeMarginsResObj(
+    const std::string& key, NG::MarginProperty& margins, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+        NG::CalcLength resultLength;
+        resultLength =
+            (result.Unit() == DimensionUnit::CALC) ? NG::CalcLength(result.CalcValue()) : NG::CalcLength(result);
+        if (key == "margin.top") {
+            margins.top = resultLength;
+        } else if (key == "margin.bottom") {
+            margins.bottom = resultLength;
+        } else if (key == "margin.left") {
+            margins.left = resultLength;
+        } else if (key == "margin.right") {
+            margins.right = resultLength;
+        }
+    };
+    margins.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ViewAbstractModelNG::RegisterLocalizedBorderColor(
+    const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (key == "borderColor.start") {
+            borderColors.startColor = result;
+        } else if (key == "borderColor.end") {
+            borderColors.endColor = result;
+        } else if (key == "borderColor.top") {
+            borderColors.topColor = result;
+        } else if (key == "borderColor.bottom") {
+            borderColors.bottomColor = result;
+        }
+    };
+    borderColors.AddResource(key, resObj, std::move(updateFunc));
 }
 
 void ViewAbstractModelNG::CreateWithDimensionResourceObj(

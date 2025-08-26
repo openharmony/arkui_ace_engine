@@ -1937,11 +1937,12 @@ uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>&
 }
 
 uint32_t ArkTSUtils::parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
 {
-    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
     Color color = DEFAULT_TEXT_SHADOW_COLOR;
-    if (!ParseJsColorAlpha(vm, jsValue, color, resObj, nodeInfo)) {
+    static const NodeInfo defaultNodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    if (!ParseJsColorAlpha(vm, jsValue, color, resObj,
+        (nodeInfo.has_value() ? nodeInfo.value() : defaultNodeInfo))) {
         color = DEFAULT_TEXT_SHADOW_COLOR;
     }
     return color.GetValue();
@@ -1970,7 +1971,7 @@ double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& 
 }
 
 double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
 {
     double radius = 0.0;
     ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
@@ -1987,7 +1988,7 @@ double ArkTSUtils::parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& 
 }
 
 double ArkTSUtils::parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    RefPtr<ResourceObject>& resObj)
+    RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
 {
     CalcDimension offset;
     if (ArkTSUtils::ParseJsResource(vm, jsValue, offset, resObj)) {
@@ -2557,6 +2558,17 @@ Local<JSValueRef> ArkTSUtils::JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info)
         return JSValueRef::Undefined(info->GetVM());
     }
     return panda::NumberRef::New(info->GetVM(), eventInfo->GetVerticalAxis());
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetPinchAxisValue(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<AxisInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    return panda::NumberRef::New(info->GetVM(), eventInfo->GetPinchAxisScale());
 }
 
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)

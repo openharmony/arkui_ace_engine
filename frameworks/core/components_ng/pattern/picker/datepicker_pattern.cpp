@@ -430,7 +430,7 @@ void DatePickerPattern::InitDisabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1215,7 +1215,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
         ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
-        auto datePickerEventHub = GetOrCreateEventHub<DatePickerEventHub>();
+        auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);

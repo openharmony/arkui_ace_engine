@@ -44,7 +44,7 @@ std::string CheckBoxGroupAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto checkBoxEventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
+    auto checkBoxEventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     auto groupName = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
     return groupName;
 }
@@ -57,7 +57,7 @@ int32_t CheckBoxGroupAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(checkBoxGroupPattern, 0);
     auto groupManager = checkBoxGroupPattern->GetGroupManager();
     CHECK_NULL_RETURN(groupManager, 0);
-    auto checkBoxGroupEventHub = checkBoxGroupPattern->GetOrCreateEventHub<CheckBoxGroupEventHub>();
+    auto checkBoxGroupEventHub = checkBoxGroupPattern->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(checkBoxGroupEventHub, 0);
     auto group = checkBoxGroupEventHub->GetGroupName();
     auto list = groupManager->GetCheckboxList(group);

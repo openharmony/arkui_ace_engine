@@ -27,7 +27,7 @@ function __establishConnection__(allow: boolean, parentView: ViewBuildNodeBase |
         if (builderNode.getInheritFreeze()) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
-        builderNode.__parentViewOfBuildNode = parentView;
+        builderNode.__parentViewOfBuildNode = new WeakRef(parentView);
         parentView?.addChildBuilderNode(builderNode);
     });
     return true;

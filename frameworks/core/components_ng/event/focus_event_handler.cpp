@@ -229,7 +229,7 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     auto onFocusAxisCallback = GetOnFocusAxisCallback();
     CHECK_NULL_RETURN(onFocusAxisCallback, false);
     auto info = FocusAxisEventInfo(event);
-    auto eventHub = node->GetOrCreateEventHub<EventHub>();
+    auto eventHub = node->GetEventHub<EventHub>();
     if (eventHub) {
         auto targetImpl = eventHub->CreateGetEventTargetImpl();
         info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -325,7 +325,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
         info.SetPatternName(node->GetTag().c_str());
-        auto eventHub = node->GetOrCreateEventHub<EventHub>();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -348,16 +348,15 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     if (isNodeNeedKey_) {
         retInternal =  ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
-            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
         return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d"
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
             "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);

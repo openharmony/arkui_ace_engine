@@ -165,19 +165,19 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(frameNode);
     auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
     auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -187,19 +187,19 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     CHECK_NULL_VOID(frameNode);
     auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
     if (buttonPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -355,19 +355,19 @@ void ToggleModelNG::OnChangeEvent(ChangeEvent&& onChangeEvent)
     CHECK_NULL_VOID(frameNode);
     auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetChangeEvent(std::move(onChangeEvent));
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChangeEvent(std::move(onChangeEvent));
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -663,7 +663,7 @@ Color ToggleModelNG::GetSwitchPointColor(FrameNode* frameNode)
 void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
@@ -938,7 +938,7 @@ std::string ToggleModelNG::DimensionTypeToString(const ToggleDimensionType toggl
 void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     auto paintProperty = frameNode->GetPaintPropertyPtr<SwitchPaintProperty>();
@@ -952,7 +952,7 @@ void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool is
 void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isOn, frameNode);
@@ -961,7 +961,7 @@ void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool 
 void ToggleModelNG::UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn, frameNode);

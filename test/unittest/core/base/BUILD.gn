@@ -141,6 +141,12 @@ ace_unittest("node_render_status_monitor_test_ng") {
   sources = [ "node_render_status_monitor_test_ng.cpp" ]
 }
 
+ace_unittest("force_split_base_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "force_split_base_test_ng.cpp" ]
+}
+
 ace_unittest("thread_safe_node_test_ng") {
   type = "new"
   module_output = "basic"
@@ -171,8 +177,7 @@ group("core_base_unittest") {
     ":view_stack_processor_test_ng",
   ]
 
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode_base_test_ng)) {
-    deps += vendor_configs.ace_engine_advanced_split_mode_base_test_ng
+  if (ace_engine_feature_enable_split_mode) {
+    deps += [":force_split_base_test_ng"]
   }
 }

@@ -385,8 +385,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
 
-    pattern->OnRealVisibleChangeInner(true);
-    pattern->OnRealVisibleChangeInner(false);
+    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChange(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -425,8 +425,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     InValidSessionWrapper(pattern);
-    pattern->OnRealVisibleChangeInner(true);
-    pattern->OnRealVisibleChangeInner(false);
+    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChange(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -994,13 +994,11 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventInValidSession, 
     auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
     EXPECT_NE(sessionWrapper, nullptr);
     pattern->isVisible_ = true;
-    pattern->curVisible_ = true;
-    pattern->OnWindowShow();
     pattern->OnWindowHide();
-    EXPECT_EQ(pattern->isVisible_, false);
-    EXPECT_EQ(pattern->curVisible_, false);
     pattern->OnWindowShow();
+    pattern->isVisible_ = false;
     pattern->OnWindowHide();
+    pattern->OnWindowShow();
 #endif
 }
 
@@ -2040,6 +2038,24 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentOnDrawReadyTestNg, Test
 }
 
 /**
+ * @tc.name: UpdateViewportConfigFromContext Test
+ * @tc.desc: Test UIExtension UpdateViewportConfigFromContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionUpdateViewportConfigFromContextTest, TestSize.Level1)
+{
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SessionViewportConfig sessionViewportConfig;
+    pattern->SetSessionViewportConfig(sessionViewportConfig);
+    pattern->UpdateSessionViewportConfigFromContext();
+    pattern->UpdateSessionViewportConfigFromContext();
+    EXPECT_EQ(pattern->sessionViewportConfig_.density_, sessionViewportConfig.density_);
+}
+
+/**
  * @tc.name: ModalUIExtensionTestNg
  * @tc.desc: Test Modal UIExtension
  * @tc.type: FUNC
@@ -2085,6 +2101,32 @@ HWTEST_F(UIExtensionComponentTestNg, ModalUIExtensionTestNgTestNg, TestSize.Leve
 }
 
 /**
+ * @tc.name: OnAttachToMainTree Test
+ * @tc.desc: Test UIExtension OnAttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, OnAttachToMainTreeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get UIExtensionPattern.
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    uiExtNode->isMoving_ = true;
+    pattern->OnAttachToMainTree();
+    uiExtNode->isMoving_ = false;
+    pattern->OnAttachToMainTree();
+    pattern->needReNotifyForeground_ = false;
+    pattern->OnAttachToMainTree();
+    EXPECT_EQ(pattern->needReNotifyForeground_, false);
+    pattern->needReNotifyForeground_ = true;
+    pattern->OnAttachToMainTree();
+    EXPECT_EQ(pattern->needReNotifyForeground_, true);
+}
+
+/**
  * @tc.name: Visible Test
  * @tc.desc: Test UIExtension Visible
  * @tc.type: FUNC
@@ -2095,10 +2137,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternVisibleTest, TestSize.Lev
     ASSERT_NE(uiExtNode, nullptr);
     auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_EQ(pattern->visiblityProperty_, true);
+    EXPECT_EQ(pattern->isVisible_, true);
     pattern->OnVisibleChange(false);
-    EXPECT_EQ(pattern->visiblityProperty_, false);
+    EXPECT_EQ(pattern->isVisible_, false);
     pattern->OnVisibleChange(true);
-    EXPECT_EQ(pattern->visiblityProperty_, true);
+    EXPECT_EQ(pattern->isVisible_, true);
 }
 } // namespace OHOS::Ace::NG

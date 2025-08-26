@@ -54,7 +54,7 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         auto toolBarMenuItems = navDestinationPattern->GetToolBarMenuItems();
 
         bool isButtonEnabled = false;
-        auto hub = navDestinationGroupNode->GetOrCreateEventHub<EventHub>();
+        auto hub = navDestinationGroupNode->GetEventHub<EventHub>();
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
@@ -829,7 +829,7 @@ void NavDestinationPattern::OnCoordScrollStart()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollStartAction();
 }
@@ -838,9 +838,9 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
-    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(offset, currentOffset);
     return 0.0f;
 }
 
@@ -848,7 +848,7 @@ void NavDestinationPattern::OnCoordScrollEnd()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollEndAction();
 }
@@ -999,7 +999,7 @@ void NavDestinationPattern::BeforeCreateLayoutWrapper()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
 }

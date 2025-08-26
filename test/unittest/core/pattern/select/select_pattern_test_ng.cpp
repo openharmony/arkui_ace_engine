@@ -2980,6 +2980,55 @@ HWTEST_F(SelectPatternTestNg, SetModifierByUser002, TestSize.Level1)
 }
 
 /**
+ *  * @tc.name: FontColorByUser001
+ * @tc.desc: Test FontColorByUser func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, FontColorByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node, obtain related objects.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    selectModelInstance.SetFontColorByUser(true);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    EXPECT_TRUE(props->GetFontColorSetByUserValue(false));
+
+    /**
+     * @tc.steps: step2. call ResetFontColor.
+     * @tc.expected: step2. Font color is reset, FontColorSetByUser flag is updated.
+     */
+    selectModelInstance.ResetFontColor();
+    EXPECT_FALSE(props->GetFontColorSetByUserValue(false));
+
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test UpdateComponentColor with BACKGROUND_COLOR.
+     * @tc.expected: The color is updated correctly.
+     */
+    selectPattern->SetModifierByUser(selectTheme, props);
+    ASSERT_NE(selectPattern->text_, nullptr);
+    auto textProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProps, nullptr);
+    ASSERT_EQ(textProps->GetTextColor(), selectTheme->GetFontColor());
+    auto context = selectPattern->text_->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    ASSERT_EQ(context->GetForegroundColor(), selectTheme->GetFontColor());
+}
+
+/**
  * @tc.name: SetOptionBgColorByUser001
  * @tc.desc: Test SetOptionBgColorByUser func
  * @tc.type: FUNC
@@ -3109,55 +3158,6 @@ HWTEST_F(SelectPatternTestNg, SetColorByUser, TestSize.Level1)
     selectPattern->SetColorByUser(select, theme);
     EXPECT_EQ(theme->GetSelectedColorText(), selectPattern->selectedFont_.FontColor);
     g_isConfigChangePerform = false;
-}
-
-/**
- * @tc.name: FontColorByUser001
- * @tc.desc: Test FontColorByUser func.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectPatternTestNg, FontColorByUser001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create select model, initialize frame node, obtain related objects.
-     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
-     */
-    SelectModelNG selectModelInstance;
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
-    selectModelInstance.Create(params);
-    selectModelInstance.SetFontColorByUser(true);
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto props = select->GetPaintProperty<SelectPaintProperty>();
-    ASSERT_NE(props, nullptr);
-    EXPECT_TRUE(props->GetFontColorSetByUserValue(false));
-
-    /**
-     * @tc.steps: step2. call ResetFontColor.
-     * @tc.expected: step2. Font color is reset, FontColorSetByUser flag is updated.
-     */
-    selectModelInstance.ResetFontColor();
-    EXPECT_FALSE(props->GetFontColorSetByUserValue(false));
-
-    auto pipeline = select->GetContextWithCheck();
-    ASSERT_NE(pipeline, nullptr);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
-    ASSERT_NE(selectTheme, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-
-    /**
-     * @tc.steps: step3. Test UpdateComponentColor with BACKGROUND_COLOR.
-     * @tc.expected: The color is updated correctly.
-     */
-    selectPattern->SetModifierByUser(selectTheme, props);
-    ASSERT_NE(selectPattern->text_, nullptr);
-    auto textProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textProps, nullptr);
-    ASSERT_EQ(textProps->GetTextColor(), selectTheme->GetFontColor());
-    auto context = selectPattern->text_->GetRenderContext();
-    ASSERT_NE(context, nullptr);
-    ASSERT_EQ(context->GetForegroundColor(), selectTheme->GetFontColor());
 }
 
 /**

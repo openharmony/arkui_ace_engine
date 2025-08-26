@@ -710,7 +710,7 @@ void clearGestures(ArkUINodeHandle node)
 // <fingerid, iterator of touchTestResults in eventManager>
 using TouchRecognizerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
 using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecognizerTarget>;
- 
+
 bool IsFingerCollectedByTarget(TouchRecognizerTarget& target, int32_t fingerId)
 {
     for (const auto& item : target) {

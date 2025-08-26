@@ -241,7 +241,18 @@ void RecognizerGroup::AddHittedRecognizerType(
 
 void RecognizerGroup::ForceCleanRecognizerWithGroup()
 {
-    ForceCleanRecognizer();
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizerWithGroup();
+        }
+    }
+    touchPoints_.clear();
+    fingersId_.clear();
+    fingerList_.clear();
+    activeFingers_.clear();
+    currentFingers_ = 0;
+    refereeState_ = RefereeState::READY;
+    disposal_ = GestureDisposal::NONE;
     for (const auto& child : recognizers_) {
         if (child) {
             child->SetGestureGroup(nullptr);

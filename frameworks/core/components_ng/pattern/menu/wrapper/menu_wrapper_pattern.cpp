@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
@@ -68,7 +67,6 @@ void MenuWrapperPattern::InitFocusEvent()
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to lost focus");
         pattern->HideMenu(HideMenuType::WRAPPER_LOSE_FOCUS);
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));
@@ -587,7 +585,9 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    CHECK_EQUAL_VOID(IsHide(), true);
+    if (IsHide()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -600,7 +600,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         TAG_LOGD(AceLogTag::ACE_MENU, "record newest finger ID %{public}d", fingerId_);
         std::vector<RefPtr<FrameNode>> toHideMenus;
         for (auto child = children.rbegin(); child != children.rend(); ++child) {
-            // get child frame node of menu wrapper
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
             CHECK_NULL_VOID(menuWrapperChildNode);
             // get menuWrapperChildNode's touch region
@@ -608,7 +607,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
                 HandleInteraction(info);
                 break;
             }
-            // if DOWN-touched outside the menu region, then hide menu
             auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
             CHECK_NULL_CONTINUE(menuPattern);
             isClearLastMenuItem_ = true;
@@ -616,6 +614,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
                 IsTouchWithinParentMenuItemZone(child, children, position)) {
                 continue;
             }
+            // if DOWN-touched outside the menu region, then hide menu
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             toHideMenus.push_back(menuWrapperChildNode);
         }
@@ -772,7 +771,7 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1112,7 +1111,6 @@ void MenuWrapperPattern::ClearAllSubMenu()
         }
     }
 }
-
 
 void MenuWrapperPattern::RequestPathRender()
 {

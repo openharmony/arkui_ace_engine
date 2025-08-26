@@ -584,7 +584,6 @@ protected:
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline,
         ListMainSizeValues listMainSizeValues, bool show);
 
-    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
@@ -650,8 +649,6 @@ protected:
     float contentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
-    bool canOverScrollStart_ = false;
-    bool canOverScrollEnd_ = false;
     bool isSpringEffect_ = false;
     bool expandSafeArea_ = false;
 
@@ -675,6 +672,7 @@ protected:
     bool isStackFromEnd_ = false;
 
     int32_t itemStartIndex_ = 0;
+    int32_t defCachedCount_ = 1;
 
 private:
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
@@ -693,12 +691,16 @@ private:
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
 
+    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
+
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
     float prevContentStartOffset_ = 0.0f;
     float prevContentEndOffset_ = 0.0f;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool canOverScroll_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;

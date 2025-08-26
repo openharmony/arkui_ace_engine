@@ -49,6 +49,8 @@ public:
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
         const std::string& pageName);
     static void SetApplicationInfo();
+    static void ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName,
+        const std::string& componentName, const std::string& bundleName, const int32_t pid);
 };
 
 } // namespace OHOS::Ace

@@ -41,7 +41,7 @@ public:
      * @param keyStr The key of extraElementValueInt.
      * @param valueInt The val of extraElementValueInt.
      */
-    int32_t SetExtraElementInfo(const std::string keyStr, const int32_t valueInt)
+    int32_t SetExtraElementInfo(const std::string& keyStr, const int32_t valueInt)
     {
         return -1;
     }

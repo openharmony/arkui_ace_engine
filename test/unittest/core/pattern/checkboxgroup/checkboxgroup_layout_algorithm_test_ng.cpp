@@ -49,7 +49,7 @@ constexpr Dimension HORIZONTAL_PADDING = Dimension(48.0);
 constexpr Dimension VERTICAL_PADDING = Dimension(24.0);
 constexpr Dimension DEFAULT_PADDING_SIZE = Dimension(96.0);
 const std::string CHECKBOXGROUP_NAME = "checkboxGroup";
-constexpr float marginValue = 10.0f;
+constexpr float MARGIN_VALUE = 10.0f;
 constexpr int CHILD_NODE_ID = 100;
 
 } // namespace
@@ -481,11 +481,11 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest011
     auto geometry = host->GetGeometryNode();
     ASSERT_NE(geometry, nullptr);
     geometry->SetContentSize(SizeF(CHECKBOXGROUP_COMPONENT_WIDTH, CHECKBOXGROUP_COMPONENT_WIDTH));
-    MarginPropertyF margin { .left = marginValue, .right = marginValue, .top = marginValue, .bottom = marginValue };
+    MarginPropertyF margin { .left = MARGIN_VALUE, .right = MARGIN_VALUE, .top = MARGIN_VALUE, .bottom = MARGIN_VALUE };
     geometry->UpdateMargin(margin);
     auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FALSE(size.has_value());
     EXPECT_EQ(geometry->GetContentSize(), SizeF(0, 0));
-    EXPECT_EQ(geometry->GetMargin()->left.value(), marginValue);
+    EXPECT_EQ(geometry->GetMargin()->left.value(), MARGIN_VALUE);
 }
 } // namespace OHOS::Ace::NG

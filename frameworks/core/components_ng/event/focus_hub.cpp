@@ -20,10 +20,10 @@
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
-#include "core/event/key_event.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1032,7 +1032,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep)
 bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
 {
     if (IsHomeOrEndStep(moveStep)) {
-        if (!GetIsFocusGroup() && IsNestingFocusGroup()) {
+        if (!GetIsFocusGroup() || IsNestingFocusGroup()) {
             return false;
         }
         auto nextNode = GetHeadOrTailChild(!IsFocusStepForward(moveStep), true);
@@ -1132,9 +1132,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusR
         focusNode->GetFrameName().c_str(),
         SEC_PARAM(focusNode->GetFrameId()));
     if (IsCurrentFocus()) {
-        auto focusManger = GetFocusManager();
-        CHECK_NULL_VOID(focusManger);
-        focusManger->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
+        GetFocusManager()->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -2153,12 +2151,26 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    MoveOffsetParam param {
-        scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset,
-        scrollAbility.contentEndOffset,
-        false
-    };
+    MoveOffsetParam param { scrollAxis == Axis::VERTICAL, scrollAbility.contentStartOffset,
+        scrollAbility.contentEndOffset, false };
+    if (AceType::InstanceOf<ListPattern>(parentPattern)) {
+        auto listPattern = AceType::DynamicCast<ListPattern>(parentPattern);
+        RefPtr<UINode> parent = curFrameNode;
+        RefPtr<FrameNode> listItemNode;
+        while (parent && parent != parentFrameNode) {
+            if (parent->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                listItemNode = AceType::DynamicCast<FrameNode>(parent);
+            }
+            parent = parent->GetParent();
+        }
+        if (listItemNode) {
+            auto listItemPattern = listItemNode->GetPattern<ListItemPattern>();
+            auto indexInListItemGroup = listItemPattern->GetIndexInListItemGroup();
+            auto indexInList = listItemPattern->GetIndexInList();
+            listPattern->LayoutListForFocus(
+                indexInList, indexInListItemGroup == -1 ? std::nullopt : std::optional<int32_t>(indexInListItemGroup));
+        }
+    }
     auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
@@ -2365,6 +2377,10 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     CHECK_NULL_RETURN(curGeometryNode, nullptr);
     RectF curFrameRect = RectF(curFrameOffset, curGeometryNode->GetFrameRect().GetSize());
     curFrameRect.SetOffset(curFrameOffset);
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Current focus node is %{public}s/%{public}d. Rect is {%{public}f,%{public}f,%{public}f,%{public}f}.",
+        GetFrameName().c_str(), GetFrameId(), curFrameRect.Left(), curFrameRect.Top(), curFrameRect.Right(),
+        curFrameRect.Bottom());
     bool isTabStep = IsFocusStepTab(step);
     double resDistance = !isTabStep ? std::numeric_limits<double>::max() : 0.0f;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();

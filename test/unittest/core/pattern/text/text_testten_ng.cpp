@@ -821,7 +821,7 @@ HWTEST_F(TextFieldTenPatternNg, InitMouseEvent001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     auto host = pattern->GetHost();
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     pattern->currentMouseStyle_ = MouseFormat::WEST;
     pattern->InitMouseEvent();
@@ -1270,7 +1270,7 @@ HWTEST_F(TextFieldTenPatternNg, GetThumbnailCallback001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     textFrameNode->draggable_ = true;
-    textFrameNode->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
+    textFrameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     textPattern->copyOption_ = CopyOptions::InApp;
@@ -1851,7 +1851,7 @@ HWTEST_F(TextFieldTenPatternNg, HandleMouseRightButton001, TestSize.Level1)
     textModelNG.SetTextDetectEnable(true);
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
-    auto inputHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputHub->mouseEventActuator_->inputEvents_.clear();
     pattern->mouseEventInitialized_ = false;
     pattern->InitMouseEvent();
@@ -1996,7 +1996,7 @@ HWTEST_F(TextFieldTenPatternNg, GetUrlSpanColor001, TestSize.Level1)
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(textBase);
     pattern->selectOverlay_->ProcessOverlay({ .animation = false });
     pipeline->themeManager_ = theme;
-    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = pattern->GetHost()->GetEventHub<EventHub>();
     eventHub->enabled_ = true;
     Color ret = pattern->GetUrlSpanColor();
     EXPECT_EQ(ret, pipeline->GetTheme<TextTheme>()->GetUrlDefaultColor());

@@ -292,7 +292,7 @@ std::vector<RefPtr<NG::Paragraph>> SpanString::GetLayoutInfo(const RefPtr<SpanSt
         NG::ParagraphUtil::HandleEmptyParagraph(paragraph, group);
         paragraph->Build();
         auto maxWidthVal = maxWidth.has_value()? maxWidth.value() : std::numeric_limits<float>::max();
-        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle);
+        NG::ParagraphUtil::ApplyIndent(spanParagraphStyle, paragraph, maxWidthVal, textStyle, maxWidthVal);
         paragraph->Layout(maxWidthVal);
         paraVec.emplace_back(paragraph);
     }
@@ -659,8 +659,8 @@ bool SpanString::ProcessMultiDecorationSpan(const RefPtr<SpanBase>& span, int32_
     return true;
 }
 
-void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration,
-    bool isFromHtml, bool removeOriginStyle)
+void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecoration, bool isFromHtml,
+    bool removeOriginStyle)
 {
     if (!span || !CheckRange(span)) {
         return;
@@ -1203,7 +1203,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = Referenced::RawPtr(spanStr);
+    SpanString* spanString = AceType::RawPtr(spanStr);
     std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback));
     return spanStr;
@@ -1214,7 +1214,7 @@ RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff,
     int32_t instanceId)
 {
     RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
-    SpanString* spanString = Referenced::RawPtr(spanStr);
+    SpanString* spanString = AceType::RawPtr(spanStr);
     DecodeTlvExt(buff, spanString, std::move(unmarshallCallback), instanceId);
     return spanStr;
 }

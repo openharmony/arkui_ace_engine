@@ -53,6 +53,7 @@ public:
     virtual void SetSymbolType(SymbolType value) = 0;
     virtual void SetSymbolShadow(const SymbolShadow& symbolShadow) = 0;
     virtual void SetShaderStyle(const std::vector<SymbolGradient>& style) = 0;
+    virtual void ResetShaderStyle() = 0;
 
     virtual void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
         const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) = 0;

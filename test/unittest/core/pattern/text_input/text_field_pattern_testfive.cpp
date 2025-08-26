@@ -35,7 +35,7 @@ public:
 HWTEST_F(TextFieldPatternTestFive, UpdateInputFilterErrorText001, TestSize.Level0)
 {
     CreateTextField();
-    auto textFieldEventHub = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
+    auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
 
     textFieldEventHub->SetOnInputFilterError([](std::u16string errorText) { ASSERT_TRUE(errorText.empty()); });
     pattern_->UpdateInputFilterErrorText(u"");
@@ -1247,7 +1247,7 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest004, TestSize.Le
 
 /**
  * @tc.name: TextFieldSelectControllerTest005
- * @tc.desc: test textfield select controller function
+ * @tc.desc: test textfield select controller function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest005, TestSize.Level0)

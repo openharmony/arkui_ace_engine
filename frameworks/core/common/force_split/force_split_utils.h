@@ -26,6 +26,8 @@ class NavBarNode;
 
 struct ForceSplitConfig {
     bool isArkUIHookEnabled = false;
+    bool navigationDisablePlaceholder = false;
+    bool navigationDisableDivider = false;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
 };

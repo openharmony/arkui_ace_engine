@@ -713,6 +713,7 @@ public:
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay);
+    static void SetOverlayNode(FrameNode* frameNode, FrameNode* overlayNode, const NG::OverlayOptions& overlay);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc);
     static void SetHasBorderImageSlice(FrameNode* frameNode, bool tag);
@@ -785,6 +786,8 @@ public:
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
+    static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
     static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
@@ -924,6 +927,7 @@ public:
     static Matrix4 GetTransform(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
+    static std::optional<EdgesParam> GetPositionEdges(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
     static NG::Gradient GetSweepGradient(FrameNode* frameNode);
     static NG::Gradient GetRadialGradient(FrameNode* frameNode);
@@ -935,19 +939,19 @@ public:
     static FlexAlign GetAlignSelf(FrameNode* frameNode);
     static void SetDragEventStrictReportingEnabled(int32_t instanceId, bool dragEventStrictReportingEnabled);
     // used in JS FrameNode
-    static void SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
-    static void SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
-    static void SetJSFrameNodeOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
-    static void SetJSFrameNodeOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
+    static void SetFrameNodeCommonOnClick(FrameNode* frameNode, GestureEventFunc&& clickEventFunc);
+    static void SetFrameNodeCommonOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc);
+    static void SetFrameNodeCommonOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear);
+    static void SetFrameNodeCommonOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear);
     static void SetJSFrameNodeOnKeyCallback(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback);
     static void SetJSFrameNodeOnFocusCallback(FrameNode* frameNode, OnFocusFunc&& onFocusCallback);
     static void SetJSFrameNodeOnBlurCallback(FrameNode* frameNode, OnBlurFunc&& onBlurCallback);
-    static void SetJSFrameNodeOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
-    static void SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
-    static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
-    static void SetJSFrameNodeOnSizeChange(
+    static void SetFrameNodeCommonOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc);
+    static void SetFrameNodeCommonOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc);
+    static void SetFrameNodeCommonOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
+    static void SetFrameNodeCommonOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
-    static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    static void SetFrameNodeCommonOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
         int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
@@ -986,6 +990,7 @@ public:
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
     static Dimension GetWidth(FrameNode* frameNode);
     static Dimension GetHeight(FrameNode* frameNode);
+    static LayoutCalPolicy GetLayoutPolicy(FrameNode* frameNode, bool isWidth);
     static Color GetBackgroundColor(FrameNode* frameNode);
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
@@ -1084,10 +1089,12 @@ public:
     // Get property value from rsNode
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
     static void UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
+    static void CheckMainThread();
+
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY);
+        const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;

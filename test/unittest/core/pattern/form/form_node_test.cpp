@@ -86,7 +86,7 @@ HWTEST_F(FormNodeTest, FormNodeTest_001, TestSize.Level1)
     auto res = formNode->TouchTest(globalPoint, parentLocalPoint,
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
     EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
-  
+
     touchRestrict.hitTestType = SourceType::NONE;
     res = formNode->TouchTest(globalPoint, parentLocalPoint,
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
@@ -483,5 +483,17 @@ HWTEST_F(FormNodeTest, FormNodeTest_016, TestSize.Level1)
     pattern->UpdateStaticCard();
     auto retRef = pattern->GetAccessibilitySessionAdapter();
     ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormNodeTest_017
+ * @tc.desc: GetImageId
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_017, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    int32_t imageId = formNode->GetImageId();
+    ASSERT_NE(imageId, 0);
 }
 } // namespace OHOS::Ace::NG

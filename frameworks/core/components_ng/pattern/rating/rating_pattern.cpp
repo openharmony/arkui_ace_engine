@@ -395,7 +395,7 @@ void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 
 void RatingPattern::FireChangeEvent()
 {
-    auto ratingEventHub = GetOrCreateEventHub<RatingEventHub>();
+    auto ratingEventHub = GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(ratingEventHub);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
@@ -744,7 +744,7 @@ void RatingPattern::SetRatingScore(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -769,7 +769,7 @@ void RatingPattern::UpdateRatingScore(double ratingScore)
 void RatingPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!(mouseEvent_ && hoverEvent_));
-    auto eventHub = GetHost()->GetOrCreateEventHub<RatingEventHub>();
+    auto eventHub = GetHost()->GetEventHub<RatingEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
@@ -982,7 +982,7 @@ void RatingPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1006,7 +1006,7 @@ void RatingPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -1160,7 +1160,7 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto isIndicator = IsIndicator();
     auto ratingScore = renderProperty->GetRatingScoreValue(themeRatingScore_);
     auto stepSize = renderProperty->GetStepSizeValue(themeStepSize_);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);

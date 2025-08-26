@@ -64,7 +64,7 @@ void PlatformPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -194,12 +194,9 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& changedTouches = info.GetChangedTouches();
-    if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
-        auto focusHub = host->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
-    }
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
 
     if (tag_ != AceLogTag::ACE_DYNAMIC_COMPONENT) {
         bool ret = HandleTouchEvent(pointerEvent);

@@ -95,7 +95,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
   private isFreeze: boolean;
-  public __parentViewOfBuildNode?: ViewBuildNodeBase;
+  public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
   private updateParams_: Object;
   private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions) {
@@ -114,7 +114,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
-      return this.__parentViewOfBuildNode.findProvidePU__(providePropName);
+      return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
     }
     return undefined;
   }
@@ -244,10 +244,10 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_.setBuilderNode(this);
     let id = this.frameNode_.getUniqueId();
     if (this.id_ && this.id_ !== id) {
-      this.__parentViewOfBuildNode?.removeChildBuilderNode(this.id_);
+      this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
     }
     this.id_ = id;
-    this.__parentViewOfBuildNode?.addChildBuilderNode(this);
+    this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
     FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
     __JSScopeUtil__.restoreInstanceId();
   }

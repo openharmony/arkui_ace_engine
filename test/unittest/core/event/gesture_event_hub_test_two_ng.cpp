@@ -929,4 +929,21 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart035, TestSize.Level1)
     gestureHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }
+
+/**
+ * @tc.name: GestureEventHubTest035
+ * @tc.desc: Test Set and Get touchTestDoneFunc;
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest035, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    auto touchTestDoneFunc = [](const std::shared_ptr<BaseGestureEvent>& event,
+                                 const std::list<RefPtr<NGGestureRecognizer>>& recognizer) {};
+    gestureEventHub->SetOnTouchTestDoneCallback(std::move(touchTestDoneFunc));
+    EXPECT_TRUE(gestureEventHub->GetOnTouchTestDoneCallback());
+}
 } // namespace OHOS::Ace::NG

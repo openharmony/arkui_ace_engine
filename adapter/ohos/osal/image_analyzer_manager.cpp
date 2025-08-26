@@ -47,7 +47,7 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
         analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
         analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
-        analyzerUIConfig_.overlayOffset = offset;
+        analyzerUIConfig_.overlayOffset = { offset.GetX(), offset.GetY() };
     }
 
     RefPtr<NG::UINode> customNode;
@@ -144,7 +144,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
         analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
         analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
-        analyzerUIConfig_.overlayOffset = offset;
+        analyzerUIConfig_.overlayOffset = { offset.GetX(), offset.GetY() };
     }
 
     if (holder_ != ImageAnalyzerHolder::IMAGE) {
@@ -222,7 +222,7 @@ bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
 {
     auto node = frameNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    auto eventHub = node->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->IsEnabled()) {
         return false;
@@ -292,8 +292,8 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
         auto props = DynamicCast<NG::ImageLayoutProperty>(layoutProps);
         CHECK_NULL_VOID(props);
-        if (analyzerUIConfig_.imageFit != props->GetImageFit().value_or(ImageFit::COVER)) {
-            analyzerUIConfig_.imageFit = props->GetImageFit().value_or(ImageFit::COVER);
+        if (analyzerUIConfig_.imageFit != static_cast<int32_t>(props->GetImageFit().value_or(ImageFit::COVER))) {
+            analyzerUIConfig_.imageFit = static_cast<int32_t>(props->GetImageFit().value_or(ImageFit::COVER));
             isUIConfigUpdate = true;
         }
     }
@@ -321,8 +321,8 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
-    if (!(analyzerUIConfig_.transformMat == transformMat)) {
-        analyzerUIConfig_.transformMat = transformMat;
+    if (!(transformMat == analyzerUIConfig_.transformMat)) {
+        transformMat.CopyMatrix(analyzerUIConfig_.transformMat);
         isUIConfigUpdate = true;
     }
 
@@ -339,14 +339,15 @@ bool ImageAnalyzerManager::UpdateVideoConfig(const PixelMapInfo& info)
     auto layoutProps = node->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, false);
     auto videoProps = DynamicCast<NG::VideoLayoutProperty>(layoutProps);
-    if (analyzerUIConfig_.imageFit != videoProps->GetObjectFitValue(ImageFit::COVER)) {
-        analyzerUIConfig_.imageFit = videoProps->GetObjectFitValue(ImageFit::COVER);
+    if (analyzerUIConfig_.imageFit != static_cast<int32_t>(videoProps->GetObjectFitValue(ImageFit::COVER))) {
+        analyzerUIConfig_.imageFit = static_cast<int32_t>(videoProps->GetObjectFitValue(ImageFit::COVER));
         shouldUpdateFit = true;
     }
 
     bool shouldUpdateSize = analyzerUIConfig_.contentWidth != info.width ||
                             analyzerUIConfig_.contentHeight != info.height ||
-                            analyzerUIConfig_.overlayOffset != info.overlayOffset;
+                            analyzerUIConfig_.overlayOffset.GetX() != info.overlayOffset.GetX() ||
+                            analyzerUIConfig_.overlayOffset.GetY() != info.overlayOffset.GetY();
     if (shouldUpdateSize) {
         analyzerUIConfig_.UpdateFromInfo(info);
     }
@@ -398,7 +399,7 @@ void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>&
         analyzerUIConfig_.touchInfo.touchPoint.x = 1.0 * pointX / rectWidth * pixelMap->GetWidth();
         analyzerUIConfig_.touchInfo.touchPoint.y = 1.0 * pointY / rectHeight * pixelMap->GetHeight();
     }
-    analyzerUIConfig_.touchInfo.touchType = TouchType::DOWN;
+    analyzerUIConfig_.touchInfo.touchType = static_cast<size_t>(TouchType::DOWN);
     analyzerUIConfig_.selectedStatus = Status::SELECTED;
     analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
     if (!analyzerUIConfig_.onTextSelected) {
@@ -419,7 +420,7 @@ void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPoin
 {
     analyzerUIConfig_.touchInfo.touchPoint.x = touchPointX - analyzerUIConfig_.overlayOffset.GetX();
     analyzerUIConfig_.touchInfo.touchPoint.y = touchPointY - analyzerUIConfig_.overlayOffset.GetY();
-    analyzerUIConfig_.touchInfo.touchType = touchType;
+    analyzerUIConfig_.touchInfo.touchType = static_cast<size_t>(touchType);
     ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
 }
 

@@ -152,8 +152,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
 
     auto nodePtr3 = Inspector::GetFrameNodeByKey("");
     ASSERT_NE(nodePtr3, nullptr);
-
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -194,8 +192,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      * @tc.expected: expect nodePtr2 not null
      */
     auto test3 = Inspector::GetInspectorNodeByKey("");
-
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -277,8 +273,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg004, TestSize.Level1)
     EXPECT_EQ(test3, true);
     test3 = Inspector::SendEventByKey("", 31, "params");
     EXPECT_EQ(test3, true);
-
-    context->rootNode_ = nullptr;
 }
 
 /**
@@ -415,7 +409,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     auto test = Inspector::GetInspector(false);
     auto str = "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}";
     EXPECT_EQ(test, str);
-
     context1->stageManager_ = nullptr;
 }
 

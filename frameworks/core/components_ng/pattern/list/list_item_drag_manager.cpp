@@ -58,7 +58,7 @@ void ListItemDragManager::InitDragDropEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -108,7 +108,7 @@ void ListItemDragManager::DeInitDragDropEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listItemEventHub = host->GetOrCreateEventHub<ListItemEventHub>();
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -248,7 +248,7 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
     res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
-    
+
     return res;
 }
 

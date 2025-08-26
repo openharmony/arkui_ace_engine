@@ -680,7 +680,7 @@ void SecurityComponentPattern::HandleEnabled()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
@@ -701,7 +701,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
     auto buttonLayoutProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     const auto& buttonRender = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
-    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
     if (scLayoutProp->GetBackgroundBorderWidth().has_value()) {
@@ -803,7 +803,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
     if (isAppearCallback_) {
         return;
     }
-    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = frameNode->GetContextRefPtr();

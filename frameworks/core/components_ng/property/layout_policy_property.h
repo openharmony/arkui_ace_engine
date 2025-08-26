@@ -125,6 +125,13 @@ struct LayoutPolicyProperty {
     {
         return IsWidthAdaptive() && IsHeightAdaptive();
     }
+    std::optional<LayoutCalPolicy> GetLayoutPolicy(bool isWidth)
+    {
+        if (isWidth) {
+            return widthLayoutPolicy_;
+        }
+        return heightLayoutPolicy_;
+    }
 };
 
 } // namespace OHOS::Ace::NG

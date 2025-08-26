@@ -17,10 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "core/common/container.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -262,7 +262,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 }
 
 void MountScrollToMenu(
-    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, RefPtr<FrameNode> menuNode)
 {
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
@@ -629,7 +629,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu(HideMenuType::VIEW_DRAG_END);
 }
 
@@ -751,7 +750,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(target);
-    auto eventHub = target->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHub = target->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -762,12 +761,15 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
-    auto hub = imageNode->GetOrCreateEventHub<EventHub>();
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
+    auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
@@ -908,7 +910,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -1498,7 +1500,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
-    MountScrollToMenu(customNode, scroll, type, menuNode);
+    MountScrollToMenu(customNode, scroll, menuNode);
     UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
     if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
@@ -1533,6 +1535,12 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
         menuParamValue.ReloadResources();
         if (menuParamValue.borderRadius) {
             menuParamValue.borderRadius->ReloadResources();
+            if (!menuParamValue.borderRadius->radiusTopLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusTopRight.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomLeft.has_value() &&
+                !menuParamValue.borderRadius->radiusBottomRight.has_value()) {
+                menuParamValue.borderRadius = std::nullopt;
+            }
         }
         if (menuParamValue.previewBorderRadius) {
             menuParamValue.previewBorderRadius->ReloadResources();
@@ -1838,7 +1846,7 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
     pattern->SetTextNode(textNode);
     pattern->SetBlockClick(params[index].disableSystemClick);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(params[index].action);
 }
@@ -1858,7 +1866,7 @@ void MenuView::CreateOption(const OptionValueInfo& value, const std::string& ico
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
 
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMenuOnClick(onClickFunc);
 }
@@ -1958,7 +1966,7 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         CHECK_NULL_VOID(menuPattern);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetOrCreateEventHub<EventHub>();
+        auto eventHub = optionNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetEnabled(params[i].enabled);
         auto focusHub = optionNode->GetFocusHub();
@@ -2018,7 +2026,7 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     pasteNode->MarkModifyDone();
     row->MountToParent(option);
     row->MarkModifyDone();
-    auto eventHub = option->GetOrCreateEventHub<MenuItemEventHub>();
+    auto eventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     pasteNode->GetOrCreateGestureEventHub()->SetUserOnClick([onClickFunc](GestureEvent& info) {
         if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
@@ -2500,6 +2508,9 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetNotifyChildAction(
         [weak = WeakPtr<FrameNode>(menuNode)] (const RefPtr<FrameNode>& node, NotifyChildActionType childActionType) {
+            if (childActionType != NotifyChildActionType::ACTION_CLICK) {
+                return AccessibilityActionResult::ACTION_OK;
+            }
             auto result = AccessibilityActionResult::ACTION_ERROR;
             CHECK_NULL_RETURN(node, result);
             auto menu = weak.Upgrade();

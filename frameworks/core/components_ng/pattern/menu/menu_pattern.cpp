@@ -17,7 +17,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -191,7 +190,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
@@ -264,7 +263,7 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 
@@ -317,7 +316,7 @@ void MenuPattern::OnModifyDone()
         CHECK_NULL_VOID(node);
         auto scroll = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(scroll);
-        auto hub = scroll->GetOrCreateEventHub<EventHub>();
+        auto hub = scroll->GetEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -996,7 +995,6 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
 }
@@ -1320,15 +1318,6 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     // move padding from scroll to inner menu
     auto scrollProp = scroll->GetLayoutProperty();
     scrollProp->UpdatePadding(PaddingProperty());
-}
-
-void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
-{
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(scroll);
-    scroll->GetRenderContext()->UpdateClipEdge(false);
 }
 
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
@@ -1790,9 +1779,8 @@ void MenuPattern::ShowStackMainMenuOpacityAnimation(const RefPtr<FrameNode>& mai
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetDuration(STACK_MAIN_MENU_APPEAR_DURATION);
     AnimationUtils::Animate(opacityOption, [innerMenuContext]() {
-        if (innerMenuContext) {
-            innerMenuContext->UpdateOpacity(MAIN_MENU_OPACITY);
-        }
+        CHECK_NULL_VOID(innerMenuContext);
+        innerMenuContext->UpdateOpacity(MAIN_MENU_OPACITY);
     }, nullptr, nullptr, mainMenu->GetContextRefPtr());
 }
 
@@ -1813,8 +1801,8 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     CHECK_NULL_VOID(mainMenuAccessibilityProps);
     mainMenuAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
 
-    ShowStackMainMenuAnimation(mainMenu, host, menuWrapper);
     ShowStackSubMenuAnimation(mainMenu, host);
+    ShowStackMainMenuAnimation(mainMenu, host, menuWrapper);
     isSubMenuShow_ = false;
 }
 
@@ -1979,10 +1967,11 @@ void MenuPattern::ShowArrowRotateAnimation() const
     }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
-void MenuPattern::ShowArrowReverseRotateAnimation(const RefPtr<FrameNode>& subMenuNode) const
+void MenuPattern::ShowArrowReverseRotateAnimation() const
 {
-    CHECK_NULL_VOID(subMenuNode);
-    auto subImageNode = GetArrowNode(subMenuNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto subImageNode = GetArrowNode(host);
     CHECK_NULL_VOID(subImageNode);
     auto subImageContext = subImageNode->GetRenderContext();
     CHECK_NULL_VOID(subImageContext);
@@ -1991,10 +1980,9 @@ void MenuPattern::ShowArrowReverseRotateAnimation(const RefPtr<FrameNode>& subMe
     double arrowRotateAnimationDuration = 200.0f;
     option.SetDuration(arrowRotateAnimationDuration);
     AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
-    }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+    }, nullptr, nullptr, host->GetContextRefPtr());
 }
 
 RefPtr<FrameNode> MenuPattern::GetArrowNode(const RefPtr<FrameNode>& host) const
@@ -2056,7 +2044,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
         }
     }, nullptr, nullptr, subMenuNode->GetContextRefPtr());
 
-    ShowArrowReverseRotateAnimation(subMenuNode);
+    ShowArrowReverseRotateAnimation();
 
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
@@ -2456,7 +2444,6 @@ void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
     wrapperPattern->HideMenu(HideMenuType::MENU_DRAG_END);
 }
 
@@ -2470,7 +2457,6 @@ void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float veloci
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
     wrapperPattern->HideMenu(HideMenuType::SCROLL_DRAG_END);
 }
 

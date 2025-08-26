@@ -6186,7 +6186,7 @@ void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
         TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }
 
-void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath)
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
     if (snapshotPath.empty()) {
         return;
@@ -6196,14 +6196,30 @@ void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath)
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), snapshotPath]() {
+        [weak = WeakClaim(this), snapshotPath, width, height]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
-            webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+            webPattern->CreateSnapshotImageFrameNode(snapshotPath, width, height);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebLoadSnapshot");
+}
+
+void WebDelegate::RecordBlanklessFrameSize(uint32_t width, uint32_t height)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->RecordBlanklessFrameSize(width, height);
+}
+
+double WebDelegate::ResizeWidth() const
+{
+    return resizeWidth_;
+}
+
+double WebDelegate::ResizeHeight() const
+{
+    return resizeHeight_;
 }
 
 void WebDelegate::SetVisibility(bool isVisible)
@@ -6638,6 +6654,15 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
     }
 }
 
+void WebDelegate::HandleStylusTouchDown(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info, bool from_overlay)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnStylusTouchPress(stylus_touch_point_info, from_overlay);
+    }
+}
+
 void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
@@ -6646,11 +6671,30 @@ void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double
     }
 }
 
+void WebDelegate::HandleStylusTouchUp(
+    const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info, bool from_overlay)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnStylusTouchRelease(stylus_touch_point_info, from_overlay);
+    }
+}
+
 void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->OnTouchMove(id, x, y, from_overlay);
+    }
+}
+
+void WebDelegate::HandleStylusTouchMove(
+    const std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>>& stylus_touch_point_infos,
+    bool from_overlay)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnStylusTouchMove(stylus_touch_point_infos, from_overlay);
     }
 }
 

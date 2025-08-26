@@ -399,4 +399,62 @@ HWTEST_F(WaterFlowSWTest, ScrollToTagetTest001, TestSize.Level1)
     EXPECT_EQ(ScrollablePattern::ScrollToTarget(frameNode_, childNode, 0.0f, align), RET_SUCCESS);
     EXPECT_TRUE(TickPosition(-100.0f));
 }
+
+/**
+ * @tc.name: InitialLoadOrderBug001
+ * @tc.desc: Test that WaterFlow sliding window mode loads items in correct order during initialization
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, InitialLoadOrderBug001, TestSize.Level1)
+{
+    // Initialize tracking variables
+    int32_t firstIndex = -1;
+    int32_t lastIndex = -1;
+
+    // Define callback to track scroll indices
+    auto onScrollIndex = [&firstIndex, &lastIndex](int32_t first, int32_t last) {
+        firstIndex = first;
+        lastIndex = last;
+    };
+
+    // Initialize waterflow model and set basic properties
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnScrollIndex(onScrollIndex);
+
+    // Start with some data, then test transition
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(10, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    // Test transition to empty
+    mockLazy->SetTotalCount(0);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
+    lazyForEachNode->OnDataReloaded();
+    FlushUITasks();
+
+    // Verify empty state
+    EXPECT_EQ(firstIndex, Infinity<int32_t>());
+    EXPECT_EQ(lastIndex, -1);
+
+    // Test transition back to populated - trigger CheckReset branch
+    mockLazy->SetTotalCount(26);
+    lazyForEachNode->OnDataReloaded();
+
+    // Manually trigger measure to call CheckReset() instead of immediate FlushUITasks()
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    // Verify fixed state after transition
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_GE(info_->endIndex_, 0);
+    EXPECT_EQ(mockLazy->GetHistoryTotalCount(), 26);
+    EXPECT_EQ(lazyForEachNode->FrameCount(), 26);
+
+    // Verify that the first item is at index 0 position
+    ASSERT_TRUE(GetItem(0, true));
+    EXPECT_EQ(pattern_->GetItemIndex(0, 0), 0);
+}
 } // namespace OHOS::Ace::NG

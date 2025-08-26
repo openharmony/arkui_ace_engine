@@ -620,7 +620,6 @@ HWTEST_F(WebPatternPartOneTest, OnDetachFromFrameNode_001, TestSize.Level1)
     auto pattern = AceType::MakeRefPtr<Pattern>();
     FrameNode node("exampleTag", 1, pattern, true, false);
     webPattern->OnDetachFromFrameNode(&node);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
 #endif
 }
 

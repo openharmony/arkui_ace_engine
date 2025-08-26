@@ -70,7 +70,7 @@ void CalendarPattern::OnModifyDone()
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateLayoutDirection(textDirection);
-    auto calendarEventHub = host->GetOrCreateEventHub<CalendarEventHub>();
+    auto calendarEventHub = host->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(calendarEventHub);
     if (swiperFrameNode->GetChildren().size() < 3) {
         return;
@@ -201,7 +201,7 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperEventHub = swiperFrameNode->GetOrCreateEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     uint8_t totalCount = swiperPattern ? static_cast<uint8_t>(swiperPattern->TotalCount()) : TOTAL_COUNT;
@@ -242,7 +242,7 @@ void CalendarPattern::FireFirstRequestData()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     auto currentMonth = calendarDay_.month;
@@ -258,7 +258,7 @@ void CalendarPattern::FireRequestData(MonthState monthState)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     if (monthState == MonthState::PRE_MONTH) {
@@ -279,7 +279,7 @@ void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t d
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
+    auto eventHub = GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     auto currentMonth = calendarDay_.month;

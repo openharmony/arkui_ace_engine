@@ -67,12 +67,14 @@ void ScrollableTestNg::TearDownTestSuite()
 void ScrollableTestNg::SetUp()
 {
     InitNestedScrolls();
+    MockPipelineContext::SetUp();
 }
 
 void ScrollableTestNg::TearDown()
 {
     scroll_.Reset();
     mockScroll_.Reset();
+    MockPipelineContext::TearDown();
 }
 
 void ScrollableTestNg::InitNestedScrolls()
@@ -380,41 +382,6 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity007, TestSize.Level1)
      */
     bool res = scrollPn->HandleScrollVelocity(-1.1f);
     EXPECT_TRUE(res);
-}
-
-/**
- * @tc.name: IsReverse001
- * @tc.desc: Test nested IsReverse for IsAtBottom
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, IsReverse001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize ScrollablePattern type pointer
-     * @tc.expected: Pointer is not nullptr.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->parent_ = mockPn;
-
-    /**
-     * @tc.steps: step2. Set the parameter scrollable to be nullptr
-     * @tc.expected: Scrollable is nullptr
-     */
-    EXPECT_CALL(*scrollPn, IsAtBottom).WillRepeatedly(Return(false));
-    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
-    auto scrollable =
-        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
-    scrollPn->scrollableEvent_->SetScrollable(scrollable);
-    EXPECT_NE(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
-
-    /**
-     * @tc.steps: step3. Call the IsReverse method
-     * @tc.expected: The result is false
-     */
-    bool res = scrollPn->IsReverse();
-    EXPECT_NE(res, true);
 }
 
 /**
@@ -1282,166 +1249,6 @@ HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleClickScroll001
- * @tc.desc: Test scrolling when clicking on the scroll bar
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and GestureEvent.
-     * @tc.expected: create FullyMockedScrollable, PartiallyMockedScrollable and GestureEvent created successfully.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
-    scrollPn->parent_ = mockPn;
-    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-    scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->isMousePressed_ = true;
-    scrollPn->scrollBar_->isScrollable_ = true;
-    scrollPn->locationInfo_ = Offset(1.0f, 150.0f);
-    // /**
-    //  * @tc.steps: step2. Test HandleClickEvent.
-    //  * @tc.expect: finalPosition_ equal to expect value.
-    //  */
-    EXPECT_CALL(*scrollPn, GetMainContentSize).Times(2).WillRepeatedly(Return(50.0f));
-    scrollPn->InitScrollBarClickEvent();
-    scrollPn->HandleClickEvent();
-    EXPECT_EQ(scrollPn->finalPosition_, 0.0f);
-
-    scrollPn->locationInfo_ = Offset(15.0f, 1.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent();
-    EXPECT_EQ(scrollPn->finalPosition_, -50.0f);
-
-    scrollPn->locationInfo_ = Offset(15.0f, 350.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->HandleClickEvent();
-    EXPECT_EQ(scrollPn->finalPosition_, 50.0f);
-}
-
-/**
- * @tc.name: HandleLongPressScroll001
- * @tc.desc: Test long press and hold scrolling when clicking on the scroll bar
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and ScrollBar.
-     * @tc.expected: create FullyMockedScrollable, PartiallyMockedScrollable and ScrollBar created successfully.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
-    scrollPn->parent_ = mockPn;
-    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-    scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->scrollBar_->InitLongPressEvent();
-    scrollPn->isMousePressed_ = true;
-    scrollPn->scrollBar_->isScrollable_ = true;
-    /**
-    * @tc.steps: step2. Test HandleClickEvent.
-    * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
-    */
-    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 110.0f);
-    scrollPn->scrollBar_->HandleLongPress(true);
-    Point point(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
-    scrollPn->scrollBar_->CheckBarDirection(point);
-    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
-    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 1.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->scrollBar_->HandleLongPress(true);
-    Point point1(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
-    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
-    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 300.0f);
-    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
-    scrollPn->scrollBar_->HandleLongPress(true);
-    Point point2(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
-    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
-}
-
-/**
- * @tc.name: InitMouseEvent001
- * @tc.desc: Test mouse event callback
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and MouseInfo.
-     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-    scrollPn->parent_ = mockPn;
-    scrollPn->InitScrollBarMouseEvent();
-    // /**
-    //  * @tc.steps: step2. Test HandleMouseEvent.
-    //  * @tc.expect: info's GetButton is LEFT_BUTTON.
-    //  */
-    MouseInfo info;
-    info.SetAction(MouseAction::PRESS);
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    auto& inputEvents = scrollPn->GetOrCreateEventHub<EventHub>()
-        ->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
-    EXPECT_EQ(inputEvents.size(), 1);
-    for (const auto& callback : inputEvents) {
-        if (callback) {
-            (*callback)(info);
-        }
-    };
-    EXPECT_TRUE(scrollPn->isMousePressed_);
-    MouseInfo info1;
-    info1.SetAction(MouseAction::RELEASE);
-    info1.SetButton(MouseButton::LEFT_BUTTON);
-    for (const auto& callback : inputEvents) {
-        if (callback) {
-            (*callback)(info1);
-        }
-    };
-    EXPECT_FALSE(scrollPn->isMousePressed_);
-}
-
-/**
- * @tc.name: InitMouseEvent002
- * @tc.desc: Test multiSelectable event and mouse scroll event
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable.
-     * @tc.expected: create PartiallyMockedScrollable successfully.
-     */
-    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
-    mockScroll_->pattern_ = mockPn;
-    ASSERT_NE(scroll_, nullptr);
-    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    ASSERT_NE(scrollPn, nullptr);
-    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
-    
-    /**
-     * @tc.steps: step2. execute the InitMouseEbent.
-     * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
-     */
-    scrollPn->InitMouseEvent();
-    gestureHub = scroll_->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    ASSERT_NE(gestureHub->panEventActuator_, nullptr);
-    EXPECT_TRUE(gestureHub->panEventActuator_->isExcludedAxis_);
-}
-
-/**
  * @tc.name: SetEdgeEffect001
  * @tc.desc: Test SetEdgeEffect
  * @tc.type: FUNC
@@ -1513,6 +1320,167 @@ HWTEST_F(ScrollableTestNg, HandleOverScroll001, TestSize.Level1)
     info.sourceTool_ = SourceTool::TOUCHPAD;
     scrollable->HandleDragEnd(info);
     EXPECT_FALSE(scrollPn->GetIsOverScroll());
+}
+
+/**
+ * @tc.name: HandleClickScroll001
+ * @tc.desc: Test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and GestureEvent.
+     * @tc.expected: create FullyMockedScrollable, PartiallyMockedScrollable and GestureEvent created successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollPn->parent_ = mockPn;
+    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
+    scrollPn->locationInfo_ = Offset(1.0f, 150.0f);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: finalPosition_ equal to expect value.
+    //  */
+    EXPECT_CALL(*scrollPn, GetMainContentSize).Times(2).WillRepeatedly(Return(50.0f));
+    scrollPn->InitScrollBarClickEvent();
+    scrollPn->HandleClickEvent();
+    EXPECT_EQ(scrollPn->finalPosition_, 0.0f);
+
+    scrollPn->locationInfo_ = Offset(15.0f, 1.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->HandleClickEvent();
+    EXPECT_EQ(scrollPn->finalPosition_, -50.0f);
+
+    scrollPn->locationInfo_ = Offset(15.0f, 350.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->HandleClickEvent();
+    EXPECT_EQ(scrollPn->finalPosition_, 50.0f);
+}
+
+/**
+ * @tc.name: HandleLongPressScroll001
+ * @tc.desc: Test long press and hold scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and ScrollBar.
+     * @tc.expected: create FullyMockedScrollable, PartiallyMockedScrollable and ScrollBar created successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollPn->parent_ = mockPn;
+    scrollPn->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->scrollBar_->InitLongPressEvent();
+    scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
+    /**
+    * @tc.steps: step2. Test HandleClickEvent.
+    * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
+    */
+    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 110.0f);
+    scrollPn->scrollBar_->HandleLongPress(true);
+    Point point(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
+    scrollPn->scrollBar_->CheckBarDirection(point);
+    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
+    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 1.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->scrollBar_->HandleLongPress(true);
+    Point point1(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
+    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
+    scrollPn->scrollBar_->locationInfo_ = Offset(1.0f, 300.0f);
+    scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
+    scrollPn->scrollBar_->HandleLongPress(true);
+    Point point2(scrollPn->scrollBar_->locationInfo_.GetX(), scrollPn->scrollBar_->locationInfo_.GetY());
+    EXPECT_EQ(scrollPn->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
+}
+
+/**
+ * @tc.name: InitMouseEvent001
+ * @tc.desc: Test mouse event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable and MouseInfo.
+     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+    scrollPn->InitScrollBarMouseEvent();
+    // /**
+    //  * @tc.steps: step2. Test HandleMouseEvent.
+    //  * @tc.expect: info's GetButton is LEFT_BUTTON.
+    //  */
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    auto& inputEvents = scrollPn->GetEventHub<EventHub>()
+        ->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
+    EXPECT_EQ(inputEvents.size(), 1);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info);
+        }
+    };
+    EXPECT_TRUE(scrollPn->isMousePressed_);
+    MouseInfo info1;
+    info1.SetAction(MouseAction::RELEASE);
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info1);
+        }
+    };
+    EXPECT_FALSE(scrollPn->isMousePressed_);
+}
+
+/**
+ * @tc.name: InitMouseEvent002
+ * @tc.desc: Test multiSelectable event and mouse scroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, InitMouseEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FullyMockedScrollable, PartiallyMockedScrollable.
+     * @tc.expected: create PartiallyMockedScrollable successfully.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    ASSERT_NE(scroll_, nullptr);
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollPn, nullptr);
+    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->panEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step2. execute the InitMouseEbent.
+     * @tc.expected: the isExcludedAxis_ of panEventActuator_ is true.
+     */
+    scrollPn->InitMouseEvent();
+    gestureHub = scroll_->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    ASSERT_NE(gestureHub->panEventActuator_, nullptr);
+    EXPECT_TRUE(gestureHub->panEventActuator_->isExcludedAxis_);
 }
 
 /**

@@ -512,7 +512,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     OnHoverFunc onHoverEventFunc;
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
-    ViewAbstract::SetJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onHoverEventFunc));
+    ViewAbstract::SetFrameNodeCommonOnHover(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onHoverEventFunc));
     ViewAbstract::ClearJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER));
     OnKeyConsumeFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
@@ -819,15 +819,15 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest014, TestSize.Level1)
     ViewAbstract::GetMargin(AceType::RawPtr(FRAME_NODE_REGISTER));
     ViewAbstract::GetTranslate(AceType::RawPtr(FRAME_NODE_REGISTER));
     GestureEventFunc tapEventFunc;
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(tapEventFunc));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(tapEventFunc));
     ViewAbstract::ClearJSFrameNodeOnClick(AceType::RawPtr(FRAME_NODE_REGISTER));
     TouchEventFunc touchEventFunc;
-    ViewAbstract::SetJSFrameNodeOnTouch(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(touchEventFunc));
+    ViewAbstract::SetFrameNodeCommonOnTouch(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(touchEventFunc));
     ViewAbstract::ClearJSFrameNodeOnTouch(AceType::RawPtr(FRAME_NODE_REGISTER));
     std::function<void()> buildFunc;
-    ViewAbstract::SetJSFrameNodeOnAppear(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(buildFunc));
+    ViewAbstract::SetFrameNodeCommonOnAppear(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(buildFunc));
     ViewAbstract::ClearJSFrameNodeOnAppear(AceType::RawPtr(FRAME_NODE_REGISTER));
-    ViewAbstract::SetJSFrameNodeOnDisappear(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(buildFunc));
+    ViewAbstract::SetFrameNodeCommonOnDisappear(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(buildFunc));
     ViewAbstract::ClearJSFrameNodeOnDisappear(AceType::RawPtr(FRAME_NODE_REGISTER));
     OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
     ViewAbstract::SetJSFrameNodeOnKeyCallback(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onKeyCallback));
@@ -836,7 +836,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest014, TestSize.Level1)
     std::function<void(bool, double)> onVisibleChange;
     const std::vector<double> ratios;
     constexpr uint32_t minInterval = 100; // 100ms
-    ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(
+    ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
         AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onVisibleChange), ratios, minInterval);
     ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(AceType::RawPtr(FRAME_NODE_REGISTER));
 
@@ -2717,6 +2717,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0058, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<Pattern>();
     ASSERT_NE(pattern, nullptr);
+    
     g_isConfigChangePerform = true;
     ViewAbstract::SetClipEdge(frameNode, true);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
@@ -3538,7 +3539,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetClickFocusTest001, TestSize.Level1)
     EXPECT_TRUE(focusHub1->IsFocusable());
 
     /**
-     * @tc.steps2: Create another FrameNode and set a JS-based onClick event via SetJSFrameNodeOnClick.
+     * @tc.steps2: Create another FrameNode and set a JS-based onClick event via SetFrameNodeCommonOnClick.
      * @tc.expected: The FrameNode should also become focusable after setting JS onClick.
      */
     auto frameNode2 = FrameNode::CreateFrameNode(
@@ -3546,7 +3547,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetClickFocusTest001, TestSize.Level1)
     ASSERT_NE(frameNode2, nullptr);
 
     GestureEventFunc jsOnClick = [](GestureEvent&) {};
-    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode2), std::move(jsOnClick));
+    ViewAbstract::SetFrameNodeCommonOnClick(AceType::RawPtr(frameNode2), std::move(jsOnClick));
 
     auto focusHub2 = frameNode2->GetFocusHub();
     ASSERT_NE(focusHub2, nullptr);

@@ -87,6 +87,14 @@ struct SessionViewportConfig {
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
+    bool operator==(const SessionViewportConfig& other) const
+    {
+        return (isDensityFollowHost_ == other.isDensityFollowHost_) &&
+            (NearZero(std::abs(density_ - other.density_))) &&
+            (displayId_ == other.displayId_) &&
+            (orientation_ == other.orientation_) &&
+            (transform_ == other.transform_);
+    }
 };
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
@@ -115,7 +123,6 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void OnRealVisibleChangeInner(bool visible);
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
@@ -208,6 +215,11 @@ public:
     {
         isModal_ = isModal;
     }
+
+    void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
+    {
+        needCheckWindowSceneId_ = needCheckWindowSceneId;
+    }
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
@@ -276,25 +288,8 @@ public:
     {
         isModalRequestFocus_ = requestFocus;
     }
-    bool IsWindowSceneVisible() const
-    {
-        return windowSceneVisible_;
-    }
 
-    bool GetVisiblityProperty() const
-    {
-        return visiblityProperty_;
-    }
-
-    void SetRealVisible(bool isVisible)
-    {
-        isVisible_ = isVisible;
-    }
-
-    void SetCurVisible(bool curVisible)
-    {
-        curVisible_ = curVisible;
-    }
+    void UpdateSessionViewportConfigFromContext();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -461,10 +456,9 @@ private:
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
+    bool needCheckWindowSceneId_ = false;
     bool needReDispatchDisplayArea_ = false;
     bool curVisible_ = false; // HandleVisibleArea visible
-    bool windowSceneVisible_ = false;
-    bool visiblityProperty_ = true;  // visibility property
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

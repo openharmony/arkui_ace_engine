@@ -32,7 +32,7 @@ void SwiperArrowPattern::OnModifyDone()
         InitNavigationArrow();
         auto swiperNode = GetSwiperNode();
         CHECK_NULL_VOID(swiperNode);
-        auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
+        auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         auto layoutProperty = GetSwiperArrowLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);

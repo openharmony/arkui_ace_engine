@@ -84,6 +84,10 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void SetOnChange(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
+    static void SetStrokeWidth(const JSCallbackInfo& info);
+    static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
     static void SetOnContentScroll(const JSCallbackInfo& info);
@@ -143,10 +147,6 @@ public:
     static void SetCapitalizationMode(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
-    static void SetOnWillChange(const JSCallbackInfo& info);
-    static void SetStrokeWidth(const JSCallbackInfo& info);
-    static void SetStrokeColor(const JSCallbackInfo& info);
     static void SetEnableAutoSpacing(const JSCallbackInfo& info);
     static NG::KeyboardAppearanceConfig ParseKeyboardAppearanceConfig(const JSRef<JSObject>& obj);
     static void SetOnWillAttachIME(const JSCallbackInfo& info);
@@ -159,7 +159,6 @@ public:
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
     static void SetCancelDefaultIcon();
-    static void ResetCancelIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetLayoutPolicy(const JSRef<JSVal>& jsValue, bool isWidth);
 };

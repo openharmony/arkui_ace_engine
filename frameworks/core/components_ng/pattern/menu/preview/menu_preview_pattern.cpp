@@ -161,7 +161,7 @@ void MenuPreviewPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetOrCreateEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -246,7 +246,7 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(menuPattern);
     auto dragTargetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(dragTargetNode);
-    auto eventHub = dragTargetNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = dragTargetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto targetGestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(targetGestureHub);

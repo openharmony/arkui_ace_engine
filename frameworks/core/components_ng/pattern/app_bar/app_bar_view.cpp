@@ -504,21 +504,21 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     }
     auto atomRect = atom->GetGeometryNode()->GetFrameRect();
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto defalutLeftMargin = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
-    auto defalutRightMargin = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
-    auto left = defalutLeftMargin;
-    auto right = defalutRightMargin;
+    auto defalutLeft = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT, DimensionUnit::VP).ConvertToPx();
+    auto defalutRight = Dimension(ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT, DimensionUnit::VP).ConvertToPx();
+    auto left = defalutLeft;
+    auto right = defalutRight;
     if (rowGeometryNode->GetMargin()) {
-        left = rowGeometryNode->GetMargin()->left.value_or(defalutLeftMargin);
-        right = rowGeometryNode->GetMargin()->right.value_or(defalutRightMargin);
+        left = rowGeometryNode->GetMargin()->left.value_or(defalutLeft);
+        right = rowGeometryNode->GetMargin()->right.value_or(defalutRight);
     }
     if (LessOrEqual(offset.GetX(), 0.0) && atomRect.Width() > 0) {
         auto width = Dimension(ATOMIC_SERVICE_MENU_BAR_WIDTH, DimensionUnit::VP).ConvertToPx();
         offset.SetX(isRtl ? (right) : (atomRect.Width() - width - left));
     } else {
         auto addEnd = isRtl ? left : right;
-        size.AddWidth((defalutLeftMargin + addEnd));
-        offset.AddX(isRtl ? -addEnd : -defalutLeftMargin);
+        size.AddWidth((defalutLeft + addEnd));
+        offset.AddX(isRtl ? -addEnd : -defalutLeft);
     }
     return RectF(offset, size);
 }

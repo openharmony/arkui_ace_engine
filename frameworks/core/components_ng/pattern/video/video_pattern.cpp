@@ -611,14 +611,14 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 
     OnUpdateTime(currentPos, CURRENT_POS);
     currentPos_ = isSeeking_ ? currentPos_ : currentPos;
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireUpdateEvent(static_cast<double>(currentPos));
 }
 
 void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
 {
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     switch (status) {
         case PlaybackStatus::STARTED:
             CHECK_NULL_VOID(eventHub);
@@ -676,7 +676,7 @@ void VideoPattern::OnError(const std::string& errorId)
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent();
 }
@@ -690,7 +690,7 @@ void VideoPattern::OnError(int32_t code, const std::string& message)
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireErrorEvent(code, message);
 }
@@ -774,7 +774,7 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     ChangePlayButtonTag(playBtn);
 
     if (needFireEvent) {
-        auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+        auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FirePreparedEvent(static_cast<double>(duration_));
     }
@@ -803,7 +803,7 @@ void VideoPattern::OnCompletion()
     isPlaying_ = false;
     currentPos_ = duration_;
     OnUpdateTime(currentPos_, CURRENT_POS);
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireFinishEvent();
 }
@@ -1075,7 +1075,7 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
@@ -1525,7 +1525,7 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
         CHECK_NULL_VOID(videoPattern);
         videoPattern->OnSliderChange(value, mode);
     };
-    auto sliderEventHub = sliderNode->GetOrCreateEventHub<SliderEventHub>();
+    auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
     auto focusHub = sliderNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
@@ -1931,7 +1931,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (mode == SliderChangeMode::BEGIN || mode == SliderChangeMode::MOVING) {
         eventHub->FireSeekingEvent(static_cast<double>(posTime));
@@ -1942,7 +1942,7 @@ void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 
 void VideoPattern::OnFullScreenChange(bool isFullScreen)
 {
-    auto eventHub = GetOrCreateEventHub<VideoEventHub>();
+    auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireFullScreenChangeEvent(isFullScreen);
     auto host = GetHost();
@@ -2064,7 +2064,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node
-    videoPattern->GetOrCreateEventHub<VideoEventHub>()->AttachHost(videoNode);
+    videoPattern->GetEventHub<VideoEventHub>()->AttachHost(videoNode);
     videoNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -2284,7 +2284,8 @@ void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
         auto padding  = layoutProperty->CreatePaddingAndBorder();
         OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
                                   contentRect_.Top() - padding.top.value_or(0) };
-        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(), contentOffset };
+        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(),
+            { contentOffset.GetX(), contentOffset.GetY() } };
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }

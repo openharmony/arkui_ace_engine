@@ -4070,5 +4070,57 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_RegisterCommonEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_NativeModule_UnregisterCommonEvent"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_Create"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_Copy"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_Dispose"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_SetTop"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_GetTop"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_SetLeft"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_GetLeft"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_SetBottom"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_GetBottom"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_SetRight"
+    },
+    {
+        "first_introduced": "21",
+        "name": "OH_ArkUI_PositionEdges_GetRight"
     }
 ]

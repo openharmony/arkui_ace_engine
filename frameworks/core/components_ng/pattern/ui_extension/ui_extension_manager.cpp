@@ -418,7 +418,7 @@ bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
         ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
     }
     decltype(aliveSecurityUIExtensions_) tempAliveSecurityUIExtensions(aliveSecurityUIExtensions_);
-    for (const auto& pattern : aliveSecurityUIExtensions_) {
+    for (const auto& pattern : tempAliveSecurityUIExtensions) {
         auto uiExtension = pattern.second.Upgrade();
         CHECK_NULL_CONTINUE(uiExtension);
         auto frameNode = uiExtension->GetHost();
@@ -536,7 +536,7 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
 void UIExtensionManager::SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode)
 {
     auto it = aliveUIExtensions_.find(nodeId);
-    if(it == aliveUIExtensions_.end()) {
+    if (it == aliveUIExtensions_.end()) {
         return;
     }
     auto uiExtension = it->second.Upgrade();

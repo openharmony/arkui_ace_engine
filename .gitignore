@@ -2,7 +2,6 @@
 .vscode/
 *.iml
 .idea/
-CMakeLists.txt
 adapter/*
 !adapter/ohos/
 !adapter/preview/

@@ -143,7 +143,7 @@ bool PostEventManager::CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, con
         case TouchType::DOWN:
             if (hasDown && !hasUpOrCancel) {
                 TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
-                    "CheckTouchEvent: DOWN event detected for id=%{public}d, dropping this event",
+                    "CheckTouchEvent: duplicate DOWN event detected for id=%{public}d, dropping this event",
                     touchEvent.id);
                 return false;
             }

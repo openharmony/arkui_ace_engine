@@ -2242,7 +2242,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(dragFrameNode);
     auto draggingNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     EXPECT_NE(draggingNode, false);
-    auto eventHub = draggingNode->GetOrCreateEventHub<EventHub>();
+    auto eventHub = draggingNode->GetEventHub<EventHub>();
     EXPECT_NE(eventHub, false);
     auto frameNode = eventHub->GetFrameNode();
     EXPECT_NE(frameNode, false);

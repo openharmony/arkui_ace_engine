@@ -179,7 +179,8 @@ void ParagraphUtil::HandleEmptyParagraph(RefPtr<Paragraph> paragraph,
 }
 
 void ParagraphUtil::ApplyIndent(
-    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width, const TextStyle& textStyle)
+    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width, const TextStyle& textStyle,
+    double indentMaxWidth)
 {
     auto indentValue = paragraphStyle.indent;
     CHECK_NULL_VOID(paragraph);
@@ -192,7 +193,7 @@ void ParagraphUtil::ApplyIndent(
             value = indentValue.ConvertToPxDistribute(
                 textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
-            value = static_cast<float>(width * indentValue.Value());
+            value = static_cast<float>(indentMaxWidth * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
         }
     }

@@ -162,7 +162,7 @@ void FormPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::EXTERNAL, std::nullopt };
     externalRenderContext_->InitContext(false, param);
     InitFormManagerDelegate();
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCache([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -191,7 +191,6 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
-    EventReport::StartFormModifyTimeoutReportTimer(cardInfo_.id, cardInfo_.bundleName, cardInfo_.cardName);
 }
 
 void FormPattern::InitClickEvent()
@@ -506,7 +505,7 @@ void FormPattern::SetNonTransparentAfterRecover()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
@@ -592,6 +591,7 @@ void FormPattern::UpdateImageNode()
     externalContext->SetVisible(true);
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         != formChildrenNodeMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "imageNode SetOpacity:0");
         externalContext->SetOpacity(TRANSPARENT_VAL);
     }
     imageNode->MarkModifyDone();
@@ -648,7 +648,6 @@ void FormPattern::OnVisibleChange(bool isVisible)
 
 void FormPattern::OnModifyDone()
 {
-    EventReport::StopFormModifyTimeoutReportTimer(cardInfo_.id);
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1591,8 +1590,14 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
     }
     TAG_LOGI(AceLogTag::ACE_FORM,
-        "attach rs node, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
-        cardInfo_.id, boundWidth, boundHeight, cardInfo_.borderWidth);
+        "attach rs node, id: %{public}" PRId64
+        " width: %{public}f height: %{public}f borderWidth: %{public}f boundWidth: %{public}f boundHeight: %{public}f",
+        cardInfo_.id,
+        cardInfo_.width.Value(),
+        cardInfo_.height.Value(),
+        cardInfo_.borderWidth,
+        boundWidth,
+        boundHeight);
     externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
         round(boundWidth), round(boundHeight));
 
@@ -1818,7 +1823,7 @@ void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& m
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
@@ -1830,7 +1835,7 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t uninstallFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1844,7 +1849,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
@@ -1861,7 +1866,7 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
@@ -1872,7 +1877,7 @@ void FormPattern::FireOnLoadEvent() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnLoad("");
 }
@@ -1996,7 +2001,7 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FormPattern::RemoveSubContainer()
 {
     auto host = GetHost();
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     if (eventHub) {
         eventHub->FireOnCache();
     }
@@ -2024,7 +2029,7 @@ void FormPattern::EnableDrag()
         info.extraInfo = "card drag";
         return info;
     };
-    auto eventHub = GetHost()->GetOrCreateEventHub<EventHub>();
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDefaultOnDragStart(std::move(dragStart));
 }
@@ -2807,7 +2812,7 @@ void FormPattern::FireOnUpdateFormDone(int64_t id) const
     TAG_LOGD(AceLogTag::ACE_FORM, "fire form update done:%{public}" PRId64, id);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetOrCreateEventHub<FormEventHub>();
+    auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     int64_t onUpdateFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);

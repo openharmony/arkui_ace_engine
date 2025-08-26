@@ -905,4 +905,20 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, GetContainerModalButtonsRect001, Te
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: ContainerModalPatternEnhanceGetContextRefPtr
+ * @tc.desc: Test ContainerModalPatternEnhanceGetContextRefPtr
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceGetContextRefPtr, TestSize.Level1)
+{
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    containerModalNode->AddChild(
+        FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 2, AceType::MakeRefPtr<ButtonPattern>()));
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto  context = containerPattern->GetContextRefPtr();
+    EXPECT_NE(context, nullptr);
+}
 } // namespace OHOS::Ace::NG

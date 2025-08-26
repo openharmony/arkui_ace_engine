@@ -574,6 +574,70 @@ private:
     double y_ = 0;
 };
 
+class NWebStylusTouchPointInfoImpl : public OHOS::NWeb::NWebStylusTouchPointInfo {
+public:
+    NWebStylusTouchPointInfoImpl(int id, double x, double y, float force, float tiltX, float tiltY, float rollAngle,
+        int32_t width, int32_t height, OHOS::NWeb::SourceTool sourceTool)
+        : id_(id), x_(x), y_(y), force_(force), tiltX_(tiltX), tiltY_(tiltY), rollAngle_(rollAngle), width_(width),
+          height_(height), sourceTool_(sourceTool)
+    {}
+
+    ~NWebStylusTouchPointInfoImpl() = default;
+
+    int GetId() override
+    {
+        return id_;
+    }
+    double GetX() override
+    {
+        return x_;
+    }
+    double GetY() override
+    {
+        return y_;
+    }
+    float GetForce() override
+    {
+        return force_;
+    }
+    float GetTiltX() override
+    {
+        return tiltX_;
+    }
+    float GetTiltY() override
+    {
+        return tiltY_;
+    }
+    float GetRollAngle() override
+    {
+        return rollAngle_;
+    }
+    int32_t GetWidth() override
+    {
+        return width_;
+    }
+    int32_t GetHeight() override
+    {
+        return height_;
+    }
+    OHOS::NWeb::SourceTool GetSourceTool() override
+    {
+        return sourceTool_;
+    }
+
+private:
+    int id_ = 0;
+    double x_ = 0;
+    double y_ = 0;
+    float force_ = 0.0f;
+    float tiltX_ = 0.0f;
+    float tiltY_ = 0.0f;
+    float rollAngle_ = 0.0f;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
+    OHOS::NWeb::SourceTool sourceTool_ = OHOS::NWeb::SourceTool::UNKNOWN;
+};
+
 class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
 public:
     explicit NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
@@ -922,6 +986,13 @@ public:
     void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleStylusTouchDown(const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info,
+        bool from_overlay = false);
+    void HandleStylusTouchUp(const std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>& stylus_touch_point_info,
+        bool from_overlay = false);
+    void HandleStylusTouchMove(
+        const std::vector<std::shared_ptr<OHOS::NWeb::NWebStylusTouchPointInfo>>& stylus_touch_point_infos,
+        bool from_overlay = false);
     void HandleTouchMove(const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> &touch_point_infos,
                          bool fromOverlay = false);
     void HandleTouchCancel();
@@ -1297,8 +1368,11 @@ public:
     int GetHitTestResult();
 
     void RemoveSnapshotFrameNode(int removeDelayTime);
-    void CreateSnapshotFrameNode(const std::string& snapshotPath);
+    void CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width = 0, uint32_t height = 0);
     void SetVisibility(bool isVisible);
+    void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
+    double ResizeWidth() const;
+    double ResizeHeight() const;
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);

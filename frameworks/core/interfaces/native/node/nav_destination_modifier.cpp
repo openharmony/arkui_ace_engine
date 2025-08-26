@@ -79,6 +79,22 @@ void ResetNavDestinationBackgroundColor(ArkUINodeHandle node)
     NavDestinationModelNG::SetBackgroundColor(frameNode, backgroundColor, false, nullptr);
 }
 
+void SetNavDestinationBackgroundColorWithColorSpace(
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+    auto backgroundColorResObj = AceType::Claim(bgColor);
+    Color backgroundColor { color };
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    NavDestinationModelNG::SetBackgroundColor(frameNode, backgroundColor, true, backgroundColorResObj);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -468,24 +484,42 @@ void SetNavDestinationOnCoordScrollStartAction(
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollStartAction);
         onCoordScrollStartAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
 }
 
+void ResetNavDestinationOnCoordScrollStartAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, nullptr);
+}
+
 void SetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node,
-    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 offset, ArkUI_Float32 currentOffset))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
-        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float offset, float currentOffset)->void {
             auto frameNode = node.Upgrade();
+            CHECK_NULL_VOID(frameNode);
             auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-                onCoordScrollUpdateAction(nodeHandle, currentOffset);
+            CHECK_NULL_VOID(onCoordScrollUpdateAction);
+            onCoordScrollUpdateAction(nodeHandle, offset, currentOffset);
         };
     NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void ResetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, nullptr);
 }
 
 void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
@@ -494,10 +528,19 @@ void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoor
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
         auto frameNode = node.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        CHECK_NULL_VOID(onCoordScrollEndAction);
         onCoordScrollEndAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void ResetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, nullptr);
 }
 
 void SetNavDestinationSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -788,6 +831,7 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
         .setNavDestinationBackgroundColor = SetNavDestinationBackgroundColor,
         .resetNavDestinationBackgroundColor = ResetNavDestinationBackgroundColor,
+        .setNavDestinationBackgroundColorWithColorSpace = SetNavDestinationBackgroundColorWithColorSpace,
         .setTitle = SetTitle,
         .resetTitle = ResetTitle,
         .setMenus = SetMenus,
@@ -803,8 +847,11 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .setNavDestinationTitleHeight = SetNavDestinationTitleHeight,
         .setNavDestinationTitlebarOptions = SetNavDestinationTitlebarOptions,
         .setNavDestinationOnCoordScrollStartAction = SetNavDestinationOnCoordScrollStartAction,
+        .resetNavDestinationOnCoordScrollStartAction = ResetNavDestinationOnCoordScrollStartAction,
         .setNavDestinationOnCoordScrollUpdateAction = SetNavDestinationOnCoordScrollUpdateAction,
+        .resetNavDestinationOnCoordScrollUpdateAction = ResetNavDestinationOnCoordScrollUpdateAction,
         .setNavDestinationOnCoordScrollEndAction = SetNavDestinationOnCoordScrollEndAction,
+        .resetNavDestinationOnCoordScrollEndAction = ResetNavDestinationOnCoordScrollEndAction,
         .setNavDestinationSystemBarStyle = SetNavDestinationSystemBarStyle,
         .resetNavDestinationSystemBarStyle = ResetNavDestinationSystemBarStyle,
         .setCustomBackButtonNode = SetCustomBackButtonNode,
@@ -862,6 +909,7 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
         .resetEnableStatusBar = ResetEnableStatusBar,
         .setEnableNavigationIndicator = SetEnableNavigationIndicator,
         .resetEnableNavigationIndicator = ResetEnableNavigationIndicator,
+        .setNavDestinationBackgroundColorWithColorSpace = SetNavDestinationBackgroundColorWithColorSpace,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

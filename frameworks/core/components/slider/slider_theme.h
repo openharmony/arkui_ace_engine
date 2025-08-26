@@ -69,14 +69,14 @@ public:
                 const double defaultMarkColorAplpa = 0.1;
                 theme->trackBgColor_ = pattern->GetAttr<Color>("track_bg_color", Color::RED);
                 theme->trackSelectedColor_ = pattern->GetAttr<Color>("track_color_selected", Color::RED);
-                theme->markerColor_ =
-                    pattern->GetAttr<Color>("marker_color", Color::RED)
+                theme->markerColor_ = pattern->GetAttr<Color>("marker_color", Color::RED)
                         .BlendOpacity(pattern->GetAttr<double>("marker_color_alpha", defaultMarkColorAplpa));
                 theme->tipTextColor_ = pattern->GetAttr<Color>("tip_text_color", Color::RED);
                 theme->tipColor_ = pattern->GetAttr<Color>("tip_color", Color::RED);
                 theme->blockHoverColor_ = pattern->GetAttr<Color>("block_color_hovered", Color::RED);
                 theme->blockPressedColor_ = pattern->GetAttr<Color>("block_color_pressed", BLOCK_COLOR_PRESSED);
-                theme->blockOuterEdgeColor_ = pattern->GetAttr<Color>("block_outer_edge_color", BLOCK_OUTER_EDGE_COLOR);
+                theme->blockOuterEdgeColor_ =
+                    pattern->GetAttr<Color>("block_outer_edge_color", BLOCK_OUTER_EDGE_COLOR);
                 theme->bubbleToCircleCenterDistance_ =
                     pattern->GetAttr<Dimension>("bubble_to_circle_center_distance", BUBBLE_TO_CIRCLE_CENTER_DISTANCE);
                 theme->measureContentDefaultWidth_ =
@@ -85,13 +85,14 @@ public:
                     pattern->GetAttr<Dimension>("outset_hot_block_shadow_width", OUTSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->insetHotBlockShadowWidth_ =
                     pattern->GetAttr<Dimension>("inset_hot_block_shadow_width", INSET_HOT_BLOCK_SHADOW_WIDTH);
-                theme->focusSideDistance_ = pattern->GetAttr<Dimension>("focus_side_distance", FOCUS_SIDE_DISTANCE);
+                theme->focusSideDistance_ =
+                    pattern->GetAttr<Dimension>("focus_side_distance", FOCUS_SIDE_DISTANCE);
                 theme->layoutMaxLength_ = pattern->GetAttr<Dimension>("slider_max_length", .0_vp);
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
                 theme->moveAnimationDuration_ = pattern->GetAttr<double>("move_animation_duration", 0.0);
-                theme->disabledAlpha_ = pattern->GetAttr<double>("slider_disable_alpha", 0.0);
                 theme->sliderPPI_ = pattern->GetAttr<double>("slider_pixels_per_inch", DEFAULT_SLIDER_PPI);
+                theme->disabledAlpha_ = pattern->GetAttr<double>("slider_disable_alpha", 0.0);
                 theme->outsetBlockSize_ = pattern->GetAttr<Dimension>("outset_block_size", 16.0_vp);
                 theme->outsetBlockHotSize_ = pattern->GetAttr<Dimension>("outset_block_hot_region_size", 40.0_vp);
                 theme->blockColor_ = pattern->GetAttr<Color>("block_color", Color(0xffffffff));
@@ -279,14 +280,14 @@ public:
         return moveAnimationDuration_;
     }
 
-    double GetDisabledAlpha() const
-    {
-        return disabledAlpha_;
-    }
-
     double GetSliderPPI() const
     {
         return sliderPPI_;
+    }
+
+    double GetDisabledAlpha() const
+    {
+        return disabledAlpha_;
     }
 
     std::string GetSelectedTxt() const

@@ -15,7 +15,6 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
@@ -105,7 +104,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
-    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
+    auto isSubwindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+    if (isSubwindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
@@ -115,10 +115,11 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     SetDialogAccessibilityHoverConsume(dialog);
     // set onCancel callback
-    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
+
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
     pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
@@ -168,4 +169,5 @@ void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dia
             return true;
         });
 }
+
 } // namespace OHOS::Ace::NG

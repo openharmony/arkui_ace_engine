@@ -310,14 +310,14 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
 {
     std::vector<SymbolGradient> gradients;
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        SymbolModel::GetInstance()->SetShaderStyle(gradients);
+        SymbolModel::GetInstance()->ResetShaderStyle();
         return;
     }
     
     if (!info[0]->IsArray()) {
         JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(info[0]);
         SymbolGradient gradient;
-        gradient.isDefined = true;
+        gradient.gradientType = GradientDefinedStatus::GRADIENT_TYPE;
         ParseShaderStyle(jsGradientObj, gradient);
         gradients.emplace_back(std::move(gradient));
         SymbolModel::GetInstance()->SetShaderStyle(gradients);
@@ -383,7 +383,8 @@ bool JSSymbol::ParseShaderStyle(const JSRef<JSObject>& shaderStyleObj, SymbolGra
         if (!angleProperty->IsEmpty() && !angleProperty->IsNull() && !angleProperty->IsUndefined()) {
             JSViewAbstract::GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), optionsObj,
                                                   gradient.angle, DEFAULT_GRADIENT_ANGLE);
-        } else {
+        }
+        if (!gradient.angle.has_value()) {
             auto directionValue = optionsObj->GetProperty("direction");
             gradient.angle = DirectionToAngle(JsiRef<JsiValue>(directionValue));
         }

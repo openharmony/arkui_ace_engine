@@ -106,9 +106,9 @@ public:
         EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
-    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
     static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
     static std::string GetColumnsTemplate(FrameNode* frameNode);
     static std::string GetRowsTemplate(FrameNode* frameNode);
@@ -125,6 +125,10 @@ public:
     static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
     static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
     static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
+    static bool GetSyncLoad(FrameNode* frameNode);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 
@@ -139,11 +143,8 @@ public:
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
-    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
-    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
-    static bool GetSyncLoad(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

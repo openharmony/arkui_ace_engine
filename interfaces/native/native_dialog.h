@@ -43,7 +43,7 @@ typedef enum {
 /**
  * @brief Enumerates the level mode.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** overlay mode. */
@@ -55,7 +55,7 @@ typedef enum {
 /**
  * @brief Enumerates the immersive mode.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** Mask covering the parent node. */

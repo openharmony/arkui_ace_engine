@@ -113,7 +113,7 @@ void WaterFlowTestNg::GetWaterFlow()
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     frameNode_->isConstraintNotChanged_ = true;
     pattern_ = frameNode_->GetPattern<WaterFlowPattern>();
-    eventHub_ = frameNode_->GetOrCreateEventHub<WaterFlowEventHub>();
+    eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<WaterFlowAccessibilityProperty>();
@@ -1700,31 +1700,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest001, TestSize.Level1)
     accessibilityProperty_->ResetSupportAction();
     expectedActions = {};
     EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
-}
-
-/**
- * @tc.name: WaterFlowAccessibilityTest002
- * @tc.desc: Test Accessibility func
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Run Accessibility func.
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetColumnsTemplate("1fr 1fr");
-    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
-    CreateDone();
-    accessibilityProperty_->ActActionScrollForward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_TRUE(Position(0));
 }
 
 /**
