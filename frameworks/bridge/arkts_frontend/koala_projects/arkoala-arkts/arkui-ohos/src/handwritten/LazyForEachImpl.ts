@@ -21,6 +21,7 @@ import { setNeedCreate } from "../ArkComponentRoot"
 import { int32 } from "@koalaui/common"
 import { IDataSource } from "../component/lazyForEach"
 import { LazyForEachOps } from "../component"
+import { OnMoveHandler, ItemDragEventHandler } from "../component"
 import { LazyItemNode } from "./LazyItemNode"
 import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
 import { CustomComponent } from "@component_handwritten/customComponent"
@@ -47,7 +48,9 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
-    isRepeat: boolean = false
+    isRepeat: boolean = false,
+    onMove?: OnMoveHandler,
+    itemDragEvent?: ItemDragEventHandler,
 ) {
     const node = createLazyNode(isRepeat)
 
@@ -80,6 +83,11 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         }
     }
     LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange)
+
+    /**
+     * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
+     */
+    LazyForEachOps.SyncOnMoveOps(node.getPeerPtr(), pool.onMoveFromTo, onMove, itemDragEvent)
 }
 
 class NodeHolder {
@@ -135,6 +143,7 @@ class LazyItemPool implements Disposable {
     private _activeItems = new Map<int32, ComputableState<LazyItemNode>>()
     private _parent: PeerNode
     private _componentRoot?: Object
+    private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
     disposed: boolean = false
 
     /**
@@ -211,9 +220,95 @@ class LazyItemPool implements Disposable {
     updateActiveRange(start: int32, end: int32) {
         if (start > end) return
         try {
-            this.pruneBy(index => index < start || index > end)
+            this.pruneBy(index => {
+                index = this.convertFromToIndexRevert(index)
+                return index < start || index > end
+            })
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
         }
+    }
+
+    /**
+     * set onMoveFromTo value used for functions convertFromToIndex and convertFromToIndexRevert
+     * @param moveFrom
+     * @param moveTo
+     */
+    onMoveFromTo(moveFrom: int32, moveTo: int32): void {
+        if (moveFrom < 0 || moveTo < 0) {
+            this.updateActiveItemsForOnMove();
+            this._moveFromTo = undefined;
+            InteropNativeModule._NativeLog(`onMoveFromTo param invalid, reset moveFromTo`);
+            return;
+        }
+        if (this._moveFromTo != undefined) {
+            this._moveFromTo![1] = moveTo;
+            if (this._moveFromTo![1] === this._moveFromTo![0]) {
+                this._moveFromTo = undefined;
+            }
+        } else {
+            this._moveFromTo = [moveFrom, moveTo];
+        }
+        if (this._moveFromTo != undefined) {
+            InteropNativeModule._NativeLog(`onMoveFromTo updated (${this._moveFromTo![0]}, ${this._moveFromTo![1]})`);
+        } else {
+            InteropNativeModule._NativeLog(`onMoveFromTo data moved to original pos, reset moveFromTo.`);
+        }
+    }
+
+    // before onMove called, update _activeItems according to the _moveFromTo
+    private updateActiveItemsForOnMove(): void {
+        if (this._moveFromTo == undefined) {
+            return;
+        }
+        const fromIndex = Math.min(this._moveFromTo![0], this._moveFromTo![1]);
+        const toIndex = Math.max(this._moveFromTo![0], this._moveFromTo![1]);
+        if (fromIndex === toIndex) {
+            return;
+        }
+        let tempActiveItems = new Map<int32, ComputableState<LazyItemNode>>();
+        this._activeItems.forEach((node, index) => {
+            if (index < fromIndex || index > toIndex) {
+                tempActiveItems.set(index, node);
+            } else {
+                const newIndex = this.convertFromToIndexRevert(index);
+                tempActiveItems.set(newIndex, node);
+            }
+        })
+        this._activeItems = tempActiveItems;
+    }
+
+    // currently unused, but may be useful in the future.
+    private convertFromToIndex(index: int32): int32 {
+        if (this._moveFromTo == undefined) {
+            return index;
+        }
+        if (this._moveFromTo![1] === index) {
+            return this._moveFromTo![0];
+        }
+        if (this._moveFromTo![0] <= index && index < this._moveFromTo![1]) {
+            return index + 1;
+        }
+        if (this._moveFromTo![1] < index && index <= this._moveFromTo![0]) {
+            return index - 1;
+        }
+        return index;
+    }
+
+    // used for updateActiveRange.
+    private convertFromToIndexRevert(index: int32): int32 {
+        if (this._moveFromTo == undefined) {
+            return index;
+        }
+        if (this._moveFromTo![0] === index) {
+            return this._moveFromTo![1];
+        }
+        if (this._moveFromTo![0] < index && index <= this._moveFromTo![1]) {
+            return index - 1;
+        }
+        if (this._moveFromTo![1] <= index && index < this._moveFromTo![0]) {
+            return index + 1;
+        }
+        return index;
     }
 }

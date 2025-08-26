@@ -183,6 +183,7 @@ import promptAction from '@ohos/promptAction'
 import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, DataSyncOptions } from '#external'
 import { uiObserver } from "@ohos/arkui/observer"
+import { ItemDragEventHandler } from "./../common"
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -16200,6 +16201,41 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_onOffsetChange_type)) {
             const value_onOffsetChange_value  = value_onOffsetChange!
             valueSerializer.holdAndWriteCallback(value_onOffsetChange_value)
+        }
+    }
+    writeItemDragEventHandler(value: ItemDragEventHandler): void {
+        let valueSerializer: Serializer = this
+        const valueHolderForOnLongPress = value.onLongPress
+        if (valueHolderForOnLongPress !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnLongPressTmpValue = valueHolderForOnLongPress!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnLongPressTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDragStart = value.onDragStart
+        if (valueHolderForOnDragStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDragStartTmpValue = valueHolderForOnDragStart!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDragStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnMoveThrough = value.onMoveThrough
+        if (valueHolderForOnMoveThrough !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnMoveThroughTmpValue = valueHolderForOnMoveThrough!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnMoveThroughTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDrop = value.onDrop
+        if (valueHolderForOnDrop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDropTmpValue = valueHolderForOnDrop!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDropTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     writeSwipeGestureEvent(value: SwipeGestureEvent): void {

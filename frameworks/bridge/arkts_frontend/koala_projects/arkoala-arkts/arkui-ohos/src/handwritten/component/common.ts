@@ -18,6 +18,11 @@ export function applyStyles<T extends CommonMethod>(this: T, customStyles: Custo
     return this;
 }
 
+export interface DynamicNode {
+    onMove(handler: OnMoveHandler | undefined): this;
+    onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this;
+}
+
 export class UIGestureEvent {
     private peer?: PeerNode
     setPeer(peer?: PeerNode) {

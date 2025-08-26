@@ -19,6 +19,7 @@
 import { __context, __id, remember } from '@koalaui/runtime';
 import { RepeatImplForOptions } from '../handwritten/RepeatImpl';
 import { ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from './common';
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from './common';
 import { InteropNativeModule } from "@koalaui/interop";
 
 export interface RepeatItem<T> {
@@ -44,13 +45,15 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface RepeatAttribute<T> extends CommonMethod {
+export interface RepeatAttribute<T> extends CommonMethod, DynamicNode {
     arr: RepeatArray<T>;
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
     key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
     virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
     template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
     templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
+    onMove(handler: OnMoveHandler | undefined): this;
+    onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this;
     setRepeatOptions(arr: RepeatArray<T>): this {
         return this;
     }
@@ -66,7 +69,7 @@ export interface RepeatAttribute<T> extends CommonMethod {
 export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements RepeatAttribute<T> {
     public arr: RepeatArray<T> = [];
     public setRepeatOptions(arr: RepeatArray<T>): this {
-    this.arr = arr;
+        this.arr = arr;
         return this;
     }
     public each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T> {
@@ -84,6 +87,12 @@ export class ArkRepeatComponent<T> extends ArkCommonMethodComponent implements R
     public templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T> {
         return this;
     };
+    public onMove(handler: OnMoveHandler | undefined): this {
+        return this;
+    }
+    public onMove(handler: OnMoveHandler | undefined, eventHandler: ItemDragEventHandler | undefined): this {
+        return this;
+    }
 }
 /** @memo */
 export function RepeatImpl<T>(
