@@ -927,6 +927,10 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
@@ -1270,11 +1274,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
-    } else {
-        JSClass<JSText>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
-    }
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
