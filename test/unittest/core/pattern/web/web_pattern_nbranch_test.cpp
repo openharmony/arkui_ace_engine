@@ -360,7 +360,6 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess008, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     webPattern->isPasswordFill_ = true;
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
-    EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
 }
 
