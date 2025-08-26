@@ -2701,16 +2701,24 @@ void ResetOverlay(ArkUI_NodeHandle node)
 int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
-    if (actualSize < 0) {
+    if (actualSize < 2 || actualSize > 4) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
     ArkUI_Float32 values[] = { item->value[NUM_0].f32, item->value[NUM_1].f32 };
     int32_t unit = GetDefaultUnit(node, UNIT_PX);
     ArkUI_Int32 units[] = { unit, unit };
-
+    ArkUI_Int32 alignMode[] = { ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START, ArkUI_Direction::ARKUI_DIRECTION_AUTO };
+    auto isAlign = false;
+    if (actualSize >= 3) {
+        isAlign = true;
+        alignMode[0] = item->value[NUM_2].i32;
+    }
+    if (actualSize == 4) {
+        alignMode[1] = item->value[NUM_3].i32;
+    }
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
-        node->uiNodeHandle, values, units, false, NUM_2, nullptr, nullptr);
+        node->uiNodeHandle, values, units, alignMode, isAlign, actualSize, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2730,7 +2738,9 @@ const ArkUI_AttributeItem* GetBackgroundImagePosition(ArkUI_NodeHandle node)
         &positionOption, unit);
     g_numberValues[NUM_0].f32 = positionOption.x;
     g_numberValues[NUM_1].f32 = positionOption.y;
-    g_attributeItem.size = NUM_2;
+    g_numberValues[NUM_2].i32 = positionOption.alignment;
+    g_numberValues[NUM_3].i32 = positionOption.direction;
+    g_attributeItem.size = NUM_4;
     return &g_attributeItem;
 }
 

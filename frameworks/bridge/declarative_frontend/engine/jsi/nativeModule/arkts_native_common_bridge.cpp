@@ -3568,6 +3568,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     }
 
     ArkUI_Float32 values[SIZE_OF_TWO];
+    ArkUI_Int32 alignMode[] = { ArkUI_Alignment::ARKUI_ALIGNMENT_TOP_START, ArkUI_Direction::ARKUI_DIRECTION_AUTO };
     int32_t types[SIZE_OF_TWO];
     values[NUM_0] = static_cast<ArkUI_Float32>(valueX);
     types[NUM_0] = static_cast<int32_t>(typeX);
@@ -3576,8 +3577,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
 
     auto bgImageXRawPtr = AceType::RawPtr(resObjX);
     auto bgImageYRawPtr = AceType::RawPtr(resObjY);
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(nativeNode, values, types, isAlign,
-        SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
+        nativeNode, values, types, alignMode, isAlign, SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -118,6 +118,8 @@ constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 constexpr int32_t API_TARGET_VERSION_MASK = 1000;
+constexpr double FULL_DIMENSION = 100.0;
+constexpr double HALF_DIMENSION = 50.0;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -2694,12 +2696,33 @@ void SetBackgroundImagePositionUpdateFunc(
                        : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
+void SetBgImgPositionSuperpositon(BackgroundImagePosition& bgImgPosition, int32_t align, int32_t direction)
+{
+    std::vector<std::pair<ArkUI_Float64, ArkUI_Float64>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
+        { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
+        { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
+    if (align < 0 || align >= vec.size()) {
+        align = static_cast<int32_t>(AlignmentMode::TOP_START);
+    }
+    OHOS::Ace::AnimationOption option;
+    auto animatableDimensionX = AnimatableDimension(vec[align].first, DimensionUnit::PERCENT, option);
+    auto animatableDimensionY = AnimatableDimension(vec[align].second, DimensionUnit::PERCENT, option);
+    bgImgPosition.SetPercentX(animatableDimensionX);
+    bgImgPosition.SetPercentY(animatableDimensionY);
+    bgImgPosition.SetAlignment(static_cast<AlignmentMode>(align));
+    bgImgPosition.SetIsOffsetBaseOnAlignmentNeeded(true);
+    if (direction < 0 || (direction > 1 && direction != 3)) {
+        direction = static_cast<int32_t>(DirectionType::AUTO);
+    }
+    bgImgPosition.SetDirectionType(static_cast<DirectionType>(direction));
+}
+
 void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
-    ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
+    const ArkUI_Int32* alignMode, ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (size != NUM_2) {
+    if (size < NUM_2) {
         return;
     }
     BackgroundImagePosition bgImgPosition;
@@ -2710,6 +2733,9 @@ void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* value
     DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
     DimensionUnit typeY = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_1]);
     SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
+    if (size > NUM_2) {
+        SetBgImgPositionSuperpositon(bgImgPosition, alignMode[NUM_0], alignMode[NUM_1]);
+    }
     bgImgPosition.SetIsAlign(isAlign);
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
@@ -3085,6 +3111,8 @@ void GetBackgroundImagePosition(ArkUINodeHandle node, ArkUIPositionOptions* posi
     auto imagePosition = ViewAbstract::GetBackgroundImagePosition(frameNode);
     position->x = imagePosition.GetSizeX().GetNativeValue(static_cast<DimensionUnit>(unit));
     position->y = imagePosition.GetSizeY().GetNativeValue(static_cast<DimensionUnit>(unit));
+    position->alignment = static_cast<int32_t>(imagePosition.GetAlignment());
+    position->direction = static_cast<int32_t>(imagePosition.GetDirectionType());
 }
 
 /**
