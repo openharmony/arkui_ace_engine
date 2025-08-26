@@ -58,9 +58,9 @@ public:
     void SetWordBreak(Ace::WordBreak value) override;
     void SetFontStyle(Ace::FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
-    void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
     void SetInputStyle(InputStyle value) override;
     void SetShowPasswordIcon(bool value) override;
     void SetShowPasswordText(bool value) override;
@@ -334,6 +334,8 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void OnPrepareMenuCallbackUpdate(
         FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);

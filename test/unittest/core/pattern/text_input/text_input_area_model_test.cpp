@@ -1966,6 +1966,7 @@ HWTEST_F(TextInputAreaTest, TextModelStaticTest001, TestSize.Level0)
     std::optional<Ace::FontWeight> validWeight  = Ace::FontWeight::W100;
     TextModelStatic::SetFontWeight(frameNode.GetRawPtr(), validWeight);
     EXPECT_FALSE(layoutProperty->GetAdaptMaxFontSize().has_value());
+    
     std::optional<Ace::FontWeight> emptyWeight = std::nullopt;
     TextModelStatic::SetFontWeight(frameNode.GetRawPtr(), emptyWeight);
     EXPECT_FALSE(layoutProperty->GetAdaptMaxFontSize().has_value());

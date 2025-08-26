@@ -32,7 +32,6 @@ public:
     {
         auto value = MakeRefPtr<TextFieldPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
-        value->UpdatePaintPropertyHost(DynamicCast<PaintProperty>(this));
         value->propPlaceholderColor_ = ClonePlaceholderColor();
         value->propInputStyle_ = CloneInputStyle();
         value->propCursorColor_ = CloneCursorColor();

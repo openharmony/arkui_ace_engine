@@ -16,11 +16,9 @@
 
 #include "core/text/text_emoji_processor.h"
 
+#include "base/utils/utf_helper.h"
 #include <unicode/uchar.h>
 
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "base/utils/utf_helper.h"
 #include "unicode/unistr.h"
 
 namespace OHOS::Ace {
