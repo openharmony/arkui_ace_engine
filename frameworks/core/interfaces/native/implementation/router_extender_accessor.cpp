@@ -100,6 +100,7 @@ void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pag
     pageFrameNode->MarkDirtyNode();
     common->MarkModifyDone();
     common->MarkDirtyNode();
+    stageNode->MarkNeedSyncRenderTree(true);
 }
 
 void BackImpl()
