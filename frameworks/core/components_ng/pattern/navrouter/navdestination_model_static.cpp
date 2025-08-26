@@ -645,4 +645,12 @@ void NavDestinationModelStatic::SetEnableNavigationIndicator(FrameNode* frameNod
     CHECK_NULL_VOID(node);
     node->SetNavigationIndicatorConfig(navigationIndicator);
 }
+
+void NavDestinationModelStatic::SetHideItemText(FrameNode* frameNode, bool isHideItemText)
+{
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
+}
 } // namespace OHOS::Ace::NG

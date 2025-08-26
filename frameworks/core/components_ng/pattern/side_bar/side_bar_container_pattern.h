@@ -197,6 +197,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void OnHostChildUpdateDone() override;
     void UpdateAnimDir();
     void DoAnimation();
     void CreateAnimation();
