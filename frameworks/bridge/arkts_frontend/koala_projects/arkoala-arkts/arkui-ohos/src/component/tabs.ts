@@ -431,10 +431,12 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_fadingEdge(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: DividerStyle | undefined): void {
+    dividerAttribute(value: DividerStyle | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
+        if (value !== null) {
+            value_type = runtimeType(value)
+        }
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
@@ -1003,7 +1005,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
     public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerStyle | undefined)
+            const value_casted = value as (DividerStyle | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }

@@ -157,19 +157,14 @@ void SetTabsOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    std::optional<TabsOptions> tabsOptionsOpt;
-    if (options->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        tabsOptionsOpt = Converter::Convert<TabsOptions>(options->value);
-    } else {
-        tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
-    }
-    CHECK_NULL_VOID(tabsOptionsOpt);
-    TabsModelStatic::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
-    TabsModelStatic::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
+    std::optional<TabsOptions> tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
+    auto tabsOptions = tabsOptionsOpt.value_or(TabsOptions());
+    TabsModelStatic::SetTabBarPosition(frameNode, tabsOptions.barPosOpt);
+    TabsModelStatic::InitIndex(frameNode, tabsOptions.indexOpt);
 
-    if (tabsOptionsOpt->controllerOpt) {
+    if (tabsOptions.controllerOpt) {
         // obtain the external TabController peer
-        if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr) {
+        if (auto peerImplPtr = *(tabsOptions.controllerOpt); peerImplPtr) {
             // obtain the internal SwiperController
             auto internalSwiperController = TabsModelStatic::GetSwiperController(frameNode);
             // pass the internal controller to external management
