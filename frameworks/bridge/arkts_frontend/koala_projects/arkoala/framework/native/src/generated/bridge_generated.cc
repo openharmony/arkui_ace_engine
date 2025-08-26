@@ -43877,10 +43877,10 @@ void impl_WebContextMenuResult_selectAll(Ark_NativePointer thisPtr) {
         GetAccessors()->getWebContextMenuResultAccessor()->selectAll(self);
 }
 KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_selectAll, Ark_NativePointer)
-Ark_NativePointer impl_ConsoleMessage_ctor(const KStringPtr& message, const KStringPtr& sourceId, KInteropNumber lineNumber, Ark_Int32 messageLevel) {
-        return GetAccessors()->getConsoleMessageAccessor()->ctor((const Ark_String*) (&message), (const Ark_String*) (&sourceId), (const Ark_Number*) (&lineNumber), static_cast<Ark_MessageLevel>(messageLevel));
+Ark_NativePointer impl_ConsoleMessage_ctor(const KStringPtr& message, const KStringPtr& sourceId, Ark_Int32 lineNumber, Ark_Int32 messageLevel) {
+        return GetAccessors()->getConsoleMessageAccessor()->ctor((const Ark_String*) (&message), (const Ark_String*) (&sourceId), (const Ark_Int32*) (&lineNumber), static_cast<Ark_MessageLevel>(messageLevel));
 }
-KOALA_INTEROP_4(ConsoleMessage_ctor, Ark_NativePointer, KStringPtr, KStringPtr, KInteropNumber, Ark_Int32)
+KOALA_INTEROP_4(ConsoleMessage_ctor, Ark_NativePointer, KStringPtr, KStringPtr, Ark_Int32, Ark_Int32)
 Ark_NativePointer impl_ConsoleMessage_getFinalizer() {
         return GetAccessors()->getConsoleMessageAccessor()->getFinalizer();
 }
@@ -43895,11 +43895,11 @@ Ark_String impl_ConsoleMessage_getSourceId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getConsoleMessageAccessor()->getSourceId(self);
 }
 KOALA_INTEROP_1(ConsoleMessage_getSourceId, KStringPtr, Ark_NativePointer)
-Ark_Number impl_ConsoleMessage_getLineNumber(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_ConsoleMessage_getLineNumber(Ark_NativePointer thisPtr) {
         Ark_ConsoleMessage self = reinterpret_cast<Ark_ConsoleMessage>(thisPtr);
         return GetAccessors()->getConsoleMessageAccessor()->getLineNumber(self);
 }
-KOALA_INTEROP_DIRECT_1(ConsoleMessage_getLineNumber, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(ConsoleMessage_getLineNumber, Ark_Int32, Ark_NativePointer)
 Ark_Int32 impl_ConsoleMessage_getMessageLevel(Ark_NativePointer thisPtr) {
         Ark_ConsoleMessage self = reinterpret_cast<Ark_ConsoleMessage>(thisPtr);
         return GetAccessors()->getConsoleMessageAccessor()->getMessageLevel(self);
@@ -43982,7 +43982,7 @@ KInteropReturnBuffer impl_WebResourceResponse_getResponseDataEx(Ark_NativePointe
             else if (retValue_value_type == 1) {
                 _retSerializer.writeInt8(1);
                 const auto retValue_value_1 = retValue_value.value1;
-                _retSerializer.writeNumber(retValue_value_1);
+                _retSerializer.writeInt32(retValue_value_1);
             }
             else if (retValue_value_type == 2) {
                 _retSerializer.writeInt8(2);
@@ -44025,16 +44025,16 @@ KInteropReturnBuffer impl_WebResourceResponse_getResponseHeader(Ark_NativePointe
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(WebResourceResponse_getResponseHeader, KInteropReturnBuffer, Ark_NativePointer)
-Ark_Number impl_WebResourceResponse_getResponseCode(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebResourceResponse_getResponseCode(Ark_NativePointer thisPtr) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         return GetAccessors()->getWebResourceResponseAccessor()->getResponseCode(self);
 }
-KOALA_INTEROP_DIRECT_1(WebResourceResponse_getResponseCode, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebResourceResponse_getResponseCode, Ark_Int32, Ark_NativePointer)
 void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int8 data_value_buf_selector = thisDeserializer.readInt8();
-        Ark_Union_String_Number_Resource_Buffer data_value_buf = {};
+        Ark_Union_String_Int32_Resource_Buffer data_value_buf = {};
         data_value_buf.selector = data_value_buf_selector;
         if (data_value_buf_selector == 0) {
             data_value_buf.selector = 0;
@@ -44042,7 +44042,7 @@ void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerial
         }
         else if (data_value_buf_selector == 1) {
             data_value_buf.selector = 1;
-            data_value_buf.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            data_value_buf.value1 = static_cast<Ark_Int32>(thisDeserializer.readInt32());
         }
         else if (data_value_buf_selector == 2) {
             data_value_buf.selector = 2;
@@ -44055,8 +44055,8 @@ void impl_WebResourceResponse_setResponseData(Ark_NativePointer thisPtr, KSerial
         else {
             INTEROP_FATAL("One of the branches for data_value_buf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_Number_Resource_Buffer data_value = static_cast<Ark_Union_String_Number_Resource_Buffer>(data_value_buf);;
-        GetAccessors()->getWebResourceResponseAccessor()->setResponseData(self, (const Ark_Union_String_Number_Resource_Buffer*)&data_value);
+        Ark_Union_String_Int32_Resource_Buffer data_value = static_cast<Ark_Union_String_Int32_Resource_Buffer>(data_value_buf);;
+        GetAccessors()->getWebResourceResponseAccessor()->setResponseData(self, (const Ark_Union_String_Int32_Resource_Buffer*)&data_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebResourceResponse_setResponseData, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebResourceResponse_setResponseEncoding(Ark_NativePointer thisPtr, const KStringPtr& encoding) {
@@ -44088,11 +44088,11 @@ void impl_WebResourceResponse_setResponseHeader(Ark_NativePointer thisPtr, KSeri
         GetAccessors()->getWebResourceResponseAccessor()->setResponseHeader(self, (const Array_Header*)&header_value);
 }
 KOALA_INTEROP_DIRECT_V3(WebResourceResponse_setResponseHeader, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_WebResourceResponse_setResponseCode(Ark_NativePointer thisPtr, KInteropNumber code) {
+void impl_WebResourceResponse_setResponseCode(Ark_NativePointer thisPtr, Ark_Int32 code) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
-        GetAccessors()->getWebResourceResponseAccessor()->setResponseCode(self, (const Ark_Number*) (&code));
+        GetAccessors()->getWebResourceResponseAccessor()->setResponseCode(self, (const Ark_Int32*) (&code));
 }
-KOALA_INTEROP_DIRECT_V2(WebResourceResponse_setResponseCode, Ark_NativePointer, KInteropNumber)
+KOALA_INTEROP_DIRECT_V2(WebResourceResponse_setResponseCode, Ark_NativePointer, Ark_Int32)
 void impl_WebResourceResponse_setResponseIsReady(Ark_NativePointer thisPtr, Ark_Boolean IsReady) {
         Ark_WebResourceResponse self = reinterpret_cast<Ark_WebResourceResponse>(thisPtr);
         GetAccessors()->getWebResourceResponseAccessor()->setResponseIsReady(self, IsReady);
@@ -44116,11 +44116,11 @@ Ark_String impl_WebResourceError_getErrorInfo(Ark_NativePointer thisPtr) {
         return GetAccessors()->getWebResourceErrorAccessor()->getErrorInfo(self);
 }
 KOALA_INTEROP_1(WebResourceError_getErrorInfo, KStringPtr, Ark_NativePointer)
-Ark_Number impl_WebResourceError_getErrorCode(Ark_NativePointer thisPtr) {
+Ark_Int32 impl_WebResourceError_getErrorCode(Ark_NativePointer thisPtr) {
         Ark_WebResourceError self = reinterpret_cast<Ark_WebResourceError>(thisPtr);
         return GetAccessors()->getWebResourceErrorAccessor()->getErrorCode(self);
 }
-KOALA_INTEROP_DIRECT_1(WebResourceError_getErrorCode, KInteropNumber, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(WebResourceError_getErrorCode, Ark_Int32, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_ctor() {
         return GetAccessors()->getJsGeolocationAccessor()->ctor();
 }

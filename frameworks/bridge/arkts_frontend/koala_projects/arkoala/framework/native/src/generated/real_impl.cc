@@ -20169,7 +20169,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_ConsoleMessage CtorImpl(const Ark_String* message,
                                 const Ark_String* sourceId,
-                                const Ark_Number* lineNumber,
+                                const Ark_Int32* lineNumber,
                                 Ark_MessageLevel messageLevel)
     {
         return new ConsoleMessagePeer(message, sourceId, lineNumber, messageLevel);
@@ -20186,7 +20186,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
+    Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
     {
         return {};
     }
@@ -20256,7 +20256,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Opt_Union_String_Number_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
+    Opt_Union_String_Int32_Buffer_Resource GetResponseDataExImpl(Ark_WebResourceResponse peer)
     {
         return {};
     }
@@ -20276,12 +20276,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
+    Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
     {
         return {};
     }
     void SetResponseDataImpl(Ark_WebResourceResponse peer,
-                             const Ark_Union_String_Number_Resource_Buffer* data)
+                             const Ark_Union_String_Int32_Resource_Buffer* data)
     {
     }
     void SetResponseEncodingImpl(Ark_WebResourceResponse peer,
@@ -20301,7 +20301,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetResponseCodeImpl(Ark_WebResourceResponse peer,
-                             const Ark_Number* code)
+                             const Ark_Int32* code)
     {
     }
     void SetResponseIsReadyImpl(Ark_WebResourceResponse peer,
@@ -20333,7 +20333,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
+    Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
     {
         return {};
     }
