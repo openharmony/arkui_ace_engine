@@ -53,11 +53,12 @@ static constexpr double SCALE_FACTOR_B = -0.012414818053443355;
 static constexpr double SCALE_FACTOR_C = -0.0015925017083441295;
 static constexpr double SCALE_FACTOR_D = 3.0809306290456454E-06;
 static constexpr double SCALE_FACTOR_E = 100.0;
+static constexpr float OFFSET_THRESHOLD = 348.5f;
 } // namespace
 
 float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {
-    float offset = fabs(pos);
+    float offset = fmin(fabs(pos), OFFSET_THRESHOLD);
     float ratio = static_cast<float>((SCALE_FACTOR_A +
                                     SCALE_FACTOR_B * offset +
                                     SCALE_FACTOR_C * pow(offset, 2) + // 2:平方
