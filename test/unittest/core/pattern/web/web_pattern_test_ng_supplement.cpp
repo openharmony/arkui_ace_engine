@@ -292,7 +292,7 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentStart001, TestSize.Leve
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentStart(scriptItems);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentStartScriptItems_.has_value());
 #endif
 }
 
@@ -321,7 +321,7 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentEnd001, TestSize.Level1
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentEnd(scriptItems);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
 #endif
 }
 
@@ -425,7 +425,7 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentStartByOrder005, TestSi
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentStartScriptItemsByOrder_.has_value());
 #endif
 }
 
@@ -455,7 +455,7 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentEndByOrder005, TestSize
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onDocumentEndScriptItemsByOrder_.has_value());
 #endif
 }
 
@@ -565,7 +565,7 @@ HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnHeadReadyByOrder001, TestSize.L
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_TRUE(webPattern->onHeadReadyScriptItemsByOrder_.has_value());
 #endif
 }
 
