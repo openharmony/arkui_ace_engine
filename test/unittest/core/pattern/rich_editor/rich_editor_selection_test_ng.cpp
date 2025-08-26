@@ -916,6 +916,30 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection020, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->HasFocus());
 }
 
+/**
+ * @tc.name: SetSelection021
+ * @tc.desc: test set selection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, SetSelection021, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
+    richEditorController->SetSelection(0, 2);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+    richEditorController->SetSelection(-1, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+}
 
 /**
  * @tc.name: InitSelection001
@@ -2175,6 +2199,36 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectArea001, TestSize.Level1)
     EXPECT_TRUE(res.IsValid());
     res = richEditorPattern->GetSelectArea(SelectRectsType::RIGHT_BOTTOM_POINT);
     EXPECT_TRUE(res.IsValid());
+}
+
+/**
+ * @tc.name: RichEditorController006
+ * @tc.desc: test get span info
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, GetSpansInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    auto info1 = richEditorController->GetSpansInfo(1, 10);
+    EXPECT_EQ(info1.selection_.selection[0], 1);
+    EXPECT_EQ(info1.selection_.selection[1], 10);
+    EXPECT_EQ(info1.selection_.resultObjects.size(), 3);
+    auto info2 = richEditorController->GetSpansInfo(10, 1);
+    EXPECT_EQ(info2.selection_.selection[0], 1);
+    EXPECT_EQ(info2.selection_.selection[1], 10);
+    auto info3 = richEditorController->GetSpansInfo(-1, 10);
+    EXPECT_EQ(info3.selection_.selection[0], 0);
+    EXPECT_EQ(info3.selection_.selection[1], 10);
+    auto info4 = richEditorController->GetSpansInfo(1, -10);
+    EXPECT_EQ(info4.selection_.selection[0], 0);
+    EXPECT_EQ(info4.selection_.selection[1], 1);
 }
 
 } // namespace OHOS::Ace::NG

@@ -347,6 +347,154 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddSymbolSpan003
+ * @tc.desc: test get symbol span info
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetSymbolColorList(SYMBOL_COLOR_LIST_1);
+    style.SetRenderStrategy(RENDER_STRATEGY_SINGLE);
+    style.SetEffectStrategy(EFFECT_STRATEGY_NONE);
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+    auto index3 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index3, 2);
+    auto index4 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index4, 3);
+
+    /**
+     * @tc.steps: step4. get symbol span info
+     */
+    auto info1 = richEditorController->GetSpansInfo(2, 5);
+    EXPECT_EQ(info1.selection_.selection[0], 2);
+    EXPECT_EQ(info1.selection_.selection[1], 5);
+    EXPECT_EQ(info1.selection_.resultObjects.size(), 2);
+
+    auto info2 = richEditorController->GetSpansInfo(5, 2);
+    EXPECT_EQ(info2.selection_.selection[0], 2);
+    EXPECT_EQ(info2.selection_.selection[1], 5);
+    EXPECT_EQ(info2.selection_.resultObjects.size(), 2);
+
+    auto info3 = richEditorController->GetSpansInfo(-2, 5);
+    EXPECT_EQ(info3.selection_.selection[0], 0);
+    EXPECT_EQ(info3.selection_.selection[1], 5);
+    EXPECT_EQ(info3.selection_.resultObjects.size(), 3);
+
+    auto info4 = richEditorController->GetSpansInfo(2, -5);
+    EXPECT_EQ(info4.selection_.selection[0], 0);
+    EXPECT_EQ(info4.selection_.selection[1], 2);
+    EXPECT_EQ(info4.selection_.resultObjects.size(), 1);
+
+    ClearSpan();
+}
+
+/**
+ * @tc.name: AddSymbolSpan004
+ * @tc.desc: test delete symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSymbolSpan004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+    auto index3 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index3, 2);
+    auto index4 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index4, 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step4. delete single symbol span
+     */
+    RangeOptions option2;
+    option2.start = 0;
+    option2.end = 2;
+    richEditorController->DeleteSpans(option2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 3);
+
+    option2.start = 2;
+    option2.end = 0;
+    richEditorController->DeleteSpans(option2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 2);
+
+    option2.start = -1;
+    option2.end = 2;
+    richEditorController->DeleteSpans(option2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 1);
+
+    option2.start = 2;
+    option2.end = -1;
+    richEditorController->DeleteSpans(option2);
+    EXPECT_EQ(contentNode->GetChildren().size(), 0);
+
+    /**
+     * @tc.steps: step5. add symbol span
+     */
+    auto index5 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index5, 0);
+
+    /**
+     * @tc.steps: step6. delete symbol span
+     */
+    option2.start = 0;
+    option2.end = 1;
+    richEditorController->DeleteSpans(option2); // delete half symbol span, will fail
+    EXPECT_EQ(contentNode->GetChildren().size(), 0);
+
+    ClearSpan();
+}
+
+/**
  * @tc.name: AddSpans001
  * @tc.desc: test use span & imagespan & symbolspan together
  * @tc.type: FUNC

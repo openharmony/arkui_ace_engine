@@ -401,6 +401,25 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCaretOffset003
+ * @tc.desc: test set caret offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, SetCaretOffset003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorController->SetCaretOffset(2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+    richEditorController->SetCaretOffset(-1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+}
+
+/**
  * @tc.name: MoveCaretAndStartFocus001
  * @tc.desc: test MoveCaretAndStartFocus
  * @tc.type: FUNC
@@ -679,6 +698,31 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretRect002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCaretRect003
+ * @tc.desc: test get caret rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, GetCaretRect003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto rect1 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect1.GetOffset().GetX(), -1);
+    EXPECT_EQ(rect1.GetOffset().GetY(), -1);
+    EXPECT_EQ(rect1.Width(), -1);
+    EXPECT_EQ(rect1.Height(), -1);
+    richEditorPattern->caretTwinkling_ = true;
+    auto rect2 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect2.GetOffset().GetX(), 0);
+    EXPECT_EQ(rect2.GetOffset().GetY(), 0);
+    EXPECT_EQ(rect2.Width(), 0);
+    EXPECT_EQ(rect2.Height(), 0);
+}
+
+/**
  * @tc.name: MoveCaretAfterTextChange001
  * @tc.desc: test move caret after text change
  * @tc.type: FUNC
@@ -889,6 +933,27 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange, TestSize.Level1)
     context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
     pattern_->TriggerAvoidOnCaretChange();
     EXPECT_EQ(pattern_->GetLastCaretPos(), std::nullopt);
+}
+
+/**
+ * @tc.name: GetCaretOffset001
+ * @tc.desc: test get caret offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, GetCaretOffset001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = 1;
+    auto offset1 = richEditorController->GetCaretOffset();
+    EXPECT_EQ(offset1, 1);
+    richEditorPattern->caretPosition_ = 2;
+    auto offset2 = richEditorController->GetCaretOffset();
+    EXPECT_EQ(offset2, 2);
 }
 
 }
