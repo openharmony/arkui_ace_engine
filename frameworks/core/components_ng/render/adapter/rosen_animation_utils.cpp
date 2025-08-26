@@ -147,7 +147,6 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(c
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
-    CHECK_NULL_RETURN(rsUIContext, false);
     return Rosen::RSNode::IsImplicitAnimationOpen(rsUIContext);
 }
 
