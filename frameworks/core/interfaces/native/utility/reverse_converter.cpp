@@ -704,8 +704,7 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
 
     dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressure.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.pressure.value.f32 = static_cast<float>(src.GetForce());
 
     dst.width.tag = Ark_Tag::INTEROP_TAG_OBJECT;
     dst.width.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
