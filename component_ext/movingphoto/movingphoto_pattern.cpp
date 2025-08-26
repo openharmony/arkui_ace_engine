@@ -589,6 +589,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
         FireMediaPlayerImageComplete();
         if (notifyTransitionFlag_) {
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent EightyToHundredAnimation.");
+            notifyTransitionFlag_ = false;
             EightyToHundredAnimation();
         }
     }
@@ -1878,7 +1879,6 @@ void MovingPhotoPattern::EightyToHundredAnimation()
         auto movingPhoto = movingPhotoPattern.Upgrade();
         CHECK_NULL_VOID(movingPhoto);
         movingPhoto->DetachFirstImageFromFrameNode();
-        movingPhoto->notifyTransitionFlag_ = false;
     });
     AnimationUtils::Animate(option, [imageRsContext]() {
             imageRsContext->UpdateOpacity(1.0);
