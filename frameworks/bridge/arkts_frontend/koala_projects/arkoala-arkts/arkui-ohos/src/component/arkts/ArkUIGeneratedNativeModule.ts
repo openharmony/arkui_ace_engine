@@ -2724,11 +2724,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabContentInterface_setTabContentOptions(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _TabContentAttribute_tabBar2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _TabContentAttribute_tabBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabContentAttribute_onWillShow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct

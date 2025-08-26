@@ -25140,10 +25140,9 @@ export class Serializer extends SerializerBase {
                 const value__content_value_1  = value__content_value as Resource
                 valueSerializer.writeResource(value__content_value_1)
             }
-            else if (TypeChecker.isComponentContent(value__content_value)) {
-                valueSerializer.writeInt8(2 as int32)
-                const value__content_value_2  = value__content_value as ComponentContent
-                valueSerializer.writeComponentContent(value__content_value_2)
+            else {
+                console.warn("not support ComponentContent now");
+                throw new Error("not support ComponentContent now");
             }
         }
         const value__indicator  = value._indicator

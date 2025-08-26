@@ -3323,6 +3323,8 @@ typedef struct Ark_TimePickerDialogOptions Ark_TimePickerDialogOptions;
 typedef struct Opt_TimePickerDialogOptions Opt_TimePickerDialogOptions;
 typedef struct Ark_Type_TabContentAttribute_tabBar_content Ark_Type_TabContentAttribute_tabBar_content;
 typedef struct Opt_Type_TabContentAttribute_tabBar_content Opt_Type_TabContentAttribute_tabBar_content;
+typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Ark_Union_PopupOptions_CustomPopupOptions Ark_Union_PopupOptions_CustomPopupOptions;
 typedef struct Opt_Union_PopupOptions_CustomPopupOptions Opt_Union_PopupOptions_CustomPopupOptions;
 typedef struct Ark_Union_RichEditorImageSpanResult_RichEditorTextSpanResult Ark_Union_RichEditorImageSpanResult_RichEditorTextSpanResult;
@@ -20083,6 +20085,23 @@ typedef struct Opt_Type_TabContentAttribute_tabBar_content {
     Ark_Tag tag;
     Ark_Type_TabContentAttribute_tabBar_content value;
 } Opt_Type_TabContentAttribute_tabBar_content;
+typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ComponentContent value0;
+        Ark_SubTabBarStyle value1;
+        Ark_BottomTabBarStyle value2;
+        Ark_String value3;
+        Ark_Resource value4;
+        CustomNodeBuilder value5;
+        Ark_TabBarOptions value6;
+    };
+} Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions {
+    Ark_Tag tag;
+    Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions value;
+} Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Ark_Union_PopupOptions_CustomPopupOptions {
     Ark_Int32 selector;
     union {
@@ -23245,12 +23264,8 @@ typedef struct GENERATED_ArkUITabContentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setTabContentOptions)(Ark_NativePointer node);
-    void (*setTabBar0)(Ark_NativePointer node,
-                       const Opt_Union_String_Resource_CustomBuilder_TabBarOptions* value);
-    void (*setTabBar1)(Ark_NativePointer node,
-                       const Opt_Union_SubTabBarStyle_BottomTabBarStyle* value);
-    void (*setTabBar2)(Ark_NativePointer node,
-                       const Opt_Type_TabContentAttribute_tabBar_content* value);
+    void (*setTabBar)(Ark_NativePointer node,
+                      const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value);
     void (*setOnWillShow)(Ark_NativePointer node,
                           const Opt_VoidCallback* value);
     void (*setOnWillHide)(Ark_NativePointer node,
