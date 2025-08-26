@@ -27,7 +27,7 @@ void GridRowBaseTestNG::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void GridRowBaseTestNG::SetUp() 
+void GridRowBaseTestNG::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
 }

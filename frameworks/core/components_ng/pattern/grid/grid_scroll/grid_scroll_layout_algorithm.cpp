@@ -2359,7 +2359,8 @@ std::pair<bool, bool> GridScrollLayoutAlgorithm::GetResetMode(LayoutWrapper* lay
     CHECK_NULL_RETURN(host, res);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, res);
-    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false)) // avoid reset during overScroll
+    // avoid reset during overScroll
+    if ((pattern->IsScrollableSpringMotionRunning() && info_.IsOutOfEnd(mainGap_, false))
         || updateIdx == -1) {
         return res;
     }
