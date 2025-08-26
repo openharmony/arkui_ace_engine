@@ -2848,6 +2848,13 @@ struct ArkUICommonModifier {
     void (*setCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node, void* userData,
         ArkUI_Float32* values, ArkUI_Int32 size);
     void (*unregisterCommonOnVisibleAreaApproximateChangeEvent)(ArkUINodeHandle node);
+    void (*setWidthLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy);
+    void (*resetWidthLayoutPolicy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getWidthLayoutPolicy)(ArkUINodeHandle node);
+    void (*setHeightLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy);
+    void (*resetHeightLayoutPolicy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getHeightLayoutPolicy)(ArkUINodeHandle node);
+    ArkUI_Bool (*getPositionEdges)(ArkUINodeHandle node, ArkUIStringAndFloat* result, ArkUI_Int32 unit);
 };
 
 struct ArkUICommonShapeModifier {

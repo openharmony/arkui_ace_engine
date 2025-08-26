@@ -5967,6 +5967,25 @@ void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
+void ViewAbstract::UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
+        layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+    }
+}
+
+void ViewAbstract::ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+    }
+}
+
 void ViewAbstract::SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
@@ -8247,6 +8266,13 @@ OffsetT<Dimension> ViewAbstract::GetPosition(FrameNode* frameNode)
     return target->GetPositionValue(position);
 }
 
+std::optional<EdgesParam> ViewAbstract::GetPositionEdges(FrameNode* frameNode)
+{
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, std::nullopt);
+    return target->GetPositionEdges();
+}
+
 std::optional<Shadow> ViewAbstract::GetShadow(FrameNode* frameNode)
 {
     Shadow value;
@@ -8596,6 +8622,17 @@ Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
         }
     }
     return value;
+}
+
+LayoutCalPolicy ViewAbstract::GetLayoutPolicy(FrameNode* frameNode, bool isWidth)
+{
+    CHECK_NULL_RETURN(frameNode, LayoutCalPolicy::NO_MATCH);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_RETURN(layoutPolicyProperty, LayoutCalPolicy::NO_MATCH);
+    auto layoutPolicy = layoutPolicyProperty->GetLayoutPolicy(isWidth);
+    return layoutPolicy.value_or(LayoutCalPolicy::NO_MATCH);
 }
 
 Color ViewAbstract::GetBackgroundColor(FrameNode* frameNode)

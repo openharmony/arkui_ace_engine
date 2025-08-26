@@ -1431,6 +1431,117 @@ int32_t SetRotateAngle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetWidthLayoutPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize != NUM_1 || item->value[NUM_0].i32 < NUM_0 || item->value[NUM_0].i32 > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setWidthLayoutPolicy(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWidthLayoutPolicy(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetWidthLayoutPolicy(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWidthLayoutPolicy(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getWidthLayoutPolicy(node->uiNodeHandle);
+    if (g_numberValues[0].i32 < 0 || g_numberValues[0].i32 > 2) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetHeightLayoutPolicy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize != NUM_1 || item->value[NUM_0].i32 < NUM_0 || item->value[NUM_0].i32 > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setHeightLayoutPolicy(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetHeightLayoutPolicy(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetHeightLayoutPolicy(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetHeightLayoutPolicy(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getHeightLayoutPolicy(node->uiNodeHandle);
+    if (g_numberValues[0].i32 < 0 || g_numberValues[0].i32 > 2) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+void FillVecFromEdges(std::vector<ArkUIStringAndFloat>& vec, const ArkUI_OptionalFloat& edge)
+{
+    vec.emplace_back(ArkUIStringAndFloat { static_cast<double>(edge.isSet), nullptr });
+    vec.emplace_back(ArkUIStringAndFloat { edge.value, nullptr });
+    vec.emplace_back(ArkUIStringAndFloat { static_cast<double>(UNIT_VP), nullptr });
+}
+
+void FillEdgesFromVec(ArkUIStringAndFloat* vec, int32_t offset, ArkUI_OptionalFloat& edge)
+{
+    edge.isSet = static_cast<int32_t>(vec[offset].value);
+    edge.value = static_cast<float>(vec[offset + NUM_1].value);
+}
+
+int32_t SetPositionEdges(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || !item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    const ArkUI_PositionEdges* edges = reinterpret_cast<ArkUI_PositionEdges*>(item->object);
+    CHECK_NULL_RETURN(edges, ERROR_CODE_PARAM_INVALID);
+    std::vector<ArkUIStringAndFloat> options;
+    FillVecFromEdges(options, edges->top);
+    FillVecFromEdges(options, edges->left);
+    FillVecFromEdges(options, edges->bottom);
+    FillVecFromEdges(options, edges->right);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setPositionEdges(
+        node->uiNodeHandle, true, options.data(), nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetPositionEdges(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetPositionEdges(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetPositionEdges(ArkUI_NodeHandle node)
+{
+    ArkUIStringAndFloat result[NUM_13];
+    auto* fullImpl = GetFullImpl();
+    if (!fullImpl->getNodeModifiers()->getCommonModifier()->getPositionEdges(
+            node->uiNodeHandle, result, GetDefaultUnit(node, UNIT_VP))) {
+        return nullptr;
+    }
+    ArkUI_PositionEdges* edges = new ArkUI_PositionEdges;
+    FillEdgesFromVec(result, NUM_0, edges->top);
+    FillEdgesFromVec(result, NUM_3, edges->left);
+    FillEdgesFromVec(result, NUM_6, edges->bottom);
+    FillEdgesFromVec(result, NUM_9, edges->right);
+    g_attributeItem.object = edges;
+    return &g_attributeItem;
+}
+
 void ResetRotate(ArkUI_NodeHandle node)
 {
     // already check in entry point.
@@ -16093,6 +16204,9 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAreaChangeApproximateOptions,
         SetTranslateWithPercentage,
         SetRotateAngle,
+        SetWidthLayoutPolicy,
+        SetHeightLayoutPolicy,
+        SetPositionEdges,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16209,6 +16323,9 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAreaChangeApproximateOptions,
         GetTranslateWithPercentage,
         GetRotateAngle,
+        GetWidthLayoutPolicy,
+        GetHeightLayoutPolicy,
+        GetPositionEdges,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -16329,6 +16446,9 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAreaChangeApproximateOptions,
         ResetTranslateWithPercentage,
         ResetRotateAngle,
+        ResetWidthLayoutPolicy,
+        ResetHeightLayoutPolicy,
+        ResetPositionEdges,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

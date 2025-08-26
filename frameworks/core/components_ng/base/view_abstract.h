@@ -786,6 +786,8 @@ public:
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
+    static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
+    static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
     static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
@@ -925,6 +927,7 @@ public:
     static Matrix4 GetTransform(FrameNode* frameNode);
     static HitTestMode GetHitTestBehavior(FrameNode* frameNode);
     static OffsetT<Dimension> GetPosition(FrameNode* frameNode);
+    static std::optional<EdgesParam> GetPositionEdges(FrameNode* frameNode);
     static std::optional<Shadow> GetShadow(FrameNode* frameNode);
     static NG::Gradient GetSweepGradient(FrameNode* frameNode);
     static NG::Gradient GetRadialGradient(FrameNode* frameNode);
@@ -987,6 +990,7 @@ public:
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
     static Dimension GetWidth(FrameNode* frameNode);
     static Dimension GetHeight(FrameNode* frameNode);
+    static LayoutCalPolicy GetLayoutPolicy(FrameNode* frameNode, bool isWidth);
     static Color GetBackgroundColor(FrameNode* frameNode);
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);

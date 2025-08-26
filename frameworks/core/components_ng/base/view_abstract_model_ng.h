@@ -111,13 +111,13 @@ public:
         }
     }
 
-    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isSetWidth) override
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override
     {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty();
         if (layoutProperty) {
-            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isSetWidth);
+            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
         }
     }
 
