@@ -21,6 +21,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
  
 using namespace testing;
@@ -28,7 +29,7 @@ using namespace testing::ext;
  
 namespace OHOS::Ace::NG {
 namespace {
-const std::u16string TEST_INSERT_LINE_SPACE = u" ";
+bool g_isOnEditChangeCalled = false;
 } // namespace
  
 class RichEditorEventTestNg : public RichEditorCommonTestNg {
@@ -549,6 +550,220 @@ HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus006, Tes
     EXPECT_FALSE(richEditorNode_->IsVisible());
     ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RichEditorEventHub001
+ * @tc.desc: test get insert
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set insert value
+     */
+    RichEditorInsertValue insertValueInfo;
+    insertValueInfo.SetInsertOffset(1);
+    insertValueInfo.SetInsertValue(INIT_VALUE_1);
+    /**
+     * @tc.steps: step2. get insert value
+     */
+    EXPECT_EQ(insertValueInfo.GetInsertOffset(), 1);
+    EXPECT_EQ(insertValueInfo.GetInsertValue(), INIT_VALUE_1);
+}
+
+/**
+ * @tc.name: RichEditorEventHub002
+ * @tc.desc: test span result
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set span result
+     */
+    RichEditorAbstractSpanResult result;
+    FONT_FEATURES_LIST fontFeature;
+    RefPtr<ResourceObject> valueResource;
+    SymbolSpanStyle symbolSpanStyle;
+
+    result.SetSpanRangeEnd(1);
+    result.SetFontFeature(fontFeature);
+    result.SetLineHeight(20.0);
+    result.SetLetterspacing(20.0);
+    result.SetValueResource(valueResource);
+    result.SetValueString(TEST_STR);
+    result.SetSymbolSpanStyle(symbolSpanStyle);
+    result.SetTextDecoration(TextDecoration::UNDERLINE);
+    result.SetColor("");
+
+    /**
+     * @tc.steps: step2. get span result
+     */
+    EXPECT_EQ(result.GetSpanRangeEnd(), 1);
+    EXPECT_EQ(result.GetFontFeatures(), fontFeature);
+    EXPECT_EQ(result.GetLineHeight(), 20.0);
+    EXPECT_EQ(result.GetLetterspacing(), 20.0);
+    EXPECT_EQ(result.GetFontColor(), "");
+    EXPECT_EQ(result.GetFontSize(), 0);
+    EXPECT_EQ(result.GetValueResource(), valueResource);
+    EXPECT_EQ(result.GetValueString(), TEST_STR);
+    EXPECT_EQ(result.GetSymbolSpanStyle().lineHeight, 0.0);
+    EXPECT_EQ(result.GetFontWeight(), 0);
+    EXPECT_EQ(result.GetFontFamily(), "");
+    EXPECT_EQ(result.GetTextDecoration(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(result.GetColor(), "");
+}
+
+/**
+ * @tc.name: RichEditorEventHub003
+ * @tc.desc: test edit change event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set OnEditingChange func
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto func = [](bool value) {
+        g_isOnEditChangeCalled = value;
+    };
+    richEditorModel.SetOnEditingChange(std::move(func));
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. fire OnEditingChange func
+     * @tc.expected: expect g_isOnEditChangeCalled is true
+     */
+    eventHub->FireOnEditingChange(true);
+    EXPECT_EQ(g_isOnEditChangeCalled, true);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: RichEditorEventHub004
+ * @tc.desc: test GetDragExtraParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.cases: case. call GetDragExtraParams(), cover branch !extraInfo.empty()
+     * @tc.expected: expect return jsonStr is {"extraInfo":"info"}
+     */
+    auto jsonStr = eventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
+    EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
+
+    /**
+     * @tc.cases: case. call GetDragExtraParams(), cover branch type == DragEventType::DROP
+     * @tc.expected: expect return jsonStr is {"extraInfo":"info"}
+     */
+    jsonStr = eventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::DROP);
+    EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
+
+    /**
+     * @tc.cases: case. call GetDragExtraParams(), cover branch timestamp_ != 0
+     * @tc.expected: expect return jsonStr is {}
+     */
+    auto timestamp = std::chrono::system_clock::now().time_since_epoch().count();
+    eventHub->timestamp_ = timestamp;
+    jsonStr = eventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::DROP);
+    EXPECT_EQ(jsonStr, "{}");
+
+    /**
+     * @tc.cases: case. call GetDragExtraParams(), cover branch pattern->GetTimestamp() == timestamp_
+     * @tc.expected: expect return jsonStr is {"isInComponent":true}
+     */
+    richEditorPattern->timestamp_ = timestamp;
+    jsonStr = eventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::DROP);
+    EXPECT_EQ(jsonStr, "{\"isInComponent\":true}");
+    EXPECT_EQ(eventHub->timestamp_, 0);
+}
+
+/**
+ * @tc.name: RichEditorEventHub005
+ * @tc.desc: test fire event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init eventHub
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. fire event when there is null func
+     */
+    RichEditorChangeValue value;
+    StyledStringChangeValue info;
+    TextCommonEvent event;
+    eventHub->FireOnDidChange(value);
+    eventHub->FireOnCut(event);
+    eventHub->FireOnCopy(event);
+    EXPECT_TRUE(eventHub->FireOnWillChange(value));
+    EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // add imageSpan
+    ClearSpan();
+    ImageSpanOptions imageSpanOptions;
+    GestureEventFunc callback2 = [](GestureEvent& info) {
+        info.SetPreventDefault(true);
+    };
+    imageSpanOptions.userGestureOption.onClick = callback2;
+    richEditorController->AddImageSpan(imageSpanOptions);
+
+    /**
+     * @tc.steps: step1. Click on imagespan
+     */
+    GestureEvent info2;
+    info2.localLocation_ = Offset(0, 0);
+    richEditorPattern->HandleClickEvent(info2);
+    EXPECT_FALSE(richEditorPattern->HasFocus());
 }
 
 }

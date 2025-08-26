@@ -600,4 +600,81 @@ HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
     EXPECT_EQ(point.GetY(), 0);
 }
 
+/**
+ * @tc.name: KeyboardAvoidance001
+ * @tc.desc: test for keyboardAvoidance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, KeyboardAvoidance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. setCustomKeyboard
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+
+    auto func = []() {};
+    richEditorModel.SetCustomKeyboard(func, true);
+    EXPECT_TRUE(richEditorPattern->keyboardAvoidance_);
+
+    /**
+     * @tc.steps: step2. check keyboardAvoidance
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    EXPECT_TRUE(overlayManager->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, SupportAvoidanceTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto supportAvoidance = true;
+    richEditorPattern->SetCustomKeyboardOption(supportAvoidance);
+    auto support = richEditorPattern->keyboardAvoidance_;
+    overlayManager->SetCustomKeyboardOption(support);
+    EXPECT_TRUE(richEditorPattern->keyboardAvoidance_);
+    supportAvoidance = false;
+    richEditorPattern->SetCustomKeyboardOption(supportAvoidance);
+    overlayManager->SetCustomKeyboardOption(support);
+    EXPECT_FALSE(richEditorPattern->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: RichEditorGetCrossOverHeight001
+ * @tc.desc: test RichEditorGetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RichEditorGetCrossOverHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    richEditorPattern->keyboardAvoidance_ = true;
+    richEditorPattern->contentChange_ = true;
+    auto ret = richEditorPattern->GetCrossOverHeight();
+    EXPECT_EQ(ret, 0);
+}
+
 }
