@@ -45,8 +45,6 @@ constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 // constexpr int32_t HOVER_IMAGE_INTERRUPT_DURATION = 500;
 // constexpr char KEY_CONTEXT_MENU_HOVER[] = "ContextMenuHover";
-constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
-constexpr char KEY_MENU[] = "Menu";
 } // namespace
 
 void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
@@ -259,41 +257,6 @@ void ViewAbstractModelNG::BindMenu(
     }
     if (!menuParam.setShow) {
         BindMenuGesture(std::move(params), std::move(buildFunc), menuParam);
-    }
-    // delete menu when target node destroy
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (!menuParam.isShowInSubWindow && expandDisplay) {
-        expandDisplay = false;
-    }
-    if (!expandDisplay) {
-        auto destructor = [id = targetNode->GetId(), params]() mutable {
-            params.clear();
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(id);
-        };
-        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
-    } else {
-        auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
-            params.clear();
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
-            CHECK_NULL_VOID(subwindow);
-            auto childContainerId = subwindow->GetChildContainerId();
-            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-            CHECK_NULL_VOID(childContainer);
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(id);
-        };
-        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     }
 }
 
@@ -669,22 +632,6 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         }
         RegisterContextMenuKeyEvent(targetNode, std::move(buildFunc), menuParam);
     }
-
-    // delete menu when target node destroy
-    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
-        CHECK_NULL_VOID(subwindow);
-        auto childContainerId = subwindow->GetChildContainerId();
-        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-        CHECK_NULL_VOID(childContainer);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
-        MenuView::RemoveMenuHoverScaleStatus(id);
-    };
-    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)

@@ -107,7 +107,7 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
-    RefPtr<FrameNode> GetPreviewMenuWrapper2();
+    void CreateTargetAndMenuWrapper(RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& wrapperNode);
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -218,17 +218,14 @@ RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper(
     return menuWrapperNode;
 }
 
-RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper2()
+void MenuWrapperTestNg::CreateTargetAndMenuWrapper(RefPtr<FrameNode>& targetNode, RefPtr<FrameNode>& wrapperNode)
 {
     auto rootNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    auto targetNode = FrameNode::CreateFrameNode(
+    targetNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(targetNode, nullptr);
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(textNode, nullptr);
     targetNode->MountToParent(rootNode);
     targetNode->GetOrCreateGestureEventHub();
     MenuParam menuParam;
@@ -236,13 +233,9 @@ RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper2()
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     auto customNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(customNode, nullptr);
     auto customGeometryNode = customNode->GetGeometryNode();
-    CHECK_NULL_RETURN(customGeometryNode, nullptr);
     customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto menuWrapperNode =
-        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
-    return menuWrapperNode;
+    wrapperNode = MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
 }
 /**
  * @tc.name: MenuWrapperPatternTestNg001
@@ -958,7 +951,9 @@ HWTEST_F(MenuWrapperTestNg, MenuViewTestNg001, TestSize.Level1)
      * @tc.steps: step1. set API12.
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    auto menuWrapperNode = GetPreviewMenuWrapper2();
+    RefPtr<FrameNode> targetNode;
+    RefPtr<FrameNode> menuWrapperNode;
+    CreateTargetAndMenuWrapper(targetNode, menuWrapperNode);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
 
@@ -2304,5 +2299,26 @@ HWTEST_F(MenuWrapperTestNg, AddFilterHotArea001, TestSize.Level1)
     wrapperPattern->isFilterInSubWindow_ = true;
     wrapperPattern->AddFilterHotArea(rects);
     EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: RegisterDetachCallbackTest001
+ * @tc.desc: test RegisterDetachCallbackTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, RegisterDetachCallbackTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> targetNode;
+    RefPtr<FrameNode> wrapperNode;
+    CreateTargetAndMenuWrapper(targetNode, wrapperNode);
+    ASSERT_NE(targetNode, nullptr);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
+    wrapperPattern->OnAttachToMainTree();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 1);
+    wrapperPattern->OnDetachFromMainTree();
+    EXPECT_EQ(targetNode->destroyCallbacksMap_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

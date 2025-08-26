@@ -695,7 +695,10 @@ private:
     void OnModifyDone() override;
     void InitFocusEvent();
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+    void RegisterDetachCallback();
+    void UnRegisterDetachCallback();
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     // mark self and all children no-draggable
