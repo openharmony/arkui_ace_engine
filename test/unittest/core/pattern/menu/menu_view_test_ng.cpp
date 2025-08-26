@@ -1246,6 +1246,26 @@ HWTEST_F(MenuViewTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Lev
 }
 
 /**
+ * @tc.name: RegisterAccessibilityChildActionNotify002
+ * @tc.desc: Test RegisterAccessibilityChildActionNotify
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, RegisterAccessibilityChildActionNotify002, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+
+    MenuView::RegisterAccessibilityChildActionNotify(menuItemNode);
+    auto accessibilityProperty = menuItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    auto callback = accessibilityProperty->GetNotifyChildActionFunc();
+    EXPECT_NE(callback, nullptr);
+    uint32_t notifyChildActionType = 2;
+    auto reuslt = callback(menuItemNode, static_cast<NotifyChildActionType>(notifyChildActionType));
+    EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_OK);
+}
+
+/**
  * @tc.name: SetHasCustomOutline001
  * @tc.desc: Verify SetHasCustomOutline.
  * @tc.type: FUNC

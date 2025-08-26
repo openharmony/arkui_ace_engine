@@ -1304,4 +1304,25 @@ HWTEST_F(MenuItemPatternBasicTestNg, RegisterAccessibilityChildActionNotify001, 
     auto reuslt = callback(menuItemNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_RISE);
 }
+
+/**
+ * @tc.name: RegisterAccessibilityClickAction001
+ * @tc.desc: Test callback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, RegisterAccessibilityClickAction001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    menuItemPattern->RegisterAccessibilityClickAction();
+    auto accessibilityProperty = menuItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    auto actionClickImpl = accessibilityProperty->actionClickImpl_;
+    EXPECT_NE(actionClickImpl, nullptr);
+    auto result = accessibilityProperty->ActActionClick();
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG
