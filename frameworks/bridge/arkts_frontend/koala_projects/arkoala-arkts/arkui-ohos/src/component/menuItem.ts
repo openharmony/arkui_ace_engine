@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, AttributeModifier } from "./common"
 import { ResourceStr, Font, ResourceColor } from "./units"
 import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Callback_Boolean_Void } from "./navigation"
@@ -33,8 +33,12 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { MenuItemOpsHandWritten } from "./../handwritten"
+import { MenuItemModifier } from '../MenuItemModifier'
+import { hookMenuItemAttributeModifier } from '../handwritten'
+import { applyAttributeModifierBase } from "src/handwritten/modifiers/ArkCommonModifier"
 
 export class ArkMenuItemPeer extends ArkCommonMethodPeer {
+    _attributeSet?: MenuItemModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -242,14 +246,16 @@ export interface MenuItemAttribute extends CommonMethod {
     setMenuItemOptions(value?: MenuItemOptions | CustomBuilder): this {
         return this
     }
-    selected(value: boolean | Bindable<boolean> | undefined): this
-    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this
-    onChange(value: ((isVisible: boolean) => void) | undefined): this
-    contentFont(value: Font | undefined): this
-    contentFontColor(value: ResourceColor | undefined): this
-    labelFont(value: Font | undefined): this
-    labelFontColor(value: ResourceColor | undefined): this
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
+    selected(value: boolean | Bindable<boolean> | undefined): this {return this;}
+    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this{return this;}
+    onChange(value: ((isVisible: boolean) => void) | undefined): this{return this;}
+    contentFont(value: Font | undefined): this{return this;}
+    contentFontColor(value: ResourceColor | undefined): this{return this;}
+    labelFont(value: Font | undefined): this{return this;}
+    labelFontColor(value: ResourceColor | undefined): this{return this;}
+    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {return;}
+    attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    {return this;}
 }
 export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAttribute {
     selected_value?: boolean | undefined
@@ -368,6 +374,11 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements Me
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    
+    public attributeModifier(modifier: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookMenuItemAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

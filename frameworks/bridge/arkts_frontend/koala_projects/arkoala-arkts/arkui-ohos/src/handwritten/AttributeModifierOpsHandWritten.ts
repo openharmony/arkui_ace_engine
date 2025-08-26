@@ -15,6 +15,9 @@
 
 import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from '../component/common';
 import { ArkButtonComponent, ButtonAttribute } from '../component/button';
+import { ArkMenuComponent, MenuAttribute } from '../component/menu';
+import { ArkMenuItemComponent, MenuItemAttribute } from '../component/menuItem';
+import { ArkMenuItemGroupComponent, MenuItemGroupAttribute } from '../component/menuItemGroup';
 import { ArkTextComponent, TextAttribute, ArkTextPeer, TextOptions } from '../component/text';
 import { ArkBlankComponent, BlankAttribute, ArkBlankPeer } from '../component/blank';
 import { ArkColumnComponent, ColumnAttribute, ArkColumnPeer } from '../component/column';
@@ -43,6 +46,9 @@ import { ArkContainerSpanComponent, ContainerSpanAttribute, ArkContainerSpanPeer
 import { applyAttributeModifierBase, applyCommonModifier, applyAttributeModifierNoCommonMethod } from "./modifiers/ArkCommonModifier";
 import { CommonModifier } from '../CommonModifier';
 import { ButtonModifier } from "../ButtonModifier";
+import { MenuModifier } from "../MenuModifier";
+import { MenuItemModifier } from "../MenuItemModifier";
+import { MenuItemGroupModifier } from "../MenuItemGroupModifier";
 import { TextModifier } from '../TextModifier';
 import { SpanModifier } from '../SpanModifier';
 import { ImageSpanModifier } from '../ImageSpanModifier';
@@ -88,6 +94,105 @@ import { ArkScrollComponent, ScrollAttribute } from '../component/scroll';
 import { ScrollModifier } from '../ScrollModifier';
 import { ArkWaterFlowComponent, WaterFlowAttribute } from '../component/waterFlow';
 import { WaterFlowModifier } from '../WaterFlowModifier';
+
+export function hookMenuItemGroupAttributeModifier(component: ArkMenuItemGroupComponent, modifier: AttributeModifier<MenuItemGroupAttribute>
+    | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): MenuItemGroupModifier => {
+        let isMenuItemGroupModifier: boolean = modifier instanceof MenuItemGroupModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new MenuItemGroupModifier();
+        if (isMenuItemGroupModifier) {
+            let menuItemGroupModifier = modifier as object as MenuItemGroupModifier;
+            initModifier.mergeModifier(menuItemGroupModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkMenuItemGroupComponent => {
+        let componentNew: ArkMenuItemGroupComponent = new ArkMenuItemGroupComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<MenuItemGroupAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+ 
+export function hookMenuItemAttributeModifier(component: ArkMenuItemComponent, modifier: AttributeModifier<MenuItemAttribute>
+    | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): MenuItemModifier => {
+        let isMenuItemModifier: boolean = modifier instanceof MenuItemModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new MenuItemModifier();
+        if (isMenuItemModifier) {
+            let menuItemModifier = modifier as object as MenuItemModifier;
+            initModifier.mergeModifier(menuItemModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkMenuItemComponent => {
+        let componentNew: ArkMenuItemComponent = new ArkMenuItemComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<MenuItemAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+ 
+export function hookMenuAttributeModifier(component: ArkMenuComponent, modifier: AttributeModifier<MenuAttribute>
+    | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): MenuModifier => {
+        let isMenuModifier: boolean = modifier instanceof MenuModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new MenuModifier();
+        if (isMenuModifier) {
+            let menuModifier = modifier as object as MenuModifier;
+            initModifier.mergeModifier(menuModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkMenuComponent => {
+        let componentNew: ArkMenuComponent = new ArkMenuComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<MenuAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 
 
 export function hookButtonAttributeModifier(component: ArkButtonComponent, modifier: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): void {

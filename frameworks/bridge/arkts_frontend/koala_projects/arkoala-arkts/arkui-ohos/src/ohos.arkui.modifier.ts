@@ -57,6 +57,12 @@ export { RelativeContainerModifier } from './RelativeContainerModifier';
 
 export { ButtonModifier } from './ButtonModifier';
 
+export { MenuModifier } from './MenuModifier';
+ 
+export { MenuItemModifier } from './MenuItemModifier';
+ 
+export { MenuItemGroupModifier } from './MenuItemGroupModifier';
+
 export { LineModifier } from './LineModifier';
 
 export { PathModifier } from './PathModifier';
