@@ -32,7 +32,7 @@ void JsAnimationOnFinishFunction::Execute(bool isDebugAnim)
         }
     }
     auto result = ExecuteJS();
-    if (isDebugAnim && !result.IsEmpty()) {
+    if (isDebugAnim && !result.IsEmpty() && result->IsString()) {
         TAG_LOGI(
             AceLogTag::ACE_ANIMATION, "call function result: %{public}s", result->ToString().c_str());
     }

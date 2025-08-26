@@ -340,8 +340,7 @@ void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
 
             for (size_t i = 0; i < result->Length(); i++) {
                 if (result->GetValueAt(i)->IsString()) {
-                    auto item = result->GetValueAt(i);
-                    popupData.emplace_back(item->ToString());
+                    popupData.emplace_back(result->GetValueAt(i)->ToString());
                 }
             }
             return popupData;
