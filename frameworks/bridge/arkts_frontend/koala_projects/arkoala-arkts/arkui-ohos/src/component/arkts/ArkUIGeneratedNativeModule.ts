@@ -6802,7 +6802,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebContextMenuResult_selectAll(ptr: KPointer): void
     @ani.unsafe.Quick
-    native static _ConsoleMessage_ctor(message: KStringPtr, sourceId: KStringPtr, lineNumber: number, messageLevel: KInt): KPointer
+    native static _ConsoleMessage_ctor(message: KStringPtr, sourceId: KStringPtr, lineNumber: int32, messageLevel: KInt): KPointer
     @ani.unsafe.Direct
     native static _ConsoleMessage_getFinalizer(): KPointer
     @ani.unsafe.Quick
@@ -6810,7 +6810,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ConsoleMessage_getSourceId(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _ConsoleMessage_getLineNumber(ptr: KPointer): number
+    native static _ConsoleMessage_getLineNumber(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -6846,7 +6846,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceResponse_getResponseHeader(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
-    native static _WebResourceResponse_getResponseCode(ptr: KPointer): number
+    native static _WebResourceResponse_getResponseCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseData(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
@@ -6858,7 +6858,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseHeader(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: number): void
+    native static _WebResourceResponse_setResponseCode(ptr: KPointer, code: int32): void
     @ani.unsafe.Direct
     native static _WebResourceResponse_setResponseIsReady(ptr: KPointer, IsReady: KInt): void
     @ani.unsafe.Direct
@@ -6870,7 +6870,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _WebResourceError_getErrorInfo(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _WebResourceError_getErrorCode(ptr: KPointer): number
+    native static _WebResourceError_getErrorCode(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _JsGeolocation_ctor(): KPointer
     @ani.unsafe.Direct
