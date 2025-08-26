@@ -1,0 +1,7 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/v2_tests",
+    "pages/v1_tests"
+  ]
+}

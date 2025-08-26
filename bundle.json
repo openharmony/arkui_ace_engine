@@ -263,7 +263,8 @@
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/test/unittest:unittest"
+                "//foundation/arkui/ace_engine/test/unittest:unittest",
+                "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/test/unittest:statemgmt_ut_hap"
             ]
         }
     }
