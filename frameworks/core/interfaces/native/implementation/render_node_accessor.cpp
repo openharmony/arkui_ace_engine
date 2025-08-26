@@ -23,11 +23,36 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
+#include "core/interfaces/native/implementation/shape_clip_peer.h"
+#include "core/interfaces/native/implementation/shape_mask_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<LengthMetricsUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = LengthMetricsUnit::DEFAULT; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = LengthMetricsUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const LengthMetricsUnit& src, ConvContext *ctx)
+{
+    switch (src) {
+        case LengthMetricsUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case LengthMetricsUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
+            LOGE("Unexpected enum value in LengthMetricsUnit: %{public}d", src);
+    }
+}
+}
+
 namespace GeneratedModifier {
 namespace {
 constexpr int32_t ARK_UNION_UNDEFINED = 1;
@@ -43,6 +68,11 @@ DimensionUnit ConvertLengthMetricsUnitToDimensionUnit(Ark_Int32 unitValue, Dimen
             return defaultUnit;
     }
     return defaultUnit;
+}
+
+RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
+{
+    return peer ? peer->shape : nullptr;
 }
 } // namespace
 namespace RenderNodeAccessor {
@@ -868,17 +898,46 @@ void SetBorderRadiusImpl(Ark_RenderNode peer, const Ark_BorderRadiuses_graphics*
 }
 Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto value = ViewAbstract::GetMask(Referenced::RawPtr(frameNode));
+    return PeerUtils::CreatePeer<ShapeMaskPeer>(value);
 }
-void SetShapeMaskImpl(Ark_RenderNode peer, Ark_ShapeMask shapeMask) {}
+void SetShapeMaskImpl(Ark_RenderNode peer, Ark_ShapeMask shapeMask)
+{
+    CHECK_NULL_VOID(peer && shapeMask);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    auto value = GetBasicShape(shapeMask);
+    ViewAbstract::SetMask(Referenced::RawPtr(frameNode), value);
+}
 Ark_ShapeClip GetShapeClipImpl(Ark_RenderNode peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto value = ViewAbstract::GetClipShape(Referenced::RawPtr(frameNode));
+    return PeerUtils::CreatePeer<ShapeClipPeer>(value);
 }
-void SetShapeClipImpl(Ark_RenderNode peer, Ark_ShapeClip shapeClip) {}
+void SetShapeClipImpl(Ark_RenderNode peer, Ark_ShapeClip shapeClip)
+{
+    CHECK_NULL_VOID(peer && shapeClip);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+    auto value = GetBasicShape(shapeClip);
+    ViewAbstract::SetClipShape(Referenced::RawPtr(frameNode), value);
+}
 Ark_Boolean GetMarkNodeGroupImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    auto isRenderGroup = ViewAbstract::GetRenderGroup(Referenced::RawPtr(frameNode));
+    return Converter::ArkValue<Ark_Boolean>(isRenderGroup);
 }
 void SetMarkNodeGroupImpl(Ark_RenderNode peer, Ark_Boolean markNodeGroup)
 {
@@ -890,17 +949,25 @@ void SetMarkNodeGroupImpl(Ark_RenderNode peer, Ark_Boolean markNodeGroup)
 
     auto frameNode = peer->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetMarkNodeGroup(isNodeGroup);
-    frameNode->SetApplicationRenderGroupMarked(true);
-    renderContext->RequestNextFrame();
+    CHECK_NULL_VOID(frameNode->GetTag() != "BuilderProxyNode");
+
+    frameNode->SetApplicationRenderGroupMarked(isNodeGroup);
+    ViewAbstract::SetRenderGroup(Referenced::RawPtr(frameNode), isNodeGroup);
 }
 Ark_LengthMetricsUnit GetLengthMetricsUnitImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_LengthMetricsUnit>(OHOS::Ace::NG::LengthMetricsUnit::DEFAULT);
+    CHECK_NULL_RETURN(peer, errorValue);
+    auto frameNode = peer->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, errorValue);
+    return Converter::ArkValue<Ark_LengthMetricsUnit>(peer->lengthMetricsUnit);
 }
-void SetLengthMetricsUnitImpl(Ark_RenderNode peer, Ark_LengthMetricsUnit lengthMetricsUnit) {}
+void SetLengthMetricsUnitImpl(Ark_RenderNode peer, Ark_LengthMetricsUnit lengthMetricsUnit)
+{
+    CHECK_NULL_VOID(peer);
+    auto value = Converter::OptConvert<OHOS::Ace::NG::LengthMetricsUnit>(lengthMetricsUnit);
+    peer->lengthMetricsUnit = value.has_value() ? value.value() : OHOS::Ace::NG::LengthMetricsUnit::DEFAULT;
+}
 } // namespace RenderNodeAccessor
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
 {
