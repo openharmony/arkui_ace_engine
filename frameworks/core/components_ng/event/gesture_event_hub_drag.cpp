@@ -1067,6 +1067,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(eventManager);
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
+    SetPixelMap(nullptr);
+    SetDragPreviewPixelMap(nullptr);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && needChangeFwkForLeaveWindow) {
         overlayManager->RemovePixelMap();
         overlayManager->RemovePreviewBadgeNode();
