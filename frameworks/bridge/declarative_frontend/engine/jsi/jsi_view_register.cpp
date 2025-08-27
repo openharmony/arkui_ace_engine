@@ -1237,7 +1237,7 @@ panda::Local<panda::JSValueRef> WrapScrollableTargetInfoPointer(panda::JsiRuntim
     if (!pointerObj.IsNull() && !pointerObj->IsUndefined()) {
         auto nativePointer = static_cast<int64_t>(pointerObj->ToNumber(vm)->Value());
         auto pattern = reinterpret_cast<NG::Pattern*>(nativePointer);
-        if (!pattern) {
+        if (pattern) {
             auto patternRef = AceType::WeakClaim(pattern);
             eventTarget->SetPattern(patternRef);
         }
