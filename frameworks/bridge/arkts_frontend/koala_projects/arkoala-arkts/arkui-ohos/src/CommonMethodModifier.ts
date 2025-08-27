@@ -966,7 +966,7 @@ export class CommonMethodModifier implements CommonMethod {
      if (this._keyboardShortcut_flag != AttributeUpdaterFlag.INITIAL) {
        switch (this._keyboardShortcut_flag) {
          case AttributeUpdaterFlag.UPDATE: {
-           peerNode.keyboardShortcutAttribute((this._keyboardShortcut_value as string | FunctionKey | undefined), (this._keyboardShortcut_keys as Array<ModifierKey> | undefined), (this._keyboardShortcut_action as (() => void)))
+          peerNode.keyboardShortcutAttribute((this._keyboardShortcut_value as string | FunctionKey | undefined), (this._keyboardShortcut_keys as Array<ModifierKey> | undefined), (this._keyboardShortcut_action as ((() => void) | undefined)))
            this._keyboardShortcut_flag = AttributeUpdaterFlag.RESET
            break
          }
@@ -1754,7 +1754,7 @@ if (value._backgroundImage_flag != AttributeUpdaterFlag.INITIAL) {
        switch (value._keyboardShortcut_flag) {
          case AttributeUpdaterFlag.UPDATE:
          case AttributeUpdaterFlag.SKIP: {
-           this.keyboardShortcut((this._keyboardShortcut_value as (string | FunctionKey | undefined)), (this._keyboardShortcut_keys as (Array<ModifierKey> | undefined)), (this._keyboardShortcut_action as (() => void)))
+           this.keyboardShortcut(value._keyboardShortcut_value, value._keyboardShortcut_keys, value._keyboardShortcut_action)
            break
          }
          default: {
