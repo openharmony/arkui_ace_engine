@@ -15,6 +15,7 @@
 
 #include "native_ui_extension.h"
 
+#include "ani_callback_info.h"
 #include "ani_common_want.h"
 #include "../utils/ani_utils.h"
 #include "base/log/log_wrapper.h"
@@ -24,11 +25,16 @@
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "frameworks/core/interfaces/native/implementation/ui_extension_proxy_peer_base.h"
 #endif //WINDOW_SCENE_SUPPORTED
+#include "native_dynamic_module.h"
 #include "want.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
 constexpr int32_t FOLLOW_HOST_DPI = 0;
+const char UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL[] = "initPlaceholder";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "undefinedPlaceholder";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "rotationPlaceholder";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND[] = "flodPlaceholder";
 
 bool IsNullishObject(ani_env *env, ani_ref objectRef)
 {
@@ -47,6 +53,14 @@ ani_status NativeUiExtension::BindNativeUiExtension(ani_env *env)
             "BindNativeUiExtensionComponent failed");
         return ret;
     }
+
+    ret = BindNativeUiExtensionProxy(env);
+    if (ret != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "BindNativeUiExtensionProxy failed");
+        return ret;
+    }
+
     return ANI_OK;
 }
 
@@ -54,7 +68,7 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
 {
     ani_class cls;
     static const char *className =
-        "Larkui/ani/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionModal;";
+        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionModal;";
     auto ani_status = env->FindClass(className, &cls);
     if (ani_status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -65,32 +79,28 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
     std::array methods = {
         ani_native_function {
             "_Uiextension_Set_Option",
-            nullptr,
-            reinterpret_cast<void*>(SetUiextensionOption)},
+            nullptr, reinterpret_cast<void *>(SetUiextensionWant)},
         ani_native_function {
             "_Uiextension_Set_Want",
-            nullptr,
-            reinterpret_cast<void *>(SetUiextensionWant)},
+            nullptr, reinterpret_cast<void *>(SetUiextensionWant)},
         ani_native_function {
             "_Uiextension_Set_OnResultCallback",
-            nullptr,
-            reinterpret_cast<void *>(SetOnResult)},
+            nullptr, reinterpret_cast<void *>(SetOnResult)},
         ani_native_function {
             "_Uiextension_Set_OnErrorCallback",
-            nullptr,
-            reinterpret_cast<void *>(SetOnError)},
+            nullptr, reinterpret_cast<void *>(SetOnError)},
         ani_native_function {
             "_Uiextension_Set_OnReciveCallback",
-            nullptr,
-            reinterpret_cast<void *>(SetOnRecive)},
+            nullptr, reinterpret_cast<void *>(SetOnRecive)},
         ani_native_function {
             "_Uiextension_Set_OnTerminationCallback",
-            nullptr,
-            reinterpret_cast<void *>(SetOnTerminate)},
+            nullptr, reinterpret_cast<void *>(SetOnTerminate)},
         ani_native_function {
             "_Uiextension_Set_OnReleaseCallback",
-            nullptr,
-            reinterpret_cast<void *>(SetOnRelease)},
+            nullptr, reinterpret_cast<void *>(SetOnRelease)},
+        ani_native_function {
+            "_Uiextension_Set_OnDrawReadyCallback",
+            nullptr, reinterpret_cast<void *>(SetOnDrawReady)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
@@ -99,6 +109,32 @@ ani_status NativeUiExtension::BindNativeUiExtensionComponent(ani_env *env)
             " className: %{public}s", className);
         return ANI_ERROR;
     };
+    return ANI_OK;
+}
+
+ani_status NativeUiExtension::BindNativeUiExtensionProxy(ani_env *env)
+{
+    static const char *className =
+        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUiextensionProxyModal;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "BindNativeUiExtensionProxy FindClass failed, className: %{public}s", className);
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function{"_Send_Data", nullptr, reinterpret_cast<void *>(SendData)},
+        ani_native_function{"_Send_Data_Sync", nullptr, reinterpret_cast<void *>(SendDataSync)},
+    };
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "BindNativeUiExtensionProxy Class_BindNativeMethods failed,"
+            " className: %{public}s", className);
+        return ANI_ERROR;
+    };
+
     return ANI_OK;
 }
 
@@ -114,7 +150,7 @@ ani_status NativeUiExtension::SetUiextensionOption(
     }
 
     std::string optionClassName =
-        "Larkui/ani/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
+        "Larkui/ani/arkts/ui_extension/ArkUIAniUiextensionModal/ArkUIAniUIExtensionOptions;";
     if (!AniUtils::CheckType(env, obj, optionClassName)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "CheckType %{public}s failed when SetUiextensionOption",
@@ -123,18 +159,47 @@ ani_status NativeUiExtension::SetUiextensionOption(
     }
 
     bool isTransferringCaller = AniUtils::GetBoolOrUndefined(env, obj, "isTransferringCaller");
+    bool isWindowModeFollowHost = AniUtils::GetBoolOrUndefined(env, obj, "isWindowModeFollowHost");
     int32_t dpiFollowStrategy = -1;
     if (!AniUtils::GetIntByName(env, obj, "dpiFollowStrategy", dpiFollowStrategy)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "Get dpiFollowStrategy failed when SetUiextensionOption");
         return ANI_ERROR;
     }
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+
+    static const std::map<std::string, NG::PlaceholderType> placeholderTypeTable = {
+        { UI_EXTENSION_PLACEHOLDER_TYPE_INITIAL, NG::PlaceholderType::INITIAL },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED, NG::PlaceholderType::UNDEFINED },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION, NG::PlaceholderType::ROTATION },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND, NG::PlaceholderType::FOLD_TO_EXPAND }
+    };
+    for (auto [strName, type] : placeholderTypeTable) {
+        ani_long placeholder;
+        if (ANI_OK != env->Object_GetFieldByName_Long(obj, strName.c_str(), &placeholder)) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Get placeholder failed.");
+            continue;
+        }
+        auto* frameNodePeerRaw = reinterpret_cast<FrameNodePeer*>(placeholder);
+        if (frameNodePeerRaw == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Get FrameNodePeer failed.");
+            continue;
+        }
+        auto nodeWeak = frameNodePeerRaw->weakNode;
+        auto upgradePtr = nodeWeak.Upgrade();
+        if (!upgradePtr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Get FrameNode RefPtr failed.");
+            continue;
+        }
+        placeholderMap.insert({type, upgradePtr});
+    }
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "SetUiextensionOption isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d,"
+        "isWindowModeFollowHost: %{public}d, placeholderMap size: %{public}d",
+        isTransferringCaller, dpiFollowStrategy, isWindowModeFollowHost, static_cast<int32_t>(placeholderMap.size()));
 
 #ifdef WINDOW_SCENE_SUPPORTED
     bool densityDpi = (dpiFollowStrategy == FOLLOW_HOST_DPI) ? true : false;
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-        "isTransferringCaller: %{public}d, dpiFollowStrategy: %{public}d, densityDpi: %{public}d",
-        isTransferringCaller, dpiFollowStrategy, densityDpi);
     NG::UIExtensionAdapter::UpdateUecConfig(frameNode, isTransferringCaller, densityDpi);
 #endif
     return ANI_OK;
@@ -195,6 +260,24 @@ ani_status NativeUiExtension::SetOnResult(
     ani_ref onResultGlobalRef;
     env->GlobalReference_Create(onResultRef, &onResultGlobalRef);
     auto onResultCallback = [env, onResultGlobalRef] (int32_t code, const AAFwk::Want& want) {
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+        auto onResultAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onResultGlobalRef);
+        auto onResultCallback = [onResultAniReadyCallbackInfo] (int32_t code, const AAFwk::Want& want) {
+            if (onResultAniReadyCallbackInfo == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onResultAniReadyCallbackInfo is nullptr");
+                return;
+            }
+    
+            ani_ref onResultGlobalRef = onResultAniReadyCallbackInfo->GetOnGlobalRef();
+            ani_env* env = onResultAniReadyCallbackInfo->GetEnvRef();
+            if (onResultGlobalRef == nullptr || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onResultGlobalRef or env is nullptr");
+                return;
+            }
+    
         auto fnObj = reinterpret_cast<ani_fn_object>(onResultGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
@@ -243,7 +326,24 @@ ani_status NativeUiExtension::SetOnRelease(
     ani_ref onReleaseRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onReleaseGlobalRef;
     env->GlobalReference_Create(onReleaseRef, &onReleaseGlobalRef);
-    auto onReleaseCallback = [env, onReleaseGlobalRef] (int32_t code) {
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onReleaseAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReleaseGlobalRef);
+    auto onReleaseCallback = [onReleaseAniReadyCallbackInfo] (int32_t code) {
+        if (onReleaseAniReadyCallbackInfo == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onReleaseAniReadyCallbackInfo is nullptr");
+            return;
+        }
+
+        ani_ref onReleaseGlobalRef = onReleaseAniReadyCallbackInfo->GetOnGlobalRef();
+        ani_env* env = onReleaseAniReadyCallbackInfo->GetEnvRef();
+        if (onReleaseGlobalRef == nullptr || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onReleaseGlobalRef or env is nullptr");
+            return;
+        }
+
         auto fnObj = reinterpret_cast<ani_fn_object>(onReleaseGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
         if (codeArgs == nullptr) {
@@ -261,6 +361,50 @@ ani_status NativeUiExtension::SetOnRelease(
 
 #ifdef WINDOW_SCENE_SUPPORTED
     NG::UIExtensionAdapter::SetOnRelease(frameNode, std::move(onReleaseCallback));
+#endif //WINDOW_SCENE_SUPPORTED
+    return ANI_OK;
+}
+
+ani_status NativeUiExtension::SetOnDrawReady(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object callbackObj)
+{
+    auto frameNode = reinterpret_cast<NG::FrameNode *>(pointer);
+    if (frameNode == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "frameNode is null when SetOnDrawReady");
+        return ANI_ERROR;
+    }
+
+    ani_ref onDrawReadyRef = reinterpret_cast<ani_ref>(callbackObj);
+    ani_ref onDrawReadyGlobalRef;
+    env->GlobalReference_Create(onDrawReadyRef, &onDrawReadyGlobalRef);
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onDrawAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onDrawReadyGlobalRef);
+    auto onDrawReadyCallback = [onDrawAniReadyCallbackInfo] () {
+        if (onDrawAniReadyCallbackInfo == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onDrawAniReadyCallbackInfo is nullptr");
+            return;
+        }
+
+        ani_ref onDrawReadyGlobalRef = onDrawAniReadyCallbackInfo->GetOnGlobalRef();
+        ani_env* env = onDrawAniReadyCallbackInfo->GetEnvRef();
+        if (onDrawReadyGlobalRef == nullptr || env == nullptr) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "onDrawReadyGlobalRef or env is nullptr");
+            return;
+        }
+
+        auto fnObj = reinterpret_cast<ani_fn_object>(onDrawReadyGlobalRef);
+        ani_ref result;
+        std::vector<ani_ref> tmp = {};
+        env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
+    };
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    NG::UIExtensionAdapter::SetOnDrawReady(frameNode, std::move(onDrawReadyCallback));
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
@@ -287,6 +431,25 @@ ani_status NativeUiExtension::SetOnError(
     ani_ref onErrorGlobalRef;
     env->GlobalReference_Create(onErrorRef, &onErrorGlobalRef);
     auto onErrorCallback = [env, onErrorGlobalRef] (
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+        auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
+        auto onErrorCallback = [onErrorAniReadyCallbackInfo] (
+            int32_t code, const std::string& name, const std::string& message) {
+            if (onErrorAniReadyCallbackInfo == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onErrorAniReadyCallbackInfo is nullptr");
+                return;
+            }
+    
+            ani_ref onErrorGlobalRef = onErrorAniReadyCallbackInfo->GetOnGlobalRef();
+            ani_env* env = onErrorAniReadyCallbackInfo->GetEnvRef();
+            if (onErrorGlobalRef == nullptr || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onErrorGlobalRef or env is nullptr");
+                return;
+            }
+
         int32_t code, const std::string& name, const std::string& message) {
         auto fnObj = reinterpret_cast<ani_fn_object>(onErrorGlobalRef);
         auto codeArgs = AniUtils::CreateDouble(env, code);
@@ -338,6 +501,24 @@ ani_status NativeUiExtension::SetOnRecive(
     ani_ref onReciveGlobalRef;
     env->GlobalReference_Create(onReciveRef, &onReciveGlobalRef);
     auto onReciveCallback = [env, onReciveGlobalRef] (const AAFwk::WantParams& params) {
+        ani_vm* vm = nullptr;
+        env->GetVM(&vm);
+        auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
+        auto onReciveCallback = [onReciveAniReadyCallbackInfo] (const AAFwk::WantParams& params) {
+            if (onReciveAniReadyCallbackInfo == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onReciveAniReadyCallbackInfo is nullptr");
+                return;
+            }
+    
+            ani_ref onReciveGlobalRef = onReciveAniReadyCallbackInfo->GetOnGlobalRef();
+            ani_env* env = onReciveAniReadyCallbackInfo->GetEnvRef();
+            if (onReciveGlobalRef == nullptr || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onReciveGlobalRef or env is nullptr");
+                return;
+            }
+    
         auto fnObj = reinterpret_cast<ani_fn_object>(onReciveGlobalRef);
         auto wantparamArgs = OHOS::AppExecFwk::WrapWantParams(env, params);
         if (wantparamArgs == nullptr) {
@@ -380,6 +561,25 @@ ani_status NativeUiExtension::SetOnTerminate(
     ani_ref onTerminateRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onTerminateGlobalRef;
     env->GlobalReference_Create(onTerminateRef, &onTerminateGlobalRef);
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onTerminateAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onTerminateGlobalRef);
+    auto onTerminateCallback =
+        [env, onTerminateAniReadyCallbackInfo] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
+            if (onTerminateAniReadyCallbackInfo == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onTerminateAniReadyCallbackInfo is nullptr");
+                return;
+            }
+
+            ani_ref onTerminateGlobalRef = onTerminateAniReadyCallbackInfo->GetOnGlobalRef();
+            ani_env* env = onTerminateAniReadyCallbackInfo->GetEnvRef();
+            if (onTerminateGlobalRef == nullptr || env == nullptr) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "onTerminateGlobalRef or env is nullptr");
+                return;
+            }
+
     auto onTerminateCallback =
         [env, onTerminateGlobalRef] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
             AAFwk::Want want;
@@ -410,4 +610,92 @@ ani_status NativeUiExtension::SetOnTerminate(
 #endif //WINDOW_SCENE_SUPPORTED
     return ANI_OK;
 }
+
+ani_status NativeUiExtension::SendData(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
+{
+    auto uIExtensionProxyPeer =
+        reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
+    if (uIExtensionProxyPeer == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "uIExtensionProxyPeer is null when SendData");
+        return ANI_ERROR;
+    }
+
+    OHOS::AAFwk::WantParams requestParams;
+    bool ret = OHOS::AppExecFwk::UnwrapWantParams(env, paramObj, requestParams);
+    if (!ret) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UnwrapWantParams failed when SendData");
+        return ANI_ERROR;
+    }
+
+    uIExtensionProxyPeer->SendData(requestParams);
+    return ANI_OK;
+}
+
+ani_object NativeUiExtension::SendDataSync(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object paramObj)
+{
+    ani_object result_obj = {};
+    auto uIExtensionProxyPeer =
+        reinterpret_cast<NG::GeneratedModifier::UIExtensionProxyPeerBase *>(pointer);
+    if (uIExtensionProxyPeer == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "uIExtensionProxyPeer is null when SendDataSync");
+        return result_obj;
+    }
+
+    OHOS::AAFwk::WantParams requestParams;
+    bool ret = OHOS::AppExecFwk::UnwrapWantParams(env, paramObj, requestParams);
+    if (!ret) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UnwrapWantParams failed when SendDataSync");
+        return result_obj;
+    }
+
+    OHOS::AAFwk::WantParams replyParams;
+    uIExtensionProxyPeer->SendDataSync(requestParams, replyParams);
+    ani_ref wantParamsObj = OHOS::AppExecFwk::WrapWantParams(env, replyParams);
+    if (wantParamsObj == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "WrapWantParams failed when SendDataSync");
+        return result_obj;
+    }
+
+    return static_cast<ani_object>(wantParamsObj);
+}
 } // namespace OHOS::Ace::Ani
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "arkuiuiextension_ani ANI_Constructor start");
+    ani_env* env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "GetEnv failed when ANI_Constructor");
+        return ANI_ERROR;
+    }
+
+    auto ani_status = OHOS::Ace::Ani::NativeUiExtension::BindNativeUiExtension(env);
+    if (ani_status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "BindNativeUiExtension failed when ANI_Constructor");
+        return ani_status;
+    }
+
+    ani_status = OHOS::Ace::Ani::NativeDynamicModule::BindNativeDynamicModule(env);
+    if (ani_status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DYNAMIC_COMPONENT,
+            "BindNativeDynamicModule failed when ANI_Constructor");
+        return ani_status;
+    }
+
+    *result = ANI_VERSION_1;
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "arkuiuiextension_ani ANI_Constructor end");
+    return ANI_OK;
+}
