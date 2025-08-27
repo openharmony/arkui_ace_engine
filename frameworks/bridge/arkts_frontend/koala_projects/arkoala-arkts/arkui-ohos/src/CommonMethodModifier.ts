@@ -511,6 +511,9 @@ export class CommonMethodModifier implements CommonMethod {
     return this
   }
   public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
+    if (runtimeType(content) === RuntimeType.FUNCTION) {
+      return this
+    }
     if ((this._bindMenu_flag) == (AttributeUpdaterFlag.INITIAL) ||
       !Type.of(content).isPrimitive() || !Type.of(options).isPrimitive() ||
       this._bindMenu0_value !== content || this._bindMenu1_value !== options) {
