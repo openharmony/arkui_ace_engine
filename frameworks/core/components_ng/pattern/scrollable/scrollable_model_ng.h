@@ -112,6 +112,18 @@ public:
     static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);
     static void ResetScrollBarMargin(FrameNode* frameNode);
     static void GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin& scrollBarMargin);
+    static void SetContentStartOffset(float offset);
+    static void SetContentEndOffset(float offset);
+    static void SetContentStartOffset(FrameNode* frameNode, float offset);
+    static void SetContentEndOffset(FrameNode* frameNode, float offset);
+    static void ResetContentStartOffset();
+    static void ResetContentEndOffset();
+    static void ResetContentStartOffset(FrameNode* frameNode);
+    static void ResetContentEndOffset(FrameNode* frameNode);
+    static void CreateWithResourceObjContentStartOffset(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjContentEndOffset(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjContentStartOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjContentEndOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };

@@ -108,4 +108,38 @@ void GridLayoutBaseAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper,
         focusHub->LostChildFocusToSelf();
     }
 }
+
+void GridLayoutBaseAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper, float mainSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto property = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(property);
+    auto startOffset = property->GetContentStartOffset();
+    if (!startOffset.has_value()) {
+        info_.contentStartOffset_ = 0;
+    }
+    auto endOffset = property->GetContentEndOffset();
+    if (!endOffset.has_value()) {
+        info_.contentEndOffset_ = 0;
+    }
+    if (!endOffset && !startOffset) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (startOffset) {
+        info_.contentStartOffset_ =
+            std::max(pipeline->NormalizeToPx(Dimension(startOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (endOffset) {
+        info_.contentEndOffset_ =
+            std::max(pipeline->NormalizeToPx(Dimension(endOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (GreatOrEqual(info_.contentStartOffset_ + info_.contentEndOffset_, mainSize)) {
+        info_.contentStartOffset_ = 0.0f;
+        info_.contentEndOffset_ = 0.0f;
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;

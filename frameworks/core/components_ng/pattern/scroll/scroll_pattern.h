@@ -105,12 +105,12 @@ public:
 
     double GetCurrentPosition() const
     {
-        return currentOffset_;
+        return currentOffset_ - contentStartOffset_;
     }
 
     double GetTotalOffset() const override
     {
-        return -currentOffset_;
+        return -currentOffset_ - contentStartOffset_;
     }
 
     void ResetPosition();
@@ -442,6 +442,8 @@ private:
     double prevOffset_ = 0.0;
     double scrollableDistance_ = 0.0;
     float viewPortLength_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
     SizeF viewPort_;
     SizeF viewSize_;
     SizeF viewPortExtent_;

@@ -268,4 +268,32 @@ void JSScrollableBase::JSOnDidStopFling(const JSCallbackInfo& args)
         NG::ScrollableModelNG::SetOnDidStopFling(nullptr);
     }
 }
+
+void JSScrollableBase::SetContentStartOffset(const JSCallbackInfo& info)
+{
+    double offset = 0.0;
+    RefPtr<ResourceObject> resObj;
+    if (JSViewAbstract::ParseJsDouble(info[0], offset, resObj)) {
+        NG::ScrollableModelNG::SetContentStartOffset(offset);
+    } else {
+        NG::ScrollableModelNG::ResetContentStartOffset();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        NG::ScrollableModelNG::CreateWithResourceObjContentStartOffset(resObj);
+    }
+}
+
+void JSScrollableBase::SetContentEndOffset(const JSCallbackInfo& info)
+{
+    double offset = 0.0;
+    RefPtr<ResourceObject> resObj;
+    if (JSViewAbstract::ParseJsDouble(info[0], offset, resObj)) {
+        NG::ScrollableModelNG::SetContentEndOffset(offset);
+    } else {
+        NG::ScrollableModelNG::ResetContentEndOffset();
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        NG::ScrollableModelNG::CreateWithResourceObjContentEndOffset(resObj);
+    }
+}
 } // namespace OHOS::Ace::Framework

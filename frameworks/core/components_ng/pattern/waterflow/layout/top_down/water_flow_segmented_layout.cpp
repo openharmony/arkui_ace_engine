@@ -74,6 +74,10 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     Init(idealSize);
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
+    CalcContentOffset(wrapper, info_, mainSize_);
+    if (!pattern->IsInitialized()) {
+        info_->currentOffset_ += info_->contentStartOffset_;
+    }
 
     PerformMeasurement();
 
@@ -401,7 +405,10 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     }
     if (info_->jumpIndex_ == LAST_ITEM) {
         auto maxHeight = info_->GetMaxMainHeight() - info_->margins_.back().bottom.value_or(0.0f);
-        info_->currentOffset_ = SolveJumpOffset({ 0, maxHeight, 0 }) + postJumpOffset_.value_or(0.0f);
+        info_->currentOffset_ =
+            SolveJumpOffset({ 0, maxHeight, 0 }) + postJumpOffset_.value_or(0.0f) - info_->contentEndOffset_;
+    } else if (info_->jumpIndex_ == 0) {
+        info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f) + info_->contentStartOffset_;
     } else {
         info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f);
     }

@@ -154,12 +154,14 @@ public:
 
     bool IsAtTopWithDelta() const override
     {
-        return info_.reachStart_ || LessNotEqual(EstimateHeight(), 0);
+        return (info_.reachStart_ && GreatOrEqual(info_.currentOffset_, info_.contentStartOffset_)) ||
+               LessNotEqual(EstimateHeight(), -info_.contentStartOffset_);
     }
 
     bool IsAtBottomWithDelta() const override
     {
-        return info_.offsetEnd_ || GreatNotEqual(EstimateHeight() + info_.lastMainSize_, GetTotalHeight());
+        return info_.offsetEnd_ ||
+               GreatNotEqual(EstimateHeight() + info_.lastMainSize_ + info_.contentEndOffset_, GetTotalHeight());
     }
 
     bool IsFadingBottom() const override;
@@ -269,6 +271,7 @@ public:
     void HandleOnItemFocus(int32_t index);
 
     void OnColorModeChange(uint32_t colorMode) override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -312,6 +315,7 @@ private:
     inline bool UseIrregularLayout() const;
 
     std::string GetIrregularIndexesString() const;
+    float GetOffsetWithLimit(float offset) const override;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;

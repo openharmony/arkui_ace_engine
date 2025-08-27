@@ -45,6 +45,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value() ;
     Init(size);
+
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         info_->isDataValid_ = false;
         return;
@@ -138,13 +139,16 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
     mainLen_ = frameSize.MainSize(axis_);
-
+    CalcContentOffset(wrapper_, info_, mainLen_);
     // omit footer from children count
     CHECK_NULL_VOID(wrapper_);
     auto host = wrapper_->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!pattern->IsInitialized()) {
+        info_->totalOffset_ += info_->contentStartOffset_;
+    }
     info_->repeatDifference_ = 0;
     info_->firstRepeatCount_ = 0;
     info_->childrenCount_ = 0;
@@ -281,7 +285,7 @@ void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 {
     // handle initial layout
     if (NearZero(delta) && info_->startIndex_ > info_->endIndex_ && itemCnt_ != 0) {
-        info_->ResetWithLaneOffset(info_->TopMargin());
+        info_->ResetWithLaneOffset(info_->TopMargin() + info_->contentStartOffset_);
     }
 
     const bool forward = NonPositive(delta);
@@ -306,7 +310,7 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
     if (Positive(delta)) {
         // positive offset is scrolling upwards
         int32_t oldStartIdx = info_->StartIndex();
-        FillFront(0.0f, info_->StartIndex() - 1, 0);
+        FillFront(info_->contentStartOffset_, info_->StartIndex() - 1, 0);
         MeasureRemainingLazyChild(oldStartIdx, info_->EndIndex(), false);
     } else {
         int32_t oldEndIdx = info_->EndIndex();
@@ -705,7 +709,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
                 lane.endPos = (mainLen_ + itemH) / 2.0f;
                 lane.items_.push_back({ jumpIdx, itemH });
 
-                FillFront(0.0f, jumpIdx - 1, 0);
+                FillFront(info_->contentStartOffset_, jumpIdx - 1, 0);
                 FillBack(mainLen_, jumpIdx + 1, itemCnt_ - 1);
             }
             break;
@@ -715,7 +719,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
                 ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
                 info_->ResetWithLaneOffset(mainLen_);
-                FillFront(0.0f, jumpIdx, 0);
+                FillFront(info_->contentStartOffset_, jumpIdx, 0);
             }
             break;
         }
@@ -737,8 +741,8 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         maxEnd += info_->footerHeight_;
     }
 
-    maxEnd += info_->BotMargin();
-    minStart -= info_->TopMargin();
+    maxEnd += info_->BotMargin() + info_->contentEndOffset_;
+    minStart -= info_->TopMargin() + info_->contentStartOffset_;
 
     int32_t startIdx = info_->StartIndex();
     if (info_->AtStartPos(startIdx) && Positive(minStart)) {

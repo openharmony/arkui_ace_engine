@@ -92,6 +92,8 @@ protected:
 
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
+    void CalcContentOffset(LayoutWrapper* layoutWrapper, float mainSize);
+
     GridLayoutInfo info_;
     bool measureInNextFrame_ = false;
     bool syncLoad_ = false;

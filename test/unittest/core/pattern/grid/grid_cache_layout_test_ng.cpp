@@ -632,8 +632,8 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 100);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 4), 200);
     EXPECT_EQ(pattern_->info_.startIndex_, 0);

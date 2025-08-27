@@ -46,6 +46,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value_or(LayoutConstraintF()), axis, MeasureType::MATCH_CONTENT);
+    CalcContentOffset(layoutWrapper);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     auto isMainFix = false;
     if (layoutPolicy.has_value()) {
@@ -78,6 +79,10 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
+    if (GreatOrEqual(contentStartOffset_ + contentEndOffset_, GetMainAxisSize(selfSize, axis))) {
+        contentStartOffset_ = 0;
+        contentEndOffset_ = 0;
+    }
     if (!isMainFix) {
         selfSize.Constrain(constraint->minSize, constraint->maxSize);
     } else {
@@ -108,6 +113,34 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     UseInitialOffset(axis, selfSize, layoutWrapper);
+}
+
+void ScrollLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto property = AceType::DynamicCast<ScrollLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(property);
+    auto startOffset = property->GetContentStartOffset();
+    if (!startOffset.has_value()) {
+        contentStartOffset_ = 0.0f;
+    }
+    auto endOffset = property->GetContentEndOffset();
+    if (!endOffset.has_value()) {
+        contentEndOffset_ = 0.0f;
+    }
+    if (!endOffset && !startOffset) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (startOffset) {
+        contentStartOffset_ = std::max(pipeline->NormalizeToPx(Dimension(startOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (endOffset) {
+        contentEndOffset_ = std::max(pipeline->NormalizeToPx(Dimension(endOffset.value(), DimensionUnit::VP)), 0.0);
+    }
 }
 
 namespace {
@@ -187,12 +220,12 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(scroll);
     float zoomScale = scroll->GetZoomScale();
     auto childSize = childGeometryNode->GetMarginFrameSize() * zoomScale;
-    auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
     float lastScrollableDistance = scrollableDistance_;
     if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
-        scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
+        scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentStartOffset_ + contentEndOffset_;
     } else {
-        scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
+        scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) +
+                              contentStartOffset_ + contentEndOffset_;
     }
     if (axis == Axis::FREE) {
         const auto effect = scroll->GetEdgeEffect();
@@ -216,7 +249,8 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     viewPortExtent_ = childSize;
     viewPortLength_ = axis == Axis::FREE ? viewPort_.Width() : GetMainAxisSize(viewPort_, axis);
-    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, crossOffset_);
+    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_ + contentStartOffset_)
+                                                : OffsetF(currentOffset_ + contentStartOffset_, crossOffset_);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }

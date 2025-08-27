@@ -382,6 +382,8 @@ struct GridLayoutInfo {
 
     // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport

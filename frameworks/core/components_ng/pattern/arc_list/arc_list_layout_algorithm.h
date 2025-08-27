@@ -119,7 +119,7 @@ private:
     float CalculateHeaderOffset(LayoutWrapper* layoutWrapper, const ListItemInfo& info);
     bool CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper);
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void CalcContentOffset(const RefPtr<ListLayoutProperty>& property) override
+    void CalcContentOffset(LayoutWrapper* layoutWrapper) override
     {
         contentStartOffset_ = 0.0;
         contentEndOffset_ = 0.0;

@@ -42,7 +42,7 @@ void GridLayoutProperty::ResetPositionFlags() const
 
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json, filter);
+    ScrollableLayoutProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;

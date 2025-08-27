@@ -24,6 +24,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -88,6 +89,16 @@ public:
         return viewPortExtent_;
     }
 
+    float GetContentStartOffset() const
+    {
+        return contentStartOffset_;
+    }
+
+    float GetContentEndOffset() const
+    {
+        return contentEndOffset_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -98,11 +109,14 @@ private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
+    void CalcContentOffset(LayoutWrapper* layoutWrapper);
 
     float crossOffset_;
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
     SizeF viewPort_;       // content area size (viewSize_ minus padding)
     SizeF viewPortExtent_; // size of child (scrollable area)
     SizeF viewSize_;       // size of the Scroll component

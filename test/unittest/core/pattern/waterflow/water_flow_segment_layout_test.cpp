@@ -2197,12 +2197,12 @@ HWTEST_F(WaterFlowSegmentTest, EmptySectionWithDefaultSize, TestSize.Level1)
     EXPECT_EQ(geometryNode->GetFrameSize().Height(), 600.0f);
 }
 
-    /**
-     * @tc.name: WaterFlowSegmentReMeasureTest001
-     * @tc.desc: Test WaterFlow segmented layout selective clearing mechanism
-     * @tc.type: FUNC
-     */
-    HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentReMeasureTest001, TestSize.Level1)
+/**
+ * @tc.name: WaterFlowSegmentReMeasureTest001
+ * @tc.desc: Test WaterFlow segmented layout selective clearing mechanism
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentReMeasureTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create WaterFlow with segmented layout
@@ -2242,5 +2242,43 @@ HWTEST_F(WaterFlowSegmentTest, EmptySectionWithDefaultSize, TestSize.Level1)
     algo->Layout(AceType::RawPtr(frameNode_));
 
     EXPECT_TRUE(algo->isLayouted_);
+}
+
+/**
+ * @tc.name: ContentOffsetTest001
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ContentOffsetTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset * 1.5);
+}
+
+/**
+ * @tc.name: ContentOffsetTest002
+ * @tc.desc: Test contentStartOffset_ and contentEndOffset_ with invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ContentOffsetTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    float contentOffset = WATER_FLOW_HEIGHT / 2;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateWaterFlowItems(10);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->contentStartOffset_, 0.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->contentEndOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG

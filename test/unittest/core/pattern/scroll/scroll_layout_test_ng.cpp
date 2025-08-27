@@ -1341,4 +1341,172 @@ HWTEST_F(ScrollLayoutTestNg, AdjustCurrentOffset_001, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, -50.0f);
     EXPECT_EQ(pattern_->scrollableDistance_, 50.0f);
 }
+
+/**
+ * @tc.name: ContentOffset001
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset001, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(20);
+    ScrollableModelNG::SetContentEndOffset(20);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), 20);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), 20);
+}
+
+/**
+ * @tc.name: ContentOffset002
+ * @tc.desc: Test Scroll scrollableDistance with ContentStartOffset and ContentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset002, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(20);
+    ScrollableModelNG::SetContentEndOffset(20);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), 20);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), 20);
+    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT + 20 + 20);
+}
+
+/**
+ * @tc.name: ContentOffset003
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset with illegle value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset003, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(HEIGHT/2);
+    ScrollableModelNG::SetContentEndOffset(HEIGHT/2);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->contentEndOffset_, 0);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0);
+    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT);
+}
+
+/**
+ * @tc.name: ContentOffset004
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset with ReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset004, TestSize.Level1)
+{
+    CreateScroll();
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20.f);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    pattern_->ScrollBy(0, -640, false);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -640.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: ContentOffset005
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset005, TestSize.Level1)
+{
+    CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(HEIGHT/2);
+    ScrollableModelNG::SetContentEndOffset(HEIGHT/2);
+    CreateContent();
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->contentEndOffset_, 0);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0);
+    EXPECT_EQ(pattern_->scrollableDistance_, CONTENT_MAIN_SIZE - HEIGHT);
+}
+
+/**
+ * @tc.name: ContentOffset005
+ * @tc.desc: Test Scroll ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ContentOffset006, TestSize.Level1)
+{
+    int32_t isToEdge = 0;
+    int32_t isReachStart = 0;
+    int32_t isReachEnd = 0;
+    NG::ScrollEdgeEvent scrollEdgeEvent = [&isToEdge](ScrollEdge) { isToEdge++; };
+    auto reachStartEvent = [&isReachStart]() { isReachStart++; };
+    auto reachEndEvent = [&isReachEnd]() { isReachEnd++; };
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::VERTICAL);
+    model.SetOnScrollEdge(std::move(scrollEdgeEvent));
+    model.SetOnReachStart(std::move(reachStartEvent));
+    model.SetOnReachEnd(std::move(reachEndEvent));
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Trigger reachStartEvent init
+     */
+    EXPECT_EQ(isReachStart, 1);
+    EXPECT_EQ(isReachEnd, 0);
+    EXPECT_EQ(isToEdge, 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
+    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+    EXPECT_EQ(isReachStart, 1);
+
+    /**
+     * @tc.steps: step2. ScrollTo 0
+     * @tc.expected: totalOffset and currentOffset is correct
+     */
+    ScrollTo(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
+    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
+
+    /**
+     * @tc.steps: step2. ScrollTo bottom
+     * @tc.expected: Trigger scrollEdgeEvent/reachEndEvent
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630.0f);
+    EXPECT_EQ(isReachEnd, 1);
+    EXPECT_EQ(isToEdge, 1);
+
+    ScrollBy(0, 10);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 620.0f);
+
+    ScrollBy(0, -10);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 630.0f);
+    EXPECT_EQ(isReachEnd, 2);
+    EXPECT_EQ(isToEdge, 2);
+
+    /**
+     * @tc.steps: step3. ScrollTo top
+     * @tc.expected: Trigger onScrollEvent/scrollEdgeEvent/reachStartEvent
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_EQ(isReachStart, 2);
+    EXPECT_EQ(isReachEnd, 2);
+    EXPECT_EQ(isToEdge, 3);
+}
 } // namespace OHOS::Ace::NG

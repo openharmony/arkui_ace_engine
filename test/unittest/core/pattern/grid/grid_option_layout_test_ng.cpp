@@ -1504,4 +1504,29 @@ HWTEST_F(GridOptionLayoutTestNg, DataReload003, TestSize.Level1)
     rect = GetChildRect(frameNode_, 0);
     EXPECT_FLOAT_EQ(rect.width_, columnWidth);
 }
+
+/**
+ * @tc.name: ContentOffset001
+ * @tc.desc: Test Grid ContentStartOffset and ContentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ContentOffset003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateFixedItems(10);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(pattern_->info_.currentOffset_, - contentOffset * 1.5);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
+    EXPECT_EQ(pattern_->info_.currentOffset_, contentOffset);
+}
 } // namespace OHOS::Ace::NG

@@ -927,6 +927,12 @@ public:
     }
 
     static double GetDefaultFriction();
+
+    bool IsInitialized() const
+    {
+        return isInitialized_;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNodeMultiThread();

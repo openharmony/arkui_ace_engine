@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
-#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollLayoutTestNg : public GridTestNg {
@@ -218,6 +217,51 @@ HWTEST_F(GridScrollLayoutTestNg, FadingEdge003, TestSize.Level1)
     FlushUITasks(frameNode_);
     geo = frameNode_->GetOverlayNode()->GetGeometryNode();
     EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
+ * @tc.name: ContentOffset001
+ * @tc.desc: Test Grid ContentStartOffset and ContentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, ContentOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateFixedItems(20);
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetContentStartOffset(), contentOffset);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffset(), contentOffset * 1.5);
+}
+
+/**
+ * @tc.name: ContentOffset001
+ * @tc.desc: Test Grid ContentStartOffset and ContentEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, ContentOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetLayoutOptions({});
+    float contentOffset = 20;
+    ScrollableModelNG::SetContentStartOffset(contentOffset);
+    ScrollableModelNG::SetContentEndOffset(contentOffset * 1.5);
+    CreateFixedItems(20);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * 16 + contentOffset * 1.5);
+    EXPECT_EQ(pattern_->GetTotalHeight(), ITEM_MAIN_SIZE * 20 + contentOffset * 2.5);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -20.0f);
+    EXPECT_EQ(pattern_->info_.currentOffset_, contentOffset);
 }
 } // namespace OHOS::Ace::NG
  

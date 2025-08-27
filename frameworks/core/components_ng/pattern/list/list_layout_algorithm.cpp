@@ -97,7 +97,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = layoutConstraintOps.value();
 
     // calculate idealSize and set FrameSize
-    CalcContentOffset(listLayoutProperty);
+    CalcContentOffset(layoutWrapper);
 
     // calculate main size.
     const auto& contentConstraintOps = listLayoutProperty->GetContentLayoutConstraint();
@@ -224,13 +224,32 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isLayouted_ = false;
 }
 
-void ListLayoutAlgorithm::CalcContentOffset(const RefPtr<ListLayoutProperty>& property)
+void ListLayoutAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
+    auto property = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(property);
-    auto startOffset = property->GetContentStartOffset().value_or(0.0f);
-    contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
-    auto endOffset = property->GetContentEndOffset().value_or(0.0f);
-    contentEndOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(endOffset), 0.0);
+    auto startOffset = property->GetContentStartOffset();
+    if (!startOffset.has_value()) {
+        contentStartOffset_ = 0.0f;
+    }
+    auto endOffset = property->GetContentEndOffset();
+    if (!endOffset.has_value()) {
+        contentEndOffset_ = 0.0f;
+    }
+    if (!endOffset && !startOffset) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (startOffset) {
+        contentStartOffset_ = std::max(pipeline->NormalizeToPx(Dimension(startOffset.value(), DimensionUnit::VP)), 0.0);
+    }
+    if (endOffset) {
+        contentEndOffset_ = std::max(pipeline->NormalizeToPx(Dimension(endOffset.value(), DimensionUnit::VP)), 0.0);
+    }
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)

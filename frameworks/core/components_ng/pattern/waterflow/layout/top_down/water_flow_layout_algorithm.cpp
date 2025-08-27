@@ -142,6 +142,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->GetChildrenCount());
     mainSize_ = GetMainAxisSize(idealSize, axis);
+    CalcContentOffset(layoutWrapper, layoutInfo_, mainSize_);
     if (layoutInfo_->jumpIndex_ >= 0 && layoutInfo_->jumpIndex_ < layoutInfo_->GetChildrenCount()) {
         auto crossIndex = layoutInfo_->GetCrossIndex(layoutInfo_->jumpIndex_);
         if (crossIndex == -1) {
@@ -149,12 +150,18 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             layoutInfo_->JumpTo(layoutInfo_->items_[0][crossIndex][layoutInfo_->jumpIndex_]);
         }
+        if (layoutInfo_->jumpIndex_ == 0) {
+            layoutInfo_->currentOffset_ += layoutInfo_->contentStartOffset_;
+        }
     } else if (layoutInfo_->jumpIndex_ == LAST_ITEM) {
+        layoutInfo_->currentOffset_ -= layoutInfo_->contentEndOffset_;
         // jump to bottom.
     } else {
         layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     }
-
+    if (!pattern->IsInitialized()) {
+        layoutInfo_->currentOffset_ = layoutInfo_->contentStartOffset_;
+    }
     FillViewport(mainSize_, layoutWrapper);
     if (layoutInfo_->targetIndex_.has_value()) {
         MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
@@ -469,6 +476,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
     }
+    maxItemHeight += layoutInfo_->contentEndOffset_;
     if (layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
             layoutInfo_->extraOffset_.reset();
@@ -478,13 +486,13 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     }
     layoutInfo_->maxHeight_ = maxItemHeight;
 
-    if (mainSize >= maxItemHeight) {
-        if ((NonNegative(layoutInfo_->currentOffset_) && !canOverScrollStart_) ||
-            (NonPositive(layoutInfo_->currentOffset_) && !canOverScrollEnd_)) {
-            layoutInfo_->currentOffset_ = 0;
+    if (mainSize - layoutInfo_->contentStartOffset_ >= maxItemHeight) {
+        if ((GreatOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_) && !canOverScrollStart_) ||
+            (LessOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_) && !canOverScrollEnd_)) {
+            layoutInfo_->currentOffset_ = layoutInfo_->contentStartOffset_;
         }
-        layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, 0.0f);
-        layoutInfo_->offsetEnd_ = LessOrEqual(layoutInfo_->currentOffset_, 0.0f);
+        layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_);
+        layoutInfo_->offsetEnd_ = LessOrEqual(layoutInfo_->currentOffset_, layoutInfo_->contentStartOffset_);
         return;
     }
 

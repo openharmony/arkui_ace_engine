@@ -107,6 +107,8 @@ protected:
     */
     virtual RefPtr<WaterFlowLayoutInfoBase> LayoutInfo() const = 0;
 
+    void CalcContentOffset(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, float mainSize);
+
     bool syncLoad_ = false;
 
 private:

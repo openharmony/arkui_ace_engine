@@ -176,7 +176,7 @@ public:
     float StartPos() const;
     inline float StartPosWithMargin() const
     {
-        return StartPos() - TopMargin();
+        return StartPos() - TopMargin() - contentStartOffset_;
     }
 
     void ClearDataFrom(int32_t idx, const std::vector<float>& mainGap);
