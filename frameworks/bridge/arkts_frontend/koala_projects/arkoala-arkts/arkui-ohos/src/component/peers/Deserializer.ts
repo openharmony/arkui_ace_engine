@@ -19525,45 +19525,7 @@ export class Deserializer extends DeserializerBase {
         return RotationGestureEventInternal.fromPtr(ptr)
     }
     readSceneOptions(): SceneOptions {
-        let valueDeserializer : Deserializer = this
-        const scene_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scene_buf : ResourceStr | Scene | undefined
-        if ((RuntimeType.UNDEFINED) != (scene_buf_runtimeType))
-        {
-            const scene_buf__selector : int32 = valueDeserializer.readInt8()
-            let scene_buf_ : ResourceStr | Scene | undefined
-            if (scene_buf__selector == 0) {
-                const scene_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let scene_buf__u : string | Resource | undefined
-                if (scene_buf__u_selector == 0) {
-                    scene_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (scene_buf__u_selector == 1) {
-                    scene_buf__u = valueDeserializer.readResource()
-                }
-                else {
-                    throw new Error("One of the branches for scene_buf__u has to be chosen through deserialisation.")
-                }
-                scene_buf_ = (scene_buf__u as string | Resource)
-            }
-            else if (scene_buf__selector == 1) {
-                scene_buf_ = (valueDeserializer.readScene() as Scene)
-            }
-            else {
-                throw new Error("One of the branches for scene_buf_ has to be chosen through deserialisation.")
-            }
-            scene_buf = (scene_buf_ as ResourceStr | Scene)
-        }
-        const scene_result : ResourceStr | Scene | undefined = scene_buf
-        const modelType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let modelType_buf : ModelType | undefined
-        if ((RuntimeType.UNDEFINED) != (modelType_buf_runtimeType))
-        {
-            modelType_buf = TypeChecker.ModelType_FromNumeric(valueDeserializer.readInt32())
-        }
-        const modelType_result : ModelType | undefined = modelType_buf
-        let value : SceneOptions = ({scene: scene_result, modelType: modelType_result} as SceneOptions)
-        return value
+        return ({} as SceneOptions)
     }
     readScrollOptions(): ScrollOptions {
         let valueDeserializer : Deserializer = this

@@ -55,6 +55,7 @@ void ModelPattern::SetModelViewContext(const ModelViewContext& context)
                 model->GetPaintProperty<ModelPaintProperty>()->ResetFlagProperties();
             }
         });
+    OnAttachToFrameNode();
 }
 
 void ModelPattern::OnModifyDone()

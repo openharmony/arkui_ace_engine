@@ -33,6 +33,7 @@ import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { uiObserver }  from "@ohos/arkui/observer"
 import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { NodeAdapter } from '../../FrameNode'
+import { Scene } from "@ohos.graphics.scene"
 export class ArkUIAniModule {
     static {
         loadLibrary('arkoala_native_ani')
@@ -326,4 +327,7 @@ export class ArkUIAniModule {
 
     native static _SyntaxItem_Construct(id: KInt): KPointer
     native static _ForEachNode_Construct(id: KInt): KPointer
+    // for Component3D
+    native static _Component3D_SetScene(ptr: KPointer, scene: Scene, modelType: KInt): void
+    native static _Component3D_SetWidget(ptr: KPointer, scenePath: string, modelType: KInt): void
 }
