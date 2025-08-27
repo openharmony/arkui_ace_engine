@@ -3160,12 +3160,13 @@ void AceContainer::InitWindowCallback()
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
-        auto container = weak.Upgrade();
-        CHECK_NULL_RETURN(container, rect);
         auto windowRect = window->GetRect();
         if (windowRect.IsUninitializedRect()) {
-            rect.SetRect(container->GetViewPosX(), container->GetViewPosY(), container->GetViewWidth(),
-                container->GetViewHeight());
+            auto container = weak.Upgrade();
+            CHECK_NULL_RETURN(container, rect);
+            bool isScb = container->IsSceneBoardWindow();
+            rect.SetRect(isScb ? 0 : container->GetViewPosX(), isScb ? 0 : container->GetViewPosY(),
+                container->GetViewWidth(), container->GetViewHeight());
         } else {
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         }
