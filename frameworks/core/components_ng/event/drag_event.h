@@ -37,7 +37,7 @@ class ScrollablePattern;
 struct GatherNodeChildInfo;
 
 class DragEvent : public AceType {
-    DECLARE_ACE_TYPE(DragEvent, AceType)
+    DECLARE_ACE_TYPE(DragEvent, AceType);
 public:
     DragEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd,
         GestureEventNoParameter&& actionCancel)
@@ -96,7 +96,7 @@ private:
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
-    DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator)
+    DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator);
 public:
     DragEventActuator(
         const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance);

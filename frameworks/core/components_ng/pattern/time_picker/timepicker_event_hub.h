@@ -28,7 +28,7 @@ using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 using TimeChangeEventForDatePicker = std::function<void()>;
 
 class TimePickerEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TimePickerEventHub, EventHub)
+    DECLARE_ACE_TYPE(TimePickerEventHub, EventHub);
 
 public:
     TimePickerEventHub() = default;

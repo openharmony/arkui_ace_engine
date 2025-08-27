@@ -32,7 +32,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSView : public JSViewAbstract, public virtual AceType {
-    DECLARE_ACE_TYPE(JSView, AceType)
+    DECLARE_ACE_TYPE(JSView, AceType);
 
 public:
     JSView() : instanceId_(Container::CurrentId()) {}
@@ -205,7 +205,7 @@ private:
 };
 
 class JSViewFullUpdate : public JSView {
-    DECLARE_ACE_TYPE(JSViewFullUpdate, JSView)
+    DECLARE_ACE_TYPE(JSViewFullUpdate, JSView);
 
 public:
     JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
@@ -312,7 +312,7 @@ private:
 };
 
 class JSViewPartialUpdate : public JSView {
-    DECLARE_ACE_TYPE(JSViewPartialUpdate, JSView)
+    DECLARE_ACE_TYPE(JSViewPartialUpdate, JSView);
 
 public:
     explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);

@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class LayoutWrapper;
 
 class LayoutWrapperBuilder : public AceType {
-    DECLARE_ACE_TYPE(LayoutWrapperBuilder, AceType)
+    DECLARE_ACE_TYPE(LayoutWrapperBuilder, AceType);
 public:
     LayoutWrapperBuilder() = default;
     ~LayoutWrapperBuilder() override = default;

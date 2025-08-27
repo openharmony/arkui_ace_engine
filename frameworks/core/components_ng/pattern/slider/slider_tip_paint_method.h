@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SliderTipPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SliderTipPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SliderTipPaintMethod, NodePaintMethod);
 public:
     explicit SliderTipPaintMethod(const RefPtr<SliderPattern>& sliderPattern,
         const SliderPaintMethod::TipParameters& tipParameters,

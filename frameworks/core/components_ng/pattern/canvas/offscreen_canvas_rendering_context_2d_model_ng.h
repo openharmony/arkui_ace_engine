@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_FORCE_EXPORT OffscreenCanvasRenderingContext2DModelNG
     : public OHOS::Ace::OffscreenCanvasRenderingContext2DModel {
-    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModelNG, OffscreenCanvasRenderingContext2DModel)
+    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModelNG, OffscreenCanvasRenderingContext2DModel);
 
 public:
     OffscreenCanvasRenderingContext2DModelNG() = default;

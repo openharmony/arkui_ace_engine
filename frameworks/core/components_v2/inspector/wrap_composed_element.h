@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT WrapComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(WrapComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(WrapComposedElement, InspectorComposedElement);
 
 public:
     explicit WrapComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

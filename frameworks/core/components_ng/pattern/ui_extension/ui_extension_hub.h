@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 class SecurityUIExtensionProxy;
 class UIExtensionHub : public EventHub {
-    DECLARE_ACE_TYPE(UIExtensionHub, EventHub)
+    DECLARE_ACE_TYPE(UIExtensionHub, EventHub);
 
 public:
     void SetOnReceiveCallback(

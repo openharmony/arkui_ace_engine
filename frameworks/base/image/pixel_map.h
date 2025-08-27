@@ -205,7 +205,7 @@ struct WritePixelsOptions {
 };
 
 class ACE_FORCE_EXPORT PixelMap : public AceType {
-    DECLARE_ACE_TYPE(PixelMap, AceType)
+    DECLARE_ACE_TYPE(PixelMap, AceType);
 
 public:
 #if defined(ACE_STATIC)

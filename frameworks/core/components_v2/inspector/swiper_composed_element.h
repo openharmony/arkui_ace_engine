@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SwiperComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SwiperComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SwiperComposedElement, InspectorComposedElement);
 
 public:
     explicit SwiperComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

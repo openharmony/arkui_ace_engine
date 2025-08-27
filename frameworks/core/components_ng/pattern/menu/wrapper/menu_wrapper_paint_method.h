@@ -55,7 +55,7 @@ struct ArrowOutlineOffset {
 };
 
 class ACE_EXPORT MenuWrapperPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuWrapperPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(MenuWrapperPaintMethod, NodePaintMethod);
 public:
     MenuWrapperPaintMethod() = default;
     ~MenuWrapperPaintMethod() override = default;

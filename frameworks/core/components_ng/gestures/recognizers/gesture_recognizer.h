@@ -53,7 +53,7 @@ inline std::string TransRefereeState(RefereeState state)
 class FrameNode;
 
 class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
-    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
+    DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget);
 
 public:
     // IsRealTime is true when using real-time layouts.

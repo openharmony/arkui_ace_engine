@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 class PixelMapOhos : public PixelMap {
-    DECLARE_ACE_TYPE(PixelMapOhos, PixelMap)
+    DECLARE_ACE_TYPE(PixelMapOhos, PixelMap);
 
 public:
     explicit PixelMapOhos(std::shared_ptr<Media::PixelMap> pixmap) : pixmap_(std::move(pixmap)) {}

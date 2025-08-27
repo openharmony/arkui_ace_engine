@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 class NavigatorEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavigatorEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavigatorEventHub, EventHub);
 
 public:
     NavigatorEventHub() = default;

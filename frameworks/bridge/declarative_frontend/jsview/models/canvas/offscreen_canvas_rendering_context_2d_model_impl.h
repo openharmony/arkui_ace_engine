@@ -24,7 +24,7 @@ class OffscreenCanvas;
 }
 namespace OHOS::Ace::Framework {
 class OffscreenCanvasRenderingContext2DModelImpl : public OHOS::Ace::OffscreenCanvasRenderingContext2DModel {
-    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModelImpl, OffscreenCanvasRenderingContext2DModel)
+    DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModelImpl, OffscreenCanvasRenderingContext2DModel);
 
 public:
     OffscreenCanvasRenderingContext2DModelImpl() = default;

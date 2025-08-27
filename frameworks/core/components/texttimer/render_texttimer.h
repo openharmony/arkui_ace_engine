@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 class RenderTextTimer : public RenderNode {
-    DECLARE_ACE_TYPE(RenderTextTimer, RenderNode)
+    DECLARE_ACE_TYPE(RenderTextTimer, RenderNode);
 
 public:
     RenderTextTimer();

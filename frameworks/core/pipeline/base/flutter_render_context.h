@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 
 class FlutterRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(FlutterRenderContext, RenderContext)
+    DECLARE_ACE_TYPE(FlutterRenderContext, RenderContext);
 
 public:
     FlutterRenderContext() = default;

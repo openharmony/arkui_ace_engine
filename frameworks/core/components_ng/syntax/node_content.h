@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 class NodeContent : public AceType {
-    DECLARE_ACE_TYPE(NodeContent, AceType)
+    DECLARE_ACE_TYPE(NodeContent, AceType);
 public:
     NodeContent() = default;
     ~NodeContent() override = default;

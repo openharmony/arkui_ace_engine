@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class MockCanvasImage : public CanvasImage {
-    DECLARE_ACE_TYPE(MockCanvasImage, CanvasImage)
+    DECLARE_ACE_TYPE(MockCanvasImage, CanvasImage);
 public:
     MockCanvasImage() = default;
     ~MockCanvasImage() override = default;

@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT NavRouterGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavRouterGroupNode, GroupNode)
+    DECLARE_ACE_TYPE(NavRouterGroupNode, GroupNode);
 public:
     NavRouterGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)

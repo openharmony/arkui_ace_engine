@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RectPaintMethod : public ShapePaintMethod {
-    DECLARE_ACE_TYPE(RectPaintMethod, ShapePaintMethod)
+    DECLARE_ACE_TYPE(RectPaintMethod, ShapePaintMethod);
 public:
     RectPaintMethod() = default;
     RectPaintMethod(

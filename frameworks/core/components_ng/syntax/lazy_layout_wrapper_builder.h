@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 class LazyForEachNode;
 
 class LazyLayoutWrapperBuilder : public LayoutWrapperBuilder {
-    DECLARE_ACE_TYPE(LazyLayoutWrapperBuilder, LayoutWrapperBuilder)
+    DECLARE_ACE_TYPE(LazyLayoutWrapperBuilder, LayoutWrapperBuilder);
 public:
     LazyLayoutWrapperBuilder(const RefPtr<LazyForEachBuilder>& builder, const WeakPtr<LazyForEachNode>& host);
     ~LazyLayoutWrapperBuilder() override = default;

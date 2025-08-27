@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SelectOverlayPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(SelectOverlayPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(SelectOverlayPaintMethod, NodePaintMethod);
 public:
     SelectOverlayPaintMethod(const RefPtr<SelectOverlayModifier>& selectOverlayModifier,
         const RefPtr<SelectOverlayContentModifier>& selectOverlayContentModifier, SelectOverlayInfo info,

@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 
 class ACE_FORCE_EXPORT WaterFlowSections : public virtual AceType {
-    DECLARE_ACE_TYPE(WaterFlowSections, AceType)
+    DECLARE_ACE_TYPE(WaterFlowSections, AceType);
 public:
     struct Section {
         bool operator==(const Section& other) const

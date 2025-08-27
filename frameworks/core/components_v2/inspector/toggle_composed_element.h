@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ToggleComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ToggleComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ToggleComposedElement, InspectorComposedElement);
 
 public:
     explicit ToggleComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

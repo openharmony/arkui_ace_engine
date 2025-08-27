@@ -31,7 +31,7 @@ using OnNavigationModeChangeEvent = std::function<void(NavigationMode mode)>;
 using OnNavBarWidthChangeEvent = std::function<void(const Dimension)>;
 
 class NavigationEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavigationEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavigationEventHub, EventHub);
 public:
     void SetOnTitleModeChange(OnTitleModeChangeEvent&& changeEvent)
     {

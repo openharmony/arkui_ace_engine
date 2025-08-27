@@ -22,7 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsiStepperBridge : virtual public AceType {
-    DECLARE_ACE_TYPE(JsiStepperBridge, AceType)
+    DECLARE_ACE_TYPE(JsiStepperBridge, AceType);
 
 public:
     void GetAttrLabel(shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue>& valObject, StepperLabels& stepperLabel);

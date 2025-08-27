@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 class RenderContext;
 class CanvasModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)
+    DECLARE_ACE_TYPE(CanvasModifier, ContentModifier);
 
 public:
     CanvasModifier();

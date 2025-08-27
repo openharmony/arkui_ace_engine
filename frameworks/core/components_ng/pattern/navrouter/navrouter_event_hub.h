@@ -26,7 +26,7 @@ using OnStateChangeEvent = std::function<void(bool)>;
 using OnDestinationChangeEvent = std::function<void()>;
 
 class NavRouterEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavRouterEventHub, EventHub)
+    DECLARE_ACE_TYPE(NavRouterEventHub, EventHub);
 public:
     void SetOnStateChange(OnStateChangeEvent&& changeEvent)
     {

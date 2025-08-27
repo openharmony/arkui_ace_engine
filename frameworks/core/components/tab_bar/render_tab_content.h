@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 
 class RenderTabContent : public RenderNode {
-    DECLARE_ACE_TYPE(RenderTabContent, RenderNode)
+    DECLARE_ACE_TYPE(RenderTabContent, RenderNode);
 
 public:
     RenderTabContent();

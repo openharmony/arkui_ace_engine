@@ -23,7 +23,7 @@
 namespace OHOS::Ace::Framework {
 
 class JsNavigationFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsNavigationFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsNavigationFunction, JsFunction);
 
 public:
     explicit JsNavigationFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

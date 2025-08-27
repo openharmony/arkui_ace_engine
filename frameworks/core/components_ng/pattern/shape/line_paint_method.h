@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT LinePaintMethod : public ShapePaintMethod {
-    DECLARE_ACE_TYPE(LinePaintMethod, ShapePaintMethod)
+    DECLARE_ACE_TYPE(LinePaintMethod, ShapePaintMethod);
 public:
     LinePaintMethod() = default;
     LinePaintMethod(

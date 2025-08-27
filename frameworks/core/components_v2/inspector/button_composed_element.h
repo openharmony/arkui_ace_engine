@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ButtonComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ButtonComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ButtonComposedElement, InspectorComposedElement);
 
 public:
     explicit ButtonComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

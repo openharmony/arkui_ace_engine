@@ -100,7 +100,7 @@ enum class RotationStatus {
 using SwiperChangeEndListener = std::function<void(const int32_t)>;
 
 class ACE_EXPORT RenderSwiper : public RenderNode, public RotationNode {
-    DECLARE_ACE_TYPE(RenderSwiper, RenderNode, RotationNode)
+    DECLARE_ACE_TYPE(RenderSwiper, RenderNode, RotationNode);
 
 public:
     static constexpr double FADE_DURATION = 500.0;

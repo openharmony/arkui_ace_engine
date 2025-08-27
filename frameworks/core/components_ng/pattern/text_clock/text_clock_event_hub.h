@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 using ChangeEvent = std::function<void(const std::string)>;
 
 class TextClockEventHub : public EventHub {
-    DECLARE_ACE_TYPE(TextClockEventHub, EventHub)
+    DECLARE_ACE_TYPE(TextClockEventHub, EventHub);
 
 public:
     TextClockEventHub() = default;

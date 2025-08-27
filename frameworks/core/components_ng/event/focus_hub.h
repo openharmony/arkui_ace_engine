@@ -113,7 +113,7 @@ enum class FocusPriority : int32_t {
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusPaintParam, AceType)
+    DECLARE_ACE_TYPE(FocusPaintParam, AceType);
 
 public:
     FocusPaintParam() = default;
@@ -179,7 +179,7 @@ private:
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusPattern, AceType)
+    DECLARE_ACE_TYPE(FocusPattern, AceType);
 
 public:
     FocusPattern() = default;
@@ -319,7 +319,7 @@ struct ScopeFocusAlgorithm final {
 };
 
 class ACE_FORCE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
-    DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
+    DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState);
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : FocusState(eventHub, type), FocusEventHandler(), focusable_(focusable)

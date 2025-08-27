@@ -35,7 +35,7 @@ class Animator;
 
 namespace OHOS::Ace::NG {
 class AnimatedImage : public virtual CanvasImage {
-    DECLARE_ACE_TYPE(AnimatedImage, CanvasImage)
+    DECLARE_ACE_TYPE(AnimatedImage, CanvasImage);
 public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
@@ -109,7 +109,7 @@ private:
 // ================================================================================================
 
 class AnimatedRSImage : public AnimatedImage, public DrawingImage {
-    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage)
+    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage);
 public:
     AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
         : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
@@ -150,7 +150,7 @@ private:
 // ================================================================================================
 
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
-    DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage)
+    DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage);
 public:
     AnimatedPixmap(const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size,
         std::string url);

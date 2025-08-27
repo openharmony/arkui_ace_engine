@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT ProgressComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(ProgressComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(ProgressComposedElement, InspectorComposedElement);
 
 public:
     explicit ProgressComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

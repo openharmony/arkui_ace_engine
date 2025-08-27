@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 // PaintProperty are used to set render properties.
 class MenuDividerPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(MenuDividerPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(MenuDividerPaintProperty, PaintProperty);
 public:
     MenuDividerPaintProperty() = default;
     ~MenuDividerPaintProperty() override = default;

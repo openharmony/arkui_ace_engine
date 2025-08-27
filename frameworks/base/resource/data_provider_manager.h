@@ -55,7 +55,7 @@ private:
 };
 
 class DataProviderManagerInterface : public AceType {
-    DECLARE_ACE_TYPE(DataProviderManagerInterface, AceType)
+    DECLARE_ACE_TYPE(DataProviderManagerInterface, AceType);
 
 public:
     DataProviderManagerInterface() = default;
@@ -71,7 +71,7 @@ public:
 
 using DataProviderImpl = std::function<std::unique_ptr<DataProviderRes>(const std::string& uriStr)>;
 class DataProviderManager : public DataProviderManagerInterface {
-    DECLARE_ACE_TYPE(DataProviderManager, DataProviderManagerInterface)
+    DECLARE_ACE_TYPE(DataProviderManager, DataProviderManagerInterface);
 public:
     explicit DataProviderManager(DataProviderImpl dataProvider) : platformImpl_(std::move(dataProvider)) {}
     ~DataProviderManager() override = default;
@@ -95,7 +95,7 @@ private:
 
 using DataAbilityHelperImpl = std::function<RefPtr<DataAbilityHelper>()>;
 class ACE_FORCE_EXPORT DataProviderManagerStandard : public DataProviderManagerInterface {
-    DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface)
+    DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface);
 
 public:
     explicit DataProviderManagerStandard(DataAbilityHelperImpl dataAbilityHelperImpl)

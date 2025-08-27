@@ -71,7 +71,7 @@ protected:
 
 using InspectorFunc = std::function<void()>;
 class InspectorEvent : public virtual AceType {
-    DECLARE_ACE_TYPE(InspectorEvent, AceType)
+    DECLARE_ACE_TYPE(InspectorEvent, AceType);
 public:
     explicit InspectorEvent(InspectorFunc&& callback) : callback_(std::move(callback)) {}
     ~InspectorEvent() override = default;

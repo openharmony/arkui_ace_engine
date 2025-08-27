@@ -51,7 +51,7 @@ struct CameraProperty {
 };
 
 class ModelAdapterWrapper : public virtual AceType {
-    DECLARE_ACE_TYPE(ModelAdapterWrapper, AceType)
+    DECLARE_ACE_TYPE(ModelAdapterWrapper, AceType);
 public:
     using PaintFinishCallback = std::function<void()>;
 

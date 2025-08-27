@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 class JsDragFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsDragFunction, JsFunction)
+    DECLARE_ACE_TYPE(JsDragFunction, JsFunction);
 
 public:
     explicit JsDragFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}

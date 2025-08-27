@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT EllipsePaintMethod : public ShapePaintMethod {
-    DECLARE_ACE_TYPE(EllipsePaintMethod, ShapePaintMethod)
+    DECLARE_ACE_TYPE(EllipsePaintMethod, ShapePaintMethod);
 public:
     EllipsePaintMethod() = default;
     EllipsePaintMethod(

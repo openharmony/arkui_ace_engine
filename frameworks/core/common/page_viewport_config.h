@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 class PageViewportConfig : public AceType {
-    DECLARE_ACE_TYPE(PageViewportConfig, AceType)
+    DECLARE_ACE_TYPE(PageViewportConfig, AceType);
 public:
     PageViewportConfig() = default;
     ~PageViewportConfig() = default;

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 class RenderNodePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(RenderNodePaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(RenderNodePaintProperty, PaintProperty);
 private:
     WeakPtr<FrameNode> host_;
 

@@ -74,7 +74,7 @@ enum class MouseFormat : int32_t {
 };
 
 class ACE_EXPORT MouseStyle : public AceType {
-    DECLARE_ACE_TYPE(MouseStyle, AceType)
+    DECLARE_ACE_TYPE(MouseStyle, AceType);
 
 public:
     static RefPtr<MouseStyle> CreateMouseStyle();
@@ -105,7 +105,7 @@ struct MouseStyleChangeLog {
 };
 
 class ACE_EXPORT MouseStyleManager : public AceType {
-    DECLARE_ACE_TYPE(MouseStyleManager, AceType)
+    DECLARE_ACE_TYPE(MouseStyleManager, AceType);
 
 public:
     MouseStyleManager() = default;

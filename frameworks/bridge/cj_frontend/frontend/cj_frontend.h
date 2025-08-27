@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 class CJPageRouter;
 
 class CJFrontend final : public CJFrontendAbstract {
-DECLARE_ACE_TYPE(CJFrontend, CJFrontendAbstract)
+DECLARE_ACE_TYPE(CJFrontend, CJFrontendAbstract);
 
 public:
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;

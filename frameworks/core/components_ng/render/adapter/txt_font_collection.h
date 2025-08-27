@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TxtFontCollection : public FontCollection {
-    DECLARE_ACE_TYPE(TxtFontCollection, FontCollection)
+    DECLARE_ACE_TYPE(TxtFontCollection, FontCollection);
 public:
     explicit TxtFontCollection(const std::shared_ptr<RSFontCollection>& fontCollection);
     TxtFontCollection();

@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 
 class RenderTabBarItem : public RenderBox {
-DECLARE_ACE_TYPE(RenderTabBarItem, RenderBox)
+DECLARE_ACE_TYPE(RenderTabBarItem, RenderBox);
 
 public:
     ~RenderTabBarItem() override = default;

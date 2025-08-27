@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 class RadioPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(RadioPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(RadioPaintMethod, NodePaintMethod);
 
 public:
     explicit RadioPaintMethod(const RefPtr<RadioModifier>& radioModifier) : radioModifier_(radioModifier) {}

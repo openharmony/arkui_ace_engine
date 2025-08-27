@@ -28,7 +28,7 @@
 namespace OHOS::Ace::Framework {
 
 class CJRouteInfo : public NG::RouteInfo {
-    DECLARE_ACE_TYPE(CJRouteInfo, NG::RouteInfo)
+    DECLARE_ACE_TYPE(CJRouteInfo, NG::RouteInfo);
 public:
     CJRouteInfo() = default;
     ~CJRouteInfo() override = default;
@@ -44,7 +44,7 @@ protected:
 };
 
 class CJNavigationStack : public NG::NavigationStack {
-    DECLARE_ACE_TYPE(CJNavigationStack, NG::NavigationStack)
+    DECLARE_ACE_TYPE(CJNavigationStack, NG::NavigationStack);
 public:
     CJNavigationStack() = default;
     ~CJNavigationStack() override = default;

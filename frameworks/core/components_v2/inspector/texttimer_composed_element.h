@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT TextTimerComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(TextTimerComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(TextTimerComposedElement, InspectorComposedElement);
 
 public:
     explicit TextTimerComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 using AnimatorEvent = std::function<void()>;
 
 class ImageAnimatorEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ImageAnimatorEventHub, EventHub)
+    DECLARE_ACE_TYPE(ImageAnimatorEventHub, EventHub);
 
 public:
     ImageAnimatorEventHub() = default;

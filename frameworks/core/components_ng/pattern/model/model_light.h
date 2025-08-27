@@ -32,7 +32,7 @@ enum ModelLightType {
 };
 
 class ModelLight : public virtual AceType {
-    DECLARE_ACE_TYPE(ModelLight, AceType)
+    DECLARE_ACE_TYPE(ModelLight, AceType);
 public:
     ModelLight(ModelLightType type, const Vec3& color, const AnimatableFloat& intensity,
         bool shadow, const ModelPosition& position, const Quaternion& rotation)

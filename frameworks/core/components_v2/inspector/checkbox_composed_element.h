@@ -24,7 +24,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT CheckboxComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(CheckboxComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(CheckboxComposedElement, InspectorComposedElement);
 
 public:
     explicit CheckboxComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

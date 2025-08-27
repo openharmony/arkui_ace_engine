@@ -40,7 +40,7 @@ struct SurfaceBufferNode;
 #endif
 
 class RosenRenderSurface : public RenderSurface {
-    DECLARE_ACE_TYPE(RosenRenderSurface, NG::RenderSurface)
+    DECLARE_ACE_TYPE(RosenRenderSurface, NG::RenderSurface);
 public:
     RosenRenderSurface() = default;
     ~RosenRenderSurface() override;

@@ -23,7 +23,7 @@
 namespace OHOS::Ace::V2 {
 
 class ACE_EXPORT SideBarComposedElement : public InspectorComposedElement {
-    DECLARE_ACE_TYPE(SideBarComposedElement, InspectorComposedElement)
+    DECLARE_ACE_TYPE(SideBarComposedElement, InspectorComposedElement);
 
 public:
     explicit SideBarComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}

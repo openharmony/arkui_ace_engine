@@ -55,7 +55,7 @@ public:
 };
 
 class JsiAnimationBridge : public BaseAnimationBridge {
-    DECLARE_ACE_TYPE(JsiAnimationBridge, BaseAnimationBridge)
+    DECLARE_ACE_TYPE(JsiAnimationBridge, BaseAnimationBridge);
 
 public:
     JsiAnimationBridge(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& animationContext,
@@ -90,7 +90,7 @@ private:
 };
 
 class JsiAnimationBridgeTaskCreate : public AnimationBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskCreate, AnimationBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskCreate, AnimationBridgeTask);
 public:
     JsiAnimationBridgeTaskCreate(
         shared_ptr<JsRuntime> runtime, const RefPtr<JsiAnimationBridge>& bridge, std::string param);
@@ -104,7 +104,7 @@ private:
 };
 
 class JsiAnimationBridgeTaskOperation : public AnimationBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskOperation, AnimationBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskOperation, AnimationBridgeTask);
 public:
     explicit JsiAnimationBridgeTaskOperation(AnimationOperation operation) : operation_(operation) {}
     ~JsiAnimationBridgeTaskOperation() override = default;
@@ -115,7 +115,7 @@ private:
 };
 
 class JsiAnimationBridgeTaskStartTime : public AnimationBridgeTask {
-    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskStartTime, AnimationBridgeTask)
+    DECLARE_ACE_TYPE(JsiAnimationBridgeTaskStartTime, AnimationBridgeTask);
 public:
     explicit JsiAnimationBridgeTaskStartTime(std::string startTime) : startTime_(std::move(startTime)) {}
     ~JsiAnimationBridgeTaskStartTime() override = default;
